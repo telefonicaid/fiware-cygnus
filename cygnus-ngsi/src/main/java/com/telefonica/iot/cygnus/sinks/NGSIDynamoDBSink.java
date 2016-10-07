@@ -331,7 +331,7 @@ public class NGSIDynamoDBSink extends NGSISink {
         ArrayList aggregation = aggregator.getAggregation();
         String tableName = aggregator.getTableName(enableLowercase);
 
-        LOGGER.info("[" + this.getName() + "] Persisting data at OrionDynamoSink. Dynamo table ("
+        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIDynamoDBSink. Dynamo table ("
                 + tableName + "), Data (" + aggregation.toString() + ")");
 
         // tables can be always created in DynamoDB, independedntly of the attribute persistence mode,

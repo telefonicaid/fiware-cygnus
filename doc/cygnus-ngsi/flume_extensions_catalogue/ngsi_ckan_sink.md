@@ -141,7 +141,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 [Top](#top)
 
 ####<a section="1.3.2"></a>Organization, dataset and resource names
-Given the above example and using the old encoding, these are the CKAN elements created 
+Given the above example and using the old encoding, these are the CKAN elements created
 
 * Orgnaization: `vehicles`.
 * Package: `vehicles_4wheels`.
@@ -322,38 +322,44 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSICKANSink</i> |
 | channel | yes | N/A |
-| enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i>. ||
-| data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. ||
-| attr_persistence | no | row | <i>row</i> or <i>column.</i>|
-| ckan_host | no | localhost | FQDN/IP address where the CKAN server runs. ||
-| ckan_port | no | 80 ||
+| enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
+| enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
+| enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
+| data\_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. ||
+| attr\_persistence | no | row | <i>row</i> or <i>column.</i>|
+| ckan\_host | no | localhost | FQDN/IP address where the CKAN server runs. ||
+| ckan\_port | no | 80 ||
 | ssl | no | false ||
-| api_key | yes | N/A ||
-| orion_url | no | http://localhost:1026 | To be put as the filestore URL. |
-| batch_size | no | 1 | Number of events accumulated before persistence. |
-| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
-| batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| api\_key | yes | N/A ||
+| orion\_url | no | http://localhost:1026 | To be put as the filestore URL. |
+| batch\_size | no | 1 | Number of events accumulated before persistence. |
+| batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
+| batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| backend.max\_conns | no | 500 | Maximum number of connections allowed for a Http-based HDFS backend. |
+| backend.max\_conns\_per\_route | no | 100 | Maximum number of connections per route allowed for a Http-based HDFS backend. |
 
 A configuration example could be:
 
-    cygnusagent.sinks = ckan-sink
-    cygnusagent.channels = ckan-channel
+    cygnus-ngsi.sinks = ckan-sink
+    cygnus-ngsi.channels = ckan-channel
     ...
-    cygnusagent.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.NGSICKANSink
-    cygnusagent.sinks.ckan-sink.channel = ckan-channel
-    cygnusagent.sinks.ckan-sink.enable_encoding = false
-    cygnusagent.sinks.ckan-sink.enable_grouping = false
-    cygnusagent.sinks.ckan-sink.data_model = dm-by-entity
-    cygnusagent.sinks.ckan-sink.attr_persistence = column
-    cygnusagent.sinks.ckan-sink.ckan_host = 192.168.80.34
-    cygnusagent.sinks.ckan-sink.ckan_port = 80
-    cygnusagent.sinks.ckan-sink.ssl = false
-    cygnusagent.sinks.ckan-sink.api_key = myapikey
-    cygnusagent.sinks.ckan-sink.orion_url = http://localhost:1026
-    cygnusagent.sinks.ckan-sink.batch_size = 100
-    cygnusagent.sinks.ckan-sink.batch_timeout = 30
-    cygnusagent.sinks.ckan-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.NGSICKANSink
+    cygnus-ngsi.sinks.ckan-sink.channel = ckan-channel
+    cygnus-ngsi.sinks.ckan-sink.enable_encoding = false
+    cygnus-ngsi.sinks.ckan-sink.enable_grouping = false
+    cygnus-ngsi.sinks.ckan-sink.enable_name_mappings = false
+    cygnus-ngsi.sinks.ckan-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.ckan-sink.attr_persistence = column
+    cygnus-ngsi.sinks.ckan-sink.ckan_host = 192.168.80.34
+    cygnus-ngsi.sinks.ckan-sink.ckan_port = 80
+    cygnus-ngsi.sinks.ckan-sink.ssl = false
+    cygnus-ngsi.sinks.ckan-sink.api_key = myapikey
+    cygnus-ngsi.sinks.ckan-sink.orion_url = http://localhost:1026
+    cygnus-ngsi.sinks.ckan-sink.batch_size = 100
+    cygnus-ngsi.sinks.ckan-sink.batch_timeout = 30
+    cygnus-ngsi.sinks.ckan-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.ckan-sink.backend.max_conns = 500
+    cygnus-ngsi.sinks.ckan-sink.backend.max_conns_per_route = 100
 
 [Top](#top)
 
@@ -401,7 +407,7 @@ From version 1.3.0 (included), Cygnus applies this specific encoding tailored to
 * All other characters, including the slash in the FIWARE service paths, are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
 * User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
 * `xffff` is used as concatenator character.
-    
+
 Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
 
 [Top](#top)
@@ -458,12 +464,12 @@ $ curl -X POST "http://demo.ckan.org/api/3/action/datastore_create" -d '{"fields
 Now, Cygnus is able to persist data for an entity with ID `room1` of type `room` in the `service` service, `service_test` service path:
 
 ```
-time=2016-04-26T15:54:45.753CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=getEvents | comp=cygnusagent | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[240] : Starting internal transaction (b465ffb8-710f-4cd3-9573-dc3799f774f9)
-time=2016-04-26T15:54:45.754CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=getEvents | comp=cygnusagent | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[256] : Received data ({  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",  "originator" : "localhost",  "contextResponses" : [    {      "contextElement" : {        "attributes" : [          {            "name" : "temperature",            "type" : "centigrade",            "value" : "26.5"          }        ],        "type" : "room",        "isPattern" : "false",        "id" : "room1"      },      "statusCode" : {        "code" : "200",        "reasonPhrase" : "OK"      }    }  ]})
-time=2016-04-26T15:55:07.843CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=processNewBatches | comp=cygnusagent | msg=com.telefonica.iot.cygnus.sinks.NGSISink[342] : Batch accumulation time reached, the batch will be processed as it is
-time=2016-04-26T15:55:07.844CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=processNewBatches | comp=cygnusagent | msg=com.telefonica.iot.cygnus.sinks.NGSISink[396] : Batch completed, persisting it
-time=2016-04-26T15:55:07.846CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=persistAggregation | comp=cygnusagent | msg=com.telefonica.iot.cygnus.sinks.NGSICKANSink[419] : [ckan-sink] Persisting data at OrionCKANSink (orgName=service, pkgName=service_test, resName=room1_room, data={"recvTime": "2016-04-26T13:54:45.756Z","fiwareServicePath": "/service_test","entityId": "room1","entityType": "room","temperature": "26.5"})
-time=2016-04-26T15:55:08.948CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=processNewBatches | comp=cygnusagent | msg=com.telefonica.iot.cygnus.sinks.NGSISink[400] : Finishing internal transaction (b465ffb8-710f-4cd3-9573-dc3799f774f9)
+time=2016-04-26T15:54:45.753CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=getEvents | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[240] : Starting internal transaction (b465ffb8-710f-4cd3-9573-dc3799f774f9)
+time=2016-04-26T15:54:45.754CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=getEvents | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[256] : Received data ({  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",  "originator" : "localhost",  "contextResponses" : [    {      "contextElement" : {        "attributes" : [          {            "name" : "temperature",            "type" : "centigrade",            "value" : "26.5"          }        ],        "type" : "room",        "isPattern" : "false",        "id" : "room1"      },      "statusCode" : {        "code" : "200",        "reasonPhrase" : "OK"      }    }  ]})
+time=2016-04-26T15:55:07.843CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=processNewBatches | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.sinks.NGSISink[342] : Batch accumulation time reached, the batch will be processed as it is
+time=2016-04-26T15:55:07.844CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=processNewBatches | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.sinks.NGSISink[396] : Batch completed, persisting it
+time=2016-04-26T15:55:07.846CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=persistAggregation | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.sinks.NGSICKANSink[419] : [ckan-sink] Persisting data at OrionCKANSink (orgName=service, pkgName=service_test, resName=room1_room, data={"recvTime": "2016-04-26T13:54:45.756Z","fiwareServicePath": "/service_test","entityId": "room1","entityType": "room","temperature": "26.5"})
+time=2016-04-26T15:55:08.948CEST | lvl=INFO | corr=b465ffb8-710f-4cd3-9573-dc3799f774f9 | trans=b465ffb8-710f-4cd3-9573-dc3799f774f9 | svc=service | subsvc=/service_test | function=processNewBatches | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.sinks.NGSISink[400] : Finishing internal transaction (b465ffb8-710f-4cd3-9573-dc3799f774f9)
 ```
 
 The insertion can be checked through the CKAN API as well:

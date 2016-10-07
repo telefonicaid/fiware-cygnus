@@ -41,7 +41,6 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     protected String mongoPassword;
     protected String dbPrefix;
     protected String collectionPrefix;
-    protected boolean shouldHash;
     protected MongoBackendImpl backend;
     protected long dataExpiration;
     protected boolean ignoreWhiteSpaces;
@@ -135,18 +134,6 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
         } // if else
-        
-        String shouldHashStr = context.getString("should_hash", "false");
-        
-        if (shouldHashStr.equals("true") || shouldHashStr.equals("false")) {
-            shouldHash = Boolean.valueOf(shouldHashStr);
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (should_hash="
-                + shouldHashStr + ")");
-        } else {
-            invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (should_hash="
-                + shouldHashStr + ") -- Must be 'true' or 'false'");
-        }  // if else
 
         dataExpiration = context.getLong("data_expiration", 0L);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (data_expiration=" + dataExpiration + ")");
@@ -203,19 +190,13 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     /**
      * Builds a collection name given a fiwareServicePath and a destination. It throws an exception if the naming
      * conventions are violated.
-     * @param dbName
      * @param fiwareServicePath
      * @param entity
      * @param attribute
-     * @param isAggregated
-     * @param entityId
-     * @param entityType
-     * @param fiwareService
      * @return
      * @throws Exception
      */
-    protected String buildCollectionName(String dbName, String fiwareServicePath, String entity, String attribute,
-            boolean isAggregated, String entityId, String entityType, String fiwareService)
+    protected String buildCollectionName(String fiwareServicePath, String entity, String attribute)
         throws Exception {
         String collectionName;
 
@@ -260,49 +241,14 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
             } // switch
         } // else
 
-        if (shouldHash) {
-            int limit = getHashSizeInBytes(dbName);
+        collectionName = collectionPrefix + collectionName;
 
-            if (limit < NGSIConstants.MONGO_DB_MIN_HASH_SIZE_IN_BYTES) {
-                LOGGER.error("The available bytes for the hashes to be used as part of the collection names is not "
-                        + "big enough (at least " + NGSIConstants.MONGO_DB_MIN_HASH_SIZE_IN_BYTES + " bytes are "
-                        + "needed), please reduce the size of the database prefix, the fiware-service and/or the "
-                        + "collection prefix");
-                return null;
-            } // if
-
-            String hash = generateHash(collectionName, limit);
-            collectionName = collectionPrefix + hash;
-            backend.storeCollectionHash(dbName, hash, isAggregated, fiwareService, fiwareServicePath, entityId,
-                    entityType, attribute, entity);
-        } else {
-            collectionName = collectionPrefix + collectionName;
-
-            if (collectionName.getBytes().length > NGSIConstants.MONGO_DB_MAX_NAMESPACE_SIZE_IN_BYTES) {
-                throw new CygnusBadConfiguration("Building collection name '" + collectionName + "' and its length is "
-                        + "greater than " + NGSIConstants.MONGO_DB_MAX_NAMESPACE_SIZE_IN_BYTES);
-            } // if
-        } // if else
+        if (collectionName.getBytes().length > NGSIConstants.MONGO_DB_MAX_NAMESPACE_SIZE_IN_BYTES) {
+            throw new CygnusBadConfiguration("Building collection name '" + collectionName + "' and its length is "
+                    + "greater than " + NGSIConstants.MONGO_DB_MAX_NAMESPACE_SIZE_IN_BYTES);
+        } // if
 
         return collectionName;
     } // buildCollectionName
-
-    private int getHashSizeInBytes(String dbName) {
-        return NGSIConstants.MONGO_DB_MAX_NAMESPACE_SIZE_IN_BYTES - dbName.getBytes().length
-                - collectionPrefix.getBytes().length - ".aggr".getBytes().length - 1;
-    } // getHashSizeInBytes
-
-    private String generateHash(String collectionName, int limit) throws Exception {
-        MessageDigest messageDigest;
-        messageDigest = MessageDigest.getInstance("SHA-512");
-        byte [] digest = messageDigest.digest(collectionName.getBytes());
-        String hash = Hex.encodeHexString(digest);
-
-        if (limit > 0) {
-            hash = hash.substring(0, limit);
-        } // if
-
-        return hash;
-    } // generateHash
 
 } // NGSIMongoBaseSink

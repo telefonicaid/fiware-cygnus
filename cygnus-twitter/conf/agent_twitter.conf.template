@@ -26,82 +26,86 @@
 # one of them (this example shows how to configure 3 sink types at the same time). Even, you can define more than one
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
-cygnusagent.sources = twitter-source
-cygnusagent.sinks = hdfs-sink
-cygnusagent.channels = hdfs-channel
+cygnus-twitter.sources = twitter-source
+cygnus-twitter.sinks = hdfs-sink
+cygnus-twitter.channels = hdfs-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnusagent.sources.twitter-source.channels = hdfs-channel
+cygnus-twitter.sources.twitter-source.channels = hdfs-channel
 # source class, must not be changed
-cygnusagent.sources.twitter-source.type = com.telefonica.iot.cygnus.sources.TwitterSource
+cygnus-twitter.sources.twitter-source.type = com.telefonica.iot.cygnus.sources.TwitterSource
 # keywords
-# cygnusagent.sources.twitter-source.keywords = keyword1, keyword2, keyword3
+# cygnus-twitter.sources.twitter-source.keywords = keyword1, keyword2, keyword3
 # Coordinates for filter query
-# cygnusagent.sources.twitter-source.south_west_latitude = 39.4247692
-# cygnusagent.sources.twitter-source.south_west_longitude = -0.4315448
-# cygnusagent.sources.twitter-source.north_east_latitude = 39.5038788
-# cygnusagent.sources.twitter-source.north_east_longitude = -0.3124204
-# cygnusagent.sources.twitter-source.consumerKey =
-# cygnusagent.sources.twitter-source.consumerSecret =
-# cygnusagent.sources.twitter-source.accessToken =
-# cygnusagent.sources.twitter-source.accessTokenSecret =
+# cygnus-twitter.sources.twitter-source.south_west_latitude = 39.4247692
+# cygnus-twitter.sources.twitter-source.south_west_longitude = -0.4315448
+# cygnus-twitter.sources.twitter-source.north_east_latitude = 39.5038788
+# cygnus-twitter.sources.twitter-source.north_east_longitude = -0.3124204
+# cygnus-twitter.sources.twitter-source.consumerKey =
+# cygnus-twitter.sources.twitter-source.consumerSecret =
+# cygnus-twitter.sources.twitter-source.accessToken =
+# cygnus-twitter.sources.twitter-source.accessTokenSecret =
 
 # ============================================
 # TwitterHDFSSink configuration
 # channel name from where to read notification events
-cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
+cygnus-twitter.sinks.hdfs-sink.channel = hdfs-channel
 # sink class, must not be changed
-cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.TwitterHDFSSink
+cygnus-twitter.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.TwitterHDFSSink
 # true if lower case is wanted to forced in all the element names, false otherwise
-# cygnusagent.sinks.hdfs-sink.enable_lowercase = false
+#cygnus-twitter.sinks.hdfs-sink.enable_lowercase = false
 # rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
-# cygnusagent.sinks.hdfs-sink.backend_impl = rest
+#cygnus-twitter.sinks.hdfs-sink.backend.impl = rest
+# maximum number of Http connections to HDFS backend
+#cygnus-twitter.sinks.hdfs-sink.backend.max_conns = 500
+# maximum number of Http connections per route to HDFS backend
+#cygnus-twitter.sinks.hdfs-sink.backend.max_conns_per_route = 100
 # Comma-separated list of FQDN/IP address regarding the HDFS Namenode endpoints
 # If you are using Kerberos authentication, then the usage of FQDNs instead of IP addresses is mandatory
-# cygnusagent.sinks.hdfs-sink.hdfs_host = localhost
+#cygnus-twitter.sinks.hdfs-sink.hdfs_host = localhost
 # port of the HDFS service listening for persistence operations; 14000 for httpfs, 50070 for webhdfs
-# cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
+#cygnus-twitter.sinks.hdfs-sink.hdfs_port = 14000
 # username allowed to write in HDFS
-cygnusagent.sinks.hdfs-sink.hdfs_username = hdfs_username
+cygnus-twitter.sinks.hdfs-sink.hdfs_username = hdfs_username
 # password for the above username; this is only required for Hive authentication
-cygnusagent.sinks.hdfs-sink.hdfs_password = xxxxxxxx
+cygnus-twitter.sinks.hdfs-sink.hdfs_password = xxxxxxxx
 # OAuth2 token for HDFS authentication
-cygnusagent.sinks.hdfs-sink.oauth2_token = xxxxxxxx
+cygnus-twitter.sinks.hdfs-sink.oauth2_token = xxxxxxxx
 # timeout for batch accumulation
-# cygnusagent.sinks.hdfs-sink.batch_timeout = 30
+#cygnus-twitter.sinks.hdfs-sink.batch_timeout = 30
 # number of retries upon persistence error
-# cygnusagent.sinks.hdfs-sink.batch_ttl = 10
+#cygnus-twitter.sinks.hdfs-sink.batch_ttl = 10
 # Hive enabling
-# cygnusagent.sinks.hdfs-sink.hive = false
+#cygnus-twitter.sinks.hdfs-sink.hive = false
 # Hive server version, 1 or 2 (ignored if hive is false)
-# cygnusagent.sinks.hdfs-sink.hive.server_version = 2
+#cygnus-twitter.sinks.hdfs-sink.hive.server_version = 2
 # Hive FQDN/IP address of the Hive server (ignored if hive is false)
-# cygnusagent.sinks.hdfs-sink.hive.host = localhost
+#cygnus-twitter.sinks.hdfs-sink.hive.host = localhost
 # Hive port for Hive external table provisioning (ignored if hive is false)
-# cygnusagent.sinks.hdfs-sink.hive.port = 10000
+#cygnus-twitter.sinks.hdfs-sink.hive.port = 10000
 # Hive database type, available types are default-db and namespace-db
-# cygnusagent.sinks.hdfs-sink.hive.db_type = default-db
+#cygnus-twitter.sinks.hdfs-sink.hive.db_type = default-db
 # Kerberos-based authentication enabling
-# cygnusagent.sinks.hdfs-sink.krb5_auth = false
+#cygnus-twitter.sinks.hdfs-sink.krb5_auth = false
 # Kerberos username (ignored if krb5_auth is false)
-cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
+cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
 # Kerberos password (ignored if krb5_auth is false)
-cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
+cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
 # Kerberos login file (ignored if krb5_auth is false)
-# cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
+#cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_login_conf_file = /usr/cygnus/conf/krb5_login.conf
 # Kerberos configuration file (ignored if krb5_auth is false)
-# cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
+#cygnus-twitter.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
 # Set folder and file to store tweets
-cygnusagent.sinks.hdfs-sink.hdfs_folder = olympic_games_2016
-cygnusagent.sinks.hdfs-sink.hdfs_file = tweets.txt
+cygnus-twitter.sinks.hdfs-sink.hdfs_folder = olympic_games_2016
+cygnus-twitter.sinks.hdfs-sink.hdfs_file = tweets.txt
 
 #=============================================
 # hdfs-channel configuration
 # channel type (must not be changed)
-cygnusagent.channels.hdfs-channel.type = memory
+cygnus-twitter.channels.hdfs-channel.type = memory
 # capacity of the channel
-cygnusagent.channels.hdfs-channel.capacity = 1000
+cygnus-twitter.channels.hdfs-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
-cygnusagent.channels.hdfs-channel.transactionCapacity = 100
+cygnus-twitter.channels.hdfs-channel.transactionCapacity = 100

@@ -35,7 +35,7 @@ The 0.2-like result will be:
     /user/johndoe/new_dataset/cygnus-Room1-Room.txt
     /user/johndoe/new_dataset/cygnus-Room2-Room.txt
 
-I.e. a single file per enity, as specified by Cygnus 0.2 and higher.
+I.e. a single file per entity, as specified by Cygnus 0.2 and higher.
 
 A complete translation guide can be found in `doc/operation/cygnus_0.1_to_0.2_migration.md`
 
@@ -89,7 +89,7 @@ This scripts adds certain fields not available in previous versions to 0.10.0 to
 Usage:
 
 ```
-$ ./cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh 
+$ ./cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh
 Usage: cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh hdfs_folder file_format null_value backup
 where hdfs_folder: a valid HDFS folder path
       file_format: a value within json-row|json-column|csv-row|csv-column
@@ -97,7 +97,7 @@ where hdfs_folder: a valid HDFS folder path
       backup     : either true or false
 ```
 
-As can be seen, a HDFS folder must be given; this folder is recursively iterated in order to find all the HDFS files within all the HDFS sub-folders. The format of the files must be given as well, since this will imply specific addition of fields (see above). Since the HDFS folder is recursively iterated, all the files within that folder and its sub-folders must be written in the same file format. Finally, a customizable null value must be given, in addition to the decission of backing or not the existent data into `.bak` files within the same path than the original one. Please observe that backing data within a HDFS backend may consume large resources (in average, the original data is duplicated when backing it).
+As can be seen, a HDFS folder must be given; this folder is recursively iterated in order to find all the HDFS files within all the HDFS sub-folders. The format of the files must be given as well, since this will imply specific addition of fields (see above). Since the HDFS folder is recursively iterated, all the files within that folder and its sub-folders must be written in the same file format. Finally, a customizable null value must be given, in addition to the decision of backing or not the existent data into `.bak` files within the same path than the original one. Please observe that backing data within a HDFS backend may consume large resources (in average, the original data is duplicated when backing it).
 
 Example assuming the file format is `json-row`, a custom value of `null` describing the emptyness and not backing the original data:
 
@@ -139,11 +139,11 @@ This scripts adds certain fields not available in previous versions to 0.10.0 to
 
 * Tables written in `row` format will have a new fields named `fiwareservicePath`.
 * Tables written in `column` format will have new fields named `fiwareservicePath`, `entityId` and `entityType`.
-* 
+*
 Usage:
 
 ```
-$ ./cygnus_translator_pre0.10.0_to_0.10.0_mysql.sh 
+$ ./cygnus_translator_pre0.10.0_to_0.10.0_mysql.sh
 Usage: cygnus_translator_pre0.10.0_to_0.10.0_mysql.sh user password database tableFormat backup
 where user        : a valid user in the MySQL server granted to modify the below database
       password    : password for the above user
@@ -152,7 +152,7 @@ where user        : a valid user in the MySQL server granted to modify the below
       backup      : either true or false
 ```
 
-As can be seen, a MySQL database must be given; this database is iterated in order to find all the MySQL tables. The format of the tables must be given as well, since this will imply specific addition of fields (see above). Since the MySQL database is iterated, all the tables within that database must be created in the same table format. Finally, the decission of backing or not the existent data into `_bak` tables within the same database than the original one is an option. Please observe that backing data within a MySQL database may consume large resources (in average, the original data is duplicated when backing it).
+As can be seen, a MySQL database must be given; this database is iterated in order to find all the MySQL tables. The format of the tables must be given as well, since this will imply specific addition of fields (see above). Since the MySQL database is iterated, all the tables within that database must be created in the same table format. Finally, the decision of backing or not the existent data into `_bak` tables within the same database than the original one is an option. Please observe that backing data within a MySQL database may consume large resources (in average, the original data is duplicated when backing it).
 
 Example assuming the table format is `row` and not backing the original data:
 
@@ -191,11 +191,11 @@ This scripts adds certain fields not available in previous versions to 0.10.0 to
 
 * Resources written in `row` format will have a new fields named `fiwareservicePath`.
 * Resources written in `column` format will have new fields named `fiwareservicePath`, `entityId` and `entityType`.
- 
+
 Usage:
 
 ```
-$ ./cygnus_translator_pre0.10.0_to_0.10.0_ckan.py 
+$ ./cygnus_translator_pre0.10.0_to_0.10.0_ckan.py
 Usage: cygnus_translator_pre0.10.0_to_0.10.0_hdfs.sh ckan_host ckan_port ssl api_key org_name attr_persistence null_value backup
 where ckan_host       : IP address or FQDN of the host running the CKAN server
       ckan_port       : port where the above CKAN server is listening
@@ -206,7 +206,7 @@ where ckan_host       : IP address or FQDN of the host running the CKAN server
       backup          : either true or false
 ```
 
-As can be seen, a CKAN organization must be given; this organization is recursively iterated in order to find all the CKAN resources within CKAN packages/datasets. The format of the resources must be given as well, since this will imply specific addition of fields (see above). Since the CKAN organization is iterated, all the resources within that organization must be created in the same resource format. Finally, the decission of backing or not the existent data into `_bak` resources within the same organization than the original one is an option. Please observe that backing data within a CKAN organization may consume large resources (in average, the original data is duplicated when backing it).
+As can be seen, a CKAN organization must be given; this organization is recursively iterated in order to find all the CKAN resources within CKAN packages/datasets. The format of the resources must be given as well, since this will imply specific addition of fields (see above). Since the CKAN organization is iterated, all the resources within that organization must be created in the same resource format. Finally, the decision of backing or not the existent data into `_bak` resources within the same organization than the original one is an option. Please observe that backing data within a CKAN organization may consume large resources (in average, the original data is duplicated when backing it).
 
 Example assuming the resource format is `row` and not backing the original data:
 

@@ -167,7 +167,7 @@ Assuming the following Flume event is created from a notified NGSI context data 
 Assuming `hdfs_username=myuser` and `service_as_namespace=false` as configuration parameters, then `NGSIHDFSSink` will persist the data within the body in this file (old encoding):
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
-    
+
 Using the new encoding:
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1xffffcar/car1xffffcar.txt
@@ -270,18 +270,20 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIHDFSSink</i> |
 | channel | yes | N/A ||
 | enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
+| enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. |
 | file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>. |
-| backend_impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS. |
+| backend.impl | no | rest | <i>rest</i>, if a WebHDFS/HttpFS-based implementation is used when interacting with HDFS; or <i>binary</i>, if a Hadoop API-based implementation is used when interacting with HDFS. |
+| backend.max_conns | no | 500 | Maximum number of connections allowed for a Http-based HDFS backend. Ignored if using a binary backend implementation. |
+| backend.max_conns_per_route | no | 100 | Maximum number of connections per route allowed for a Http-based HDFS backend. Ignored if using a binary backend implementation. |
 | hdfs_host | no | localhost | FQDN/IP address where HDFS Namenode runs, or comma-separated list of FQDN/IP addresses where HDFS HA Namenodes run. |
 | hdfs_port | no | 14000 | <i>14000</i> if using HttpFS (rest), <i>50070</i> if using WebHDFS (rest), <i>8020</i> if using the Hadoop API (binary). |
 | hdfs_username | yes | N/A | If `service_as_namespace=false` then it must be an already existent user in HDFS. If `service_as_namespace=true` then it must be a HDFS superuser. |
 | hdfs_password | yes | N/A | Password for the above `hdfs_username`; this is only required for Hive authentication. |
 | oauth2_token | yes | N/A | OAuth2 token required for the HDFS authentication. |
 | service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`, which in this case must be a HDFS superuser. |
-| file_format | no | json-row | <i>json-row</i>, <i>json-column</i>, <i>csv-row</i> or <i>json-column</i>. |
 | csv_separator | no | , ||
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
@@ -299,39 +301,40 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 
 A configuration example could be:
 
-    cygnusagent.sinks = hdfs-sink
-    cygnusagent.channels = hdfs-channel
+    cygnus-ngsi.sinks = hdfs-sink
+    cygnus-ngsi.channels = hdfs-channel
     ...
-    cygnusagent.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
-    cygnusagent.sinks.hdfs-sink.channel = hdfs-channel
-    cygnusagent.sinks.hdfs-sink.enable_encoding = false
-    cygnusagent.sinks.hdfs-sink.enable_grouping = false
-    cygnusagent.sinks.hdfs-sink.enable_lowercase = false
-    cygnusagent.sinks.hdfs-sink.data_model = dm-by-entity
-    cygnusagent.sinks.hdfs-sink.file_format = json-column
-    cygnusagent.sinks.hdfs-sink.backend_impl = rest
-    cygnusagent.sinks.hdfs-sink.hdfs_host = 192.168.80.34
-    cygnusagent.sinks.hdfs-sink.hdfs_port = 14000
-    cygnusagent.sinks.hdfs-sink.hdfs_username = myuser
-    cygnusagent.sinks.hdfs-sink.hdfs_password = mypassword
-    cygnusagent.sinks.hdfs-sink.oauth2_token = mytoken
-    cygnusagent.sinks.hdfs-sink.service_as_namespace = false
-    cygnusagent.sinks.hdfs-sink.batch_size = 100
-    cygnusagent.sinks.hdfs-sink.batch_timeout = 30
-    cygnusagent.sinks.hdfs-sink.batch_ttl = 10
-    cygnusagent.sinks.hdfs-sink.hive = true
-    cygnusagent.sinks.hdfs-sink.hive.server_version = 2
-    cygnusagent.sinks.hdfs-sink.hive.host = 192.168.80.35
-    cygnusagent.sinks.hdfs-sink.hive.port = 10000
-    cygnusagent.sinks.hdfs-sink.hive.db_type = default-db
-    cygnusagent.sinks.hdfs-sink.krb5_auth = false
+    cygnus-ngsi.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
+    cygnus-ngsi.sinks.hdfs-sink.channel = hdfs-channel
+    cygnus-ngsi.sinks.hdfs-sink.enable_encoding = false
+    cygnus-ngsi.sinks.hdfs-sink.enable_grouping = false
+    cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.hdfs-sink.enable_name_mappings = false
+    cygnus-ngsi.sinks.hdfs-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.hdfs-sink.file_format = json-column
+    cygnus-ngsi.sinks.hdfs-sink.backend.impl = rest
+    cygnus-ngsi.sinks.hdfs-sink.backend.max_conns = 500
+    cygnus-ngsi.sinks.hdfs-sink.backend.max_conns_per_route = 100
+    cygnus-ngsi.sinks.hdfs-sink.hdfs_host = 192.168.80.34
+    cygnus-ngsi.sinks.hdfs-sink.hdfs_port = 14000
+    cygnus-ngsi.sinks.hdfs-sink.hdfs_username = myuser
+    cygnus-ngsi.sinks.hdfs-sink.hdfs_password = mypassword
+    cygnus-ngsi.sinks.hdfs-sink.oauth2_token = mytoken
+    cygnus-ngsi.sinks.hdfs-sink.service_as_namespace = false
+    cygnus-ngsi.sinks.hdfs-sink.batch_size = 100
+    cygnus-ngsi.sinks.hdfs-sink.batch_timeout = 30
+    cygnus-ngsi.sinks.hdfs-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.hdfs-sink.cygnus-ngsi
+    cygnus-ngsi.sinks.hdfs-sink.hive = false
+    cygnus-ngsi.sinks.hdfs-sink.krb5_auth = false
+>>>>>>> develop
 
 [Top](#top)
 
 ###<a name="section2.2"></a>Use cases
 Use `NGSIHDFSSink` if you are looking for a JSON or CSV-based document storage growing in the mid-long-term in estimated sizes of terabytes for future trending discovery, along the time persistent patterns of behaviour and so on.
 
-For a short-term historic, those required by dashboards and charting user interfaces, other backends are more suited such as MongoDB, FIWARE Comet or MySQL (Cygnus provides sinks for them, as well).
+For a short-term historic, those required by dashboards and charting user interfaces, other backends are more suited such as MongoDB, STH Comet or MySQL (Cygnus provides sinks for them, as well).
 
 [Top](#top)
 
@@ -382,7 +385,7 @@ From version 1.3.0 (included), Cygnus applies this specific encoding tailored to
 * Slash character, `/`, is encoded as `x002f`.
 * All the other characters are not encoded.
 * `xffff` is used as concatenator character.
-    
+
 Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
 
 [Top](#top)
@@ -413,7 +416,7 @@ A detailed architecture of OAuth2 can be found [here](http://forge.fiware.org/pl
 * Access tokens are requested to the Identity Manager, which is asked by the final service for authentication purposes once the tokens are received. Please observe by asking this the service not only discover who is the real FIWARE user behind the request, but the service has full certainty the user is who he/she says to be.
 * At the same time, the Identity Manager relies on the Access Control for authorization purposes. The access token gives, in addition to the real identity of the user, his/her roles according to the requested resource. The Access Control owns a list of policies regarding who is allowed to access all the resources based on the user roles.
 
-This is important for Cygnus since HDFS (big) data can be accessed through the native [WebHDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html) RESTful API. And it may be protected with the above mentioned mechanism. If that's the case, simply ask for an access token and add it to the configuration through `cygnusagent.sinks.hdfs-sink.oauth2_token` parameter.
+This is important for Cygnus since HDFS (big) data can be accessed through the native [WebHDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html) RESTful API. And it may be protected with the above mentioned mechanism. If that's the case, simply ask for an access token and add it to the configuration through `cygnus-ngsi.sinks.hdfs-sink.oauth2_token` parameter.
 
 In order to get an access token, do the following request to your OAuth2 tokens provider; in FIWARE Lab this is `cosmos.lab.fi-ware.org:13000`:
 
@@ -445,15 +448,15 @@ Nevertheless, Cygnus needs this process to be automated. Let's see how through t
 This file can be built from the distributed `conf/cygnus.conf.template`. Edit appropriately this part of the `NGSIHDFSSink` configuration:
 
     # Kerberos-based authentication enabling
-    cygnusagent.sinks.hdfs-sink.krb5_auth = true
+    cygnus-ngsi.sinks.hdfs-sink.krb5_auth = true
     # Kerberos username
-    cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
+    cygnus-ngsi.sinks.hdfs-sink.krb5_auth.krb5_user = krb5_username
     # Kerberos password
-    cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
+    cygnus-ngsi.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
     # Kerberos login file
-    cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_login_file = /usr/cygnus/conf/krb5_login.conf
+    cygnus-ngsi.sinks.hdfs-sink.krb5_auth.krb5_login_file = /usr/cygnus/conf/krb5_login.conf
     # Kerberos configuration file
-    cygnusagent.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
+    cygnus-ngsi.sinks.hdfs-sink.krb5_auth.krb5_conf_file = /usr/cygnus/conf/krb5.conf
 
 I.e. start enabling (or not) the Kerberos authentication. Then, configure a user with an already registered Kerberos principal, and its password. Finally, specify the location of two special Kerberos files.
 

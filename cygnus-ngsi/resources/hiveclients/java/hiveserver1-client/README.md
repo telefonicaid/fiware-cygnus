@@ -10,11 +10,11 @@ You can run the built application by using Maven too (please observe with HiveSe
 
     $ mvn exec:java -Dexec.args="<hive_host> <hive_port> <hadoop_user> <hadoop_password>"
 
-Once it is running, you will see a promt asking you for HiveQL sentences to be executed:
+Once it is running, you will see a prompt asking you for HiveQL sentences to be executed:
 
     remoteclient>
 
-You can write any set of HiveQL senteces separated by `;`, for instance:
+You can write any set of HiveQL sentences separated by `;`, for instance:
 
     remoteclient> select * from <table>;
     [data_being_printed]

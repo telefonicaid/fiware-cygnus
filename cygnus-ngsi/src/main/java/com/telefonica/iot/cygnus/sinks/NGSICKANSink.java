@@ -24,7 +24,6 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
-import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
@@ -48,6 +47,8 @@ public class NGSICKANSink extends NGSISink {
     private String orionUrl;
     private boolean rowAttrPersistence;
     private boolean ssl;
+    private int backendMaxConns;
+    private int backendMaxConnsPerRoute;
     private CKANBackend persistenceBackend;
 
     /**
@@ -114,6 +115,24 @@ public class NGSICKANSink extends NGSISink {
     protected boolean getSSL() {
         return this.ssl;
     } // getSSL
+    
+    /**
+     * Gets the maximum number of Http connections allowed in the backend. It is protected due to it is only required
+     * for testing purposes.
+     * @return The maximum number of Http connections allowed in the backend
+     */
+    protected int getBackendMaxConns() {
+        return backendMaxConns;
+    } // getBackendMaxConns
+    
+    /**
+     * Gets the maximum number of Http connections per route allowed in the backend. It is protected due to it is only
+     * required for testing purposes.
+     * @return The maximum number of Http connections per route allowed in the backend
+     */
+    protected int getBackendMaxConnsPerRoute() {
+        return backendMaxConnsPerRoute;
+    } // getBackendMaxConnsPerRoute
 
     @Override
     public void configure(Context context) {
@@ -158,6 +177,12 @@ public class NGSICKANSink extends NGSISink {
                 + sslStr + ") -- Must be 'true' or 'false'");
         }  // if else
         
+        backendMaxConns = context.getInteger("backend.max_conns", 500);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns=" + backendMaxConns + ")");
+        backendMaxConnsPerRoute = context.getInteger("backend.max_conns_per_route", 100);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns_per_route="
+                + backendMaxConnsPerRoute + ")");
+        
         super.configure(context);
         
         // Techdebt: allow this sink to work with all the data models
@@ -170,7 +195,8 @@ public class NGSICKANSink extends NGSISink {
     @Override
     public void start() {
         try {
-            persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, orionUrl, ssl);
+            persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, orionUrl, ssl, backendMaxConns,
+                    backendMaxConnsPerRoute);
             LOGGER.debug("[" + this.getName() + "] CKAN persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the CKAN persistence backend. Details="
@@ -406,7 +432,7 @@ public class NGSICKANSink extends NGSISink {
         String pkgName = aggregator.getPkgName(enableLowercase);
         String resName = aggregator.getResName(enableLowercase);
 
-        LOGGER.info("[" + this.getName() + "] Persisting data at OrionCKANSink (orgName=" + orgName
+        LOGGER.info("[" + this.getName() + "] Persisting data at NGSICKANSink (orgName=" + orgName
                 + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + aggregation + ")");
 
         if (aggregator instanceof RowAggregator) {

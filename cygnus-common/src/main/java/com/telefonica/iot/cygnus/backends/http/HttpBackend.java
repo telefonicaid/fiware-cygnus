@@ -27,8 +27,6 @@ import java.security.AccessController;
 import java.security.Principal;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.Set;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
@@ -54,7 +52,7 @@ import org.json.simple.parser.JSONParser;
  */
 public abstract class HttpBackend {
     
-    private final LinkedList<String> hosts;
+    private final String host;
     private final String port;
     private final boolean ssl;
     private final boolean krb5;
@@ -66,7 +64,7 @@ public abstract class HttpBackend {
     
     /**
      * Constructor.
-     * @param hosts
+     * @param host
      * @param port
      * @param ssl
      * @param krb5
@@ -74,10 +72,12 @@ public abstract class HttpBackend {
      * @param krb5Password
      * @param krb5LoginConfFile
      * @param krb5ConfFile
+     * @param maxConns
+     * @param maxConnsPerRoute
      */
-    public HttpBackend(String[] hosts, String port, boolean ssl, boolean krb5, String krb5User, String krb5Password,
-            String krb5LoginConfFile, String krb5ConfFile) {
-        this.hosts = new LinkedList(Arrays.asList(hosts));
+    public HttpBackend(String host, String port, boolean ssl, boolean krb5, String krb5User, String krb5Password,
+            String krb5LoginConfFile, String krb5ConfFile, int maxConns, int maxConnsPerRoute) {
+        this.host = host;
         this.port = port;
         this.ssl = ssl;
         this.krb5 = krb5;
@@ -85,7 +85,7 @@ public abstract class HttpBackend {
         this.krb5Password = krb5Password;
         
         // create a Http clients factory and an initial connection
-        httpClientFactory = new HttpClientFactory(ssl, krb5LoginConfFile, krb5ConfFile);
+        httpClientFactory = new HttpClientFactory(ssl, krb5LoginConfFile, krb5ConfFile, maxConns, maxConnsPerRoute);
         httpClient = httpClientFactory.getHttpClient(ssl, krb5);
     } // HttpBackend
     
@@ -113,34 +113,21 @@ public abstract class HttpBackend {
         JsonResponse response;
         
         if (relative) {
-            // iterate on the hosts
-            for (String host : hosts) {
-                // create the HttpFS URL
-                String effectiveURL = (ssl ? "https://" : "http://") + host + ":" + port + url;
-                
-                try {
-                    if (krb5) {
-                        response = doPrivilegedRequest(method, effectiveURL, headers, entity);
-                    } else {
-                        response = doRequest(method, effectiveURL, headers, entity);
-                    } // if else
-                } catch (Exception e) {
-                    LOGGER.debug("There was a problem when performing the request (details=" + e.getMessage() + "). "
-                            + "Most probably the used http endpoint (" + host + ") is not active, trying another one");
-                    continue;
-                } // try catch
-                
-                // place the current host in the first place (if not yet placed), since it is currently working
-                if (!hosts.getFirst().equals(host)) {
-                    hosts.remove(host);
-                    hosts.add(0, host);
-                    LOGGER.debug("Placing the host in the first place of the list (host=" + host + ")");
-                } // if
-                
-                return response;
-            } // for
-            
-            throw new CygnusPersistenceError("No http endpoint was reachable");
+            // create the HttpFS URL
+            String effectiveURL = (ssl ? "https://" : "http://") + host + ":" + port + url;
+
+            try {
+                if (krb5) {
+                    response = doPrivilegedRequest(method, effectiveURL, headers, entity);
+                } else {
+                    response = doRequest(method, effectiveURL, headers, entity);
+                } // if else
+            } catch (Exception e) {
+                LOGGER.debug("There was a problem when performing the request. Details: " + e.getMessage());
+                throw e;
+            } // try catch
+
+            return response;
         } else {
             if (krb5) {
                 return doPrivilegedRequest(method, url, headers, entity);
@@ -153,12 +140,11 @@ public abstract class HttpBackend {
     /**
      * Does a Http request given a method, a relative URL, a list of headers and the payload
      * Protected method due to it's used by the tests.
-     * 
      * @param method
      * @param url
      * @param headers
      * @param entity
-     * @return 
+     * @return The result of the request
      * @throws java.lang.Exception
      */
         

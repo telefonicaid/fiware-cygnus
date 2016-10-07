@@ -48,6 +48,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private String postgresqlPassword;
     private boolean rowAttrPersistence;
     private PostgreSQLBackendImpl persistenceBackend;
+    private boolean enableCache;
 
     /**
      * Constructor.
@@ -62,6 +63,14 @@ public class NGSIPostgreSQLSink extends NGSISink {
      */
     protected String getPostgreSQLHost() {
         return postgresqlHost;
+    } // getPostgreSQLHost
+    
+    /**
+     * Gets the PostgreSQL cache. It is protected due to it is only required for testing purposes.
+     * @return The PostgreSQL cache state
+     */
+    protected boolean getEnableCache() {
+        return enableCache;
     } // getPostgreSQLHost
 
     /**
@@ -160,14 +169,25 @@ public class NGSIPostgreSQLSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
                 + persistence + ") -- Must be 'row' or 'column'");
         }  // if else
+                
+        String enableCacheStr = context.getString("backend.enable_cache", "false");
+        
+        if (enableCacheStr.equals("true") || enableCacheStr.equals("false")) {
+            enableCache = Boolean.valueOf(enableCacheStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.enable_cache=" + enableCache + ")");
+        }  else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (backend.enable_cache="
+                + enableCache + ") -- Must be 'true' or 'false'");
+        }  // if else
+        
     } // configure
 
     @Override
     public void start() {
-        try {
-            LOGGER.debug("[" + this.getName() + "] PostgreSQL persistence backend created");
+        try {            
             persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlDatabase,
-                    postgresqlUsername, postgresqlPassword);
+                    postgresqlUsername, postgresqlPassword, enableCache);
         } catch (Exception e) {
             LOGGER.error("Error while creating the PostgreSQL persistence backend. Details="
                     + e.getMessage());
@@ -450,16 +470,17 @@ public class NGSIPostgreSQLSink extends NGSISink {
         String schemaName = aggregator.getSchemaName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 
-        LOGGER.info("[" + this.getName() + "] Persisting data at OrionPostgreSQLSink. Schema ("
+        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgreSQLSink. Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
                 + fieldValues + ")");
-
-        // creating the database and the table has only sense if working in row mode, in column node
-        // everything must be provisioned in advance
+        
         if (aggregator instanceof RowAggregator) {
             persistenceBackend.createSchema(schemaName);
             persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
         } // if
+        // creating the database and the table has only sense if working in row mode, in column node
+        // everything must be provisioned in advance
+        
 
         persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
     } // persistAggregation

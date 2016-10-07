@@ -276,13 +276,13 @@ public class NGSIKafkaSink extends NGSISink {
         ProducerRecord<String, String> record;
 
         if (!persistenceBackend.topicExists(topicName)) {
-            LOGGER.info("[" + this.getName() + "] Creating topic at OrionKafkaSink. "
+            LOGGER.info("[" + this.getName() + "] Creating topic at NGSIKafkaSink. "
                     + "Topic: " + topicName + " , partitions: " + partitions + " , "
                     + "replication factor: " + replicationFactor);
             persistenceBackend.createTopic(topicName, partitions, replicationFactor);
         } // if
 
-        LOGGER.info("[" + this.getName() + "] Persisting data at OrionKafkaSink. Topic ("
+        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIKafkaSink. Topic ("
                 + topicName + "), Data (" + aggregation + ")");
         record = new ProducerRecord<String, String>(topicName, aggregation);
         persistenceBackend.send(record);

@@ -95,17 +95,17 @@ time=2015-12-10T14:31:49.486CET | lvl=INFO | trans=1429535775-308-0000000000 | s
 
 A configuration example could be:
 
-    cygnusagent.sinks = test-sink
-    cygnusagent.channels = test-channel
+    cygnus-ngsi.sinks = test-sink
+    cygnus-ngsi.channels = test-channel
     ...
-    cygnusagent.sinks.test-sink.type = com.telefonica.iot.cygnus.sinks.NGSITestSink
-    cygnusagent.sinks.test-sink.channel = ckan-channel
-    cygnusagent.sinks.test-sink.enable_grouping = false
-    cygnusagent.sinks.test-sink.enable_lowercase = false
-    cygnusagent.sinks.test-sink.data_model = dm-by-entity
-    cygnusagent.sinks.test-sink.batch_size = 100
-    cygnusagent.sinks.test-sink.batch_timeout = 30
-    cygnusagent.sinks.test-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.test-sink.type = com.telefonica.iot.cygnus.sinks.NGSITestSink
+    cygnus-ngsi.sinks.test-sink.channel = ckan-channel
+    cygnus-ngsi.sinks.test-sink.enable_grouping = false
+    cygnus-ngsi.sinks.test-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.test-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.test-sink.batch_size = 100
+    cygnus-ngsi.sinks.test-sink.batch_timeout = 30
+    cygnus-ngsi.sinks.test-sink.batch_ttl = 10
 
 [Top](#top)
 

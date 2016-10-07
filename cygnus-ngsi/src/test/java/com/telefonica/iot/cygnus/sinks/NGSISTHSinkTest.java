@@ -17,8 +17,8 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.utils.CommonUtilsForTests;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import java.util.Arrays;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
@@ -44,7 +44,7 @@ public class NGSISTHSinkTest {
      */
     @Test
     public void testConfigureDefaultValues() {
-        System.out.println(getTestTraceHead("[OrionSTHSink.configure]")
+        System.out.println(getTestTraceHead("[NGSISTHSink.configure]")
                 + "-------- Non mandatory parameters get the default value when not configured");
         String collectionPrefix = null; // default value
         String dbPrefix = null; // default value
@@ -57,10 +57,10 @@ public class NGSISTHSinkTest {
         try {
             boolean[] expected = {true, true, true, true, true};
             assertTrue(Arrays.equals(expected, sink.resolutions));
-            System.out.println(getTestTraceHead("[OrionSTHSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISTHSink.configure]")
                     + "-  OK  - 'resolutions' gets the default value when not configured");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSTHSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISTHSink.configure]")
                     + "- FAIL - 'resolutions' doesn't get the default value when not configured");
             throw e;
         } // try catch
@@ -71,7 +71,7 @@ public class NGSISTHSinkTest {
      */
     @Test
     public void testConfigureInvalidResolutions() {
-        System.out.println(getTestTraceHead("[OrionSTHSink.configure]")
+        System.out.println(getTestTraceHead("[NGSISTHSink.configure]")
                 + "-------- Non valid resolutions are detected");
         String collectionPrefix = null; // default value
         String dbPrefix = null; // default value
@@ -84,10 +84,10 @@ public class NGSISTHSinkTest {
         try {
             boolean[] expected = {true, false, false, false, true};
             assertTrue(Arrays.equals(expected, sink.resolutions));
-            System.out.println(getTestTraceHead("[OrionSTHSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISTHSink.configure]")
                     + "-  OK  - Invalid resolution 'week' has been detected");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSTHSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISTHSink.configure]")
                     + "- FAIL - Invalid resolution 'week' has not been detected");
             throw e;
         } // try catch
@@ -98,7 +98,7 @@ public class NGSISTHSinkTest {
      */
     @Test
     public void testConfigureEmptyResolutions() {
-        System.out.println(getTestTraceHead("[OrionSTHSink.configure]")
+        System.out.println(getTestTraceHead("[NGSISTHSink.configure]")
                 + "-------- Empty 'resolutions' means no persistence for any resolution");
         String collectionPrefix = null; // default value
         String dbPrefix = null; // default value
@@ -111,10 +111,10 @@ public class NGSISTHSinkTest {
         try {
             boolean[] expected = {false, false, false, false, false};
             assertTrue(Arrays.equals(expected, sink.resolutions));
-            System.out.println(getTestTraceHead("[OrionSTHSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISTHSink.configure]")
                     + "-  OK  - Empty 'resolutions' detected");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionSTHSink.configure]")
+            System.out.println(getTestTraceHead("[NGSISTHSink.configure]")
                     + "- FAIL - Empty 'resolutions' not detected");
             throw e;
         } // try catch
@@ -122,7 +122,7 @@ public class NGSISTHSinkTest {
     
     private Context createContext(String collectionPrefix, String dbPrefix, String dataModel, String enableEncoding,
             String resolutions) {
-        Context context = CommonUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
+        Context context = NGSIUtilsForTests.createContextForMongoSTH(collectionPrefix, dbPrefix, dataModel,
                 enableEncoding);
         context.put("resolutions", resolutions);
         return context;

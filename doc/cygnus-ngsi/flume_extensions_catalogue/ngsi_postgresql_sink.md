@@ -227,7 +227,8 @@ Coming soon.
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink</i> |
 | channel | yes | N/A ||
 | enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
+| enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | postgresql_host | no | localhost | FQDN/IP address where the PostgreSQL server runs. |
@@ -239,27 +240,29 @@ Coming soon.
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
-
+| backend.enable_cache | no | false | <i>true</i> or <i>false</i>, <i>true</i> enables the creation of a Cache, <i>false</i> disables the creation of a Cache. |
 A configuration example could be:
 
-    cygnusagent.sinks = postgresql-sink
-    cygnusagent.channels = postgresql-channel
+    cygnus-ngsi.sinks = postgresql-sink
+    cygnus-ngsi.channels = postgresql-channel
     ...
-    cygnusagent.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink
-    cygnusagent.sinks.postgresql-sink.channel = postgresql-channel
-    cygnusagent.sinks.postgresql-sink.enable_encoding = false
-    cygnusagent.sinks.postgresql-sink.enable_grouping = false
-    cygnusagent.sinks.postgresql-sink.enable_lowercase = false
-    cygnusagent.sinks.postgresql-sink.data_model = dm-by-entity
-    cygnusagent.sinks.postgresql-sink.postgresql_host = 192.168.80.34
-    cygnusagent.sinks.postgresql-sink.postgresql_port = 5432
-    cygnusagent.sinks.postgresql-sink.postgresql_database = mydatabase
-    cygnusagent.sinks.postgresql-sink.postgresql_username = myuser
-    cygnusagent.sinks.postgresql-sink.postgresql_password = mypassword
-    cygnusagent.sinks.postgresql-sink.attr_persistence = row
-    cygnusagent.sinks.postgresql-sink.batch_size = 100
-    cygnusagent.sinks.postgresql-sink.batch_timeout = 30
-    cygnusagent.sinks.postgresql-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink
+    cygnus-ngsi.sinks.postgresql-sink.channel = postgresql-channel
+    cygnus-ngsi.sinks.postgresql-sink.enable_encoding = false
+    cygnus-ngsi.sinks.postgresql-sink.enable_grouping = false
+    cygnus-ngsi.sinks.postgresql-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.postgresql-sink.enable_name_mappings = false
+    cygnus-ngsi.sinks.postgresql-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_host = 192.168.80.34
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_port = 5432
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_database = mydatabase
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_username = myuser
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_password = mypassword
+    cygnus-ngsi.sinks.postgresql-sink.attr_persistence = row
+    cygnus-ngsi.sinks.postgresql-sink.batch_size = 100
+    cygnus-ngsi.sinks.postgresql-sink.batch_timeout = 30
+    cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.postgresql.backend.enable_cache = false
 
 [Top](#top)
 
@@ -318,7 +321,7 @@ From version 1.3.0 (included), Cygnus applies this specific encoding tailored to
 * All other characters, including the slash in the FIWARE service paths, are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
 * User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
 * `xffff` is used as concatenator character.
-    
+
 Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
 
 [Top](#top)

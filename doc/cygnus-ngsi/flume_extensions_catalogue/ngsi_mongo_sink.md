@@ -17,10 +17,9 @@ Content:
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
-        * [Hashing based collections](#section2.3.1)
-        * [About batching](#section2.3.2)
-        * [About `recvTime` and `TimeInstant` metadata](#section2.3.3)
-        * [About the encoding](#section2.3.4)
+        * [About batching](#section2.3.1)
+        * [About `recvTime` and `TimeInstant` metadata](#section2.3.2)
+        * [About the encoding](#section2.3.3)
 * [Programmers guide](#section3)
     * [`NGSIMongoSink` class](#section3.1)
     * [`NGSIMongoBackend` class](#section3.2)
@@ -295,14 +294,14 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.NGSIMongoSink |
 | channel | yes | N/A |
 | enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable\_grouping | no | false | Always <i>false</i> ||
+| enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported. |
 | attr_persistence | no | row | <i>row</i> or <i>column</i>. |
 | mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
 | mongo_username | no | <i>empty</i> | If empty, no authentication is done. |
 | mongo_password | no | <i>empty</i> | If empty, no authentication is done. |
-| should_hash | no | false | <i>true</i> for collection names based on a hash, <i>false</i> for human redable collections. |
 | db_prefix | no | sth_ ||
 | collection_prefix | no | sth_ | `system.` is not accepted. |
 | batch_size | no | 1 | Number of events accumulated before persistence. |
@@ -315,30 +314,30 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 
 A configuration example could be:
 
-    cygnusagent.sinks = mongo-sink
-    cygnusagent.channels = mongo-channel
+    cygnus-ngsi.sinks = mongo-sink
+    cygnus-ngsi.channels = mongo-channel
     ...
-    cygnusagent.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMongoSink
-    cygnusagent.sinks.mongo-sink.channel = mongo-channel
-    cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
-    cygnusagent.sinks.mongo-sink.attr_persistence = column
-    cygnusagent.sinks.mongo-sink.enable_encoding = false
-    cygnusagent.sinks.mongo-sink.enable_grouping = false
-    cygnusagent.sinks.mongo-sink.enable_lowercase = false
-    cygnusagent.sinks.mongo-sink.mongo_hosts = 192.168.80.34:27017
-    cygnusagent.sinks.mongo-sink.mongo_username = myuser
-    cygnusagent.sinks.mongo-sink.mongo_password = mypassword
-    cygnusagent.sinks.mongo-sink.db_prefix = cygnus_
-    cygnusagent.sinks.mongo-sink.collection_prefix = cygnus_
-    cygnusagent.sinks.mongo-sink.should_hash = false
-    cygnusagent.sinks.mongo-sink.data_model = dm-by-entity
-    cygnusagent.sinks.mongo-sink.batch_size = 100
-    cygnusagent.sinks.mongo-sink.batch_timeout = 30
-    cygnusagent.sinks.mongo-sink.batch_ttl = 10
-    cygnusagent.sinks.mongo-sink.data_expiration = 0
-    cygnusagent.sinks.mongo-sink.collections_size = 0
-    cygnusagent.sinks.mongo-sink.max_documents = 0
-    cygnusagent.sinks.mongo-sink.ignore_white_spaces = true
+    cygnus-ngsi.sinks.mongo-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMongoSink
+    cygnus-ngsi.sinks.mongo-sink.channel = mongo-channel
+    cygnus-ngsi.sinks.mongo-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.mongo-sink.attr_persistence = column
+    cygnus-ngsi.sinks.mongo-sink.enable_encoding = false
+    cygnus-ngsi.sinks.mongo-sink.enable_grouping = false
+    cygnus-ngsi.sinks.mongo-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.mongo-sink.enable_name_mappings = false
+    cygnus-ngsi.sinks.mongo-sink.mongo_hosts = 192.168.80.34:27017
+    cygnus-ngsi.sinks.mongo-sink.mongo_username = myuser
+    cygnus-ngsi.sinks.mongo-sink.mongo_password = mypassword
+    cygnus-ngsi.sinks.mongo-sink.db_prefix = cygnus_
+    cygnus-ngsi.sinks.mongo-sink.collection_prefix = cygnus_
+    cygnus-ngsi.sinks.mongo-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.mongo-sink.batch_size = 100
+    cygnus-ngsi.sinks.mongo-sink.batch_timeout = 30
+    cygnus-ngsi.sinks.mongo-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.mongo-sink.data_expiration = 0
+    cygnus-ngsi.sinks.mongo-sink.collections_size = 0
+    cygnus-ngsi.sinks.mongo-sink.max_documents = 0
+    cygnus-ngsi.sinks.mongo-sink.ignore_white_spaces = true
 
 [Top](#top)
 
@@ -348,14 +347,7 @@ Use `NGSIMongoSink` if you are looking for a Json-based document storage not gro
 [Top](#top)
 
 ###<a name="section2.3"></a>Important notes
-####<a name="section2.3.1"></a>Hashing based collections
-In case the `should_hash` option is set to `true`, the collection names are generated as a concatenation of the `collection_prefix` plus a generated hash plus `.aggr` for the collections of the aggregated data. To avoid collisions in the generation of these hashes, they are forced to be 20 bytes long at least. Once again, the length of the collection name plus the `db_prefix` plus the database name (i.e. the fiware-service) should not be more than 120 bytes using UTF-8 or MongoDB will complain and will not create the collection, and consequently no data would be stored by Cygnus. The hash function used is SHA-512.
-
-In case of using hashes as part of the collection names and to let the user or developer easily recover this information, a collection named `<collection_prefix>_collection_names` is created and fed with information regarding the mapping of the collection names and the combination of concrete services, service paths, entities and attributes.
-
-[Top](#top)
-
-####<a name="section2.3.2"></a>About batching
+####<a name="section2.3.1"></a>About batching
 As explained in the [programmers guide](#section3), `NGSIMongoSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same MongoDB collection. If processing the events one by one, we would need 100 inserts into MongoDB; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination MongoDB collection. In the worst case, the whole 100 entities will be about 100 different entities (100 different MongoDB collections), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
@@ -366,12 +358,12 @@ By default, `NGSIMongoSink` has a configured batch size and batch accumulation t
 
 [Top](#top)
 
-###<a name="section2.3.3"></a>About `recvTime` and `TimeInstant` metadata
+####<a name="section2.3.2"></a>About `recvTime` and `TimeInstant` metadata
 By default, `NGSIMongoSink` stores the notification reception timestamp. Nevertheless, if (and only if) working in `row` mode and a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
 
 [Top](#top)
 
-###<a name="section2.3.4"></a>About the encoding
+####<a name="section2.3.3"></a>About the encoding
 `NGSIMongoSink` follows the [MongoDB naming restrictions](https://docs.mongodb.org/manual/reference/limits/#naming-restrictions). In a nutshell:
 
 Until version 1.2.0 (included), Cygnus applied a very simple encoding:
@@ -385,7 +377,7 @@ From version 1.3.0 (included), Cygnus applies this specific encoding tailored to
 * All the forbidden characters are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
 * User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
 * `xffff` is used as concatenator character.
-    
+
 Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
 
 [Top](#top)
@@ -421,7 +413,7 @@ Creates a collection, given its name, if not exists in the given database.
 
     public void insertContextDataRaw(String dbName, String collectionName, long recvTimeTs, String recvTime, String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd) throws Exception;
 
-Updates or inserts (depending if the document already exists or not) a set of documents in the given collection within the given database. Such a set of documents contains all the information regarding current and past notifications (historic) for a single attribute. a set of documents is managed since historical data is stored using several resolutions and range combinations (second-minute, minute-hour, hour-day, day-month and month-year). See FIWARE Comet at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
+Updates or inserts (depending if the document already exists or not) a set of documents in the given collection within the given database. Such a set of documents contains all the information regarding current and past notifications (historic) for a single attribute. a set of documents is managed since historical data is stored using several resolutions and range combinations (second-minute, minute-hour, hour-day, day-month and month-year). See STH Comet at [Github](https://github.com/telefonicaid/IoT-STH/blob/develop/README.md) for more details.
 
 Nothing special is done with regards to the encoding. Since Cygnus generally works with UTF-8 character set, this is how the data is written into the collections. It will responsability of the MongoDB client to convert the bytes read into UTF-8.
 

@@ -137,12 +137,12 @@ As said, Flume events are not much more different than the above representation:
 
 A configuration example could be:
 
-    cygnusagent.sources = http-source
+    cygnus-ngsi.sources = http-source
     ...
-    cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
-    cygnusagent.sources.http-source.notification_target = /notify
-    cygnusagent.sources.http-source.default_service = default
-    cygnusagent.sources.http-source.default_service_path = /
+    cygnus-ngsi.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
+    cygnus-ngsi.sources.http-source.notification_target = /notify
+    cygnus-ngsi.sources.http-source.default_service = default
+    cygnus-ngsi.sources.http-source.default_service_path = /
 
 [Top](#top)
 

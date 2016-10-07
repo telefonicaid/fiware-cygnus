@@ -203,7 +203,8 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIMySQLSink</i> |
 | channel | yes | N/A ||
 | enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i>. |
+| enable_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
+| enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | mysql_host | no | localhost | FQDN/IP address where the MySQL server runs |
@@ -217,23 +218,24 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 
 A configuration example could be:
 
-    cygnusagent.sinks = mysql-sink
-    cygnusagent.channels = mysql-channel
+    cygnus-ngsi.sinks = mysql-sink
+    cygnus-ngsi.channels = mysql-channel
     ...
-    cygnusagent.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSink
-    cygnusagent.sinks.mysql-sink.channel = mysql-channel
-    cygnusagent.sinks.mysql-sink.enable_encoding = false
-    cygnusagent.sinks.mysql-sink.enable_grouping = false
-    cygnusagent.sinks.mysql-sink.enable_lowercase = false
-    cygnusagent.sinks.mysql-sink.data_model = dm-by-entity
-    cygnusagent.sinks.mysql-sink.mysql_host = 192.168.80.34
-    cygnusagent.sinks.mysql-sink.mysql_port = 3306
-    cygnusagent.sinks.mysql-sink.mysql_username = myuser
-    cygnusagent.sinks.mysql-sink.mysql_password = mypassword
-    cygnusagent.sinks.mysql-sink.attr_persistence = row
-    cygnusagent.sinks.mysql-sink.batch_size = 100
-    cygnusagent.sinks.mysql-sink.batch_timeout = 30
-    cygnusagent.sinks.mysql-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSink
+    cygnus-ngsi.sinks.mysql-sink.channel = mysql-channel
+    cygnus-ngsi.sinks.mysql-sink.enable_encoding = false
+    cygnus-ngsi.sinks.mysql-sink.enable_grouping = false
+    cygnus-ngsi.sinks.mysql-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.mysql-sink.enable_name_mappings = false
+    cygnus-ngsi.sinks.mysql-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.mysql-sink.mysql_host = 192.168.80.34
+    cygnus-ngsi.sinks.mysql-sink.mysql_port = 3306
+    cygnus-ngsi.sinks.mysql-sink.mysql_username = myuser
+    cygnus-ngsi.sinks.mysql-sink.mysql_password = mypassword
+    cygnus-ngsi.sinks.mysql-sink.attr_persistence = row
+    cygnus-ngsi.sinks.mysql-sink.batch_size = 100
+    cygnus-ngsi.sinks.mysql-sink.batch_timeout = 30
+    cygnus-ngsi.sinks.mysql-sink.batch_ttl = 10
 
 [Top](#top)
 

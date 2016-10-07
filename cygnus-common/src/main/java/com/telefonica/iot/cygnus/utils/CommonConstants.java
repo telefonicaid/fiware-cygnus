@@ -49,10 +49,6 @@ public final class CommonConstants {
     public static final String ATTR_VALUE          = "attrValue";
     public static final String ATTR_MD             = "attrMd";
     public static final String ATTR_MD_FILE        = "attrMdFile";
-
-    // Maximum values
-    public static final int MAX_CONNS           = 500;
-    public static final int MAX_CONNS_PER_ROUTE = 100;
     
     // Others
     public static final String EMPTY_MD = "[]";

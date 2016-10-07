@@ -155,8 +155,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             entity = cygnusEvent.getEntity();
             attribute = cygnusEvent.getAttribute();
             dbName = buildDbName(service);
-            collectionName = buildCollectionName(dbName, servicePath, entity, attribute, false, null, null,
-                    service);
+            collectionName = buildCollectionName(servicePath, entity, attribute);
         } // initialize
         
         public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
@@ -341,7 +340,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         
         String dbName = aggregator.getDbName(enableLowercase);
         String collectionName = aggregator.getCollectionName(enableLowercase);
-        LOGGER.info("[" + this.getName() + "] Persisting data at OrionMongoSink. Database: "
+        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIMongoSink. Database: "
                 + dbName + ", Collection: " + collectionName + ", Data: " + aggregation.toString());
         backend.createDatabase(dbName);
         backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);

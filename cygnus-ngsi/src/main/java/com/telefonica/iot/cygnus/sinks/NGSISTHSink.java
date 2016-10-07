@@ -112,10 +112,8 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
         // create the collection at this stage, if the data model is collection-per-service-path
         if (dataModel == DataModel.DMBYSERVICEPATH) {
             collectionName = enableLowercase
-                    ? (buildCollectionName(dbName, fiwareServicePath, null, null, true, null, null,
-                            fiwareService) + ".aggr").toLowerCase()
-                    : buildCollectionName(dbName, fiwareServicePath, null, null, true, null, null,
-                            fiwareService) + ".aggr";
+                    ? (buildCollectionName(fiwareServicePath, null, null) + ".aggr").toLowerCase()
+                    : buildCollectionName(fiwareServicePath, null, null) + ".aggr";
             backend.createCollection(dbName, collectionName, dataExpiration);
         } // if
         
@@ -127,10 +125,8 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
         // create the collection at this stage, if the data model is collection-per-entity
         if (dataModel == DataModel.DMBYENTITY) {
             collectionName = enableLowercase
-                    ? (buildCollectionName(dbName, fiwareServicePath, destination, null, true,
-                            entityId, entityType, fiwareService) + ".aggr").toLowerCase()
-                    : buildCollectionName(dbName, fiwareServicePath, destination, null, true,
-                            entityId, entityType, fiwareService) + ".aggr";
+                    ? (buildCollectionName(fiwareServicePath, destination, null) + ".aggr").toLowerCase()
+                    : buildCollectionName(fiwareServicePath, destination, null) + ".aggr";
             backend.createCollection(dbName, collectionName, dataExpiration);
         } // if
 
@@ -171,15 +167,13 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
             // create the collection at this stage, if the data model is collection-per-attribute
             if (dataModel == DataModel.DMBYATTRIBUTE) {
                 collectionName = enableLowercase
-                        ? (buildCollectionName(dbName, fiwareServicePath, destination, attrName,
-                                true, entityId, entityType, fiwareService) + ".aggr").toLowerCase()
-                        : buildCollectionName(dbName, fiwareServicePath, destination, attrName,
-                                true, entityId, entityType, fiwareService) + ".aggr";
+                        ? (buildCollectionName(fiwareServicePath, destination, attrName) + ".aggr").toLowerCase()
+                        : buildCollectionName(fiwareServicePath, destination, attrName) + ".aggr";
                 backend.createCollection(dbName, collectionName, dataExpiration);
             } // if
 
             // insert the data
-            LOGGER.info("[" + this.getName() + "] Persisting data at OrionSTHSink. Database: " + dbName
+            LOGGER.info("[" + this.getName() + "] Persisting data at NGSISTHSink. Database: " + dbName
                     + ", Collection: " + collectionName + ", Data: " + recvTimeTs + ","
                     + entityId + "," + entityType + "," + attrName + "," + attrType + "," + attrValue + ","
                     + attrMetadata);
