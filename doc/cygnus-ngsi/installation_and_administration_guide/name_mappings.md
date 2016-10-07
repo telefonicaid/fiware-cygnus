@@ -52,19 +52,19 @@ Please observe no raw bytes about the body are sent.
 Whenever a sink takes one of these `NGSIEvent`'s, it is only a matter of deciding if such a sink enables the name mappings (`enable_name_mappings` parameter) or not. If name mappings are enabled, then the already parsed `NotifyContextRequest`, mapped version, is used. If not, then the original version is used.
 
 ##Important notes
-Please observe the name mappings definition is global to all the sinks, at `NGSIRestHandler`, but then the application is local to the sink, depending on the `enable_name_mappings` parameter. Thus, if any of yur sinks is going to take advantage of the mappings, simply leave blank the mappings configuration file in the REST handler. That will avoid unncessary interception and iterations on the mappings.
+Please observe the name mappings definition is global to all the sinks, at `NGSIRestHandler`, but then the application is local to the sink, depending on the `enable_name_mappings` parameter. Thus, if any of your sinks is going to take advantage of the mappings, simply leave blank the mappings configuration file in the REST handler. That will avoid unnecessary interception and iterations on the mappings.
 
 Additionally, please observe if any of the original names is not present, then the mapping affects all the names of that type. For instance, if `originalService` is not present in the fist mapping, then the mapping affects all the FIWARE services.
 
 [Top](#top)
 
 ##Name mappings vs. grouping rules
-As seen, the name mappings feature is quite similar to the already existent grouping rules. Both of them are Flume interceptors and bot h of them allow chaning certain notified name elements. Thus, which are the differences? Mainly:
+As seen, the name mappings feature is quite similar to the already existent grouping rules. Both of them are Flume interceptors and both of them allow changing certain notified name elements. Thus, which are the differences? Mainly:
 
 | Name mappings | Grouping rules |
 |---|---|
 |Allow changing the notified <b>FIWARE service</b>, <b>FIWARE service path</b>, <b>entity IDs</b>, <b>entity types</b>, <b>attribute names</b> and <b>attribute types</b>.|Allow changing the notified <b>FIWARE service path</b> and the <b>concatenation of entity ID and entity type</b> (this is called the <i>destination</i>).|
-|Plain Flume `Event`'s are intercepted, and `NGSIEvent`'s are put into the channel. Because the intercetor needs to parse the original notidfication, a `NGSIEvent` already contains the original notification parsed, and the mapped version of the original notification, <b>freeing the sinks to parse the notification</b>.|Plain Flume `Event`'s are intercepted, and plain `Event`'s are put into the channel. Thus, <b>the sinks must parse the notification</b>, despite the grouping interceptor already parsed it`.|
+|Plain Flume `Event`'s are intercepted, and `NGSIEvent`'s are put into the channel. Because the intercetor needs to parse the original notification, a `NGSIEvent` already contains the original notification parsed, and the mapped version of the original notification, <b>freeing the sinks to parse the notification</b>.|Plain Flume `Event`'s are intercepted, and plain `Event`'s are put into the channel. Thus, <b>the sinks must parse the notification</b>, despite the grouping interceptor already parsed it`.|
 |It is expected a `enable_content_mappings` feature is implemented in the future. Such a content mapping will take advantage of the already mapped version on the origianl notification within `NGSIEvent`'s.|Such a funcionality is very hard to implement based on the current grouping interceptor code.|
 
 Most probably, the grouping rules feature is deprecated in future versions of Cygnus.

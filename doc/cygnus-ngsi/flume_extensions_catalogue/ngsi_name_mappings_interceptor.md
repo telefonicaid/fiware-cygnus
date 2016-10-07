@@ -67,12 +67,12 @@ There exists a <i>name mappings</i> file containing a Json following this format
 }
 ```
 
-The above Json is quite straightforward: the `<original_service>` is mapped as the `<new_service>`, the `<original_service_path>` is mapped as the `<new_service_path>` and so on. The name mappings are iterated until a map is found; if no map is found, the mapped vesion of the original notification is equals to the original one.
+The above Json is quite straightforward: the `<original_service>` is mapped as the `<new_service>`, the `<original_service_path>` is mapped as the `<new_service_path>` and so on. The name mappings are iterated until a map is found; if no map is found, the mapped version of the original notification is equals to the original one.
 
 [Top](#top)
 
 ###<a name="section1.2"></a>Headers before and after intercepting
-Before interception, these are the headers added by the [`NGSIRestHandler`](./ngsi_rest_handler.md) to all the internal Flumm events of type `Event`:
+Before interception, these are the headers added by the [`NGSIRestHandler`](./ngsi_rest_handler.md) to all the internal Flume events of type `Event`:
 
 * `fiware-service`. FIWARE service which the entity related to the notified data belongs to.
 * `fiware-servicepath`. FIWARE service path which the entity related to notified data belongs to. If the notification relates to several entities in different service paths, these are included within this header separated by comma.

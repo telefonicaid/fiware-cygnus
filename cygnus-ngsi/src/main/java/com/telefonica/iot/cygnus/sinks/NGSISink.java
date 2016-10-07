@@ -446,7 +446,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 try {
                     notification = parseEventBody(event);
                 } catch (Exception e) {
-                    LOGGER.error("There was some problem when parsing the notifed context element. Details: "
+                    LOGGER.error("There was some problem when parsing the notified context element. Details: "
                             + e.getMessage());
                     continue;
                 } // try catch
