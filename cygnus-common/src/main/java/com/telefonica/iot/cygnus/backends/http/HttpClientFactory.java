@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.backends.http;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
@@ -64,6 +65,10 @@ public class HttpClientFactory {
         // set the Kerberos parameters
         this.loginConfFile = loginConfFile;
         this.krb5ConfFile = krb5ConfFile;
+        
+        // trace the file containing the httpclient library
+        URL myClassURL = PoolingClientConnectionManager.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading httpclient from " + myClassURL.toExternalForm());
         
         // create the appropriate connections manager
         if (ssl) {
