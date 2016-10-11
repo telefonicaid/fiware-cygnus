@@ -35,6 +35,10 @@ ENV CYGNUS_MYSQL_USER "mysql"
 ENV CYGNUS_MYSQL_PASS "mysql"
 ENV CYGNUS_MONGO_USER "mongo"
 ENV CYGNUS_MONGO_PASS "mongo"
+ENV CYGNUS_CKAN_HOST "iot-ckan"
+ENV CYGNUS_CKAN_PORT "80"
+ENV CYGNUS_CKAN_API_KEY ""
+ENV CYGNUS_CKAN_SSL "false"
 
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 ENV GIT_REV_CYGNUS "master"
@@ -49,7 +53,7 @@ ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
 ENV FLUME_URL "http://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 ENV FLUME_HOME "/opt/apache-flume"
 
-ENV JAVA_HOME /usr/lib/jvm/java-1.6.0
+ENV JAVA_HOME "/usr/lib/jvm/java-1.6.0-openjdk-1.6.0.40.x86_64"
 
 # Install
 RUN \
@@ -115,4 +119,3 @@ ENTRYPOINT ["/cygnus-entrypoint.sh"]
 
 # Ports used by cygnus-ngsi
 EXPOSE ${CYGNUS_SERVICE_PORT} ${CYGNUS_API_PORT}
-

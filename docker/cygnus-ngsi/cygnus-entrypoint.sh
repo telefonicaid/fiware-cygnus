@@ -28,6 +28,10 @@ sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_username/c '${CYGNUS_AGEN
 sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_password/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_password = '${CYGNUS_MONGO_PASS} ${FLUME_HOME}/conf/agent.conf
 sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_username/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_username = '${CYGNUS_MONGO_USER} ${FLUME_HOME}/conf/agent.conf
 sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_password/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_password = '${CYGNUS_MONGO_PASS} ${FLUME_HOME}/conf/agent.conf
+sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.ckan_host/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.ckan_host = '${CYGNUS_CKAN_HOST} ${FLUME_HOME}/conf/agent.conf
+sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.ckan_port/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.ckan_port = '${CYGNUS_CKAN_PORT} ${FLUME_HOME}/conf/agent.conf
+sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.ssl/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.ssl = '${CYGNUS_CKAN_SSL} ${FLUME_HOME}/conf/agent.conf
+sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.api_key/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.api_key = '${CYGNUS_CKAN_API_KEY} ${FLUME_HOME}/conf/agent.conf
 
 # Run the Cygnus command
 ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${CYGNUS_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p ${CYGNUS_API_PORT} -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC &
