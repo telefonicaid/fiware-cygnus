@@ -1,7 +1,7 @@
 #<a name="top"></a>Grouping Rules
 Grouping rules are an advanced global feature of Cygnus. It is global because it is available for all NGSI sinks.
 
-Such rules are just a Json within a configuration file (that can be instantiated from the template) given in the Cygnus repository, `conf/grouping_rules.conf.template`.
+Such rules are just a Json within a configuration file (that can be instantiated from `grouping_rules.conf.template`) located at `conf/`.
 
 Grouping rules allow changing the notified <b>FIWARE service path</b> and the concatenation of <b>entity ID</b> and <b>entity type</b> (this is called the destination).
 Such rules are just a Json within a configuration file detailing how notified <b>FIWARE service path</b> must be replaced by alternative <b>FIWARE service path</b>.
