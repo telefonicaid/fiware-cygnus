@@ -1,0 +1,1 @@
+- [cygnus-ngsi][hardening] Delay the retries of not persisted batches (#1138)
