@@ -171,8 +171,8 @@ If `attr_persistence=colum` then `NGSIDynamoDBSink` will persist the data within
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIDynamoDBSink</i> |
 | channel | yes | N/A ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
-| enable_name_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
+| enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
+| enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity |  <i>dm-by-entity</i> or <i>dm-by-service-path</i>. |
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
@@ -181,7 +181,8 @@ If `attr_persistence=colum` then `NGSIDynamoDBSink` will persist the data within
 | region | no | eu-central-1 | [AWS regions](http://docs.aws.amazon.com/general/latest/gr/rande.html). |
 | batch\_size | no | 1 | Number of events accumulated before persistence (Maximum 25, check [Amazon Web Services Documentation](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html) for more information). |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
-| batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| batch\_retry\_intervals | no | 5000 | Comma-separated list of intervals (in miliseconds) at which the retries regarding not persisted batches will be done. First retry will be done as many miliseconds after as the first value, then the second retry will be done as many miliseconds after as second value, and so on. If the batch\_ttl is greater than the number of intervals, the last interval is repeated. |
 
 A configuration example could be:
 
@@ -192,7 +193,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.dynamodb-sink.channel = dynamodb-channel
     cygnus-ngsi.sinks.dynamodb-sink.enable_grouping = false
     cygnus-ngsi.sinks.dynamodb-sink.enable_lowercase = false
-    ygnus-ngsi.sinks.dynamodb-sink.enable_name_mappings = false
+    cygnus-ngsi.sinks.dynamodb-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.dynamodb-sink.data_model = dm-by-entity
     cygnus-ngsi.sinks.dynamodb-sink.attr_persistence = column
     cygnus-ngsi.sinks.dynamodb-sink.access_key_id = xxxxxxxx
@@ -201,6 +202,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.dynamodb-sink.batch_size = 25
     cygnus-ngsi.sinks.dynamodb-sink.batch_timeout = 30
     cygnus-ngsi.sinks.dynamodb-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.dynamodb-sink.batch_retry_intervals = 5000
 
 [Top](#top)
 
@@ -230,6 +232,8 @@ As explained in the [programmers guide](#section3), `NGSIDynamoDBSink` extends `
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of inserts is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same DynamoDB table. If processing the events one by one, we would need 100 inserts into DynamoDB; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination DynamoDB table. In the worst case, the whole 100 entities will be about 100 different entities (100 different DynamoDB tables), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
 
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
+
+Regarding the retries of not persisted batches, a couple of parameters is used. On the one hand, a Time-To-Live (TTL) is used, specifing the number of retries Cygnus will do before definitely dropping the event. On the other hand, a list of retry intervals can be configured. Such a list defines the first retry interval, then se second retry interval, and so on; if the TTL is greater than the length of the list, then the last retry interval is repeated as many times as necessary.
 
 By default, `NGSIDynamoDBSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
 
