@@ -41,9 +41,9 @@ As seen, the name mappings feature is quite similar to the already existent grou
 
 | Grouping rules | Name mappings |
 |---|---|
-|Allow changing the notified <b>FIWARE service path</b> and the <b>concatenation of entity ID and entity type</b> (this is called the <i>destination</i>).|Allow changing the notified <b>FIWARE service</b>, <b>FIWARE service path</b>, <b>entity IDs</b>, <b>entity types</b>, <b>attribute names</b> and <b>attribute types</b>.
-|Plain Flume `Event`'s are intercepted, and plain `Event`'s are put into the channel. Thus, <b>the sinks must parse the notification</b>, despite the grouping interceptor already parsed it`.|Plain Flume `Event`'s are intercepted, and `NGSIEvent`'s are put into the channel. Because the interceptor needs to parse the original notification, a `NGSIEvent` already contains the original notification parsed, and the mapped version of the original notification, <b>freeing the sinks to parse the notification</b>.
-|Such a functionality is very hard to implement based on the current grouping interceptor code.|It is expected a `enable_content_mappings` feature is implemented in the future. Such a content mapping will take advantage of the already mapped version on the original notification within `NGSIEvent`'s.|
+|Allow changing the notified <b>FIWARE service path</b> and the <b>concatenation of entity ID and entity type</b> (this is called the <i>destination</i>). |Allow changing the notified <b>FIWARE service</b>, <b>FIWARE service path</b>, <b>entity IDs</b>, <b>entity types</b>, <b>attribute names</b> and <b>attribute types</b>.
+|Plain Flume `Event`'s are intercepted, and plain `Event`'s are put into the channel. Thus, <b>the sinks must parse the notification</b>, despite the grouping interceptor already parsed it`. |Plain Flume `Event`'s are intercepted, and `NGSIEvent`'s are put into the channel. Because the interceptor needs to parse the original notification, a `NGSIEvent` already contains the original notification parsed, and the mapped version of the original notification, <b>freeing the sinks to parse the notification</b>.
+|Such a functionality is very hard to implement based on the current grouping interceptor code. |It is expected a `enable_content_mappings` feature is implemented in the future. Such a content mapping will take advantage of the already mapped version on the original notification within `NGSIEvent`'s.|
 
 Most probably, the grouping rules feature is deprecated in future versions of Cygnus.
 
