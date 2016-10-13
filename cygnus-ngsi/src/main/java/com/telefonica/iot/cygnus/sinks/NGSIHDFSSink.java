@@ -26,6 +26,7 @@ import com.telefonica.iot.cygnus.backends.hive.HiveBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -982,9 +983,9 @@ public class NGSIHDFSSink extends NGSISink {
         String aggregation = aggregator.getAggregation();
         String hdfsFolder = aggregator.getFolder(enableLowercase);
         String hdfsFile = aggregator.getFile(enableLowercase);
-
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIHDFSSink. HDFS file ("
                 + hdfsFile + "), Data (" + aggregation + ")");
+        boolean persisted = false;
 
         for (HDFSBackend persistenceBackend: persistenceBackends) {
             try {
@@ -1002,12 +1003,17 @@ public class NGSIHDFSSink extends NGSISink {
                             + ") in the first place of the list");
                 } // if
 
+                persisted = true;
                 break;
             } catch (Exception e) {
                 LOGGER.info("[" + this.getName() + "] There was some problem with the current endpoint, "
                         + "trying other one. Details: " + e.getMessage());
             } // try catch
         } // for
+        
+        if (!persisted) {
+            throw new CygnusPersistenceError("[" + this.getName() + "] No endpoint was available");
+        } // if
     } // persistAggregation
 
     private void persistMDAggregations(HDFSAggregator aggregator) throws Exception {

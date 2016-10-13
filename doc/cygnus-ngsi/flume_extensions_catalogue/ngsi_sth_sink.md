@@ -297,21 +297,22 @@ Assuming `data_model=dm-by-entity` and all the possible resolutions as configura
 |---|---|---|---|
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.NGSISTHSink |
 | channel | yes | N/A |
-| enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable_grouping | no | false | Always <i>false</i>. ||
-| enable_name_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
+| enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
+| enable\_grouping | no | false | Always <i>false</i>. ||
+| enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
-| data_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported. |
-| mongo_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
-| mongo_username | no | <i>empty</i> | If empty, no authentication is done. |
-| mongo_password | no | <i>empty</i> | If empty, no authentication is done. |
-| db_prefix | no | sth_ ||
-| collection_prefix | no | sth_ | `system.` is not accepted. |
+| data\_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported. |
+| mongo\_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
+| mongo\_username | no | <i>empty</i> | If empty, no authentication is done. |
+| mongo\_password | no | <i>empty</i> | If empty, no authentication is done. |
+| db\_prefix | no | sth_ ||
+| collection\_prefix | no | sth_ | `system.` is not accepted. |
 | resolutions | no | month,day,hour,minute,second | Resolutions for which it is desired to aggregate data. Accepted values are <i>month</i>, <i>day</i>, <i>hour</i>, <i>minute</i> and <i>second</i> separated  by comma. |
-| batch_size | no | 1 | Number of events accumulated before persistence. |
-| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
-| batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
-| data_expiration | no | 0 | Collections will be removed if older than the value specified in seconds. The reference of time is the one stored in the `_id.origin` property. Set to 0 if not wanting this policy. |
+| batch\_size | no | 1 | Number of events accumulated before persistence. |
+| batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
+| batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| batch\_retry\_intervals | no | 5000 | Comma-separated list of intervals (in miliseconds) at which the retries regarding not persisted batches will be done. First retry will be done as many miliseconds after as the first value, then the second retry will be done as many miliseconds after as second value, and so on. If the batch\_ttl is greater than the number of intervals, the last interval is repeated. |
+| data\_expiration | no | 0 | Collections will be removed if older than the value specified in seconds. The reference of time is the one stored in the `_id.origin` property. Set to 0 if not wanting this policy. |
 | ignore\_white\_spaces | no | true | <i>true</i> if exclusively white space-based attribute values must be ignored, <i>false</i> otherwise. |
 
 A configuration example could be:
@@ -335,6 +336,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.sth-sink.batch_size = 100
     cygnus-ngsi.sinks.sth-sink.batch_timeout = 30
     cygnus-ngsi.sinks.sth-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.sth-sink.batch_retry_intervals = 5000
     cygnus-ngsi.sinks.sth-sink.data_expiration = 0
     cygnus-ngsi.sinks.sth-sink.ignore_white_spaces = true
 

@@ -21,6 +21,7 @@ package com.telefonica.iot.cygnus.sinks;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplBinary;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplREST;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import org.apache.flume.Context;
 
@@ -362,9 +363,9 @@ public class TwitterHDFSSink extends TwitterSink {
         String aggregation = aggregator.getAggregation().trim();
         String hdfsFolder = aggregator.getFolder(enableLowercase);
         String hdfsFile = aggregator.getFile(enableLowercase);
-
         LOGGER.info("[" + this.getName() + "] Persisting data at TwitterHDFSSink. HDFS file ("
                 + hdfsFile + ")");
+        boolean persisted = false;
         
         for (HDFSBackend persistenceBackend: persistenceBackends) {
             try {
@@ -382,12 +383,17 @@ public class TwitterHDFSSink extends TwitterSink {
                             + ") in the first place of the list");
                 } // if
 
+                persisted = true;
                 break;
             } catch (Exception e) {
                 LOGGER.info("[" + this.getName() + "] There was some problem with the current endpoint, "
                         + "trying other one. Details: " + e.getMessage());
             } // try catch
         } // for
+        
+        if (!persisted) {
+            throw new CygnusPersistenceError("[" + this.getName() + "] No endpoint was available");
+        } // if
     } // persistAggregation
 
 } // TwitterHDFSSink
