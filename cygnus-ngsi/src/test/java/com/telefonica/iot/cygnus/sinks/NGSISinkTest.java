@@ -371,6 +371,22 @@ public class NGSISinkTest {
                     + configuredEnableNameMappings + "' has not been detected");
             throw e;
         } // try catch
+        
+        sink = new NGSISinkImpl();
+        String batchRetryIntervals = "1000,2000,-3000";
+        sink.configure(createContext(batchRetryIntervals, null, null, null, null, null, null, null));
+        
+        try {
+            assertTrue(sink.getInvalidConfiguration());
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
+                    + "-  OK  - A wrong configuration 'batch_retry_intervals='"
+                    + batchRetryIntervals + "' has been detected");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
+                    + "- FAIL - A wrong configuration 'batch_retry_intervals='"
+                    + batchRetryIntervals + "' has not been detected");
+            throw e;
+        } // try catch
     } // testConfigureInvalidConfiguration
     
     /**
