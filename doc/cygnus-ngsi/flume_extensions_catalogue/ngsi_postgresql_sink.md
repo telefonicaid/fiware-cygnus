@@ -226,21 +226,23 @@ Coming soon.
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink</i> |
 | channel | yes | N/A ||
-| enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
+| enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
+| enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
-| data_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
-| postgresql_host | no | localhost | FQDN/IP address where the PostgreSQL server runs. |
-| postgresql_port | no | 5432 ||
-| postgresql_database | no | postgres | `postgres` is the default database that is created automatically when install |
-| postgresql_username | no | postgres | `postgres` is the default username that is created automatically when install |
-| postgresql_password | no | N/A | Empty value by default (No password is created when install) |
-| attr_persistence | no | row | <i>row</i> or <i>column</i>. |
-| batch_size | no | 1 | Number of events accumulated before persistence. |
-| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
-| batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
-| backend.enable_cache | no | false | <i>true</i> or <i>false</i>, <i>true</i> enables the creation of a Cache, <i>false</i> disables the creation of a Cache. |
+| data\_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
+| postgresql\_host | no | localhost | FQDN/IP address where the PostgreSQL server runs. |
+| postgresql\_port | no | 5432 ||
+| postgresql\_database | no | postgres | `postgres` is the default database that is created automatically when install |
+| postgresql\_username | no | postgres | `postgres` is the default username that is created automatically when install |
+| postgresql\_password | no | N/A | Empty value by default (No password is created when install) |
+| attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
+| batch\_size | no | 1 | Number of events accumulated before persistence. |
+| batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
+| batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| batch\_retry\_intervals | no | 5000 | Comma-separated list of intervals (in miliseconds) at which the retries regarding not persisted batches will be done. First retry will be done as many miliseconds after as the first value, then the second retry will be done as many miliseconds after as second value, and so on. If the batch\_ttl is greater than the number of intervals, the last interval is repeated. |
+| backend.enable\_cache | no | false | <i>true</i> or <i>false</i>, <i>true</i> enables the creation of a Cache, <i>false</i> disables the creation of a Cache. |
+
 A configuration example could be:
 
     cygnus-ngsi.sinks = postgresql-sink
@@ -262,6 +264,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.postgresql-sink.batch_size = 100
     cygnus-ngsi.sinks.postgresql-sink.batch_timeout = 30
     cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.postgresql-sink.batch_retry_intervals = 5000
     cygnus-ngsi.sinks.postgresql.backend.enable_cache = false
 
 [Top](#top)
@@ -294,6 +297,8 @@ As explained in the [programmers guide](#section3), `NGSIPostgreSQLSink` extends
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same PostgreSQL table. If processing the events one by one, we would need 100 inserts into PostgreSQL; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination PostgreSQL table. In the worst case, the whole 100 entities will be about 100 different entities (100 different PostgreSQL tables), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
 
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
+
+Regarding the retries of not persisted batches, a couple of parameters is used. On the one hand, a Time-To-Live (TTL) is used, specifing the number of retries Cygnus will do before definitely dropping the event. On the other hand, a list of retry intervals can be configured. Such a list defines the first retry interval, then se second retry interval, and so on; if the TTL is greater than the length of the list, then the last retry interval is repeated as many times as necessary.
 
 By default, `NGSIPostgreSQLSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
 

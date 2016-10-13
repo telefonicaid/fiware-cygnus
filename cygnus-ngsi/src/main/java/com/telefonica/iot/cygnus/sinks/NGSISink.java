@@ -75,6 +75,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     protected int batchSize;
     protected int batchTimeout;
     protected int batchTTL;
+    protected int[] batchRetryIntervals;
     protected boolean enableLowercase;
     protected boolean invalidConfiguration;
     protected boolean enableEncoding;
@@ -82,7 +83,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     // accumulator utility
     private final Accumulator accumulator;
     // rollback queues
-    private final ArrayList<Accumulator> rollbackedAccumulations;
+    private ArrayList<Accumulator> rollbackedAccumulations;
 
     /**
      * Constructor.
@@ -99,6 +100,10 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         // crete the rollbacking queue
         rollbackedAccumulations = new ArrayList<Accumulator>();
     } // NGSISink
+    
+    protected String getBatchRetryIntervals() {
+        return Arrays.toString(batchRetryIntervals).replaceAll("\\[", "").replaceAll("\\]", "");
+    } // getBatchRetryIntervals
     
     /**
      * Gets the batch size.
@@ -168,6 +173,14 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     protected boolean getInvalidConfiguration() {
         return invalidConfiguration;
     } // getInvalidConfiguration
+    
+    protected ArrayList<Accumulator> getRollbackedAccumulations() {
+        return rollbackedAccumulations;
+    } // getRollbackedAccumulations
+    
+    protected void setRollbackedAccumulations(ArrayList<Accumulator> rollbackedAccumulations) {
+        this.rollbackedAccumulations = rollbackedAccumulations;
+    } // setRollbackedAccumulations
 
     @Override
     public void configure(Context context) {
@@ -264,6 +277,30 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 + enableNameMappingsStr + ") -- Must be 'true' or 'false'");
         }  // if else
         
+        String batchRetryIntervalsStr = context.getString("batch_retry_intervals", "5000");
+        String[] batchRetryIntervalsSplit = batchRetryIntervalsStr.split(",");
+        batchRetryIntervals = new int[batchRetryIntervalsSplit.length];
+        boolean allOK = true;
+        
+        for (int i = 0; i < batchRetryIntervalsSplit.length; i++) {
+            String batchRetryIntervalStr = batchRetryIntervalsSplit[i];
+            int batchRetryInterval = new Integer(batchRetryIntervalStr);
+            
+            if (batchRetryInterval <= 0) {
+                invalidConfiguration = true;
+                LOGGER.debug("[" + this.getName() + "] Invalid configuration (batch_retry_intervals="
+                        + batchRetryIntervalStr + ") -- Members must be greater than 0");
+                allOK = false;
+                break;
+            } else {
+                batchRetryIntervals[i] = batchRetryInterval;
+            } // if else
+        } // for
+        
+        if (allOK) {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_retry_intervals="
+                    + batchRetryIntervalsStr + ")");
+        } // if
     } // configure
 
     @Override
@@ -292,21 +329,20 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         } else if (rollbackedAccumulations.isEmpty()) {
             return processNewBatches();
         } else {
-            return processRollbackedBatches();
+            processRollbackedBatches();
+            return processNewBatches();
         } // if else
     } // process
 
     private Status processRollbackedBatches() throws EventDeliveryException {
-        Accumulator rollbackedAccumulation;
+        // Get a rollbacked accumulation
+        Accumulator rollbackedAccumulation = getRollbackedAccumulationForRetry();
 
-        // get a rollbacked accumulation
-        if (rollbackedAccumulations.isEmpty()) {
-            return Status.BACKOFF;
-        } else {
-            rollbackedAccumulation = rollbackedAccumulations.get(0);
-        } // if else
-
-        // try persisting the rollbacked accumulation
+        if (rollbackedAccumulation == null) {
+            return Status.READY; // No rollbacked batch was ready for retry, so we are ready to process new batches
+        } // if
+            
+        // Try persisting the rollbacked accumulation
         try {
             persistBatch(rollbackedAccumulation.getBatch());
             
@@ -320,27 +356,11 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         } catch (Exception e) {
             LOGGER.debug(Arrays.toString(e.getStackTrace()));
 
-            // rollback only if the exception is about a persistence error
+            // Rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
                 LOGGER.error(e.getMessage());
-                
-                if (rollbackedAccumulation.ttl == -1) {
-                    LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + "), "
-                            + "infinite batch TTL");
-                } else if (rollbackedAccumulation.ttl > 0) {
-                    rollbackedAccumulation.ttl--;
-                    LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + "), "
-                            + "batch TTL=" + rollbackedAccumulation.ttl);
-                } else {
-                    rollbackedAccumulations.remove(0);
-                    
-                    if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
-                        LOGGER.info("TTL exhausted, finishing internal transaction ("
-                                + rollbackedAccumulation.getAccTransactionIds() + ")");
-                    } // if
-                } // if else
-                
-                return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
+                doRollbackAgain(rollbackedAccumulation);
+                return Status.BACKOFF; // Slow down the sink since there are problems with the persistence backend
             } else {
                 if (e instanceof CygnusRuntimeError) {
                     LOGGER.error(e.getMessage());
@@ -356,6 +376,58 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             } // if else
         } // try catch
     } // processRollbackedBatches
+    
+    /**
+     * Gets a rollbacked accumulation for retry.
+     * @return A rollbacked accumulation for retry.
+     */
+    protected Accumulator getRollbackedAccumulationForRetry() {
+        Accumulator rollbackedAccumulation = null;
+        
+        for (Accumulator rollbackedAcc : rollbackedAccumulations) {
+            rollbackedAccumulation = rollbackedAcc;
+            
+            // Check the last retry
+            int retryIntervalIndex = batchTTL - rollbackedAccumulation.ttl;
+            
+            if (retryIntervalIndex >= batchRetryIntervals.length) {
+                retryIntervalIndex = batchRetryIntervals.length - 1;
+            } // if
+            
+            if (rollbackedAccumulation.getLastRetry() + batchRetryIntervals[retryIntervalIndex]
+                    <= new Date().getTime()) {
+                break;
+            } // if
+            
+            rollbackedAccumulation = null;
+        } // for
+        
+        return rollbackedAccumulation;
+    } // getRollbackedAccumulationForRetry
+    
+    /**
+     * Rollbacks the accumulation once more.
+     * @param rollbackedAccumulation
+     */
+    protected void doRollbackAgain(Accumulator rollbackedAccumulation) {
+        if (rollbackedAccumulation.getTTL() == -1) {
+            rollbackedAccumulation.setLastRetry(new Date().getTime());
+            LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + "), "
+                    + "infinite batch TTL");
+        } else if (rollbackedAccumulation.getTTL() > 1) {
+            rollbackedAccumulation.setLastRetry(new Date().getTime());
+            rollbackedAccumulation.setTTL(rollbackedAccumulation.getTTL() - 1);
+            LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + "), "
+                    + "this was retry #" + (batchTTL - rollbackedAccumulation.getTTL()));
+        } else {
+            rollbackedAccumulations.remove(rollbackedAccumulation);
+
+            if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
+                LOGGER.info("Finishing internal transaction ("
+                        + rollbackedAccumulation.getAccTransactionIds() + "), this was retry #" + batchTTL);
+            } // if
+        } // if else
+    } // doRollbackAgain
 
     private Status processNewBatches() throws EventDeliveryException {
         // get the channel
@@ -487,23 +559,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             // rollback only if the exception is about a persistence error
             if (e instanceof CygnusPersistenceError) {
                 LOGGER.error(e.getMessage());
-                
-                if (accumulator.ttl == -1) {
-                    rollbackedAccumulations.add(accumulator.clone());
-                    LOGGER.info("Rollbacking again (" + accumulator.getAccTransactionIds() + "), "
-                            + "infinite batch TTL");
-                } else if (accumulator.ttl > 0) {
-                    accumulator.ttl--;
-                    rollbackedAccumulations.add(accumulator.clone());
-                    LOGGER.info("Rollbacking again (" + accumulator.getAccTransactionIds() + "), "
-                            + "batch TTL=" + accumulator.ttl);
-                } else {
-                    if (!accumulator.getAccTransactionIds().isEmpty()) {
-                        LOGGER.info("TTL exhausted, finishing internal transaction ("
-                                + accumulator.getAccTransactionIds() + ")");
-                    } // if
-                } // if else
-                
+                doRollback(accumulator.clone()); // the global accumulator has to be cloned for rollbacking purposes
                 accumulator.initialize(new Date().getTime());
                 txn.commit();
                 txn.close();
@@ -527,6 +583,29 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         } // try catch
     } // processNewBatches
 
+    /**
+     * Rollbacks the accumulator for the first time.
+     * @param accumulator Accumulator to be rollbacked
+     */
+    protected void doRollback(Accumulator accumulator) {
+        if (accumulator.getTTL() == -1) {
+            accumulator.setLastRetry(new Date().getTime());
+            rollbackedAccumulations.add(accumulator);
+            LOGGER.info("Rollbacking (" + accumulator.getAccTransactionIds() + "), "
+                    + "infinite batch TTL");
+        } else if (accumulator.getTTL() > 0) {
+            accumulator.setLastRetry(new Date().getTime());
+            rollbackedAccumulations.add(accumulator);
+            LOGGER.info("Rollbacking (" + accumulator.getAccTransactionIds() + "), "
+                    + batchTTL + " retries will be done");
+        } else {
+            if (!accumulator.getAccTransactionIds().isEmpty()) {
+                LOGGER.info("Finishing internal transaction ("
+                        + accumulator.getAccTransactionIds() + "), 0 retries will be done");
+            } // if
+        } // if else
+    } // doRollback
+    
     /**
      * Given an event, it is parsed before it is persisted. Depending on the content type, it is appropriately
      * parsed (Json or XML) in order to obtain a NotifyContextRequest instance.
@@ -561,6 +640,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         private int accIndex;
         private String accTransactionIds;
         private int ttl;
+        private long lastRetry;
 
         /**
          * Constructor.
@@ -571,6 +651,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             accIndex = 0;
             accTransactionIds = null;
             ttl = batchTTL;
+            lastRetry = 0;
         } // Accumulator
 
         public long getAccStartDate() {
@@ -592,6 +673,22 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         public String getAccTransactionIds() {
             return accTransactionIds;
         } // getAccTransactionIds
+        
+        public long getLastRetry() {
+            return lastRetry;
+        } // getLastRetry
+        
+        public void setLastRetry(long lastRetry) {
+            this.lastRetry = lastRetry;
+        } // setLastRetry
+        
+        public int getTTL() {
+            return ttl;
+        } // getTTL
+        
+        public void setTTL(int ttl) {
+            this.ttl = ttl;
+        } // setTTL
 
         /**
          * Accumulates an event given its headers and context data.
