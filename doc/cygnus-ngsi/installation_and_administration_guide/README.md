@@ -7,7 +7,6 @@
     * [Installation from sources](./install_from_sources.md)
 * Configuration:
     * [NGSI agent configuration](./ngsi_agent_conf.md)
-    * [Grouping Rules configuration](./grouping_rules_conf.md)
     * [log4j configuration](../../installation_and_administration_guide/log4j_conf.md)
     * [Configuration examples](./configuration_examples.md)
 * Running:
@@ -15,6 +14,7 @@
 * Advanced features:
     * [Testing](./testing.md)
     * [Name mappings](./name_mappings.md)
+    * [Grouping Rules](./grouping_rules.md)
     * [Multitenancy](./multitenancy.md)
     * [Performance tips](./performance_tips.md)
 * [Sanity checks](./sanity_checks.md)
