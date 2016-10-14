@@ -17,11 +17,14 @@
  */
 package com.telefonica.iot.cygnus.interceptors;
 
+import com.telefonica.iot.cygnus.containers.NameMappings;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.createEvent;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.util.Map;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.log4j.Level;
@@ -150,7 +153,7 @@ public class NGSINameMappingsInterceptorTest {
         System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
                 + "-------- When a NGSI event is put in the channel, it contains fiware-service, fiware-servicepath, "
                 + "fiware-correlator, transaction-id, mapped-fiware-service and mapped-fiware-servicepath headers");
-        NGSINameMappingsInterceptor nameMappingInterceptor = new NGSINameMappingsInterceptor("", false);
+        NGSINameMappingsInterceptor nameMappingInterceptor = new NGSINameMappingsInterceptor(null, false);
         nameMappingInterceptor.initialize();
         Event originalEvent = createEvent();
         Map<String, String> interceptedEventHeaders = nameMappingInterceptor.intercept(originalEvent).getHeaders();
@@ -237,7 +240,7 @@ public class NGSINameMappingsInterceptorTest {
         System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
                 + "-------- When a Flume event is put in the channel, it contains the original NotifyContextRequest "
                 + "and the mapped one");
-        NGSINameMappingsInterceptor nameMappingInterceptor = new NGSINameMappingsInterceptor("", false);
+        NGSINameMappingsInterceptor nameMappingInterceptor = new NGSINameMappingsInterceptor(null, false);
         nameMappingInterceptor.initialize();
         Event originalEvent = createEvent();
         NGSIEvent ngsiEvent = (NGSIEvent) nameMappingInterceptor.intercept(originalEvent);
@@ -262,6 +265,17 @@ public class NGSINameMappingsInterceptorTest {
             throw e1;
         } // try catch
     } // testGetNCRsInNGSIEvent
+    
+    /**
+     * [NGSIGroupingInterceptor.doMap] -------- A mapped NotifyContextRequest can be obtained from the Name Mappings.
+     */
+    //@Test
+    public void testDoMap() {
+        System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMap]")
+                + "-------- A mapped NotifyContextRequest can be obtained from the Name Mappings");
+        NGSINameMappingsInterceptor nameMappingInterceptor = new NGSINameMappingsInterceptor(null, false);
+        nameMappingInterceptor.initialize();
+    } // testDoMap
     
     private Context createBuilderContext(String nameMappingsConfFile) {
         Context context = new Context();
