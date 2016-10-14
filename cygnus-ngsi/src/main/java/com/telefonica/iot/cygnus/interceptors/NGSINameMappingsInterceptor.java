@@ -258,7 +258,14 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         } catch (Exception e) {
             LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
             nameMappings = null;
+            return;
         } // try catch
+        
+        if (jsonStr == null) {
+            LOGGER.debug("[nmi] Reding name mappings, no file to read");
+            nameMappings = null;
+            return;
+        } // if
 
         // Parse the Json string
         Gson gson = new Gson();
@@ -269,9 +276,11 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         } catch (JsonIOException e) {
             LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
             nameMappings = null;
+            return;
         } catch (JsonSyntaxException e) {
             LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
             nameMappings = null;
+            return;
         } // try catch
 
         // Check if any of the mappings is not valid, e.g. some field is missing
