@@ -51,12 +51,12 @@ Once created, change to this new fresh user in order to proceed with the rest of
 [Top](#top)
 
 ###<a name="section2.1"></a>`log4j` path
-Once the user is created is necessary to create the path `/var/log/cygnus` due to `log4j` purposes. Starting by creating the path and then give permissions for `cygnus` user:
+Once the user is created is necessary to create the path `/var/log/cygnus` for `log4j` purposes. Start by creating the path and then give permissions for `cygnus` user:
 
     $ mkdir -p /var/log/cygnus
     $ chown -R cygnus:cygnus /var/log/cygnus
 
-This step is important because if you don't have the log path created Cygnus is going to shutdown when running first time.
+This step is important because if you don't have the log path created Cygnus will shutdown when running for the first time.
 
 [Top](#top)
 
