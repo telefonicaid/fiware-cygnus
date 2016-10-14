@@ -3,6 +3,7 @@ Content:
 
 * [Prerequisites](#section1)
 * [`cygnus` user creation](#section2)
+    * [`log4j` path](#section2.1)
 * [Installing Apache Flume](#section3)
 * [Installing cygnus-common](#section4)
     * [Cloning `fiware-cygnus`](#section4.1)
@@ -49,6 +50,16 @@ Once created, change to this new fresh user in order to proceed with the rest of
 
 [Top](#top)
 
+###<a name="section2.1"></a>`log4j` path
+Once the user is created is necessary to create the path `/var/log/cygnus` due to `log4j` purposes. Starting by creating the path and then give permissions for `cygnus` user:
+
+    $ mkdir -p /var/log/cygnus
+    $ chown -R cygnus:cygnus /var/log/cygnus
+
+This step is important because if you don't have the log path created Cygnus is going to shutdown when running first time.
+
+[Top](#top)
+
 ##<a name="section3"></a>Installing Apache Flume
 Apache Flume can be easily installed by downloading its latests version from [flume.apache.org](http://flume.apache.org/download.html). Move the untared directory to a folder of your choice (represented by `APACHE_FLUME_HOME`):
 
@@ -85,7 +96,7 @@ Start by cloning the Github repository containing cygnus-common:
 The developed classes must be packaged in a Java jar file. This can be done as a fat Java jar containing all the third-party dependencies  (**recommended**). You may need to edit the `pom.xml` (\*):
 
     $ cd cygnus-common
-    $ APACHE_MAVEN_HOME/bin/mvn clean compile exec:exec assembly:single
+    $ APACHE_FLUME_HOME/bin/mvn clean compile exec:exec assembly:single
     $ cp target/cygnus-common-<x.y.z>-jar-with-dependencies.jar APACHE_FLUME_HOME/plugins.d/cygnus/libext
 
 Or as a thin Java jar file containing only the `cygnus-common` classes. You may need to edit the `pom.xml` if necessary (\*):
