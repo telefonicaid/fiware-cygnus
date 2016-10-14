@@ -250,7 +250,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
     
     private void loadNameMappings() {
         // Read the Json string from the configuration file
-        String jsonStr = null;
+        String jsonStr;
 
         try {
             jsonStr = JsonUtils.readJsonFile(nameMappingsConfFile);
@@ -261,6 +261,15 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             return;
         } // try catch
         
+        loadNameMappings(jsonStr);
+    } // loadNameMappings
+    
+    /**
+     * Loads the Name Mappings given a Json string. It is protected since it only can be used by this class and test
+     * classes.
+     * @param jsonStr
+     */
+    protected void loadNameMappings(String jsonStr) {
         if (jsonStr == null) {
             LOGGER.debug("[nmi] Reding name mappings, no file to read");
             nameMappings = null;
