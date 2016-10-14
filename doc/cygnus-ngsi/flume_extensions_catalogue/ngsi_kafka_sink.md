@@ -188,9 +188,14 @@ By default, `NGSIKafkaSink` has a configured batch size and batch accumulation t
 ####<a name="section2.3.2"></a>About the encoding
 Cygnus applies this specific encoding tailored to Kafka data structures:
 
+* Alphanumeric characters are not encoded.
+* Numeric characters are not encoded.
+* Underscore character, `_`, is not encoded.
+* Hyphen character, `-`, is not encoded.
+* Dot character, `.`, is not encoded.
 * Equals character, `=`, is encoded as `xffff`.
-* User defined strings composed of a `x` character and a [Unicode](http://unicode-table.com) are encoded as `xx` followed by the Unicode.
-* All the other characters are not encoded.
+* All other characters, including the slash in the FIWARE service paths, are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
+* User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
 * `xffff` is used as concatenator character.
 
 [Top](#top)

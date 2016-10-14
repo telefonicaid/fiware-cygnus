@@ -1490,7 +1490,7 @@ public class NGSICharsetsTest {
                 + "-------- Non lower case alphanumerics and underscore are encoded");
         String in = "ÁÉÍÓÚáéíóúÑñÇç";
         String expected = "x00c1x00c9x00cdx00d3x00dax00e1x00e9x00edx00f3x00fax00d1x00f1x00c7x00e7";
-        String out = NGSICharsets.encodeMySQL(in);
+        String out = NGSICharsets.encodeDynamoDB(in);
         
         try {
             assertEquals(expected, out);
@@ -1504,7 +1504,7 @@ public class NGSICharsetsTest {
         
         in = "!\"#$%&'()*+,/";
         expected = "x0021x0022x0023x0024x0025x0026x0027x0028x0029x002ax002bx002cx002f";
-        out = NGSICharsets.encodeMySQL(in);
+        out = NGSICharsets.encodeDynamoDB(in);
         
         try {
             assertEquals(expected, out);
@@ -1519,7 +1519,7 @@ public class NGSICharsetsTest {
         // '=' has been excluded from here since it is not notified by Orion and it is used as concatenator
         in = ":;<>?@";
         expected = "x003ax003bx003cx003ex003fx0040";
-        out = NGSICharsets.encodeMySQL(in);
+        out = NGSICharsets.encodeDynamoDB(in);
         
         try {
             assertEquals(expected, out);
@@ -1533,7 +1533,7 @@ public class NGSICharsetsTest {
         
         in = "[\\]^`";
         expected = "x005bx005cx005dx005ex0060";
-        out = NGSICharsets.encodeMySQL(in);
+        out = NGSICharsets.encodeDynamoDB(in);
         
         try {
             assertEquals(expected, out);
@@ -1547,7 +1547,7 @@ public class NGSICharsetsTest {
         
         in = "{|}~";
         expected = "x007bx007cx007dx007e";
-        out = NGSICharsets.encodeMySQL(in);
+        out = NGSICharsets.encodeDynamoDB(in);
         
         try {
             assertEquals(expected, out);
@@ -1559,6 +1559,140 @@ public class NGSICharsetsTest {
             throw e;
         } // try catch
     } // testEncodeDynamoDBRare
+    
+    // ---------- Kafka ----------
+    
+    /**
+     * [NGSICharsets.encodeKafka] -------- Upper case not accented characters are not encoded.
+     */
+    @Test
+    public void testEncodeKafkaUpperCase() {
+        System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                + "-------- Upper case not accented characters are not encoded");
+        String in = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String expected = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String out = NGSICharsets.encodeKafka(in);
+        
+        try {
+            assertEquals(expected, out);
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "-  OK  - '" + in + "' has not been encoded");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "- FAIL - '" + in + "' has been encoded as '" + out + "'");
+            throw e;
+        } // try catch
+    } // testEncodeKafkaUpperCase
+    
+    /**
+     * [NGSICharsets.encodeKafka] -------- Lower case not accented characters except 'x' are not encoded.
+     */
+    @Test
+    public void testEncodeKafkaLowerCase() {
+        System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                + "-------- Lower case not accented characters are not encoded");
+        String in = "abcdefghijklmnopqrstuvwyz";
+        String expected = "abcdefghijklmnopqrstuvwyz";
+        String out = NGSICharsets.encodeKafka(in);
+        
+        try {
+            assertEquals(expected, out);
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "-  OK  - '" + in + "' has not been encoded");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "- FAIL - '" + in + "' has been encoded as '" + out + "'");
+            throw e;
+        } // try catch
+    } // testEncodeKafkaLowerCase
+    
+    /**
+     * [NGSICharsets.encodeKafka] -------- Numbers are not encoded.
+     */
+    @Test
+    public void testEncodeKafkaBNums() {
+        System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                + "-------- Numbers are not encoded");
+        String in = "0123456789";
+        String expected = "0123456789";
+        String out = NGSICharsets.encodeKafka(in);
+        
+        try {
+            assertEquals(expected, out);
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "-  OK  - '" + in + "' has not been encoded");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "- FAIL - '" + in + "' has been encoded as '" + out + "'");
+            throw e;
+        } // try catch
+    } // testEncodeKafkaNums
+    
+    /**
+     * [NGSICharsets.encodeKafka] -------- Underscore is not encoded.
+     */
+    @Test
+    public void testEncodeKafkaUnderscore() {
+        System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                + "-------- Underscore is not encoded");
+        String in = "_";
+        String expected = "_";
+        String out = NGSICharsets.encodeKafka(in);
+        
+        try {
+            assertEquals(expected, out);
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "-  OK  - '" + in + "' has not been encoded");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "- FAIL - '" + in + "' has been encoded as '" + out + "'");
+            throw e;
+        } // try catch
+    } // testEncodeKafkaUnderscore
+    
+    /**
+     * [NGSICharsets.encodeKafka] -------- Hyphen is not encoded.
+     */
+    @Test
+    public void testEncodeKafkaHyphen() {
+        System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                + "-------- Hyphen is not encoded");
+        String in = "-";
+        String expected = "-";
+        String out = NGSICharsets.encodeKafka(in);
+        
+        try {
+            assertEquals(expected, out);
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "-  OK  - '" + in + "' has not been encoded");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "- FAIL - '" + in + "' has been encoded as '" + out + "'");
+            throw e;
+        } // try catch
+    } // testEncodeKafkaHyphen
+    
+    /**
+     * [NGSICharsets.encodeKafka] -------- Dot is not encoded.
+     */
+    @Test
+    public void testEncodeKafkaDot() {
+        System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                + "-------- Dot is not encoded");
+        String in = ".";
+        String expected = ".";
+        String out = NGSICharsets.encodeKafka(in);
+        
+        try {
+            assertEquals(expected, out);
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "-  OK  - '" + in + "' has not been encoded");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "- FAIL - '" + in + "' has been encoded as '" + out + "'");
+            throw e;
+        } // try catch
+    } // testEncodeKafkaDot
     
     /**
      * [NGSICharsets.encodeKafka] -------- '=' (internal concatenator) is encoded as "xffff" (public concatenator).
@@ -1627,23 +1761,81 @@ public class NGSICharsetsTest {
     } // testEncodeKafkaxffff
     
     /**
-     * [NGSICharsets.encodeKafka] -------- Rare characters are not encoded.
+     * [NGSICharsets.encodeKafka] -------- Non lower case alphanumerics nor underscore nor hyphen nor dot are
+     * encoded.
      */
     @Test
     public void testEncodeKafkaRare() {
         System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
-                + "-------- Rare characters are not encoded");
-        String in = "ÁÉÍÓÚáéíóúÑñÇç!/\"#$%&'()*+,.-_:;<>?@[\\]^`{|}~";
-        String expected = "ÁÉÍÓÚáéíóúÑñÇç!/\"#$%&'()*+,.-_:;<>?@[\\]^`{|}~";
+                + "-------- Non lower case alphanumerics and underscore are encoded");
+        String in = "ÁÉÍÓÚáéíóúÑñÇç";
+        String expected = "x00c1x00c9x00cdx00d3x00dax00e1x00e9x00edx00f3x00fax00d1x00f1x00c7x00e7";
         String out = NGSICharsets.encodeKafka(in);
         
         try {
             assertEquals(expected, out);
             System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
-                    + "-  OK  - '" + in + "' has not been encoded");
+                    + "-  OK  - '" + in + "' has been encoded");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
-                    + "- FAIL - '" + in + "' has been encoded as '" + out + "'");
+                    + "- FAIL - '" + in + "' has not been encoded");
+            throw e;
+        } // try catch
+        
+        in = "!\"#$%&'()*+,/";
+        expected = "x0021x0022x0023x0024x0025x0026x0027x0028x0029x002ax002bx002cx002f";
+        out = NGSICharsets.encodeKafka(in);
+        
+        try {
+            assertEquals(expected, out);
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "-  OK  - '" + in + "' has been encoded");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "- FAIL - '" + in + "' has not been encoded");
+            throw e;
+        } // try catch
+        
+        // '=' has been excluded from here since it is not notified by Orion and it is used as concatenator
+        in = ":;<>?@";
+        expected = "x003ax003bx003cx003ex003fx0040";
+        out = NGSICharsets.encodeKafka(in);
+        
+        try {
+            assertEquals(expected, out);
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "-  OK  - '" + in + "' has been encoded");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "- FAIL - '" + in + "' has not been encoded");
+            throw e;
+        } // try catch
+        
+        in = "[\\]^`";
+        expected = "x005bx005cx005dx005ex0060";
+        out = NGSICharsets.encodeKafka(in);
+        
+        try {
+            assertEquals(expected, out);
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "-  OK  - '" + in + "' has been encoded");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "- FAIL - '" + in + "' has not been encoded");
+            throw e;
+        } // try catch
+        
+        in = "{|}~";
+        expected = "x007bx007cx007dx007e";
+        out = NGSICharsets.encodeKafka(in);
+        
+        try {
+            assertEquals(expected, out);
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "-  OK  - '" + in + "' has been encoded");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICharsets.encodeKafka]")
+                    + "- FAIL - '" + in + "' has not been encoded");
             throw e;
         } // try catch
     } // testEncodeKafkaRare
