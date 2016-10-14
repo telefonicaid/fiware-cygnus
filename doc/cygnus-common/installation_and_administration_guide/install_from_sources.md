@@ -3,14 +3,14 @@ Content:
 
 * [Prerequisites](#section1)
 * [`cygnus` user creation](#section2)
-    * [`log4j` path](#section2.1)
-* [Installing Apache Flume](#section3)
-* [Installing cygnus-common](#section4)
-    * [Cloning `fiware-cygnus`](#section4.1)
-    * [Installing `cygnus-common`](#section4.2)
-    * [Installing `cygnus-flume-ng` script](#section4.3)
-    * [Known issues](#section4.4)
-* [Installing dependencies](#section5)
+* [`log4j` path](#section3)
+* [Installing Apache Flume](#section4)
+* [Installing cygnus-common](#section5)
+    * [Cloning `fiware-cygnus`](#section5.1)
+    * [Installing `cygnus-common`](#section5.2)
+    * [Installing `cygnus-flume-ng` script](#section5.3)
+    * [Known issues](#section5.4)
+* [Installing dependencies](#section6)
 
 ##<a name="section1"></a>Prerequisites
 Maven (and thus Java SDK, since Maven is a Java tool) is needed in order to install cygnus-common.
@@ -50,7 +50,7 @@ Once created, change to this new fresh user in order to proceed with the rest of
 
 [Top](#top)
 
-###<a name="section2.1"></a>`log4j` path
+##<a name="section3"></a>`log4j` path
 Once the user is created is necessary to create the path `/var/log/cygnus` for `log4j` purposes. Start by creating the path and then give permissions for `cygnus` user:
 
     $ mkdir -p /var/log/cygnus
@@ -60,7 +60,7 @@ This step is important because if you don't have the log path created Cygnus wil
 
 [Top](#top)
 
-##<a name="section3"></a>Installing Apache Flume
+##<a name="section4"></a>Installing Apache Flume
 Apache Flume can be easily installed by downloading its latests version from [flume.apache.org](http://flume.apache.org/download.html). Move the untared directory to a folder of your choice (represented by `APACHE_FLUME_HOME`):
 
     $ wget http://www.eu.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz
@@ -80,8 +80,8 @@ Some remarks:
 
 [Top](#top)
 
-##<a name="section4"></a>Installing cygnus-common
-###<a name="section4.1"></a>Cloning `fiware-cygnus`
+##<a name="section5"></a>Installing cygnus-common
+###<a name="section5.1"></a>Cloning `fiware-cygnus`
 Start by cloning the Github repository containing cygnus-common:
 
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
@@ -92,7 +92,7 @@ Start by cloning the Github repository containing cygnus-common:
 
 [Top](#top)
 
-###<a name="section4.2"></a>Installing `cygnus-common`
+###<a name="section5.2"></a>Installing `cygnus-common`
 The developed classes must be packaged in a Java jar file. This can be done as a fat Java jar containing all the third-party dependencies  (**recommended**). You may need to edit the `pom.xml` (\*):
 
     $ cd cygnus-common
@@ -113,9 +113,11 @@ In both cases, the `cygnus-common` dependency must be installed at Maven as well
 
 (*) Please have into account from Cygnus 0.10.0 the version of `hadoop-core` within the `pom.xml` must match the Hadoop version you are going to use; on the contrary, the HDFS sink will not work. Of course, if you are not going to use the HDFS sink, simply use the default `hadoop-core` version (1.2.1) within the downloaded `pom.xml` for correct compilation purposes.
 
+Finally, please find a `compile.sh` script containing all the commands shown in this section. It must be parameterized with the version of the current branch and the Apache Flume base path.
+
 [Top](#top)
 
-###<a name="section4.3"></a>Installing `cygnus-flume-ng` script
+###<a name="section5.3"></a>Installing `cygnus-flume-ng` script
 The installation is completed by copying the `cygnus-flume-ng` script into `APACHE_FLUME_HOME/bin`:
 
     $ cp target/classes/cygnus-flume-ng APACHE_FLUME_HOME/bin
@@ -123,14 +125,14 @@ The installation is completed by copying the `cygnus-flume-ng` script into `APAC
 
 [Top](#top)
 
-###<a name="section4.4"></a>Known issues
+###<a name="section5.4"></a>Known issues
 It may happen while compiling `cygnus-common` the Maven JVM has not enough memory. This can be changed as detailed at the [Maven official documentation](https://cwiki.apache.org/confluence/display/MAVEN/OutOfMemoryError):
 
     $ export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m"
 
 [Top](#top)
 
-##<a name="section5"></a>Installing dependencies
+##<a name="section6"></a>Installing dependencies
 These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the Cygnus jar**:
 
 | Cygnus dependencies | Version | Required by / comments |

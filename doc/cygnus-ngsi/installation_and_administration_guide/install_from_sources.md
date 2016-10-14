@@ -38,6 +38,8 @@ Or as a thin Java jar file:
     $ APACHE_MAVEN_HOME/bin/mvn exec:exec package
     $ cp target/cygnus-<x.y.z>.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 
+Finally, please find a `compile.sh` script containing all the commands shown in this section. It must be parameterized with the version of the current branch and the Apache Flume base path.
+
 [Top](#top)
 
 ###<a name="section2.3"></a>Known issues
