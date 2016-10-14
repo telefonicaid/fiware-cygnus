@@ -2,3 +2,4 @@
 - [cygnus-ngsi][hardening] Delay the retries of not persisted batches (#1138)
 - [cygnus-ngsi][bug] Fix accepted charset by Kafka (#1217)
 - [cygnus][doc] Add missing creation of log4j path (#1212)
+- [cygnus][hardening] Add compilation scripts (#1213)
