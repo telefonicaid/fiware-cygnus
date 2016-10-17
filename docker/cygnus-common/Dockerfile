@@ -45,14 +45,15 @@ ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
 ENV FLUME_URL "http://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 ENV FLUME_HOME "/opt/apache-flume"
 
-ENV JAVA_HOME /usr/lib/jvm/java-1.6.0
+ENV JAVA_VERSION=1.7.0
 
 # Add Cygnus user
 RUN adduser ${CYGNUS_USER}
 
 # Install
-RUN yum -y install tar nc which git java-1.6.0-openjdk-devel && \
+RUN yum -y install tar nc which git java-${JAVA_VERSION}-openjdk-devel && \
     yum clean all && \
+    export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION} && \
     curl --remote-name --location --insecure --silent --show-error "${MVN_URL}" && \
     tar xzvf ${MVN_TGZ} && \
     mv apache-maven-${MVN_VER} ${MVN_HOME} && \
