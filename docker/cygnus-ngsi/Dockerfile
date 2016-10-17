@@ -56,7 +56,7 @@ RUN \
     adduser ${CYGNUS_USER} && \
     yum -y install nc java-${JAVA_VERSION}-openjdk-devel git && \
     export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION} && \
-    export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m -Dfile.encoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1" && \
+    export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1" && \
     export MAVEN_ARGS="-B -T4" && \
     # For debug Maven
     # export MAVEN_ARGS="${MAVEN_ARGS} -X -e -Dmaven.compiler.verbose=true" && \
