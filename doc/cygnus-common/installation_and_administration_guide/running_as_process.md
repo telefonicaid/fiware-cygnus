@@ -17,7 +17,7 @@ The parameters used in these commands are:
 * `-n` (or `--name`). The name of the Cygnus agent to be run.
 * `-Dflume.root.logger`. Changes the logging level and the logging appender for log4j.
 * `-Duser.timezone=UTC`. Changes the timezone in order all the timestamps (logs, data reception times, etc) are UTC.
-* `-Dfile.encoding=UTF-8`. 
+* `-Dfile.encoding=UTF-8`. Sets the JVM encoding to UTF-8.
 * `-p` (or `--mgmt-if-port`). Configures the listening port for the Management Interface. If not configured, the default value is used, `8081`.
 * `-g` (or `--web-app-port`). Configures the port where the web application for Cygnus runs. If not configured, the default value is used, `8082`.
 * `-t` (or `--polling-interval`). Configures the polling interval (seconds) when the configuration is periodically reloaded. If not configured, the default value is used, `30`.
