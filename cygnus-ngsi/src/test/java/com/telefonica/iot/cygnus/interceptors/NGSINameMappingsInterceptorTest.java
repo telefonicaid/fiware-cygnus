@@ -40,7 +40,7 @@ import org.junit.Test;
  */
 public class NGSINameMappingsInterceptorTest {
     
-    private final String nameMappingsStr = "" 
+    private final String nameMappingsStr = ""
             + "{"
             + "   \"serviceMappings\": ["
             + "      {"
@@ -52,7 +52,7 @@ public class NGSINameMappingsInterceptorTest {
             + "               \"newServicePath\": \"/new_any\","
             + "               \"entityMappings\": ["
             + "                  {"
-            + "                     \"originalEntityId\": \"Room\\.(\\d*)\","
+            + "                     \"originalEntityId\": \"Room(\\\\d*)\","
             + "                     \"originalEntityType\": \"Room\","
             + "                     \"newEntityId\": \"new_Room1\","
             + "                     \"newEntityType\": \"new_Room\","
