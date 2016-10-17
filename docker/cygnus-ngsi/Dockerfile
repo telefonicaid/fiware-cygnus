@@ -36,10 +36,13 @@ ENV CYGNUS_MYSQL_PASS "mysql"
 ENV CYGNUS_MONGO_USER "mongo"
 ENV CYGNUS_MONGO_PASS "mongo"
 
-ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "release/1.4.0"
+# NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
+# ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
+ENV GIT_URL_CYGNUS "https://github.com/cesarjorgemartinez/fiware-cygnus.git"
+# ENV GIT_REV_CYGNUS "master"
+ENV GIT_REV_CYGNUS "hardening/1208_automated_build_stuck_filelock_denied"
 
-ENV MVN_VER "3.2.5"
+ENV MVN_VER "3.3.9"
 ENV MVN_TGZ "apache-maven-${MVN_VER}-bin.tar.gz"
 ENV MVN_URL "http://www.eu.apache.org/dist/maven/maven-3/${MVN_VER}/binaries/${MVN_TGZ}"
 ENV MVN_HOME "/opt/apache-maven"
