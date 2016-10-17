@@ -4,4 +4,4 @@
 - [cygnus][doc] Add missing creation of log4j path (#1212)
 - [cygnus][hardening] Add compilation scripts (#1213)
 - [cygnus][doc] Warn about the incompatibility of installing cygnus-ngsi and cygnus-twitter in the same base path (#1214)
-- [cygnus-common,cygnus-ngsi][hardening] Add -Dfile.encoding=UTF-8 Java option (#1225)
+- [cygnus-common][hardening] Add -Dfile.encoding=UTF-8 Java option (#1225)
