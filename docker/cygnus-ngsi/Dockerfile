@@ -49,13 +49,14 @@ ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
 ENV FLUME_URL "http://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 ENV FLUME_HOME "/opt/apache-flume"
 
-ENV JAVA_HOME /usr/lib/jvm/java-1.6.0
+ENV JAVA_VERSION=1.7.0
 
 # Install
 RUN \
     # Add Cygnus user
     adduser ${CYGNUS_USER} && \
-    yum -y install nc java-1.6.0-openjdk-devel git && \
+    yum -y install nc java-${JAVA_VERSION}-openjdk-devel git && \
+    export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION} && \
     curl --remote-name --location --insecure --silent --show-error "${MVN_URL}" && \
     tar xzvf ${MVN_TGZ} && \
     mv apache-maven-${MVN_VER} ${MVN_HOME} && \
@@ -94,7 +95,7 @@ RUN \
     cd ${CYGNUS_HOME}/cygnus-ngsi && \
     ${MVN_HOME}/bin/mvn clean && \
     rm -rf /root/.m2 && rm -rf ${MVN_HOME} && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz && \
-    yum erase -y git java-1.6.0-openjdk-devel && unset JAVA_HOME && \
+    yum erase -y git java-${JAVA_VERSION}-openjdk-devel && unset JAVA_HOME && \
     rpm -qa redhat-logos gtk2 pulseaudio-libs libvorbis jpackage* groff alsa* atk cairo libX* | xargs -r rpm -e --nodeps && yum -y erase libss && \
     yum clean all && rpm -vv --rebuilddb && rm -rf /var/lib/yum/yumdb && rm -rf /var/lib/yum/history && \
     find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en_US' ! -name 'locale.alias' | xargs -r rm -r && rm -f /var/log/*log && \
