@@ -48,7 +48,7 @@ ENV MVN_HOME "/opt/apache-maven"
 ENV FLUME_VER "1.4.0"
 ENV FLUME_HOME "/opt/apache-flume"
 
-ENV JAVA_VERSION=1.7.0
+ENV JAVA_VERSION "1.7.0"
 
 # Install
 RUN \

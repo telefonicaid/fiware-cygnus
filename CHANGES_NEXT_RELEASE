@@ -1,1 +1,1 @@
-- [cygnus][hardening] Automated build stuck filelock denied new Linux SECCOMP policies (#1208)
+- [cygnus-ngsi][hardening] Fix automated builds because of "filelock denied" (#1208)
