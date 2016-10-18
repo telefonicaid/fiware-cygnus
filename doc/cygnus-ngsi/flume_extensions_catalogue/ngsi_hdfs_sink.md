@@ -326,7 +326,6 @@ A configuration example could be:
     cygnus-ngsi.sinks.hdfs-sink.batch_timeout = 30
     cygnus-ngsi.sinks.hdfs-sink.batch_ttl = 10
     cygnus-ngsi.sinks.hdfs-sink.batch_retry_intervals = 5000
-    cygnus-ngsi.sinks.hdfs-sink.cygnus-ngsi
     cygnus-ngsi.sinks.hdfs-sink.hive = false
     cygnus-ngsi.sinks.hdfs-sink.krb5_auth = false
 
@@ -423,7 +422,7 @@ This is important for Cygnus since HDFS (big) data can be accessed through the n
 
 In order to get an access token, do the following request to your OAuth2 tokens provider; in FIWARE Lab this is `cosmos.lab.fi-ware.org:13000`:
 
-    $ curl -X POST "http://cosmos.lab.fi-ware.org:13000/cosmos-auth/v1/token" -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type=password&username=frb@tid.es&password=xxxxxxxx”
+    $ curl -X POST "http://computing.cosmos.lab.fiware.org:13000/cosmos-auth/v1/token" -H "Content-Type: application/x-www-form-urlencoded" -d "grant_type=password&username=frb@tid.es&password=xxxxxxxx”
     {"access_token": "qjHPUcnW6leYAqr3Xw34DWLQlja0Ix", "token_type": "Bearer", "expires_in": 3600, "refresh_token": “V2Wlk7aFCnElKlW9BOmRzGhBtqgR2z"}
 
 As you can see, your FIWARE Lab credentials are required in the payload, in the form of a password-based grant type (this will be the only time you have to give them).
