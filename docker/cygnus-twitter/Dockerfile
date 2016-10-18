@@ -44,7 +44,7 @@ ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
 ENV FLUME_URL "http://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 ENV FLUME_HOME "/opt/apache-flume"
 
-ENV JAVA_VERSION=1.7.0
+ENV JAVA_VERSION "1.7.0"
 
 # Add Cygnus user
 RUN adduser ${CYGNUS_USER}
