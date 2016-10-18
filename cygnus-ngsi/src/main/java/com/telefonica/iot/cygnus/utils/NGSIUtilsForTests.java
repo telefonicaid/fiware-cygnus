@@ -17,6 +17,10 @@
  */
 package com.telefonica.iot.cygnus.utils;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import org.apache.flume.Context;
 
 /**
@@ -60,5 +64,22 @@ public final class NGSIUtilsForTests {
         context.put("mongo_username", "");
         return context;
     } // createContextForMongoSTH
+    
+    /**
+     * Creates a NotifyContextRequest object from a Json string.
+     * @param jsonStr
+     * @return A NotifyContextRequest object
+     */
+    public static NotifyContextRequest createNotifyContextRequest(String jsonStr) {
+        Gson gson = new Gson();
+
+        try {
+            return gson.fromJson(jsonStr, NotifyContextRequest.class);
+        } catch (JsonIOException e) {
+            return null;
+        } catch (JsonSyntaxException e) {
+            return null;
+        } // try catch
+    } // createNotifyContextRequest
     
 } // NGSIUtilsForTests
