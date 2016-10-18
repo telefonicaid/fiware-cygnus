@@ -39,8 +39,8 @@ ENV CYGNUS_MONGO_PASS "mongo"
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
-# ENV GIT_REV_CYGNUS "master"
-ENV GIT_REV_CYGNUS "hardening/1208_automated_build_stuck_filelock_denied"
+ENV GIT_REV_CYGNUS "master"
+# ENV GIT_REV_CYGNUS "mybranch"
 
 ENV MVN_VER "3.3.9"
 ENV MVN_HOME "/opt/apache-maven"
