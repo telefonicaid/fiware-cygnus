@@ -37,16 +37,14 @@ nohup sh startAgent.sh --udp-port 0 --tcp-port 4444 &
 ```
   >**Properties**:
 ```
-* RUNTIME       - time of test duration (1 second by default)
-* THREADS       - threads number (1 by default)
-* RAMPUP        - ramp up of threads (0 by default)
-* HOST          - IP or hostname main node (in case of clusters is Nginx)  (127.0.0.1 by default)
-* PORT          - port used by cygnus (5050 by default)
-* HOST_NODE_1   - IP or hostname of Node 1  (127.0.0.1 by default, if the property is not appends it is ignored)
-* HOST_NODE_2   - IP or hostname of Node 2  (127.0.0.1 by default, if the property is not appends it is ignored)
-* TESTNAME      - sink name (channel to test)
-* SERVICE       - FIWARE service to be notified (loadtest by default)
-* SERVICE_PAATH - FIWARE service path to be notified (/any by default)
+* RUNTIME      - time of test duration (1 second by default)
+* THREADS      - threads number (1 by default)
+* RAMPUP       - ramp up of threads (0 by default)
+* HOST         - IP or hostname main node (in case of clusters is Nginx)  (127.0.0.1 by default)
+* PORT         - port used by cygnus (5050 by default)
+* TESTNAME     - sink name (channel to test)
+* SERVICE      - FIWARE service to be notified (loadtest by default)
+* SERVICE_PATH - FIWARE service path to be notified (/any by default)
 ```
 
   >**example**:
