@@ -1,25 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
- Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
-
- This file is part of fiware-connectors (FI-WARE project).
-
- fiware-connectors is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
- Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
- later version.
- fiware-connectors is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
- details.
-
- You should have received a copy of the GNU Affero General Public License along with fiware-connectors. If not, see
- http://www.gnu.org/licenses/.
-
- For those usages not covered by the GNU Affero General Public License please contact:
-  iot_support at tid.es
-
- author: 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
--->
-<jmeterTestPlan version="1.2" properties="2.6" jmeter="2.11 r1554548">
+<jmeterTestPlan version="1.2" properties="2.8" jmeter="2.13 r1665067">
   <hashTree>
     <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Cygnus Load Test (MOCK)" enabled="true">
       <stringProp name="TestPlan.comments">Script to generate notifications to validate cygnus load test against mock</stringProp>
@@ -42,16 +22,6 @@
             <stringProp name="Argument.value">${__P(PORT,5050)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
-          <elementProp name="HOST_NODE_1" elementType="Argument">
-            <stringProp name="Argument.name">HOST_NODE_1</stringProp>
-            <stringProp name="Argument.value">${__P(HOST_NODE_1,127.0.0.1)}</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="HOST_NODE_2" elementType="Argument">
-            <stringProp name="Argument.name">HOST_NODE_2</stringProp>
-            <stringProp name="Argument.value">${__P(HOST_NODE_2,127.0.0.1)}</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
           <elementProp name="THREADS" elementType="Argument">
             <stringProp name="Argument.name">THREADS</stringProp>
             <stringProp name="Argument.value">${__P(THREADS,1)}</stringProp>
@@ -64,12 +34,17 @@
           </elementProp>
           <elementProp name="RUNTIME" elementType="Argument">
             <stringProp name="Argument.name">RUNTIME</stringProp>
-            <stringProp name="Argument.value">${__P(RUNTIME,1)}</stringProp>
+            <stringProp name="Argument.value">${__P(RUNTIME,10)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
-          <elementProp name="ORGANIZATION" elementType="Argument">
-            <stringProp name="Argument.name">ORGANIZATION</stringProp>
-            <stringProp name="Argument.value">${__P(ORGANIZATION,loadtest)}</stringProp>
+          <elementProp name="SERVICE" elementType="Argument">
+            <stringProp name="Argument.name">SERVICE</stringProp>
+            <stringProp name="Argument.value">${__P(SERVICE,loadtest)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="SERVICE_PATH" elementType="Argument">
+            <stringProp name="Argument.name">SERVICE_PATH</stringProp>
+            <stringProp name="Argument.value">${__P(SERVICE_PATH,/any)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -158,7 +133,11 @@
           </elementProp>
           <elementProp name="" elementType="Header">
             <stringProp name="Header.name">Fiware-Service</stringProp>
-            <stringProp name="Header.value">${ORGANIZATION}</stringProp>
+            <stringProp name="Header.value">${SERVICE}</stringProp>
+          </elementProp>
+          <elementProp name="" elementType="Header">
+            <stringProp name="Header.name">Fiware-ServicePath</stringProp>
+            <stringProp name="Header.value">${SERVICE_PATH}</stringProp>
           </elementProp>
         </collectionProp>
       </HeaderManager>
@@ -191,38 +170,36 @@
           <stringProp name="RunTime.seconds">${RUNTIME}</stringProp>
         </RunTime>
         <hashTree>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="simple- XML" enabled="true">
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="simple-json" enabled="true">
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">&lt;notifyContextRequest&gt;&#xd;
-  &lt;subscriptionId&gt;51c0ac9ed714fb3b37d7d5a8&lt;/subscriptionId&gt;&#xd;
-  &lt;originator&gt;localhost&lt;/originator&gt;&#xd;
-  &lt;contextResponseList&gt;&#xd;
-    &lt;contextElementResponse&gt;&#xd;
-      &lt;contextElement&gt;&#xd;
-        &lt;entityId type=&quot;Room&quot; isPattern=&quot;false&quot;&gt;&#xd;
-          &lt;id&gt;Room1&lt;/id&gt;&#xd;
-        &lt;/entityId&gt;&#xd;
-        &lt;contextAttributeList&gt;         &#xd;
-          &lt;contextAttribute&gt;&#xd;
-            &lt;name&gt;teperature&lt;/name&gt;&#xd;
-            &lt;type&gt;centigrade&lt;/type&gt;&#xd;
-            &lt;contextValue&gt;720&lt;/contextValue&gt;&#xd;
-    &#xd;
-          &lt;/contextAttribute&gt;          &#xd;
-        &lt;/contextAttributeList&gt;&#xd;
-      &lt;/contextElement&gt;&#xd;
-      &lt;statusCode&gt;&#xd;
-        &lt;code&gt;200&lt;/code&gt;&#xd;
-        &lt;reasonPhrase&gt;OK&lt;/reasonPhrase&gt;&#xd;
-      &lt;/statusCode&gt;&#xd;
-    &lt;/contextElementResponse&gt;&#xd;
-  &lt;/contextResponseList&gt;&#xd;
-&lt;/notifyContextRequest&gt;&#xd;
-</stringProp>
+                  <stringProp name="Argument.value">{&#xd;
+  &quot;subscriptionId&quot; : &quot;51c0ac9ed714fb3b37d7d5a8&quot;,&#xd;
+  &quot;originator&quot; : &quot;localhost&quot;,&#xd;
+  &quot;contextResponses&quot; : [&#xd;
+    {&#xd;
+      &quot;contextElement&quot; : {&#xd;
+        &quot;attributes&quot; : [&#xd;
+          {&#xd;
+            &quot;name&quot; : &quot;temperature&quot;,&#xd;
+            &quot;type&quot; : &quot;centigrade&quot;,&#xd;
+            &quot;value&quot; : &quot;26.5&quot;&#xd;
+          }&#xd;
+        ],&#xd;
+        &quot;type&quot; : &quot;Room&quot;,&#xd;
+        &quot;isPattern&quot; : &quot;false&quot;,&#xd;
+        &quot;id&quot; : &quot;Room1&quot;&#xd;
+      },&#xd;
+      &quot;statusCode&quot; : {&#xd;
+        &quot;code&quot; : &quot;200&quot;,&#xd;
+        &quot;reasonPhrase&quot; : &quot;OK&quot;&#xd;
+      }&#xd;
+    }&#xd;
+  ]&#xd;
+}</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
@@ -247,11 +224,11 @@
               <collectionProp name="HeaderManager.headers">
                 <elementProp name="" elementType="Header">
                   <stringProp name="Header.name">Content-Type</stringProp>
-                  <stringProp name="Header.value">application/xml</stringProp>
+                  <stringProp name="Header.value">application/json; charset=utf-8</stringProp>
                 </elementProp>
                 <elementProp name="" elementType="Header">
                   <stringProp name="Header.name">Accept</stringProp>
-                  <stringProp name="Header.value">application/xml</stringProp>
+                  <stringProp name="Header.value">application/json; charset=utf-8</stringProp>
                 </elementProp>
               </collectionProp>
             </HeaderManager>
@@ -261,6 +238,35 @@
         <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>false</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <threadCounts>true</threadCounts>
+            </value>
+          </objProp>
+          <objProp>
+            <name></name>
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
@@ -283,6 +289,7 @@
               <responseDataOnError>false</responseDataOnError>
               <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
               <assertionsResultsToSave>0</assertionsResultsToSave>
+              <threadCounts>true</threadCounts>
             </value>
           </objProp>
           <stringProp name="filename">${OUTPUT_DIR}/AggregateReport${POSTFIX_FILES}.csv</stringProp>
@@ -291,6 +298,35 @@
         <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="Requests/Responses Errors " enabled="true">
           <boolProp name="ResultCollector.error_logging">true</boolProp>
           <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>false</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <threadCounts>true</threadCounts>
+            </value>
+          </objProp>
+          <objProp>
+            <name></name>
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
@@ -328,6 +364,35 @@
         <kg.apc.jmeter.perfmon.PerfMonCollector guiclass="kg.apc.jmeter.vizualizers.PerfMonGui" testclass="kg.apc.jmeter.perfmon.PerfMonCollector" testname="PerfMon Metrics main node" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>false</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <threadCounts>true</threadCounts>
+            </value>
+          </objProp>
+          <objProp>
+            <name></name>
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
@@ -384,166 +449,11 @@
               <stringProp name="0"></stringProp>
             </collectionProp>
           </collectionProp>
+          <stringProp name="start_offset"></stringProp>
+          <stringProp name="end_offset"></stringProp>
+          <boolProp name="include_checkbox_state">false</boolProp>
+          <boolProp name="exclude_checkbox_state">false</boolProp>
         </kg.apc.jmeter.perfmon.PerfMonCollector>
-        <hashTree/>
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Perf Monitor in Node 1" enabled="true">
-          <stringProp name="IfController.condition">&quot;${HOST_NODE_2}&quot; != &quot;127.0.0.1&quot;</stringProp>
-          <boolProp name="IfController.evaluateAll">false</boolProp>
-        </IfController>
-        <hashTree>
-          <kg.apc.jmeter.perfmon.PerfMonCollector guiclass="kg.apc.jmeter.vizualizers.PerfMonGui" testclass="kg.apc.jmeter.perfmon.PerfMonCollector" testname="PerfMon Metrics Collector" enabled="true">
-            <boolProp name="ResultCollector.error_logging">false</boolProp>
-            <objProp>
-              <value class="SampleSaveConfiguration">
-                <time>true</time>
-                <latency>true</latency>
-                <timestamp>true</timestamp>
-                <success>true</success>
-                <label>true</label>
-                <code>true</code>
-                <message>true</message>
-                <threadName>true</threadName>
-                <dataType>true</dataType>
-                <encoding>false</encoding>
-                <assertions>true</assertions>
-                <subresults>true</subresults>
-                <responseData>false</responseData>
-                <samplerData>false</samplerData>
-                <xml>false</xml>
-                <fieldNames>false</fieldNames>
-                <responseHeaders>false</responseHeaders>
-                <requestHeaders>false</requestHeaders>
-                <responseDataOnError>false</responseDataOnError>
-                <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
-                <assertionsResultsToSave>0</assertionsResultsToSave>
-                <bytes>true</bytes>
-              </value>
-            </objProp>
-            <stringProp name="filename">${OUTPUT_DIR}/perforMonitor_Node1${POSTFIX_FILES}.csv</stringProp>
-            <longProp name="interval_grouping">1000</longProp>
-            <boolProp name="graph_aggregated">false</boolProp>
-            <stringProp name="include_sample_labels"></stringProp>
-            <stringProp name="exclude_sample_labels"></stringProp>
-            <collectionProp name="metricConnections">
-              <collectionProp name="1464390453">
-                <stringProp name="-2007640951">${HOST_NODE_1}</stringProp>
-                <stringProp name="-1152144878">${MON_PORT}</stringProp>
-                <stringProp name="66952">CPU</stringProp>
-                <stringProp name="0"></stringProp>
-              </collectionProp>
-              <collectionProp name="-836323868">
-                <stringProp name="-2007640951">${HOST_NODE_1}</stringProp>
-                <stringProp name="-1152144878">${MON_PORT}</stringProp>
-                <stringProp name="-1993889503">Memory</stringProp>
-                <stringProp name="0"></stringProp>
-              </collectionProp>
-              <collectionProp name="-849203721">
-                <stringProp name="-2007640951">${HOST_NODE_1}</stringProp>
-                <stringProp name="-1152144878">${MON_PORT}</stringProp>
-                <stringProp name="82881">TCP</stringProp>
-                <stringProp name="0"></stringProp>
-              </collectionProp>
-            </collectionProp>
-          </kg.apc.jmeter.perfmon.PerfMonCollector>
-          <hashTree/>
-        </hashTree>
-        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="Perf Monitor in Node 2" enabled="true">
-          <stringProp name="IfController.condition">&quot;${HOST_NODE_2}&quot; != &quot;127.0.0.1&quot;</stringProp>
-          <boolProp name="IfController.evaluateAll">false</boolProp>
-        </IfController>
-        <hashTree>
-          <kg.apc.jmeter.perfmon.PerfMonCollector guiclass="kg.apc.jmeter.vizualizers.PerfMonGui" testclass="kg.apc.jmeter.perfmon.PerfMonCollector" testname="PerfMon Metrics Collector" enabled="true">
-            <boolProp name="ResultCollector.error_logging">false</boolProp>
-            <objProp>
-              <value class="SampleSaveConfiguration">
-                <time>true</time>
-                <latency>true</latency>
-                <timestamp>true</timestamp>
-                <success>true</success>
-                <label>true</label>
-                <code>true</code>
-                <message>true</message>
-                <threadName>true</threadName>
-                <dataType>true</dataType>
-                <encoding>false</encoding>
-                <assertions>true</assertions>
-                <subresults>true</subresults>
-                <responseData>false</responseData>
-                <samplerData>false</samplerData>
-                <xml>false</xml>
-                <fieldNames>false</fieldNames>
-                <responseHeaders>false</responseHeaders>
-                <requestHeaders>false</requestHeaders>
-                <responseDataOnError>false</responseDataOnError>
-                <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
-                <assertionsResultsToSave>0</assertionsResultsToSave>
-                <bytes>true</bytes>
-              </value>
-            </objProp>
-            <stringProp name="filename">${OUTPUT_DIR}/perforMonitor_Node2${POSTFIX_FILES}.csv</stringProp>
-            <longProp name="interval_grouping">1000</longProp>
-            <boolProp name="graph_aggregated">false</boolProp>
-            <stringProp name="include_sample_labels"></stringProp>
-            <stringProp name="exclude_sample_labels"></stringProp>
-            <collectionProp name="metricConnections">
-              <collectionProp name="1361700876">
-                <stringProp name="-2007640920">${HOST_NODE_2}</stringProp>
-                <stringProp name="-1152144878">${MON_PORT}</stringProp>
-                <stringProp name="66952">CPU</stringProp>
-                <stringProp name="0"></stringProp>
-              </collectionProp>
-              <collectionProp name="-939013445">
-                <stringProp name="-2007640920">${HOST_NODE_2}</stringProp>
-                <stringProp name="-1152144878">${MON_PORT}</stringProp>
-                <stringProp name="-1993889503">Memory</stringProp>
-                <stringProp name="0"></stringProp>
-              </collectionProp>
-              <collectionProp name="-951893298">
-                <stringProp name="-2007640920">${HOST_NODE_2}</stringProp>
-                <stringProp name="-1152144878">${MON_PORT}</stringProp>
-                <stringProp name="82881">TCP</stringProp>
-                <stringProp name="0"></stringProp>
-              </collectionProp>
-            </collectionProp>
-          </kg.apc.jmeter.perfmon.PerfMonCollector>
-          <hashTree/>
-        </hashTree>
-        <kg.apc.jmeter.reporters.LoadosophiaUploader guiclass="kg.apc.jmeter.reporters.LoadosophiaUploaderGui" testclass="kg.apc.jmeter.reporters.LoadosophiaUploader" testname="Loadosophia.report" enabled="true">
-          <boolProp name="ResultCollector.error_logging">false</boolProp>
-          <objProp>
-            <value class="SampleSaveConfiguration">
-              <time>true</time>
-              <latency>true</latency>
-              <timestamp>true</timestamp>
-              <success>true</success>
-              <label>true</label>
-              <code>true</code>
-              <message>true</message>
-              <threadName>true</threadName>
-              <dataType>true</dataType>
-              <encoding>false</encoding>
-              <assertions>true</assertions>
-              <subresults>true</subresults>
-              <responseData>false</responseData>
-              <samplerData>false</samplerData>
-              <xml>false</xml>
-              <fieldNames>false</fieldNames>
-              <responseHeaders>false</responseHeaders>
-              <requestHeaders>false</requestHeaders>
-              <responseDataOnError>false</responseDataOnError>
-              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
-              <assertionsResultsToSave>0</assertionsResultsToSave>
-              <bytes>true</bytes>
-            </value>
-          </objProp>
-          <stringProp name="filename"></stringProp>
-          <stringProp name="project">${TESTNAME}</stringProp>
-          <stringProp name="uploadToken">${LOADOSOPHIA_TOKEN}</stringProp>
-          <stringProp name="storeDir">${OUTPUT_DIR}</stringProp>
-          <stringProp name="color">green</stringProp>
-          <stringProp name="title">${POSTFIX_FILES}</stringProp>
-          <boolProp name="useOnline">true</boolProp>
-        </kg.apc.jmeter.reporters.LoadosophiaUploader>
         <hashTree/>
       </hashTree>
     </hashTree>
