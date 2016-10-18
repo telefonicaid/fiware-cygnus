@@ -7,3 +7,4 @@
 - [cygnus][doc] Warn about the incompatibility of installing cygnus-ngsi and cygnus-twitter in the same base path (#1214)
 - [cygnus][doc] Fix docker links in badges (#1222)
 - [cygnus-common][hardening] Add -Dfile.encoding=UTF-8 Java option (#1225)
+- [cygnus][doc] Update link for get tokens in documentations (#1227)
