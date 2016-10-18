@@ -4,10 +4,9 @@
 [![Support badge]( https://img.shields.io/badge/support-sof-yellowgreen.svg)](http://stackoverflow.com/questions/tagged/fiware-cygnus)
 [![Support badge]( https://img.shields.io/badge/support-askbot-yellowgreen.svg)](https://ask.fiware.org/questions/scope%3Aall/tags%3Acygnus/)
 <br>
-<br>
-[![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus.svg)](https://hub.docker.com/r/fiware/cygnus-common/) (cygnus-common)
-<br>
-[![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus.svg)](https://hub.docker.com/r/fiware/cygnus-ngsi/) (cygnus-ngsi)
+[![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus-common.svg)](https://hub.docker.com/r/fiware/cygnus-common/)
+[![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus-ngsi.svg)](https://hub.docker.com/r/fiware/cygnus-ngsi/)
+[![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus-twitter.svg)](https://hub.docker.com/r/fiware/cygnus-twitter/)
 
 ##Welcome
 This project is part of [FIWARE](http://fiware.org), being part of the [Cosmos](http://catalogue.fiware.org/enablers/bigdata-analysis-cosmos) Ecosystem.

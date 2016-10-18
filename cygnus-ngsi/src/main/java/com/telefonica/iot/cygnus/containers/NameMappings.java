@@ -18,6 +18,7 @@
 package com.telefonica.iot.cygnus.containers;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -39,11 +40,27 @@ public class NameMappings {
     } // getServiceMappings
     
     /**
+     * Purges the Name Mappings if any field is missing or has an invalid value.
+     */
+    public void purge() {
+    } // purge
+    
+    /**
+     * Compiles the regular expressions into Java Patterns.
+     */
+    public void compilePatterns() {
+        for (ServiceMapping serviceMapping : serviceMappings) {
+            serviceMapping.compilePatterns();
+        } // for
+    } // compilePatterns
+    
+    /**
      * ServiceMapping class.
      */
     public class ServiceMapping {
         
         private String originalService;
+        private Pattern originalServicePattern;
         private String newService;
         private final ArrayList<ServicePathMapping> servicePathMappings;
     
@@ -66,6 +83,21 @@ public class NameMappings {
             return newService;
         } // getNewService
         
+        public Pattern getOriginalServicePattern() {
+            return originalServicePattern;
+        } // getOriginalServicePattern
+        
+        /**
+         * Compiles the regular expressions into Java Patterns.
+         */
+        public void compilePatterns() {
+            originalServicePattern = Pattern.compile(originalService);
+
+            for (ServicePathMapping servicePathMapping : servicePathMappings) {
+                servicePathMapping.compilePatterns();
+            } // for
+        } // compilePatterns
+        
     } // ServiceMapping
     
     /**
@@ -74,6 +106,7 @@ public class NameMappings {
     public class ServicePathMapping {
         
         private String originalServicePath;
+        private Pattern originalServicePathPattern;
         private String newServicePath;
         private final ArrayList<EntityMapping> entityMappings;
         
@@ -96,6 +129,21 @@ public class NameMappings {
             return newServicePath;
         } // getNewServicePath
         
+        public Pattern getOriginalServicePathPattern() {
+            return originalServicePathPattern;
+        } // getOriginalServicePathPattern
+        
+        /**
+         * Compiles the regular expressions into Java Patterns.
+         */
+        public void compilePatterns() {
+            originalServicePathPattern = Pattern.compile(originalServicePath);
+
+            for (EntityMapping entityMapping : entityMappings) {
+                entityMapping.compilePatterns();
+            } // for
+        } // compilePatterns
+        
     } // ServicePathMapping
     
     /**
@@ -104,7 +152,9 @@ public class NameMappings {
     public class EntityMapping {
         
         private String originalEntityId;
+        private Pattern originalEntityIdPattern;
         private String originalEntityType;
+        private Pattern originalEntityTypePattern;
         private String newEntityId;
         private String newEntityType;
         private final ArrayList<AttributeMapping> attributeMappings;
@@ -136,6 +186,26 @@ public class NameMappings {
             return newEntityType;
         } // getNewEntityType
         
+        public Pattern getOriginalEntityIdPattern() {
+            return originalEntityIdPattern;
+        } // getOriginalEntityIdPattern
+        
+        public Pattern getOriginalEntityTypePattern() {
+            return originalEntityTypePattern;
+        } // getOriginalEntityTypePattern
+        
+        /**
+         * Compiles the regular expressions into Java Patterns.
+         */
+        public void compilePatterns() {
+            originalEntityIdPattern = Pattern.compile(originalEntityId);
+            originalEntityTypePattern = Pattern.compile(originalEntityType);
+
+            for (AttributeMapping attributeMapping : attributeMappings) {
+                attributeMapping.compilePatterns();
+            } // for
+        } // compilePatterns
+        
     } // EntityMapping
     
     /**
@@ -144,7 +214,9 @@ public class NameMappings {
     public class AttributeMapping {
         
         private String originalAttributeName;
+        private Pattern originalAttributeNamePattern;
         private String originalAttributeType;
+        private Pattern originalAttributeTypePattern;
         private String newAttributeName;
         private String newAttributeType;
         
@@ -169,6 +241,22 @@ public class NameMappings {
         public String getNewAttributeType() {
             return newAttributeType;
         } // getNewAttributeType
+        
+        public Pattern getOriginalAttributeNamePattern() {
+            return originalAttributeNamePattern;
+        } // getOriginalAttributeNamePattern
+        
+        public Pattern getOriginalAttributeTypePattern() {
+            return originalAttributeTypePattern;
+        } // getOriginalAttributeTypePattern
+        
+        /**
+         * Compiles the regular expressions into Java Patterns.
+         */
+        public void compilePatterns() {
+            originalAttributeNamePattern = Pattern.compile(originalAttributeName);
+            originalAttributeTypePattern = Pattern.compile(originalAttributeType);
+        } // compilePatterns
         
     } // AttributeMapping
     
