@@ -4,16 +4,16 @@
 # This file is part of fiware-cygnus (FI-WARE project).
 #
 # fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
-# General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
-# option) any later version.
-# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
-# for more details.
+# General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+# option) any later version.
+# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+# for more details.
 #
 # You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
-# http://www.gnu.org/licenses/.
+# http://www.gnu.org/licenses/.
 #
-# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
 FROM centos:6
@@ -35,15 +35,11 @@ ENV CYGNUS_MYSQL_USER "mysql"
 ENV CYGNUS_MYSQL_PASS "mysql"
 ENV CYGNUS_MONGO_USER "mongo"
 ENV CYGNUS_MONGO_PASS "mongo"
-ENV CYGNUS_CKAN_HOST "iot-ckan"
-ENV CYGNUS_CKAN_PORT "80"
-ENV CYGNUS_CKAN_API_KEY ""
-ENV CYGNUS_CKAN_SSL "false"
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
-ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
+ENV GIT_URL_CYGNUS "https://github.com/pcoello25/fiware-cygnus"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "master"
+ENV GIT_REV_CYGNUS "hardening/1193_add_ngsickansink_configuration_in_agent_file"
 # ENV GIT_REV_CYGNUS "mybranch"
 
 ENV MVN_VER "3.3.9"
@@ -137,3 +133,4 @@ ENTRYPOINT ["/cygnus-entrypoint.sh"]
 
 # Ports used by cygnus-ngsi
 EXPOSE ${CYGNUS_SERVICE_PORT} ${CYGNUS_API_PORT}
+
