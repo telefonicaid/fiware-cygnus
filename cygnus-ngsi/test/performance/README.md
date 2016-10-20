@@ -25,7 +25,7 @@ nohup sh startAgent.sh --udp-port 0 --tcp-port 4444 &
 
   >**Scenario**:
 ```
-* N threads in the same time against a sink specific (ckan, mysql or hdfs) using mock
+* N threads at the same time against a specific sink
 ```
   >**Steps**:
 ```
@@ -37,20 +37,19 @@ nohup sh startAgent.sh --udp-port 0 --tcp-port 4444 &
 ```
   >**Properties**:
 ```
-* RUNTIME      - time of test duration (60 Sec by default)
+* RUNTIME      - time of test duration (1 second by default)
 * THREADS      - threads number (1 by default)
-* RAMPUP       -  ramp up of threads (0 by default)
-* HOST         - IP or hostname main node(in case of clusters is Nginx)  (127.0.0.1 by default)
+* RAMPUP       - ramp up of threads (0 by default)
+* HOST         - IP or hostname main node (in case of clusters is Nginx)  (127.0.0.1 by default)
 * PORT         - port used by cygnus (5050 by default)
-* HOST_NODE_1  - IP or hostname of Node 1  (127.0.0.1 by default, if the property is not appends it is ignored)
-* HOST_NODE_2  - IP or hostname of Node 2  (127.0.0.1 by default, if the property is not appends it is ignored)
-* TESTNAME    - sink name (channel to test)
-* ORGANIZATION - organization name (HA by default)
+* TESTNAME     - sink name (channel to test)
+* SERVICE      - FIWARE service to be notified (loadtest by default)
+* SERVICE_PATH - FIWARE service path to be notified (/any by default)
 ```
 
   >**example**:
 ```
-<jmeter_path>/jmeter.sh -n -t <path>/loadTest_cygnus_v1.0.jmx -JHOST=X.X.X.X -JPORT=5050 -JTHREADS=20 -JRAMPUP=10 -JRUNTIME=180 -JTESTNAME=CKAN -JORGANIZATION=loadtest > <log_path>/soaktest_cygnus_`date +%FT%T`.log &
+<jmeter_path>/jmeter.sh -n -t <path>/loadTest_cygnus_v1.0.jmx -JHOST=X.X.X.X -JPORT=5050 -JTHREADS=20 -JRAMPUP=10 -JRUNTIME=180 -JTESTNAME=CKAN -JSERVICE=loadtest -JSERVICE_PATH=/any > <log_path>/soaktest_cygnus_`date +%FT%T`.log &
 ```
 
 #### Post-steps:

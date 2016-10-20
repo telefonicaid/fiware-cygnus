@@ -250,7 +250,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
     
     private void loadNameMappings() {
         // Read the Json string from the configuration file
-        String jsonStr = null;
+        String jsonStr;
 
         try {
             jsonStr = JsonUtils.readJsonFile(nameMappingsConfFile);
@@ -258,7 +258,23 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         } catch (Exception e) {
             LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
             nameMappings = null;
+            return;
         } // try catch
+        
+        loadNameMappings(jsonStr);
+    } // loadNameMappings
+    
+    /**
+     * Loads the Name Mappings given a Json string. It is protected since it only can be used by this class and test
+     * classes.
+     * @param jsonStr
+     */
+    protected void loadNameMappings(String jsonStr) {
+        if (jsonStr == null) {
+            LOGGER.debug("[nmi] Reding name mappings, no file to read");
+            nameMappings = null;
+            return;
+        } // if
 
         // Parse the Json string
         Gson gson = new Gson();
@@ -269,18 +285,21 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         } catch (JsonIOException e) {
             LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
             nameMappings = null;
+            return;
         } catch (JsonSyntaxException e) {
             LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
             nameMappings = null;
+            return;
         } // try catch
 
         // Check if any of the mappings is not valid, e.g. some field is missing
-        purge();
+        nameMappings.purge();
         LOGGER.debug("[nmi] Reading name mappings, Json purged");
+        
+        // Pre-compile the regular expressions
+        nameMappings.compilePatterns();
+        LOGGER.debug("[nmi] Reading name mappings, regular expressions pre-compiled");
     } // loadNameMappings
-    
-    private void purge() {
-    } // purge
     
     /**
      * Applies the mappings to the input NotifyContextRequest object.
@@ -306,7 +325,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         for (ServiceMapping sm : nameMappings.getServiceMappings()) {
             serviceMapping = sm;
             
-            if (!serviceMapping.getOriginalService().equals(originalService)) {
+            if (!serviceMapping.getOriginalServicePattern().matcher(originalService).matches()) {
                 serviceMapping = null;
                 continue;
             } // if
@@ -331,7 +350,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         for (ServicePathMapping spm : serviceMapping.getServicePathMappings()) {
             servicePathMapping = spm;
             
-            if (!servicePathMapping.getOriginalServicePath().equals(originalServicePath)) {
+            if (!servicePathMapping.getOriginalServicePathPattern().matcher(originalServicePath).matches()) {
                 servicePathMapping = null;
                 continue;
             } // if
@@ -361,8 +380,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             for (EntityMapping em : servicePathMapping.getEntityMappings()) {
                 entityMapping = em;
 
-                if (!entityMapping.getOriginalEntityId().equals(originalEntityId)
-                        || !entityMapping.getOriginalEntityType().equals(originalEntityType)) {
+                if (!entityMapping.getOriginalEntityIdPattern().matcher(originalEntityId).matches()
+                        || !entityMapping.getOriginalEntityTypePattern().matcher(originalEntityType).matches()) {
                     entityMapping = null;
                     continue;
                 } // if
@@ -398,8 +417,9 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 for (AttributeMapping am : entityMapping.getAttributeMappings()) {
                     attributeMapping = am;
 
-                    if (!attributeMapping.getOriginalAttributeName().equals(originalAttributeName)
-                            || !attributeMapping.getOriginalAttributeType().equals(originalAttributeType)) {
+                    if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches()
+                            || !attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType).
+                                    matches()) {
                         attributeMapping = null;
                         continue;
                     } // if

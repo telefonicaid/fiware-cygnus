@@ -9,7 +9,7 @@ Content:
 * [Installing dependencies](#section3)
 
 ##<a name="section1"></a>Prerequisites
-[`cygnus-common`](../../cygnus-common/installation_and_administration_guide/install_from_sources.md) must be installed. This includes Maven, `cygnus` user creation, Apache Flume and `cygnus-flume-ng` script installation.
+[`cygnus-common`](../../cygnus-common/installation_and_administration_guide/install_from_sources.md) must be installed. This includes Maven, `cygnus` user creation, `log4j` path creation, Apache Flume and `cygnus-flume-ng` script installation.
 
 [Top](#top)
 
@@ -37,6 +37,8 @@ Or as a thin Java jar file:
     $ cd cygnus-ngsi
     $ APACHE_MAVEN_HOME/bin/mvn exec:exec package
     $ cp target/cygnus-<x.y.z>.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
+
+Finally, please find a `compile.sh` script containing all the commands shown in this section. It must be parameterized with the version of the current branch and the Apache Flume base path.
 
 [Top](#top)
 

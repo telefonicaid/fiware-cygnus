@@ -110,7 +110,7 @@ public class NGSIKafkaSinkTest {
         String topic = sink.buildTopicName(service, servicePath, entity, attribute);
         
         try {
-            expectedTopic = "servicexffff/servicePath";
+            expectedTopic = "servicexffffx002fservicePath";
             assertEquals(expectedTopic, topic);
             System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
@@ -136,7 +136,7 @@ public class NGSIKafkaSinkTest {
         String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
         
         try {
-            expectedTopic = "servicexffff/";
+            expectedTopic = "servicexffffx002f";
             assertEquals(expectedTopic, topic);
             System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
@@ -162,7 +162,7 @@ public class NGSIKafkaSinkTest {
         String topic = sink.buildTopicName(service, servicePath, entity, attribute);
         
         try {
-            expectedTopic = "servicexffff/servicePathxffffentityIdxffffentityType";
+            expectedTopic = "servicexffffx002fservicePathxffffentityIdxffffentityType";
             assertEquals(expectedTopic, topic);
             System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
@@ -188,7 +188,7 @@ public class NGSIKafkaSinkTest {
         String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
         
         try {
-            expectedTopic = "servicexffff/xffffentityIdxffffentityType";
+            expectedTopic = "servicexffffx002fxffffentityIdxffffentityType";
             assertEquals(expectedTopic, topic);
             System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
@@ -215,7 +215,7 @@ public class NGSIKafkaSinkTest {
         String topic = sink.buildTopicName(service, servicePath, entity, attribute);
         
         try {
-            expectedTopic = "servicexffff/servicePathxffffentityIdxffffentityTypexffffattributeName";
+            expectedTopic = "servicexffffx002fservicePathxffffentityIdxffffentityTypexffffattributeName";
             assertEquals(expectedTopic, topic);
             System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);
@@ -241,7 +241,7 @@ public class NGSIKafkaSinkTest {
         String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
         
         try {
-            expectedTopic = "servicexffff/xffffentityIdxffffentityTypexffffattributeName";
+            expectedTopic = "servicexffffx002fxffffentityIdxffffentityTypexffffattributeName";
             assertEquals(expectedTopic, topic);
             System.out.println(getTestTraceHead("[NGSIKafkaSink.buildTopicName]") + "-  OK  - "
                     + "Created topic is equals to " + expectedTopic);

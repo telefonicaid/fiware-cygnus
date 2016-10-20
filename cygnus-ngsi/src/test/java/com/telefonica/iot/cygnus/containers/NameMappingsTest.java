@@ -24,6 +24,7 @@ import com.telefonica.iot.cygnus.containers.NameMappings.ServicePathMapping;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -236,6 +237,38 @@ public class NameMappingsTest {
             + "   ]"
             + "}";
     
+    private final String nameMappingsRegex = "" 
+            + "{"
+            + "   \"serviceMappings\": ["
+            + "      {"
+            + "         \"originalService\": \".*\","
+            + "         \"newService\": \"new_default\","
+            + "         \"servicePathMappings\": ["
+            + "            {"
+            + "               \"originalServicePath\": \"/.*\","
+            + "               \"newServicePath\": \"/new_default\","
+            + "               \"entityMappings\": ["
+            + "                  {"
+            + "                     \"originalEntityId\": \"Room\\.(\\d*)\","
+            + "                     \"originalEntityType\": \"Room\","
+            + "                     \"newEntityId\": \"new_Room1\","
+            + "                     \"newEntityType\": \"new_Room\","
+            + "                     \"attributeMappings\": ["
+            + "                        {"
+            + "                           \"originalAttributeName\": \"temp*\","
+            + "                           \"originalAttributeType\": \"cent*\","
+            + "                           \"newAttributeName\": \"new_temperature\","
+            + "                           \"newAttributeType\": \"new_centigrade\""
+            + "                        }"
+            + "                     ]"
+            + "                  }"
+            + "               ]"
+            + "            }"
+            + "         ]"
+            + "      }"
+            + "   ]"
+            + "}";
+    
     /**
      * [NameMappings.getServiceMappings] -------- Service mappings can be retrieved.
      * @throws java.lang.Exception
@@ -427,5 +460,90 @@ public class NameMappingsTest {
             } // for
         } // for
     } // testNameMappingsSuccessfullyParsed
+    
+    /**
+     * [NameMappings.compilePatterns] -------- Patterns are successfully compiled.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testNameMappingsPatternsCompiled() throws Exception {
+        System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
+                + "-------- Patterns are successfully compiled");
+        NameMappings nameMappings = TestUtils.createJsonNameMappings(nameMappingsRegex);
+        nameMappings.compilePatterns();
+        ServiceMapping serviceMapping = nameMappings.getServiceMappings().get(0);
+       
+        try {
+            assertEquals(Pattern.compile(serviceMapping.getOriginalService()).pattern(),
+                    serviceMapping.getOriginalServicePattern().pattern());
+            System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
+                    + "-  OK  - The retrieved pattern for the original service matches the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
+                    + "- FAIL - The retrieved pattern for the original service does not match the expected one");
+            throw e;
+        } // try catch
+        
+        ServicePathMapping servicePathMapping = serviceMapping.getServicePathMappings().get(0);
+        
+        try {
+            assertEquals(Pattern.compile(servicePathMapping.getOriginalServicePath()).pattern(),
+                    servicePathMapping.getOriginalServicePathPattern().pattern());
+            System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
+                    + "-  OK  - The retrieved pattern for the original service path matches the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
+                    + "- FAIL - The retrieved pattern for the original service path does not match the expected one");
+            throw e;
+        } // try catch
+        
+        EntityMapping entityMapping = servicePathMapping.getEntityMappings().get(0);
+        
+        try {
+            assertEquals(Pattern.compile(entityMapping.getOriginalEntityId()).pattern(),
+                    entityMapping.getOriginalEntityIdPattern().pattern());
+            System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
+                    + "-  OK  - The retrieved pattern for the original entity ID matches the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
+                    + "- FAIL - The retrieved pattern for the original entity ID does not match the expected one");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(Pattern.compile(entityMapping.getOriginalEntityType()).pattern(),
+                    entityMapping.getOriginalEntityTypePattern().pattern());
+            System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
+                    + "-  OK  - The retrieved pattern for the original entity type matches the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
+                    + "- FAIL - The retrieved pattern for the original entity type does not match the expected one");
+            throw e;
+        } // try catch
+        
+        AttributeMapping attributeMapping = entityMapping.getAttributeMappings().get(0);
+        
+        try {
+            assertEquals(Pattern.compile(attributeMapping.getOriginalAttributeName()).pattern(),
+                    attributeMapping.getOriginalAttributeNamePattern().pattern());
+            System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
+                    + "-  OK  - The retrieved pattern for the original attribute name matches the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
+                    + "- FAIL - The retrieved pattern for the original attribute name does not match the expected one");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(Pattern.compile(attributeMapping.getOriginalAttributeType()).pattern(),
+                    attributeMapping.getOriginalAttributeTypePattern().pattern());
+            System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
+                    + "-  OK  - The retrieved pattern for the original attribute type matches the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
+                    + "- FAIL - The retrieved pattern for the original attribute type does not match the expected one");
+            throw e;
+        } // try catch
+    } // testNameMappingsPatternsCompiled
     
 } // NameMappingsTest

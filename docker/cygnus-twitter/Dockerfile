@@ -30,10 +30,11 @@ ENV CYGNUS_AGENT_NAME "cygnus-twitter"
 ENV CYGNUS_LOG_LEVEL "INFO"
 ENV CYGNUS_LOG_APPENDER "console"
 
+# NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 ENV GIT_REV_CYGNUS "master"
 
-ENV MVN_VER "3.2.5"
+ENV MVN_VER "3.3.9"
 ENV MVN_TGZ "apache-maven-${MVN_VER}-bin.tar.gz"
 ENV MVN_URL "http://www.eu.apache.org/dist/maven/maven-3/${MVN_VER}/binaries/${MVN_TGZ}"
 ENV MVN_HOME "/opt/apache-maven"
@@ -43,18 +44,19 @@ ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
 ENV FLUME_URL "http://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 ENV FLUME_HOME "/opt/apache-flume"
 
-ENV JAVA_HOME /usr/lib/jvm/java-1.6.0
+ENV JAVA_VERSION "1.7.0"
 
 # Add Cygnus user
 RUN adduser ${CYGNUS_USER}
 
 # Install
-RUN yum -y install tar nc which git java-1.6.0-openjdk-devel && \
+RUN yum -y install tar nc which git java-${JAVA_VERSION}-openjdk-devel && \
     yum clean all && \
+    export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION} && \
     curl --remote-name --location --insecure --silent --show-error "${MVN_URL}" && \
     tar xzvf ${MVN_TGZ} && \
     mv apache-maven-${MVN_VER} ${MVN_HOME} && \
-    export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m" && \
+    export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8" && \
     curl --remote-name --location --insecure --silent --show-error "${FLUME_URL}" && \
     tar zxf ${FLUME_TGZ} && \
     mv apache-flume-${FLUME_VER}-bin ${FLUME_HOME} && \

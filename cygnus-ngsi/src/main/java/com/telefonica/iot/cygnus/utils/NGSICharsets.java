@@ -404,8 +404,13 @@ public final class NGSICharsets {
         
         for (int i = 0; i < in.length(); i++) {
             char c = in.charAt(i);
+            int code = c;
             
-            if (c == 'x') {
+            if (code >= 65 && code <= 90) { // A-Z --> A-Z
+                out += c;
+            } else if (code >= 97 && code <= 119) { // a-w --> a-w
+                out += c;
+            } else if (c == 'x') {
                 String next4;
             
                 if (i + 4 < in.length()) {
@@ -419,10 +424,21 @@ public final class NGSICharsets {
                 } else { // x --> x
                     out += c;
                 } // if else
+            } else if (code == 121 || code == 122) { // yz --> yz
+                out += c;
+            } else if (code >= 48 && code <= 57) { // 0-9 --> 0-9
+                out += c;
+            } else if (c == '_') { // _ --> _
+                out += c;
+            } else if (c == '-') { // - --> -
+                out += c;
+            } else if (c == '.') { // . --> .
+                out += c;
             } else if (c == '=') { // = --> xffff
                 out += "xffff";
-            } else {
-                out += c;
+            } else { // --> xUNICODE
+                String hex = Integer.toHexString(code);
+                out += "x" + ("0000" + hex).substring(hex.length());
             } // else
         } // for
         

@@ -131,17 +131,18 @@ Let's assume a topic name `vehiclesxffffx002f4wheelsxffffcar1xffffcarxffffspeed`
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIKafkaSink</i> |
 | channel | yes | N/A ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
+| enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
-| data_model | no | dm-by-entity |  <i>dm-by-service</i>, <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <i>dm-by-attribute</i>. |
-| broker_list | no | localhost:9092 | Comma-separated list of Kafka brokers (a broker is defined as <i>host:port</i>). |
-| zookeeper_endpoint | no | localhost:2181 | Zookeeper endpoint needed to create Kafka topics, in the form of <i>host:port</i>. |
+| data\_model | no | dm-by-entity |  <i>dm-by-service</i>, <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <i>dm-by-attribute</i>. |
+| broker\_list | no | localhost:9092 | Comma-separated list of Kafka brokers (a broker is defined as <i>host:port</i>). |
+| zookeeper\_endpoint | no | localhost:2181 | Zookeeper endpoint needed to create Kafka topics, in the form of <i>host:port</i>. |
 | partitions |  no | 1 | Number of partitions for a topic. |
-| replication_factor | no | 1 | For a topic with replication factor N, Kafka will tolerate N-1 server failures without losing any messages committed to the log. Replication factor must be less than or equal to the number of brokers created. |
-| batch_size | no | 1 | Number of events accumulated before persistence. |
-| batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
-| batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| replication\_factor | no | 1 | For a topic with replication factor N, Kafka will tolerate N-1 server failures without losing any messages committed to the log. Replication factor must be less than or equal to the number of brokers created. |
+| batch\_size | no | 1 | Number of events accumulated before persistence. |
+| batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
+| batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
+| batch\_retry\_intervals | no | 5000 | Comma-separated list of intervals (in miliseconds) at which the retries regarding not persisted batches will be done. First retry will be done as many miliseconds after as the first value, then the second retry will be done as many miliseconds after as second value, and so on. If the batch\_ttl is greater than the number of intervals, the last interval is repeated. |
 
 A configuration example could be:
 
@@ -161,6 +162,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.kafka-sink.batch_size = 100
     cygnus-ngsi.sinks.kafka-sink.batch_timeout = 30
     cygnus-ngsi.sinks.kafka-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.kafka-sink.batch_retry_intervals = 5000
 
 [Top](#top)
 
@@ -177,6 +179,8 @@ What is important regarding the batch mechanism is it largely increases the perf
 
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
+Regarding the retries of not persisted batches, a couple of parameters is used. On the one hand, a Time-To-Live (TTL) is used, specifing the number of retries Cygnus will do before definitely dropping the event. On the other hand, a list of retry intervals can be configured. Such a list defines the first retry interval, then se second retry interval, and so on; if the TTL is greater than the length of the list, then the last retry interval is repeated as many times as necessary.
+
 By default, `NGSIKafkaSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
 
 [Top](#top)
@@ -184,9 +188,14 @@ By default, `NGSIKafkaSink` has a configured batch size and batch accumulation t
 ####<a name="section2.3.2"></a>About the encoding
 Cygnus applies this specific encoding tailored to Kafka data structures:
 
+* Alphanumeric characters are not encoded.
+* Numeric characters are not encoded.
+* Underscore character, `_`, is not encoded.
+* Hyphen character, `-`, is not encoded.
+* Dot character, `.`, is not encoded.
 * Equals character, `=`, is encoded as `xffff`.
-* User defined strings composed of a `x` character and a [Unicode](http://unicode-table.com) are encoded as `xx` followed by the Unicode.
-* All the other characters are not encoded.
+* All other characters, including the slash in the FIWARE service paths, are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
+* User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
 * `xffff` is used as concatenator character.
 
 [Top](#top)
