@@ -157,105 +157,25 @@ As seen above, the default configuration distributed with the image is tied to c
 
 * MySQL:
   * It only works for building historical context data in MySQL.
-  * The user for MySQL is `mysql`.
-  * The pass for MySQL is `mysql`.
-  * The logging level is `INFO`.
-  * The logging appender is `console`.
+  * The user for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_USER environment variable.
+  * The pass for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_USER environment variable.
 * Mongo:
   * It only works for building historical context data in Mongo.
-  * The user for Mongo is `mongo`.
-  * The pass for Mongo is `mongo`.
-  * The logging level is `INFO`.
-  * The logging appender is `console`.
+  * The user for Mongo is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
+  * The pass for Mongo is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
 * STH:
   * It only works for building historical context data in STH.
-  * The user for STH is `mongo`.
-  * The pass for STH is `mongo`.
-  * The logging level is `INFO`.
-  * The logging appender is `console`.
+  * The user for STH is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
+  * The pass for STH is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
 * CKAN:
   * It only works for building historical context data in CKAN.
-  * The endpoint for CKAN is `iot-ckan`.
-  * The port for CKAN is `80`.
-  * The ssl for CKAN is `false`.
-  * The api_key for CKAN is ``.
+  * The endpoint for CKAN is `iot-ckan` but can be changed through the CYGNUS_CKAN_HOST environment variable.
+  * The port for CKAN is `80` but can be changed through the CYGNUS_CKAN_PORT environment variable.
+  * The ssl for CKAN is `false` but can be changed through the CYGNUS_CKAN_SSL environment variable.
+  * The api_key for CKAN is `` but can be changed through the CYGNUS_CKAN_API_KEY environment variable.
 * Log4j configuration file:
-  * The logging level is `INFO`.
-  * The logging appender is `console`.
-  
-```
-# Copyright 2016 Telefónica Investigación y Desarrollo, S.A.U
-#
-# This file is part of fiware-cygnus (FI-WARE project).
-#
-# fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
-# Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
-# later version.
-# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
-# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
-# details.
-#
-# You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
-# http://www.gnu.org/licenses/.
-#
-# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
-
-# To be put in APACHE_FLUME_HOME/conf/log4j.properties
-
-# Define some default values.
-# These can be overridden by system properties, e.g. the following logs in the standard output, which is very useful
-# for testing purposes (-Dflume.root.logger=DEBUG,console)
-flume.root.logger=INFO,LOGFILE
-#flume.root.logger=DEBUG,console
-flume.log.dir=/var/log/cygnus/
-flume.log.file=cygnus.log
-
-# Logging level for third party components.
-log4j.logger.org.apache.flume.lifecycle = WARN
-log4j.logger.org.jboss = WARN
-log4j.logger.org.mortbay = WARN
-log4j.logger.org.apache.avro.ipc.NettyTransceiver = WARN
-log4j.logger.org.apache.hadoop = WARN
-log4j.logger.org.mongodb = WARN
-log4j.logger.org.apache.http = WARN
-log4j.logger.org.apache.zookeeper = WARN
-log4j.logger.org.apache.kafka = WARN
-log4j.logger.org.I0Itec = WARN
-log4j.logger.com.amazonaws = WARN
-
-# Define the root logger to the system property "flume.root.logger".
-log4j.rootLogger=${flume.root.logger}
-
-# Stock log4j rolling file appender.
-# Default log rotation configuration.
-log4j.appender.LOGFILE=org.apache.log4j.RollingFileAppender
-log4j.appender.LOGFILE.MaxFileSize=100MB
-log4j.appender.LOGFILE.MaxBackupIndex=10
-log4j.appender.LOGFILE.File=${flume.log.dir}/${flume.log.file}
-log4j.appender.LOGFILE.layout=org.apache.log4j.PatternLayout
-log4j.appender.LOGFILE.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | corr=%X{correlatorId} | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
-
-# Warning: If you enable the following appender it will fill up your disk if you don't have a cleanup job!
-# cleanup job example: find /var/log/cygnus -type f -mtime +30 -exec rm -f {} \;
-# This uses the updated rolling file appender from log4j-extras that supports a reliable time-based rolling policy.
-# See http://logging.apache.org/log4j/companions/extras/apidocs/org/apache/log4j/rolling/TimeBasedRollingPolicy.html
-# Add "DAILY" to flume.root.logger above if you want to use this.
-log4j.appender.DAILY=org.apache.log4j.rolling.RollingFileAppender
-log4j.appender.DAILY.rollingPolicy=org.apache.log4j.rolling.TimeBasedRollingPolicy
-log4j.appender.DAILY.rollingPolicy.ActiveFileName=${flume.log.dir}/${flume.log.file}
-log4j.appender.DAILY.rollingPolicy.FileNamePattern=${flume.log.dir}/${flume.log.file}.%d{yyyy-MM-dd}
-log4j.appender.DAILY.layout=org.apache.log4j.PatternLayout
-log4j.appender.DAILY.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | corr=%X{correlatorId} | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
-
-# Console appender, i.e. printing logs in the standard output.
-# Add "console" to flume.root.logger above if you want to use this.
-log4j.appender.console=org.apache.log4j.ConsoleAppender
-log4j.appender.console.target=System.err
-log4j.appender.console.layout=org.apache.log4j.PatternLayout
-log4j.appender.console.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSSzzz} | lvl=%p | corr=%X{correlatorId} | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | function=%M | comp=Cygnus | msg=%C[%L] : %m%n
-```
-
-You may need to alter the above values with values of your own.
+  * The logging level is `INFO` but can be changed through the CYGNUS_LOG_LEVEL environment variable.
+  * The logging appender is `console` but can be changed through the CYGNUS_LOG_APPENDER environment variable.
 
 [Top](#top)
 
