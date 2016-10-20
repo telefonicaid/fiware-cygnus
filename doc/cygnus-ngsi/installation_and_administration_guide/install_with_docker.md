@@ -60,13 +60,13 @@ centos              6                   273a1eca2d3a        2 weeks ago         
 
 ##<a name="section3"></a>Using the image
 ###<a name="section3.1"></a>As it is
-The cygnus-ngsi image (either built from the scratch, either downloaded from hub.docker.com) allows running a Cygnus agent in charge of receiving NGSI-like notifications and persisting them into a MySQL database running at `mysql` host.
+The cygnus-ngsi image (either built from the scratch, either downloaded from hub.docker.com) allows running a Cygnus agent in charge of receiving NGSI-like notifications and persisting them into wide variety of storages: MySQL (Running in a  `mysql` host), MongoDB (running in a  `mongo` host), STH (running in `sth` host) and  CKAN (running in `ckan` host).
 
 Start a container for this image by typing in a terminal:
 
     $ docker run cygnus-ngsi
 
-Immediately after, you will start seeing cygnus-ngsi logging traces:
+Immediately after, you will start seeing cygnus-ngsi logging traces (MySQL example):
 
 ```
 + exec /usr/lib/jvm/java-1.6.0/bin/java -Xmx20m -Dflume.root.logger=INFO,console -cp '/opt/apache-flume/conf:/opt/apache-flume/lib/*:/opt/apache-flume/plugins.d/cygnus/lib/*:/opt/apache-flume/plugins.d/cygnus/libext/*' -Djava.library.path= com.telefonica.iot.cygnus.nodes.CygnusApplication -f /opt/apache-flume/conf/agent.conf -n cygnus-ngsi
@@ -127,7 +127,7 @@ $ ./notification.sh http://172.17.0.13:5050/notify
 * Closing connection #0
 ```
 
-You will be able to see something like the following in the cygnus-ngsi terminal:
+You will be able to see something like the following in the cygnus-ngsi terminal (MySQL example):
 
 ```
 time=2016-05-05T10:01:22.111UTC | lvl=INFO | corr=8bed4f8d-c47f-499a-a70d-365883584ac7 | trans=8bed4f8d-c47f-499a-a70d-365883584ac7 | srv=default | subsrv=/ | function=getEvents | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[249] : Starting internal transaction (8bed4f8d-c47f-499a-a70d-365883584ac7)
@@ -155,12 +155,27 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 ###<a name="section3.2"></a>Using a specific configuration
 As seen above, the default configuration distributed with the image is tied to certain values that may not be suitable for you tests. Specifically:
 
-* It only works for building historical context data in MySQL.
-* The endpoint for MySQL is `mysql`.
-* The logging level is `INFO`.
-* The logging appender is `console`.
-
-You may need to alter the above values with values of your own.
+* MySQL:
+  * It only works for building historical context data in MySQL.
+  * The user for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_USER environment variable.
+  * The pass for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_USER environment variable.
+* Mongo:
+  * It only works for building historical context data in Mongo.
+  * The user for Mongo is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
+  * The pass for Mongo is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
+* STH:
+  * It only works for building historical context data in STH.
+  * The user for STH is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
+  * The pass for STH is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
+* CKAN:
+  * It only works for building historical context data in CKAN.
+  * The endpoint for CKAN is `iot-ckan` but can be changed through the CYGNUS_CKAN_HOST environment variable.
+  * The port for CKAN is `80` but can be changed through the CYGNUS_CKAN_PORT environment variable.
+  * The ssl for CKAN is `false` but can be changed through the CYGNUS_CKAN_SSL environment variable.
+  * The api_key for CKAN is `` but can be changed through the CYGNUS_CKAN_API_KEY environment variable.
+* Log4j configuration file:
+  * The logging level is `INFO` but can be changed through the CYGNUS_LOG_LEVEL environment variable.
+  * The logging appender is `console` but can be changed through the CYGNUS_LOG_APPENDER environment variable.
 
 [Top](#top)
 
