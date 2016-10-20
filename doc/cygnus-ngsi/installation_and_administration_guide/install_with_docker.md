@@ -179,10 +179,10 @@ As seen above, the default configuration distributed with the image is tied to c
   * The port for CKAN is `80`.
   * The ssl for CKAN is `false`.
   * The api_key for CKAN is ``.
+* Log4j configuration file:
   * The logging level is `INFO`.
   * The logging appender is `console`.
-* Log4j configuration file:
-
+  
 ```
 # Copyright 2016 Telefónica Investigación y Desarrollo, S.A.U
 #
