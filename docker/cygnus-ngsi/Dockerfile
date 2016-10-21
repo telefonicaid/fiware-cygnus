@@ -39,11 +39,15 @@ ENV CYGNUS_CKAN_HOST "iot-ckan"
 ENV CYGNUS_CKAN_PORT "80"
 ENV CYGNUS_CKAN_API_KEY ""
 ENV CYGNUS_CKAN_SSL "false"
+ENV CYGNUS_HDFS_HOST "iot-hdfs"
+ENV CYGNUS_HDFS_PORT "50070"
+ENV CYGNUS_HDFS_USER "hdfs"
+ENV CYGNUS_HDFS_TOKEN ""
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
-ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
+ENV GIT_URL_CYGNUS "https://github.com/pcoello25/fiware-cygnus.git"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "master"
+ENV GIT_REV_CYGNUS "hardening/1172_add_ngsihdfssink_configuration_in_docker"
 # ENV GIT_REV_CYGNUS "mybranch"
 
 ENV MVN_VER "3.3.9"
