@@ -11,3 +11,4 @@
 - [cygnus-common][hardening] Add -Dfile.encoding=UTF-8 Java option (#1225)
 - [cygnus-ngsi][hardening] Update JMeter tests (#1229)
 - [cygnus][doc] Update link about getting tokens in documentations (#1227)
+- [cygnus][doc] Replace references to JDK 1.6 with JDK 1.7 (#1232)
