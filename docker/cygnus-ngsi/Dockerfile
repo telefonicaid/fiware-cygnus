@@ -39,6 +39,10 @@ ENV CYGNUS_CKAN_HOST "iot-ckan"
 ENV CYGNUS_CKAN_PORT "80"
 ENV CYGNUS_CKAN_API_KEY ""
 ENV CYGNUS_CKAN_SSL "false"
+ENV CYGNUS_HDFS_HOST "iot-hdfs"
+ENV CYGNUS_HDFS_PORT "50070"
+ENV CYGNUS_HDFS_USER "hdfs"
+ENV CYGNUS_HDFS_TOKEN ""
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
