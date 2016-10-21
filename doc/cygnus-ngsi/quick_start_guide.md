@@ -20,13 +20,13 @@ $ sudo yum install cygnus
 Cygnus, as it is based on Apache Flume, needs Java SDK is installed. If not yet installed, do it right now:
 
 ```
-$ sudo yum install java-1.6.0-openjdk-devel
+$ sudo yum install java-1.7.0-openjdk-devel
 ```
 
 Remember to export the JAVA_HOME environment variable. In the case you have installed Java SDK right now as shown above, this would be as:
 
 ```
-$ export JAVA_HOME=/usr/lib/jvm/java-1.6.0-openjdk.x86_64
+$ export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk.x86_64
 ```
 
 In order to do it permanently, edit `/root/.bash_profile` (root user) or `/etc/profile` (other users).
