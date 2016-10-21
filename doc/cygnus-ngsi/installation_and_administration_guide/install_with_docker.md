@@ -60,7 +60,7 @@ centos              6                   273a1eca2d3a        2 weeks ago         
 
 ##<a name="section3"></a>Using the image
 ###<a name="section3.1"></a>As it is
-The cygnus-ngsi image (either built from the scratch, either downloaded from hub.docker.com) allows running a Cygnus agent in charge of receiving NGSI-like notifications and persisting them into wide variety of storages: MySQL (Running in a  `mysql` host), MongoDB (running in a  `mongo` host), STH (running in `sth` host), CKAN (running in `ckan` host) and HDFS (running in `hdfs` host).
+The cygnus-ngsi image (either built from the scratch, either downloaded from hub.docker.com) allows running a Cygnus agent in charge of receiving NGSI-like notifications and persisting them into wide variety of storages: MySQL (Running in a  `iot-mysql` host), MongoDB and STH (running in a  `iot-mongo` host), CKAN (running in `iot-ckan` host) and HDFS (running in `iot-hdfs` host).
 
 Start a container for this image by typing in a terminal:
 
