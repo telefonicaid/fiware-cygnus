@@ -83,6 +83,9 @@ RUN \
     curl --remote-name --location --insecure --silent --show-error "${FLUME_URL}" && \
     tar zxf apache-flume-${FLUME_VER}-bin.tar.gz && \
     mv apache-flume-${FLUME_VER}-bin ${FLUME_HOME} && \
+    mv ${FLUME_HOME}/lib/httpclient-4.2.1.jar ${FLUME_HOME}/lib/httpclient-4.2.1.jar.old && \
+    mv ${FLUME_HOME}/lib/httpcore-4.2.1.jar ${FLUME_HOME}/lib/httpcore-4.2.1.jar.old && \
+    mv ${FLUME_HOME}/lib/libthrift-0.7.0.jar ${FLUME_HOME}/lib/libthrift-0.7.0.jar.old && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/lib && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/libext && \
