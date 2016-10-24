@@ -161,14 +161,12 @@ As seen above, the default configuration distributed with the image is tied to c
   * The port for MYSQL is `3306` but can be changed through the CYGNUS_MYSQL_PORT environment variable.
   * The user for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_USER environment variable.
   * The pass for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_PASS environment variable.
-* Mongo:
-  * It only works for building historical context data in Mongo.
-  * The user for Mongo is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
-  * The pass for Mongo is `mongo` but can be changed through the CYGNUS_MONGO_PASS environment variable.
-* STH:
-  * It only works for building historical context data in STH.
-  * The user for STH is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
-  * The pass for STH is `mongo` but can be changed through the CYGNUS_MONGO_PASS environment variable.
+* Mongo and STH:
+  * Mongo only works for building historical context data in Mongo.
+  * STH only works for building historical context data in STH.
+  * The endpoint for Mongo and STH, containing host and port, is `iot-mongo:27017` but can be changed through the CYGNUS_MONGO_HOSTS environment variable.
+  * The user for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
+  * The pass for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_PASS environment variable.
 * CKAN:
   * It only works for building historical context data in CKAN.
   * The endpoint for CKAN is `iot-ckan` but can be changed through the CYGNUS_CKAN_HOST environment variable.
