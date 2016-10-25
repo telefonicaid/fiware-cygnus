@@ -17,11 +17,8 @@
  */
 package com.telefonica.iot.cygnus.backends.http;
 
-import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRule;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseFactory;
