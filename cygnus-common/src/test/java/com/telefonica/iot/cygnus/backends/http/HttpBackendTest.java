@@ -145,13 +145,13 @@ public class HttpBackendTest {
     } // testDoRequestWithArrayResponse
     
     /**
-     * [HttpBackend.createJsonResponse] -------- A JsonResponse object is not crated if the content-type header does
+     * [HttpBackend.createJsonResponse] -------- A JsonResponse object is not created if the content-type header does
      * not contains 'application/json'.
      */
     @Test
     public void testCreateJsonResponseNotJsonPayload() {
         System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
-                + "-------- A JsonResponse object is not crated if the content-type header does not contains "
+                + "-------- A JsonResponse object is not created if the content-type header does not contains "
                 + "'application/json'");
         HttpResponseFactory factory = new DefaultHttpResponseFactory();
         HttpResponse response = factory.newHttpResponse(
