@@ -258,10 +258,26 @@ public abstract class HttpBackend {
         
     } // PrivilegedRequest
     
-    private JsonResponse createJsonResponse(HttpResponse httpRes) throws Exception {
+    /**
+     * Creates a JsonResponse object based on the given HttpResponse. It is protected for testing purposes.
+     * @param httpRes
+     * @return A JsonResponse object
+     * @throws Exception
+     */
+    protected JsonResponse createJsonResponse(HttpResponse httpRes) throws Exception {
         try {
             if (httpRes == null) {
                 return null;
+            } // if
+            
+            if (httpRes.getHeaders("Content-Type").length == 0) {
+                return new JsonResponse(null, httpRes.getStatusLine().getStatusCode(),
+                    httpRes.getStatusLine().getReasonPhrase(), null);
+            } // if
+            
+            if (httpRes.getHeaders("Content-Type")[0].getValue().contains("application\\/json")) {
+                return new JsonResponse(null, httpRes.getStatusLine().getStatusCode(),
+                    httpRes.getStatusLine().getReasonPhrase(), null);
             } // if
             
             LOGGER.debug("Http response status line: " + httpRes.getStatusLine().toString());
@@ -306,9 +322,7 @@ public abstract class HttpBackend {
             // return the result
             return new JsonResponse(jsonPayload, httpRes.getStatusLine().getStatusCode(),
                     httpRes.getStatusLine().getReasonPhrase(), locationHeader);
-        } catch (IOException e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } catch (IllegalStateException e) {
+        } catch (IOException | IllegalStateException e) {
             throw new CygnusRuntimeError(e.getMessage());
         } // try catch
     } // createJsonResponse
