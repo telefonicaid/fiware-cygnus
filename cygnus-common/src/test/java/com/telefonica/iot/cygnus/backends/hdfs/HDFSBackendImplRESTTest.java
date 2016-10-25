@@ -80,8 +80,11 @@ public class HDFSBackendImplRESTTest {
         
         // set up other instances
         BasicHttpResponse resp200 = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 200, "OK");
+        resp200.addHeader("Content-Type", "application/json");
         BasicHttpResponse resp201 = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 201, "Created");
+        resp201.addHeader("Content-Type", "application/json");
         BasicHttpResponse resp307 = new BasicHttpResponse(new ProtocolVersion("HTTP", 1, 1), 307, "Temporary Redirect");
+        resp307.addHeader("Content-Type", "application/json");
         resp307.addHeader(new BasicHeader("Location", "http://localhost:14000/"));
         
         // set up the behaviour of the mocked classes
