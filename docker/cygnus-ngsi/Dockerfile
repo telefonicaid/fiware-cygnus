@@ -47,9 +47,9 @@ ENV CYGNUS_HDFS_USER "hdfs"
 ENV CYGNUS_HDFS_TOKEN ""
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
-ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
+ENV GIT_URL_CYGNUS "https://github.com/pcoello25/fiware-cygnus.git"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "master"
+ENV GIT_REV_CYGNUS "hardening/1233_fix_use_of_old_libs_in_docker"
 # ENV GIT_REV_CYGNUS "mybranch"
 
 ENV MVN_VER "3.3.9"
