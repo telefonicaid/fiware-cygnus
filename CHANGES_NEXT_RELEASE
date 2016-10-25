@@ -14,3 +14,4 @@
 - [cygnus][doc] Replace references to JDK 1.6 with JDK 1.7 (#1232)
 - [cygnus][hardening] Add NGSIHDFSSink configuration in docker's agent.conf file (#1172)
 - [cygnus][hardening] Fix NGSIMySQLSink configuration in docker's agent.conf file (#1237)
+- [cygnus][bug] Discard Http responses not containing Json payload when creating JsonResponse objects (#1243)
