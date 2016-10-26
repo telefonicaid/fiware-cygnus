@@ -222,16 +222,16 @@ public class NGSICKANSinkTest {
     } // testConfigureDefaults
     
     /**
-     * [NGSICKANSink.configure] -------- backend.max_conns gets the configured value.
+     * [NGSICKANSink.configure] -------- Parameters get the configured value.
      */
     @Test
-    public void testConfigureMaxConns() {
+    public void testConfigureGetConfiguration() {
         System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
-                + "-------- backend.max_conns gets the configured value");
+                + "-------- Parameters gets the configured value");
         String apiKey = null; // default
         String attrPersistence = null; // default
         String backendMaxConns = "25";
-        String backendMaxConnsPerRoute = null; // default
+        String backendMaxConnsPerRoute = "3";
         String batchSize = null; // default
         String batchTime = null; // default
         String batchTTL = null; // default
@@ -242,7 +242,7 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
-        String viewer = null; // default
+        String viewer = "recline_view";
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -257,34 +257,6 @@ public class NGSICKANSinkTest {
                     + "- FAIL - 'backend.max_conns=25' was not configured");
             throw e;
         } // try catch
-    } // testConfigureMaxConns
-    
-    /**
-     * [NGSICKANSink.configure] -------- backend.max_conns_per_route gets the configured value.
-     */
-    @Test
-    public void testConfigureMaxConnsPerRoute() {
-        System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
-                + "-------- backend.max_conns_per_route gets the configured value");
-        String apiKey = null; // default
-        String attrPersistence = null; // default
-        String backendMaxConns = null; // default
-        String backendMaxConnsPerRoute = "3";
-        String batchSize = null; // default
-        String batchTime = null; // default
-        String batchTTL = null; // default
-        String dataModel = null; // default
-        String enableEncoding = "falso";
-        String enableGrouping = null; // default
-        String enableLowercase = null; // default
-        String host = null; // default
-        String port = null; // default
-        String ssl = null; // default
-        String viewer = null; // default
-        NGSICKANSink sink = new NGSICKANSink();
-        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
-                viewer));
         
         try {
             assertEquals(3, sink.getBackendMaxConnsPerRoute());
@@ -295,7 +267,17 @@ public class NGSICKANSinkTest {
                     + "- FAIL - 'backend.max_conns_per_route=3' was not configured");
             throw e;
         } // try catch
-    } // testConfigureMaxConnsPerRoute
+        
+        try {
+            assertEquals("recline_view", sink.getCKANViewer());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'ckan_viewer=recline_view' was configured");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'ckan_viewer=recline_view' was not configured");
+            throw e;
+        } // try catch
+    } // testConfigureGetConfiguration
     
     /**
      * [NGSICKANSink.configure] -------- enable_encoding can only be 'true' or 'false'.
