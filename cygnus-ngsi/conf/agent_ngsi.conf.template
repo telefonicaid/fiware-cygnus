@@ -138,6 +138,8 @@ cygnus-ngsi.sinks.ckan-sink.api_key = ckanapikey
 #cygnus-ngsi.sinks.ckan-sink.ckan_host = x.y.z.w
 # the port for the CKAN API endpoint
 #cygnus-ngsi.sinks.ckan-sink.ckan_port = 80
+# the viewer attached to the created resources
+#cygnus-ngsi.sinks.ckan-sink.ckan_viewer = recline_grid_view
 # Orion URL used to compose the resource URL with the convenience operation URL to query it
 #cygnus-ngsi.sinks.ckan-sink.orion_url = http://localhost:1026
 # how the attributes are stored, either per row either per column (row, column)
