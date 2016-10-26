@@ -20,3 +20,4 @@
 - [cygnus][hardening] Fix yum install command (#1249)
 - [cygnus][hardening] Add FIWARE architecture section in the documentation (#1248)
 - [cygnus][doc] Fix API entries in documentation (#1246)
+- [cygnus][doc] Add entries about running as process and running as service in documentation (#1255)
