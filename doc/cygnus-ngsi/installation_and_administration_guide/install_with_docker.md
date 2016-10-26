@@ -156,32 +156,32 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 As seen above, the default configuration distributed with the image is tied to certain values that may not be suitable for you tests. Specifically:
 
 * MySQL:
-  * It only works for building historical context data in MySQL.
-  * The endpoint for MYSQL is `iot-mysql` but can be changed through the CYGNUS_MYSQL_HOST environment variable.
-  * The port for MYSQL is `3306` but can be changed through the CYGNUS_MYSQL_PORT environment variable.
-  * The user for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_USER environment variable.
-  * The pass for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_PASS environment variable.
+    * It only works for building historical context data in MySQL.
+    * The endpoint for MYSQL is `iot-mysql` but can be changed through the CYGNUS_MYSQL_HOST environment variable.
+    * The port for MYSQL is `3306` but can be changed through the CYGNUS_MYSQL_PORT environment variable.
+    * The user for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_USER environment variable.
+    * The pass for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_PASS environment variable.
 * Mongo and STH:
-  * Mongo only works for building historical context data in Mongo.
-  * STH only works for building historical context data in STH.
-  * The endpoint for Mongo and STH, containing host and port, is `iot-mongo:27017` but can be changed through the CYGNUS_MONGO_HOSTS environment variable.
-  * The user for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
-  * The pass for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_PASS environment variable.
+    * Mongo only works for building historical context data in Mongo.
+    * STH only works for building historical context data in STH.
+    * The endpoint for Mongo and STH, containing host and port, is `iot-mongo:27017` but can be changed through the CYGNUS_MONGO_HOSTS environment variable.
+    * The user for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
+    * The pass for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_PASS environment variable.
 * CKAN:
-  * It only works for building historical context data in CKAN.
-  * The endpoint for CKAN is `iot-ckan` but can be changed through the CYGNUS_CKAN_HOST environment variable.
-  * The port for CKAN is `80` but can be changed through the CYGNUS_CKAN_PORT environment variable.
-  * The ssl for CKAN is `false` but can be changed through the CYGNUS_CKAN_SSL environment variable.
-  * The api_key for CKAN is `` but can be changed through the CYGNUS_CKAN_API_KEY environment variable.
+    * It only works for building historical context data in CKAN.
+    * The endpoint for CKAN is `iot-ckan` but can be changed through the CYGNUS_CKAN_HOST environment variable.
+    * The port for CKAN is `80` but can be changed through the CYGNUS_CKAN_PORT environment variable.
+    * The ssl for CKAN is `false` but can be changed through the CYGNUS_CKAN_SSL environment variable.
+    * The api_key for CKAN is `` but can be changed through the CYGNUS_CKAN_API_KEY environment variable.
 * HDFS:
-  * It only workf for building historical context data in HDFS.
-  * The endpoint for HDFS is `iot-hdfs` but can be changed through the CYGNUS_HDFS_HOST environment variable.
-  * The port for HDFS is `50070` but can be changed through the CYGNUS_HDFS_PORT environment variable.
-  * The user for HDFS is `hdfs` but can be changed through the CYGNUS_HDFS_USER environment variable.
-  * The token for HDFS is empty but can be set through the CYGNUS_HDFS_TOKEN environment variable
+    * It only workf for building historical context data in HDFS.
+    * The endpoint for HDFS is `iot-hdfs` but can be changed through the CYGNUS_HDFS_HOST environment variable.
+    * The port for HDFS is `50070` but can be changed through the CYGNUS_HDFS_PORT environment variable.
+    * The user for HDFS is `hdfs` but can be changed through the CYGNUS_HDFS_USER environment variable.
+    * The token for HDFS is empty but can be set through the CYGNUS_HDFS_TOKEN environment variable
 * Log4j configuration file:
-  * The logging level is `INFO` but can be changed through the CYGNUS_LOG_LEVEL environment variable.
-  * The logging appender is `console` but can be changed through the CYGNUS_LOG_APPENDER environment variable.
+    * The logging level is `INFO` but can be changed through the CYGNUS_LOG_LEVEL environment variable.
+    * The logging appender is `console` but can be changed through the CYGNUS_LOG_APPENDER environment variable.
 
 [Top](#top)
 

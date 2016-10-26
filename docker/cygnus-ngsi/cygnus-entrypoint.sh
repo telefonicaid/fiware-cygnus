@@ -26,10 +26,10 @@ sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_host/c '${CYGNUS_AGENT_NA
 sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_port/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_port = '${CYGNUS_MYSQL_PORT} ${FLUME_HOME}/conf/agent.conf
 sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_username/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_username = '${CYGNUS_MYSQL_USER} ${FLUME_HOME}/conf/agent.conf
 sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_password/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_password = '${CYGNUS_MYSQL_PASS} ${FLUME_HOME}/conf/agent.conf
-sed -i '/'${CYGNUS-AGENT_NAME}'.sinks.mongo-sink.mongo_hosts/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_hosts = '${CYGNUS_MONGO_HOSTS} ${FLUME_HOME}/conf/agent.conf
+sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_hosts/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_hosts = '${CYGNUS_MONGO_HOSTS} ${FLUME_HOME}/conf/agent.conf
 sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_username/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_username = '${CYGNUS_MONGO_USER} ${FLUME_HOME}/conf/agent.conf
 sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_password/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_password = '${CYGNUS_MONGO_PASS} ${FLUME_HOME}/conf/agent.conf
-sed -i '/'${CYGNUS-AGENT_NAME}'.sinks.sth-sink.mongo_hosts/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_hosts = '${CYGNUS_MONGO_HOSTS} ${FLUME_HOME}/conf/agent.conf
+sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_hosts/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_hosts = '${CYGNUS_MONGO_HOSTS} ${FLUME_HOME}/conf/agent.conf
 sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_username/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_username = '${CYGNUS_MONGO_USER} ${FLUME_HOME}/conf/agent.conf
 sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_password/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_password = '${CYGNUS_MONGO_PASS} ${FLUME_HOME}/conf/agent.conf
 sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.ckan_host/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.ckan_host = '${CYGNUS_CKAN_HOST} ${FLUME_HOME}/conf/agent.conf
