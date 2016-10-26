@@ -16,6 +16,7 @@ pages:
       - 'Installation and Administration Guide':
           - 'Introduction': 'cygnus-common/installation_and_administration_guide/introduction.md'
           - 'Hardware requirements': 'cygnus-common/installation_and_administration_guide/hw_requirements.md'
+          - 'Installation via RPM': 'cygnus-common/installation_and_administration_guide/install_with_rpm.md'
           - 'Installation from sources': 'cygnus-common/installation_and_administration_guide/install_from_sources.md'
           - 'Installation via docker': 'cygnus-common/installation_and_administration_guide/install_with_docker.md'
           - 'Cygnus agent configuration': 'cygnus-common/installation_and_administration_guide/cygnus_agent_conf.md'
