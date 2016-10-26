@@ -21,10 +21,16 @@ import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHe
 import java.util.ArrayList;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponseFactory;
+import org.apache.http.HttpStatus;
+import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicStatusLine;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -137,5 +143,40 @@ public class HttpBackendTest {
             throw e;
         } // try catch
     } // testDoRequestWithArrayResponse
+    
+    /**
+     * [HttpBackend.createJsonResponse] -------- A JsonResponse object is not created if the content-type header does
+     * not contains 'application/json'.
+     */
+    @Test
+    public void testCreateJsonResponseNotJsonPayload() {
+        System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                + "-------- A JsonResponse object is not created if the content-type header does not contains "
+                + "'application/json'");
+        HttpResponseFactory factory = new DefaultHttpResponseFactory();
+        HttpResponse response = factory.newHttpResponse(
+                new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, null), null);
+        response.addHeader("Content-Type", "text/html");
+        httpBackend = new HttpBackendImpl(host, normalURL, false, false, null, null, null, null, maxConns,
+                maxConnsPerRoute);
+
+        try {
+            JsonResponse jsonRes = httpBackend.createJsonResponse(response);
+            
+            try {
+                assertEquals(null, jsonRes.getJsonObject());
+                System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                        + "-  OK  - The JsonResponse object could not be created with a 'text/html' content type "
+                        + "header");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                        + "- FAIL - The JsonResponse object was created with a 'text/html' content type header");
+                throw e;
+            } // try catch
+        } catch (Exception ex) {
+            System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                        + "- FAIL - There was some problem when creating the JsonResponse object");
+        } // try catch
+    } // testCreateJsonResponseNotJsonPayload
 
 } // HttpBackendTest

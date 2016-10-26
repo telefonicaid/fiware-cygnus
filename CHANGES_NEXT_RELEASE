@@ -15,4 +15,6 @@
 - [cygnus][hardening] Add NGSIHDFSSink configuration in docker's agent.conf file (#1172)
 - [cygnus][hardening] Fix NGSIMySQLSink configuration in docker's agent.conf file (#1237)
 - [cygnus][hardening] Fix NGSIMongoSink and NGSISTHSink configuration in docker's agent.conf file (#1239)
+- [cygnus][bug] Discard Http responses not containing Json payload when creating JsonResponse objects (#1243)
 - [cygnus][hardening] Force the usage of certain version in libraries used by cygnus-ngsi docker (#1233)
+- [cygnus][hardening] Fix yum install command (#1249)
