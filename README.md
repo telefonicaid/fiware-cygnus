@@ -34,18 +34,23 @@ Current stable release is able to persist the following sources of data in the f
 
 **IMPORTANT NOTE**: for the time being, cygnus-ngsi and cygus-twitter agents cannot be installed in the same base path, because of an incompatibility with the required version of the `httpclient` library. Of course, if you are going to use just one of the agents, there is no problem at all.
 
+##Cyngus place in FIWARE architecture
+Cygnus (more specifically, cygnus-ngsi agent) plays the role of a connector between Orion Context Broker (which is a NGSI source of data) and many FIWARE storages such as CKAN, Cosmos Big Data (Hadoop) and STH Comet. Of course, as previously said, you may add MySQL, Kafka, CartoDB, etc as other non FIWARE storages to the FIWARE architecture.
+
+![FIWARE architecture](doc/images/fiware_architecture.png)
+
 ##Further documentation
-The per agent **Quick Start Guide** provides a good documentation summary.
+The per agent **Quick Start Guide** found at readthedocs.org provides a good documentation summary ([cygnus-ngsi](http://fiware-cygnus.readthedocs.io/en/latest/cygnus-ngsi/quick_start_guide/index.html), [cygnus-twitter](http://fiware-cygnus.readthedocs.io/en/latest/cygnus-twitter/quick_start_guide/index.html)).
 
-Nevertheless, both the **Installation and Administration Guide** and the **User and Programmer Guide** shown within this documentation for each agent cover more advanced topics.
+Nevertheless, both the **Installation and Administration Guide** and the **User and Programmer Guide** for each agent also found at [readthedocs.org](http://fiware-cygnus.readthedocs.io/en/latest/) cover more advanced topics.
 
-Of special interest are the per-agent integration examples under `doc/<agent>/integration`.
+The per agent **Flume Extensions Catalogue** completes the available documentation for Cygnus ([cygnus-ngsi](http://fiware-cygnus.readthedocs.io/en/latest/cygnus-ngsi/flume_extensions_catalogue/introduction/index.html), [cygnus-twitter](http://fiware-cygnus.readthedocs.io/en/latest/cygnus-twitter/flume_extensions_catalogue/introduction/index.html)).
 
-The per agent **Flume Extensions Catalogue** completes the available documentation for Cygnus.
+Other interesting links are:
 
-Of special interest are the [Contributing Guidelines](./doc/contributing/contributing_guidelines.md) if your aim is to extend Cygnus.
-
-Finally, please check our [Apiary Documentation](http://telefonicaid.github.io/fiware-cygnus/api/) if you want to know how to use our API methods for Cygnus.
+* Our [Apiary Documentation](http://telefonicaid.github.io/fiware-cygnus/api/latest) if you want to know how to use our API methods for Cygnus.
+* The per-agent **integration** examples ([cygnus-ngsi](doc/cygnus-ngsi/integration)).
+* The [Contributing Guidelines](doc/contributing/contributing_guidelines.md) if your aim is to extend Cygnus.
 
 ##Licensing
 Cygnus is licensed under Affero General Public License (GPL) version 3. You can find a [copy of this license in the repository](./LICENSE).
