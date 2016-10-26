@@ -1,4 +1,4 @@
-#Running Cygnus as a process
+#Running cygnus-ngsi as a process
 Cygnus implements its own startup script, `cygnus-flume-ng` which replaces the standard `flume-ng` one, which in the end runs a custom `com.telefonica.iot.cygnus.nodes.CygnusApplication` instead of a standard `org.apache.flume.node.Application`. 
 
 In foreground (with logging):

@@ -10,6 +10,7 @@
     * [log4j configuration](../../installation_and_administration_guide/log4j_conf.md)
     * [Configuration examples](./configuration_examples.md)
 * Running:
+    * [Running as a process](./running_as_process.md)
     * [Running as a service](./running_as_service.md)
 * Advanced features:
     * [Testing](./testing.md)
