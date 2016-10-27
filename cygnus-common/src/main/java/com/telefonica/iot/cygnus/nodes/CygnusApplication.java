@@ -111,7 +111,7 @@ public class CygnusApplication extends Application {
             supervisorRef = null;
         } // try catch // try catch
     } // CygnusApplication
-        
+    
     /**
      * Gets a reference to the private variable "supervisor" within the super class "Application". This is achieved by
      * using Java Reflection.
@@ -165,7 +165,8 @@ public class CygnusApplication extends Application {
             // Print Cygnus starting trace including version
             LOGGER.info("Starting Cygnus, version " + CommonUtils.getCygnusVersion() + "."
                     + CommonUtils.getLastCommit());
-            
+           
+            CommonUtils.printLoadedJars();
             // Define the options to be read
             Options options = new Options();
 

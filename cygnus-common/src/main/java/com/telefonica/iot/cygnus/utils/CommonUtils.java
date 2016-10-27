@@ -17,15 +17,22 @@
  */
 package com.telefonica.iot.cygnus.utils;
 
+import com.amazonaws.services.dynamodbv2.model.WriteRequest;
+import com.google.gson.JsonPrimitive;
+import com.mongodb.binding.AsyncReadWriteBinding;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYATTRIBUTE;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITY;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYSERVICEPATH;
+import com.mysql.jdbc.Driver;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,6 +41,17 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import kafka.common.OffsetOutOfRangeException;
+import kafka.tools.KafkaMigrationTool;
+import org.I0Itec.zkclient.exception.ZkNoNodeException;
+import org.apache.flume.interceptor.RegexExtractorInterceptorMillisSerializer;
+import org.apache.hadoop.hive.jdbc.HivePreparedStatement;
+import org.apache.hadoop.hive.ql.exec.AbstractMapJoinOperator;
+import org.apache.hadoop.metrics.spi.AbstractMetricsContext;
+import org.apache.http.impl.DefaultBHttpServerConnection;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.log4j.pattern.SequenceNumberPatternConverter;
+import org.codehaus.groovy.control.ErrorCollector;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -41,6 +59,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.json.simple.parser.Yytoken;
+import org.postgresql.largeobject.BlobOutputStream;
+import parquet.org.apache.thrift.meta_data.ListMetaData;
 
 /**
  *
@@ -322,5 +343,84 @@ public final class CommonUtils {
             return UUID.randomUUID().toString();
         } // else
     } // generateUniqueId
+        
+    /**
+     * Only works in DEBUG level.
+     * Prints the loaded .jar files at the start of Cygnus run.
+     */ 
+    public static void printLoadedJars() {
+        // trace the file containing the httpclient library        
+        URL myClassURL = PoolingClientConnectionManager.class.getProtectionDomain().getCodeSource().getLocation();        
+        LOGGER.debug("Loading httpclient from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the httpcore library
+        myClassURL = DefaultBHttpServerConnection.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading httpcore from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the junit library
+        myClassURL = ErrorCollector.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading junit from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the flume-ng-node library
+        myClassURL = RegexExtractorInterceptorMillisSerializer.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading flume-ng-node from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the libthrift library
+        myClassURL = ListMetaData.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading libthrift from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the gson library
+        myClassURL = JsonPrimitive.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading gson from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the json-simple library
+        myClassURL = Yytoken.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading json-simple from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the mysql-connector-java library
+        myClassURL = Driver.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading mysql-connector-java from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the postgresql library
+        myClassURL = BlobOutputStream.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading postgresql from " + myClassURL.toExternalForm());      
+        
+        // trace the file containing the log4j library
+        myClassURL = SequenceNumberPatternConverter.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading log4j from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the hadoop-core library
+        myClassURL = AbstractMetricsContext.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading hadoop-core from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the hive-exec library
+        myClassURL = AbstractMapJoinOperator.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading hive-exec from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the hive-jdbc library
+        myClassURL = HivePreparedStatement.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading hive-jdbc from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the mongodb-driver library
+        myClassURL = AsyncReadWriteBinding.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading mongodb-driver from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the kafka-clients library
+        myClassURL = OffsetOutOfRangeException.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading kafka-clientsc from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the zkclient library
+        myClassURL = ZkNoNodeException.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading zkclient from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the kafka_2.11 library
+        myClassURL = KafkaMigrationTool.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading kafka_2.11 from " + myClassURL.toExternalForm());
+        
+        // trace the file containing the aws-java-sdk-dynamodb library
+        myClassURL = WriteRequest.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading aws-java-sdk-dynamodb from " + myClassURL.toExternalForm());
+
+    } // printLoadedJars
 
 } // CommonUtils
