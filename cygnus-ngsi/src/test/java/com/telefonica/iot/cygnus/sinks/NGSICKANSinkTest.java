@@ -64,9 +64,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         
         try {
             assertTrue(sink.getRowAttrPersistence());
@@ -207,54 +209,28 @@ public class NGSICKANSinkTest {
                     + "- FAIL - 'ssl=false' not configured by default");
             throw e;
         } // try catch
+        
+        try {
+            assertEquals("recline_grid_view", sink.getCKANViewer());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'ckan_viewer=recline_grid_view' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'ckan_viewer=recline_grid_view' not configured by default");
+            throw e;
+        } // try catch
     } // testConfigureDefaults
     
     /**
-     * [NGSICKANSink.configure] -------- backend.max_conns gets the configured value.
+     * [NGSICKANSink.configure] -------- Parameters get the configured value.
      */
     @Test
-    public void testConfigureMaxConns() {
+    public void testConfigureGetConfiguration() {
         System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
-                + "-------- backend.max_conns gets the configured value");
+                + "-------- Parameters gets the configured value");
         String apiKey = null; // default
         String attrPersistence = null; // default
         String backendMaxConns = "25";
-        String backendMaxConnsPerRoute = null; // default
-        String batchSize = null; // default
-        String batchTime = null; // default
-        String batchTTL = null; // default
-        String dataModel = null; // default
-        String enableEncoding = "falso";
-        String enableGrouping = null; // default
-        String enableLowercase = null; // default
-        String host = null; // default
-        String port = null; // default
-        String ssl = null; // default
-        NGSICKANSink sink = new NGSICKANSink();
-        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
-        
-        try {
-            assertEquals(25, sink.getBackendMaxConns());
-            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
-                    + "-  OK  - 'backend.max_conns=25' was configured");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
-                    + "- FAIL - 'backend.max_conns=25' was not configured");
-            throw e;
-        } // try catch
-    } // testConfigureMaxConns
-    
-    /**
-     * [NGSICKANSink.configure] -------- backend.max_conns_per_route gets the configured value.
-     */
-    @Test
-    public void testConfigureMaxConnsPerRoute() {
-        System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
-                + "-------- backend.max_conns_per_route gets the configured value");
-        String apiKey = null; // default
-        String attrPersistence = null; // default
-        String backendMaxConns = null; // default
         String backendMaxConnsPerRoute = "3";
         String batchSize = null; // default
         String batchTime = null; // default
@@ -266,9 +242,21 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = "recline_view";
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
+        
+        try {
+            assertEquals(25, sink.getBackendMaxConns());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'backend.max_conns=25' was configured");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'backend.max_conns=25' was not configured");
+            throw e;
+        } // try catch
         
         try {
             assertEquals(3, sink.getBackendMaxConnsPerRoute());
@@ -279,7 +267,17 @@ public class NGSICKANSinkTest {
                     + "- FAIL - 'backend.max_conns_per_route=3' was not configured");
             throw e;
         } // try catch
-    } // testConfigureMaxConnsPerRoute
+        
+        try {
+            assertEquals("recline_view", sink.getCKANViewer());
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "-  OK  - 'ckan_viewer=recline_view' was configured");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
+                    + "- FAIL - 'ckan_viewer=recline_view' was not configured");
+            throw e;
+        } // try catch
+    } // testConfigureGetConfiguration
     
     /**
      * [NGSICKANSink.configure] -------- enable_encoding can only be 'true' or 'false'.
@@ -302,9 +300,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -338,9 +338,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -374,9 +376,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -411,9 +415,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -447,9 +453,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -486,9 +494,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         String service = "someService";
         
         try {
@@ -534,9 +544,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         String service = "someService";
         
         try {
@@ -585,9 +597,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         String service = "someService";
         String servicePath = "/someServicePath";
         
@@ -639,9 +653,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         String service = "someService";
         String servicePath = "/someServicePath";
         
@@ -693,9 +709,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         String service = "someService";
         String servicePath = "/";
         
@@ -747,9 +765,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         String service = "someService";
         String servicePath = "/";
         
@@ -799,9 +819,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         String entity = "someId=someType";
         
         try {
@@ -849,9 +871,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         String entity = "someId=someType";
         
         try {
@@ -897,9 +921,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         String service = "veryLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
                 + "ooooogService";
         
@@ -937,9 +963,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         String service = "veryLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
                 + "ooooogService";
         String servicePath = "veryLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
@@ -979,9 +1007,11 @@ public class NGSICKANSinkTest {
         String host = null; // default
         String port = null; // default
         String ssl = null; // default
+        String viewer = null; // default
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
-                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl));
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
         String entity = "veryLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
                 + "ooooogEntity";
         
@@ -1009,7 +1039,7 @@ public class NGSICKANSinkTest {
     private Context createContext(String apiKey, String attrPersistence, String backendMaxConns,
             String backendMaxConnsPerRoute, String batchSize, String batchTime, String batchTTL, String dataModel,
             String enableEncoding, String enableGrouping, String enableLowercase, String host, String port,
-            String ssl) {
+            String ssl, String viewer) {
         Context context = new Context();
         context.put("api_key", apiKey);
         context.put("attr_persistence", attrPersistence);
@@ -1020,6 +1050,7 @@ public class NGSICKANSinkTest {
         context.put("batch_ttl", batchTTL);
         context.put("ckan_host", host);
         context.put("ckan_port", port);
+        context.put("ckan_viewer", viewer);
         context.put("data_model", dataModel);
         context.put("enable_encoding", enableEncoding);
         context.put("enable_grouping", enableGrouping);

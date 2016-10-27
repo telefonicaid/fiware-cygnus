@@ -329,6 +329,7 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 | attr\_persistence | no | row | <i>row</i> or <i>column.</i>|
 | ckan\_host | no | localhost | FQDN/IP address where the CKAN server runs. ||
 | ckan\_port | no | 80 ||
+| ckan\_viewer | no | recline\_grid\_view | Please check the [available](http://docs.ckan.org/en/latest/maintaining/data-viewer.html) viewers at CKAN documentation. |
 | ssl | no | false ||
 | api\_key | yes | N/A ||
 | orion\_url | no | http://localhost:1026 | To be put as the filestore URL. |
@@ -353,6 +354,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.ckan-sink.attr_persistence = column
     cygnus-ngsi.sinks.ckan-sink.ckan_host = 192.168.80.34
     cygnus-ngsi.sinks.ckan-sink.ckan_port = 80
+    cygnus-ngsi.sinks.ckan-sink.ckan_viewer = recline_grid_view
     cygnus-ngsi.sinks.ckan-sink.ssl = false
     cygnus-ngsi.sinks.ckan-sink.api_key = myapikey
     cygnus-ngsi.sinks.ckan-sink.orion_url = http://localhost:1026

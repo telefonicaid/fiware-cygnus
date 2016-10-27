@@ -42,6 +42,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
     private static final CygnusLogger LOGGER = new CygnusLogger(CKANBackendImpl.class);
     private final String orionUrl;
     private final String apiKey;
+    private final String viewer;
     private CKANCache cache;
 
     /**
@@ -53,14 +54,16 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
      * @param ssl
      * @param maxConns
      * @param maxConnsPerRoute
+     * @param ckanViewer
      */
     public CKANBackendImpl(String apiKey, String ckanHost, String ckanPort, String orionUrl,
-            boolean ssl, int maxConns, int maxConnsPerRoute) {
+            boolean ssl, int maxConns, int maxConnsPerRoute, String ckanViewer) {
         super(ckanHost, ckanPort, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
         
         // this class attributes
         this.apiKey = apiKey;
         this.orionUrl = orionUrl;
+        this.viewer = ckanViewer;
         
         // create the cache
         cache = new CKANCache(ckanHost, ckanPort, ssl, apiKey, maxConns, maxConnsPerRoute);
@@ -379,7 +382,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             try {
                 // create the CKAN request JSON
                 String jsonString = "{ \"resource_id\": \"" + resourceId + "\","
-                        + "\"view_type\": \"recline_grid_view\","
+                        + "\"view_type\": \"" + viewer + "\","
                         + "\"title\": \"Recline grid view\" }";
 
                 // create the CKAN request URL
