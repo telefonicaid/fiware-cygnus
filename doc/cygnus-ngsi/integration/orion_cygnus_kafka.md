@@ -752,4 +752,4 @@ time=2016-08-30T08:15:20.234CEST | lvl=INFO | corr=79e5aee5-dd0e-4aeb-90d7-532ae
 
 [Top](#top)
 
-[kafka]: https://github.com/pcoello25/fiware-cygnus/blob/doc/1132_add_integration_examples/doc/cygnus-ngsi/integration/img/kafka_zookeeper.png "Architecture for sinfonier"
+[kafka]: https://github.com/pcoello25/fiware-cygnus/blob/master/doc/cygnus-ngsi/integration/img/kafka_zookeeper.png "Architecture for sinfonier"

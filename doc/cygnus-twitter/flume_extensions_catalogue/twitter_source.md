@@ -57,7 +57,7 @@ These coordinates are used to define a rectangle filter where tweets have been g
        south-west ------------   
 ```
 
-The credentials used to connect with Twitter API. Credentials can be obtained in https://dev.twitter.com/oauth/overview/application-owner-access-tokens:
+The credentials used to connect with Twitter API. Credentials can be obtained [here](https://dev.twitter.com/oauth/overview/application-owner-access-tokens):
 ```
 cygnus-twitter.sources.twitter-source.consumerKey = xxxxxxx
 cygnus-twitter.sources.twitter-source.consumerSecret = xxxxxxx

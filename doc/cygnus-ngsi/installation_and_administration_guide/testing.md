@@ -301,7 +301,7 @@ Tests run: 85, Failures: 0, Errors: 0, Skipped: 0
 [Top](#top)
 
 ##<a name="section2"></a>e2e testing
-Cygnus can be tested form a e2e point of view by using any of the scripts, [given with this repo](../../resources/ngsi-examples), emulating a NGSI-like notification. You can find both Json and XML examples of simple and compound notifications, with or without metadata, even model entities and loops of continuous notifiers.
+Cygnus can be tested form a e2e point of view by using any of the scripts, [given with this repo](../../../cygnus-ngsi/resources/ngsi-examples), emulating a NGSI-like notification. You can find both Json and XML examples of simple and compound notifications, with or without metadata, even model entities and loops of continuous notifiers.
 
 For instance, if running the `notification-json-simple.sh`:
 

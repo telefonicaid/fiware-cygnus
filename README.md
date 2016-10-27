@@ -28,14 +28,14 @@ Current stable release is able to persist the following sources of data in the f
     * [Kafka](http://kafka.apache.org/), the publish-subscribe messaging broker.
     * [DynamoDB](https://aws.amazon.com/dynamodb/), a cloud-based NoSQL database by [Amazon Web Services](https://aws.amazon.com/).
     * [PostgreSQL](http://www.postgresql.org/), the well-know relational database manager.
-    * [CartoDB](https://cartodb.com/), the database specialized in geolocated data.
+    * [Carto](https://carto.com/), the database specialized in geolocated data.
 * Twitter data in:
     * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
 
 **IMPORTANT NOTE**: for the time being, cygnus-ngsi and cygus-twitter agents cannot be installed in the same base path, because of an incompatibility with the required version of the `httpclient` library. Of course, if you are going to use just one of the agents, there is no problem at all.
 
 ##Cyngus place in FIWARE architecture
-Cygnus (more specifically, cygnus-ngsi agent) plays the role of a connector between Orion Context Broker (which is a NGSI source of data) and many FIWARE storages such as CKAN, Cosmos Big Data (Hadoop) and STH Comet. Of course, as previously said, you may add MySQL, Kafka, CartoDB, etc as other non FIWARE storages to the FIWARE architecture.
+Cygnus (more specifically, cygnus-ngsi agent) plays the role of a connector between Orion Context Broker (which is a NGSI source of data) and many FIWARE storages such as CKAN, Cosmos Big Data (Hadoop) and STH Comet. Of course, as previously said, you may add MySQL, Kafka, Carto, etc as other non FIWARE storages to the FIWARE architecture.
 
 ![FIWARE architecture](doc/images/fiware_architecture.png)
 

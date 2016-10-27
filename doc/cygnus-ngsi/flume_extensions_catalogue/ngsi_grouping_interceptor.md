@@ -230,6 +230,6 @@ GET http://<cygnus_host>:<management_port>/v1/groupingrules
 }
 ```
 
-Please, check [this](../installation_and_administration_guide/management_interface.md) link in order to know further details.
+Please, check [this](../../cygnus-common/installation_and_administration_guide/management_interface.md) link in order to know further details.
 
 [Top](#top)

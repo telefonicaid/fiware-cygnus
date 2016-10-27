@@ -35,7 +35,7 @@ Content:
   * [DELETE all loggers](#section16.2)
 
 ##<a name="section1"></a>Apiary version of this document
-This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/) as well.
+This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/latests) as well.
 
 [Top](#top)
 
@@ -149,7 +149,7 @@ Response:
 [Top](#top)
 
 ##<a name="section5"></a>`GET /v1/groupingrules`
-Gets the configured [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md).
+Gets the configured [grouping rules](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md).
 
 ```
 GET http://<cygnus_host>:<management_port>/v1/groupingrules
@@ -186,7 +186,7 @@ Response:
 [Top](#top)
 
 ##<a name="section6"></a>`POST /v1/groupingrules`
-Adds a new rule, passed as a Json in the payload, to the [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md).
+Adds a new rule, passed as a Json in the payload, to the [grouping rules](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md).
 
 ```
 POST http://<cygnus_host>:<management_port>/v1/groupingrules
@@ -209,7 +209,7 @@ Please observe the `id` field is not passed as part of the posted Json. This is 
 [Top](#top)
 
 ##<a name="section7"></a>`PUT /v1/groupingrules`
-Updates an already existent [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md), given its ID as a query parameter and passed the rule as a Json in the payload.
+Updates an already existent [grouping rules](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md), given its ID as a query parameter and passed the rule as a Json in the payload.
 
 ```
 PUT http://<cygnus_host>:<management_port>/v1/groupingrules=id=2
@@ -230,7 +230,7 @@ Response:
 [Top](#top)
 
 ##<a name="section8"></a>`DELETE /v1/groupingrules`
-Deletes a [grouping rules](../flume_extensions_catalogue/grouping_interceptor.md), given its ID as a query parameter.
+Deletes a [grouping rules](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md), given its ID as a query parameter.
 
 ```
 DELETE http://<cygnus_host>:<management_port>/v1/groupingrules?id=2
