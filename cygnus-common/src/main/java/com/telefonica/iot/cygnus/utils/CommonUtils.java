@@ -31,8 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.security.CodeSource;
-import java.security.ProtectionDomain;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
