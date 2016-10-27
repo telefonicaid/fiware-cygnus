@@ -49,6 +49,7 @@ public class NGSICKANSink extends NGSISink {
     private boolean ssl;
     private int backendMaxConns;
     private int backendMaxConnsPerRoute;
+    private String ckanViewer;
     private CKANBackend persistenceBackend;
 
     /**
@@ -133,6 +134,14 @@ public class NGSICKANSink extends NGSISink {
     protected int getBackendMaxConnsPerRoute() {
         return backendMaxConnsPerRoute;
     } // getBackendMaxConnsPerRoute
+    
+    /**
+     * Gets the CKAN Viewer. It is protected for testing purposes.
+     * @return The CKAN viewer
+     */
+    protected String getCKANViewer() {
+        return ckanViewer;
+    } // getCKANViewer
 
     @Override
     public void configure(Context context) {
@@ -182,7 +191,9 @@ public class NGSICKANSink extends NGSISink {
         backendMaxConnsPerRoute = context.getInteger("backend.max_conns_per_route", 100);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns_per_route="
                 + backendMaxConnsPerRoute + ")");
-        
+        ckanViewer = context.getString("ckan_viewer", "recline_grid_view");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (ckan_viewer=" + ckanViewer + ")");
+
         super.configure(context);
         
         // Techdebt: allow this sink to work with all the data models
@@ -196,7 +207,7 @@ public class NGSICKANSink extends NGSISink {
     public void start() {
         try {
             persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, orionUrl, ssl, backendMaxConns,
-                    backendMaxConnsPerRoute);
+                    backendMaxConnsPerRoute, ckanViewer);
             LOGGER.debug("[" + this.getName() + "] CKAN persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the CKAN persistence backend. Details="
