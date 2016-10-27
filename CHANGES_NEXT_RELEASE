@@ -22,3 +22,4 @@
 - [cygnus][doc] Fix API entries in documentation (#1246)
 - [cygnus][doc] Add entries about running as process and running as service in documentation (#1255)
 - [cygnus][hardening] Do configurable the CKAN viewer attached to resources (#1258)
+- [cygnus][hardening] Document IPv6 support in native Http sources (#1058)
