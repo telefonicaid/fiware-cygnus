@@ -165,7 +165,7 @@ Where <i>short description</i> MAY enclose other “[...]” sublevels. For inst
     [873][cygnus-ngsi] Add support for pattern storage
     [873][cygnus-ngsi] Add regex compilation
 
-With regards to the [squashing policy](https://help.github.com/articles/configuring-pull-request-merge-squashing), the main repository MUST be configured with the <i>Allow Squash Merging</i> option.
+With regards to the [squashing policy](https://help.github.com/articles/about-pull-request-merges/#squash-and-merge-your-pull-request-commits), the main repository MUST be configured with the <i>Allow Squash Merging</i> option.
 
 [Top](#top)
 

@@ -18,7 +18,7 @@ Content:
 * [DELETE `/admin/configuration/instance`](#section11)
 
 ##<a name="section1"></a>Apiary version of this document
-This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/) as well.
+This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/latest) as well.
 
 [Top](#top)
 

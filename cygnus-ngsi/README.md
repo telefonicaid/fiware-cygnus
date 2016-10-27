@@ -31,7 +31,7 @@ Current stable release is able to persist Orion context data in:
 * [Kafka](http://kafka.apache.org/), the publish-subscribe messaging broker.
 * [DynamoDB](https://aws.amazon.com/dynamodb/), a cloud-based NoSQL database by [Amazon Web Services](https://aws.amazon.com/).
 * [PostgreSQL](http://www.postgresql.org/), the well-know relational database manager.
-* [CartoDB](https://cartodb.com/), the database specialized in geolocated data.
+* [Carto](https://carto.com/), the database specialized in geolocated data.
 
 You may consider to visit [cygnus-ngsi Quick Start Guide](../../doc/cygnus-ngsi/quick_start_guide.md) before going deep into the details.
 

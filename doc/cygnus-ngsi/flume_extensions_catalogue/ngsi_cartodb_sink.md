@@ -3,7 +3,7 @@ Content:
 
 * [Functionality](#section1)
     * [Mapping NGSI events to flume events](#section1.1)
-    * [Mapping Flume events to CartoDB data structures](#section1.2)
+    * [Mapping Flume events to Carto data structures](#section1.2)
         * [PostgreSQL databases and schemas naming conventions](#section1.2.1)
         * [PostgreSQL tables naming conventions](#section1.2.2)
         * [Raw-based storing](#section1.2.3)
@@ -26,9 +26,9 @@ Content:
     * [Authentication and authorization](#section3.2)
 
 ##<a name="section2"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.NGSICartoDBSink`, or simply `NGSICartoDBSSink` is a cygnus-ngsi sink designed to persist NGSI-like context data events within [CartoDB](https://cartodb.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.NGSICartoDBSink`, or simply `NGSICartoDBSSink` is a cygnus-ngsi sink designed to persist NGSI-like context data events within [Carto](https://carto.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
-Independently of the data generator, NGSI context data is always transformed into internal Flume events at cygnus-ngsi sources. In the end, the information within these Flume events must be mapped into specific CartoDB data structures at the Cygnus sinks.
+Independently of the data generator, NGSI context data is always transformed into internal Flume events at cygnus-ngsi sources. In the end, the information within these Flume events must be mapped into specific Carto data structures at the Cygnus sinks.
 
 Next sections will explain this in detail.
 
@@ -37,29 +37,29 @@ Next sections will explain this in detail.
 ###<a name="section1.1"></a>Mapping NGSI events to flume events
 Notified NGSI events (containing context data) are transformed into Flume events (such an event is a mix of certain headers and a byte-based body), independently of the NGSI data generator or the final backend where it is persisted.
 
-This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./ngsi_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
+This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
-###<a name="section1.2"></a>Mapping Flume events to CartoDB data structures
-CartoDB is based on [PostgreSQL](http://www.postgresql.org/) and [PostGIS](http://postgis.net/) extensions. It organizes the data in databases (one per organization), schemas (one per user within an organization) and tables (a schema may have one or more tables). Such organization is exploited by `NGSICartoDBSink` each time a Flume event is going to be persisted.
+###<a name="section1.2"></a>Mapping Flume events to Carto data structures
+Carto is based on [PostgreSQL](http://www.postgresql.org/) and [PostGIS](http://postgis.net/) extensions. It organizes the data in databases (one per organization), schemas (one per user within an organization) and tables (a schema may have one or more tables). Such organization is exploited by `NGSICartoDBSink` each time a Flume event is going to be persisted.
 
 [Top](#top)
 
 ####<a name="section1.2.1"></a>PostgreSQL databases and schemas naming conventions
-PostgreSQL databases and schemas are already created by CartoDB upon organization and username request, respectively. Thus, it is up to CartoDB to define the naming conventions for these elements; specifically:
+PostgreSQL databases and schemas are already created by Carto upon organization and username request, respectively. Thus, it is up to Carto to define the naming conventions for these elements; specifically:
 
 * Organization must... ?
 * Username must only contain lowercase letters, numbers and the dash symbol (`-`).
 
-Here it is assumed the notified/default FIWARE service maps the PostgreSQL schema/username, ensuring this way multitenancy and data isolation. This multitenancy approach is complemented by the usage of a configuration file holding the mapping between FIWARE service/CartoDB username and API Key (please, check the [Configuration](#section2.1) section).
+Here it is assumed the notified/default FIWARE service maps the PostgreSQL schema/username, ensuring this way multitenancy and data isolation. This multitenancy approach is complemented by the usage of a configuration file holding the mapping between FIWARE service/Carto username and API Key (please, check the [Configuration](#section2.1) section).
 
 [Top](#top)
 
 ####<a name="section1.2.2"></a>PostgreSQL tables naming conventions
 The name of these tables depends on the configured data model and analysis mode (see the [Configuration](#section2.1) section for more details):
 
-* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](.ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table.
+* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table.
 * Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
 
 The above applies both if `enable_raw` or `enable_distance` es set to `true`. In addition, the distance analysis mode adds the sufix `x0000distance` to the table name.
@@ -391,7 +391,7 @@ curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsx000
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data\_model | no | dm-by-entity |  <i>dm-by-service-path</i> or <i>dm-by-entity</i>. |
-| keys\_conf\_file | yes | N/A | Absolute path to the CartoDB file containing the mapping between FIWARE service/CartoDB usernames and CartoDB API Keys. |
+| keys\_conf\_file | yes | N/A | Absolute path to the CartoDB file containing the mapping between FIWARE service/Carto usernames and Carto API Keys. |
 | flip\_coordinates | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, the latitude and longitude values are exchanged. |
 | enable\_raw | no | true | <i>true</i> or <i>false</i>. If <i>true</i>, a raw based storage is done. |
 | enable\_distance | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, a distance based storage is done. |
@@ -426,7 +426,7 @@ cygnus-ngsi.sinks.cartodb-sink.backend.max_conns = 500
 cygnus-ngsi.sinks.cartodb-sink.backend.max_conns_per_route = 100
 ```
 
-An example of CartoDB keys configuration file could be (this can be generated from the configuration template distributed with Cygnus):
+An example of Carto keys configuration file could be (this can be generated from the configuration template distributed with Cygnus):
 
 ```
 $ cat /usr/cygnus/conf/cartodb_keys.conf
@@ -468,14 +468,14 @@ It is mandatory the entities aimed to be handled by this sink have a geolocated 
 [Top](#top)
 
 ####<a name="section2.3.2"></a>Multitenancy support
-Different than other NGSI sinks, where a single authorized user is able to create user spaces and write data on behalf of all the other users (who can only read the data), this sink requires the writing credentials of each user and such user spaces created in advance. The reason is CartoDB imposes the database and schema upon user account creation, which typically are related to the FIWARE service (or FIWARE tenant ID), and the only persistence element Cygnus must create are the tables within the already provisiones databases and schemas. As can be inferred, accessing these databases and schemas require specific user credentials.
+Different than other NGSI sinks, where a single authorized user is able to create user spaces and write data on behalf of all the other users (who can only read the data), this sink requires the writing credentials of each user and such user spaces created in advance. The reason is Carto imposes the database and schema upon user account creation, which typically are related to the FIWARE service (or FIWARE tenant ID), and the only persistence element Cygnus must create are the tables within the already provisiones databases and schemas. As can be inferred, accessing these databases and schemas require specific user credentials.
 
 [Top](#top)
 
 ####<a name="section2.3.3"></a>Batching
 As explained in the [programmers guide](#section3), `NGSICartoDBSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
-What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of inserts is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same CartoDB table. If processing the events one by one, we would need 100 inserts in CartoDB; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination CartoDB table. In the worst case, the whole 100 entities will be about 100 different entities (100 different CartoDB destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
+What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of inserts is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same Carto table. If processing the events one by one, we would need 100 inserts in Carto; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination Carto table. In the worst case, the whole 100 entities will be about 100 different entities (100 different Carto destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
 
 The batching mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
@@ -488,7 +488,7 @@ Finally, it must be said currently batching only works with the raw-like storing
 [Top](#top)
 
 ####<a name="section2.3.4"></a>About the encoding
-Cygnus applies this specific encoding tailored to CartoDB data structures:
+Cygnus applies this specific encoding tailored to Carto data structures:
 
 * Lowercase alphanumeric characters are not encoded.
 * Upercase alphanumeric characters are encoded.

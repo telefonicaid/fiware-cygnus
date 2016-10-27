@@ -15,6 +15,6 @@ Then, it is time to explain [`NGSIRestHandler`](./ngsi_rest_handler.md), the NGS
 
 Then, each one of the NGSI oriented sinks is described; for each sink an explanation about the functionality (including how the information within a Flume event is mapped into the storage data structures, according to the above mentioned naming conventions), configuration, uses cases and implementation details are given.
 
-Finally, other components added to Flume are explained, such as the [`GroupingInterceptor`](./grouping_interceptor.md) or the [`RoundRobinChannelSelector`](./round_robin_channel_selector.md).
+Finally, other components added to Flume are explained, such as the [`GroupingInterceptor`](./ngsi_grouping_interceptor.md) or the [`RoundRobinChannelSelector`](./round_robin_channel_selector.md).
 
 [Top](#top)
