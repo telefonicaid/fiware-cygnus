@@ -10,7 +10,7 @@ Native Flume Http sources supprt IPv6, therefore cygnus-ngsi supports IPv6 at it
 
 It is just a matter of configuring the Http source `bind` parameter (which by default takes the value `127.0.0.1` when not explicitely configured) to `::` (undefined address) or `::1` (IPv6 localhost).
 
-For instance, let's supose a cygnus-ngsi focused on persisting NGSI data in MySQL. IPv6 is enabled in the Http source as said above:
+For instance, let's suppose a cygnus-ngsi focused on persisting NGSI data in MySQL. IPv6 is enabled in the Http source as said above:
 
 ```
 cygnus-ngsi.sources = http-source
