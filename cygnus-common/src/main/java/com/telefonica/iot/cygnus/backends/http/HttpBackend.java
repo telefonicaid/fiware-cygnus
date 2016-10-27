@@ -275,7 +275,7 @@ public abstract class HttpBackend {
                     httpRes.getStatusLine().getReasonPhrase(), null);
             } // if
             
-            if (!httpRes.getHeaders("Content-Type")[0].getValue().contains("application\\/json")) {
+            if (!httpRes.getHeaders("Content-Type")[0].getValue().contains("application/json")) {
                 return new JsonResponse(null, httpRes.getStatusLine().getStatusCode(),
                     httpRes.getStatusLine().getReasonPhrase(), null);
             } // if
