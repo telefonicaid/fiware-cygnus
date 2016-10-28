@@ -49,7 +49,8 @@ The per agent **Flume Extensions Catalogue** completes the available documentati
 Other interesting links are:
 
 * Our [Apiary Documentation](http://telefonicaid.github.io/fiware-cygnus/api/latest) if you want to know how to use our API methods for Cygnus.
-* The per-agent **integration** examples ([cygnus-ngsi](../doc/cygnus-ngsi/integration)).
+* [cygnus-ngsi](doc/cygnus-ngsi/integration) **integration** examples .
+* [cygnus-ngsi](https://edu.fiware.org/mod/resource/view.php?id=1005) **introductory course** in FIWARE Academy.
 * The [Contributing Guidelines](../doc/contributing/contributing_guidelines.md) if your aim is to extend Cygnus.
 
 ##Licensing
