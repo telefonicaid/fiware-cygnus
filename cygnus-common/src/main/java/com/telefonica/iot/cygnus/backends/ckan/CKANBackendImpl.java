@@ -77,7 +77,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         String resId = resourceLookupOrCreate(orgName, pkgName, resName, createEnabled);
         
         if (resId == null) {
-            throw new CygnusRuntimeError("Cannot persist the data (orgName=" + orgName + ", pkgName=" + pkgName
+            throw new CygnusPersistenceError("Cannot persist the data (orgName=" + orgName + ", pkgName=" + pkgName
                     + ", resName=" + resName + ")");
         } else {
             LOGGER.debug("Going to persist the data (orgName=" + orgName + ", pkgName=" + pkgName
@@ -178,7 +178,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             if (res.getStatusCode() == 200) {
                 LOGGER.debug("Successful insert (resource/datastore id=" + resId + ")");
             } else {
-                throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode());
+                throw new CygnusPersistenceError("Could not insert (resId=" + resId + ", statusCode="
+                        + res.getStatusCode() + ")");
             } // if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
@@ -214,9 +215,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 LOGGER.debug("Successful organization creation (orgName/OrgId=" + orgName + "/" + orgId + ")");
                 return orgId;
             } else {
-                throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the organization "
-                        + "already exists in a deleted state (respCode=" + res.getStatusCode() + ", orgName="
-                        + orgName + ")");
+                throw new CygnusPersistenceError("Could not create the orgnaization (orgName=" + orgName
+                        + ", statusCode=" + res.getStatusCode() + ")");
             } // if else if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
@@ -268,9 +268,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 } // if else
             */
             } else {
-                throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the package "
-                        + "already exists in a deleted state (respCode=" + res.getStatusCode() + ", pkgName="
-                        + pkgName + ")");
+                throw new CygnusPersistenceError("Could not create the package (orgId=" + orgId
+                        + ", pkgName=" + pkgName + ", statusCode=" + res.getStatusCode() + ")");
             } // if else if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
@@ -285,15 +284,15 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
     /**
      * Creates a resource within a given package in CKAN.
-     * @param resourceName Resource to be created
+     * @param resName Resource to be created
      * @param pkgId Package the resource belongs to
      * @return A resource identifier if the resource was created or an exception if something went wrong
      * @throws Exception
      */
-    private String createResource(String resourceName, String pkgId) throws Exception {
+    private String createResource(String resName, String pkgId) throws Exception {
         try {
             // create the CKAN request JSON
-            String jsonString = "{ \"name\": \"" + resourceName + "\", "
+            String jsonString = "{ \"name\": \"" + resName + "\", "
                     + "\"url\": \"none\", "
                     + "\"format\": \"\", "
                     + "\"package_id\": \"" + pkgId + "\" }";
@@ -307,12 +306,12 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             // check the status
             if (res.getStatusCode() == 200) {
                 String resourceId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
-                LOGGER.debug("Successful resource creation (resName/resId=" + resourceName + "/" + resourceId
+                LOGGER.debug("Successful resource creation (resName/resId=" + resName + "/" + resourceId
                         + ")");
                 return resourceId;
             } else {
-                throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the resource "
-                        + "already exists (respCode=" + res.getStatusCode() + ", resourceName=" + resourceName + ")");
+                throw new CygnusPersistenceError("Could not create the resource (pkgId=" + pkgId
+                        + ", resName=" + resName + ", statusCode=" + res.getStatusCode() + ")");
             } // if else if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
@@ -330,11 +329,11 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
      * @param resId Identifies the resource whose datastore is going to be created.
      * @throws Exception
      */
-    private void createDataStore(String resourceId) throws Exception {
+    private void createDataStore(String resId) throws Exception {
         try {
             // create the CKAN request JSON
             // CKAN types reference: http://docs.ckan.org/en/ckan-2.2/datastore.html#valid-types
-            String jsonString = "{ \"resource_id\": \"" + resourceId
+            String jsonString = "{ \"resource_id\": \"" + resId
                     + "\", \"fields\": [ "
                     + "{ \"id\": \"" + CommonConstants.RECV_TIME_TS + "\", \"type\": \"int\"},"
                     + "{ \"id\": \"" + CommonConstants.RECV_TIME + "\", \"type\": \"timestamp\"},"
@@ -356,10 +355,10 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
             // check the status
             if (res.getStatusCode() == 200) {
-                LOGGER.debug("Successful datastore creation (resourceId=" + resourceId + ")");
+                LOGGER.debug("Successful datastore creation (resourceId=" + resId + ")");
             } else {
-                throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the datastore "
-                        + "already exists (respCode=" + res.getStatusCode() + ", resourceId=" + resourceId + ")");
+                throw new CygnusPersistenceError("Could not create the datastore (resId=" + resId
+                        + ", statusCode=" + res.getStatusCode() + ")");
             } // if else if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
@@ -377,11 +376,11 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
      * @param resId Identifies the resource whose view is going to be created.
      * @throws Exception
      */
-    private void createView(String resourceId) throws Exception {
-        if (!existsView(resourceId)) {
+    private void createView(String resId) throws Exception {
+        if (!existsView(resId)) {
             try {
                 // create the CKAN request JSON
-                String jsonString = "{ \"resource_id\": \"" + resourceId + "\","
+                String jsonString = "{ \"resource_id\": \"" + resId + "\","
                         + "\"view_type\": \"" + viewer + "\","
                         + "\"title\": \"Recline grid view\" }";
 
@@ -393,10 +392,10 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
                 // check the status
                 if (res.getStatusCode() == 200) {
-                    LOGGER.debug("Successful view creation (resourceId=" + resourceId + ")");
+                    LOGGER.debug("Successful view creation (resourceId=" + resId + ")");
                 } else {
-                    throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the datastore "
-                            + "already exists (respCode=" + res.getStatusCode() + ", resourceId=" + resourceId + ")");
+                    throw new CygnusPersistenceError("Could not create the datastore (resId=" + resId
+                        + ", statusCode=" + res.getStatusCode() + ")");
                 } // if else if else
             } catch (Exception e) {
                 if (e instanceof CygnusRuntimeError
@@ -410,10 +409,10 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         } // if
     } // createView
     
-    private boolean existsView(String resourceId) throws Exception {
+    private boolean existsView(String resId) throws Exception {
         try {
             // create the CKAN request JSON
-            String jsonString = "{ \"id\": \"" + resourceId + "\" }";
+            String jsonString = "{ \"id\": \"" + resId + "\" }";
 
             // create the CKAN request URL
             String urlPath = "/api/3/action/resource_view_list";
@@ -423,11 +422,11 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
             // check the status
             if (res.getStatusCode() == 200) {
-                LOGGER.debug("Successful view listing (resourceId=" + resourceId + ")");
+                LOGGER.debug("Successful view listing (resourceId=" + resId + ")");
                 return (((JSONArray) res.getJsonObject().get("result")).size() > 0);
             } else {
-                throw new CygnusRuntimeError("Don't know how to treat the response code. Possibly the datastore "
-                        + "already exists (respCode=" + res.getStatusCode() + ", resourceId=" + resourceId + ")");
+                throw new CygnusPersistenceError("Could not check if the view exists (resId=" + resId
+                        + ", statusCode=" + res.getStatusCode() + ")");
             } // if else if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
