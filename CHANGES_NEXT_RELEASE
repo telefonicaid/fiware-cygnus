@@ -24,3 +24,4 @@
 - [cygnus-common][hardening] Add traces regarding loaded .jar files (#1210)
 - [cygnus][hardening] Do configurable the CKAN viewer attached to resources (#1258)
 - [cygnus][hardening] Document IPv6 support (#1058)
+- [cygnus][hardening] Add introductory course slides link (#1265)
