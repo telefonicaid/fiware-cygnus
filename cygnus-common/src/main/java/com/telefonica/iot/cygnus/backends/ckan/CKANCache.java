@@ -21,7 +21,7 @@ package com.telefonica.iot.cygnus.backends.ckan;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
-import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ public class CKANCache extends HttpBackend {
     
     /**
      * Constructor.
-     * @param hosts
+     * @param host
      * @param port
      * @param ssl
      * @param apiKey
@@ -196,7 +196,8 @@ public class CKANCache extends HttpBackend {
         } else if (res.getStatusCode() == 404) {
             return false;
         } else {
-            throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode() + ")");
+            throw new CygnusPersistenceError("Could not check if the organization exists ("
+                    + "orgName=" + orgName + ", statusCode=" + res.getStatusCode() + ")");
         } // if else
     } // isCachedOrg
     
@@ -252,7 +253,8 @@ public class CKANCache extends HttpBackend {
         } else if (res.getStatusCode() == 404) {
             return false;
         } else {
-            throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode() + ")");
+            throw new CygnusPersistenceError("Could not check if the package exists ("
+                    + "orgName=" + orgName + ", pkgName=" + pkgName + ", statusCode=" + res.getStatusCode() + ")");
         } // if else
     } // isCachedPkg
     
@@ -318,10 +320,11 @@ public class CKANCache extends HttpBackend {
                 } // if else
             } // if else
         } else if (res.getStatusCode() == 404) {
-            throw new CygnusRuntimeError("Unexpected package error when updating its resources... the package was "
-                    + "supposed to exist!");
+            return false;
         } else {
-            throw new CygnusRuntimeError("Don't know how to treat response code " + res.getStatusCode() + ")");
+            throw new CygnusPersistenceError("Could not check if the resource exists ("
+                    + "orgName=" + orgName + ", pkgName=" + pkgName + ", resName=" + resName
+                    + ", statusCode=" + res.getStatusCode() + ")");
         } // if else
     } // isCachedRes
 
