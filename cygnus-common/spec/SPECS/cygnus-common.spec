@@ -169,6 +169,24 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed Nov 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.5.0
+- [cygnus][hardening] Add entry for Grouping Rules in Installation and Administration Guide (#1206)
+- [cygnus][hardening] Add missing creation of log4j path (#1212)
+- [cygnus][hardening] Add compilation scripts (#1213)
+- [cygnus][hardening] Warn about the incompatibility of installing cygnus-ngsi and cygnus-twitter in the same base path (#1214)
+- [cygnus][hardening] Fix docker links in badges (#1222)
+- [cygnus-common][hardening] Add -Dfile.encoding=UTF-8 Java option (#1225)
+- [cygnus][hardening] Update link about getting tokens in documentations (#1227)
+- [cygnus][hardening] Replace references to JDK 1.6 with JDK 1.7 (#1232)
+- [cygnus][hardening] Fix yum install command (#1249)
+- [cygnus][hardening] Add FIWARE architecture section in the documentation (#1248)
+- [cygnus][hardening]] Fix API entries in documentation (#1246)
+- [cygnus][hardening] Add entries about running as process and running as service in documentation (#1255)
+- [cygnus-common][hardening] Add traces regarding loaded .jar files (#1210)
+- [cygnus][hardening] Do configurable the CKAN viewer attached to resources (#1258)
+- [cygnus][hardening] Document IPv6 support (#1058)
+- [cygnus][hardening] Add introductory course slides link (#1265)
+
 * Fri Oct 07 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.4.0
 
 * Fri Sep 09 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.3.0
@@ -177,7 +195,7 @@ rm -rf $RPM_BUILD_ROOT
 - [cygnus-common][hardening] Add implementation for /admin/log route (#807)
 - [cygnus-common][hardening] Create ManagementInterfaceUtils class (#1115)
 - [cygnus-common][bug] Add fiware-service and fiware-servicePath headers to all API operations (#1124)
-- [cygnus][doc] Add Orion-Cygnus-Kafka integration example (#1132)
+- [cygnus][hardening] Add Orion-Cygnus-Kafka integration example (#1132)
 - [cygnus-common][bug] Release connection upon persistence error (#1139)
 - [cygnus-common][bug] Insert NULL in CKAN columns when an empty attribute value ("", null, {} or []) or empty attribute metadata (null or []) is notified (#1144)
 

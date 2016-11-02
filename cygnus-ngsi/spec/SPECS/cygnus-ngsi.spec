@@ -97,6 +97,33 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed Nov 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.5.0
+- [cygnus][hardening] Add NGSICKANSink configuration in docker's agent.conf file (#1193)
+- [cygnus][hardening] Add entry for Grouping Rules in Installation and Administration Guide (#1206)
+- [cygnus-ngsi][hardening] Delay the retries of not persisted batches (#1138)
+- [cygnus-ngsi][hardening] Add support for regular expressions in Name Mappings (#1202)
+- [cygnus-ngsi][bug] Fix accepted charset by Kafka (#1217)
+- [cygnus][hardening] Add missing creation of log4j path (#1212)
+- [cygnus][hardening] Add compilation scripts (#1213)
+- [cygnus][hardening] Warn about the incompatibility of installing cygnus-ngsi and cygnus-twitter in the same base path (#1214)
+- [cygnus-ngsi][hardening] Fix automated builds because of "filelock denied" (#1208)
+- [cygnus][hardening] Fix docker links in badges (#1222)
+- [cygnus-ngsi][hardening] Update JMeter tests (#1229)
+- [cygnus][hardening] Update link about getting tokens in documentations (#1227)
+- [cygnus][hardening] Replace references to JDK 1.6 with JDK 1.7 (#1232)
+- [cygnus][hardening] Add NGSIHDFSSink configuration in docker's agent.conf file (#1172)
+- [cygnus][hardening] Fix NGSIMySQLSink configuration in docker's agent.conf file (#1237)
+- [cygnus][hardening] Fix NGSIMongoSink and NGSISTHSink configuration in docker's agent.conf file (#1239)
+- [cygnus][bug] Discard Http responses not containing Json payload when creating JsonResponse objects (#1243)
+- [cygnus][hardening] Force the usage of certain version in libraries used by cygnus-ngsi docker (#1233)
+- [cygnus][hardening] Fix yum install command (#1249)
+- [cygnus][hardening] Add FIWARE architecture section in the documentation (#1248)
+- [cygnus][hardening] Fix API entries in documentation (#1246)
+- [cygnus][hardening] Add entries about running as process and running as service in documentation (#1255)
+- [cygnus][hardening] Do configurable the CKAN viewer attached to resources (#1258)
+- [cygnus][hardening] Document IPv6 support (#1058)
+- [cygnus][hardening] Add introductory course slides link (#1265)
+
 * Fri Oct 07 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.4.0
 - [cygnus][bug] Fix documentation about DELETE subscriptions (#1147)
 - [cygnus-ngsi][hardening] Remove unused hashing feature in NGSIMongoSink and NGSISTHSink (#1113)
@@ -106,7 +133,7 @@ rm -rf $RPM_BUILD_ROOT
 - [cygnus-ngsi][bug] Add certain Http responses as condition for changing host (#1176)
 - [cygnus-ngsi][feature] Name mappings (#1076)
 - [cygnus-ngis][hardening] Add a cache for already created elements in PostgreSQLSink (#1171)
-- [cygnus][doc] Update mkdocs.yml with the google analytics ID (#1183)
+- [cygnus][hardening] Update mkdocs.yml with the google analytics ID (#1183)
 - [cygnus][hardening] Update default agent.conf file with latests paremeters (#1194)
 
 * Fri Sep 09 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.3.0
@@ -117,7 +144,7 @@ rm -rf $RPM_BUILD_ROOT
 - [cygnus-ngsi][hardening] Reduce the size of the Docker image (#1117)
 - [cygnus-ngsi][hardening] Docker image must print the logs in console (#1125)
 - [cygnus-ngsi][feature] Do per-sink active checkings of element name sizes (#407)
-- [cygnus][doc] Add Orion-Cygnus-Kafka integration example (#1132)
+- [cygnus][hardening] Add Orion-Cygnus-Kafka integration example (#1132)
 - [cygnus-ngsi][hardening] Decrease to DEBUG the logging level of batching related traces (#1126)
 
 * Wed Sep 07 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.2.1
