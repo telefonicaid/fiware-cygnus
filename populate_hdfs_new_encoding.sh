@@ -20,30 +20,31 @@
 # Author: frb
 
 # Show the usage
-if [ $# -ne 1 ]; then
+if [ $# -ne 2 ]; then
 	echo "Usage:"
-	echo "      populate_hdfs_new_encoding.sh <basepath>"
+	echo "      populate_hdfs_new_encoding.sh <basepath> <username>"
 	echo "Where:"
-	echo "      <basepath> is the base path where to populate"
-	echo "      Warning: before populating, this path will be deleted, if existing!"
+	echo "      <basepath> is the absolute base path in HDFS where to populate"
+	echo "         Warning: before populating, this path will be deleted, if existing!"
+	echo "      <username> is the user account in HDFS owning the above base path"
 	exit 1
 fi
 
 # Input parameters
 $basepath=$1
 
-sudo -u hdfs hadoop fs -rm -r -skipTrash $basepath
-sudo -u hdfs hadoop fs -mkdir /user/frb/encoding/
-sudo -u hdfs hadoop fs -mkdir /user/frb/encoding/svc/
-sudo -u hdfs hadoop fs -mkdir /user/frb/encoding/svc/svcpath/
-sudo -u hdfs hadoop fs -mkdir /user/frb/encoding/svc/svcpath/room1_room/
-sudo -u hdfs hadoop fs -touchz /user/frb/encoding/svc/svcpath/room1_room/room1_room.txt
-sudo -u hdfs hadoop fs -mkdir /user/frb/encoding/svc/svcpath/room_2_room/
-sudo -u hdfs hadoop fs -touchz /user/frb/encoding/svc/svcpath/room_2_room/room_2_room.txt
-sudo -u hdfs hadoop fs -mkdir /user/frb/encoding/svc/svc_path/
-sudo -u hdfs hadoop fs -mkdir /user/frb/encoding/svc/svc_path/room3_room/
-sudo -u hdfs hadoop fs -touchz /user/frb/encoding/svc/svc_path/room3_room/room3_room.txt
-sudo -u hdfs hadoop fs -mkdir /user/frb/encoding/svc_other/
-sudo -u hdfs hadoop fs -mkdir /user/frb/encoding/svc_other/svcpath/
-sudo -u hdfs hadoop fs -mkdir /user/frb/encoding/svc_other/svcpath/room4_room/
-sudo -u hdfs hadoop fs -touchz /user/frb/encoding/svc_other/svcpath/room4_room/room4_room.txt
+sudo -u $user hadoop fs -rm -r -skipTrash $basepath
+sudo -u $user hadoop fs -mkdir $basepath
+sudo -u $user hadoop fs -mkdir $basepath/svc/
+sudo -u $user hadoop fs -mkdir $basepath/svc/svcpath/
+sudo -u $user hadoop fs -mkdir $basepath/svc/svcpath/room1_room/
+sudo -u $user hadoop fs -touchz $basepath/svc/svcpath/room1_room/room1_room.txt
+sudo -u $user hadoop fs -mkdir $basepath/svc/svcpath/room_2_room/
+sudo -u $user hadoop fs -touchz $basepath/svc/svcpath/room_2_room/room_2_room.txt
+sudo -u $user hadoop fs -mkdir $basepath/svc/svc_path/
+sudo -u $user hadoop fs -mkdir $basepath/svc/svc_path/room3_room/
+sudo -u $user hadoop fs -touchz $basepath/svc/svc_path/room3_room/room3_room.txt
+sudo -u $user hadoop fs -mkdir $basepath/svc_other/
+sudo -u $user hadoop fs -mkdir $basepath/svc_other/svcpath/
+sudo -u $user hadoop fs -mkdir $basepath/svc_other/svcpath/room4_room/
+sudo -u $user hadoop fs -touchz $basepath/svc_other/svcpath/room4_room/room4_room.txt
