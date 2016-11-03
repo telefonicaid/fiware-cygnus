@@ -45,22 +45,26 @@ public class JettyServer extends Thread {
         
         // add the Management Interface connector
         SelectChannelConnector conn1 = new SelectChannelConnector();
+        
         if (ipv6) {
             conn1.setHost("::0");
         } else {
             conn1.setHost("0.0.0.0");
-        }
+        } // if else
+        
         conn1.setPort(mgmtIfPort);
         server.addConnector(conn1);
         
         if (guiPort != 0) {
             // add the GUI connector
             SelectChannelConnector conn2 = new SelectChannelConnector();
+            
             if (ipv6) {
-                conn2.setHost("0.0.0.0");
-            } else {
                 conn2.setHost("::0");
-            }
+            } else {
+                conn2.setHost("0.0.0.0");
+            } // if else
+            
             conn2.setPort(guiPort);
             server.addConnector(conn2);
         } // if
