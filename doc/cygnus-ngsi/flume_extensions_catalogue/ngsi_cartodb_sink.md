@@ -21,9 +21,13 @@ Content:
         * [Multitenancy support](#section2.3.1)
         * [Batching](#section2.3.3)
         * [About the encoding](#senction2.3.4)
+        * [About automatically creating the tables](#section2.3.5)
+        * [Supported Orion's geometries](#section2.3.6)
 * [Programmers guide](#section3)
     * [`NGSICartoDBSSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
+* [Annexes](#section4)
+    * [Annex 1: provisioning a table](#section4.1)
 
 ##<a name="section2"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSICartoDBSink`, or simply `NGSICartoDBSSink` is a cygnus-ngsi sink designed to persist NGSI-like context data events within [Carto](https://carto.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -49,7 +53,7 @@ Carto is based on [PostgreSQL](http://www.postgresql.org/) and [PostGIS](http://
 ####<a name="section1.2.1"></a>PostgreSQL databases and schemas naming conventions
 PostgreSQL databases and schemas are already created by Carto upon organization and username request, respectively. Thus, it is up to Carto to define the naming conventions for these elements; specifically:
 
-* Organization must... ?
+* Organization must only contain lowercase letters.
 * Username must only contain lowercase letters, numbers and the dash symbol (`-`).
 
 Here it is assumed the notified/default FIWARE service maps the PostgreSQL schema/username, ensuring this way multitenancy and data isolation. This multitenancy approach is complemented by the usage of a configuration file holding the mapping between FIWARE service/Carto username and API Key (please, check the [Configuration](#section2.1) section).
@@ -62,7 +66,7 @@ The name of these tables depends on the configured data model and analysis mode 
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table.
 * Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
 
-The above applies both if `enable_raw` or `enable_distance` es set to `true`. In addition, the distance analysis mode adds the sufix `x0000distance` to the table name.
+The above applies both if `enable_raw` or `enable_distance` is set to `true`. In addition, the distance analysis mode adds the sufix `xffffdistance` to the table name.
 
 Since based in [PostgreSQL](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. This leads to certain [encoding](#section2.3.4) is applied.
 
@@ -72,10 +76,10 @@ The following table summarizes the table name composition:
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
 |---|---|---|
-| `/` | `x002f` | `x002fxffff<entityId>x0000<entityType>[x0000distance]` |
-| `/<svcPath>` | `x002fxffff<svcPath>[x0000distance]` | `x002fxffff<svcPath>x0000<entityId>x0000<entityType>[x0000distance]` |
+| `/` | `x002f` | `x002fxffff<entityId>xffff<entityType>[xffffdistance]` |
+| `/<svcPath>` | `x002fxffff<svcPath>[xffffdistance]` | `x002fxffff<svcPath>xffff<entityId>xffff<entityType>[xffffdistance]` |
 
-Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
+Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event. 
 
 [Top](#top)
 
@@ -92,6 +96,8 @@ A single insert is composed for each notified entity, containing such insert the
     * Either of type `geo:point`.
     * Either having associated a `location` metadata of type `string` and value `WGS84`.
 * For each not-geolocated attribute, the insert will contain two additional fields, one for the value, named `<attrName>`, and another for the metadata, named `<attrName>_md`).
+
+It must be said Cygnus does not create Carto tables in the raw-based storing. The reason is Cygnus is not able to infer from a notification the complete set of attributes an entity has, i.e. the columns cannot be inferred. Thus, tables must be preprovisioned in advance (please, check the Annex 1 for specific Carto queries).
 
 [Top](#top)
 
@@ -125,6 +131,8 @@ A single insert is composed for each notified entity, containing such insert the
 * `maxSpeed`: Maximum stage speed.
 * `minSpeed`: Minimum stage speed.
 * `numStages`: Number of stages.
+
+Different than the raw-based storing, Cygnus is able to create by itself the tables used by the distance-based storing. The reason is columns of the tables are well known in advance.
 
 [Top](#top)
 
@@ -175,16 +183,16 @@ The PostgreSQL table names will be, depending on the configured data model and a
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
 |---|---|---|
-| `/` | `x002f` | `x002fcar1x0000car[x0000distance]` |
-| `/4wheels` | `x002f4wheels[x0000distance]` | `x002f4wheelsx0000car1x0000car[x0000distance]` |
+| `/` | `x002f` | `x002fcar1xffffcar[xffffdistance]` |
+| `/4wheels` | `x002f4wheels[xffffdistance]` | `x002f4wheelsxffffcar1xffffcar[xffffdistance]` |
 
 [Top](#top)
 
 ####<a name="section1.3.3"></a>Raw-based storing
-Let's assume a table name `x002f4wheelsx0000car1x0000car` (data model by entity, non-root service path, only raw analysis mode). The data stored within this table would be:
+Let's assume a table name `x002f4wheelsxffffcar1xffffcar` (data model by entity, non-root service path, only raw analysis mode). The data stored within this table would be:
 
 ```
-curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsx0000car1x0000car&api_key=abcdef0123456789"
+curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsxffffcar1xffffcar&api_key=abcdef0123456789"
 {
   "rows": [
     {
@@ -244,10 +252,10 @@ curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsx000
 [Top](#top)
 
 ####<a name="section1.3.4"></a>Distance-based storing
-Let's assume a table name `x002f4wheelsx0000car1x0000carx0000distance` (data model by entity, non-root service path, only distance analysis mode) with a previous insertion (on the contrary, this would be the first insertion and almost all the aggregated values will be set to 0). The data stored within this table would be:
+Let's assume a table name `x002f4wheelsxffffcar1xffffcarxffffdistance` (data model by entity, non-root service path, only distance analysis mode) with a previous insertion (on the contrary, this would be the first insertion and almost all the aggregated values will be set to 0). The data stored within this table would be:
 
 ```
-curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsx0000car1x0000carx0000distance&api_key=abcdef0123456789"
+curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsxffffcar1xffffcarxffffdistance&api_key=abcdef0123456789"
 {
   "rows": [
     {
@@ -501,6 +509,24 @@ Cygnus applies this specific encoding tailored to Carto data structures:
 
 [Top](#top)
 
+####<a name="section2.3.5"></a>About automatically creating the tables
+It has already been commented, but just a reminder: Cygnus does not automatically create the required tables for the raw-based mode. This is because the first notification regarding an entity could not contain the full list of such an entity's attributes, i.e. only the updated attributes could be being notified.
+
+On the contrary, the distance-based mode automatically creates the tables since the number and semantic of the table columns is always the same, and it is independent of the entity's attributes.
+
+When required, the Annex 1 shows how to provision a table for Carto, among other interesting operations.
+
+[Top](#top)
+
+####<a name="section2.3.6"></a>Supported Orion's geometries
+Current version of `NGSICartoDBSink` supports the following Orion's geometries:
+
+* `geo:point`, in this case the geolocated attribute is about a single point.
+* `geo:json`, in this case the geolocated attribute is about any geometry, from a simple point to a complex polygon.
+* `location` metadata, in this case the geolocated attribute is about a single point.
+
+[Top](#top)
+
 ##<a name="section3"></a>Programmers guide
 ###<a name="section3.1"></a>`NGSICartoDBSink` class
 Coming soon.
@@ -509,5 +535,29 @@ Coming soon.
 
 ###<a name="section3.2"></a>Authentication and authorization
 Authentication is done by means of an API key related to the username. Once authenticated, the client is only allowed to create, read, update and delete PostgreSQL tables in the user space (PostgreSQL schema) within the organization (PostgreSQL database).
+
+[Top](#top)
+
+##<a name="section4"></a>Annexes
+###<a name="section4.1"></a>Annex 1: provisioning a table in Carto
+Following you may find the queries required to provision a table in Carto. Start by creating the table:
+
+    $ curl -G "https://iotsupport.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=CREATE TABLE <table_name> (recvTime text, fiwareServicePath text, entityId text, entityType text, <attr_1> <type_1>, <attr_1>_md text, ..., <attr_n> <type_n>, <attr_n>_md text, the_geom geometry(POINT,4326))"
+
+Every table in Carto has to be <i>cartodbfied</i>, if you want it appears in Carto web-based dashboard:
+
+    $ curl -G "https://iotsupport.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=SELECT CDB_CartodbfyTable('<my_user_or_schema>', '<table_name>')"
+
+Now, you should be able to insert some data (just for testing purpose, since Cygnus will be in charge of this part):
+
+    $ curl -G "https://iotsupport.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=INSERT INTO <table_name> (recvTime, fiwareServicePath, entityId, entityType, <attr_1>, <attr_1>_md, ..., <attr_n>, <attr_n>_md, the_geom) VALUES ('2016-04-19T07:09:53.116Z', '<service_path>', '<entity_id>', '<entity_type>', '<attr_1_value>', '<attr_1_metadata>', ..., '<attr_n_value>', '<attr_n_metadata>', 'ST_SetSRID(ST_MakePoint(<lat>, <lon>), 4326))"
+
+You can query the data as:
+
+    $ curl -G "https://iotsupport.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=SELECT * FROM <table_name>"
+
+For completeness, let's see how to delete a table:
+
+    $ curl -G "https://iotsupport.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=DROP TABLE <table_name>"
 
 [Top](#top)
