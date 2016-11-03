@@ -26,14 +26,15 @@ RED='\033[0;31m'
 NOCOLOR='\033[0m'
 
 # Show the usage
-if [ $# -ne 4 ]; then
+if [ $# -ne 5 ]; then
 	echo "Usage:"
-	echo "      cygnus_translator_pre1.3.0_to_1.3.0_hdfs.sh <function> <force> <basepath> <dictionary>"
+	echo "      cygnus_translator_pre1.3.0_to_1.3.0_hdfs.sh <function> <force> <basepath> <dictionary> <user>"
 	echo "Where:"
-	echo "      <function> may be 'analyze' or 'encode'"
+	echo "      <function> may be 'analyze', 'copy_encode' or 'replace_encode'"
 	echo "      <force> may be 'true' or 'false'"
 	echo "      <basepath> is the base path where to start analyzing/encoding"
 	echo "      <dictionaly> is a file containing encodings this script is not able to do by itself"
+	echo "      <user> is a HDFS superuser"
 	exit 1
 fi
 
@@ -42,17 +43,18 @@ function=$1
 force=$2
 basepath=$3
 dictFile=$4
+user=$5
 
 # Check the function value
-if [ "$function" != "analyze" ] && [ "$function" != "encode" ]; then
-	echo "Unknown function value '$function', use 'analyze' or 'encode' instead"
+if [ "$function" != "analyze" ] && [ "$function" != "copy_encode" ] && [ "$function" != "replace_encode" ]; then
+	echo "Unknown function value '$function', use 'analyze' 'copy_encode' or 'replace_encode' instead"
 	exit 2
 fi
 
 # Check the force value
 if [ "$force" != "true" ] && [ "$force" != "false" ]; then
-        echo "Unknown force value '$force', use 'true' or 'false' instead"
-        exit 2
+	echo "Unknown force value '$force', use 'true' or 'false' instead"
+	exit 2
 fi
 
 # Function to load a dictionary
@@ -60,9 +62,9 @@ declare -A dictionary
 
 function load_dictionary {
 	while IFS='' read -r line || [[ -n "$line" ]]; do
-        	IFS=',' read -ra splits <<< "$line"
-	        key=${splits[0]}
-        	value=${splits[1]}
+		IFS=',' read -ra splits <<< "$line"
+		key=${splits[0]}
+		value=${splits[1]}
 		dictionary[$key]=$value
 	done < "$dictFile"
 }
@@ -89,7 +91,7 @@ function get_encoding {
 	if [ -z "$res" ]; then
 		numUnderscores=$(grep -o _ <<< $path | wc -l)
 
-		if [ "$type_" == "service" ] || [ "$type_" == "subservice" ]; then
+		if [ "$type_" == "service" ] || [ "$type_" == "service_path" ]; then
 			if [ $numUnderscores -eq 0 ]; then
 				res=$path
 			elif [ "$force" == "true" ]; then
@@ -99,15 +101,15 @@ function get_encoding {
 			fi
 		elif [ "$type_" == "entity_dir" ] || [ "$type_" == "entity_file" ]; then
 			if [ $numUnderscores -eq 1 ]; then
-                                res=$path
-                        elif [ "$force" == "true" ]; then
+				res=$(echo "$path" | sed -r 's/[_]+/xffff/g')
+			elif [ "$force" == "true" ]; then
 				res=$(echo "$path" | sed -r 's/[_]+/xffff/g')
 			else
-                                res="null"
-                        fi
+				res="null"
+			fi
 		else
-        	        echo "Unknown type '$type_'"
-	        fi
+			echo "Unknown type '$type_'"
+		fi
 	fi
 
 	echo $res
@@ -116,120 +118,135 @@ function get_encoding {
 # Function to process a path
 # $1 --> path to be processed (input)
 # $2 --> type of path (input)
+# $3 --> function to be performed (input)
 function process {
-        local path=$1
-        local type_=$2
+	local path=$1
+	local type_=$2
+	local funct=$3
 
 	# Get the encoding of the given path
 	dir="$(dirname $path)"
-        name="$(basename $path)"
+	name="$(basename $path)"
 	encoding=$(get_encoding $name $type_)
 
-	# Some pretty printigs
-        if [ "$type_" == "service" ]; then
-                if [ "$encoding" == "null" ]; then
-			echo -e " |    |__ ${BLUE}$name${NOCOLOR} -> ${RED}unable${NOCOLOR}"
+	# Process
+	if [ "$type_" == "service" ]; then
+		if [ "$encoding" == "null" ]; then
+			echo -e "[service] ${BLUE}$name${NOCOLOR} -> ${RED}$name${NOCOLOR}"
+			iterate $path $type_ $funct
 		elif [ "$encoding" == "$name" ]; then
-			echo -e " |    |__ ${BLUE}$name${NOCOLOR} --> $encoding"
+			echo -e "[service] ${BLUE}$name${NOCOLOR} --> $encoding"
+			iterate $path $type_ $funct
 		else
-			if [ "$function" == "encode" ]; then
-				hadoop fs -mv $path $dir/$encoding
+			if [ "$funct" == "replace_encode" ]; then
+				sudo -u $user hadoop fs -mv $path $dir/$encoding
+				echo -e "[service] ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
+				iterate $dir/$encoding $type_ $funct
+			elif [ "$funct" == "copy_encode" ]; then
+				sudo -u $user hadoop fs -mkdir $dir/$encoding
+				sudo -u $user hadoop fs -cp $path/* $dir/$encoding/
+				echo -e "[service] ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
+				# From here on, everything must be replaced
+				iterate $dir/$encoding $type_ "replace_encode"
+			elif [ "$funct" == "analyze" ]; then
+				echo -e "[service] ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
+				iterate $path $type_ $funct
+			else
+				echo "Unknown function '$funct'"
 			fi
-
-			echo -e " |    |__ ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
-                fi
-        elif [ "$type_" == "subservice" ]; then
-                if [ "$encoding" == "null" ]; then
-			echo -e " |    |    |__ ${BLUE}$name${NOCOLOR} -> ${RED}unable${NOCOLOR}"
-                elif [ "$encoding" == "$name" ]; then
-                        echo -e " |    |    |__ ${BLUE}$name${NOCOLOR} --> $encoding"
+		fi
+	elif [ "$type_" == "service_path" ]; then
+		if [ "$encoding" == "null" ]; then
+			echo -e "   [service_path] ${BLUE}$name${NOCOLOR} -> ${RED}$name${NOCOLOR}"
+			iterate $path $type_ $funct
+		elif [ "$encoding" == "$name" ]; then
+			echo -e "   [service_path] ${BLUE}$name${NOCOLOR} --> $encoding"
+			iterate $path $type_ $funct
 		else
-			if [ "$function" == "encode" ]; then
-				hadoop fs -mv $path $dir/$encoding
+			if [ "$funct" == "replace_encode" ]; then
+				sudo -u $user hadoop fs -mv $path $dir/$encoding
+				echo -e "   [service_path] ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
+				iterate $dir/$encoding $type_ $funct
+			elif [ "$funct" == "copy_encode" ]; then
+				sudo -u $user hadoop fs -mkdir $dir/$encoding
+				sudo -u $user hadoop fs -cp $path/* $dir/$encoding/
+				echo -e "   [service_path] ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
+				# From here on, everything must be replaced
+				iterate $dir/$encoding $type_ "replace_encode"
+			elif [ "$funct" == "analyze" ]; then
+				echo -e "   [service_path] ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
+				iterate $path $type_ $funct
+			else
+				echo "Unknown function '$funct'"
 			fi
-
-                        echo -e " |    |    |__ ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
-                fi
-        elif [ "$type_" == "entity_dir" ]; then
-                if [ "$encoding" == "null" ]; then
-			echo -e " |    |    |    |__ ${BLUE}$name${NOCOLOR} -> ${RED}unable${NOCOLOR}"
+		fi
+	elif [ "$type_" == "entity_dir" ]; then
+		if [ "$encoding" == "null" ]; then
+			echo -e "      [entity dir] ${BLUE}$name${NOCOLOR} -> ${RED}$name${NOCOLOR}"
+			iterate $path $type_ $funct
 		elif [ "$encoding" == "$name" ]; then
-                        echo -e " |    |    |    |__ ${BLUE}$name${NOCOLOR} --> $encoding"
-                else
-			if [ "$function" == "encode" ]; then
-				hadoop fs -mv $path $dir/$encoding
+			echo -e "      [entity dir] ${BLUE}$name${NOCOLOR} --> $encoding"
+			iterate $path $type_ $funct
+		else
+			if [ "$funct" == "replace_encode" ]; then
+				sudo -u $user hadoop fs -mv $path $dir/$encoding
+				echo -e "      [entity dir] ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
+				iterate $dir/$encoding $type_ $funct
+			elif [ "$funct" == "copy_encode" ]; then
+				sudo -u $user hadoop fs -mkdir $dir/$encoding
+				sudo -u $user hadoop fs -cp $path/* $dir/$encoding/
+				echo -e "      [entity dir] ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
+				# From here on, everything must be replaced
+				iterate $dir/$encoding $type_ "replace_encode"
+			elif [ "$funct" == "analyze" ]; then
+				echo -e "      [entity dir] ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
+				iterate $path $type_
+			else
+				echo "Unknown function '$funct'"
 			fi
-
-                        echo -e " |    |    |    |__ ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
-                fi
-        elif [ "$type_" == "entity_file" ]; then
-                if [ "$encoding" == "null" ]; then
-			echo -e " |    |    |    |    |__ ${BLUE}$name${NOCOLOR} -> ${RED}unable${NOCOLOR}"
+		fi
+	elif [ "$type_" == "entity_file" ]; then
+		if [ "$encoding" == "null" ]; then
+			echo -e "         [entity file] ${BLUE}$name${NOCOLOR} -> ${RED}$name${NOCOLOR}"
 		elif [ "$encoding" == "$name" ]; then
-                        echo -e " |    |    |    |    |__ ${BLUE}$name${NOCOLOR} --> $encoding"
-                else
-			if [ "$function" == "encode" ]; then
-				hadoop fs -mv $path $dir/$encoding
+			echo -e "         [entity file] ${BLUE}$name${NOCOLOR} --> $encoding"
+		else
+			if [ "$function" == "replace_encode" ]; then
+				sudo -u $user hadoop fs -mv $path $dir/$encoding
+			elif [ "$function" == "copy_encode" ]; then
+				# In fact, this should be 'cp' and 'rm', but summarized as 'mv'
+				sudo -u $user hadoop fs -mv $path $dir/$encoding
 			fi
 
-                        echo -e " |    |    |    |    |__ ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
-                fi
-        else
-                echo "Unknown type '$type_'"
-        fi
+			echo -e "         [entity file] ${BLUE}$name${NOCOLOR} --> ${GREEN}$encoding${NOCOLOR}"
+		fi
+	else
+		echo "Unknown type '$type_'"
+	fi
 }
 
 # Function to iterate a path
-# $1 --> path to be processed (input)
+# $1 --> path to be iterated (input)
 # $2 --> type of path (input)
+# $3 --> function to be performed (input)
 function iterate {
 	local path=$1
 	local type_=$2
-	local subpath
-	local subtype
+	local funct=$3
 
-	# Some pretty pritings
-	if [ "$type_" == "basepath" ]; then
-		echo "Entering $path ($type_)"
-	elif [ "$type_" == "service" ]; then
-		echo " |   Entering $path ($type_)"
-        elif [ "$type_" == "subservice" ]; then
-		echo " |    |   Entering $path ($type_)"
-        elif [ "$type_" == "entity_dir" ]; then
-		echo " |    |    |   Entering $path ($type_)"
-        elif [ "$type_" == "entity_file" ]; then
-		echo " |    |    |    |   Entering $path ($type_)"
-        else
-                echo "Unknown type '$type_'"
-        fi
-
-	# Iterate on the subpaths only if the current path is not an entity file
-	if [ "$type_" != "entity_file" ]; then
-		while read -r subpath; do
-			dirOrFile=$(hadoop fs -ls $path |grep $subpath |awk '{print $1}' |head -c 1)
-
-			if [ "$dirOrFile" == "d" ]; then
-				if [ "$type_" == "basepath" ]; then
-					subtype="service"
-				elif [ "$type_" == "service" ]; then
-					subtype="subservice"
-				elif [ "$type_" == "subservice" ]; then
-					subtype="entity_dir"
-				fi
-			else
-				subtype="entity_file"
-			fi
-
-			iterate $subpath $subtype
-	  	done < <(hadoop fs -ls $path | grep -v Found | awk '{print $8}')
-	fi
-
-	# Analyze the current path
-	if [ "$type_" != "basepath" ]; then
-		process $path $type_
-	fi
+	while read -r subpath; do
+		if [ "$type_" == "basepath" ]; then
+			process $subpath "service" $funct
+		elif [ "$type_" == "service" ]; then
+			process $subpath "service_path" $funct
+		elif [ "$type_" == "service_path" ]; then
+			process $subpath "entity_dir" $funct
+		elif [ "$type_" == "entity_dir" ]; then
+			process $subpath "entity_file" $funct
+		fi
+	done < <(sudo -u $user hadoop fs -ls $path | grep -v Found | awk '{print $8}')
 }
 
 # Main function
 load_dictionary
-iterate $basepath "basepath"
+iterate $basepath "basepath" $function
