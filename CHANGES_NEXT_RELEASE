@@ -1,2 +1,3 @@
 - [cygnus-ngsi][hardening] Update migration script for HDFS regarding new encoding (#1271)
 - [cygnus-ngsi][feature] Add support for geo:json Orion's type in NGSICartoDBSink (#1275)
+- [cygnus-common][hardening] Add IPv6 support to API and GUI (#1261)
