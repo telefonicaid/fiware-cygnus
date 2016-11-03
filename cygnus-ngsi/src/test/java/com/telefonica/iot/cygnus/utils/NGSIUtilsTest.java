@@ -18,6 +18,7 @@
 package com.telefonica.iot.cygnus.utils;
 
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.json.simple.JSONArray;
@@ -39,42 +40,43 @@ public class NGSIUtilsTest {
     } // NGSIUtilsTest
     
     /**
-     * [NGSIUtils.getLocation] -------- When getting a location, a CartoDB point is obtained when passing
+     * [NGSIUtils.getGeometry] -------- When getting a geometry, a CartoDB point is obtained when passing
      * an attribute of type 'geo:point'.
      */
     @Test
-    public void testGetLocationType() {
+    public void testGetGeometryGeopoint() {
         System.out.println(getTestTraceHead("[Utils.getLocation]")
-                + "-------- When getting a location, a CartoDB point is obtained when passing an attribute "
+                + "-------- When getting a geometry, a CartoDB point is obtained when passing an attribute "
                 + "of type 'geo:point'");
         String attrMetadataStr = "[]";
         String attrValue = "-3.7167, 40.3833";
         String attrType = "geo:point";
         boolean flipCoordinates = false; // irrelevant for this test
-        String location = NGSIUtils.getLocation(attrValue, attrType, attrMetadataStr, flipCoordinates);
+        ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(
+                attrValue, attrType, attrMetadataStr, flipCoordinates);
 
         try {
-            assertEquals("ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326)", location);
+            assertEquals("ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326)", geometry.getLeft());
             System.out.println(getTestTraceHead("[Utils.getLocation]")
-                    + "-  OK  - Location '" + location + "' obtained for an attribute of type '" + attrType
+                    + "-  OK  - Geometry '" + geometry.getLeft() + "' obtained for an attribute of type '" + attrType
                     + "' and value '" + attrValue + "'");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[Utils.getLocation]")
-                    + "- FAIL - Location '" + location + "' obtained for an attribute of type '" + attrType
+                    + "- FAIL - Geometry '" + geometry.getLeft() + "' obtained for an attribute of type '" + attrType
                     + "' and value '" + attrValue + "'");
             throw e;
-        } // try catch
-    } // testGetLocationType
+        } // try catch // try catch
+    } // testGetGeometryGeopoint
     
     /**
-     * [NGSIUtils.getLocation] -------- When getting a location, a CartoDB point is obtained when passing
-     * an attribute of type 'geo:point'.
+     * [NGSIUtils.getGeometry] -------- When getting a geometry, a CartoDB point is obtained when passing
+     * an attribute with 'geometry' metadata.
      */
     @Test
-    public void testGetLocationMetadata() {
+    public void testGetGeometryMetadata() {
         System.out.println(getTestTraceHead("[Utils.getLocation]")
-                + "-------- When getting a location, a CartoDB point is obtained when passing an attribute "
-                + "of type 'geo:point'");
+                + "-------- When getting a geometry, a CartoDB point is obtained when passing an attribute "
+                + "with 'location' metadata");
         JSONObject metadataJson = new JSONObject();
         metadataJson.put("name", "location");
         metadataJson.put("type", "string");
@@ -85,45 +87,76 @@ public class NGSIUtilsTest {
         String attrValue = "-3.7167, 40.3833";
         String attrType = "coordinates"; // irrelevant for this test
         boolean flipCoordinates = false; // irrelevant for this test
-        String location = NGSIUtils.getLocation(attrValue, attrType, attrMetadataStr, flipCoordinates);
+        ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(
+                attrValue, attrType, attrMetadataStr, flipCoordinates);
 
         try {
-            assertEquals("ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326)", location);
+            assertEquals("ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326)", geometry.getLeft());
             System.out.println(getTestTraceHead("[Utils.getLocation]")
-                    + "-  OK  - Location '" + location + "' obtained for an attribute with metadata '"
+                    + "-  OK  - Geometry '" + geometry.getLeft() + "' obtained for an attribute with metadata '"
                     + attrMetadataStr + "' and value '" + attrValue + "'");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[Utils.getLocation]")
-                    + "- FAIL - Location '" + location + "' obtained for an attribute with metadata '"
+                    + "- FAIL - Geometry '" + geometry.getLeft() + "' obtained for an attribute with metadata '"
                     + attrMetadataStr + "' and value '" + attrValue + "'");
             throw e;
-        } // try catch
-    } // testGetLocationMetadata
+        } // try catch // try catch
+    } // testGetGeometryMetadata
     
     /**
-     * [NGSIUtils.getLocation] -------- When getting a location, the original attribute is returned when the
-     * attribute type is not geo:point and there is no WGS84 location metadata.
+     * [NGSIUtils.getGeometry] -------- When getting a geometry, the original attribute is returned when the
+     * attribute type is not geo:point and there is no WGS84 geometry metadata.
      */
     @Test
-    public void testGetLocationNoGeolocation() {
+    public void testGetGeometryNoGeolocation() {
         System.out.println(getTestTraceHead("[Utils.getLocation]")
-                + "-------- When getting a location, the original attribute is returned when the attribute "
+                + "-------- When getting a geometry, the original attribute is returned when the attribute "
                 + "type is not geo:point and there is no WGS84 location metadata");
         String attrMetadataStr = "[]";
         String attrValue = "-3.7167, 40.3833";
         String attrType = "coordinates";
         boolean flipCoordinates = false; // irrelevant for this test
-        String location = NGSIUtils.getLocation(attrValue, attrType, attrMetadataStr, flipCoordinates);
+        ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(
+                attrValue, attrType, attrMetadataStr, flipCoordinates);
 
         try {
-            assertEquals(attrValue, location);
+            assertEquals(attrValue, geometry.getLeft());
             System.out.println(getTestTraceHead("[Utils.getLocation]")
-                    + "-  OK  - Location '" + location + "' obtained for a not geolocated attribute");
+                    + "-  OK  - Geometry '" + geometry.getLeft() + "' obtained for a not geolocated attribute");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[Utils.getLocation]")
-                    + "- FAIL - Location '" + location + "' obtained for a not geolocated attribute");
+                    + "- FAIL - Geometry '" + geometry.getLeft() + "' obtained for a not geolocated attribute");
             throw e;
-        } // try catch
-    } // testGetLocationNoGeolocation
+        } // try catch // try catch
+    } // testGetGeometryNoGeolocation
+    
+    /**
+     * [NGSIUtils.getGeometry] -------- When getting a geometry, a CartoDB geometry is obtained when passing
+     * an attribute of type 'geo:json'.
+     */
+    @Test
+    public void testGetGeometryGeojson() {
+        System.out.println(getTestTraceHead("[Utils.getLocation]")
+                + "-------- When getting a geometry, a CartoDB geometry is obtained when passing an attribute "
+                + "of type 'geo:json'");
+        String attrMetadataStr = "[]";
+        String attrValue = "{\"coordinates\": [-3.7167, 40.3833], \"type\": \"Point\"}";
+        String attrType = "geo:json";
+        boolean flipCoordinates = false; // irrelevant for this test
+        ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(
+                attrValue, attrType, attrMetadataStr, flipCoordinates);
+
+        try {
+            assertEquals("ST_GeomFromGeoJSON('{\"coordinates\": [-3.7167, 40.3833], \"type\": \"Point\"}')", geometry.getLeft());
+            System.out.println(getTestTraceHead("[Utils.getLocation]")
+                    + "-  OK  - Geometry '" + geometry.getLeft() + "' obtained for an attribute of type '" + attrType
+                    + "' and value '" + attrValue + "'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[Utils.getLocation]")
+                    + "- FAIL - Geometry '" + geometry.getLeft() + "' obtained for an attribute of type '" + attrType
+                    + "' and value '" + attrValue + "'");
+            throw e;
+        } // try catch // try catch
+    } // testGetGeometryGeojson
 
 } // NGSIUtilsTest
