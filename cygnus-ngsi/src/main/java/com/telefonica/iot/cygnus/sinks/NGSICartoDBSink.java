@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -180,8 +181,8 @@ public class NGSICartoDBSink extends NGSISink {
         backendMaxConns = context.getInteger("backend.max_conns", 500);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns=" + backendMaxConns + ")");
         backendMaxConnsPerRoute = context.getInteger("backend.max_conns_per_route", 100);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns_per_route=" + backendMaxConnsPerRoute
-                + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns_per_route="
+                + backendMaxConnsPerRoute + ")");
     } // configure
     
     @Override
@@ -209,7 +210,7 @@ public class NGSICartoDBSink extends NGSISink {
         LOGGER.info("[" + this.getName() + "] Json containing CartoDB API keys is syntactically OK");
 
         // Create the persistence backend
-        backends = new HashMap<String, CartoDBBackendImpl>();
+        backends = new HashMap<>();
 
         // Iterate on the JSONObject containing the API keys
         for (Object apiKey : apiKeys) {
@@ -265,7 +266,8 @@ public class NGSICartoDBSink extends NGSISink {
                 continue;
             } // if
 
-            backends.put(username, new CartoDBBackendImpl(host, port, ssl, key, backendMaxConns, backendMaxConnsPerRoute));
+            backends.put(username, new CartoDBBackendImpl(host, port, ssl, key, backendMaxConns,
+                    backendMaxConnsPerRoute));
         } // for
         
         if (backends.isEmpty()) {
@@ -351,13 +353,12 @@ public class NGSICartoDBSink extends NGSISink {
                 } // if else
                 
                 boolean first = true;
-                Iterator it = aggregation.keySet().iterator();
-            
-                while (it.hasNext()) {
-                    ArrayList<String> values = (ArrayList<String>) aggregation.get((String) it.next());
+                
+                for (String field : aggregation.keySet()) {
+                    ArrayList<String> values = (ArrayList<String>) aggregation.get(field);
                     String value = values.get(i);
                     
-                    if (!value.startsWith("ST_SetSRID(ST_MakePoint(")) {
+                    if (!field.equals("the_geom")) {
                         value = "'" + value + "'";
                     } // if
                     
@@ -367,7 +368,7 @@ public class NGSICartoDBSink extends NGSISink {
                     } else {
                         rows += "," + value;
                     } // if else
-                } // while
+                }
                 
                 rows += ")";
             } // for
@@ -411,7 +412,7 @@ public class NGSICartoDBSink extends NGSISink {
             tableName = buildTableName(servicePath, entity, attribute);
             
             // aggregation initialization
-            aggregation = new LinkedHashMap<String, ArrayList<String>>();
+            aggregation = new LinkedHashMap<>();
             aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<String>());
             aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<String>());
             aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<String>());
@@ -431,8 +432,7 @@ public class NGSICartoDBSink extends NGSISink {
                 String attrValue = contextAttribute.getContextValue(false);
                 String attrMetadata = contextAttribute.getContextMetadata();
                 
-                if (!NGSIUtils.getLocation(attrValue, attrType, attrMetadata, flipCoordinates).startsWith(
-                        "ST_SetSRID(ST_MakePoint(")) {
+                if (!NGSIUtils.getGeometry(attrValue, attrType, attrMetadata, flipCoordinates).getRight()) {
                     aggregation.put(attrName, new ArrayList<String>());
                     aggregation.put(attrName + "_md", new ArrayList<String>());
                 } // if
@@ -477,10 +477,11 @@ public class NGSICartoDBSink extends NGSISink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                String location = NGSIUtils.getLocation(attrValue, attrType, attrMetadata, flipCoordinates);
+                ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(attrValue, attrType, attrMetadata,
+                        flipCoordinates);
                 
-                if (location.startsWith("ST_SetSRID(ST_MakePoint(")) {
-                    aggregation.get(NGSIConstants.CARTO_DB_THE_GEOM).add(location);
+                if (location.right) {
+                    aggregation.get(NGSIConstants.CARTO_DB_THE_GEOM).add(location.getLeft());
                 } else {
                     aggregation.get(attrName).add(attrValue);
                     aggregation.get(attrName + "_md").add(attrMetadata);
@@ -521,11 +522,12 @@ public class NGSICartoDBSink extends NGSISink {
             String attrType = contextAttribute.getType();
             String attrValue = contextAttribute.getContextValue(false);
             String attrMetadata = contextAttribute.getContextMetadata();
-            String location = NGSIUtils.getLocation(attrValue, attrType, attrMetadata, flipCoordinates);
+            ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(attrValue, attrType, attrMetadata,
+                    flipCoordinates);
             String tableName = buildTableName(event.getServicePath(), event.getEntity(), event.getAttribute())
                     + CommonConstants.CONCATENATOR + "distance";
 
-            if (location.startsWith("ST_SetSRID(ST_MakePoint(")) {
+            if (location.getRight()) {
                 // Try creating the table... the cost of checking if it exists and creating it is higher than directly
                 // attempting to create it. If existing, nothing will be re-created and the new values will be inserted
                 
