@@ -195,6 +195,9 @@ public class CygnusApplication extends Application {
             option = new Option("t", "polling-interval", true, "polling interval");
             option.setRequired(false);
             options.addOption(option);
+            
+            option = new Option("6", "ipv6", false, "use ipv6 instead ipv4");
+            options.addOption(option);
 
             // Read the options
             CommandLineParser parser = new GnuParser();
@@ -229,6 +232,12 @@ public class CygnusApplication extends Application {
             
             if (commandLine.hasOption('t')) {
                 pollingInterval = new Integer(commandLine.getOptionValue('t'));
+            } // if
+            
+            boolean ipv6 = false;
+            
+            if (commandLine.hasOption('6')) {
+                ipv6 = true;
             } // if
             
             // the following is to ensure that by default the agent will fail on startup if the file does not exist
@@ -286,9 +295,13 @@ public class CygnusApplication extends Application {
             } // try catch
             
             // start the Management Interface, passing references to Flume components
-            LOGGER.info("Starting a Jetty server listening on port " + apiPort + " (Management Interface)");
+            if (ipv6) {
+                LOGGER.info("Starting a Jetty server listening on ::0:" + apiPort + " (Management Interface)");
+            } else {
+                LOGGER.info("Starting a Jetty server listening on 0.0.0.0:" + apiPort + " (Management Interface)");
+            }
             mgmtIfServer = new JettyServer(apiPort, guiPort, new ManagementInterface(configurationPath,
-                    configurationFile, sourcesRef, channelsRef, sinksRef, apiPort, guiPort));
+                    configurationFile, sourcesRef, channelsRef, sinksRef, apiPort, guiPort), ipv6);
             mgmtIfServer.start();
 
             // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)
