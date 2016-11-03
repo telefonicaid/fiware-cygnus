@@ -299,7 +299,8 @@ public class CygnusApplication extends Application {
                 LOGGER.info("Starting a Jetty server listening on ::0:" + apiPort + " (Management Interface)");
             } else {
                 LOGGER.info("Starting a Jetty server listening on 0.0.0.0:" + apiPort + " (Management Interface)");
-            }
+            } // if else
+            
             mgmtIfServer = new JettyServer(apiPort, guiPort, new ManagementInterface(configurationPath,
                     configurationFile, sourcesRef, channelsRef, sinksRef, apiPort, guiPort), ipv6);
             mgmtIfServer.start();
