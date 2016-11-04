@@ -125,6 +125,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         NGSIEvent ngsiEvent = new NGSIEvent(headers, originalNCR, map.getRight());
         
         // Return the intercepted event
+        LOGGER.debug("[nmi] Event put in the channel, id=" + event.hashCode());
         return ngsiEvent;
     } // intercept
 
@@ -133,7 +134,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         if (invalidConfiguration) {
             return events;
         } else {
-            List<Event> interceptedEvents = new ArrayList<Event>(events.size());
+            List<Event> interceptedEvents = new ArrayList<>(events.size());
         
             for (Event event : events) {
                 Event interceptedEvent = intercept(event);
