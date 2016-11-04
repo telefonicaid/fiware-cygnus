@@ -542,22 +542,22 @@ Authentication is done by means of an API key related to the username. Once auth
 ###<a name="section4.1"></a>Annex 1: provisioning a table in Carto
 Following you may find the queries required to provision a table in Carto. Start by creating the table:
 
-    $ curl -G "https://iotsupport.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=CREATE TABLE <table_name> (recvTime text, fiwareServicePath text, entityId text, entityType text, <attr_1> <type_1>, <attr_1>_md text, ..., <attr_n> <type_n>, <attr_n>_md text, the_geom geometry(POINT,4326))"
+    $ curl -G "https://<my_user>.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=CREATE TABLE <table_name> (recvTime text, fiwareServicePath text, entityId text, entityType text, <attr_1> <type_1>, <attr_1>_md text, ..., <attr_n> <type_n>, <attr_n>_md text, the_geom geometry(POINT,4326))"
 
 Every table in Carto has to be <i>cartodbfied</i>, if you want it appears in Carto web-based dashboard:
 
-    $ curl -G "https://iotsupport.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=SELECT CDB_CartodbfyTable('<my_user_or_schema>', '<table_name>')"
+    $ curl -G "https://<my_user>.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=SELECT CDB_CartodbfyTable('<my_user_or_schema>', '<table_name>')"
 
 Now, you should be able to insert some data (just for testing purpose, since Cygnus will be in charge of this part):
 
-    $ curl -G "https://iotsupport.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=INSERT INTO <table_name> (recvTime, fiwareServicePath, entityId, entityType, <attr_1>, <attr_1>_md, ..., <attr_n>, <attr_n>_md, the_geom) VALUES ('2016-04-19T07:09:53.116Z', '<service_path>', '<entity_id>', '<entity_type>', '<attr_1_value>', '<attr_1_metadata>', ..., '<attr_n_value>', '<attr_n_metadata>', 'ST_SetSRID(ST_MakePoint(<lat>, <lon>), 4326))"
+    $ curl -G "https://<my_user>.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=INSERT INTO <table_name> (recvTime, fiwareServicePath, entityId, entityType, <attr_1>, <attr_1>_md, ..., <attr_n>, <attr_n>_md, the_geom) VALUES ('2016-04-19T07:09:53.116Z', '<service_path>', '<entity_id>', '<entity_type>', '<attr_1_value>', '<attr_1_metadata>', ..., '<attr_n_value>', '<attr_n_metadata>', 'ST_SetSRID(ST_MakePoint(<lat>, <lon>), 4326))"
 
 You can query the data as:
 
-    $ curl -G "https://iotsupport.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=SELECT * FROM <table_name>"
+    $ curl -G "https://<my_user>.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=SELECT * FROM <table_name>"
 
 For completeness, let's see how to delete a table:
 
-    $ curl -G "https://iotsupport.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=DROP TABLE <table_name>"
+    $ curl -G "https://<my_user>.cartodb.com/api/v2/sql?api_key=<api_key>" --data-urlencode "q=DROP TABLE <table_name>"
 
 [Top](#top)
