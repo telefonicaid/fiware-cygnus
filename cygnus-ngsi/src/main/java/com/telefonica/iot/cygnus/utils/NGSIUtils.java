@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.utils;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -82,27 +83,34 @@ public final class NGSIUtils {
     } // encodeSTHCollection
     
     /**
-     * Gets the geolocation value, ready for insertion in CartoDB, given a NGSI attribute value and its metadata.
+     * Gets a geometry value, ready for insertion in CartoDB, given a NGSI attribute value and its metadata.
      * If the attribute is not geo-related, it is returned as it is.
      * @param attrValue
      * @param attrType
      * @param metadata
      * @param flipCoordinates
-     * @return The geolocation value, ready for insertion in CartoDB, or tehe value as it is
+     * @return The geometry value, ready for insertion in CartoDB, or the value as it is
      */
-    public static String getLocation(String attrValue, String attrType, String metadata, boolean flipCoordinates) {
+    public static ImmutablePair<String, Boolean> getGeometry(String attrValue, String attrType, String metadata,
+            boolean flipCoordinates) {
         // First, check the attribute type
         if (attrType.equals("geo:point")) {
             String[] split = attrValue.split(",");
                 
             if (flipCoordinates) {
-                return "ST_SetSRID(ST_MakePoint(" + split[1].trim() + "," + split[0].trim() + "), 4326)";
+                return new ImmutablePair(
+                        "ST_SetSRID(ST_MakePoint(" + split[1].trim() + "," + split[0].trim() + "), 4326)", true);
             } else {
-                return "ST_SetSRID(ST_MakePoint(" + split[0].trim() + "," + split[1].trim() + "), 4326)";
+                return new ImmutablePair(
+                        "ST_SetSRID(ST_MakePoint(" + split[0].trim() + "," + split[1].trim() + "), 4326)", true);
             } // if else
         } // if
         
-        // The type was not 'geo:pint', thus try the metadata
+        if (attrType.equals("geo:json")) {
+            return new ImmutablePair("ST_GeomFromGeoJSON('" + attrValue + "')", true);
+        } // if
+        
+        // The type was not 'geo:point' nor 'geo:json', thus try the metadata
         JSONParser parser = new JSONParser();
         JSONArray mds;
         
@@ -110,7 +118,7 @@ public final class NGSIUtils {
             mds = (JSONArray) parser.parse(metadata);
         } catch (ParseException e) {
             LOGGER.error("Error while parsing the metadata. Details: " + e.getMessage());
-            return attrValue;
+            return new ImmutablePair(attrValue, false);
         } // try catch
         
         for (Object mdObject : mds) {
@@ -123,15 +131,17 @@ public final class NGSIUtils {
                 String[] split = attrValue.split(",");
                 
                 if (flipCoordinates) {
-                    return "ST_SetSRID(ST_MakePoint(" + split[1].trim() + "," + split[0].trim() + "), 4326)";
+                    return new ImmutablePair(
+                            "ST_SetSRID(ST_MakePoint(" + split[1].trim() + "," + split[0].trim() + "), 4326)", true);
                 } else {
-                    return "ST_SetSRID(ST_MakePoint(" + split[0].trim() + "," + split[1].trim() + "), 4326)";
+                    return new ImmutablePair(
+                            "ST_SetSRID(ST_MakePoint(" + split[0].trim() + "," + split[1].trim() + "), 4326)", true);
                 } // if else
             } // if
         } // for
         
         // The attribute was not related to a geolocation
-        return attrValue;
-    } // getLocation
+        return new ImmutablePair(attrValue, false);
+    } // getGeometry
         
 } // NGSIUtils
