@@ -5,34 +5,35 @@ Content:
 * [GET `/v1/version`](#section2)
 * [GET `/v1/stats`](#section3)
 * [PUT `/v1/stats`](#section4)
-* [GET `/v1/groupingrules`](#section5)
-* [POST `/v1/groupingrules`](#section6)
-* [PUT `/v1/groupingrules`](#section7)
-* [DELETE `/v1/groupingrules`](#section8)
-* [POST `/v1/subscriptions`](#section9)
-  * [`NGSI Version 1`](#section9.1)
-  * [`NGSI Version 2`](#section9.2)
-* [DELETE `/v1/subscriptions`](#section10)
-* [GET `/v1/subscriptions`](#section11)
-  * [GET subscription by ID](#section11.1)
-  * [GET all subscriptions](#section11.2)
-* [GET `/v1/admin/log/appenders`](#section12)
-  * [GET appender by name](#section12.1)
-  * [GET all appenders](#section12.2)
-* [GET `/v1/admin/log/loggers`](#section13)
-  * [GET logger by name](#section13.1)
-  * [GET all loggers](#section13.2)
-* [PUT and POST methods for loggers and appenders](#section14)
-  * [PUT `/v1/admin/log/appenders`](#section14.1)
-  * [POST `/v1/admin/log/appenders`](#section14.2)
-  * [PUT `/v1/admin/log/loggers`](#section14.3)
-  * [POST `/v1/admin/log/loggers`](#section14.4)
-* [DELETE `/v1/admin/log/appenders`](#section15)
-  * [DELETE appender by name](#section15.1)
-  * [DELETE all appenders](#section15.2)
-* [DELETE `/v1/admin/log/loggers`](#section16)
-  * [DELETE logger by name](#section16.1)
-  * [DELETE all loggers](#section16.2)
+* [GET `/v1/namemappings`](#section5)
+* [GET `/v1/groupingrules`](#section6)
+* [POST `/v1/groupingrules`](#section7)
+* [PUT `/v1/groupingrules`](#section8)
+* [DELETE `/v1/groupingrules`](#section9)
+* [POST `/v1/subscriptions`](#section10)
+  * [`NGSI Version 1`](#section10.1)
+  * [`NGSI Version 2`](#section10.2)
+* [DELETE `/v1/subscriptions`](#section11)
+* [GET `/v1/subscriptions`](#section12)
+  * [GET subscription by ID](#section12.1)
+  * [GET all subscriptions](#section12.2)
+* [GET `/v1/admin/log/appenders`](#section13)
+  * [GET appender by name](#section13.1)
+  * [GET all appenders](#section13.2)
+* [GET `/v1/admin/log/loggers`](#section14)
+  * [GET logger by name](#section14.1)
+  * [GET all loggers](#section14.2)
+* [PUT and POST methods for loggers and appenders](#section15)
+  * [PUT `/v1/admin/log/appenders`](#section15.1)
+  * [POST `/v1/admin/log/appenders`](#section15.2)
+  * [PUT `/v1/admin/log/loggers`](#section15.3)
+  * [POST `/v1/admin/log/loggers`](#section15.4)
+* [DELETE `/v1/admin/log/appenders`](#section16)
+  * [DELETE appender by name](#section16.1)
+  * [DELETE all appenders](#section16.2)
+* [DELETE `/v1/admin/log/loggers`](#section17)
+  * [DELETE logger by name](#section17.1)
+  * [DELETE all loggers](#section17.2)
 
 ##<a name="section1"></a>Apiary version of this document
 This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/latests) as well.
@@ -148,7 +149,53 @@ Response:
 
 [Top](#top)
 
-##<a name="section5"></a>`GET /v1/groupingrules`
+##<a name="section5"></a>`GET /v1/namemappings`
+Gets the configured [namemappings](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md).
+
+```
+GET http://<cygnus_host>:<management_port>/v1/namemappings
+```
+
+Response:
+
+```
+{
+    "success":"true",
+    "serviceMapping": [
+        {
+            "originalService":"",
+            "newService":"",
+            "servicePathMappings": [
+                {
+                    "originalServicePath":"",
+                    "newServicePath":"",
+                    "entityMappings": [
+                        {
+                            "originalEntityId":"",
+                            "originalEntityType":"",
+                            "newEntityId":"",
+                            "newEntityType":"",
+                            "attributeMappings":[
+                                {
+                                    "originalAttributeName":"",
+                                    "originalAttributeType":"",
+                                    "newAttributeName":"",
+                                    "newAttributeType":""
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+
+```
+
+[Top](#top)
+
+##<a name="section6"></a>`GET /v1/groupingrules`
 Gets the configured [grouping rules](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md).
 
 ```
@@ -185,7 +232,7 @@ Response:
 
 [Top](#top)
 
-##<a name="section6"></a>`POST /v1/groupingrules`
+##<a name="section7"></a>`POST /v1/groupingrules`
 Adds a new rule, passed as a Json in the payload, to the [grouping rules](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md).
 
 ```
@@ -208,7 +255,7 @@ Please observe the `id` field is not passed as part of the posted Json. This is 
 
 [Top](#top)
 
-##<a name="section7"></a>`PUT /v1/groupingrules`
+##<a name="section8"></a>`PUT /v1/groupingrules`
 Updates an already existent [grouping rules](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md), given its ID as a query parameter and passed the rule as a Json in the payload.
 
 ```
@@ -229,7 +276,7 @@ Response:
 
 [Top](#top)
 
-##<a name="section8"></a>`DELETE /v1/groupingrules`
+##<a name="section9"></a>`DELETE /v1/groupingrules`
 Deletes a [grouping rules](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md), given its ID as a query parameter.
 
 ```
@@ -244,8 +291,8 @@ Response:
 
 [Top](#top)
 
-##<a name="section9"></a>`POST /v1/subscriptions`
-###<a name="section9.1"></a>`NGSI Version 1`
+##<a name="section10"></a>`POST /v1/subscriptions`
+###<a name="section10.1"></a>`NGSI Version 1`
 
 Creates a new subscription to Orion given the version of NGSI (`ngsi_version=1` in this case). The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
 
@@ -306,7 +353,7 @@ Please observe Cygnus checks if the Json passed in the payload is valid (syntact
 
 [Top](#top)
 
-###<a name="section9.2"></a>`NGSI Version 2`
+###<a name="section10.2"></a>`NGSI Version 2`
 
 Creates a new subscription to Orion given the version of NGSI (`ngsi_version=2` in this case). The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
 
@@ -378,7 +425,7 @@ Please observe Cygnus checks if the Json passed in the payload is valid (syntact
 
 [Top](#top)
 
-##<a name="section10"></a>`DELETE /v1/subscriptions`
+##<a name="section11"></a>`DELETE /v1/subscriptions`
 
 Deletes a subscription made to Orion given its ID and the NGSI version. The Json passed in the payload contains the Orion's endpoint details.
 
@@ -433,8 +480,8 @@ Missing fields (empty or not given):
 
 [Top](#top)
 
-##<a name="section11"></a>`GET /v1/subscriptions`
-###<a name="section11.1"></a> GET subscription by ID
+##<a name="section12"></a>`GET /v1/subscriptions`
+###<a name="section12.1"></a> GET subscription by ID
 
 Gets an existent subscription from Orion, given the NGSI version and the subscription id as a query parameter.
 
@@ -479,7 +526,7 @@ Missing or empty parameters:
 
 [Top](#top)
 
-###<a name="section11.2"></a> GET all subscriptions
+###<a name="section12.2"></a> GET all subscriptions
 
 Gets all existent subscriptions from Orion, given the NGSI version as a query parameter.
 
@@ -518,8 +565,8 @@ Missing or empty parameters:
 
 [Top](#top)
 
-##<a name="section12"></a> GET `/v1/admin/log/appenders`
-###<a name="section12.1"></a> GET appender by name
+##<a name="section13"></a> GET `/v1/admin/log/appenders`
+###<a name="section13.1"></a> GET appender by name
 
 Gets an existent appender from a running logger given its name. It can be retrieved from the running Cygnus or from the `log4j.properties` file.
 If parameterised with `transient=true` (or omitting this parameter) the appenders are retrieved from Cygnus, if `transient=false` are retrieved from file.
@@ -547,7 +594,7 @@ Invalid `transient` parameter is given:
 
 [Top](#top)
 
-###<a name="section12.2"></a> GET all appenders
+###<a name="section13.2"></a> GET all appenders
 
 Gets all existent appenders from a running logger. They can be retrieved from the running Cygnus or from the `log4j.properties` file.
 If parameterised with `transient=true` (or omitting this parameter) the appenders are retrieved from Cygnus, if `transient=false` are retrieved from file.
@@ -575,8 +622,8 @@ Invalid `transient` parameter is given:
 
 [Top](#top)
 
-##<a name="section13"></a> GET `/v1/admin/log/loggers`
-###<a name="section13.1"></a> GET logger by name
+##<a name="section14"></a> GET `/v1/admin/log/loggers`
+###<a name="section14.1"></a> GET logger by name
 
 Gets an existent logger from a running Cygnus given its name. It can be retrieved from the running Cygnus or from the `log4j.properties` file.
 If parameterised with `transient=true` (or omitting this parameter) the logger is retrieved from Cygnus, if `transient=false` is retrieved from file.
@@ -604,7 +651,7 @@ Invalid `transient` parameter is given:
 
 [Top](#top)
 
-###<a name="section13.2"></a> GET all loggers
+###<a name="section14.2"></a> GET all loggers
 
 Gets all existent loggers from a running Cygnus. They can be retrieved from the running Cygnus or from the `log4j.properties` file.
 If parameterised with `transient=true` (or omitting this parameter) the loggers are retrieved from Cygnus, if `transient=false` are retrieved from file.
@@ -632,7 +679,7 @@ When an invalid `transient` parameter is given:
 
 [Top](#top)
 
-##<a name="section14"></a> PUT and POST methods for loggers and appenders
+##<a name="section15"></a> PUT and POST methods for loggers and appenders
 
 Following table resume the behaviour of PUT and POST method for every mode (`transient=true` or `transient=false`) and every method:
 
@@ -646,7 +693,7 @@ Following table resume the behaviour of PUT and POST method for every mode (`tra
 | DELETE              |    YES      |     YES      |    YES      |     YES      |
 
 
-###<a name="section14.1"></a> PUT `/v1/admin/log/appenders`
+###<a name="section15.1"></a> PUT `/v1/admin/log/appenders`
 
 Puts an appender in a running Cygnus given a JSON with the information about the name and class of the appender and its layout and ConversionPattern of its pattern. If parameterised with `transient=true` (or omitting this parameter) the appender is updated if the name is equals with the current active appender; if `transient=false` the appender is added or updated in the file.
 
@@ -695,7 +742,7 @@ Sending only a request without JSON or sending a invalid one:
 
 [Top](#top)
 
-###<a name="section14.2"></a> POST `/v1/admin/log/appenders`
+###<a name="section15.2"></a> POST `/v1/admin/log/appenders`
 
 Posts an appender in a running Cygnus given a JSON with the information about the name and class of the appender and its layout and ConversionPattern of its pattern. If parameterised with `transient=false` is posted on the file. POST method is not implemented with `transient=true`.
 
@@ -744,7 +791,7 @@ Sending a request without JSON or an invalid one:
 
 [Top](#top)
 
-###<a name="section14.3"></a> PUT `/v1/admin/log/loggers`
+###<a name="section15.3"></a> PUT `/v1/admin/log/loggers`
 
 Puts an logger in a running Cygnus given a JSON with the information about the name and level of the logger. If parameterised with `transient=true` (or omitting this parameter) the logger is updated if the name is equals with a current logger. PUT method only update in transient mode due to logger creation limitations in the code. If `transient=false` the appender is added or updated in the file.
 
@@ -789,7 +836,7 @@ Sending a request without JSON or an invalid one:
 
 [Top](#top)
 
-###<a name="section14.4"></a> POST `/v1/admin/log/loggers`
+###<a name="section15.4"></a> POST `/v1/admin/log/loggers`
 
 Posts an logger on a running Cygnus. This method only accepts the parameter `transient=false` due to logger creation limitations in the code. Therefore, the loggers are posted on the `log4j.properties` file.
 Posts an logger in a running Cygnus given a JSON with the information about the name and level of the logger. If parameterised with `transient=false` is posted on the file. POST method is not implemented with `transient=true`.
@@ -836,8 +883,8 @@ Sending a request without JSON or an invalid one:
 [Top](#top)
 
 
-##<a name="section15"></a> DELETE `/v1/admin/log/appenders`
-###<a name="section15.1"></a> DELETE appender by name
+##<a name="section16"></a> DELETE `/v1/admin/log/appenders`
+###<a name="section16.1"></a> DELETE appender by name
 
 Deletes an existent appender from a running logger given its name. It can be deleted on the running Cygnus or in the `log4j.properties` file.
 If parameterised with `transient=true` (or omitting this parameter) the appender is deleted on Cygnus, if `transient=false` is deleted in the file.
@@ -865,7 +912,7 @@ When an invalid `transient` parameter is given:
 
 [Top](#top)
 
-###<a name="section15.2"></a> DELETE all appenders
+###<a name="section16.2"></a> DELETE all appenders
 
 Deletes all existent appenders from a running logger. They can be deleted on the running Cygnus or in the `log4j.properties` file.
 If parameterised with `transient=true` (or omitting this parameter) the appenders are deleted on Cygnus, if `transient=false` are deleted in the file.
@@ -888,8 +935,8 @@ When an invalid `transient` parameter is given:
 
 [Top](#top)
 
-##<a name="section16"></a> DELETE `/v1/admin/log/loggers`
-###<a name="section16.1"></a> DELETE logger by name
+##<a name="section17"></a> DELETE `/v1/admin/log/loggers`
+###<a name="section17.1"></a> DELETE logger by name
 
 Deletes an existent logger from a running Cygnus given its name. It can be deleted on a running Cygnus or in the `log4j.properties` file.
 If parameterised with `transient=true` (or omitting this parameter) the logger is deleted on Cygnus, if `transient=false` is deleted in the file.
@@ -917,7 +964,7 @@ When an invalid `transient` parameter is given:
 
 [Top](#top)
 
-###<a name="section16.2"></a> DELETE all loggers
+###<a name="section17.2"></a> DELETE all loggers
 
 Deletes all existent loggers from a running Cygnus. They can be deleted on a running Cygnus or in the `log4j.properties` file.
 If parameterised with `transient=true` (or omitting this parameter) the loggers are deleted on Cygnus, if `transient=false` are deleted in the file.

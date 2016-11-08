@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.management;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -28,6 +29,7 @@ import com.telefonica.iot.cygnus.channels.CygnusChannel;
 import com.telefonica.iot.cygnus.backends.orion.OrionBackendImpl;
 import com.telefonica.iot.cygnus.containers.CygnusSubscriptionV1;
 import com.telefonica.iot.cygnus.containers.CygnusSubscriptionV2;
+import com.telefonica.iot.cygnus.containers.NameMappings;
 import com.telefonica.iot.cygnus.containers.OrionEndpoint;
 import com.telefonica.iot.cygnus.handlers.CygnusHandler;
 import com.telefonica.iot.cygnus.interceptors.CygnusGroupingRule;
@@ -62,6 +64,7 @@ import org.mortbay.jetty.handler.AbstractHandler;
 import org.json.simple.JSONObject;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonConstants.LoggingLevels;
+import com.telefonica.iot.cygnus.utils.JsonUtils;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -69,7 +72,6 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Appender;
-import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
 /**
  *
@@ -80,6 +82,8 @@ public class ManagementInterface extends AbstractHandler {
     private static final CygnusLogger LOGGER = new CygnusLogger(ManagementInterface.class);
     private final File configurationFile;
     private String groupingRulesConfFile;
+    private String nameMappingsConfFile;
+    private NameMappings nameMappings;
     private final ImmutableMap<String, SourceRunner> sources;
     private final ImmutableMap<String, Channel> channels;
     private final ImmutableMap<String, SinkRunner> sinks;
@@ -116,7 +120,16 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("There was a problem while obtaining the grouping rules configuration file. Details: "
                     + e.getMessage());
         } // try catch
-
+        
+        try {
+            this.nameMappingsConfFile = getNameMappingsConfFile();
+            loadNameMappings();
+        } catch (Exception e) {
+            this.nameMappingsConfFile = null;
+            LOGGER.error("There was a problem while obtainin the name mappings configuration file: Details: "
+                    + e.getMessage());
+        } // try catch
+        
         this.sources = sources;
         this.channels = channels;
         this.sinks = sinks;
@@ -165,6 +178,8 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetAdminLogLoggers(request, response);
                 } else if (uri.startsWith("/v1/admin/log/appenders")) {
                     handleGetAdminLogAppenders(request, response);
+                } else if (uri.startsWith("/v1/namemappings")) {
+                    handleGetNameMappings(request, response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                     response.getWriter().println(method + " " + uri + " Not implemented");
@@ -423,6 +438,21 @@ public class ManagementInterface extends AbstractHandler {
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println("{\"success\":\"true\"," + rulesStr + "}");
     } // handleGetGroupingRules
+    
+    protected void handleGetNameMappings(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+                
+        if (nameMappingsConfFile == null) {
+            response.getWriter().println("{\"success\":\"false\","
+                    + "\"error\":\"Configuration file for Name Mappings not found. Details: "
+                    + nameMappingsConfFile + "\"}");
+            LOGGER.error("Configuration file for Name Mappings not found. Details: " + nameMappingsConfFile);
+            return;
+        } // if
+        
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().println("{\"success\":\"true\",\n" + nameMappings.toString());
+    } // handleGetNameMappings
     
     /**
      * Handles GET /admin/log.
@@ -2904,6 +2934,82 @@ public class ManagementInterface extends AbstractHandler {
         reader.close();
         return groupingRulesConfFile;
     } // getGroupingRulesConfFile
+    
+    private String getNameMappingsConfFile() throws IOException {
+        if (!configurationFile.exists()) {
+            return "404 - Configuration file for Cygnus not found. Details: "
+                    + configurationFile.toString();
+        } // if
+
+        BufferedReader reader = new BufferedReader(new FileReader(configurationFile));
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            if (!line.startsWith("#")) {
+                if (line.contains("name_mappings_conf_file")) {
+                    String[] splits = line.split("=");
+                    nameMappingsConfFile = splits[1].replaceAll(" ", "");
+                    break;
+                } // if
+            } // if
+        } // while
+
+        reader.close();
+        return nameMappingsConfFile;
+    } // getGroupingRulesConfFile
+    
+    private void loadNameMappings() {
+        String nameMappingsStr = null;
+        
+        // Read the Json string from the configuration file
+        try {
+            nameMappingsStr = JsonUtils.readJsonFile(nameMappingsConfFile);
+            LOGGER.debug("[nmi] Reading name mappings, Json read: " + nameMappingsStr);
+        } catch (Exception e) {
+            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
+            nameMappingsStr = null;
+            return;
+        } // try catch
+        
+        loadNameMappings(nameMappingsStr);
+    } // loadNameMappings
+    
+    /**
+     * Loads the Name Mappings given a Json string. It is protected since it only can be used by this class and test
+     * classes.
+     * @param jsonStr
+     */
+    protected void loadNameMappings(String jsonStr) {
+        if (jsonStr == null) {
+            LOGGER.debug("[nmi] Reding name mappings, no file to read");
+            nameMappings = null;
+            return;
+        } // if
+
+        // Parse the Json string
+        Gson gson = new Gson();
+
+        try {
+            nameMappings = gson.fromJson(jsonStr, NameMappings.class);
+            LOGGER.debug("[nmi] Reading attribute mappings, Json parsed");
+        } catch (JsonIOException e) {
+            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
+            nameMappings = null;
+            return;
+        } catch (JsonSyntaxException e) {
+            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
+            nameMappings = null;
+            return;
+        } // try catch
+
+        // Check if any of the mappings is not valid, e.g. some field is missing
+        nameMappings.purge();
+        LOGGER.debug("[nmi] Reading name mappings, Json purged");
+        
+        // Pre-compile the regular expressions
+        nameMappings.compilePatterns();
+        LOGGER.debug("[nmi] Reading name mappings, regular expressions pre-compiled");
+    } // loadNameMappings
 
     private void handleGetGUI(HttpServletResponse response) throws IOException {
         response.setContentType("application/json; charset=utf-8");
