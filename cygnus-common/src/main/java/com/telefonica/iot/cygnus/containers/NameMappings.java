@@ -54,7 +54,6 @@ public class NameMappings {
         } // for
     } // compilePatterns
     
-        
     /**
      * Overwrite of toString() method.
      * @return 

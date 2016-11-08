@@ -163,24 +163,24 @@ Response:
     "success":"true",
     "serviceMapping": [
         {
-            "originalService":"",
-            "newService":"",
+            "originalService":"service",
+            "newService":"newService",
             "servicePathMappings": [
                 {
-                    "originalServicePath":"",
-                    "newServicePath":"",
+                    "originalServicePath":"/servicePath",
+                    "newServicePath":"/newServicePath",
                     "entityMappings": [
                         {
-                            "originalEntityId":"",
-                            "originalEntityType":"",
-                            "newEntityId":"",
-                            "newEntityType":"",
+                            "originalEntityId":"Room1",
+                            "originalEntityType":"Room",
+                            "newEntityId":"BigRoom1",
+                            "newEntityType":"BigRoom",
                             "attributeMappings":[
                                 {
-                                    "originalAttributeName":"",
-                                    "originalAttributeType":"",
-                                    "newAttributeName":"",
-                                    "newAttributeType":""
+                                    "originalAttributeName":"temperature",
+                                    "originalAttributeType":"float",
+                                    "newAttributeName":"bedsNumber",
+                                    "newAttributeType":"integer"
                                 }
                             ]
                         }

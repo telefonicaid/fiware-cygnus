@@ -2964,9 +2964,9 @@ public class ManagementInterface extends AbstractHandler {
         // Read the Json string from the configuration file
         try {
             nameMappingsStr = JsonUtils.readJsonFile(nameMappingsConfFile);
-            LOGGER.debug("[nmi] Reading name mappings, Json read: " + nameMappingsStr);
+            LOGGER.debug("Reading name mappings, Json read: " + nameMappingsStr);
         } catch (Exception e) {
-            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
+            LOGGER.error("Runtime error (" + e.getMessage() + ")");
             nameMappingsStr = null;
             return;
         } // try catch
@@ -2981,7 +2981,7 @@ public class ManagementInterface extends AbstractHandler {
      */
     protected void loadNameMappings(String jsonStr) {
         if (jsonStr == null) {
-            LOGGER.debug("[nmi] Reding name mappings, no file to read");
+            LOGGER.debug("Reding name mappings, no file to read");
             nameMappings = null;
             return;
         } // if
@@ -2991,24 +2991,24 @@ public class ManagementInterface extends AbstractHandler {
 
         try {
             nameMappings = gson.fromJson(jsonStr, NameMappings.class);
-            LOGGER.debug("[nmi] Reading attribute mappings, Json parsed");
+            LOGGER.debug("Reading attribute mappings, Json parsed");
         } catch (JsonIOException e) {
-            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
+            LOGGER.error("Runtime error (" + e.getMessage() + ")");
             nameMappings = null;
             return;
         } catch (JsonSyntaxException e) {
-            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
+            LOGGER.error("Runtime error (" + e.getMessage() + ")");
             nameMappings = null;
             return;
         } // try catch
 
         // Check if any of the mappings is not valid, e.g. some field is missing
         nameMappings.purge();
-        LOGGER.debug("[nmi] Reading name mappings, Json purged");
+        LOGGER.debug("Reading name mappings, Json purged");
         
         // Pre-compile the regular expressions
         nameMappings.compilePatterns();
-        LOGGER.debug("[nmi] Reading name mappings, regular expressions pre-compiled");
+        LOGGER.debug("Reading name mappings, regular expressions pre-compiled");
     } // loadNameMappings
 
     private void handleGetGUI(HttpServletResponse response) throws IOException {
