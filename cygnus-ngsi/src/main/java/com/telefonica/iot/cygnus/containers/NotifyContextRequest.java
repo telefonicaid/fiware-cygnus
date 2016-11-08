@@ -39,7 +39,7 @@ public class NotifyContextRequest {
      * Constructor for Gson, a Json parser.
      */
     public NotifyContextRequest() {
-        contextResponses = new ArrayList<ContextElementResponse>();
+        contextResponses = new ArrayList<>();
     } // NotifyContextRequest
 
     public String getSubscriptionId() {
@@ -76,7 +76,7 @@ public class NotifyContextRequest {
         copy.originator = this.originator;
         
         if (this.contextResponses != null) {
-            copy.contextResponses = new ArrayList<ContextElementResponse>();
+            copy.contextResponses = new ArrayList<>();
 
             for (ContextElementResponse cer : this.contextResponses) {
                 copy.contextResponses.add(cer.deepCopy());
@@ -174,7 +174,7 @@ public class NotifyContextRequest {
          * Constructor for Gson, a Json parser.
          */
         public ContextElement() {
-            attributes = new ArrayList<ContextAttribute>();
+            attributes = new ArrayList<>();
         } // ContextElement
         
         public ArrayList<ContextAttribute> getAttributes() {
@@ -199,13 +199,14 @@ public class NotifyContextRequest {
          * @return
          */
         public String getString(String fieldName) {
-            if (fieldName.equals("entityId")) {
-                return getId();
-            } else if (fieldName.equals("entityType")) {
-                return getType();
-            } else {
-                return null;
-            } // if else
+            switch (fieldName) {
+                case "entityId":
+                    return getId();
+                case "entityType":
+                    return getType();
+                default:
+                    return null; // if else
+            } // switch
         } // getString
         
         public void setAttributes(ArrayList<ContextAttribute> attributes) {
@@ -256,7 +257,7 @@ public class NotifyContextRequest {
             ce.isPattern = this.isPattern;
             
             if (this.attributes != null) {
-                ce.attributes = new ArrayList<ContextAttribute>();
+                ce.attributes = new ArrayList<>();
 
                 for (ContextAttribute ca : this.attributes) {
                     ce.attributes.add(ca.deepCopy());
@@ -305,7 +306,7 @@ public class NotifyContextRequest {
          * Constructor for Gson, a Json parser.
          */
         public ContextAttribute() {
-            metadatas = new ArrayList<ContextMetadata>();
+            metadatas = new ArrayList<>();
         } // ContextAttribute
         
         public String getName() {
@@ -390,7 +391,7 @@ public class NotifyContextRequest {
             ca.value = this.value;
             
             if (this.metadatas != null) {
-                ca.metadatas = new ArrayList<ContextMetadata>();
+                ca.metadatas = new ArrayList<>();
                 
                 for (ContextMetadata cm : this.metadatas) {
                     ca.metadatas.add(cm.deepCopy());
