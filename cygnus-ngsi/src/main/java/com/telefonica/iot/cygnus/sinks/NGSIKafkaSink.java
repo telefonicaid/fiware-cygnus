@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.backends.kafka.KafkaBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
@@ -131,25 +132,28 @@ public class NGSIKafkaSink extends NGSISink {
             return;
         } // if
 
-        // iterate on the destinations, for each one a single create / append will be performed
-        for (String destination : batch.getDestinations()) {
-            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
-                    + " destination");
+        // Iterate on the destinations
+        batch.startIterator();
+        
+        while (batch.hasNext()) {
+            String destination = batch.getNextDestination();
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the "
+                    + destination + " destination");
 
-            // get the sub-batch for this destination
-            ArrayList<NGSIEvent> subBatch = batch.getEvents(destination);
+            // Get the events within the current sub-batch
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
 
-            // get an aggregator for this destination and initialize it
+            // Get an aggregator for this destination and initialize it
             KafkaAggregator aggregator = new KafkaAggregator();
-            aggregator.initialize(subBatch.get(0));
+            aggregator.initialize(events.get(0));
 
-            for (NGSIEvent cygnusEvent : subBatch) {
-                aggregator.aggregate(cygnusEvent);
+            for (NGSIEvent event : events) {
+                aggregator.aggregate(event);
             } // for
 
-            // persist the aggregation
+            // Persist the aggregation
             persistAggregation(aggregator);
-            batch.setPersisted(destination);
+            batch.setNextPersisted(true);
         } // for
     } // persistBatch
     
@@ -215,9 +219,10 @@ public class NGSIKafkaSink extends NGSISink {
         // string containing the data aggregation
         protected String aggregation;
         protected String service;
-        protected String servicePath;
-        protected String entity;
-        protected String attribute;
+        protected String servicePathForData;
+        protected String servicePathForNaming;
+        protected String entityForNaming;
+        protected String attributeForNaming;
 
         public KafkaAggregator() {
             aggregation = "";
@@ -229,38 +234,39 @@ public class NGSIKafkaSink extends NGSISink {
 
         public String getService() {
             return service;
-        } // getService
+        } // getServiceForNaming
 
-        public String getServicePath() {
-            return servicePath;
-        } // getServicePath
+        public String getServicePathForNaming() {
+            return servicePathForNaming;
+        } // getServicePathForNaming
         
-        public String getEntity() {
-            return entity;
-        } // getEntity
+        public String getEntityForNaming() {
+            return entityForNaming;
+        } // getEntityForNaming
         
-        public String getAttribute() {
-            return attribute;
-        } // getAttribute
+        public String getAttributeForNaming() {
+            return attributeForNaming;
+        } // getAttributeForNaming
 
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
-            service = cygnusEvent.getService();
-            servicePath = cygnusEvent.getServicePath();
-            entity = cygnusEvent.getEntity();
-            attribute = cygnusEvent.getAttribute();
+        public void initialize(NGSIEvent event) throws Exception {
+            service = event.getServiceForNaming(enableNameMappings);
+            servicePathForData = event.getServicePathForData();
+            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            attributeForNaming = event.getAttributeForNaming(enableNameMappings);
         } // initialize
 
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
-            // get the event headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+        public void aggregate(NGSIEvent event) throws Exception {
+            // get the getRecvTimeTs headers
+            long recvTimeTs = event.getRecvTimeTs();
 
-            // get the event body
-            ContextElement contextElement = cygnusEvent.getContextElement();
+            // get the getRecvTimeTs body
+            ContextElement contextElement = event.getContextElement();
 
             if (aggregation.isEmpty()) {
-                aggregation = buildMessage(contextElement, service, servicePath, recvTimeTs);
+                aggregation = buildMessage(contextElement, service, servicePathForData, recvTimeTs);
             } else {
-                aggregation += "\n" + buildMessage(contextElement, service, servicePath, recvTimeTs);
+                aggregation += "\n" + buildMessage(contextElement, service, servicePathForData, recvTimeTs);
             } // if else
         } // aggregate
 
@@ -269,8 +275,8 @@ public class NGSIKafkaSink extends NGSISink {
     private void persistAggregation(KafkaAggregator aggregator) throws Exception {
         String aggregation = aggregator.getAggregation();
         String topicName = buildTopicName(aggregator.getService(),
-                aggregator.getServicePath(), aggregator.getEntity(),
-                aggregator.getAttribute()).toLowerCase();
+                aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(),
+                aggregator.getAttributeForNaming()).toLowerCase();
 
         // build the message/record to be sent to Kafka
         ProducerRecord<String, String> record;
@@ -284,7 +290,7 @@ public class NGSIKafkaSink extends NGSISink {
 
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIKafkaSink. Topic ("
                 + topicName + "), Data (" + aggregation + ")");
-        record = new ProducerRecord<String, String>(topicName, aggregation);
+        record = new ProducerRecord<>(topicName, aggregation);
         persistenceBackend.send(record);
     } // persistAggregation
 

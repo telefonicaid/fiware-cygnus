@@ -22,6 +22,7 @@ import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
@@ -185,7 +186,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
 
     @Override
     public void start() {
-        try {            
+        try {
             persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlDatabase,
                     postgresqlUsername, postgresqlPassword, enableCache);
         } catch (Exception e) {
@@ -204,25 +205,28 @@ public class NGSIPostgreSQLSink extends NGSISink {
             return;
         } // if
 
-        // iterate on the destinations, for each one a single create / append will be performed
-        for (String destination : batch.getDestinations()) {
-            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
-                    + " destination");
+        // Iterate on the destinations
+        batch.startIterator();
+        
+        while (batch.hasNext()) {
+            String destination = batch.getNextDestination();
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the "
+                    + destination + " destination");
 
             // get the sub-batch for this destination
-            ArrayList<NGSIEvent> subBatch = batch.getEvents(destination);
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
 
             // get an aggregator for this destination and initialize it
             PostgreSQLAggregator aggregator = getAggregator(rowAttrPersistence);
-            aggregator.initialize(subBatch.get(0));
+            aggregator.initialize(events.get(0));
 
-            for (NGSIEvent cygnusEvent : subBatch) {
-                aggregator.aggregate(cygnusEvent);
+            for (NGSIEvent event : events) {
+                aggregator.aggregate(event);
             } // for
 
             // persist the fieldValues
             persistAggregation(aggregator);
-            batch.setPersisted(destination);
+            batch.setNextPersisted(true);
         } // for
     } // persistBatch
 
@@ -235,9 +239,10 @@ public class NGSIPostgreSQLSink extends NGSISink {
         protected String aggregation;
 
         protected String service;
-        protected String servicePath;
-        protected String entity;
-        protected String attribute;
+        protected String servicePathForData;
+        protected String servicePathForNaming;
+        protected String entityForNaming;
+        protected String attributeForNaming;
         protected String schemaName;
         protected String tableName;
         protected String typedFieldNames;
@@ -275,13 +280,14 @@ public class NGSIPostgreSQLSink extends NGSISink {
             return fieldNames;
         } // getFieldNames
 
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
-            service = cygnusEvent.getService();
-            servicePath = cygnusEvent.getServicePath();
-            entity = cygnusEvent.getEntity();
-            attribute = cygnusEvent.getAttribute();
+        public void initialize(NGSIEvent event) throws Exception {
+            service = event.getServiceForNaming(enableNameMappings);
+            servicePathForData = event.getServicePathForData();
+            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            attributeForNaming = event.getAttributeForNaming(enableNameMappings);
             schemaName = buildSchemaName(service);
-            tableName = buildTableName(servicePath, entity, attribute);
+            tableName = buildTableName(servicePathForNaming, entityForNaming, attributeForNaming);
         } // initialize
 
         public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
@@ -321,13 +327,13 @@ public class NGSIPostgreSQLSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
-            // get the event headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+        public void aggregate(NGSIEvent event) throws Exception {
+            // get the getRecvTimeTs headers
+            long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
-            // get the event body
-            ContextElement contextElement = cygnusEvent.getContextElement();
+            // get the getRecvTimeTs body
+            ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
@@ -354,7 +360,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 String row = "('"
                     + recvTimeTs + "','"
                     + recvTime + "','"
-                    + servicePath + "','"
+                    + servicePathForData + "','"
                     + entityId + "','"
                     + entityType + "','"
                     + attrName + "','"
@@ -411,11 +417,11 @@ public class NGSIPostgreSQLSink extends NGSISink {
 
         @Override
         public void aggregate(NGSIEvent cygnusEvent) throws Exception {
-            // get the event headers
+            // get the getRecvTimeTs headers
             long recvTimeTs = cygnusEvent.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
-            // get the event body
+            // get the getRecvTimeTs body
             ContextElement contextElement = cygnusEvent.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
@@ -431,7 +437,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 return;
             } // if
 
-            String column = "('" + recvTime + "','" + servicePath + "','" + entityId + "','" + entityType + "'";
+            String column = "('" + recvTime + "','" + servicePathForData + "','" + entityId + "','" + entityType + "'";
 
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();

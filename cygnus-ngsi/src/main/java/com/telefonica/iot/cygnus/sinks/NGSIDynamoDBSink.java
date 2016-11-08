@@ -23,6 +23,7 @@ import com.telefonica.iot.cygnus.backends.dynamo.DynamoDBBackend;
 import com.telefonica.iot.cygnus.backends.dynamo.DynamoDBBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITY;
@@ -139,25 +140,28 @@ public class NGSIDynamoDBSink extends NGSISink {
             return;
         } // if
 
-        // iterate on the destinations, for each one a single create / append will be performed
-        for (String destination : batch.getDestinations()) {
-            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
-                    + " destination");
+        // Iterate on the destinations
+        batch.startIterator();
+        
+        while (batch.hasNext()) {
+            String destination = batch.getNextDestination();
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the "
+                    + destination + " destination");
 
-            // get the sub-batch for this destination
-            ArrayList<NGSIEvent> subBatch = batch.getEvents(destination);
+            // Get the events within the current sub-batch
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
 
-            // get an aggregator for this destination and initialize it
+            // Get an aggregator for this destination and initialize it
             DynamoDBAggregator aggregator = getAggregator(attrPersistenceRow);
-            aggregator.initialize(subBatch.get(0));
+            aggregator.initialize(events.get(0));
 
-            for (NGSIEvent cygnusEvent : subBatch) {
-                aggregator.aggregate(cygnusEvent);
+            for (NGSIEvent event : events) {
+                aggregator.aggregate(event);
             } // for
 
-            // persist the aggregation
+            // Persist the aggregation
             persistAggregation(aggregator);
-            batch.setPersisted(destination);
+            batch.setNextPersisted(true);
         } // for
     } // persistBatch
 
@@ -169,8 +173,9 @@ public class NGSIDynamoDBSink extends NGSISink {
         // string containing the data aggregation
         protected ArrayList<Item> aggregation;
         protected String service;
-        protected String servicePath;
-        protected String destination;
+        protected String servicePathForData;
+        protected String servicePathForNaming;
+        protected String entityForNaming;
         protected String tableName;
 
         public ArrayList<Item> getAggregation() {
@@ -185,12 +190,13 @@ public class NGSIDynamoDBSink extends NGSISink {
             } // if else
         } // getTableName
 
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
-            service = cygnusEvent.getService();
-            servicePath = cygnusEvent.getServicePath();
-            destination = cygnusEvent.getEntity();
-            tableName = buildTableName(service, servicePath, destination, dataModel);
-            aggregation = new ArrayList<Item>();
+        public void initialize(NGSIEvent event) throws Exception {
+            service = event.getServiceForNaming(enableNameMappings);
+            servicePathForData = event.getServicePathForData();
+            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            tableName = buildTableName(service, servicePathForNaming, entityForNaming, dataModel);
+            aggregation = new ArrayList<>();
         } // initialize
 
         public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
@@ -208,13 +214,13 @@ public class NGSIDynamoDBSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
-            // get the event headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+        public void aggregate(NGSIEvent event) throws Exception {
+            // get the getRecvTimeTs headers
+            long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
-            // get the event body
-            NotifyContextRequest.ContextElement contextElement = cygnusEvent.getContextElement();
+            // get the getRecvTimeTs body
+            NotifyContextRequest.ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
@@ -242,7 +248,7 @@ public class NGSIDynamoDBSink extends NGSISink {
                         .withPrimaryKey(NGSIConstants.DYNAMO_DB_PRIMARY_KEY, id)
                         .withDouble(NGSIConstants.RECV_TIME_TS, recvTimeTs / 1000)
                         .withString(NGSIConstants.RECV_TIME, recvTime)
-                        .withString(NGSIConstants.FIWARE_SERVICE_PATH, servicePath)
+                        .withString(NGSIConstants.FIWARE_SERVICE_PATH, servicePathForData)
                         .withString(NGSIConstants.ENTITY_ID, entityId)
                         .withString(NGSIConstants.ENTITY_TYPE, entityType)
                         .withString(NGSIConstants.ATTR_NAME, attrName)
@@ -264,18 +270,18 @@ public class NGSIDynamoDBSink extends NGSISink {
     private class DynamoDBColumnAggregator extends DynamoDBAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
-            super.initialize(cygnusEvent);
+        public void initialize(NGSIEvent event) throws Exception {
+            super.initialize(event);
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
-            // get the event headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+        public void aggregate(NGSIEvent event) throws Exception {
+            // get the getRecvTimeTs headers
+            long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
-            // get the event body
-            NotifyContextRequest.ContextElement contextElement = cygnusEvent.getContextElement();
+            // get the getRecvTimeTs body
+            NotifyContextRequest.ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
@@ -294,7 +300,7 @@ public class NGSIDynamoDBSink extends NGSISink {
             Item item = new Item()
                     .withPrimaryKey(NGSIConstants.DYNAMO_DB_PRIMARY_KEY, id)
                     .withString(NGSIConstants.RECV_TIME, recvTime)
-                    .withString(NGSIConstants.FIWARE_SERVICE_PATH, servicePath)
+                    .withString(NGSIConstants.FIWARE_SERVICE_PATH, servicePathForData)
                     .withString(NGSIConstants.ENTITY_ID, entityId)
                     .withString(NGSIConstants.ENTITY_TYPE, entityType);
 

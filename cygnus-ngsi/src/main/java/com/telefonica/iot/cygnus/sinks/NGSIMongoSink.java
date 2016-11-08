@@ -19,6 +19,7 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import static com.telefonica.iot.cygnus.sinks.NGSIMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.util.ArrayList;
@@ -88,25 +89,28 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             return;
         } // if
  
-        // iterate on the destinations, for each one a single create / append will be performed
-        for (String destination : batch.getDestinations()) {
-            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
-                    + " destination");
+        // Iterate on the destinations
+        batch.startIterator();
+        
+        while (batch.hasNext()) {
+            String destination = batch.getNextDestination();
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the "
+                    + destination + " destination");
 
-            // get the sub-batch for this destination
-            ArrayList<NGSIEvent> subBatch = batch.getEvents(destination);
+            // Get the events within the current sub-batch
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
             
             // get an aggregator for this destination and initialize it
             MongoDBAggregator aggregator = getAggregator(rowAttrPersistence);
-            aggregator.initialize(subBatch.get(0));
+            aggregator.initialize(events.get(0));
 
-            for (NGSIEvent cygnusEvent : subBatch) {
-                aggregator.aggregate(cygnusEvent);
+            for (NGSIEvent event : events) {
+                aggregator.aggregate(event);
             } // for
             
             // persist the fieldValues
             persistAggregation(aggregator);
-            batch.setPersisted(destination);
+            batch.setNextPersisted(true);
         } // for
     } // persistBatch
     
@@ -119,14 +123,15 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         protected ArrayList<Document> aggregation;
 
         protected String service;
-        protected String servicePath;
-        protected String entity;
-        protected String attribute;
+        protected String servicePathForData;
+        protected String servicePathForNaming;
+        protected String entityForNaming;
+        protected String attributeForNaming;
         protected String dbName;
         protected String collectionName;
         
         public MongoDBAggregator() {
-            aggregation = new ArrayList<Document>();
+            aggregation = new ArrayList<>();
         } // MongoDBAggregator
         
         public ArrayList<Document> getAggregation() {
@@ -149,13 +154,14 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             } // if else
         } // getCollectionName
         
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
-            service = cygnusEvent.getService();
-            servicePath = cygnusEvent.getServicePath();
-            entity = cygnusEvent.getEntity();
-            attribute = cygnusEvent.getAttribute();
+        public void initialize(NGSIEvent event) throws Exception {
+            service = event.getServiceForNaming(enableNameMappings);
+            servicePathForData = event.getServicePathForData();
+            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            attributeForNaming = event.getAttributeForNaming(enableNameMappings);
             dbName = buildDbName(service);
-            collectionName = buildCollectionName(servicePath, entity, attribute);
+            collectionName = buildCollectionName(servicePathForNaming, entityForNaming, attributeForNaming);
         } // initialize
         
         public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;

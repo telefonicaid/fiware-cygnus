@@ -21,9 +21,12 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.flume.Context;
 
 /**
@@ -63,25 +66,28 @@ public class NGSITestSink extends NGSISink {
             return;
         } // if
  
-        // iterate on the destinations, for each one a single create / append will be performed
-        for (String destination : batch.getDestinations()) {
-            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
-                    + " destination");
+        // Iterate on the destinations
+        batch.startIterator();
+        
+        while (batch.hasNext()) {
+            String destination = batch.getNextDestination();
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the "
+                    + destination + " destination");
 
-            // get the sub-batch for this destination
-            ArrayList<NGSIEvent> subBatch = batch.getEvents(destination);
+            // Get the sub-batch for this destination
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
             
-            // get an aggregator for this destination and initialize it
+            // Get an aggregator for this destination and initialize it
             TestAggregator aggregator = new TestAggregator();
-            aggregator.initialize(subBatch.get(0));
+            aggregator.initialize(events.get(0));
 
-            for (NGSIEvent cygnusEvent : subBatch) {
-                aggregator.aggregate(cygnusEvent);
+            for (NGSIEvent event : events) {
+                aggregator.aggregate(event);
             } // for
             
-            // persist the aggregation
+            // Persist the aggregation
             persistAggregation(aggregator);
-            batch.setPersisted(destination);
+            batch.setNextPersisted(true);
         } // for
     } // persistBatch
     
@@ -89,12 +95,9 @@ public class NGSITestSink extends NGSISink {
      * Class for aggregating aggregation.
      */
     private class TestAggregator {
-        
+
         // string containing the data aggregation
         private String aggregation;
-        private String service;
-        private String servicePath;
-        private String destination;
         
         public TestAggregator() {
             aggregation = "";
@@ -104,25 +107,30 @@ public class NGSITestSink extends NGSISink {
             return aggregation;
         } // getAggregation
         
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
-            service = cygnusEvent.getService();
-            servicePath = cygnusEvent.getServicePath();
-            destination = cygnusEvent.getEntity();
+        public void initialize(NGSIEvent event) throws Exception {
         } // initialize
         
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
+        public void aggregate(NGSIEvent event) throws Exception {
             String line = "Processing event={";
             
-            // get the event headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+            // get the getRecvTimeTs headers
+            line += "Processing headers={";
+            Map<String, String> headers = event.getHeaders();
+            boolean first = true;
             
-            line += "Processing headers={recvTimeTs=" + recvTimeTs
-                    + ", fiwareService=" + service
-                    + ", fiwareServicePath=" + servicePath
-                    + ", destinations=" + destination + "}";
+            for (Entry entry : headers.entrySet()) {
+                if (first) {
+                    line += entry.getKey() + "=" + entry.getValue();
+                    first = false;
+                } else {
+                    line += "," + entry.getKey() + "=" + entry.getValue();
+                } // if else
+            } // for
+
+            line += "}";
             
-            // get the event body
-            ContextElement contextElement = cygnusEvent.getContextElement();
+            // get the getRecvTimeTs body
+            ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
             line += ", Processing context element={id=" + entityId
