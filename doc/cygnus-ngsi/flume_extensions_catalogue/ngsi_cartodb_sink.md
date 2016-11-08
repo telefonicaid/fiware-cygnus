@@ -95,7 +95,7 @@ A single insert is composed for each notified entity, containing such insert the
 * `the_geom`: The current geolocation point, i.e. containing longitude and latitude. It must be of type PostGIS Geometry, but it must only contain points. It can be created for instance using [`ST_Point()`](http://postgis.net/docs/ST_Point.html). The data used for composing the PostGIS Geometry is obtained from a special notified attribute:
     * Either of type `geo:point` (a point).
     * Either of type `geo:json` (a GeoJson representing a point).
-    * Either having associated a `location` metadata of type `string` and value `WGS84`. Please observe this option is deprecated.
+    * Either having associated a `location` metadata of type `string` and value `WGS84`. Please observe this option is [deprecated](https://fiware-orion.readthedocs.io/en/master/deprecated/index.html).
 * For each not-geolocated attribute, the insert will contain two additional fields, one for the value, named `<attrName>`, and another for the metadata, named `<attrName>_md`).
 
 It must be said Cygnus does not create Carto tables in the raw-based storing. The reason is Cygnus is not able to infer from a notification the complete set of attributes an entity has, i.e. the columns cannot be inferred. Thus, tables must be preprovisioned in advance (please, check the Annex 1 for specific Carto queries).
@@ -116,7 +116,7 @@ A single insert is composed for each notified entity, containing such insert the
 * `the_geom`: The current geolocation point, i.e. containing longitude and latitude. It must be of type PostGIS Geometry, but it must only contain points. It can be created for instance using [`ST_Point()`](http://postgis.net/docs/ST_Point.html). The data used for composing the PostGIS Geometry is obtained from a special notified attribute:
     * Either of type `geo:point` (a point).
     * Either of type `geo:json` (a GeoJson representing a point).
-    * Either having associated a `location` metadata of type `string` and value `WGS84`. Please observe this option is deprecated.
+    * Either having associated a `location` metadata of type `string` and value `WGS84`. Please observe this option is [deprecated](https://fiware-orion.readthedocs.io/en/master/deprecated/index.html).
 * `stageDistance`: The linear distance between the current and previous geopoint.
 * `stageTime`: The elapsed time when moving from the previous geopoint to the current one.
 * `stageSpeed`: The result of dividing the stage distance by the stage time.
@@ -527,7 +527,7 @@ Current version of `NGSICartoDBSink` supports the following NGSIv2 geometries:
 * `geo:json`, despite a GeoJson can describe any geometry, from a simple point to a complex polygon, it must represent a single point.
 * `location` metadata, in this case the geolocated attribute is about a single point.
 
-You can get more information at [NGSIv2]() specification (<i>Geospatial properties of entities</i> section).
+You can get more information at [NGSIv2](http://telefonicaid.github.io/fiware-orion/api/v2/stable/) specification (<i>Geospatial properties of entities</i> section).
 
 [Top](#top)
 
