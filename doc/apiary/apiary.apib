@@ -119,6 +119,50 @@ Statistics can be reset by a PUT request.
 # Group Grouping Rules API
 API operations used to manage the grouping rules of Cygnus.
 
+## Methods [/Name Mappings API]
+
+### "GET /v1/namemappings" [GET /v1/namemappings]
+Name mappings can be retrieved by GET methods.
+
++ Request 
+
+      GET http://<cygnus_host>:<management_port>/v1/namemappings
+
++ Response 200 (application/json)
+
+        {
+            "success":"true",
+            "serviceMapping": [
+                {
+                    "originalService":"service",
+                    "newService":"newService",
+                    "servicePathMappings": [
+                        {
+                            "originalServicePath":"/servicePath",
+                            "newServicePath":"/newServicePath",
+                            "entityMappings": [
+                                {
+                                    "originalEntityId":"Room1",
+                                    "originalEntityType":"Room",
+                                    "newEntityId":"BigRoom1",
+                                    "newEntityType":"BigRoom",
+                                    "attributeMappings":[
+                                        {
+                                            "originalAttributeName":"temperature",
+                                            "originalAttributeType":"float",
+                                            "newAttributeName":"bedsNumber",
+                                            "newAttributeType":"integer"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+
+
 ## Methods [/Grouping Rules API]
 
 ### "GET /v1/groupingrules" [GET /v1/groupingrules]
