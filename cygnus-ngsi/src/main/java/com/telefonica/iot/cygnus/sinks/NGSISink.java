@@ -493,45 +493,19 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 LOGGER.error("Runtime error (" + e.getMessage() + ")");
             } // catch
 
-            if (event instanceof com.telefonica.iot.cygnus.interceptors.NGSIEvent) {
-                NotifyContextRequest originalNCR =
-                        ((com.telefonica.iot.cygnus.interceptors.NGSIEvent) event).getOriginalNCR();
-                NotifyContextRequest mappedNCR =
-                        ((com.telefonica.iot.cygnus.interceptors.NGSIEvent) event).getMappedNCR();
+            NotifyContextRequest originalNCR =
+                    ((com.telefonica.iot.cygnus.interceptors.NGSIEvent) event).getOriginalNCR();
+            NotifyContextRequest mappedNCR =
+                    ((com.telefonica.iot.cygnus.interceptors.NGSIEvent) event).getMappedNCR();
 
-                // Accumulate the event
-                try {
-                    accumulator.accumulate(event.getHeaders(), originalNCR, mappedNCR);
-                    numProcessedEvents++;
-                } catch (Exception e) {
-                    LOGGER.error("There was some problem when accumulating the notified context element. "
-                            + "Details: " + e.getMessage());
-                } // try catch
-            } else {
-                // 'TODO': to be removed
-                LOGGER.debug("Event got from the channel (id=" + event.hashCode() + ", headers="
-                        + event.getHeaders().toString() + ", bodyLength=" + event.getBody().length + ")");
-
-                // Parse the event
-                NotifyContextRequest notification;
-                
-                try {
-                    notification = parseEventBody(event);
-                } catch (Exception e) {
-                    LOGGER.error("There was some problem when parsing the notified context element. Details: "
-                            + e.getMessage());
-                    continue;
-                } // try catch
-            
-                // Accumulate the event
-                try {
-                    accumulator.accumulate(event.getHeaders(), notification, null);
-                    numProcessedEvents++;
-                } catch (Exception e) {
-                    LOGGER.error("There was some problem when accumulating the notified context element. "
-                            + "Details: " + e.getMessage());
-                } // try catch
-            } // if else
+            // Accumulate the event
+            try {
+                accumulator.accumulate(event.getHeaders(), originalNCR, mappedNCR);
+                numProcessedEvents++;
+            } catch (Exception e) {
+                LOGGER.error("There was some problem when accumulating the notified context element. "
+                        + "Details: " + e.getMessage());
+            } // try catch
         } // for
 
         // save the current index for next run of the process() method
@@ -605,29 +579,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             } // if
         } // if else
     } // doRollback
-    
-    /**
-     * Given an event, it is parsed before it is persisted. Depending on the content type, it is appropriately
-     * parsed (Json or XML) in order to obtain a NotifyContextRequest instance.
-     *
-     * @param event A Flume event containing the data to be persistedDestinations and certain metadata (headers).
-     * @throws Exception
-     */
-    private NotifyContextRequest parseEventBody(Event event) throws Exception {
-        String eventData = new String(event.getBody());
-
-        // parse the event body as a Json document
-        NotifyContextRequest notification = null;
-        Gson gson = new Gson();
-
-        try {
-            notification = gson.fromJson(eventData, NotifyContextRequest.class);
-        } catch (Exception e) {
-            throw new CygnusBadContextData(e.getMessage());
-        } // try catch
-
-        return notification;
-    } // parseEventBody
 
     /**
      * Utility class for batch-like event accumulation purposes.

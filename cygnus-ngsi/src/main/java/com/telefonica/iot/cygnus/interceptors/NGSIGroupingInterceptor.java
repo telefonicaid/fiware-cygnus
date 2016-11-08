@@ -78,87 +78,92 @@ public class NGSIGroupingInterceptor implements Interceptor {
     } // initialize
     
     @Override
-    public Event intercept(Event event) {
-        
+    public Event intercept(Event event) {  
         if (invalidConfiguration) {
             return event;
-        } else {
-            LOGGER.debug("Event intercepted, id=" + event.hashCode());
+        } // if
+        
+        LOGGER.debug("[gi] Event intercepted, id=" + event.hashCode());
 
-            // get the original headers and body
-            Map<String, String> headers = event.getHeaders();
-            String body = new String(event.getBody());
+        // get the original headers and body
+        Map<String, String> headers = event.getHeaders();
+        String body = new String(event.getBody());
 
-            // get some original header values
-            String fiwareServicePath = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
+        // get some original header values
+        String fiwareServicePath = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
 
-            // parse the original body; this part may be unnecessary if notifications are parsed at the source only once
-            // see --> https://github.com/telefonicaid/fiware-cygnus/issues/359
-            NotifyContextRequest notification;
-            Gson gson = new Gson();
+        // Parse the original body, getting the original NotifyContextRequest
+        // 'TODO': this part will be moved to NGSIRestHandler in a second stage
+        NotifyContextRequest originalNCR;
+        Gson gson = new Gson();
 
-            try {
-                notification = gson.fromJson(body, NotifyContextRequest.class);
-            } catch (Exception e) {
-                LOGGER.error("Runtime error (" + e.getMessage() + ")");
-                return null;
-            } // try catch
+        try {
+            originalNCR = gson.fromJson(body, NotifyContextRequest.class);
+            LOGGER.debug("[gi] Original NotifyContextRequest: " + originalNCR.toString());
+        } catch (Exception e) {
+            LOGGER.error("[gi] Runtime error (" + e.getMessage() + ")");
+            return null;
+        } // try catch
 
-            // iterate on the context responses and notified service paths
-            ArrayList<String> defaultDestinations = new ArrayList<String>();
-            ArrayList<String> groupedDestinations = new ArrayList<String>();
-            ArrayList<String> groupedServicePaths = new ArrayList<String>();
-            ArrayList<NotifyContextRequest.ContextElementResponse> contextResponses =
-                    notification.getContextResponses();
+        // iterate on the context responses and notified service paths
+        ArrayList<String> defaultDestinations = new ArrayList<>();
+        ArrayList<String> groupedDestinations = new ArrayList<>();
+        ArrayList<String> groupedServicePaths = new ArrayList<>();
+        ArrayList<NotifyContextRequest.ContextElementResponse> contextResponses =
+                originalNCR.getContextResponses();
 
-            if (contextResponses == null || contextResponses.isEmpty()) {
-                LOGGER.warn("No context responses within the notified entity, nothing is done");
-                return null;
-            } // if
+        if (contextResponses == null || contextResponses.isEmpty()) {
+            LOGGER.warn("No context responses within the notified entity, nothing is done");
+            return null;
+        } // if
 
-            String[] splitedNotifiedServicePaths = fiwareServicePath.split(",");
+        String[] splitedNotifiedServicePaths = fiwareServicePath.split(",");
 
-            for (int i = 0; i < contextResponses.size(); i++) {
-                NotifyContextRequest.ContextElementResponse contextElementResponse = contextResponses.get(i);
-                NotifyContextRequest.ContextElement contextElement = contextElementResponse.getContextElement();
+        for (int i = 0; i < contextResponses.size(); i++) {
+            NotifyContextRequest.ContextElementResponse contextElementResponse = contextResponses.get(i);
+            NotifyContextRequest.ContextElement contextElement = contextElementResponse.getContextElement();
 
-                // get the matching rule
-                CygnusGroupingRule matchingRule = groupingRules.getMatchingRule(fiwareServicePath,
-                        contextElement.getId(), contextElement.getType());
+            // get the matching rule
+            CygnusGroupingRule matchingRule = groupingRules.getMatchingRule(fiwareServicePath,
+                    contextElement.getId(), contextElement.getType());
 
-                if (matchingRule == null) {
-                    groupedDestinations.add(contextElement.getId()
-                            + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
-                            + contextElement.getType());
-                    groupedServicePaths.add(splitedNotifiedServicePaths[i]);
-                } else {
-                    groupedDestinations.add((String) matchingRule.getDestination());
-                    groupedServicePaths.add((String) matchingRule.getNewFiwareServicePath());
-                } // if else
-
-                defaultDestinations.add(contextElement.getId()
+            if (matchingRule == null) {
+                groupedDestinations.add(contextElement.getId()
                         + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
                         + contextElement.getType());
-            } // for
+                groupedServicePaths.add(splitedNotifiedServicePaths[i]);
+            } else {
+                groupedDestinations.add((String) matchingRule.getDestination());
+                groupedServicePaths.add((String) matchingRule.getNewFiwareServicePath());
+            } // if else
 
-            // set the final header values
-            String defaultDestinationsStr = CommonUtils.toString(defaultDestinations);
-            headers.put(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITIES, defaultDestinationsStr);
-            LOGGER.debug("Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITIES
-                    + ", value=" + defaultDestinationsStr + ")");
-            String groupedDestinationsStr = CommonUtils.toString(groupedDestinations);
-            headers.put(NGSIConstants.FLUME_HEADER_GROUPED_ENTITIES, groupedDestinationsStr);
-            LOGGER.debug("Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_ENTITIES
-                    + ", value=" + groupedDestinationsStr + ")");
-            String groupedServicePathsStr = CommonUtils.toString(groupedServicePaths);
-            headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS, groupedServicePathsStr);
-            LOGGER.debug("Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS
-                    + ", value=" + groupedServicePathsStr + ")");
-            event.setHeaders(headers);
-            LOGGER.debug("Event put in the channel, id=" + event.hashCode());
-            return event;
-        } // if else
+            defaultDestinations.add(contextElement.getId()
+                    + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
+                    + contextElement.getType());
+        } // for
+
+        // set the final header values
+        String defaultDestinationsStr = CommonUtils.toString(defaultDestinations);
+        headers.put(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITIES, defaultDestinationsStr);
+        LOGGER.debug("[gi] Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITIES
+                + ", value=" + defaultDestinationsStr + ")");
+        String groupedDestinationsStr = CommonUtils.toString(groupedDestinations);
+        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_ENTITIES, groupedDestinationsStr);
+        LOGGER.debug("[gi] Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_ENTITIES
+                + ", value=" + groupedDestinationsStr + ")");
+        String groupedServicePathsStr = CommonUtils.toString(groupedServicePaths);
+        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS, groupedServicePathsStr);
+        LOGGER.debug("[gi] Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS
+                + ", value=" + groupedServicePathsStr + ")");
+
+        // Create the NGSIEvent
+        // 'TODO': the NGSIEvent will be created at NGSIRestHandler in a second stage;
+        //       then, this interceptor will only add the mappedNCR
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, originalNCR, null);
         
+        // Return the intercepted event
+        LOGGER.debug("[gi] Event put in the channel, id=" + event.hashCode());
+        return ngsiEvent;
     } // intercept
  
     @Override
@@ -166,7 +171,7 @@ public class NGSIGroupingInterceptor implements Interceptor {
         if (invalidConfiguration) {
             return events;
         } else {
-            List<Event> interceptedEvents = new ArrayList<Event>(events.size());
+            List<Event> interceptedEvents = new ArrayList<>(events.size());
         
             for (Event event : events) {
                 Event interceptedEvent = intercept(event);
