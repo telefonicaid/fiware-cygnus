@@ -22,13 +22,17 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextMetadata;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.sinks.NGSICartoDBSink.CartoDBAggregator;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.flume.Context;
 import org.apache.flume.channel.MemoryChannel;
 import org.apache.log4j.Level;
@@ -1201,13 +1205,23 @@ public class NGSICartoDBSinkTest {
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
         
         // Create a NGSIEvent
-        long recvTimeTs = 1461136795801L;
-        String service = "someService";
-        String servicePath = "somePath";
-        String entity = "someId_someType";
-        String attribute = null; // irrelevant for this test
-        ContextElement contextElement = createContextElement();
-        NGSIEvent event = new NGSIEvent(recvTimeTs, service, servicePath, entity, attribute, contextElement);
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        ContextElement originalCE = createContextElement();
+        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1264,13 +1278,23 @@ public class NGSICartoDBSinkTest {
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
         
         // Create a NGSIEvent
-        long recvTimeTs = 1461136795801L;
-        String service = "someService";
-        String servicePath = "somePath";
-        String entity = "someId_someType";
-        String attribute = null; // irrelevant for this test
-        ContextElement contextElement = createContextElement();
-        NGSIEvent event = new NGSIEvent(recvTimeTs, service, servicePath, entity, attribute, contextElement);
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        ContextElement originalCE = createContextElement();
+        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1346,13 +1370,23 @@ public class NGSICartoDBSinkTest {
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
         
         // Create a NGSIEvent
-        long recvTimeTs = 1461136795801L;
-        String service = "someService";
-        String servicePath = "somePath";
-        String entity = "someId_someType";
-        String attribute = null; // irrelevant for this test
-        ContextElement contextElement = createContextElement();
-        NGSIEvent event = new NGSIEvent(recvTimeTs, service, servicePath, entity, attribute, contextElement);
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        ContextElement originalCE = createContextElement();
+        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1430,13 +1464,23 @@ public class NGSICartoDBSinkTest {
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
         
         // Create a NGSIEvent
-        long recvTimeTs = 1461136795801L;
-        String service = "someService";
-        String servicePath = "somePath";
-        String entity = "someId_someType";
-        String attribute = null; // irrelevant for this test
-        ContextElement contextElement = createContextElement();
-        NGSIEvent event = new NGSIEvent(recvTimeTs, service, servicePath, entity, attribute, contextElement);
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        ContextElement originalCE = createContextElement();
+        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1520,13 +1564,23 @@ public class NGSICartoDBSinkTest {
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
         
         // Create a NGSIEvent
-        long recvTimeTs = 1461136795801L;
-        String service = "someService";
-        String servicePath = "somePath";
-        String entity = "someId_someType";
-        String attribute = null; // irrelevant for this test
-        ContextElement contextElement = createContextElement();
-        NGSIEvent event = new NGSIEvent(recvTimeTs, service, servicePath, entity, attribute, contextElement);
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        ContextElement originalCE = createContextElement();
+        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1593,13 +1647,23 @@ public class NGSICartoDBSinkTest {
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
         
         // Create a NGSIEvent
-        long recvTimeTs = 1461136795801L;
-        String service = "someService";
-        String servicePath = "somePath";
-        String entity = "someId_someType";
-        String attribute = null; // irrelevant for this test
-        ContextElement contextElement = createContextElement();
-        NGSIEvent event = new NGSIEvent(recvTimeTs, service, servicePath, entity, attribute, contextElement);
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        ContextElement originalCE = createContextElement();
+        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
         
         try {
             aggregator.initialize(event);

@@ -178,9 +178,9 @@ public class NGSINameMappingsInterceptorTest {
     } // testBuilderConfigureNameMappingsConfFileNotNull
     
     /**
-     * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI event is put in the channel, it contains
-     * fiware-service, fiware-servicepath, fiware-correlator, transaction-id, mapped-fiware-service and
-     * mapped-fiware-servicepath headers.
+     * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI getRecvTimeTs is put in the channel, it contains
+ fiware-service, fiware-servicepath, fiware-correlator, transaction-id, mapped-fiware-service and
+ mapped-fiware-servicepath headers.
      */
     @Test
     public void testGetEventsHeadersInNGSIFlumeEvent() {
@@ -266,13 +266,13 @@ public class NGSINameMappingsInterceptorTest {
     } // testGetEventsHeadersInNGSIFlumeEvent
     
     /**
-     * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI event is put in the channel, it contains
-     * the original NotifyContextRequest and the mapped one.
+     * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI getRecvTimeTs is put in the channel, it contains
+ the original ContextElement and the mapped one.
      */
     @Test
     public void testGetNCRsInNGSIEvent() {
         System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                + "-------- When a Flume event is put in the channel, it contains the original NotifyContextRequest "
+                + "-------- When a Flume event is put in the channel, it contains the original ContextElement "
                 + "and the mapped one");
         NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
         nameMappingsInterceptor.loadNameMappings(nameMappingsStr);
@@ -280,22 +280,22 @@ public class NGSINameMappingsInterceptorTest {
         NGSIEvent ngsiEvent = (NGSIEvent) nameMappingsInterceptor.intercept(originalEvent);
 
         try {
-            assertTrue(ngsiEvent.getMappedNCR() != null);
+            assertTrue(ngsiEvent.getMappedCE() != null);
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "-  OK  - The generated NGSI event contains the original NotifyContextRequest");
+                    + "-  OK  - The generated NGSI event contains the original ContextElement");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "- FAIL - The generated NGSI event does not contain the original NotifyContextRequest");
+                    + "- FAIL - The generated NGSI event does not contain the original ContextElement");
             throw e;
         } // try catch
         
         try {
-            assertTrue(ngsiEvent.getOriginalNCR() != null);
+            assertTrue(ngsiEvent.getOriginalCE() != null);
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "-  OK  - The generated NGSI event contains the mapped NotifyContextRequest");
+                    + "-  OK  - The generated NGSI event contains the mapped ContextElement");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "- FAIL - The generated NGSI event does not contain the mapped NotifyContextRequest");
+                    + "- FAIL - The generated NGSI event does not contain the mapped ContextElement");
             throw e;
         } // try catch
     } // testGetNCRsInNGSIEvent
