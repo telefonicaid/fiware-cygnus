@@ -12,12 +12,14 @@
 * Running:
     * [Running as a process](./running_as_process.md)
     * [Running as a service](./running_as_service.md)
-* Advanced features:
+* Advanced topics:
     * [Testing](./testing.md)
     * [Name mappings](./name_mappings.md)
     * [Grouping Rules](./grouping_rules.md)
     * [Multitenancy](./multitenancy.md)
     * [Performance tips](./performance_tips.md)
+    * [NGSIv2 support](./ngsiv2_support.md)
+    * [IPv6 support](./ipv6_support.md)
 * [Sanity checks](./sanity_checks.md)
 * [Diagnosis procedures](./diagnosis_procedures.md)
 * [Reporting issues and contact information](./issues_and_contact.md)
