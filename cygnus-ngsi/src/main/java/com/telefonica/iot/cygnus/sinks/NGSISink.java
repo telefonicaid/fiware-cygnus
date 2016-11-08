@@ -18,15 +18,13 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.google.gson.Gson;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYATTRIBUTE;
@@ -41,7 +39,6 @@ import java.util.Arrays;
 import java.util.Date;
 import org.apache.flume.Channel;
 import org.apache.flume.Context;
-import org.apache.flume.Event;
 import org.apache.flume.EventDeliveryException;
 import org.apache.flume.Sink.Status;
 import org.apache.flume.Transaction;
@@ -59,7 +56,7 @@ import org.apache.log4j.MDC;
  The common methods are:
   - void stop()
   - Status process() throws EventDeliveryException
-  - void persistOne(Event event) throws Exception
+  - void persistOne(Event getRecvTimeTs) throws Exception
  The non common parts, and therefore those that are sink dependant and must be implemented are:
   - void configure(Context context)
   - void start()
@@ -98,7 +95,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         accumulator = new Accumulator();
 
         // crete the rollbacking queue
-        rollbackedAccumulations = new ArrayList<Accumulator>();
+        rollbackedAccumulations = new ArrayList<>();
     } // NGSISink
     
     protected String getBatchRetryIntervals() {
@@ -461,17 +458,17 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 break;
             } // if
 
-            // get an event
-            Event event = null;
+            // get an getRecvTimeTs
+            NGSIEvent event = null;
 
             try {
-                event = ch.take();
+                event = (NGSIEvent) ch.take();
             } catch (Exception e) {
                 LOGGER.error("Channel error (The event could not be got. Details: " + e.getMessage() + ")");
                 throw new EventDeliveryException(e);
             } // try catch
 
-            // check if the event is null
+            // check if the getRecvTimeTs is null
             if (event == null) {
                 accumulator.setAccIndex(currentIndex);
                 txn.commit();
@@ -493,14 +490,9 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 LOGGER.error("Runtime error (" + e.getMessage() + ")");
             } // catch
 
-            NotifyContextRequest originalNCR =
-                    ((com.telefonica.iot.cygnus.interceptors.NGSIEvent) event).getOriginalNCR();
-            NotifyContextRequest mappedNCR =
-                    ((com.telefonica.iot.cygnus.interceptors.NGSIEvent) event).getMappedNCR();
-
-            // Accumulate the event
+            // Accumulate the getRecvTimeTs
             try {
-                accumulator.accumulate(event.getHeaders(), originalNCR, mappedNCR);
+                accumulator.accumulate(event);
                 numProcessedEvents++;
             } catch (Exception e) {
                 LOGGER.error("There was some problem when accumulating the notified context element. "
@@ -581,7 +573,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     } // doRollback
 
     /**
-     * Utility class for batch-like event accumulation purposes.
+     * Utility class for batch-like getRecvTimeTs accumulation purposes.
      */
     protected class Accumulator implements Cloneable {
 
@@ -642,14 +634,11 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         } // setTTL
 
         /**
-         * Accumulates an event given its headers and context data.
-         * @param headers
-         * @param originalNCR
-         * @param mappedNCR
+         * Accumulates an getRecvTimeTs given its headers and context data.
+         * @param event
          */
-        public void accumulate(Map<String, String> headers, NotifyContextRequest originalNCR,
-                NotifyContextRequest mappedNCR) {
-            String transactionId = headers.get(CommonConstants.HEADER_CORRELATOR_ID);
+        public void accumulate(NGSIEvent event) {
+            String transactionId = event.getHeaders().get(CommonConstants.HEADER_CORRELATOR_ID);
 
             if (accTransactionIds.isEmpty()) {
                 accTransactionIds = transactionId;
@@ -659,299 +648,149 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
             switch (dataModel) {
                 case DMBYSERVICE:
-                    if (mappedNCR == null) { // 'TODO': to be removed
-                        accumulateByService(headers, originalNCR);
-                    } else {
-                        accumulateByService(headers, originalNCR, mappedNCR);
-                    } // if else
-                    
+                    accumulateByService(event);
                     break;
                 case DMBYSERVICEPATH:
-                    if (mappedNCR == null) { // 'TODO': to be removed
-                        accumulateByServicePath(headers, originalNCR);
-                    } else {
-                        accumulateByServicePath(headers, originalNCR, mappedNCR);
-                    } // if else
-                    
+                    accumulateByServicePath(event);
                     break;
                 case DMBYENTITY:
-                    if (mappedNCR == null) { // 'TODO': to be removed
-                        accumulateByEntity(headers, originalNCR);
-                    } else {
-                        accumulateByEntity(headers, originalNCR, mappedNCR);
-                    } // if else
-                    
+                    accumulateByEntity(event);
                     break;
                 case DMBYATTRIBUTE:
-                    if (mappedNCR == null) { // 'TODO': to be removed
-                        accumulateByAttribute(headers, originalNCR);
-                    } else {
-                        accumulateByAttribute(headers, originalNCR, mappedNCR);
-                    } // if else
-                    
+                    accumulateByAttribute(event);
                     break;
                 default:
                     LOGGER.error("Unknown data model. Details=" + dataModel.toString());
             } // switch
         } // accumulate
 
-        // 'TODO': to be removed
-        private void accumulateByService(Map<String, String> headers, NotifyContextRequest notification) {
-            Long recvTimeTs = new Long(headers.get(NGSIConstants.FLUME_HEADER_TIMESTAMP));
-            String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-            String destination = service;
-
-            if (!enableGrouping) {
-                String[] notifiedServicePaths = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH).split(",");
-
-                for (int i = 0; i < notifiedServicePaths.length; i++) {
-                    NGSIEvent cygnusEvent = new NGSIEvent(
-                            recvTimeTs, destination, notifiedServicePaths[i], null, null,
-                            notification.getContextResponses().get(i).getContextElement());
-                    batch.addEvent(destination, cygnusEvent);
-                } // for
-            } else {
-                String[] groupedServicePaths = headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
-
-                for (int i = 0; i < groupedServicePaths.length; i++) {
-                    NGSIEvent cygnusEvent = new NGSIEvent(
-                            recvTimeTs, destination, groupedServicePaths[i], null, null,
-                            notification.getContextResponses().get(i).getContextElement());
-                    batch.addEvent(destination, cygnusEvent);
-                } // for
-            } // if else
-        } // accumulateByService
-        
-        private void accumulateByService(Map<String, String> headers, NotifyContextRequest originalNCR,
-                NotifyContextRequest mappedNCR) {
-            Long recvTimeTs = new Long(headers.get(NGSIConstants.FLUME_HEADER_TIMESTAMP));
-            String originalService = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-            String mappedService = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE);
-            String[] originalServicePaths = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH).split(",");
-            String[] mappedServicePaths = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH).split(",");
-            String destination = (enableNameMappings ? mappedService : originalService);
+        private void accumulateByService(NGSIEvent event) {
+            Map<String, String> headers = event.getHeaders();
+            ContextElement mappedCE = event.getMappedCE();
+            String destination;
             
-            if (enableNameMappings) {
-                for (int i = 0; i < mappedServicePaths.length; i++) {
-                    // 'TODO': when enableContentMappings is implemented, this has to be changed
-                    ContextElement originalCE = originalNCR.getContextResponses().get(i).getContextElement();
-                    
-                    NGSIEvent cygnusEvent = new NGSIEvent(
-                            recvTimeTs, destination, mappedServicePaths[i], null, null, originalCE);
-                    batch.addEvent(destination, cygnusEvent);
-                } // for
+            if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
+                destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
             } else {
-                for (int i = 0; i < originalServicePaths.length; i++) {
-                    // 'TODO': when enableContentMappings is implemented, this has to be changed
-                    ContextElement originalCE = originalNCR.getContextResponses().get(i).getContextElement();
-                    
-                    NGSIEvent cygnusEvent = new NGSIEvent(
-                            recvTimeTs, destination, originalServicePaths[i], null, null, originalCE);
-                    batch.addEvent(destination, cygnusEvent);
-                } // for
+                if (enableNameMappings) {
+                    destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE);
+                } else {
+                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
+                } // if else
             } // if else
+            
+            batch.addEvent(destination, event);
         } // accumulateByService
 
-        private void accumulateByServicePath(Map<String, String> headers, NotifyContextRequest notification) {
-            Long recvTimeTs = new Long(headers.get(NGSIConstants.FLUME_HEADER_TIMESTAMP));
-            String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-
-            if (!enableGrouping) {
-                String[] notifiedServicePaths = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH).split(",");
-
-                for (int i = 0; i < notifiedServicePaths.length; i++) {
-                    String destination = service + "_" + notifiedServicePaths[i];
-                    NGSIEvent cygnusEvent = new NGSIEvent(
-                            recvTimeTs, service, notifiedServicePaths[i], null, null,
-                            notification.getContextResponses().get(i).getContextElement());
-                    batch.addEvent(destination, cygnusEvent);
-                } // for
+        private void accumulateByServicePath(NGSIEvent event) {
+            Map<String, String> headers = event.getHeaders();
+            ContextElement mappedCE = event.getMappedCE();
+            String destination;
+            
+            if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
+                String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
+                
+                if (enableGrouping) {
+                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH);
+                } else {
+                    destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
+                } // if else
             } else {
-                String[] groupedServicePaths = headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
-
-                for (int i = 0; i < groupedServicePaths.length; i++) {
-                    String destination = service + "_" + groupedServicePaths[i];
-                    NGSIEvent cygnusEvent = new NGSIEvent(
-                            recvTimeTs, service, groupedServicePaths[i], null, null,
-                            notification.getContextResponses().get(i).getContextElement());
-                    batch.addEvent(destination, cygnusEvent);
-                } // for
+                if (enableNameMappings) {
+                    destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
+                            + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH);
+                } else {
+                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
+                            + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
+                } // if else
             } // if else
-        } // accumulateByServicePath
-        
-        private void accumulateByServicePath(Map<String, String> headers, NotifyContextRequest originalNCR,
-                NotifyContextRequest mappedNCR) {
-            Long recvTimeTs = new Long(headers.get(NGSIConstants.FLUME_HEADER_TIMESTAMP));
-            String originalService = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-            String mappedService = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE);
-            String[] originalServicePaths = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH).split(",");
-            String[] mappedServicePaths = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH).split(",");
 
-            if (enableNameMappings) {
-                for (int i = 0; i < mappedServicePaths.length; i++) {
-                    // 'TODO': when enableContentMappings is implemented, this has to be changed
-                    ContextElement originalCE = originalNCR.getContextResponses().get(i).getContextElement();
-                    
-                    NGSIEvent cygnusEvent = new NGSIEvent(
-                            recvTimeTs, mappedService, mappedServicePaths[i], null, null, originalCE);
-                    String destination = mappedService + "_" + mappedServicePaths[i];
-                    batch.addEvent(destination, cygnusEvent);
-                } // for
-            } else {
-                for (int i = 0; i < originalServicePaths.length; i++) {
-                    // 'TODO': when enableContentMappings is implemented, this has to be changed
-                    ContextElement originalCE = originalNCR.getContextResponses().get(i).getContextElement();
-                    
-                    NGSIEvent cygnusEvent = new NGSIEvent(
-                            recvTimeTs, originalService, originalServicePaths[i], null, null, originalCE);
-                    String destination = originalService + "_" + originalServicePaths[i];
-                    batch.addEvent(destination, cygnusEvent);
-                } // for
-            } // if else
+            batch.addEvent(destination, event);
         } // accumulateByServicePath
 
-        private void accumulateByEntity(Map<String, String> headers, NotifyContextRequest notification) {
-            Long recvTimeTs = new Long(headers.get(NGSIConstants.FLUME_HEADER_TIMESTAMP));
-            String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-
-            if (!enableGrouping) {
-                String[] notifiedServicePaths = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH).split(",");
-                String[] notifiedEntities = headers.get(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITIES).split(",");
-
-                for (int i = 0; i < notifiedEntities.length; i++) {
-                    String destination = service + "_" + notifiedServicePaths[i] + "_" + notifiedEntities[i];
-                    NGSIEvent cygnusEvent = new NGSIEvent(
-                            recvTimeTs, service, notifiedServicePaths[i], notifiedEntities[i], null,
-                            notification.getContextResponses().get(i).getContextElement());
-                    batch.addEvent(destination, cygnusEvent);
-                } // for
+        private void accumulateByEntity(NGSIEvent event) {
+            Map<String, String> headers = event.getHeaders();
+            ContextElement originalCE = event.getOriginalCE();
+            ContextElement mappedCE = event.getMappedCE();
+            String destination;
+            
+            if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
+                String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
+                
+                if (enableGrouping) {
+                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH)
+                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY);
+                } else {
+                    destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH)
+                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY);
+                } // if else
             } else {
-                String[] groupedServicePaths = headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
-                String[] groupedEntities = headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITIES).split(",");
-
-                for (int i = 0; i < groupedEntities.length; i++) {
-                    String destination = service + "_" + groupedServicePaths[i] + "_" + groupedEntities[i];
-                    NGSIEvent cygnusEvent = new NGSIEvent(
-                            recvTimeTs, service, groupedServicePaths[i], groupedEntities[i], null,
-                            notification.getContextResponses().get(i).getContextElement());
-                    batch.addEvent(destination, cygnusEvent);
-                } // for
+                if (enableNameMappings) {
+                    destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
+                            + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH) + "_"
+                            + mappedCE.getId() + "_" + mappedCE.getType();
+                } else {
+                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
+                            + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
+                            + originalCE.getId() + "_" + originalCE.getType();
+                } // if else
             } // if else
-        } // accumulateByEntity
-        
-        private void accumulateByEntity(Map<String, String> headers, NotifyContextRequest originalNCR,
-                NotifyContextRequest mappedNCR) {
-            Long recvTimeTs = new Long(headers.get(NGSIConstants.FLUME_HEADER_TIMESTAMP));
-            String originalService = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-            String mappedService = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE);
-            String[] originalServicePaths = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH).split(",");
-            String[] mappedServicePaths = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH).split(",");
 
-            if (enableNameMappings) {
-                for (int i = 0; i < mappedNCR.getContextResponses().size(); i++) {
-                    ContextElement originalCE = originalNCR.getContextResponses().get(i).getContextElement();
-                    ContextElement mappedCE = mappedNCR.getContextResponses().get(i).getContextElement();
-                    String mappedEntity = mappedCE.getId() + (enableEncoding ? CommonConstants.CONCATENATOR : "_")
-                            + mappedCE.getType();
-                    NGSIEvent cygnusEvent = new NGSIEvent(
-                            recvTimeTs, mappedService, mappedServicePaths[i], mappedEntity, null, originalCE);
-                    String destination = mappedService + "_" + mappedServicePaths[i] + "_" + mappedEntity;
-                    batch.addEvent(destination, cygnusEvent);
-                } // for
-            } else {
-                for (int i = 0; i < originalNCR.getContextResponses().size(); i++) {
-                    ContextElement originalCE = originalNCR.getContextResponses().get(i).getContextElement();
-                    String originalEntity = originalCE.getId() + (enableEncoding ? CommonConstants.CONCATENATOR : "_")
-                            + originalCE.getType();
-                    NGSIEvent cygnusEvent = new NGSIEvent(
-                            recvTimeTs, originalService, originalServicePaths[i], originalEntity, null, originalCE);
-                    String destination = originalService + "_" + originalServicePaths[i] + "_" + originalEntity;
-                    batch.addEvent(destination, cygnusEvent);
-                } // for
-            } // if else
+            batch.addEvent(destination, event);
         } // accumulateByEntity
 
-        private void accumulateByAttribute(Map<String, String> headers, NotifyContextRequest notification) {
-            Long recvTimeTs = new Long(headers.get(NGSIConstants.FLUME_HEADER_TIMESTAMP));
-            String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-            ArrayList<ContextElementResponse> contextElementResponses = notification.getContextResponses();
+        private void accumulateByAttribute(NGSIEvent event) {
+            Map<String, String> headers = event.getHeaders();
+            ContextElement originalCE = event.getOriginalCE();
+            ContextElement mappedCE = event.getMappedCE();
+            String destination;
+            
+            if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
+                String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
+                
+                if (enableGrouping) {
+                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH)
+                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY);
+                } else {
+                    destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH)
+                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY);
+                } // if else
+                
+                ArrayList<ContextAttribute> attrs = originalCE.getAttributes();
 
-            if (!enableGrouping) {
-                String[] notifiedServicePaths = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH).split(",");
-                String[] notifiedEntities = headers.get(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITIES).split(",");
-
-                for (int i = 0; i < contextElementResponses.size(); i++) {
-                    ContextElement contextElement = contextElementResponses.get(i).getContextElement();
-                    ArrayList<ContextAttribute> attrs = contextElement.getAttributes();
-
-                    for (ContextAttribute attr : attrs) {
-                        String destination = service + "_" + notifiedServicePaths[i] + "_" + notifiedEntities[i]
-                                + "_" + attr.getName();
-                        NGSIEvent cygnusEvent = new NGSIEvent(
-                                recvTimeTs, service, notifiedServicePaths[i], notifiedEntities[i],
-                                attr.getName(), contextElement.filter(attr.getName()));
-                        batch.addEvent(destination, cygnusEvent);
-                    } // for
+                for (ContextAttribute attr : attrs) {
+                    ContextElement filteredOriginalCE = originalCE.filter(attr.getName());
+                    event.setOriginalCE(filteredOriginalCE);
+                    batch.addEvent(destination + "_" + attr.getName(), event);
                 } // for
             } else {
-                String[] groupedServicePaths = headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS).split(",");
-                String[] groupedEntities = headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITIES).split(",");
-
-                for (int i = 0; i < contextElementResponses.size(); i++) {
-                    ContextElement contextElement = contextElementResponses.get(i).getContextElement();
-                    ArrayList<ContextAttribute> attrs = contextElement.getAttributes();
+                if (enableNameMappings) {
+                    destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
+                            + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH) + "_"
+                            + mappedCE.getId() + "_" + mappedCE.getType();
+                    ArrayList<ContextAttribute> attrs = mappedCE.getAttributes();
 
                     for (ContextAttribute attr : attrs) {
-                        String destination = service + "_" + groupedServicePaths[i] + "_" + groupedEntities[i]
-                                + "_" + attr.getName();
-                        NGSIEvent cygnusEvent = new NGSIEvent(
-                                recvTimeTs, service, groupedServicePaths[i], groupedEntities[i],
-                                attr.getName(), contextElement.filter(attr.getName()));
-                        batch.addEvent(destination, cygnusEvent);
+                        ContextElement filteredOriginalCE = originalCE.filter(attr.getName());
+                        ContextElement filteredMappedCE = mappedCE.filter(attr.getName());
+                        event.setOriginalCE(filteredOriginalCE);
+                        event.setMappedCE(filteredMappedCE);
+                        batch.addEvent(destination + "_" + attr.getName(), event);
                     } // for
-                } // for
-            } // if else
-        } // accumulateByAttribute
-        
-        private void accumulateByAttribute(Map<String, String> headers, NotifyContextRequest originalNCR,
-                NotifyContextRequest mappedNCR) {
-            Long recvTimeTs = new Long(headers.get(NGSIConstants.FLUME_HEADER_TIMESTAMP));
-            String originalService = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-            String mappedService = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE);
-            String[] originalServicePaths = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH).split(",");
-            String[] mappedServicePaths = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH).split(",");
+                } else {
+                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
+                            + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
+                            + originalCE.getId() + "_" + originalCE.getType();
+                    ArrayList<ContextAttribute> attrs = originalCE.getAttributes();
 
-            if (enableNameMappings) {
-                for (int i = 0; i < mappedNCR.getContextResponses().size(); i++) {
-                    ContextElement originalCE = originalNCR.getContextResponses().get(i).getContextElement();
-                    ContextElement mappedCE = mappedNCR.getContextResponses().get(i).getContextElement();
-                    String mappedEntity = mappedCE.getId() + (enableEncoding ? CommonConstants.CONCATENATOR : "_")
-                            + mappedCE.getType();
-                    
-                    for (ContextAttribute mappedCA : mappedCE.getAttributes()) {
-                        NGSIEvent cygnusEvent = new NGSIEvent(
-                                recvTimeTs, mappedService, mappedServicePaths[i], mappedEntity, mappedCA.getName(),
-                                originalCE.filter(mappedCA.getName()));
-                        String destination = mappedService + "_" + mappedServicePaths[i] + "_" + mappedEntity + "_"
-                                + mappedCA.getName();
-                        batch.addEvent(destination, cygnusEvent);
+                    for (ContextAttribute attr : attrs) {
+                        ContextElement filteredOriginalCE = originalCE.filter(attr.getName());
+                        ContextElement filteredMappedCE = mappedCE.filter(attr.getName()); // not really necessary...
+                        event.setOriginalCE(filteredOriginalCE);
+                        event.setMappedCE(filteredMappedCE);
+                        batch.addEvent(destination + "_" + attr.getName(), event);
                     } // for
-                } // for
-            } else {
-                for (int i = 0; i < originalNCR.getContextResponses().size(); i++) {
-                    ContextElement originalCE = originalNCR.getContextResponses().get(i).getContextElement();
-                    String originalEntity = originalCE.getId() + (enableEncoding ? CommonConstants.CONCATENATOR : "_")
-                            + originalCE.getType();
-                    
-                    for (ContextAttribute originalCA : originalCE.getAttributes()) {
-                        NGSIEvent cygnusEvent = new NGSIEvent(
-                                recvTimeTs, originalService, originalServicePaths[i], originalEntity,
-                                originalCA.getName(), originalCE.filter(originalCA.getName()));
-                        String destination = originalService + "_" + originalServicePaths[i] + "_" + originalEntity
-                                + "_" + originalCA.getName();
-                        batch.addEvent(destination, cygnusEvent);
-                    } // for
-                } // for
+                } // if else
             } // if else
         } // accumulateByAttribute
 
