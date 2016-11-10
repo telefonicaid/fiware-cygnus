@@ -425,14 +425,14 @@ CKAN supports several [viewers](http://docs.ckan.org/en/latest/maintaining/data-
 Geolocation data in CKAN can be add in two ways:
 
 * Using a column in the DataStore for the longitude, and another column in the DataStore for the latitude, and then configuring in the viewer which resource fields (columns in the DataStore) contain such a geolocation information. If the fields/columns are directly named `longitude` and `latitude`, they are automatically selected by the viewer. Pleae observe this option only works for 2D coordinates.
-* Using a single column named `geojson` (in fact, any combination of upper and lower case of the string `geojson` is valid, e.g. `GeoJson`, `geoJSON`, ...) of type `Json`. By default, a columna like this one is directly used for rendering geolocation data. If not named as `geojson`, it is possible to select which filed/column contains GeoJson values. Please observe a [GeoJson](http://geojson.org/) may render any geometry (points, lines and polygons).
+* Using a single column named `geojson` (in fact, any combination of upper and lower case of the string `geojson` is valid, e.g. `GeoJson`, `geoJSON`, ...) of type `Json`. By default, a column like this one is directly used for rendering geolocation data. If not named as `geojson`, it is possible to select which filed/column contains GeoJson values. Please observe a [GeoJson](http://geojson.org/) may render any geometry (points, lines and polygons).
 
 Thus, it seems pretty straightforward mapping these geolocation features and NGSI entity model:
 
 * Simply add a pair of `longitude` and `latitude` attributes, containing longitude and latitude parts of a coordinate, respectively.
 * Or add a single `geojson` attribute containing a valid [GeoJson](http://geojson.org/) value.
 
-Finally, it must be said this way of mapping geolocated context information into CKAN data structures does not really follow the NGSI model, which defines special types for geolocation purposes (`geo:point`, `geo:line`, `geo:box` and `geo:json`). I.e., despite it works, using `geojson` or `longitude` and `latitude` attributes is not standard in NGSI. Therefore, future releases of this sink will support NGSI geolocation types, automatically translating them into above explained geolcation fields/columns CKAN understands.
+Finally, it must be said this way of mapping geolocated context information into CKAN data structures does not really follow the NGSI model, which defines special types for geolocation purposes (`geo:point`, `geo:line`, `geo:box` and `geo:json`). I.e., despite it works, using `geojson` or `longitude` and `latitude` attributes is not standard in NGSI. Therefore, future releases of this sink will support NGSI geolocation types, automatically translating them into above explained geolocation fields/columns CKAN understands.
 
 [Top](#top)
 
