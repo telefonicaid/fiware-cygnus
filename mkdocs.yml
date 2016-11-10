@@ -58,6 +58,7 @@ pages:
           - 'Grouping Rules': 'cygnus-ngsi/installation_and_administration_guide/grouping_rules.md'
           - 'Multitenancy': 'cygnus-ngsi/installation_and_administration_guide/multitenancy.md'
           - 'Performance tips': 'cygnus-ngsi/installation_and_administration_guide/performance_tips.md'
+          - 'NGSIv2 support': 'cygnus-ngsi/installation_and_administration_guide/ngsiv2_support.md'
           - 'IPv6 support': 'cygnus-ngsi/installation_and_administration_guide/ipv6_support.md'
           - 'Sanity checks': 'cygnus-ngsi/installation_and_administration_guide/sanity_checks.md'
           - 'Diagnosis procedures': 'cygnus-ngsi/installation_and_administration_guide/diagnosis_procedures.md'

@@ -55,6 +55,29 @@ public class NameMappings {
     } // compilePatterns
     
     /**
+     * Overwrite of toString() method.
+     * @return 
+     */
+    @Override
+    public String toString() {
+        String nameMappingsStr = "   \"serviceMapping\": [\n";
+        int lastIndex = serviceMappings.size() - 1;
+        
+        for (ServiceMapping map : serviceMappings) {
+            nameMappingsStr += "      {\n"
+                            + map.toString() + "\n"
+                            + "      }";    
+            
+            if (!map.equals(serviceMappings.get(lastIndex))) {
+                nameMappingsStr += ",\n";
+            } // if
+            
+        } // for
+        nameMappingsStr += "\n   ]\n}";
+        return nameMappingsStr;
+    } // toString
+    
+    /**
      * ServiceMapping class.
      */
     public class ServiceMapping {
@@ -97,6 +120,28 @@ public class NameMappings {
                 servicePathMapping.compilePatterns();
             } // for
         } // compilePatterns
+        
+        @Override
+        public String toString() {
+            int lastIndex = servicePathMappings.size() - 1;
+            String serviceMappingStr = "         \"originalService\":\"" + getOriginalService() + "\",\n"
+                                     + "         \"newService\":\"" + getNewService()+ "\",\n"
+                                     + "         \"servicePathMappings\": [\n";
+             
+            for (Object originalSP : servicePathMappings) {
+                serviceMappingStr += "            {\n" 
+                                   + originalSP.toString() + "\n"
+                                   + "            }";
+                
+                if (!originalSP.equals(servicePathMappings.get(lastIndex))) {
+                    serviceMappingStr += ",\n";
+                } // if
+                
+            } // for    
+            
+            serviceMappingStr += "\n         ]";         
+            return serviceMappingStr;
+        } // toString
         
     } // ServiceMapping
     
@@ -143,6 +188,28 @@ public class NameMappings {
                 entityMapping.compilePatterns();
             } // for
         } // compilePatterns
+        
+        @Override
+        public String toString() {
+            int lastIndex = entityMappings.size() - 1;
+            String entityMappingStr = "               \"originalServicePath\":\"" + getOriginalServicePath()+ "\",\n"
+                                 + "               \"newServicePath\":\"" + getNewServicePath()+ "\",\n"
+                                 + "               \"entityMappings\": [\n";
+            
+            for (Object entityMap: entityMappings) {
+                entityMappingStr += "                  {\n" 
+                            + entityMap.toString() + "\n"
+                            + "                  }";
+                
+                if (!entityMap.equals(entityMappings.get(lastIndex))) {
+                    entityMappingStr += ",\n";
+                } // if
+                
+            } // for
+            
+            entityMappingStr += "\n                ]";  
+            return entityMappingStr;
+        } // toString
         
     } // ServicePathMapping
     
@@ -206,6 +273,30 @@ public class NameMappings {
             } // for
         } // compilePatterns
         
+        @Override
+        public String toString() {
+            int lastIndex = attributeMappings.size()-1;
+            String attrMappingStr = "                     \"originalEntityId\":\"" + getOriginalEntityId() + "\",\n"
+                        + "                     \"originalEntityType\":\"" + getOriginalEntityType()+ "\",\n"
+                        + "                     \"newEntityId\":\"" + getNewEntityId() + "\",\n"
+                        + "                     \"newEntityType\":\"" + getNewEntityType() + "\",\n"
+                        + "                     \"attributeMappings\":[\n";
+            
+            for (Object attrMap: attributeMappings) {
+                attrMappingStr += "                        {\n" 
+                            + attrMap.toString() + "\n" 
+                            + "                        }";
+            
+                if (!attrMap.equals(attributeMappings.get(lastIndex))) {
+                    attrMappingStr += ",\n";
+                } // if
+                
+            } // for
+            
+            attrMappingStr += "\n                    ]";        
+            return attrMappingStr;
+        } // toString
+        
     } // EntityMapping
     
     /**
@@ -257,6 +348,19 @@ public class NameMappings {
             originalAttributeNamePattern = Pattern.compile(originalAttributeName);
             originalAttributeTypePattern = Pattern.compile(originalAttributeType);
         } // compilePatterns
+        
+        @Override
+        public String toString() {
+            String attrMappingStr = "                           \"originalAttributeName\":\"" 
+                        + getOriginalAttributeName() + "\",\n"
+                        + "                           \"originalAttributeType\":\"" 
+                        + getOriginalAttributeType() + "\",\n"
+                        + "                           \"newAttributeName\":\"" 
+                        + getNewAttributeName() + "\",\n"
+                        + "                           \"newAttributeType\":\"" 
+                        + getNewAttributeType() + "\"";
+            return attrMappingStr;
+        } // toString
         
     } // AttributeMapping
     
