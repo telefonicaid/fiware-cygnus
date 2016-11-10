@@ -20,6 +20,7 @@
     * [Performance tips](./performance_tips.md)
     * [NGSIv2 support](./ngsiv2_support.md)
     * [IPv6 support](./ipv6_support.md)
+    * [Deprecated and removed functionality](./deprecated_and_removed.md)
 * [Sanity checks](./sanity_checks.md)
 * [Diagnosis procedures](./diagnosis_procedures.md)
 * [Reporting issues and contact information](./issues_and_contact.md)
