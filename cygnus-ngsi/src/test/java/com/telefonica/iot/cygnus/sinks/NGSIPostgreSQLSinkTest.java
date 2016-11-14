@@ -912,15 +912,6 @@ public class NGSIPostgreSQLSinkTest {
         } // try catch
     } // testConfigureEnableEncoding
     
-    private NGSIBatch createBatch(long recvTimeTs, String service, String servicePath, String destination,
-            NotifyContextRequest.ContextElement contextElement) {
-        NGSIEvent groupedEvent = new NGSIEvent(recvTimeTs, service, servicePath, destination, null,
-            contextElement);
-        NGSIBatch batch = new NGSIBatch();
-        batch.addEvent(destination, groupedEvent);
-        return batch;
-    } // createBatch
-    
     private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
             String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
             String password, String port, String username, String cache) {

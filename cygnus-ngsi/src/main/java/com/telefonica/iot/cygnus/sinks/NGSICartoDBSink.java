@@ -21,6 +21,7 @@ import com.telefonica.iot.cygnus.backends.cartodb.CartoDBBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -282,37 +283,40 @@ public class NGSICartoDBSink extends NGSISink {
             return;
         } // if
         
-        // iterate on the destinations, for each one a single create / append will be performed
-        for (String destination : batch.getDestinations()) {
-            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
-                    + " destination");
+        // Iterate on the destinations
+        batch.startIterator();
+        
+        while (batch.hasNext()) {
+            String destination = batch.getNextDestination();
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the "
+                    + destination + " destination");
 
-            // get the sub-batch for this destination
-            ArrayList<NGSIEvent> subBatch = batch.getEvents(destination);
+            // Get the events within the current sub-batch
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
             CartoDBAggregator aggregator = null;
 
             if (enableRaw) {
-                // get an aggregator for this destination and initialize it
+                // Get an aggregator for this destination and initialize it
                 aggregator = new CartoDBAggregator();
-                aggregator.initialize(subBatch.get(0));
+                aggregator.initialize(events.get(0));
             } // if
 
-            for (NGSIEvent cygnusEvent : subBatch) {
+            for (NGSIEvent event : events) {
                 if (enableRaw && aggregator != null) {
-                    aggregator.aggregate(cygnusEvent);
+                    aggregator.aggregate(event);
                 } // if
                 
                 if (enableDistance) {
-                    persistDistanceEvent(cygnusEvent);
+                    persistDistanceEvent(event);
                 } // if
             } // for
 
             if (enableRaw) {
-                // persist the aggregation
+                // Persist the aggregation
                 persistRawAggregation(aggregator);
             } // if
             
-            batch.setPersisted(destination);
+            batch.setNextPersisted(true);
         } // for
     } // persistBatch
     
@@ -323,9 +327,10 @@ public class NGSICartoDBSink extends NGSISink {
         
         private LinkedHashMap<String, ArrayList<String>> aggregation;
         private String service;
-        private String servicePath;
-        private String entity;
-        private String attribute;
+        private String servicePathForData;
+        private String servicePathForNaming;
+        private String entityForNaming;
+        private String attributeForNaming;
         private String schemaName;
         private String tableName;
         
@@ -404,12 +409,13 @@ public class NGSICartoDBSink extends NGSISink {
          * @throws Exception
          */
         public void initialize(NGSIEvent event) throws Exception {
-            service = event.getService();
-            servicePath = event.getServicePath();
-            entity = event.getEntity();
-            attribute = event.getAttribute();
+            service = event.getServiceForNaming(enableNameMappings);
+            servicePathForData = event.getServicePathForData();
+            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            attributeForNaming = event.getAttributeForNaming(enableNameMappings);
             schemaName = buildSchemaName(service);
-            tableName = buildTableName(servicePath, entity, attribute);
+            tableName = buildTableName(servicePathForNaming, entityForNaming, attributeForNaming);
             
             // aggregation initialization
             aggregation = new LinkedHashMap<>();
@@ -440,17 +446,17 @@ public class NGSICartoDBSink extends NGSISink {
         } // initialize
         
         /**
-         * Aggregates a given Cygnus event.
-         * @param cygnusEvent
+         * Aggregates a given Cygnus getRecvTimeTs.
+         * @param event
          * @throws Exception
          */
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
-            // get the event headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+        public void aggregate(NGSIEvent event) throws Exception {
+            // get the getRecvTimeTs headers
+            long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
-            // get the event body
-            NotifyContextRequest.ContextElement contextElement = cygnusEvent.getContextElement();
+            // get the getRecvTimeTs body
+            NotifyContextRequest.ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
@@ -466,7 +472,7 @@ public class NGSICartoDBSink extends NGSISink {
             } // if
             
             aggregation.get(NGSIConstants.RECV_TIME).add(recvTime);
-            aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(servicePath);
+            aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(servicePathForData);
             aggregation.get(NGSIConstants.ENTITY_ID).add(entityId);
             aggregation.get(NGSIConstants.ENTITY_TYPE).add(entityType);
             
@@ -505,8 +511,8 @@ public class NGSICartoDBSink extends NGSISink {
     
     private void persistDistanceEvent(NGSIEvent event) throws Exception {
         // Get some values
-        String schema = buildSchemaName(event.getService());
-        String servicePath = event.getServicePath();
+        String schema = buildSchemaName(event.getServiceForNaming(enableNameMappings));
+        String servicePath = event.getServicePathForData();
         String entityId = event.getContextElement().getId();
         String entityType = event.getContextElement().getType();
         
@@ -518,13 +524,15 @@ public class NGSICartoDBSink extends NGSISink {
         } // if
 
         for (ContextAttribute contextAttribute : contextAttributes) {
-            long recvTimeMs = event.getRecvTimeTs();
+            long recvTimeTs = event.getRecvTimeTs();
             String attrType = contextAttribute.getType();
             String attrValue = contextAttribute.getContextValue(false);
             String attrMetadata = contextAttribute.getContextMetadata();
             ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(attrValue, attrType, attrMetadata,
                     flipCoordinates);
-            String tableName = buildTableName(event.getServicePath(), event.getEntity(), event.getAttribute())
+            String tableName = buildTableName(event.getServicePathForNaming(enableGrouping, enableNameMappings),
+                    event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding),
+                    event.getAttributeForNaming(enableNameMappings))
                     + CommonConstants.CONCATENATOR + "distance";
 
             if (location.getRight()) {
@@ -544,7 +552,7 @@ public class NGSICartoDBSink extends NGSISink {
                     String fields = "(recvTimeMs, fiwareServicePath, entityId, entityType, the_geom, stageDistance,"
                             + "stageTime, stageSpeed, sumDistance, sumTime, sumSpeed, sum2Distance, sum2Time,"
                             + "sum2Speed, maxDistance, minDistance, maxTime, mintime, maxSpeed, minSpeed, numSamples)";
-                    String rows = "(" + recvTimeMs + ",'" + servicePath + "','" + entityId + "','" + entityType + "',"
+                    String rows = "(" + recvTimeTs + ",'" + servicePath + "','" + entityId + "','" + entityType + "',"
                             + location + ",0,0,0,0,0,0,0,0,0," + Float.MIN_VALUE + "," + Float.MAX_VALUE + ","
                             + Float.MIN_VALUE + "," + Float.MAX_VALUE + "," + Float.MIN_VALUE + "," + Float.MAX_VALUE
                             + ",1)";
@@ -559,7 +567,7 @@ public class NGSICartoDBSink extends NGSISink {
                             + "   SELECT"
                             + "      cartodb_id,"
                             + "      ST_Distance(the_geom::geography, geom.point::geography) AS stage_distance,"
-                            + "      (" + recvTimeMs + " - recvTimeMs) AS stage_time"
+                            + "      (" + recvTimeTs + " - recvTimeMs) AS stage_time"
                             + "   FROM " + tableName + ", geom"
                             + "   ORDER BY cartodb_id DESC"
                             + "   LIMIT 1"
@@ -611,7 +619,7 @@ public class NGSICartoDBSink extends NGSISink {
                     String fields = "(recvTimeMs, fiwareServicePath, entityId, entityType, the_geom, stageDistance,"
                             + "stageTime, stageSpeed, sumDistance, sumTime, sumSpeed, sum2Distance, sum2Time,"
                             + "sum2Speed, maxDistance, minDistance, maxTime, mintime, maxSpeed, minSpeed, numSamples)";
-                    String rows = "(" + recvTimeMs + ",'" + servicePath + "','" + entityId + "','" + entityType + "',"
+                    String rows = "(" + recvTimeTs + ",'" + servicePath + "','" + entityId + "','" + entityType + "',"
                             + "(SELECT point FROM geom),(SELECT stage_distance FROM calcs),"
                             + "(SELECT stage_time FROM calcs),(SELECT stage_speed FROM speed),"
                             + "(SELECT sum_dist FROM inserts),(SELECT sum_time FROM inserts),"

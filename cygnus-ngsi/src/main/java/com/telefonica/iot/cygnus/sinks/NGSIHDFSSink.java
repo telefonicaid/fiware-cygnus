@@ -27,6 +27,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribut
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -424,7 +425,7 @@ public class NGSIHDFSSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Hive persistence backend created");
             
             // create the persistence backends
-            persistenceBackends = new LinkedList<HDFSBackend>();
+            persistenceBackends = new LinkedList<>();
             
             for (String host : hosts) {
                 if (backendImpl == BackendImpl.BINARY) {
@@ -460,32 +461,35 @@ public class NGSIHDFSSink extends NGSISink {
             return;
         } // if
 
-        // iterate on the destinations, for each one a single create / append will be performed
-        for (String destination : batch.getDestinations()) {
-            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
-                    + " destination");
+        // Iterate on the destinations
+        batch.startIterator();
+        
+        while (batch.hasNext()) {
+            String destination = batch.getNextDestination();
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the "
+                    + destination + " destination");
 
-            // get the sub-batch for this destination
-            ArrayList<NGSIEvent> subBatch = batch.getEvents(destination);
+            // Get the events within the current sub-batch
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
 
-            // get an aggregator for this destination and initialize it
+            // Get an aggregator for this destination and initialize it
             HDFSAggregator aggregator = getAggregator(fileFormat);
-            aggregator.initialize(subBatch.get(0));
+            aggregator.initialize(events.get(0));
 
-            for (NGSIEvent cygnusEvent : subBatch) {
-                aggregator.aggregate(cygnusEvent);
+            for (NGSIEvent event : events) {
+                aggregator.aggregate(event);
             } // for
 
-            // persist the aggregation
+            // Persist the aggregation
             persistAggregation(aggregator);
-            batch.setPersisted(destination);
+            batch.setNextPersisted(true);
 
-            // persist the metadata aggregations only in CSV-like file formats
+            // Persist the metadata aggregations only in CSV-like file formats
             if (fileFormat == FileFormat.CSVROW || fileFormat == FileFormat.CSVCOLUMN) {
                 persistMDAggregations(aggregator);
             } // if
 
-            // create the Hive table
+            // Create the Hive table
             if (enableHive) {
                 if (hiveDBType == HiveDBType.NAMESPACEDB) {
                     if (serviceAsNamespace) {
@@ -512,18 +516,16 @@ public class NGSIHDFSSink extends NGSISink {
         // map containing the HDFS files holding the attribute metadata, one per attribute
         protected Map<String, String> mdAggregations;
         protected String service;
-        protected String servicePath;
-        protected String destination;
-        //protected String firstLevel;
-        //protected String secondLevel;
-        //protected String thirdLevel;
+        protected String servicePathForData;
+        protected String servicePathForNaming;
+        protected String entityForNaming;
         protected String hdfsFolder;
         protected String hdfsFile;
         protected String hiveFields;
 
         public HDFSAggregator() {
             aggregation = "";
-            mdAggregations = new HashMap<String, String>();
+            mdAggregations = new HashMap<>();
         } // HDFSAggregator
 
         public String getAggregation() {
@@ -558,17 +560,13 @@ public class NGSIHDFSSink extends NGSISink {
             return hiveFields;
         } // getHiveFields
 
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
-            service = cygnusEvent.getService();
-            servicePath = cygnusEvent.getServicePath();
-            destination = cygnusEvent.getEntity();
-            //firstLevel = buildFirstLevel(service);
-            //secondLevel = buildSecondLevel(servicePath);
-            //thirdLevel = buildThirdLevel(destination);
-            hdfsFolder = buildFolderPath(service, servicePath, destination);
-            hdfsFile = buildFilePath(service, servicePath, destination);
-            //hdfsFolder = firstLevel + (servicePath.equals("/") ? "" : secondLevel) + "/" + thirdLevel;
-            //hdfsFile = hdfsFolder + "/" + thirdLevel + ".txt";
+        public void initialize(NGSIEvent event) throws Exception {
+            service = event.getServiceForNaming(enableNameMappings);
+            servicePathForData = event.getServicePathForData();
+            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            hdfsFolder = buildFolderPath(service, servicePathForNaming, entityForNaming);
+            hdfsFile = buildFilePath(service, servicePathForNaming, entityForNaming);
         } // initialize
 
         public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
@@ -596,13 +594,13 @@ public class NGSIHDFSSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
-            // get the event headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+        public void aggregate(NGSIEvent event) throws Exception {
+            // get the getRecvTimeTs headers
+            long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
-            // get the event body
-            ContextElement contextElement = cygnusEvent.getContextElement();
+            // get the getRecvTimeTs body
+            ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
@@ -629,7 +627,7 @@ public class NGSIHDFSSink extends NGSISink {
                 String line = "{"
                     + "\"" + NGSIConstants.RECV_TIME_TS + "\":\"" + recvTimeTs / 1000 + "\","
                     + "\"" + NGSIConstants.RECV_TIME + "\":\"" + recvTime + "\","
-                    + "\"" + NGSIConstants.FIWARE_SERVICE_PATH + "\":\"" + servicePath + "\","
+                    + "\"" + NGSIConstants.FIWARE_SERVICE_PATH + "\":\"" + servicePathForData + "\","
                     + "\"" + NGSIConstants.ENTITY_ID + "\":\"" + entityId + "\","
                     + "\"" + NGSIConstants.ENTITY_TYPE + "\":\"" + entityType + "\","
                     + "\"" + NGSIConstants.ATTR_NAME + "\":\"" + attrName + "\","
@@ -678,13 +676,13 @@ public class NGSIHDFSSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
-            // get the event headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+        public void aggregate(NGSIEvent event) throws Exception {
+            // get the getRecvTimeTs headers
+            long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
-            // get the event body
-            ContextElement contextElement = cygnusEvent.getContextElement();
+            // get the getRecvTimeTs body
+            ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
@@ -700,7 +698,7 @@ public class NGSIHDFSSink extends NGSISink {
             } // if
 
             String line = "{\"" + NGSIConstants.RECV_TIME + "\":\"" + recvTime + "\","
-                    + "\"" + NGSIConstants.FIWARE_SERVICE_PATH + "\":\"" + servicePath + "\","
+                    + "\"" + NGSIConstants.FIWARE_SERVICE_PATH + "\":\"" + servicePathForData + "\","
                     + "\"" + NGSIConstants.ENTITY_ID + "\":\"" + entityId + "\","
                     + "\"" + NGSIConstants.ENTITY_TYPE + "\":\"" + entityType + "\"";
 
@@ -746,13 +744,13 @@ public class NGSIHDFSSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
-            // get the event headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+        public void aggregate(NGSIEvent event) throws Exception {
+            // get the getRecvTimeTs headers
+            long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
-            // get the event body
-            ContextElement contextElement = cygnusEvent.getContextElement();
+            // get the getRecvTimeTs body
+            ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
@@ -776,7 +774,8 @@ public class NGSIHDFSSink extends NGSISink {
                         + attrType + ")");
                 // this has to be done notification by notification and not at initialization since in row mode not all
                 // the notifications contain all the attributes
-                String attrMdFileName = buildAttrMdFilePath(service, servicePath, destination, attrName, attrType);
+                String attrMdFileName = buildAttrMdFilePath(service, servicePathForNaming, entityForNaming, attrName,
+                        attrType);
                 String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
                 String mdAggregation = mdAggregations.get(attrMdFileName);
 
@@ -798,7 +797,7 @@ public class NGSIHDFSSink extends NGSISink {
                 // aggreagate the data
                 String line = recvTimeTs / 1000 + csvSeparator
                     + recvTime + csvSeparator
-                    + servicePath + csvSeparator
+                    + servicePathForData + csvSeparator
                     + entityId + csvSeparator
                     + entityType + csvSeparator
                     + attrName + csvSeparator
@@ -865,7 +864,8 @@ public class NGSIHDFSSink extends NGSISink {
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
-                String attrMdFileName = buildAttrMdFilePath(service, servicePath, destination, attrName, attrType);
+                String attrMdFileName = buildAttrMdFilePath(service, servicePathForNaming, entityForNaming, attrName,
+                        attrType);
                 mdAggregations.put(attrMdFileName, new String());
                 hiveFields += ",`" + NGSICharsets.encodeHive(attrName) + "` string,"
                         + "`" + NGSICharsets.encodeHive(attrName) + "_md_file` string";
@@ -873,13 +873,13 @@ public class NGSIHDFSSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
-            // get the event headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+        public void aggregate(NGSIEvent event) throws Exception {
+            // get the getRecvTimeTs headers
+            long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
-            // get the event body
-            ContextElement contextElement = cygnusEvent.getContextElement();
+            // get the getRecvTimeTs body
+            ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
@@ -894,7 +894,8 @@ public class NGSIHDFSSink extends NGSISink {
                 return;
             } // if
 
-            String line = recvTime + csvSeparator + servicePath + csvSeparator + entityId + csvSeparator + entityType;
+            String line = recvTime + csvSeparator + servicePathForData + csvSeparator + entityId + csvSeparator
+                    + entityType;
 
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
@@ -906,7 +907,8 @@ public class NGSIHDFSSink extends NGSISink {
 
                 // this has to be done notification by notification and not at initialization since in row mode not all
                 // the notifications contain all the attributes
-                String attrMdFileName = buildAttrMdFilePath(service, servicePath, destination, attrName, attrType);
+                String attrMdFileName = buildAttrMdFilePath(service, servicePathForNaming, entityForNaming, attrName,
+                        attrType);
                 String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
                 String mdAggregation = mdAggregations.get(attrMdFileName);
 
@@ -1113,8 +1115,10 @@ public class NGSIHDFSSink extends NGSISink {
      * @param servicePath
      * @param destination
      * @return The HDFS folder path
+     * @throws com.telefonica.iot.cygnus.errors.CygnusBadConfiguration
      */
-    protected String buildFolderPath(String service, String servicePath, String destination) throws CygnusBadConfiguration {
+    protected String buildFolderPath(String service, String servicePath, String destination)
+        throws CygnusBadConfiguration {
         String folderPath;
         
         if (enableEncoding) {
@@ -1139,8 +1143,10 @@ public class NGSIHDFSSink extends NGSISink {
      * @param servicePath
      * @param destination
      * @return The file path
+     * @throws com.telefonica.iot.cygnus.errors.CygnusBadConfiguration
      */
-    protected String buildFilePath(String service, String servicePath, String destination) throws CygnusBadConfiguration {
+    protected String buildFilePath(String service, String servicePath, String destination)
+        throws CygnusBadConfiguration {
         String filePath;
         
         if (enableEncoding) {

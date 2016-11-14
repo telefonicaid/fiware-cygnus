@@ -17,7 +17,11 @@
  */
 package com.telefonica.iot.cygnus.interceptors;
 
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import java.util.ArrayList;
 import java.util.Map;
 import org.apache.flume.Event;
 
@@ -28,20 +32,19 @@ import org.apache.flume.Event;
 public class NGSIEvent implements Event {
     
     private Map<String, String> headers;
-    private NotifyContextRequest originalNCR;
-    private NotifyContextRequest mappedNCR;
+    private ContextElement originalCE;
+    private ContextElement mappedCE;
     
     /**
      * Constructor.
      * @param headers
-     * @param originalNCR
-     * @param mappedNCR
+     * @param originalCE
+     * @param mappedCE
      */
-    public NGSIEvent(Map<String, String> headers, NotifyContextRequest originalNCR,
-            NotifyContextRequest mappedNCR) {
+    public NGSIEvent(Map<String, String> headers, ContextElement originalCE, ContextElement mappedCE) {
         this.headers = headers;
-        this.originalNCR = originalNCR;
-        this.mappedNCR = mappedNCR;
+        this.originalCE = originalCE;
+        this.mappedCE = mappedCE;
     } // NGSIEvent
 
     @Override
@@ -63,20 +66,103 @@ public class NGSIEvent implements Event {
     public void setBody(byte[] bytes) {
     } // setBody
     
-    public NotifyContextRequest getOriginalNCR() {
-        return originalNCR;
+    public ContextElement getOriginalCE() {
+        return originalCE;
     } // getOriginalNCR
     
-    public void setOriginalNCR(NotifyContextRequest originalNCR) {
-        this.originalNCR = originalNCR;
+    public void setOriginalCE(ContextElement originalCE) {
+        this.originalCE = originalCE;
     } // setOriginalNCR
     
-    public NotifyContextRequest getMappedNCR() {
-        return mappedNCR;
+    public ContextElement getMappedCE() {
+        return mappedCE;
     } // getMappedNCR
     
-    public void setMappedNCR(NotifyContextRequest mappedNCR) {
-        this.mappedNCR = mappedNCR;
+    public void setMappedCE(ContextElement mappedCE) {
+        this.mappedCE = mappedCE;
     } // setMappedNCR
+    
+    /*
+     * From here on, methods used by custom sinks. They are smart wrappers of the above methods.
+     */
+    
+    public long getRecvTimeTs() {
+        return new Long(headers.get(NGSIConstants.FLUME_HEADER_TIMESTAMP));
+    } // getRecvTimeTs
+    
+    /**
+     * Gets the service both for data and for naming.
+     * @param enableMappings
+     * @return The service both for data and for naming
+     */
+    public String getServiceForNaming(boolean enableMappings) {
+        if (enableMappings) {
+            return headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE);
+        } else {
+            return headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
+        } // if else
+    } // getServiceForNaming
+    
+    /**
+     * Gets the service path for data.
+     * @return The service path for data
+     */
+    public String getServicePathForData() {
+        return headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
+    } // getOriginalServicePath
+
+    /**
+     * Gets the service path for naming.
+     * @param enableGrouping
+     * @param enableMappings
+     * @return The service path for naming
+     */
+    public String getServicePathForNaming(boolean enableGrouping, boolean enableMappings) {
+        if (enableGrouping) {
+            return headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH);
+        } else if (enableMappings) {
+            return headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH);
+        } else {
+            return headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
+        } // if else
+    } // getMappedServicePath
+    
+    /**
+     * Gets the entity for naming.
+     * @param enableGrouping
+     * @param enableMappings
+     * @param enableEncoding
+     * @return The entity for naming
+     */
+    public String getEntityForNaming(boolean enableGrouping, boolean enableMappings, boolean enableEncoding) {
+        if (enableGrouping) {
+            return headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY);
+        } else if (enableMappings) {
+            return mappedCE.getId() + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
+                    + mappedCE.getType();
+        } else {
+            return originalCE.getId() + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
+                    + originalCE.getType();
+        } // if else
+    } // getEntityForNaming
+    
+    /**
+     * Gets the attribute for naming.
+     * @param enableMappings
+     * @return The attribute for naming
+     */
+    public String getAttributeForNaming(boolean enableMappings) {
+        if (enableMappings) {
+            ArrayList<ContextAttribute> attrs = mappedCE.getAttributes();
+            return attrs.get(0).getName(); // the CE has been filtered for having just one attribute
+        } else {
+            ArrayList<ContextAttribute> attrs = originalCE.getAttributes();
+            return attrs.get(0).getName(); // the CE has been filtered for having just one attribute
+        } // if else
+    } // getAttributeForNaming
+    
+    public ContextElement getContextElement() {
+        return originalCE;
+    } // getContextElement
     
 } // NGSIEvent

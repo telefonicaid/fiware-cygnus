@@ -18,85 +18,139 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 /**
  *
  * @author frb
  * 
- * Class representing a batch of Cygnus events.
+ * Class representing a batch of NGSIEvent's.
  * 
  */
 public class NGSIBatch {
     
-    private long numEvents;
-    private final ArrayList<String> persistedDestinations;
-    private final HashMap<String, ArrayList<NGSIEvent>> eventsPerDestination;
-
+    private HashMap<String, SubBatch> subBatches;
+    private int numEvents;
+    private Iterator entries;
+    private Entry nextEntry;
+    
     /**
      * Constructor.
      */
     public NGSIBatch() {
+        subBatches = new HashMap<>();
         numEvents = 0;
-        persistedDestinations = new ArrayList<String>();
-        eventsPerDestination = new HashMap<String, ArrayList<NGSIEvent>>();
+        entries = null;
+        nextEntry = null;
     } // NGSIBatch
-
-    public Set<String> getDestinations() {
-        return eventsPerDestination.keySet();
-    } // getDestinations
-
-    /**
-     * Get the list of events regarding a destination.
-     * @param destination
-     * @return The list of events regarding the given destination
-     */
-    public ArrayList<NGSIEvent> getEvents(String destination) {
-        return eventsPerDestination.get(destination);
-    } // getEvents
     
+    public int getNumEvents() {
+        return numEvents;
+    } // getNumEvents
+
     /**
-     * Adds an event to a sub-barch, given its destination.
+     * Adds an event to the given destination sub-batch.
      * @param destination
      * @param event
      */
     public void addEvent(String destination, NGSIEvent event) {
-        ArrayList<NGSIEvent> list = eventsPerDestination.get(destination);
-
-        if (list == null) {
-            list = new ArrayList<NGSIEvent>();
-            eventsPerDestination.put(destination, list);
+        SubBatch subBatch = subBatches.get(destination);
+        
+        if (subBatch == null) {
+            ArrayList<NGSIEvent> events = new ArrayList<>();
+            events.add(event);
+            subBatch = new SubBatch(false, events);
         } // if
         
-        list.add(event);
+        subBatches.put(destination, subBatch);
         numEvents++;
     } // addEvent
 
     /**
-     * Sets a destination has been persistedDestinations.
-     * @param destination
+     * Starts an iterator for the sub-batches.
      */
-    public void setPersisted(String destination) {
-        persistedDestinations.add(destination);
-    } // setPersisted;
+    public void startIterator() {
+        entries = subBatches.entrySet().iterator();
+    } // getIterator
 
     /**
-     * Gets is a destination has been persistedDestinations.
-     * @param destination
-     * @return True if the given destination has been persistedDestinations, false otherwise
+     * Return if there is another element to iterate.
+     * @return True if there is another element to iterare, false otherwise. Internally, gets stores a pointer to the
+     * next entry
      */
-    public boolean isPersisted(String destination) {
-        return persistedDestinations.contains(destination);
-    } // isPersisted
+    public boolean hasNext() {
+        if (entries.hasNext()) {
+            nextEntry = (Entry) entries.next();
+            return true;
+        } else {
+            return false;
+        } // if else
+    } // hasNext
     
     /**
-     * Gets the total number of events within this batch.
-     * @return The total number of events within this batch
+     * Gets the next sub-batch destination.
+     * @return The next sub-batch destination
      */
-    public long getNumEvents() {
-        return numEvents;
-    } // getNumEvents
+    public String getNextDestination() {
+        return (String) nextEntry.getKey();
+    } // getNextDestination
+    
+    /**
+     * Gets the next sub-batch events.
+     * @return The next sub-batch events
+     */
+    public ArrayList<NGSIEvent> getNextEvents() {
+        return ((SubBatch) nextEntry.getValue()).getEvents();
+    } // getNextEvent
+    
+    public void setNextPersisted(boolean persisted) {
+        ((SubBatch) nextEntry.getValue()).setPersisted(persisted);
+    } // setNextPersisted
+    
+    /**
+     * Class representing a SubBatch of NGSIEvent's.
+     */
+    private class SubBatch {
+        
+        private boolean persisted;
+        private ArrayList<NGSIEvent> events;
+        
+        /**
+         * Constructor.
+         * @param persisted
+         * @param events
+         */
+        public SubBatch(boolean persisted, ArrayList<NGSIEvent> events) {
+            this.persisted = persisted;
+            this.events = events;
+        } // SubBatch
+        
+        /**
+         * Constructor.
+         */
+        public SubBatch() {
+        } // SubBatch
+        
+        public boolean getPersisted() {
+            return persisted;
+        } // getPersisted
+        
+        public void setPersisted(boolean persisted) {
+            this.persisted = persisted;
+        } // setPersisted
+        
+        public ArrayList<NGSIEvent> getEvents() {
+            return this.events;
+        } // getEvents
+        
+        public void setEvents(ArrayList<NGSIEvent> events) {
+            this.events = events;
+        } // setEvents
+        
+    } // SubBatch
         
 } // NGSIBatch

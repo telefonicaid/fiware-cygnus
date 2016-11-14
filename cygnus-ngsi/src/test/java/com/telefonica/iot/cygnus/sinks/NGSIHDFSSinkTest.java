@@ -1169,15 +1169,6 @@ public class NGSIHDFSSinkTest {
         } // try catch
     } // testBuildFilePathLength
     
-    private NGSIBatch createBatch(long recvTimeTs, String service, String servicePath, String destination,
-            ContextElement contextElement) {
-        NGSIEvent groupedEvent = new NGSIEvent(recvTimeTs, service, servicePath, destination, null,
-            contextElement);
-        NGSIBatch batch = new NGSIBatch();
-        batch.addEvent(destination, groupedEvent);
-        return batch;
-    } // createBatch
-    
     private Context createContext(String backendImpl, String backendMaxConns, String backendMaxConnsPerRoute,
             String batchSize, String batchTime, String batchTTL, String csvSeparator, String dataModel,
             String enableEncoding, String enableGrouping, String enableLowercase, String fileFormat, String host,

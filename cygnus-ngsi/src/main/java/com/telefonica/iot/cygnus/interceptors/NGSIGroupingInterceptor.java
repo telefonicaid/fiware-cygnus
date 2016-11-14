@@ -78,7 +78,7 @@ public class NGSIGroupingInterceptor implements Interceptor {
     } // initialize
     
     @Override
-    public Event intercept(Event event) {  
+    public Event intercept(Event event) {
         if (invalidConfiguration) {
             return event;
         } // if
@@ -144,24 +144,32 @@ public class NGSIGroupingInterceptor implements Interceptor {
 
         // set the final header values
         String defaultDestinationsStr = CommonUtils.toString(defaultDestinations);
-        headers.put(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITIES, defaultDestinationsStr);
-        LOGGER.debug("[gi] Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITIES
+        headers.put(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY, defaultDestinationsStr);
+        LOGGER.debug("[gi] Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY
                 + ", value=" + defaultDestinationsStr + ")");
         String groupedDestinationsStr = CommonUtils.toString(groupedDestinations);
-        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_ENTITIES, groupedDestinationsStr);
-        LOGGER.debug("[gi] Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_ENTITIES
+        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY, groupedDestinationsStr);
+        LOGGER.debug("[gi] Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_ENTITY
                 + ", value=" + groupedDestinationsStr + ")");
         String groupedServicePathsStr = CommonUtils.toString(groupedServicePaths);
-        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS, groupedServicePathsStr);
-        LOGGER.debug("[gi] Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATHS
+        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH, groupedServicePathsStr);
+        LOGGER.debug("[gi] Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH
                 + ", value=" + groupedServicePathsStr + ")");
 
         // Create the NGSIEvent
         // 'TODO': the NGSIEvent will be created at NGSIRestHandler in a second stage;
         //       then, this interceptor will only add the mappedNCR
-        NGSIEvent ngsiEvent = new NGSIEvent(headers, originalNCR, null);
+        // 'TODO': we will assume the NCR only contains one CE; this will be fixed when
+        //       NGSIRestHandler creates the NGSIEvents
+        ArrayList<NotifyContextRequest.ContextElementResponse> originalCER = originalNCR.getContextResponses();
         
-        // Return the intercepted event
+        if (originalCER == null || originalCER.isEmpty()) {
+            return null;
+        } // if
+        
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, originalCER.get(0).getContextElement(), null);
+        
+        // Return the intercepted getRecvTimeTs
         LOGGER.debug("[gi] Event put in the channel, id=" + event.hashCode());
         return ngsiEvent;
     } // intercept

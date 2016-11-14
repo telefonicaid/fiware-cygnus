@@ -122,9 +122,19 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         // Create the NGSIEvent
         // 'TODO': the NGSIEvent will be created at NGSIRestHandler in a second stage;
         //       then, this interceptor will only add the mappedNCR
-        NGSIEvent ngsiEvent = new NGSIEvent(headers, originalNCR, map.getRight());
+        // 'TODO': we will assume the NCR only contains one CE; this will be fixed when
+        //       NGSIRestHandler creates the NGSIEvents
+        ArrayList<ContextElementResponse> originalCER = originalNCR.getContextResponses();
+        ArrayList<ContextElementResponse> mappedCER = map.getRight().getContextResponses();
         
-        // Return the intercepted event
+        if (originalCER == null || mappedCER == null || originalCER.isEmpty() || mappedCER.isEmpty()) {
+            return null;
+        } // if
+        
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, originalCER.get(0).getContextElement(),
+                mappedCER.get(0).getContextElement());
+        
+        // Return the intercepted getRecvTimeTs
         LOGGER.debug("[nmi] Event put in the channel, id=" + event.hashCode());
         return ngsiEvent;
     } // intercept
