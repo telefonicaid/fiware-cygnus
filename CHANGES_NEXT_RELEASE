@@ -6,3 +6,5 @@
 - [cygnus-ngsi][hardening] NGSIEvent must contain ContextElement's instead of NotifyContextRequest's (#1203)
 - [cygnus-ngsi][hardening] Add a note regarding supported NGSI version (#1288)
 - [cygnus-ngsi][bug] Add concatenator to CKAN packages when new encoding is enabled (#1291)
+- [cygnus-ngsi][hardening] Add a documentation piece regarding deprecated functionality (#1289)
+- [cygnus-ngsi][hardening] Add a note regarding geolocation attributes in NGSICKANSink documentation (#1293)
