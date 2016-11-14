@@ -43,6 +43,7 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.when;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import org.junit.Assert;
 
 /**
  *
@@ -418,7 +419,7 @@ public class NGSIRestHandlerTest {
             body = handler.getEvents(mockHttpServletRequest).get(0).getBody();
             
             try {
-                assertEquals(null, body);
+                Assert.assertArrayEquals(null, body);
                 System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "-  OK  - The event body is null");
             } catch (AssertionError e1) {
