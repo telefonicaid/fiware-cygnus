@@ -1026,15 +1026,6 @@ public class NGSICKANSinkTest {
                     + "-  OK  - A resource name length greater than 100 characters has been detected");
         } // try catch
     } // testBuildResourceNameLength
-
-    private NGSIBatch createBatch(long recvTimeTs, String service, String servicePath, String destination,
-            NotifyContextRequest.ContextElement contextElement) {
-        NGSIEvent groupedEvent = new NGSIEvent(recvTimeTs, service, servicePath, destination, null,
-            contextElement);
-        NGSIBatch batch = new NGSIBatch();
-        batch.addEvent(destination, groupedEvent);
-        return batch;
-    } // createBatch
     
     private Context createContext(String apiKey, String attrPersistence, String backendMaxConns,
             String backendMaxConnsPerRoute, String batchSize, String batchTime, String batchTTL, String dataModel,

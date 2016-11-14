@@ -17,7 +17,8 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.sinks.NGSISink.Accumulator;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -43,56 +44,31 @@ import org.junit.Test;
  */
 public class NGSISinkTest {
     
-    private final String originalNCRStr = ""
+    private final String originalCEStr = ""
             + "{"
-            +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
-            +   "\"originator\" : \"localhost\","
-            +   "\"contextResponses\" : ["
+            +   "\"attributes\" : ["
             +     "{"
-            +       "\"contextElement\" : {"
-            +         "\"attributes\" : ["
-            +           "{"
-            +             "\"name\" : \"temperature\","
-            +             "\"type\" : \"centigrade\","
-            +             "\"value\" : \"26.5\""
-            +           "}"
-            +         "],"
-            +         "\"type\" : \"Room\","
-            +         "\"isPattern\" : \"false\","
-            +         "\"id\" : \"Room1\""
-            +       "},"
-            +       "\"statusCode\" : {"
-            +         "\"code\" : \"200\","
-            +         "\"reasonPhrase\" : \"OK\""
-            +       "}"
+            +       "\"name\" : \"temperature\","
+            +       "\"type\" : \"centigrade\","
+            +       "\"value\" : \"26.5\""
             +     "}"
-            +   "]"
+            +   "],"
+            +   "\"type\" : \"Room\","
+            +   "\"isPattern\" : \"false\","
+            +   "\"id\" : \"Room1\""
             + "}";
-    
-    private final String mappedNCRStr = ""
+    private final String mappedCEStr = ""
             + "{"
-            +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
-            +   "\"originator\" : \"localhost\","
-            +   "\"contextResponses\" : ["
+            +   "\"attributes\" : ["
             +     "{"
-            +       "\"contextElement\" : {"
-            +         "\"attributes\" : ["
-            +           "{"
-            +             "\"name\" : \"new_temperature\","
-            +             "\"type\" : \"new_centigrade\","
-            +             "\"value\" : \"26.5\""
-            +           "}"
-            +         "],"
-            +         "\"type\" : \"new_Room\","
-            +         "\"isPattern\" : \"false\","
-            +         "\"id\" : \"new_Room1\""
-            +       "},"
-            +       "\"statusCode\" : {"
-            +         "\"code\" : \"200\","
-            +         "\"reasonPhrase\" : \"OK\""
-            +       "}"
+            +       "\"name\" : \"new_temperature\","
+            +       "\"type\" : \"new_centigrade\","
+            +       "\"value\" : \"26.5\""
             +     "}"
-            +   "]"
+            +   "],"
+            +   "\"type\" : \"new_Room\","
+            +   "\"isPattern\" : \"false\","
+            +   "\"id\" : \"new_Room1\""
             + "}";
     private final String timestamp = "1234567890";
     private final String correlatorId = "1234567891";
@@ -403,16 +379,23 @@ public class NGSISinkTest {
         sink.configure(createContext(null, null, null, null, dataModel, null, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
         headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NotifyContextRequest originalNCR = TestUtils.createJsonNotifyContextRequest(originalNCRStr);
-        NotifyContextRequest mappedNCR = TestUtils.createJsonNotifyContextRequest(mappedNCRStr);
-        acc.accumulate(headers, originalNCR, mappedNCR);
+        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        acc.accumulate(event);
+        NGSIBatch batch = acc.getBatch();
+        batch.startIterator();
+        batch.hasNext();
+        String destination = batch.getNextDestination();
+        int numEvents = batch.getNumEvents();
+        ArrayList<NGSIEvent> events = batch.getNextEvents();
         
         try {
             assertEquals(correlatorId, acc.getAccTransactionIds());
@@ -425,7 +408,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(1, acc.getBatch().getNumEvents());
+            assertEquals(1, numEvents);
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated events is 1");
         } catch (AssertionError e) {
@@ -433,9 +416,9 @@ public class NGSISinkTest {
                     + "- FAIL - Accumulated events is not 1");
             throw e;
         } // try catch
-        
+
         try {
-            assertTrue(acc.getBatch().getDestinations().contains(originalService));
+            assertTrue(destination.equals(originalService));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated destination is '" + originalService + "'");
         } catch (AssertionError e) {
@@ -445,7 +428,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalService, acc.getBatch().getEvents(originalService).get(0).getService());
+            assertEquals(originalService, events.get(0).getServiceForNaming(false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service is '" + originalService + "'");
         } catch (AssertionError e) {
@@ -455,7 +438,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalServicePath, acc.getBatch().getEvents(originalService).get(0).getServicePath());
+            assertEquals(originalServicePath, events.get(0).getServicePathForNaming(false, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + originalServicePath + "'");
         } catch (AssertionError e) {
@@ -463,9 +446,9 @@ public class NGSISinkTest {
                     + "- FAIL - Accumulated event's service path is not '" + originalServicePath + "'");
             throw e;
         } // try catch
-        
+/*        
         try {
-            assertEquals(null, acc.getBatch().getEvents(originalService).get(0).getEntity());
+            assertEquals(null, events.get(0).getEntityForNaming(false, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is 'null'");
         } catch (AssertionError e) {
@@ -475,7 +458,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(null, acc.getBatch().getEvents(originalService).get(0).getAttribute());
+            assertEquals(null, events.get(0).getAttributeForNaming(false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is 'null'");
         } catch (AssertionError e) {
@@ -483,6 +466,7 @@ public class NGSISinkTest {
                     + "- FAIL - Accumulated event's entity path is not 'null'");
             throw e;
         } // try catch
+*/
     } // testAccumulateDMByService
     
     /**
@@ -499,16 +483,23 @@ public class NGSISinkTest {
         sink.configure(createContext(null, null, null, null, dataModel, null, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
         headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NotifyContextRequest originalNCR = TestUtils.createJsonNotifyContextRequest(originalNCRStr);
-        NotifyContextRequest mappedNCR = TestUtils.createJsonNotifyContextRequest(mappedNCRStr);
-        acc.accumulate(headers, originalNCR, mappedNCR);
+        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        acc.accumulate(event);
+        NGSIBatch batch = acc.getBatch();
+        batch.startIterator();
+        batch.hasNext();
+        String destination = batch.getNextDestination();
+        int numEvents = batch.getNumEvents();
+        ArrayList<NGSIEvent> events = batch.getNextEvents();
         
         try {
             assertEquals(correlatorId, acc.getAccTransactionIds());
@@ -521,7 +512,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(1, acc.getBatch().getNumEvents());
+            assertEquals(1, numEvents);
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated events is 1");
         } catch (AssertionError e) {
@@ -531,7 +522,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertTrue(acc.getBatch().getDestinations().contains(originalService + "_" + originalServicePath));
+            assertTrue(destination.equals(originalService + "_" + originalServicePath));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated destination is '" + originalService + "_" + originalServicePath + "'");
         } catch (AssertionError e) {
@@ -541,8 +532,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalService,
-                    acc.getBatch().getEvents(originalService + "_" + originalServicePath).get(0).getService());
+            assertEquals(originalService, events.get(0).getServiceForNaming(false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service is '" + originalService + "'");
         } catch (AssertionError e) {
@@ -552,8 +542,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalServicePath,
-                    acc.getBatch().getEvents(originalService + "_" + originalServicePath).get(0).getServicePath());
+            assertEquals(originalServicePath, events.get(0).getServicePathForNaming(false, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + originalServicePath + "'");
         } catch (AssertionError e) {
@@ -561,10 +550,9 @@ public class NGSISinkTest {
                     + "- FAIL - Accumulated event's service path is not '" + originalServicePath + "'");
             throw e;
         } // try catch
-        
+/*        
         try {
-            assertEquals(null,
-                    acc.getBatch().getEvents(originalService + "_" + originalServicePath).get(0).getAttribute());
+            assertEquals(null, events.get(0).getEntityForNaming(false, false, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is 'null'");
         } catch (AssertionError e) {
@@ -574,8 +562,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(null,
-                    acc.getBatch().getEvents(originalService + "_" + originalServicePath).get(0).getEntity());
+            assertEquals(null, events.get(0).getAttributeForNaming(false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is 'null'");
         } catch (AssertionError e) {
@@ -583,6 +570,7 @@ public class NGSISinkTest {
                     + "- FAIL - Accumulated event's entity path is not 'null'");
             throw e;
         } // try catch
+*/
     } // testAccumulateDMByServicePath
     
     /**
@@ -599,16 +587,23 @@ public class NGSISinkTest {
         sink.configure(createContext(null, null, null, null, dataModel, null, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
         headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NotifyContextRequest originalNCR = TestUtils.createJsonNotifyContextRequest(originalNCRStr);
-        NotifyContextRequest mappedNCR = TestUtils.createJsonNotifyContextRequest(mappedNCRStr);
-        acc.accumulate(headers, originalNCR, mappedNCR);
+        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        acc.accumulate(event);
+        NGSIBatch batch = acc.getBatch();
+        batch.startIterator();
+        batch.hasNext();
+        String destination = batch.getNextDestination();
+        int numEvents = batch.getNumEvents();
+        ArrayList<NGSIEvent> events = batch.getNextEvents();
         
         try {
             assertEquals(correlatorId, acc.getAccTransactionIds());
@@ -621,7 +616,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(1, acc.getBatch().getNumEvents());
+            assertEquals(1, numEvents);
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated events is 1");
         } catch (AssertionError e) {
@@ -631,8 +626,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertTrue(acc.getBatch().getDestinations().contains(originalService + "_" + originalServicePath + "_"
-                    + originalEntity));
+            assertTrue(destination.equals(originalService + "_" + originalServicePath + "_" + originalEntity));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated destination is '" + originalService + "_" + originalServicePath + "_"
                     + originalEntity + "'");
@@ -644,8 +638,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalService, acc.getBatch().getEvents(originalService + "_" + originalServicePath + "_"
-                    + originalEntity).get(0).getService());
+            assertEquals(originalService, events.get(0).getServiceForNaming(false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service is '" + originalService + "'");
         } catch (AssertionError e) {
@@ -655,8 +648,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalServicePath, acc.getBatch().getEvents(originalService + "_" + originalServicePath + "_"
-                    + originalEntity).get(0).getServicePath());
+            assertEquals(originalServicePath, events.get(0).getServicePathForNaming(false, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + originalServicePath + "'");
         } catch (AssertionError e) {
@@ -666,8 +658,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalEntity, acc.getBatch().getEvents(originalService + "_" + originalServicePath + "_"
-                    + originalEntity).get(0).getEntity());
+            assertEquals(originalEntity, events.get(0).getEntityForNaming(false, false, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is '" + originalEntity + "'");
         } catch (AssertionError e) {
@@ -675,10 +666,9 @@ public class NGSISinkTest {
                     + "- FAIL - Accumulated event's entity path is not '" + originalEntity + "'");
             throw e;
         } // try catch
-        
+/*        
         try {
-            assertEquals(null, acc.getBatch().getEvents(originalService + "_" + originalServicePath + "_"
-                    + originalEntity).get(0).getAttribute());
+            assertEquals(null, events.get(0).getAttributeForNaming(false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is 'null'");
         } catch (AssertionError e) {
@@ -686,6 +676,7 @@ public class NGSISinkTest {
                     + "- FAIL - Accumulated event's entity path is not 'null'");
             throw e;
         } // try catch
+*/
     } // testAccumulateDMByEntity
     
     /**
@@ -702,16 +693,23 @@ public class NGSISinkTest {
         sink.configure(createContext(null, null, null, null, dataModel, null, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
         headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NotifyContextRequest originalNCR = TestUtils.createJsonNotifyContextRequest(originalNCRStr);
-        NotifyContextRequest mappedNCR = TestUtils.createJsonNotifyContextRequest(mappedNCRStr);
-        acc.accumulate(headers, originalNCR, mappedNCR);
+        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        acc.accumulate(event);
+        NGSIBatch batch = acc.getBatch();
+        batch.startIterator();
+        batch.hasNext();
+        String destination = batch.getNextDestination();
+        int numEvents = batch.getNumEvents();
+        ArrayList<NGSIEvent> events = batch.getNextEvents();
         
         try {
             assertEquals(correlatorId, acc.getAccTransactionIds());
@@ -724,7 +722,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(1, acc.getBatch().getNumEvents());
+            assertEquals(1, numEvents);
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated events is 1");
         } catch (AssertionError e) {
@@ -734,7 +732,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertTrue(acc.getBatch().getDestinations().contains(originalService + "_" + originalServicePath + "_"
+            assertTrue(destination.equals(originalService + "_" + originalServicePath + "_"
                     + originalEntity + "_" + originalAttribute));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated destination is '" + originalService + "_" + originalServicePath + "_"
@@ -747,8 +745,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalService, acc.getBatch().getEvents(originalService + "_" + originalServicePath + "_"
-                    + originalEntity + "_" + originalAttribute).get(0).getService());
+            assertEquals(originalService, events.get(0).getServiceForNaming(false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service is '" + originalService + "'");
         } catch (AssertionError e) {
@@ -758,8 +755,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalServicePath, acc.getBatch().getEvents(originalService + "_" + originalServicePath + "_"
-                    + originalEntity + "_" + originalAttribute).get(0).getServicePath());
+            assertEquals(originalServicePath, events.get(0).getServicePathForNaming(false, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + originalServicePath + "'");
         } catch (AssertionError e) {
@@ -769,8 +765,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalEntity, acc.getBatch().getEvents(originalService + "_" + originalServicePath + "_"
-                    + originalEntity + "_" + originalAttribute).get(0).getEntity());
+            assertEquals(originalEntity, events.get(0).getEntityForNaming(false, false, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is '" + originalEntity + "'");
         } catch (AssertionError e) {
@@ -780,8 +775,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalAttribute, acc.getBatch().getEvents(originalService + "_" + originalServicePath + "_"
-                    + originalEntity + "_" + originalAttribute).get(0).getAttribute());
+            assertEquals(originalAttribute, events.get(0).getAttributeForNaming(false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is '" + originalAttribute + "'");
         } catch (AssertionError e) {
@@ -807,16 +801,23 @@ public class NGSISinkTest {
         sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
         headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NotifyContextRequest originalNCR = TestUtils.createJsonNotifyContextRequest(originalNCRStr);
-        NotifyContextRequest mappedNCR = TestUtils.createJsonNotifyContextRequest(mappedNCRStr);
-        acc.accumulate(headers, originalNCR, mappedNCR);
+        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        acc.accumulate(event);
+        NGSIBatch batch = acc.getBatch();
+        batch.startIterator();
+        batch.hasNext();
+        String destination = batch.getNextDestination();
+        int numEvents = batch.getNumEvents();
+        ArrayList<NGSIEvent> events = batch.getNextEvents();
         
         try {
             assertEquals(correlatorId, acc.getAccTransactionIds());
@@ -829,7 +830,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(1, acc.getBatch().getNumEvents());
+            assertEquals(1, numEvents);
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated events is 1");
         } catch (AssertionError e) {
@@ -839,7 +840,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertTrue(acc.getBatch().getDestinations().contains(mappedService));
+            assertTrue(destination.equals(mappedService));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated destination is '" + mappedService + "'");
         } catch (AssertionError e) {
@@ -849,7 +850,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedService, acc.getBatch().getEvents(mappedService).get(0).getService());
+            assertEquals(mappedService, events.get(0).getServiceForNaming(true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service is '" + mappedService + "'");
         } catch (AssertionError e) {
@@ -859,7 +860,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedServicePath, acc.getBatch().getEvents(mappedService).get(0).getServicePath());
+            assertEquals(mappedServicePath, events.get(0).getServicePathForNaming(false, true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + mappedServicePath + "'");
         } catch (AssertionError e) {
@@ -867,9 +868,9 @@ public class NGSISinkTest {
                     + "- FAIL - Accumulated event's service path is not '" + mappedServicePath + "'");
             throw e;
         } // try catch
-        
+/*        
         try {
-            assertEquals(null, acc.getBatch().getEvents(mappedService).get(0).getEntity());
+            assertEquals(null, events.get(0).getEntityForNaming(false, true, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is 'null'");
         } catch (AssertionError e) {
@@ -879,7 +880,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(null, acc.getBatch().getEvents(mappedService).get(0).getAttribute());
+            assertEquals(null, events.get(0).getAttributeForNaming(true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is 'null'");
         } catch (AssertionError e) {
@@ -887,6 +888,7 @@ public class NGSISinkTest {
                     + "- FAIL - Accumulated event's entity path is not 'null'");
             throw e;
         } // try catch
+*/
     } // testAccumulateDMByServiceNameMappings
     
     /**
@@ -905,16 +907,23 @@ public class NGSISinkTest {
         sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
         headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NotifyContextRequest originalNCR = TestUtils.createJsonNotifyContextRequest(originalNCRStr);
-        NotifyContextRequest mappedNCR = TestUtils.createJsonNotifyContextRequest(mappedNCRStr);
-        acc.accumulate(headers, originalNCR, mappedNCR);
+        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        acc.accumulate(event);
+        NGSIBatch batch = acc.getBatch();
+        batch.startIterator();
+        batch.hasNext();
+        String destination = batch.getNextDestination();
+        int numEvents = batch.getNumEvents();
+        ArrayList<NGSIEvent> events = batch.getNextEvents();
         
         try {
             assertEquals(correlatorId, acc.getAccTransactionIds());
@@ -927,7 +936,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(1, acc.getBatch().getNumEvents());
+            assertEquals(1, numEvents);
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated events is 1");
         } catch (AssertionError e) {
@@ -937,7 +946,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertTrue(acc.getBatch().getDestinations().contains(mappedService + "_" + mappedServicePath));
+            assertTrue(destination.equals(mappedService + "_" + mappedServicePath));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated destination is '" + mappedService + "_" + mappedServicePath + "'");
         } catch (AssertionError e) {
@@ -947,8 +956,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedService,
-                    acc.getBatch().getEvents(mappedService + "_" + mappedServicePath).get(0).getService());
+            assertEquals(mappedService, events.get(0).getServiceForNaming(true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service is '" + mappedService + "'");
         } catch (AssertionError e) {
@@ -958,8 +966,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedServicePath,
-                    acc.getBatch().getEvents(mappedService + "_" + mappedServicePath).get(0).getServicePath());
+            assertEquals(mappedServicePath, events.get(0).getServicePathForNaming(false, true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + mappedServicePath + "'");
         } catch (AssertionError e) {
@@ -967,10 +974,9 @@ public class NGSISinkTest {
                     + "- FAIL - Accumulated event's service path is not '" + mappedServicePath + "'");
             throw e;
         } // try catch
-        
+/*        
         try {
-            assertEquals(null,
-                    acc.getBatch().getEvents(mappedService + "_" + mappedServicePath).get(0).getAttribute());
+            assertEquals(null, events.get(0).getEntityForNaming(false, true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is 'null'");
         } catch (AssertionError e) {
@@ -980,8 +986,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(null,
-                    acc.getBatch().getEvents(mappedService + "_" + mappedServicePath).get(0).getEntity());
+            assertEquals(null, events.get(0).getAttributeForNaming(true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is 'null'");
         } catch (AssertionError e) {
@@ -989,6 +994,7 @@ public class NGSISinkTest {
                     + "- FAIL - Accumulated event's entity path is not 'null'");
             throw e;
         } // try catch
+*/
     } // testAccumulateDMByServicePathNameMappings
     
     /**
@@ -1007,16 +1013,23 @@ public class NGSISinkTest {
         sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
         headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NotifyContextRequest originalNCR = TestUtils.createJsonNotifyContextRequest(originalNCRStr);
-        NotifyContextRequest mappedNCR = TestUtils.createJsonNotifyContextRequest(mappedNCRStr);
-        acc.accumulate(headers, originalNCR, mappedNCR);
+        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        acc.accumulate(event);
+        NGSIBatch batch = acc.getBatch();
+        batch.startIterator();
+        batch.hasNext();
+        String destination = batch.getNextDestination();
+        int numEvents = batch.getNumEvents();
+        ArrayList<NGSIEvent> events = batch.getNextEvents();
         
         try {
             assertEquals(correlatorId, acc.getAccTransactionIds());
@@ -1029,7 +1042,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(1, acc.getBatch().getNumEvents());
+            assertEquals(1, numEvents);
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated events is 1");
         } catch (AssertionError e) {
@@ -1039,8 +1052,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertTrue(acc.getBatch().getDestinations().contains(mappedService + "_" + mappedServicePath + "_"
-                    + mappedEntity));
+            assertTrue(destination.equals(mappedService + "_" + mappedServicePath + "_" + mappedEntity));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated destination is '" + mappedService + "_" + mappedServicePath + "_"
                     + mappedEntity + "'");
@@ -1052,8 +1064,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedService, acc.getBatch().getEvents(mappedService + "_" + mappedServicePath + "_"
-                    + mappedEntity).get(0).getService());
+            assertEquals(mappedService, events.get(0).getServiceForNaming(true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service is '" + mappedService + "'");
         } catch (AssertionError e) {
@@ -1063,8 +1074,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedServicePath, acc.getBatch().getEvents(mappedService + "_" + mappedServicePath + "_"
-                    + mappedEntity).get(0).getServicePath());
+            assertEquals(mappedServicePath, events.get(0).getServicePathForNaming(false, true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + mappedServicePath + "'");
         } catch (AssertionError e) {
@@ -1074,8 +1084,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedEntity, acc.getBatch().getEvents(mappedService + "_" + mappedServicePath + "_"
-                    + mappedEntity).get(0).getEntity());
+            assertEquals(mappedEntity, events.get(0).getEntityForNaming(false, true, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is '" + mappedEntity + "'");
         } catch (AssertionError e) {
@@ -1083,10 +1092,9 @@ public class NGSISinkTest {
                     + "- FAIL - Accumulated event's entity path is not '" + mappedEntity + "'");
             throw e;
         } // try catch
-        
+/*        
         try {
-            assertEquals(null, acc.getBatch().getEvents(mappedService + "_" + mappedServicePath + "_"
-                    + mappedEntity).get(0).getAttribute());
+            assertEquals(null, events.get(0).getAttributeForNaming(true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is 'null'");
         } catch (AssertionError e) {
@@ -1094,6 +1102,7 @@ public class NGSISinkTest {
                     + "- FAIL - Accumulated event's entity path is not 'null'");
             throw e;
         } // try catch
+*/
     } // testAccumulateDMByEntityNameMappings
     
     /**
@@ -1112,16 +1121,23 @@ public class NGSISinkTest {
         sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
         headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NotifyContextRequest originalNCR = TestUtils.createJsonNotifyContextRequest(originalNCRStr);
-        NotifyContextRequest mappedNCR = TestUtils.createJsonNotifyContextRequest(mappedNCRStr);
-        acc.accumulate(headers, originalNCR, mappedNCR);
+        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        acc.accumulate(event);
+        NGSIBatch batch = acc.getBatch();
+        batch.startIterator();
+        batch.hasNext();
+        String destination = batch.getNextDestination();
+        int numEvents = batch.getNumEvents();
+        ArrayList<NGSIEvent> events = batch.getNextEvents();
         
         try {
             assertEquals(correlatorId, acc.getAccTransactionIds());
@@ -1134,7 +1150,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(1, acc.getBatch().getNumEvents());
+            assertEquals(1, numEvents);
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated events is 1");
         } catch (AssertionError e) {
@@ -1144,7 +1160,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertTrue(acc.getBatch().getDestinations().contains(mappedService + "_" + mappedServicePath + "_"
+            assertTrue(destination.equals(mappedService + "_" + mappedServicePath + "_"
                     + mappedEntity + "_" + mappedAttribute));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated destination is '" + mappedService + "_" + mappedServicePath + "_"
@@ -1157,8 +1173,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedService, acc.getBatch().getEvents(mappedService + "_" + mappedServicePath + "_"
-                    + mappedEntity + "_" + mappedAttribute).get(0).getService());
+            assertEquals(mappedService, events.get(0).getServiceForNaming(true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service is '" + mappedService + "'");
         } catch (AssertionError e) {
@@ -1168,8 +1183,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedServicePath, acc.getBatch().getEvents(mappedService + "_" + mappedServicePath + "_"
-                    + mappedEntity + "_" + mappedAttribute).get(0).getServicePath());
+            assertEquals(mappedServicePath, events.get(0).getServicePathForNaming(false, true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + mappedServicePath + "'");
         } catch (AssertionError e) {
@@ -1179,8 +1193,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedEntity, acc.getBatch().getEvents(mappedService + "_" + mappedServicePath + "_"
-                    + mappedEntity + "_" + mappedAttribute).get(0).getEntity());
+            assertEquals(mappedEntity, events.get(0).getEntityForNaming(false, true, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is '" + mappedEntity + "'");
         } catch (AssertionError e) {
@@ -1190,8 +1203,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedAttribute, acc.getBatch().getEvents(mappedService + "_" + mappedServicePath + "_"
-                    + mappedEntity + "_" + mappedAttribute).get(0).getAttribute());
+            assertEquals(mappedAttribute, events.get(0).getAttributeForNaming(true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is '" + mappedAttribute + "'");
         } catch (AssertionError e) {
@@ -1212,7 +1224,7 @@ public class NGSISinkTest {
                 + "-------- When there are no candidates for retrying, null is returned");
         NGSISinkImpl sink = new NGSISinkImpl();
         sink.configure(createContext(null, null, null, null, null, null, null, null)); // default configuration
-        ArrayList<Accumulator> rollbackedAccumulations = new ArrayList<Accumulator>();
+        ArrayList<Accumulator> rollbackedAccumulations = new ArrayList<>();
         sink.setRollbackedAccumulations(rollbackedAccumulations);
         
         try {
@@ -1225,7 +1237,7 @@ public class NGSISinkTest {
             throw e;
         } // try catch
         
-        rollbackedAccumulations = new ArrayList<Accumulator>();
+        rollbackedAccumulations = new ArrayList<>();
         Accumulator acc = sink.new Accumulator();
         // this accumulation has supposedly been retried 10 miliseconds ago, so it is not a candidate
         acc.setLastRetry(new Date().getTime() - 10);
@@ -1253,7 +1265,7 @@ public class NGSISinkTest {
                 + "-------- When there is a candidate for retrying, it is returned");
         NGSISinkImpl sink = new NGSISinkImpl();
         sink.configure(createContext(null, null, null, null, null, null, null, null)); // default configuration
-        ArrayList<Accumulator> rollbackedAccumulations = new ArrayList<Accumulator>();
+        ArrayList<Accumulator> rollbackedAccumulations = new ArrayList<>();
         Accumulator acc = sink.new Accumulator();
         // this accumulation has supposedly been retried 10000 miliseconds ago, so it is a candidate
         acc.setLastRetry(new Date().getTime() - 10000);

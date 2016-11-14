@@ -193,32 +193,32 @@ public class NGSIGroupingInterceptorTest {
         } // try catch
         
         try {
-            assertTrue(interceptedEventHeaders.containsKey("notified-entities"));
+            assertTrue(interceptedEventHeaders.containsKey("notified-entity"));
             System.out.println(getTestTraceHead("[GroupingInterceptor.intercept]")
-                    + "-  OK  - The generated Flume event contains 'notified-entities'");
+                    + "-  OK  - The generated Flume event contains 'notified-entity'");
         } catch (AssertionError e5) {
             System.out.println(getTestTraceHead("[GroupingInterceptor.intercept]")
-                    + "- FAIL - The generated Flume event does not contain 'notified-entities'");
+                    + "- FAIL - The generated Flume event does not contain 'notified-entity'");
             throw e5;
         } // try catch
         
         try {
-            assertTrue(interceptedEventHeaders.containsKey("grouped-servicepaths"));
+            assertTrue(interceptedEventHeaders.containsKey("grouped-servicepath"));
             System.out.println(getTestTraceHead("[GroupingInterceptor.intercept]")
-                    + "-  OK  - The generated Flume event contains 'grouped-servicepaths'");
+                    + "-  OK  - The generated Flume event contains 'grouped-servicepath'");
         } catch (AssertionError e6) {
             System.out.println(getTestTraceHead("[GroupingInterceptor.intercept]")
-                    + "- FAIL - The generated Flume event does not contain 'grouped-servicepaths'");
+                    + "- FAIL - The generated Flume event does not contain 'grouped-servicepath'");
             throw e6;
         } // try catch
         
         try {
-            assertTrue(interceptedEventHeaders.containsKey("grouped-entities"));
+            assertTrue(interceptedEventHeaders.containsKey("grouped-entity"));
             System.out.println(getTestTraceHead("[GroupingInterceptor.intercept]")
-                    + "-  OK  - The generated Flume event contains 'grouped-entities'");
+                    + "-  OK  - The generated Flume event contains 'grouped-entity'");
         } catch (AssertionError e7) {
             System.out.println(getTestTraceHead("[GroupingInterceptor.intercept]")
-                    + "- FAIL - The generated Flume event does not contain 'grouped-entities'");
+                    + "- FAIL - The generated Flume event does not contain 'grouped-entity'");
             throw e7;
         } // try catch
     } // testGetEventsHeadersInFlumeEvent

@@ -19,6 +19,7 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import static com.telefonica.iot.cygnus.sinks.NGSIMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
@@ -72,38 +73,39 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
             return;
         } // if
  
-        // iterate on the destinations
-        for (String destination : batch.getDestinations()) {
-            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
-                    + " destination");
+        // Iterate on the destinations
+        batch.startIterator();
+        
+        while (batch.hasNext()) {
+            String destination = batch.getNextDestination();
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the "
+                    + destination + " destination");
 
-            // get the sub-batch for this destination
-            ArrayList<NGSIEvent> subBatch = batch.getEvents(destination);
+            // Get the events within the current sub-batch
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
             
-            // iterate on the events within the sub-batch... events are not aggregated but directly persisted
-            for (NGSIEvent cygnusEvent : subBatch) {
-                persistOne(cygnusEvent);
+            // Iterate on the events within the sub-batch... events are not aggregated but directly persisted
+            for (NGSIEvent event : events) {
+                persistOne(event);
             } // for
             
-            // set the sub-batch as persisted
-            batch.setPersisted(destination);
+            // Set the sub-batch as persisted
+            batch.setNextPersisted(true);
         } // for
     } // persistBatch
     
     private void persistOne(NGSIEvent event) throws Exception {
         // get some values from the event
         Long notifiedRecvTimeTs = event.getRecvTimeTs();
-        String fiwareService = event.getService();
-        String fiwareServicePath = event.getServicePath();
-        String destination = event.getEntity();
+        String service = event.getServiceForNaming(enableNameMappings);
+        String servicePathForData = event.getServicePathForData();
+        String servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+        String entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
         ContextElement contextElement = event.getContextElement();
 
-        // human readable version of the reception time
-        String notifiedRecvTime = CommonUtils.getHumanReadable(notifiedRecvTimeTs, true);
-
-        // create the database for this fiwareService if not yet existing... the cost of trying to create it is the same
+        // create the database for this service if not yet existing... the cost of trying to create it is the same
         // than checking if it exits and then creating it
-        String dbName = enableLowercase ? buildDbName(fiwareService).toLowerCase() : buildDbName(fiwareService);
+        String dbName = enableLowercase ? buildDbName(service).toLowerCase() : buildDbName(service);
         backend.createDatabase(dbName);
         
         // collection name container
@@ -112,8 +114,8 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
         // create the collection at this stage, if the data model is collection-per-service-path
         if (dataModel == DataModel.DMBYSERVICEPATH) {
             collectionName = enableLowercase
-                    ? (buildCollectionName(fiwareServicePath, null, null) + ".aggr").toLowerCase()
-                    : buildCollectionName(fiwareServicePath, null, null) + ".aggr";
+                    ? (buildCollectionName(servicePathForNaming, null, null) + ".aggr").toLowerCase()
+                    : buildCollectionName(servicePathForNaming, null, null) + ".aggr";
             backend.createCollection(dbName, collectionName, dataExpiration);
         } // if
         
@@ -125,8 +127,8 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
         // create the collection at this stage, if the data model is collection-per-entity
         if (dataModel == DataModel.DMBYENTITY) {
             collectionName = enableLowercase
-                    ? (buildCollectionName(fiwareServicePath, destination, null) + ".aggr").toLowerCase()
-                    : buildCollectionName(fiwareServicePath, destination, null) + ".aggr";
+                    ? (buildCollectionName(servicePathForNaming, entityForNaming, null) + ".aggr").toLowerCase()
+                    : buildCollectionName(servicePathForNaming, entityForNaming, null) + ".aggr";
             backend.createCollection(dbName, collectionName, dataExpiration);
         } // if
 
@@ -167,8 +169,8 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
             // create the collection at this stage, if the data model is collection-per-attribute
             if (dataModel == DataModel.DMBYATTRIBUTE) {
                 collectionName = enableLowercase
-                        ? (buildCollectionName(fiwareServicePath, destination, attrName) + ".aggr").toLowerCase()
-                        : buildCollectionName(fiwareServicePath, destination, attrName) + ".aggr";
+                        ? (buildCollectionName(servicePathForNaming, entityForNaming, attrName) + ".aggr").toLowerCase()
+                        : buildCollectionName(servicePathForNaming, entityForNaming, attrName) + ".aggr";
                 backend.createCollection(dbName, collectionName, dataExpiration);
             } // if
 

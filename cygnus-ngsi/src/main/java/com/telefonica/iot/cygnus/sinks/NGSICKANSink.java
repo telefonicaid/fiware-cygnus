@@ -22,6 +22,7 @@ import com.telefonica.iot.cygnus.backends.ckan.CKANBackendImpl;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackend;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
@@ -224,25 +225,28 @@ public class NGSICKANSink extends NGSISink {
             return;
         } // if
 
-        // iterate on the destinations, for each one a single create / append will be performed
-        for (String destination : batch.getDestinations()) {
-            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the " + destination
-                    + " destination");
+        // Iterate on the destinations
+        batch.startIterator();
+        
+        while (batch.hasNext()) {
+            String destination = batch.getNextDestination();
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the "
+                    + destination + " destination");
 
-            // get the sub-batch for this destination
-            ArrayList<NGSIEvent> subBatch = batch.getEvents(destination);
+            // Get the events within the current sub-batch
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
 
-            // get an aggregator for this destination and initialize it
+            // Get an aggregator for this entity and initialize it
             CKANAggregator aggregator = getAggregator(this.rowAttrPersistence);
-            aggregator.initialize(subBatch.get(0));
+            aggregator.initialize(events.get(0));
 
-            for (NGSIEvent cygnusEvent : subBatch) {
-                aggregator.aggregate(cygnusEvent);
+            for (NGSIEvent event : events) {
+                aggregator.aggregate(event);
             } // for
 
-            // persist the aggregation
+            // Persist the aggregation
             persistAggregation(aggregator);
-            batch.setPersisted(destination);
+            batch.setNextPersisted(true);
         } // for
     } // persistBatch
 
@@ -255,8 +259,9 @@ public class NGSICKANSink extends NGSISink {
         protected String records;
 
         protected String service;
-        protected String servicePath;
-        protected String destination;
+        protected String servicePathForData;
+        protected String servicePathForNaming;
+        protected String entityForNaming;
         protected String orgName;
         protected String pkgName;
         protected String resName;
@@ -294,13 +299,14 @@ public class NGSICKANSink extends NGSISink {
             } // if else
         } // getResName
 
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
-            service = cygnusEvent.getService();
-            servicePath = cygnusEvent.getServicePath();
-            destination = cygnusEvent.getEntity();
+        public void initialize(NGSIEvent event) throws Exception {
+            service = event.getServiceForNaming(enableNameMappings);
+            servicePathForData = event.getServicePathForData();
+            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
             orgName = buildOrgName(service);
-            pkgName = buildPkgName(service, servicePath);
-            resName = buildResName(destination);
+            pkgName = buildPkgName(service, servicePathForNaming);
+            resName = buildResName(entityForNaming);
         } // initialize
 
         public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
@@ -313,18 +319,18 @@ public class NGSICKANSink extends NGSISink {
     private class RowAggregator extends CKANAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
-            super.initialize(cygnusEvent);
+        public void initialize(NGSIEvent event) throws Exception {
+            super.initialize(event);
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
-            // get the event headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+        public void aggregate(NGSIEvent event) throws Exception {
+            // get the getRecvTimeTs headers
+            long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
-            // get the event body
-            NotifyContextRequest.ContextElement contextElement = cygnusEvent.getContextElement();
+            // get the getRecvTimeTs body
+            NotifyContextRequest.ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
@@ -350,7 +356,7 @@ public class NGSICKANSink extends NGSISink {
                 // create a column and aggregate it
                 String record = "{\"" + NGSIConstants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\","
                     + "\"" + NGSIConstants.RECV_TIME + "\": \"" + recvTime + "\","
-                    + "\"" + NGSIConstants.FIWARE_SERVICE_PATH + "\": \"" + servicePath + "\","
+                    + "\"" + NGSIConstants.FIWARE_SERVICE_PATH + "\": \"" + servicePathForData + "\","
                     + "\"" + NGSIConstants.ENTITY_ID + "\": \"" + entityId + "\","
                     + "\"" + NGSIConstants.ENTITY_TYPE + "\": \"" + entityType + "\","
                     + "\"" + NGSIConstants.ATTR_NAME + "\": \"" + attrName + "\","
@@ -375,18 +381,18 @@ public class NGSICKANSink extends NGSISink {
     private class ColumnAggregator extends CKANAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
-            super.initialize(cygnusEvent);
+        public void initialize(NGSIEvent event) throws Exception {
+            super.initialize(event);
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
-            // get the event headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
+        public void aggregate(NGSIEvent event) throws Exception {
+            // get the getRecvTimeTs headers
+            long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
 
-            // get the event body
-            NotifyContextRequest.ContextElement contextElement = cygnusEvent.getContextElement();
+            // get the getRecvTimeTs body
+            NotifyContextRequest.ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
@@ -402,7 +408,7 @@ public class NGSICKANSink extends NGSISink {
             } // if
 
             String record = "{\"" + NGSIConstants.RECV_TIME + "\": \"" + recvTime + "\","
-                    + "\"" + NGSIConstants.FIWARE_SERVICE_PATH + "\": \"" + servicePath + "\","
+                    + "\"" + NGSIConstants.FIWARE_SERVICE_PATH + "\": \"" + servicePathForData + "\","
                     + "\"" + NGSIConstants.ENTITY_ID + "\": \"" + entityId + "\","
                     + "\"" + NGSIConstants.ENTITY_TYPE + "\": \"" + entityType + "\"";
 
@@ -513,18 +519,18 @@ public class NGSICKANSink extends NGSISink {
     } // buildPkgName
 
     /**
-     * Builds a resource name given a destination. It throws an exception if the naming conventions are violated.
-     * @param destination
+     * Builds a resource name given a entity. It throws an exception if the naming conventions are violated.
+     * @param entity
      * @return
      * @throws Exception
      */
-    public String buildResName(String destination) throws Exception {
+    public String buildResName(String entity) throws Exception {
         String resName;
         
         if (enableEncoding) {
-            resName = NGSICharsets.encodeCKAN(destination);
+            resName = NGSICharsets.encodeCKAN(entity);
         } else {
-            resName = NGSIUtils.encode(destination, false, true);
+            resName = NGSIUtils.encode(entity, false, true);
         } // if else
 
         if (resName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
