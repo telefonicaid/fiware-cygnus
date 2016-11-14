@@ -43,6 +43,7 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.when;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import org.junit.Assert;
 
 /**
  *
@@ -93,17 +94,17 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testConfigureNotMandatoryParameters() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                 + "-------- When not configured, the default values are used for non mandatory parameters");
         NGSIRestHandler handler = new NGSIRestHandler();
         handler.configure(createContext(null, null, null)); // default configuration
         
         try {
             assertEquals("/notify", handler.getNotificationTarget());
-            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                     + "-  OK  - The default configuration value for 'notification_target' is '/notify'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                     + "- FAIL - The default configuration value for 'notification_target' is '"
                     + handler.getNotificationTarget() + "'");
             throw e;
@@ -111,10 +112,10 @@ public class NGSIRestHandlerTest {
         
         try {
             assertEquals("default", handler.getDefaultService());
-            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                     + "-  OK  - The default configuration value for 'default_service' is 'default'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                     + "- FAIL - The default configuration value for 'default_service' is '"
                     + handler.getDefaultService() + "'");
             throw e;
@@ -122,10 +123,10 @@ public class NGSIRestHandlerTest {
         
         try {
             assertEquals("/", handler.getDefaultServicePath());
-            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                     + "-  OK  - The default configuration value for 'default_service_path' is '/'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                     + "- FAIL - The default configuration value for 'default_service_path' is '"
                     + handler.getDefaultServicePath() + "'");
             throw e;
@@ -138,7 +139,7 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testConfigureDefaultServiceIsLegal() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                 + "-------- The configured default service can only contain alphanumerics and underscores");
         NGSIRestHandler handler = new NGSIRestHandler();
         String configuredDefaultService = "default-service!!";
@@ -146,11 +147,11 @@ public class NGSIRestHandlerTest {
         
         try {
             assertTrue(handler.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                     + "-  OK  - The configured default service '" + configuredDefaultService
                     + "' was detected as invalid");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                     + "- FAIL - The configured default service '" + configuredDefaultService
                     + "' was not detected as invalid");
             throw e;
@@ -163,7 +164,7 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testConfigureDefaultServicePathIsLegal() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                 + "-------- The configured default service path can only contain alphanumerics and underscores");
         NGSIRestHandler handler = new NGSIRestHandler();
         String configuredDefaultServicePath = "/something.?";
@@ -171,11 +172,11 @@ public class NGSIRestHandlerTest {
         
         try {
             assertTrue(handler.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                     + "-  OK  - The configured default service path '" + configuredDefaultServicePath
                     + "' was detected as invalid");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                     + "- FAIL - The configured default service path '" + configuredDefaultServicePath
                     + "' was not detected as invalid");
             throw e;
@@ -187,7 +188,7 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testConfigureDefaultServicePathStartsWithSlash() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                 + "-------- The configured default service path must start with '/'");
         NGSIRestHandler handler = new NGSIRestHandler();
         String configuredDefaultServicePath = "/something";
@@ -196,11 +197,11 @@ public class NGSIRestHandlerTest {
         try {
             assertEquals(configuredDefaultServicePath, handler.getDefaultServicePath());
             assertTrue(!handler.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                     + "-  OK  - The configured default service path '" + configuredDefaultServicePath
                     + "' starts with '/'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                     + "- FAIL - The configured default service path '" + configuredDefaultServicePath
                     + "' does not start with '/'");
             throw e;
@@ -212,7 +213,7 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testConfigureNotificationTargerStartsWithSlash() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                 + "-------- The configured notification target must start with '/'");
         NGSIRestHandler handler = new NGSIRestHandler();
         String configuredNotificationTarget = "/notify";
@@ -221,11 +222,11 @@ public class NGSIRestHandlerTest {
         try {
             assertEquals(configuredNotificationTarget, handler.getNotificationTarget());
             assertTrue(!handler.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                     + "-  OK  - The configured notification target '" + configuredNotificationTarget
                     + "' starts with '/'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.configure]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                     + "- FAIL - The configured notification target '" + configuredNotificationTarget
                     + "' does not start with '/'");
             throw e;
@@ -237,7 +238,7 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testGetEventsContentTypeHeader() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                 + "-------- When a notification is sent, the headers are valid");
         NGSIRestHandler handler = new NGSIRestHandler();
         handler.configure(createContext(null, null, null)); // default configuration
@@ -245,29 +246,29 @@ public class NGSIRestHandlerTest {
         try {
             handler.getEvents(mockHttpServletRequest);
             assertTrue(true);
-            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                     + "-  OK  - The value for 'Content-Type' header is 'application/json; charset=utf-8'");
-            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                     + "-  OK  - The value for 'fiware-servicePath' header starts with '/'");
-            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                     + "-  OK  - The length of 'fiware-service' header value is "
                     + " less or equal than '" + NGSIConstants.SERVICE_HEADER_MAX_LEN + "'");
-            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                     + "-  OK  - The length of 'fiware-servicePath' header value "
                     + "is less or equal than '" + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + "'");
         } catch (Exception e) {
             if (e.getMessage().contains("content type not supported")) {
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "- FAIL - The value for 'Content-Type' is not 'application/json; charset=utf-8'");
             } else if (e.getMessage().contains("header value must start with '/'")) {
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "- FAIL - The value for 'fiware-servicePath' does not start with '/'");
             } else if (e.getMessage().contains("'fiware-service' header length greater than")) {
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "- FAIL - The length of 'fiware-service' header value "
                         + "is greater than '" + NGSIConstants.SERVICE_HEADER_MAX_LEN + "'");
             } else if (e.getMessage().contains("'fiware-servicePath' header length greater than")) {
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "- FAIL - The length of 'fiware-servicePath' header "
                         + "value is greater than '" + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + "'");
             } // if else
@@ -281,7 +282,7 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testGetEventsNullEventsUponInvalidConfiguration() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                 + "-------- When a the configuration is wrong, no evetns are obtained");
         NGSIRestHandler handler = new NGSIRestHandler();
         String configuredNotificationTarget = "notify"; // wrong value
@@ -296,15 +297,15 @@ public class NGSIRestHandlerTest {
             
             try {
                 assertEquals(0, events.size());
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "-  OK  - No events are processed since the configuration is wrong");
             } catch (AssertionError e1) {
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "- FAIL - The events are being processed despite of the configuration is wrong");
                 throw e1;
             } // try catch
         } catch (Exception ex) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                     + "- FAIL - There was some problem while processing the events");
             assertTrue(false);
         } // try catch
@@ -316,7 +317,7 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testGetEventsSingleEvent() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                 + "-------- When a notification is sent as a Http message, a single Flume event is generated");
         NGSIRestHandler handler = new NGSIRestHandler();
         handler.configure(createContext(null, null, null)); // default configuration
@@ -327,15 +328,15 @@ public class NGSIRestHandlerTest {
             
             try {
                 assertEquals(1, events.size());
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "-  OK  - A single event has been generated");
             } catch (AssertionError e1) {
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "- FAIL - 0, 2 or more than an event were generated");
                 throw e1;
             } // try catch
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                     + "- FAIL - There was some problem while processing the events");
             assertTrue(false);
         } // try catch
@@ -347,7 +348,7 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testGetEventsHeadersInFlumeEvent() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                 + "-------- When a Flume event is generated, it contains fiware-service, fiware-servicepath, "
                 + "fiware-correlator and transaction-id headers");
         NGSIRestHandler handler = new NGSIRestHandler();
@@ -359,92 +360,75 @@ public class NGSIRestHandlerTest {
             
             try {
                 assertTrue(headers.containsKey("fiware-service"));
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "-  OK  - The generated Flume event contains 'fiware-service'");
             } catch (AssertionError e1) {
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "- FAIL - The generated Flume event does not contain 'fiware-service'");
                 throw e1;
             } // try catch
             
             try {
                 assertTrue(headers.containsKey("fiware-servicepath"));
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "-  OK  - The generated Flume event contains 'fiware-servicepath'");
             } catch (AssertionError e2) {
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "- FAIL - The generated Flume event does not contain 'fiware-servicepath'");
                 throw e2;
             } // try catch
 
             try {
                 assertTrue(headers.containsKey("fiware-correlator"));
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "-  OK  - The generated Flume event contains 'fiware-correlator'");
             } catch (AssertionError e3) {
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "- FAIL - The generated Flume event does not contain 'fiware-correlator'");
                 throw e3;
             } // try catch
             
             try {
                 assertTrue(headers.containsKey("transaction-id"));
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "-  OK  - The generated Flume event contains 'transaction-id'");
             } catch (AssertionError e4) {
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                         + "- FAIL - The generated Flume event does not contain 'transaction-id'");
                 throw e4;
             } // try catch
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                     + "- FAIL - There was some problem while processing the events");
             assertTrue(false);
         } // try catch
     } // testGetEventsHeadersInFlumeEvent
     
     /**
-     * [NGSIRestHandler.getEvents] -------- When a Flume event is generated, it contains the payload of the Http
- notification as body.
+     * [NGSIRestHandler.getEvents] -------- When a Flume event is generated, the Flume body is null.
      */
     @Test
     public void testGetEventsBodyInFlumeEvent() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
-                + "-------- When a Flume event is generated, it contains "
-                + "the payload of the Http notification as body");
+        System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                + "-------- When a Flume event is generated, the Flume body is null");
         NGSIRestHandler handler = new NGSIRestHandler();
         handler.configure(createContext(null, null, null)); // default configuration
         byte[] body;
         
         try {
             body = handler.getEvents(mockHttpServletRequest).get(0).getBody();
-            byte[] notificationBytes = notification.toJSONString().getBytes();
-            boolean areEqual = true;
-            
-            if (body.length != notificationBytes.length) {
-                areEqual = false;
-            } else {
-                for (int i = 0; i < body.length; i++) {
-                    if (body[i] != notificationBytes[i]) {
-                        areEqual = false;
-                        break;
-                    } // if
-                } // for
-            } // if else
             
             try {
-                assertTrue(areEqual);
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
-                        + "-  OK  - The event body '" + new String(body)
-                        + "' is equal to the notification Json '" + new String(notificationBytes) + "'");
+                Assert.assertArrayEquals(null, body);
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                        + "-  OK  - The event body is null");
             } catch (AssertionError e1) {
-                System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
-                        + "- FAIL - The event body '" + new String(body)
-                        + "' is nbot equal to the notification Json '" + new String(notificationBytes) + "'");
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                        + "- FAIL - The event body is not null");
                 throw e1;
             } // try catch
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.getEvents]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                     + "- FAIL - There was some problem while processing the events");
             assertTrue(false);
         } // try catch
@@ -455,17 +439,17 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testGenerateUniqueIdTransIdGenerated() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.generateUniqueId]")
                 + "-------- An internal transaction ID is generated");
         NGSIRestHandler handler = new NGSIRestHandler();
         String generatedTransId = CommonUtils.generateUniqueId(null, null);
         
         try {
             assertTrue(generatedTransId != null);
-            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.generateUniqueId]")
                     + "-  OK  - An internal transaction ID '" + generatedTransId + "' has been generated");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.generateUniqueId]")
                     + "- FAIL - An intertnal transaction ID was not "
                     + "generated");
             throw e;
@@ -477,7 +461,7 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testGenerateUniqueIdCorrIdReused() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.generateUniqueId]")
                 + "-------- When a correlator ID is notified, it is reused");
         NGSIRestHandler handler = new NGSIRestHandler();
         String generatedTransId = "1111111111-111-1111111111";
@@ -486,10 +470,10 @@ public class NGSIRestHandlerTest {
         
         try {
             assertEquals(notifiedCorrId, generatedCorrId);
-            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.generateUniqueId]")
                     + "-  OK  - The notified transaction ID '" + notifiedCorrId + "' has been reused");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.generateUniqueId]")
                     + "- FAIL - The notified transaction ID '" + notifiedCorrId + "' has not not reused, '"
                     + generatedCorrId + "' has been generated instead");
             throw e;
@@ -501,7 +485,7 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testGenerateUniqueIdCorrIdGenerated() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.generateUniqueId]")
                 + "-------- When a correlation ID is not notified, it is generated");
         NGSIRestHandler handler = new NGSIRestHandler();
         String generatedTransId = "1234567890-123-1234567890";
@@ -509,10 +493,10 @@ public class NGSIRestHandlerTest {
         
         try {
             assertTrue(CommonUtils.generateUniqueId(notifiedCorrId, generatedTransId) != null);
-            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.generateUniqueId]")
                     + "-  OK  - The transaction ID has been generated");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.generateUniqueId]")
                     + "- FAIL - The transaction ID has not been generated");
             throw e;
         } // try catch
@@ -524,7 +508,7 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testGenerateUniqueIdSameCorrAndTransIds() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.generateUniqueId]")
                 + "-------- When a correlation ID is genereated, both "
                 + "generated correlation ID and generated transaction ID have the same value");
         NGSIRestHandler handler = new NGSIRestHandler();
@@ -534,11 +518,11 @@ public class NGSIRestHandlerTest {
         
         try {
             assertEquals(generatedTransId, generatedCorrId);
-            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.generateUniqueId]")
                     + "-  OK  - The generated transaction ID '" + generatedTransId
                     + "' is equals to the generated correlator ID '" + generatedCorrId + "'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.generateUniqueId]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.generateUniqueId]")
                     + "- FAIL - The generated transaction ID '" + generatedTransId
                     + "' is not equals to the generated correlator ID '" + generatedCorrId + "'");
             throw e;
@@ -551,17 +535,17 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testWrongContentType() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.wrongContentType]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.wrongContentType]")
                 + "-------- A content-type different than 'application/json; charset=utf-8' is detected");
         NGSIRestHandler handler = new NGSIRestHandler();
         String wrongContentType = "application/json";
         
         try {
             assertTrue(handler.wrongContentType(wrongContentType));
-            System.out.println(getTestTraceHead("[OrionRestHandler.wrongContentType]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.wrongContentType]")
                     + "-  OK  - A wrong content-type '" + wrongContentType + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.wrongContentType]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.wrongContentType]")
                     + "- FAIL - A wrong content-type '" + wrongContentType + "' has not been detected");
             throw e;
         } // try catch
@@ -573,17 +557,17 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testWrongServiceHeaderLength() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.wrongServiceHeaderLength]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServiceHeaderLength]")
                 + "-------- A FIWARE service header whose length is greater than 50 characters is detected");
         NGSIRestHandler handler = new NGSIRestHandler();
         String wrongServiceHeader = "thisIsAFiwareServiceHeaderWhoseLengthIsGreaterThanTheAccepted50CharactersLimit";
         
         try {
             assertTrue(handler.wrongServiceHeaderLength(wrongServiceHeader));
-            System.out.println(getTestTraceHead("[OrionRestHandler.wrongServiceHeaderLength]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServiceHeaderLength]")
                     + "-  OK  - A wrong FIWARE service header '" + wrongServiceHeader + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.wrongServiceHeaderLength]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServiceHeaderLength]")
                     + "- FAIL - A wrong FIWARE service header '" + wrongServiceHeader + "' has not been detected");
             throw e;
         } // try catch
@@ -595,7 +579,7 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testWrongServicePathHeaderLength() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.wrongServicePathHeaderLength]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServicePathHeaderLength]")
                 + "-------- A FIWARE service path header whose length is greater than 50 characters is detected");
         NGSIRestHandler handler = new NGSIRestHandler();
         String wrongServicePathHeader = "thisIsAFiwareServicePathHeaderWhoseLengthIsGreaterThanTheAccepted50"
@@ -603,10 +587,10 @@ public class NGSIRestHandlerTest {
         
         try {
             assertTrue(handler.wrongServicePathHeaderLength(wrongServicePathHeader));
-            System.out.println(getTestTraceHead("[OrionRestHandler.wrongServicePathHeaderLength]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServicePathHeaderLength]")
                     + "-  OK  - A wrong FIWARE service path header '" + wrongServicePathHeader + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.wrongServicePathHeaderLength]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServicePathHeaderLength]")
                     + "- FAIL - A wrong FIWARE service path header '" + wrongServicePathHeader + "' has not been "
                     + "detected");
             throw e;
@@ -619,17 +603,17 @@ public class NGSIRestHandlerTest {
      */
     @Test
     public void testWrongServicePathHeaderInitialCharacter() {
-        System.out.println(getTestTraceHead("[OrionRestHandler.wrongServicePathHeaderInitialCharacter]")
+        System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServicePathHeaderInitialCharacter]")
                 + "-------- A FIWARE service path header not starting by slash is detected");
         NGSIRestHandler handler = new NGSIRestHandler();
         String wrongServicePathHeader = "servicePath";
         
         try {
             assertTrue(handler.wrongServicePathHeaderInitialCharacter(wrongServicePathHeader));
-            System.out.println(getTestTraceHead("[OrionRestHandler.wrongServicePathHeaderInitialCharacter]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServicePathHeaderInitialCharacter]")
                     + "-  OK  - A wrong FIWARE service path header '" + wrongServicePathHeader + "' has been detected");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[OrionRestHandler.wrongServicePathHeaderInitialCharacter]")
+            System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServicePathHeaderInitialCharacter]")
                     + "- FAIL - A wrong FIWARE service path header '" + wrongServicePathHeader + "' has not been "
                     + "detected");
             throw e;

@@ -18,6 +18,10 @@
 
 package com.telefonica.iot.cygnus.handlers;
 
+import com.google.gson.Gson;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
@@ -34,7 +38,6 @@ import org.apache.flume.source.http.HTTPBadRequestException;
 import org.apache.flume.source.http.HTTPSourceHandler;
 import org.apache.http.MethodNotSupportedException;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import org.apache.flume.event.EventBuilder;
 import org.slf4j.MDC;
 
 /**
@@ -155,15 +158,19 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             
     @Override
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
-        // if the configuration is invalid, nothing has to be done but to return null
+        // Result
+        ArrayList<Event> ngsiEvents = new ArrayList<>();
+        
+        // If the configuration is invalid, nothing has to be done but to return null
         if (invalidConfiguration) {
             LOGGER.debug("[NGSIRestHandler] Invalid configuration, thus returning an empty list of Flume events");
-            return new ArrayList<Event>();
+            return new ArrayList<>();
         } // if
         
+        // Update the counters
         numReceivedEvents++;
         
-        // check the method
+        // Check the method
         String method = request.getMethod().toUpperCase(Locale.ENGLISH);
         
         if (!method.equals("POST")) {
@@ -171,7 +178,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             throw new MethodNotSupportedException(method + " method not supported");
         } // if
 
-        // check the notificationTarget
+        // Check the notificationTarget
         String target = request.getRequestURI();
         
         if (!target.equals(notificationTarget)) {
@@ -179,7 +186,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             throw new HTTPBadRequestException(target + " target not supported");
         } // if
         
-        // check the headers looking for not supported user agents, content type and tenant/organization
+        // Check the headers looking for not supported content type and/or invalid FIWARE service and service path
         Enumeration headerNames = request.getHeaderNames();
         String corrId = null;
         String contentType = null;
@@ -191,53 +198,73 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             String headerValue = request.getHeader(headerName);
             LOGGER.debug("[NGSIRestHandler] Header " + headerName + " received with value " + headerValue);
             
-            if (headerName.equals(CommonConstants.HEADER_CORRELATOR_ID)) {
-                corrId = headerValue;
-            } else if (headerName.equals(CommonConstants.HTTP_HEADER_CONTENT_TYPE)) {
-                if (wrongContentType(headerValue)) {
-                    LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (" + headerValue + " content type not supported)");
-                    throw new HTTPBadRequestException(headerValue + " content type not supported");
-                } else {
-                    contentType = headerValue;
-                } // if else
-            } else if (headerName.equals(CommonConstants.HEADER_FIWARE_SERVICE)) {
-                if (wrongServiceHeaderLength(headerValue)) {
-                    LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('" + CommonConstants.HEADER_FIWARE_SERVICE
-                            + "' header length greater than " + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
-                    throw new HTTPBadRequestException("'" + CommonConstants.HEADER_FIWARE_SERVICE
-                            + "' header length greater than " + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
-                } else {
-                    service = headerValue;
-                } // if else
-            } else if (headerName.equals(CommonConstants.HEADER_FIWARE_SERVICE_PATH)) {
-                String[] splitValues = headerValue.split(",");
-                
-                for (String splitValue : splitValues) {
-                    if (wrongServicePathHeaderLength(splitValue)) {
-                        LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                                + "' header value length greater than " + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN
-                                + ")");
-                        throw new HTTPBadRequestException("'fiware-servicePath' header length greater than "
-                                + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
-                    } else if (wrongServicePathHeaderInitialCharacter(splitValue)) {
-                        LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                                + "' header value must start with '/'");
-                        throw new HTTPBadRequestException("'" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                                + "' header value must start with '/'");
+            switch (headerName) {
+                case CommonConstants.HEADER_CORRELATOR_ID:
+                    corrId = headerValue;
+                    break;
+                case CommonConstants.HTTP_HEADER_CONTENT_TYPE:
+                    if (wrongContentType(headerValue)) {
+                        LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (" + headerValue
+                                + " content type not supported)");
+                        throw new HTTPBadRequestException(headerValue
+                                + " content type not supported");
+                    } else {
+                        contentType = headerValue;
                     } // if else
-                } // for
-                
-                servicePath = headerValue;
-            } // if else if
+                    
+                    break;
+                case CommonConstants.HEADER_FIWARE_SERVICE:
+                    if (wrongServiceHeaderLength(headerValue)) {
+                        LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('"
+                                + CommonConstants.HEADER_FIWARE_SERVICE
+                                + "' header length greater than "
+                                + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
+                        throw new HTTPBadRequestException(
+                                "'" + CommonConstants.HEADER_FIWARE_SERVICE
+                                + "' header length greater than "
+                                        + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
+                    } else {
+                        service = headerValue;
+                    } // if else
+                    
+                    break;
+                case CommonConstants.HEADER_FIWARE_SERVICE_PATH:
+                    String[] splitValues = headerValue.split(",");
+                    
+                    for (String splitValue : splitValues) {
+                        if (wrongServicePathHeaderLength(splitValue)) {
+                            LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('"
+                                    + CommonConstants.HEADER_FIWARE_SERVICE_PATH
+                                    + "' header value length greater than "
+                                    + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
+                            throw new HTTPBadRequestException(
+                                    "'fiware-servicePath' header length greater than "
+                                            + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
+                        } else if (wrongServicePathHeaderInitialCharacter(splitValue)) {
+                            LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('"
+                                    + CommonConstants.HEADER_FIWARE_SERVICE_PATH
+                                    + "' header value must start with '/'");
+                            throw new HTTPBadRequestException(
+                                    "'" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
+                                            + "' header value must start with '/'");
+                        } // if else
+                    } // for
+                    
+                    servicePath = headerValue;
+                    
+                    break;
+                default:
+                    LOGGER.warn("[NGSIRestHandler] Unnecessary header");
+            } // switch
         } // while
         
-        // check if received content type is null
+        // Check if received content type is null
         if (contentType == null) {
             LOGGER.warn("[NGSIRestHandler] Missing content type. Required 'application/json; charset=utf-8'");
             throw new HTTPBadRequestException("Missing content type. Required 'application/json; charset=utf-8'");
         } // if
         
-        // get a service and servicePath and store it in the log4j Mapped Diagnostic Context (MDC)
+        // Get a service and servicePath and store it in the log4j Mapped Diagnostic Context (MDC)
         MDC.put(CommonConstants.LOG4J_SVC, service == null ? defaultService : service);
         MDC.put(CommonConstants.LOG4J_SUBSVC, servicePath == null ? defaultServicePath : servicePath);
         
@@ -254,7 +281,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         MDC.put(CommonConstants.LOG4J_TRANS, transId);
         LOGGER.info("[NGSIRestHandler] Starting internal transaction (" + transId + ")");
         
-        // get the data content
+        // Get the data content
         String data = "";
         String line;
         BufferedReader reader = request.getReader();
@@ -270,29 +297,59 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
 
         LOGGER.info("[NGSIRestHandler] Received data (" + data + ")");
         
-        // create the appropiate headers
-        Map<String, String> eventHeaders = new HashMap<String, String>();
-        eventHeaders.put(CommonConstants.HEADER_FIWARE_SERVICE, service == null ? defaultService : service);
-        LOGGER.debug("[NGSIRestHandler] Adding flume event header (name=" + CommonConstants.HEADER_FIWARE_SERVICE
-                + ", value=" + (service == null ? defaultService : service) + ")");
-        eventHeaders.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, servicePath == null
-                ? defaultServicePath : servicePath);
-        LOGGER.debug("[NGSIRestHandler] Adding flume event header (name=" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                + ", value=" + (servicePath == null ? defaultServicePath : servicePath) + ")");
-        eventHeaders.put(CommonConstants.HEADER_CORRELATOR_ID, corrId);
-        LOGGER.debug("[NGSIRestHandler] Adding flume event header (name=" + CommonConstants.HEADER_CORRELATOR_ID
-                + ", value=" + corrId + ")");
-        eventHeaders.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transId);
-        LOGGER.debug("[NGSIRestHandler] Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_TRANSACTION_ID
-                + ", value=" + transId + ")");
+        // Parse the original data into a NotifyContextRequest object
+        NotifyContextRequest ncr;
+        Gson gson = new Gson();
+
+        try {
+            ncr = gson.fromJson(data, NotifyContextRequest.class);
+            LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest: " + ncr.toString());
+        } catch (Exception e) {
+            LOGGER.error("[NGSIRestHandler] Runtime error (" + e.getMessage() + ")");
+            return null;
+        } // try catch
         
-        // create the event list containing only one event
-        ArrayList<Event> eventList = new ArrayList<Event>();
-        Event event = EventBuilder.withBody(data.getBytes(), eventHeaders);
-        eventList.add(event);
-        LOGGER.debug("[NGSIRestHandler] Event put in the channel, id=" + event.hashCode());
+        String ids = "";
+        
+        // Iterate on the NotifyContextRequest object in order to create an event per ContextElement
+        for (ContextElementResponse cer: ncr.getContextResponses()) {
+            LOGGER.debug("[NGSIRestHandler] NGSI event created for ContextElementResponse: " + cer.toString());
+            
+            // Create the appropiate headers
+            Map<String, String> headers = new HashMap<>();
+            headers.put(CommonConstants.HEADER_FIWARE_SERVICE, service == null ? defaultService : service);
+            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
+                    + CommonConstants.HEADER_FIWARE_SERVICE
+                    + ": " + (service == null ? defaultService : service) + ")");
+            headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, servicePath == null
+                    ? defaultServicePath : servicePath);
+            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
+                    + CommonConstants.HEADER_FIWARE_SERVICE_PATH
+                    + ": " + (servicePath == null ? defaultServicePath : servicePath) + ")");
+            headers.put(CommonConstants.HEADER_CORRELATOR_ID, corrId);
+            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
+                    + CommonConstants.HEADER_CORRELATOR_ID
+                    + ": " + corrId + ")");
+            headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transId);
+            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
+                    + NGSIConstants.FLUME_HEADER_TRANSACTION_ID
+                    + ": " + transId + ")");
+            
+            // Create the NGSIEvent and add it to the list
+            NGSIEvent ngsiEvent = new NGSIEvent(headers, cer.getContextElement(), null);
+            ngsiEvents.add(ngsiEvent);
+            
+            if (ids.isEmpty()) {
+                ids += ngsiEvent.hashCode();
+            } else {
+                ids += "," + ngsiEvent.hashCode();
+            } // if else
+        } // for
+
+        // Return the NGSIEvent list
+        LOGGER.debug("[NGSIRestHandler] NGSI events put in the channel, ids=" + ids);
         numProcessedEvents++;
-        return eventList;
+        return ngsiEvents;
     } // getEvents
     
     /**

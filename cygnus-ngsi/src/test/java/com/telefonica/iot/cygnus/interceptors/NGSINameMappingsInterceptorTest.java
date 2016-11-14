@@ -17,18 +17,15 @@
  */
 package com.telefonica.iot.cygnus.interceptors;
 
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
-import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.createEvent;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
+import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.flume.Context;
-import org.apache.flume.Event;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertTrue;
@@ -73,55 +70,31 @@ public class NGSINameMappingsInterceptorTest {
             + "}";
     private final String originalService = "default";
     private final String originalServicePath = "/any";
-    private final String originalNCRStr = ""
+    private final String originalCEStr = ""
             + "{"
-            +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
-            +   "\"originator\" : \"localhost\","
-            +   "\"contextResponses\" : ["
+            +   "\"attributes\" : ["
             +     "{"
-            +       "\"contextElement\" : {"
-            +         "\"attributes\" : ["
-            +           "{"
-            +             "\"name\" : \"temperature\","
-            +             "\"type\" : \"centigrade\","
-            +             "\"value\" : \"26.5\""
-            +           "}"
-            +         "],"
-            +         "\"type\" : \"Room\","
-            +         "\"isPattern\" : \"false\","
-            +         "\"id\" : \"Room1\""
-            +       "},"
-            +       "\"statusCode\" : {"
-            +         "\"code\" : \"200\","
-            +         "\"reasonPhrase\" : \"OK\""
-            +       "}"
+            +       "\"name\" : \"temperature\","
+            +       "\"type\" : \"centigrade\","
+            +       "\"value\" : \"26.5\""
             +     "}"
-            +   "]"
+            +   "],"
+            +   "\"type\" : \"Room\","
+            +   "\"isPattern\" : \"false\","
+            +   "\"id\" : \"Room1\""
             + "}";
-    private final String expectedNCRStr = ""
+    private final String expectedCEStr = ""
             + "{"
-            +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
-            +   "\"originator\" : \"localhost\","
-            +   "\"contextResponses\" : ["
+            +   "\"attributes\" : ["
             +     "{"
-            +       "\"contextElement\" : {"
-            +         "\"attributes\" : ["
-            +           "{"
-            +             "\"name\" : \"new_temperature\","
-            +             "\"type\" : \"new_centigrade\","
-            +             "\"value\" : \"26.5\""
-            +           "}"
-            +         "],"
-            +         "\"type\" : \"new_Room\","
-            +         "\"isPattern\" : \"false\","
-            +         "\"id\" : \"new_Room1\""
-            +       "},"
-            +       "\"statusCode\" : {"
-            +         "\"code\" : \"200\","
-            +         "\"reasonPhrase\" : \"OK\""
-            +       "}"
+            +       "\"name\" : \"new_temperature\","
+            +       "\"type\" : \"new_centigrade\","
+            +       "\"value\" : \"26.5\""
             +     "}"
-            +   "]"
+            +   "],"
+            +   "\"type\" : \"new_Room\","
+            +   "\"isPattern\" : \"false\","
+            +   "\"id\" : \"new_Room1\""
             + "}";
     
     /**
@@ -179,8 +152,8 @@ public class NGSINameMappingsInterceptorTest {
     
     /**
      * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI getRecvTimeTs is put in the channel, it contains
- fiware-service, fiware-servicepath, fiware-correlator, transaction-id, mapped-fiware-service and
- mapped-fiware-servicepath headers.
+     * fiware-service, fiware-servicepath, fiware-correlator, transaction-id, mapped-fiware-service and
+     * mapped-fiware-servicepath headers.
      */
     @Test
     public void testGetEventsHeadersInNGSIFlumeEvent() {
@@ -189,7 +162,17 @@ public class NGSINameMappingsInterceptorTest {
                 + "fiware-correlator, transaction-id, mapped-fiware-service and mapped-fiware-servicepath headers");
         NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
         nameMappingsInterceptor.initialize();
-        Event originalEvent = createEvent();
+        NGSIEvent originalEvent;
+        
+        try {
+            originalEvent = TestUtils.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
+                    "12345");
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
+                    + "- FAIL - There was some problem when creating the NGSIEVent");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
         Map<String, String> interceptedEventHeaders = nameMappingsInterceptor.intercept(originalEvent).getHeaders();
 
         try {
@@ -267,7 +250,7 @@ public class NGSINameMappingsInterceptorTest {
     
     /**
      * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI getRecvTimeTs is put in the channel, it contains
- the original ContextElement and the mapped one.
+     * the original ContextElement and the mapped one.
      */
     @Test
     public void testGetNCRsInNGSIEvent() {
@@ -276,11 +259,19 @@ public class NGSINameMappingsInterceptorTest {
                 + "and the mapped one");
         NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
         nameMappingsInterceptor.loadNameMappings(nameMappingsStr);
-        Event originalEvent = createEvent();
-        NGSIEvent ngsiEvent = (NGSIEvent) nameMappingsInterceptor.intercept(originalEvent);
+        NGSIEvent originalEvent;
+        
+        try {
+            originalEvent = TestUtils.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
+                    "12345");
+        } catch (Exception e) {
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        NGSIEvent interceptedEvent = (NGSIEvent) nameMappingsInterceptor.intercept(originalEvent);
 
         try {
-            assertTrue(ngsiEvent.getMappedCE() != null);
+            assertTrue(interceptedEvent.getMappedCE() != null);
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
                     + "-  OK  - The generated NGSI event contains the original ContextElement");
         } catch (AssertionError e) {
@@ -290,7 +281,7 @@ public class NGSINameMappingsInterceptorTest {
         } // try catch
         
         try {
-            assertTrue(ngsiEvent.getOriginalCE() != null);
+            assertTrue(interceptedEvent.getOriginalCE() != null);
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
                     + "-  OK  - The generated NGSI event contains the mapped ContextElement");
         } catch (AssertionError e) {
@@ -309,32 +300,37 @@ public class NGSINameMappingsInterceptorTest {
                 + "-------- A mapped NotifyContextRequest can be obtained from the Name Mappings");
         NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
         nameMappingsInterceptor.loadNameMappings(nameMappingsStr);
-        NotifyContextRequest originalNCR = NGSIUtilsForTests.createNotifyContextRequest(originalNCRStr);
-        NotifyContextRequest expectedNCR = NGSIUtilsForTests.createNotifyContextRequest(expectedNCRStr);
-        ImmutableTriple<String, String, NotifyContextRequest> map = nameMappingsInterceptor.doMap(
-                originalService, originalServicePath, originalNCR);
-        NotifyContextRequest mappedNCR = map.getRight();
+        ContextElement originalCE;
+        ContextElement expectedCE;
+        
+        try {
+            originalCE = TestUtils.createJsonContextElement(originalCEStr);
+            expectedCE = TestUtils.createJsonContextElement(expectedCEStr);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMap]")
+                    + "- FAIL - There was some problem when parsing the ContextElements");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(
+                originalService, originalServicePath, originalCE);
+        ContextElement mappedCE = map.getRight();
         boolean equals = true;
         
-        for (int i = 0; i < mappedNCR.getContextResponses().size(); i++) {
-            ContextElement ce = mappedNCR.getContextResponses().get(i).getContextElement();
-            ContextElement expectedCE = expectedNCR.getContextResponses().get(i).getContextElement();
-            
-            if (!ce.getId().equals(expectedCE.getId()) || !ce.getType().equals(expectedCE.getType())) {
-                equals = false;
-                break;
-            } // if
-            
-            for (int j = 0; j < ce.getAttributes().size(); j++) {
-                ContextAttribute ca = ce.getAttributes().get(j);
+        if (!mappedCE.getId().equals(expectedCE.getId()) || !mappedCE.getType().equals(expectedCE.getType())) {
+            equals = false;
+        } else {
+            for (int j = 0; j < mappedCE.getAttributes().size(); j++) {
+                ContextAttribute mappedCA = mappedCE.getAttributes().get(j);
                 ContextAttribute expectedCA = expectedCE.getAttributes().get(j);
-                
-                if (!ca.getName().equals(expectedCA.getName()) || !ca.getType().equals(expectedCA.getType())) {
+
+                if (!mappedCA.getName().equals(expectedCA.getName())
+                        || !mappedCA.getType().equals(expectedCA.getType())) {
                     equals = false;
                     break;
                 } // if
             } // for
-        } // for
+        } // if else
         
         try {
             assertTrue(equals);
