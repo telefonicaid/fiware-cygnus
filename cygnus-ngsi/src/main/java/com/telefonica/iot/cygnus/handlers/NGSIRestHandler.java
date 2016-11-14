@@ -303,43 +303,51 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
 
         try {
             ncr = gson.fromJson(data, NotifyContextRequest.class);
-            LOGGER.debug("[NGSIRestHandler] NotifyContextRequest: " + ncr.toString());
+            LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest: " + ncr.toString());
         } catch (Exception e) {
             LOGGER.error("[NGSIRestHandler] Runtime error (" + e.getMessage() + ")");
             return null;
         } // try catch
         
+        String ids = "";
+        
         // Iterate on the NotifyContextRequest object in order to create an event per ContextElement
         for (ContextElementResponse cer: ncr.getContextResponses()) {
-            LOGGER.debug("[NGSIRestHandler] Creating NGSI event for ContextElementResponse: " + cer.toString());
+            LOGGER.debug("[NGSIRestHandler] NGSI event created for ContextElementResponse: " + cer.toString());
             
             // Create the appropiate headers
             Map<String, String> headers = new HashMap<>();
             headers.put(CommonConstants.HEADER_FIWARE_SERVICE, service == null ? defaultService : service);
-            LOGGER.debug("[NGSIRestHandler] Adding flume event header (name="
+            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
                     + CommonConstants.HEADER_FIWARE_SERVICE
-                    + ", value=" + (service == null ? defaultService : service) + ")");
+                    + ": " + (service == null ? defaultService : service) + ")");
             headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, servicePath == null
                     ? defaultServicePath : servicePath);
-            LOGGER.debug("[NGSIRestHandler] Adding flume event header (name="
+            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
                     + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                    + ", value=" + (servicePath == null ? defaultServicePath : servicePath) + ")");
+                    + ": " + (servicePath == null ? defaultServicePath : servicePath) + ")");
             headers.put(CommonConstants.HEADER_CORRELATOR_ID, corrId);
-            LOGGER.debug("[NGSIRestHandler] Adding flume event header (name="
+            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
                     + CommonConstants.HEADER_CORRELATOR_ID
-                    + ", value=" + corrId + ")");
+                    + ": " + corrId + ")");
             headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transId);
-            LOGGER.debug("[NGSIRestHandler] Adding flume event header (name="
+            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
                     + NGSIConstants.FLUME_HEADER_TRANSACTION_ID
-                    + ", value=" + transId + ")");
+                    + ": " + transId + ")");
             
             // Create the NGSIEvent and add it to the list
             NGSIEvent ngsiEvent = new NGSIEvent(headers, cer.getContextElement(), null);
             ngsiEvents.add(ngsiEvent);
+            
+            if (ids.isEmpty()) {
+                ids += ngsiEvent.hashCode();
+            } else {
+                ids += "," + ngsiEvent.hashCode();
+            } // if else
         } // for
 
         // Return the NGSIEvent list
-        LOGGER.debug("[NGSIRestHandler] NGSI events put in the channel");
+        LOGGER.debug("[NGSIRestHandler] NGSI events put in the channel, ids=" + ids);
         numProcessedEvents++;
         return ngsiEvents;
     } // getEvents

@@ -103,11 +103,13 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         
         // Add the mapped service and service path to the headers
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, map.getLeft());
-        LOGGER.debug("[nmi] Adding flume event header '" + NGSIConstants.FLUME_HEADER_MAPPED_SERVICE + ":"
-                + map.getLeft() + "'");
+        LOGGER.debug("[nmi] Header added to NGSI event ("
+                + NGSIConstants.FLUME_HEADER_MAPPED_SERVICE
+                + ": " + map.getLeft() + ")");
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, map.getMiddle());
-        LOGGER.debug("[nmi] Adding flume event header '" + NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH + ":"
-                + map.getMiddle() + "'");
+        LOGGER.debug("[nmi] Header added to NGSI event ("
+                + NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH
+                + ": " + map.getMiddle() + ")");
         
         // Return the intercepted event
         LOGGER.debug("[nmi] Event put in the channel, id=" + event.hashCode());
