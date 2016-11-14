@@ -138,11 +138,21 @@ public class NGSIEvent implements Event {
         if (enableGrouping) {
             return headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY);
         } else if (enableMappings) {
-            return mappedCE.getId() + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
-                    + mappedCE.getType();
+            if (mappedCE.getType() == null || mappedCE.getType().isEmpty()) {
+                return mappedCE.getId();
+            } else {
+                return mappedCE.getId()
+                        + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
+                        + mappedCE.getType();
+            } // if else
         } else {
-            return originalCE.getId() + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
-                    + originalCE.getType();
+            if (originalCE.getType() == null || originalCE.getType().isEmpty()) {
+                return originalCE.getId(); // should never occur since Orion does not allow it
+            } else {
+                return originalCE.getId()
+                        + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
+                        + originalCE.getType();
+            } // if else
         } // if else
     } // getEntityForNaming
     
