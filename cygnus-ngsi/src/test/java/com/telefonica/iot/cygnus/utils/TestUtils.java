@@ -22,6 +22,8 @@ import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NameMappings;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
+import java.util.HashMap;
 
 /**
  *
@@ -67,5 +69,41 @@ public final class TestUtils {
         Gson gson = new Gson();
         return gson.fromJson(jsonStr, NameMappings.class);
     } // createJsonNameMappings
+    
+    /**
+     * Creates a NGSIEvent as NGSIRestHandler would create it (not intercepted).
+     * @param originalCEStr
+     * @param mappedCEStr
+     * @param service
+     * @param servicePath
+     * @param correlatorID
+     * @return A NGSIEvent as NGSIRestHandler would create it (not intercepted)
+     * @throws java.lang.Exception
+     */
+    public static NGSIEvent createNGSIEvent(String originalCEStr, String mappedCEStr, String service,
+            String servicePath, String correlatorID) throws Exception {
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, service);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, servicePath);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorID);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, correlatorID);
+        ContextElement originalCE = createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = createJsonContextElement(mappedCEStr);
+        return new NGSIEvent(headers, originalCE, mappedCE);
+    } // createNGSIEvent
+    
+    /**
+     * Creates a NGSIEvent as NGSINameMappings would create it.
+     * @param originalCEStr
+     * @param mappedCEStr
+     * @return A NGSIEvent as NGSINameMappings would create it
+     * @throws java.lang.Exception
+     */
+    public static NGSIEvent createInterceptedNGSIEvent(String originalCEStr, String mappedCEStr) throws Exception {
+        HashMap<String, String> headers = new HashMap<>();
+        ContextElement originalCE = createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = createJsonContextElement(mappedCEStr);
+        return new NGSIEvent(headers, originalCE, mappedCE);
+    } // createInterceptedNGSIEvent
     
 } // TestUtils
