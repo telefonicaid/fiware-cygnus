@@ -5,3 +5,4 @@
 - [cygnus-ngsi][hardening] Produce NGSIEvent's at Grouping Rules interceptor (#1280)
 - [cygnus-ngsi][hardening] NGSIEvent must contain ContextElement's instead of NotifyContextRequest's (#1203)
 - [cygnus-ngsi][hardening] Add a note regarding supported NGSI version (#1288)
+- [cygnus-ngsi][hardening] Produce NGSIEvent's at NGSIRestHandler (#1204)
