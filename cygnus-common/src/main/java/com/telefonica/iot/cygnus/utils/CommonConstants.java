@@ -63,6 +63,7 @@ public final class CommonConstants {
     // encoding
     public static final String INTERNAL_CONCATENATOR = "=";
     public static final String CONCATENATOR = "xffff";
+    public static final String OLD_CONCATENATOR = "_";
     
     // Header for API uses
     public static final String CYGNUS_IPR_HEADER = "#####\n"
