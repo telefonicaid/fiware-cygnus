@@ -632,7 +632,7 @@ public class NGSICartoDBSink extends NGSISink {
                     LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
                             + "), Table (" + tableName + "), Data (" + rows + ")");
                     backends.get(schema).insert(schema, tableName, withs, fields, rows);
-                } // try catch // try catch
+                } // try catch
             } // if
         } // for
     } // persistDistanceEvent
