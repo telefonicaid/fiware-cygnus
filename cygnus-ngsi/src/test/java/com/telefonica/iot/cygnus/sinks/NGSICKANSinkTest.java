@@ -663,7 +663,7 @@ public class NGSICKANSinkTest {
         
         try {
             String builtPkgName = sink.buildPkgName(service, servicePath);
-            String expectedPkgName = "somex0053ervicex002fsomex0053ervicex0050ath";
+            String expectedPkgName = "somex0053ervicexffffx002fsomex0053ervicex0050ath";
         
             try {
                 assertEquals(expectedPkgName, builtPkgName);
@@ -775,7 +775,7 @@ public class NGSICKANSinkTest {
         
         try {
             String builtPkgName = sink.buildPkgName(service, servicePath);
-            String expectedPkgName = "somex0053ervicex002f";
+            String expectedPkgName = "somex0053ervicexffffx002f";
         
             try {
                 assertEquals(expectedPkgName, builtPkgName);

@@ -25,6 +25,7 @@ import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
@@ -497,7 +498,9 @@ public class NGSICKANSink extends NGSISink {
         String pkgName;
         
         if (enableEncoding) {
-            pkgName = NGSICharsets.encodeCKAN(fiwareService) + NGSICharsets.encodeCKAN(fiwareServicePath);
+            pkgName = NGSICharsets.encodeCKAN(fiwareService)
+                    + CommonConstants.CONCATENATOR
+                    + NGSICharsets.encodeCKAN(fiwareServicePath);
         } else {
             if (fiwareServicePath.equals("/")) {
                 pkgName = NGSIUtils.encode(fiwareService, false, true);
