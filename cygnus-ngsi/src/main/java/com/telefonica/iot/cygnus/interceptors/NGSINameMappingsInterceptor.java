@@ -25,10 +25,8 @@ import com.telefonica.iot.cygnus.containers.NameMappings.AttributeMapping;
 import com.telefonica.iot.cygnus.containers.NameMappings.EntityMapping;
 import com.telefonica.iot.cygnus.containers.NameMappings.ServiceMapping;
 import com.telefonica.iot.cygnus.containers.NameMappings.ServicePathMapping;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.JsonUtils;
@@ -85,31 +83,23 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         
         LOGGER.debug("[nmi] Event intercepted, id=" + event.hashCode());
 
-        // Get the original headers and body
+        // Casting to NGSIEvent
+        NGSIEvent ngsiEvent = (NGSIEvent) event;
+        
+        // Get the original headers
         Map<String, String> headers = event.getHeaders();
-        String body = new String(event.getBody());
 
         // Get some original header values
         String originalService = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
         String originalServicePath = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
 
-        // Parse the original body, getting the original NotifyContextRequest
-        // 'TODO': this part will be moved to NGSIRestHandler in a second stage
-        NotifyContextRequest originalNCR;
-        Gson gson = new Gson();
-
-        try {
-            originalNCR = gson.fromJson(body, NotifyContextRequest.class);
-            LOGGER.debug("[nmi] Original NotifyContextRequest: " + originalNCR.toString());
-        } catch (Exception e) {
-            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
-            return null;
-        } // try catch
-
         // Create the mapped NotifyContextRequest
-        ImmutableTriple<String, String, NotifyContextRequest> map =
-                doMap(originalService, originalServicePath, originalNCR);
-        LOGGER.debug("[nmi] Mapped NotifyContextRequest: " + map.getRight().toString());
+        ImmutableTriple<String, String, ContextElement> map =
+                doMap(originalService, originalServicePath, ngsiEvent.getOriginalCE());
+        LOGGER.debug("[nmi] Mapped ContextElement: " + map.getRight().toString());
+        
+        // Add the mapped ContextElement to the NGSIEvent
+        ngsiEvent.setMappedCE(map.getRight());
         
         // Add the mapped service and service path to the headers
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, map.getLeft());
@@ -118,23 +108,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, map.getMiddle());
         LOGGER.debug("[nmi] Adding flume event header '" + NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH + ":"
                 + map.getMiddle() + "'");
-
-        // Create the NGSIEvent
-        // 'TODO': the NGSIEvent will be created at NGSIRestHandler in a second stage;
-        //       then, this interceptor will only add the mappedNCR
-        // 'TODO': we will assume the NCR only contains one CE; this will be fixed when
-        //       NGSIRestHandler creates the NGSIEvents
-        ArrayList<ContextElementResponse> originalCER = originalNCR.getContextResponses();
-        ArrayList<ContextElementResponse> mappedCER = map.getRight().getContextResponses();
         
-        if (originalCER == null || mappedCER == null || originalCER.isEmpty() || mappedCER.isEmpty()) {
-            return null;
-        } // if
-        
-        NGSIEvent ngsiEvent = new NGSIEvent(headers, originalCER.get(0).getContextElement(),
-                mappedCER.get(0).getContextElement());
-        
-        // Return the intercepted getRecvTimeTs
+        // Return the intercepted event
         LOGGER.debug("[nmi] Event put in the channel, id=" + event.hashCode());
         return ngsiEvent;
     } // intercept
@@ -316,19 +291,19 @@ public class NGSINameMappingsInterceptor implements Interceptor {
      * Applies the mappings to the input NotifyContextRequest object.
      * @param originalService
      * @param originalServicePath
-     * @param originalNCR
+     * @param originalCE
      * @return The input NotifyContextRequest object with maps applied
      */
-    public ImmutableTriple<String, String, NotifyContextRequest> doMap(String originalService,
-            String originalServicePath, NotifyContextRequest originalNCR) {
+    public ImmutableTriple<String, String, ContextElement> doMap(String originalService,
+            String originalServicePath, ContextElement originalCE) {
         if (nameMappings == null) {
-            return new ImmutableTriple(originalService, originalServicePath, originalNCR);
+            return new ImmutableTriple(originalService, originalServicePath, originalCE);
         } // if
         
         // Triple to be returned
         String newService = originalService;
         String newServicePath = originalServicePath;
-        NotifyContextRequest newNCR = originalNCR.deepCopy();
+        ContextElement newCE = originalCE.deepCopy();
         
         // Map the service
         ServiceMapping serviceMapping = null;
@@ -352,7 +327,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         
         if (serviceMapping == null) {
             LOGGER.debug("[nmi] FIWARE service not found: " + originalService);
-            return new ImmutableTriple(newService, newServicePath, newNCR);
+            return new ImmutableTriple(newService, newServicePath, newCE);
         } // if
         
         // Map the service path
@@ -377,88 +352,85 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         
         if (servicePathMapping == null) {
             LOGGER.debug("[nmi] FIWARE service path not found: " + originalServicePath);
-            return new ImmutableTriple(newService, newServicePath, newNCR);
+            return new ImmutableTriple(newService, newServicePath, newCE);
         } // if
 
-        for (ContextElementResponse contextElementResponse : newNCR.getContextResponses()) {
-            ContextElement newCE = contextElementResponse.getContextElement();
-            String originalEntityId = newCE.getId();
-            String originalEntityType = newCE.getType();
-            String newEntityId = originalEntityId;
-            String newEntityType = originalEntityType;
-            EntityMapping entityMapping = null;
+        String originalEntityId = newCE.getId();
+        String originalEntityType = newCE.getType();
+        String newEntityId = originalEntityId;
+        String newEntityType = originalEntityType;
+        EntityMapping entityMapping = null;
 
-            for (EntityMapping em : servicePathMapping.getEntityMappings()) {
-                entityMapping = em;
+        for (EntityMapping em : servicePathMapping.getEntityMappings()) {
+            entityMapping = em;
 
-                if (!entityMapping.getOriginalEntityIdPattern().matcher(originalEntityId).matches()
-                        || !entityMapping.getOriginalEntityTypePattern().matcher(originalEntityType).matches()) {
-                    entityMapping = null;
+            if (!entityMapping.getOriginalEntityIdPattern().matcher(originalEntityId).matches()
+                    || !entityMapping.getOriginalEntityTypePattern().matcher(originalEntityType).matches()) {
+                entityMapping = null;
+                continue;
+            } // if
+
+            LOGGER.debug("[nmi] Entity found: " + originalEntityId + ", " + originalEntityType);
+
+            if (entityMapping.getNewEntityId() != null) {
+                newEntityId = entityMapping.getNewEntityId();
+            } // if
+
+            if (entityMapping.getNewEntityType() != null) {
+                newEntityType = entityMapping.getNewEntityType();
+            } // if
+
+            break;
+        } // for
+
+        if (entityMapping == null) {
+            LOGGER.debug("[nmi] Entity not found: " + originalEntityId + ", " + originalEntityType);
+            return new ImmutableTriple(newService, newServicePath, newCE);
+        } // if
+
+        newCE.setId(newEntityId);
+        newCE.setType(newEntityType);
+
+        for (ContextAttribute newCA : newCE.getAttributes()) {
+            String originalAttributeName = newCA.getName();
+            String originalAttributeType = newCA.getType();
+            String newAttributeName = originalAttributeName;
+            String newAttributeType = originalAttributeType;
+            AttributeMapping attributeMapping = null;
+
+            for (AttributeMapping am : entityMapping.getAttributeMappings()) {
+                attributeMapping = am;
+
+                if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches()
+                        || !attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType).
+                                matches()) {
+                    attributeMapping = null;
                     continue;
                 } // if
 
-                LOGGER.debug("[nmi] Entity found: " + originalEntityId + ", " + originalEntityType);
+                LOGGER.debug("[nmi] Attribute found: " + originalAttributeName + ", " + originalAttributeType);
 
-                if (entityMapping.getNewEntityId() != null) {
-                    newEntityId = entityMapping.getNewEntityId();
+                if (attributeMapping.getNewAttributeName() != null) {
+                    newAttributeName = attributeMapping.getNewAttributeName();
                 } // if
 
-                if (entityMapping.getNewEntityType() != null) {
-                    newEntityType = entityMapping.getNewEntityType();
+                if (attributeMapping.getNewAttributeType() != null) {
+                    newAttributeType = attributeMapping.getNewAttributeType();
                 } // if
 
                 break;
             } // for
 
-            if (entityMapping == null) {
-                LOGGER.debug("[nmi] Entity not found: " + originalEntityId + ", " + originalEntityType);
+            if (attributeMapping == null) {
+                LOGGER.debug("[nmi] Attribute not found: " + originalAttributeName + ", " + originalAttributeType);
                 continue;
             } // if
 
-            newCE.setId(newEntityId);
-            newCE.setType(newEntityType);
-
-            for (ContextAttribute newCA : newCE.getAttributes()) {
-                String originalAttributeName = newCA.getName();
-                String originalAttributeType = newCA.getType();
-                String newAttributeName = originalAttributeName;
-                String newAttributeType = originalAttributeType;
-                AttributeMapping attributeMapping = null;
-
-                for (AttributeMapping am : entityMapping.getAttributeMappings()) {
-                    attributeMapping = am;
-
-                    if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches()
-                            || !attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType).
-                                    matches()) {
-                        attributeMapping = null;
-                        continue;
-                    } // if
-
-                    LOGGER.debug("[nmi] Attribute found: " + originalAttributeName + ", " + originalAttributeType);
-
-                    if (attributeMapping.getNewAttributeName() != null) {
-                        newAttributeName = attributeMapping.getNewAttributeName();
-                    } // if
-
-                    if (attributeMapping.getNewAttributeType() != null) {
-                        newAttributeType = attributeMapping.getNewAttributeType();
-                    } // if
-
-                    break;
-                } // for
-
-                if (attributeMapping == null) {
-                    LOGGER.debug("[nmi] Attribute not found: " + originalAttributeName + ", " + originalAttributeType);
-                    continue;
-                } // if
-
-                newCA.setName(newAttributeName);
-                newCA.setType(newAttributeType);
-            } // for
+            newCA.setName(newAttributeName);
+            newCA.setType(newAttributeType);
         } // for
 
-        return new ImmutableTriple(newService, newServicePath, newNCR);
+        return new ImmutableTriple(newService, newServicePath, newCE);
     } // map
     
 } // NGSINameMappingsInterceptor
