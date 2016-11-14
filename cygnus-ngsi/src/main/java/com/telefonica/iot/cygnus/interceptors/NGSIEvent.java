@@ -142,7 +142,7 @@ public class NGSIEvent implements Event {
                 return mappedCE.getId();
             } else {
                 return mappedCE.getId()
-                        + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
+                        + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : CommonConstants.OLD_CONCATENATOR)
                         + mappedCE.getType();
             } // if else
         } else {
@@ -150,7 +150,7 @@ public class NGSIEvent implements Event {
                 return originalCE.getId(); // should never occur since Orion does not allow it
             } else {
                 return originalCE.getId()
-                        + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : "_")
+                        + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : CommonConstants.OLD_CONCATENATOR)
                         + originalCE.getType();
             } // if else
         } // if else
