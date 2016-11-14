@@ -10,3 +10,4 @@
 - [cygnus-ngsi][bug] Add concatenator to CKAN packages when new encoding is enabled (#1291)
 - [cygnus-ngsi][hardening] Add a documentation piece regarding deprecated functionality (#1289)
 - [cygnus-ngsi][hardening] Add a note regarding geolocation attributes in NGSICKANSink documentation (#1293)
+- [cygnus-ngsi][hardening] Add OLD_CONCATENATOR constant (#1284)
