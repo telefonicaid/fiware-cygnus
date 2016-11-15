@@ -18,11 +18,9 @@
 
 package com.telefonica.iot.cygnus.interceptors;
 
-import com.google.gson.Gson;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.io.File;
 import java.util.ArrayList;
@@ -84,90 +82,46 @@ public class NGSIGroupingInterceptor implements Interceptor {
         } // if
         
         LOGGER.debug("[gi] Event intercepted, id=" + event.hashCode());
+        
+        // Casting to NGSIEvent
+        NGSIEvent ngsiEvent = (NGSIEvent) event;
 
-        // get the original headers and body
-        Map<String, String> headers = event.getHeaders();
-        String body = new String(event.getBody());
+        // Get the original headers and original ContextElement
+        Map<String, String> headers = ngsiEvent.getHeaders();
+        ContextElement originalCE = ngsiEvent.getOriginalCE();
 
-        // get some original header values
+        // Get some original header values
         String fiwareServicePath = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
 
-        // Parse the original body, getting the original NotifyContextRequest
-        // 'TODO': this part will be moved to NGSIRestHandler in a second stage
-        NotifyContextRequest originalNCR;
-        Gson gson = new Gson();
+        // Get the matching rule
+        CygnusGroupingRule matchingRule = groupingRules.getMatchingRule(fiwareServicePath,
+                originalCE.getId(), originalCE.getType());
 
-        try {
-            originalNCR = gson.fromJson(body, NotifyContextRequest.class);
-            LOGGER.debug("[gi] Original NotifyContextRequest: " + originalNCR.toString());
-        } catch (Exception e) {
-            LOGGER.error("[gi] Runtime error (" + e.getMessage() + ")");
-            return null;
-        } // try catch
-
-        // iterate on the context responses and notified service paths
-        ArrayList<String> defaultDestinations = new ArrayList<>();
-        ArrayList<String> groupedDestinations = new ArrayList<>();
-        ArrayList<String> groupedServicePaths = new ArrayList<>();
-        ArrayList<NotifyContextRequest.ContextElementResponse> contextResponses =
-                originalNCR.getContextResponses();
-
-        if (contextResponses == null || contextResponses.isEmpty()) {
-            LOGGER.warn("No context responses within the notified entity, nothing is done");
-            return null;
-        } // if
-
-        String[] splitedNotifiedServicePaths = fiwareServicePath.split(",");
-
-        for (int i = 0; i < contextResponses.size(); i++) {
-            NotifyContextRequest.ContextElementResponse contextElementResponse = contextResponses.get(i);
-            NotifyContextRequest.ContextElement contextElement = contextElementResponse.getContextElement();
-
-            // get the matching rule
-            CygnusGroupingRule matchingRule = groupingRules.getMatchingRule(fiwareServicePath,
-                    contextElement.getId(), contextElement.getType());
-
-            if (matchingRule == null) {
-                groupedDestinations.add(contextElement.getId()
-                        + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : CommonConstants.OLD_CONCATENATOR)
-                        + contextElement.getType());
-                groupedServicePaths.add(splitedNotifiedServicePaths[i]);
-            } else {
-                groupedDestinations.add((String) matchingRule.getDestination());
-                groupedServicePaths.add((String) matchingRule.getNewFiwareServicePath());
-            } // if else
-
-            defaultDestinations.add(contextElement.getId()
-                    + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : CommonConstants.OLD_CONCATENATOR)
-                    + contextElement.getType());
-        } // for
-
-        // set the final header values
-        String defaultDestinationsStr = CommonUtils.toString(defaultDestinations);
-        headers.put(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY, defaultDestinationsStr);
-        LOGGER.debug("[gi] Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY
-                + ", value=" + defaultDestinationsStr + ")");
-        String groupedDestinationsStr = CommonUtils.toString(groupedDestinations);
-        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY, groupedDestinationsStr);
-        LOGGER.debug("[gi] Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_ENTITY
-                + ", value=" + groupedDestinationsStr + ")");
-        String groupedServicePathsStr = CommonUtils.toString(groupedServicePaths);
-        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH, groupedServicePathsStr);
-        LOGGER.debug("[gi] Adding flume event header (name=" + NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH
-                + ", value=" + groupedServicePathsStr + ")");
-
-        // Create the NGSIEvent
-        // 'TODO': the NGSIEvent will be created at NGSIRestHandler in a second stage;
-        //       then, this interceptor will only add the mappedNCR
-        // 'TODO': we will assume the NCR only contains one CE; this will be fixed when
-        //       NGSIRestHandler creates the NGSIEvents
-        ArrayList<NotifyContextRequest.ContextElementResponse> originalCER = originalNCR.getContextResponses();
+        // Get values for headers added by this interceptor
+        String notifiedEntity = originalCE.getId()
+                + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : CommonConstants.OLD_CONCATENATOR)
+                + originalCE.getType();
+        String groupedDestination;
+        String groupedServicePath;
         
-        if (originalCER == null || originalCER.isEmpty()) {
-            return null;
-        } // if
-        
-        NGSIEvent ngsiEvent = new NGSIEvent(headers, originalCER.get(0).getContextElement(), null);
+        if (matchingRule == null) {
+            groupedDestination = notifiedEntity;
+            groupedServicePath = fiwareServicePath;
+        } else {
+            groupedDestination = matchingRule.getDestination();
+            groupedServicePath = matchingRule.getNewFiwareServicePath();
+        } // if else
+
+        // Set the final header values
+        headers.put(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY, notifiedEntity);
+        LOGGER.debug("[gi] Adding flume event header (" + NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY
+                + ": " + notifiedEntity + ")");
+        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY, groupedDestination);
+        LOGGER.debug("[gi] Adding flume event header (" + NGSIConstants.FLUME_HEADER_GROUPED_ENTITY
+                + ": " + groupedDestination + ")");
+        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH, groupedServicePath);
+        LOGGER.debug("[gi] Adding flume event header (" + NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH
+                + ": " + groupedServicePath + ")");
         
         // Return the intercepted getRecvTimeTs
         LOGGER.debug("[gi] Event put in the channel, id=" + event.hashCode());
