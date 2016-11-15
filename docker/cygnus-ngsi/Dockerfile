@@ -142,7 +142,7 @@ RUN \
     rm -f ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
     echo "INFO: Copy some files needed for starting cygnus-ngsi" && \
     cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/cygnus-entrypoint.sh / && \
-    cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/ &&
+    cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/ && \
     cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/cartodb_keys.conf ${FLUME_HOME}/conf/
 
 # Define the entry point
