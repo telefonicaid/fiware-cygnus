@@ -46,11 +46,12 @@ ENV CYGNUS_HDFS_HOST "iot-hdfs"
 ENV CYGNUS_HDFS_PORT "50070"
 ENV CYGNUS_HDFS_USER "hdfs"
 ENV CYGNUS_HDFS_TOKEN ""
+ENV CYGNUS_CARTO_KEY_CONF_FILE ""
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
-ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
+ENV GIT_URL_CYGNUS "https://github.com/pcoello25/fiware-cygnus"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "master"
+ENV GIT_REV_CYGNUS "hardening/1299_add_ngsicartodbsink_configuration_in_docker""
 # ENV GIT_REV_CYGNUS "mybranch"
 
 ENV MVN_VER "3.3.9"
