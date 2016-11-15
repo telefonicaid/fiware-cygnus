@@ -46,7 +46,8 @@ ENV CYGNUS_HDFS_HOST "iot-hdfs"
 ENV CYGNUS_HDFS_PORT "50070"
 ENV CYGNUS_HDFS_USER "hdfs"
 ENV CYGNUS_HDFS_TOKEN ""
-ENV CYGNUS_CARTO_KEY_CONF_FILE ""
+ENV CYGNUS_CARTO_USER "carto"
+ENV CYGNUS_CARTO_KEY "carto"
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/pcoello25/fiware-cygnus"
@@ -142,6 +143,7 @@ RUN \
     echo "INFO: Copy some files needed for starting cygnus-ngsi" && \
     cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/cygnus-entrypoint.sh / && \
     cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/
+    cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/cartodb_keys.conf ${FLUME_HOME}/conf/
 
 # Define the entry point
 ENTRYPOINT ["/cygnus-entrypoint.sh"]
