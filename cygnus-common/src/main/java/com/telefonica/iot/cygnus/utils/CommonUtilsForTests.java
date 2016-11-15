@@ -51,20 +51,6 @@ public final class CommonUtilsForTests {
     } // getTestTraceHead
     
     /**
-     * Create a Flume event.
-     * @return A Flume event
-     */
-    public static Event createEvent() {
-        String eventData = createNotification().toJSONString();
-        Map<String, String> eventHeaders = new HashMap<String, String>();
-        eventHeaders.put("fiware-service", "default");
-        eventHeaders.put("fiware-servicepath", "/");
-        eventHeaders.put("fiware-correlator", "0123456789ABCDEF");
-        eventHeaders.put("transaction-id", "0123456789ABCDEF");
-        return EventBuilder.withBody(eventData.getBytes(), eventHeaders);
-    } // createEvent
-    
-    /**
      * Creates a JSONObject-like notification.
      * @return A JSONObject-like notification
      */
