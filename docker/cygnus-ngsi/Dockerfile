@@ -48,6 +48,7 @@ ENV CYGNUS_HDFS_USER "hdfs"
 ENV CYGNUS_HDFS_TOKEN ""
 ENV CYGNUS_CARTO_USER "carto"
 ENV CYGNUS_CARTO_KEY "carto"
+ENV CYGNUS_CARTO_KEY_CONF_FILE "/opt/apache-flume/conf/cartodb_keys.conf"
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/pcoello25/fiware-cygnus"
