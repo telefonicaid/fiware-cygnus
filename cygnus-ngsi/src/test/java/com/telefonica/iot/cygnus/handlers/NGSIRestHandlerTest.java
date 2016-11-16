@@ -18,7 +18,7 @@
 
 package com.telefonica.iot.cygnus.handlers;
 
-import com.telefonica.iot.cygnus.utils.CommonUtilsForTests;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -33,7 +33,6 @@ import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import org.json.simple.JSONObject;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -55,9 +54,78 @@ public class NGSIRestHandlerTest {
     // Mocks
     @Mock
     private HttpServletRequest mockHttpServletRequest;
+    @Mock
+    private HttpServletRequest mockHttpServletRequest2;
     
     // Other variables
-    private JSONObject notification;
+    private final String notification = ""
+            + "{"
+            + "  \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
+            + "  \"originator\" : \"localhost\","
+            + "  \"contextResponses\" : ["
+            + "    {"
+            + "      \"contextElement\" : {"
+            + "        \"attributes\" : ["
+            + "          {"
+            + "            \"name\" : \"temperature\","
+            + "            \"type\" : \"centigrade\","
+            + "            \"value\" : \"26.5\""
+            + "          }"
+            + "        ],"
+            + "        \"type\" : \"Room\","
+            + "        \"isPattern\" : \"false\","
+            + "        \"id\" : \"Room1\""
+            + "      },"
+            + "      \"statusCode\" : {"
+            + "        \"code\" : \"200\","
+            + "        \"reasonPhrase\" : \"OK\""
+            + "      }"
+            + "    }"
+            + "  ]"
+            + "}";
+    private final String notification2 = ""
+            + "{"
+            + "  \"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
+            + "  \"originator\" : \"localhost\","
+            + "  \"contextResponses\" : ["
+            + "    {"
+            + "      \"contextElement\" : {"
+            + "        \"attributes\" : ["
+            + "          {"
+            + "            \"name\" : \"temperature\","
+            + "            \"type\" : \"centigrade\","
+            + "            \"value\" : \"26.5\""
+            + "          }"
+            + "        ],"
+            + "        \"type\" : \"Room\","
+            + "        \"isPattern\" : \"false\","
+            + "        \"id\" : \"Room.1\""
+            + "      },"
+            + "      \"statusCode\" : {"
+            + "        \"code\" : \"200\","
+            + "        \"reasonPhrase\" : \"OK\""
+            + "      }"
+            + "    },"
+            + "    {"
+            + "      \"contextElement\" : {"
+            + "        \"attributes\" : ["
+            + "          {"
+            + "            \"name\" : \"temperature\","
+            + "            \"type\" : \"centigrade\","
+            + "            \"value\" : \"19.3\""
+            + "          }"
+            + "        ],"
+            + "        \"type\" : \"Room\","
+            + "        \"isPattern\" : \"false\","
+            + "        \"id\" : \"Room.suite\""
+            + "      },"
+            + "      \"statusCode\" : {"
+            + "        \"code\" : \"200\","
+            + "        \"reasonPhrase\" : \"OK\""
+            + "      }"
+            + "    }"
+            + "  ]"
+            + "}";
     
     /**
      * Constructor.
@@ -82,10 +150,18 @@ public class NGSIRestHandlerTest {
         when(mockHttpServletRequest.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
         when(mockHttpServletRequest.getHeader("fiware-service")).thenReturn("myservice");
         when(mockHttpServletRequest.getHeader("fiware-servicepath")).thenReturn("/myservicepath");
-        notification = CommonUtilsForTests.createNotification();
         when(mockHttpServletRequest.getReader()).thenReturn(
-                new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-                        notification.toJSONString().getBytes()))));
+                new BufferedReader(new InputStreamReader(new ByteArrayInputStream(notification.getBytes()))));
+        when(mockHttpServletRequest2.getMethod()).thenReturn("POST");
+        when(mockHttpServletRequest2.getRequestURI()).thenReturn("/notify");
+        String[] headerNames2 = {"Content-Type", "fiware-service", "fiware-servicePath"};
+        when(mockHttpServletRequest2.getHeaderNames()).thenReturn(
+                Collections.enumeration(new ArrayList(Arrays.asList(headerNames2))));
+        when(mockHttpServletRequest2.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
+        when(mockHttpServletRequest2.getHeader("fiware-service")).thenReturn("myservice");
+        when(mockHttpServletRequest2.getHeader("fiware-servicepath")).thenReturn("/a,/b");
+        when(mockHttpServletRequest2.getReader()).thenReturn(
+                new BufferedReader(new InputStreamReader(new ByteArrayInputStream(notification2.getBytes()))));
     } // setUp
     
     /**
@@ -313,7 +389,7 @@ public class NGSIRestHandlerTest {
     
     /**
      * [NGSIRestHandler.getEvents] -------- When a notification is sent as a Http message, a single Flume event
- is generated.
+     * is generated.
      */
     @Test
     public void testGetEventsSingleEvent() {
@@ -344,7 +420,7 @@ public class NGSIRestHandlerTest {
     
     /**
      * [NGSIRestHandler.getEvents] -------- When a Flume event is generated, it contains fiware-service,
- fiware-servicepath, fiware-correlator and transaction-id headers.
+     * fiware-servicepath, fiware-correlator and transaction-id headers.
      */
     @Test
     public void testGetEventsHeadersInFlumeEvent() {
@@ -403,6 +479,53 @@ public class NGSIRestHandlerTest {
             assertTrue(false);
         } // try catch
     } // testGetEventsHeadersInFlumeEvent
+    
+    /**
+     * [NGSIRestHandler.getEvents] -------- When a notification contains multiple ContextElementResponses, a NGSIEvent
+     * is generated for each one of them; the notified service path is split as well.
+     */
+    @Test
+    public void testGetEventsMultiValuedServicePath() {
+        System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                + "-------- When a notification contains multiple ContextElementResponses, a NGSIEvent is generated "
+                + "for each one of them; the notified service path is split as well");
+        NGSIRestHandler handler = new NGSIRestHandler();
+        handler.configure(createContext(null, null, null)); // default configuration
+        List<Event> events;
+        
+        try {
+            events = handler.getEvents(mockHttpServletRequest2);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "- FAIL - There was some problem when intercepting the event");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+            
+        try {
+            assertEquals(2, events.size());
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "-  OK  - The generated events are 2");
+        } catch (AssertionError e1) {
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "- FAIL - The generated events are not 2");
+            throw e1;
+        } // try catch
+        
+        try {
+            String event1ServicePath = events.get(0).getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
+            String event2ServicePath = events.get(1).getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
+            assertTrue((event1ServicePath.equals("/a") && event2ServicePath.equals("/b"))
+                    || (event1ServicePath.equals("/b") && event2ServicePath.equals("/a")));
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "-  OK  - The generated events have a service path equals to a split of the notified service "
+                    + "path");
+        } catch (AssertionError e1) {
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "- FAIL - The generated events have not a service path equals to a split of the notified service "
+                    + "path");
+            throw e1;
+        } // try catch
+    } // testGetEventsMultiValuedServicePath
     
     /**
      * [NGSIRestHandler.getEvents] -------- When a Flume event is generated, the Flume body is null.
