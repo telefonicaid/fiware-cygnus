@@ -11,3 +11,4 @@
 - [cygnus-ngsi][hardening] Add a documentation piece regarding deprecated functionality (#1289)
 - [cygnus-ngsi][hardening] Add a note regarding geolocation attributes in NGSICKANSink documentation (#1293)
 - [cygnus-ngsi][hardening] Add OLD_CONCATENATOR constant (#1284)
+- [cygnus-ngsi][hardening] Document how Name Mappings behave in absence of a "newSomething" field (#1302)
