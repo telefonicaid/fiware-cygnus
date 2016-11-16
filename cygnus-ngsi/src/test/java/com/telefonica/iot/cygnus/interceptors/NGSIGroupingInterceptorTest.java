@@ -17,11 +17,10 @@
  */
 package com.telefonica.iot.cygnus.interceptors;
 
-import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.createEvent;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+import com.telefonica.iot.cygnus.utils.TestUtils;
 import java.util.Map;
 import org.apache.flume.Context;
-import org.apache.flume.Event;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertTrue;
@@ -149,7 +148,32 @@ public class NGSIGroupingInterceptorTest {
                 + "headers");
         NGSIGroupingInterceptor groupingInterceptor = new NGSIGroupingInterceptor("", false, false);
         groupingInterceptor.initialize();
-        Event originalEvent = createEvent();
+        String originalCEStr = ""
+            + "{"
+            +   "\"attributes\" : ["
+            +     "{"
+            +       "\"name\" : \"temperature\","
+            +       "\"type\" : \"centigrade\","
+            +       "\"value\" : \"26.5\""
+            +     "}"
+            +   "],"
+            +   "\"type\" : \"Room\","
+            +   "\"isPattern\" : \"false\","
+            +   "\"id\" : \"Room1\""
+            + "}";
+        String service = "default";
+        String servicePath = "/default";
+        String correlatorID = "12345";
+        NGSIEvent originalEvent;
+        
+        try {
+            originalEvent = TestUtils.createNGSIEvent(originalCEStr, null, service, servicePath, correlatorID);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[GroupingInterceptor.intercept]")
+                    + "- FAIL - There was a problem when creating the NGSIEvent");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
         Map<String, String> interceptedEventHeaders = groupingInterceptor.intercept(originalEvent).getHeaders();
 
         try {
