@@ -1,30 +1,30 @@
-#<a name="top"></a>Name mappings
-Name mappings is an advanced global feature of Cygnus. It is global because it is available for all NGSI sinks.
+#<a name="top"></a>Name Mappings
+Name Mappings is an advanced global feature of Cygnus. It is global because it is available for all NGSI sinks.
 
-Name mappings allow changing the notified <b>FIWARE service</b>, <b>FIWARE service path</b>, <b>entity IDs</b>, <b>entity types</b>, <b>attribute names</b> and <b>attribute types</b>, given a mapping. Such a mapping is just a Json within a configuration file detailing how original naming must be replaced by alternative naming.
+Name Mappings allow changing the notified <b>FIWARE service</b>, <b>FIWARE service path</b>, <b>entity IDs</b>, <b>entity types</b>, <b>attribute names</b> and <b>attribute types</b>, given a mapping. Such a mapping is just a Json within a configuration file detailing how original naming must be replaced by alternative naming.
 
 ```
 {
    "serviceMappings": [
       {
-         "originalService": "frb",
-         "newService": "new_frb",
+         "originalService": "myservice1",
+         "newService": "new_myservice1",
          "servicePathMappings": [
             {
-               "originalServicePath": "/any",
-               "newServicePath": "/new_any",
+               "originalServicePath": "/myservicepath1",
+               "newServicePath": "/new_myservicepath1",
                "entityMappings": [
                   {
-                     "originalEntityId": "Room1",
-                     "originalEntityType": "Room",
-                     "newEntityId": "new_room1",
-                     "newEntityType": "new_room",
+                     "originalEntityId": "myentityid1",
+                     "originalEntityType": "myentitytype1",
+                     "newEntityId": "new_myentityid1",
+                     "newEntityType": "new_myentitytype1",
                      "attributeMappings": [
                         {
-                           "originalAttributeName": "temperature",
-                           "originalAttributeType": "centigrade",
-                           "newAttributeName": "new_temp",
-                           "newAttributeType": "new_cent"
+                           "originalAttributeName": "myattributename1",
+                           "originalAttributeType": "myattributetype1",
+                           "newAttributeName": "new_myattributename1",
+                           "newAttributeType": "new_myattributetype1"
                         },
                         ...
                      ]
@@ -49,19 +49,135 @@ When a notification is sent to Cygnus, a special Flume interceptor called `NGSIN
 
 Please observe no raw bytes about the body are sent.
 
-Whenever a sink takes one of these `NGSIEvent`'s, it is only a matter of deciding if such a sink enables the name mappings (`enable_name_mappings` parameter) or not. If name mappings are enabled, then the already parsed `NotifyContextRequest`, mapped version, is used. If not, then the original version is used.
+Whenever a sink takes one of these `NGSIEvent`'s, it is only a matter of deciding if such a sink enables the mappings (`enable_name_mappings` parameter) or not. If mappings are enabled, then the already parsed `NotifyContextRequest`, mapped version, is used. If not, then the original version is used.
 
-##Important notes
-Please observe the name mappings definition is global to all the sinks, at `NGSIRestHandler`, but then the application is local to the sink, depending on the `enable_name_mappings` parameter. Thus, if any of your sinks is going to take advantage of the mappings, simply leave blank the mappings configuration file in the REST handler. That will avoid unnecessary interception and iterations on the mappings.
+##Creating your own Name Mappings
+Please observe the mappings definition is global to all the sinks, at `NGSIRestHandler`, as a Flume interceptor. Nevertheless, the application is local to the sink, depending on the `enable_name_mappings` parameter. Thus, if none of your sinks is going to take advantage of the mappings, simply avoid configuring the `NGSINameMappingsInterceptor` in `NGSIRestHandler`. That will avoid unnecessary interception and iterations on the mappings and Cygnus will perform faster.
 
-Additionally, please observe if any of the original names is not present, then the mapping affects all the names of that type. For instance, if `originalService` is not present in the fist mapping, then the mapping affects all the FIWARE services.
+```
+$ cat /path/to/conf/agent.conf
+cygnus-ngsi.sources.http-source.type = org.apache.flume.source.http.HTTPSource
+cygnus-ngsi.sources.http-source.channels = hdfs-channel
+cygnus-ngsi.sources.http-source ...
+cygnus-ngsi.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
+cygnus-ngsi.sources.http-source.handler ...
+cygnus-ngsi.sources.http-source.interceptors = ts nmi
+cygnus-ngsi.sources.http-source.interceptors.ts.type = timestamp
+cygnus-ngsi.sources.http-source.interceptors.nmi.type = com.telefonica.iot.cygnus.interceptors.NGSINameMappingsInterceptor$Builder
+cygnus-ngsi.sources.http-source.interceptors.nmi.name_mappings_conf_file = /path/to/conf/name_mappings.conf
+```
+
+Additionally, please observe if any of the original names is not present, then the mapping affects all the names of that type. For instance, if `originalService` is not present in the mapping, then the mapping affects all the FIWARE services:
+
+```
+$ cat /path/to/conf/name_mappings.conf
+{
+   "serviceMappings": [
+      {
+         "servicePathMappings": [
+            {
+               "originalServicePath": "/myservicepath1",
+               "newServicePath": "/new_myservicepath1",
+               "entityMappings": [
+                  {
+                     "originalEntityId": "myentityid1",
+                     "originalEntityType": "myentitytype1",
+                     "newEntityId": "new_myentityid1",
+                     "newEntityType": "new_myentitytype1",
+                     "attributeMappings": [
+                        {
+                           "originalAttributeName": "myattributename1",
+                           "originalAttributeType": "myattributetype1",
+                           "newAttributeName": "new_myattributename1",
+                           "newAttributeType": "new_myattributetype1"
+                        }
+                     ]
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}
+```
+
+Another relevant behaviour must be noticed: when any of the new names is not present, then the original name is used in the mapping. I.e. there is no mapping. In this example, the original service path is never changed, since `newServicePath` is missing:
+
+```
+$ cat /path/to/conf/name_mappings.conf
+{
+   "serviceMappings": [
+      {
+         "originalService": "myservice1",
+         "newService": "new_myservice1",
+         "servicePathMappings": [
+            {
+               "originalServicePath": "/myservicepath1",
+               "entityMappings": [
+                  {
+                     "originalEntityId": "myentityid1",
+                     "originalEntityType": "myentitytype1",
+                     "newEntityId": "new_myentityid1",
+                     "newEntityType": "new_myentitytype1",
+                     "attributeMappings": [
+                        {
+                           "originalAttributeName": "myattributename1",
+                           "originalAttributeType": "myattributetype1",
+                           "newAttributeName": "new_myattributename1",
+                           "newAttributeType": "new_myattributetype1"
+                        }
+                     ]
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}
+```
+
+Last but not least, the original names support Java-based regular expressions. For instance, if you want all the service paths are re-named equals simply use `/.*` as value for `originalServicePath`:
+
+```
+$ cat /path/to/conf/name_mappings.conf
+{
+   "serviceMappings": [
+      {
+         "originalService": "myservice1",
+         "newService": "new_myservice1",
+         "servicePathMappings": [
+            {
+               "originalServicePath": "/.*",
+               "newServicePath": "/new_all",
+               "entityMappings": [
+                  {
+                     "originalEntityId": "myentityid1",
+                     "originalEntityType": "myentitytype1",
+                     "newEntityId": "new_myentityid1",
+                     "newEntityType": "new_myentitytype1",
+                     "attributeMappings": [
+                        {
+                           "originalAttributeName": "myattributename1",
+                           "originalAttributeType": "myattributetype1",
+                           "newAttributeName": "new_myattributename1",
+                           "newAttributeType": "new_myattributetype1"
+                        }
+                     ]
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}
+```
 
 [Top](#top)
 
-##Name mappings vs. grouping rules
-As seen, the name mappings feature is quite similar to the already existent grouping rules. Both of them are Flume interceptors and both of them allow changing certain notified name elements. Thus, which are the differences? Mainly:
+##Name Mappings vs. grouping rules
+As seen, the Name Mappings feature is quite similar to the already existent grouping rules. Both of them are Flume interceptors and both of them allow changing certain notified name elements. Thus, which are the differences? Mainly:
 
-| Name mappings | Grouping rules |
+| Name Mappings | Grouping rules |
 |---|---|
 |Allow changing the notified <b>FIWARE service</b>, <b>FIWARE service path</b>, <b>entity IDs</b>, <b>entity types</b>, <b>attribute names</b> and <b>attribute types</b>.|Allow changing the notified <b>FIWARE service path</b> and the <b>concatenation of entity ID and entity type</b> (this is called the <i>destination</i>).|
 |Plain Flume `Event`'s are intercepted, and `NGSIEvent`'s are put into the channel. Because the interceptor needs to parse the original notification, a `NGSIEvent` already contains the original notification parsed, and the mapped version of the original notification, <b>freeing the sinks to parse the notification</b>.|Plain Flume `Event`'s are intercepted, and plain `Event`'s are put into the channel. Thus, <b>the sinks must parse the notification</b>, despite the grouping interceptor already parsed it`.|
