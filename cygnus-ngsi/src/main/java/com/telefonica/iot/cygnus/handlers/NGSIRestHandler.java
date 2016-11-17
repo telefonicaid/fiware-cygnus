@@ -284,11 +284,12 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         // Get the data content
         String data = "";
         String line;
-        BufferedReader reader = request.getReader();
         
-        while ((line = reader.readLine()) != null) {
-            data += line;
-        } // while
+        try (BufferedReader reader = request.getReader()) {
+            while ((line = reader.readLine()) != null) {
+                data += line;
+            } // while
+        } // try
                 
         if (data.length() == 0) {
             LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (No content in the request)");
