@@ -190,8 +190,8 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         Enumeration headerNames = request.getHeaderNames();
         String corrId = null;
         String contentType = null;
-        String service = null;
-        String servicePath = null;
+        String service = defaultService;
+        String servicePath = defaultServicePath;
         
         while (headerNames.hasMoreElements()) {
             String headerName = ((String) headerNames.nextElement()).toLowerCase(Locale.ENGLISH);
@@ -284,11 +284,12 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         // Get the data content
         String data = "";
         String line;
-        BufferedReader reader = request.getReader();
         
-        while ((line = reader.readLine()) != null) {
-            data += line;
-        } // while
+        try (BufferedReader reader = request.getReader()) {
+            while ((line = reader.readLine()) != null) {
+                data += line;
+            } // while
+        } // try
                 
         if (data.length() == 0) {
             LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (No content in the request)");
@@ -309,31 +310,39 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             return null;
         } // try catch
         
-        String ids = "";
+        // Split the notified service path and check if it matches the number of notified context responses
+        String[] servicePaths = servicePath.split(",");
+        
+        if (servicePaths.length != ncr.getContextResponses().size()) {
+            LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('"
+                    + CommonConstants.HEADER_FIWARE_SERVICE_PATH
+                    + "' header value does not match the number of notified context responses");
+            throw new HTTPBadRequestException(
+                    "'" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
+                    + "' header value does not match the number of notified context responses");
+        } // if
         
         // Iterate on the NotifyContextRequest object in order to create an event per ContextElement
-        for (ContextElementResponse cer: ncr.getContextResponses()) {
+        String ids = "";
+        
+        for (int i = 0; i < ncr.getContextResponses().size(); i++) {
+            ContextElementResponse cer = ncr.getContextResponses().get(i);
             LOGGER.debug("[NGSIRestHandler] NGSI event created for ContextElementResponse: " + cer.toString());
             
             // Create the appropiate headers
             Map<String, String> headers = new HashMap<>();
-            headers.put(CommonConstants.HEADER_FIWARE_SERVICE, service == null ? defaultService : service);
+            headers.put(CommonConstants.HEADER_FIWARE_SERVICE, service);
             LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                    + CommonConstants.HEADER_FIWARE_SERVICE
-                    + ": " + (service == null ? defaultService : service) + ")");
-            headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, servicePath == null
-                    ? defaultServicePath : servicePath);
+                    + CommonConstants.HEADER_FIWARE_SERVICE + ": " + service + ")");
+            headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, servicePaths[i]);
             LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                    + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                    + ": " + (servicePath == null ? defaultServicePath : servicePath) + ")");
+                    + CommonConstants.HEADER_FIWARE_SERVICE_PATH + ": " + servicePaths[i] + ")");
             headers.put(CommonConstants.HEADER_CORRELATOR_ID, corrId);
             LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                    + CommonConstants.HEADER_CORRELATOR_ID
-                    + ": " + corrId + ")");
+                    + CommonConstants.HEADER_CORRELATOR_ID + ": " + corrId + ")");
             headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transId);
             LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                    + NGSIConstants.FLUME_HEADER_TRANSACTION_ID
-                    + ": " + transId + ")");
+                    + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + ": " + transId + ")");
             
             // Create the NGSIEvent and add it to the list
             NGSIEvent ngsiEvent = new NGSIEvent(headers, cer.getContextElement(), null);

@@ -10,7 +10,7 @@ Content:
     * [Management Interface related operations](#section2.2)
 
 ##<a name="section1"></a>Functionality
-This is a custom Interceptor specifically designed for Cygnus. Its purpose is to alter an original Flume `Event` object (which comes from a NGSI notification handled by [`NGSIRestHandler`](./ngsi_rest_handler.md) and contains a set of headers and a byte-based version of the original notification in Json format) by replacing (one or more at the same time):
+This is a custom Interceptor specifically designed for Cygnus. Its purpose is to alter an original `NGSIEvent` object (which comes from a NGSI notification handled by [`NGSIRestHandler`](./ngsi_rest_handler.md)) by <i>replacing</i> (one or more at the same time):
 
 * The FIWARE service Http header sent with the notification.
 * The FIWARE service path Http header sent with the notification.
@@ -19,11 +19,11 @@ This is a custom Interceptor specifically designed for Cygnus. Its purpose is to
 * Any attribute name within the notification.
 * Any attribute type within the notification.
 
-In fact, there is no replacement but another twin notification with propper mapped names is created. Then, both notifications are put into the destination channels within a `NGSIEvent` object:
+As known, a `NGSIEvent` contains a set of headers and an already parsed version of the notified Json payload as an object of type `ContextElement`. Being said this, it must be said there is no real replacement but another twin `ContextElement` with propper mapped names is created and added to the `NGSIEvent`, resulting in:
 
 * Original headers in the Flume `Event` object are extended with mapped versions of FIWARE service and FIWARE service path.
-* An already parsed `NotifyContextRequest` object contains the original notification.
-* An already parsed `NotifyContextRequest` object contains the mapped notification.
+* An already parsed `ContextElement` object contains the original context element.
+* An already parsed `ContextElement` object contains the mapped context element.
 
 [Top](#top)
 
@@ -69,6 +69,12 @@ There exists a <i>name mappings</i> file containing a Json following this format
 
 The above Json is quite straightforward: the `<original_service>` is mapped as the `<new_service>`, the `<original_service_path>` is mapped as the `<new_service_path>` and so on. The name mappings are iterated until a map is found; if no map is found, the mapped version of the original notification is equals to the original one.
 
+However, certain special behaviours must be noticed:
+
+* If any of the original names is not present, then the mapping affects all the names of that type.
+* When any of the new names is not present, then the original name is used in the mapping.
+* The original names support Java-based regular expressions.
+
 [Top](#top)
 
 ###<a name="section1.2"></a>Headers before and after intercepting
@@ -92,64 +98,169 @@ Other interceptors may add further headers, such as the `timestamp` header added
 Let's assume these name mappings:
 
 ```
+{
+   "serviceMappings": [
+      {
+         "originalService": "hotel1",
+         "servicePathMappings": [
+            {
+               "originalServicePath": "/suites",
+               "entityMappings": [
+                  {
+                     "originalEntityId": "suite.(\\d*)",
+                     "originalEntityType": "room",
+                     "newEntityId": "all_suites",
+                     "newEntityType": "room",
+                     "attributeMappings": []
+                  }
+               ]
+            },
+            {
+               "originalServicePath": "/other",
+               "entityMappings": [
+                  {
+                     "originalEntityId": "room.(\\d*)",
+                     "originalEntityType": "room",
+                     "newEntityId": "all_other",
+                     "newEntityType": "room",
+                     "attributeMappings": []
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}
 ```
 
 Now, let's assume the following not-intercepted event regarding a received notification (the code below is an <i>object representation</i>, not any real data format):
 
-    flume-event={
-        headers={
-	         fiware-service=hotel,
-	         fiware-servicepath=/allrooms,/allrooms,
-	         transaction-id=1234567890-0000-1234567890,
-	         correlation-id=1234567890-0000-1234567890
-        },
-        body=[
-           {
-	            entityId=Room.12,
-	            entityType=Room.left,
-	            attributes=[
-	                ...
-	            ]
-	        },
-	        {
-	            entityId=Room2,
-	            entityType=Room,
-	            attributes=[
-	                ...
-	            ]
-	        }
-	    ]
-    }
+```
+notification={
+   headers={
+	   fiware-service=hotel1,
+	   fiware-servicepath=/other,/suites,
+	   correlation-id=1234567890-0000-1234567890
+   },
+   body={
+      {
+	      entityId=suite.12,
+	      entityType=room,
+	      attributes=[
+	         ...
+	      ]
+	   },
+	   {
+	      entityId=other.9,
+	      entityType=room,
+	      attributes=[
+	         ...
+	      ]
+	   }
+	}
+}
+```
 
-As can be seen, two entities (`Room1` and `Room2`) of the same type (`Room`) within the same FIWARE service (`hotel`) and service paths (`/allrooms` for both of them) are notified. Once intercepted, this is how the event should look like (the code below is an <i>object representation</i>, not any real data format):
+As can be seen, two entities (`suite.12` and `other.9`) of the same type (`room`) within the same FIWARE service (`hotel`) but different service paths (`/suites` and `/other`) are notified. `NGSIRestHandler` will create two `NGSIEvent`'s:
 
-    flume-event={
-        headers={
-	         fiware-service=hotel,
-	         fiware-servicepath=/allrooms,/allrooms,
-	         transaction-id=1234567890-0000-1234567890,
-	         correlation-id=1234567890-0000-1234567890,
-	         timestamp=1234567890,
-	         mapped-fiware-service=
-	         mapped-fiware-service-path=
-        },
-        body=[
-           {
-	            entityId=Room.12,
-	            entityType=Room.left,
-	            attributes=[
-	                ...
-	            ]
-	        },
-	        {
-	            entityId=Room2,
-	            entityType=Room,
-	            attributes=[
-	                ...
-	            ]
-	        }
-	    ]
-    }
+
+```
+ngsi-event-1={
+   headers={
+	   fiware-service=hotel,
+	   fiware-servicepath=/suites,
+	   transaction-id=1234567890-0000-1234567890,
+	   correlation-id=1234567890-0000-1234567890,
+	   timestamp=1234567890,
+	   mapped-fiware-service=hotel
+	   mapped-fiware-service-path=/suites
+	},
+   original-context-element={
+	   entityId=suite.12,
+	   entityType=room,
+	   attributes=[
+	      ...
+	   ]
+	},
+	mapped-context-element=null
+}
+    
+ngsi-event-2={
+   headers={
+	   fiware-service=hotel,
+	   fiware-servicepath=/other,
+	   transaction-id=1234567890-0000-1234567890,
+	   correlation-id=1234567890-0000-1234567890,
+	   timestamp=1234567890,
+	   mapped-fiware-service=hotel
+	   mapped-fiware-service-path=/other
+   },
+   original-context-element={
+	   entityId=other.9,
+	   entityType=room,
+	   attributes=[
+	      ...
+	   ]
+	},
+	mapped-context-element=null
+}
+```
+
+Once intercepted, the above events will look like this (the code below is an <i>object representation</i>, not any real data format):
+
+```
+intercepted-ngsi-event-1={
+   headers={
+	   fiware-service=hotel,
+	   fiware-servicepath=/suites,
+	   transaction-id=1234567890-0000-1234567890,
+	   correlation-id=1234567890-0000-1234567890,
+	   timestamp=1234567890,
+	   mapped-fiware-service=hotel
+	   mapped-fiware-service-path=/suites
+	},
+	original-context-element={
+	   entityId=suite.12,
+	   entityType=room,
+	   attributes=[
+	      ...
+	   ]
+	},
+	mapped-context-element={
+	   entityId=all_suites,
+	   entityType=room,
+	   attributes=[
+	      ...
+	   ]
+	}
+}
+    
+intercepted-ngsi-event-2={
+   headers={
+	   fiware-service=hotel,
+	   fiware-servicepath=/other,
+	   transaction-id=1234567890-0000-1234567890,
+	   correlation-id=1234567890-0000-1234567890,
+	   timestamp=1234567890,
+	   mapped-fiware-service=hotel
+	   mapped-fiware-service-path=/other
+	},
+	original-context-element={
+      entityId=other.9,
+      entityType=room,
+      attributes=[
+	      ...
+	   ]
+	},
+   mapped-context-element={
+      entityId=all_other,
+      entityType=room,
+      attributes=[
+	      ...
+	   ]
+	}
+}
+```
 
 [Top](#top)
 

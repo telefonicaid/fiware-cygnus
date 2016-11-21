@@ -17,13 +17,7 @@
  */
 package com.telefonica.iot.cygnus.utils;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.commons.lang.StringUtils;
-import org.apache.flume.Event;
-import org.apache.flume.event.EventBuilder;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 /**
  *
@@ -49,36 +43,5 @@ public final class CommonUtilsForTests {
         traceHead += " " + StringUtils.repeat("-", MAX_LEN_TEST_TRACE_HEAD - originalHead.length());
         return traceHead;
     } // getTestTraceHead
-    
-    /**
-     * Creates a JSONObject-like notification.
-     * @return A JSONObject-like notification
-     */
-    public static JSONObject createNotification() {
-        JSONObject attribute = new JSONObject();
-        attribute.put("name", "temperature");
-        attribute.put("type", "centigrade");
-        attribute.put("value", "26.5");
-        JSONArray attributes = new JSONArray();
-        attributes.add(attribute);
-        JSONObject contextElement = new JSONObject();
-        contextElement.put("attributes", attributes);
-        contextElement.put("type", "Room");
-        contextElement.put("isPattern", "false");
-        contextElement.put("id", "room1");
-        JSONObject statusCode = new JSONObject();
-        statusCode.put("code", "200");
-        statusCode.put("reasonPhrase", "OK");
-        JSONObject contextResponse = new JSONObject();
-        contextResponse.put("contextElement", contextElement);
-        contextResponse.put("statusCode", statusCode);
-        JSONArray contextResponses = new JSONArray();
-        contextResponses.add(contextResponse);
-        JSONObject notification = new JSONObject();
-        notification.put("subscriptionId", "51c0ac9ed714fb3b37d7d5a8");
-        notification.put("originator", "localhost");
-        notification.put("contextResponses", contextResponses);
-        return notification;
-    } // createNotification
     
 } // CommonUtilsForTests

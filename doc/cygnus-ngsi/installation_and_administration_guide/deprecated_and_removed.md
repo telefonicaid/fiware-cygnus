@@ -10,6 +10,7 @@ Content:
     * [Data model by attribute in `NGSICartoDBSink`](#section3.4)
     * [`matching_table` parameter](#section3.5)
     * [Hash-based collection names in MongoDB/STH](#section3.6)
+    * [Grouping Rules](#section3.7)
 
 ##<a name="section1"></a>Functionality deprecation and remove policy
 At Cygnus NGSI agent (cygnus-ngsi), functionality lifecycle is:
@@ -85,5 +86,12 @@ Added after releasing version [0.8.1](https://github.com/telefonicaid/fiware-cyg
 Never deprecated.
 
 Removed after releasing version [1.4.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/1.4.0) (issue [1113](https://github.com/telefonicaid/fiware-cygnus/issues/1113)).
+
+[Top](#top)
+
+###<a nanem="section3.7"></a>Grouping Rules
+Added after releasing version [0.5](https://github.com/telefonicaid/fiware-cygnus/releases/tag/release-0.5) (issue [107](https://github.com/telefonicaid/fiware-cygnus/issues/107)).
+
+Deprecated after releasing version [1.6.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/1.6.0) (issue [1182](https://github.com/telefonicaid/fiware-cygnus/issues/1182)).
 
 [Top](#top)
