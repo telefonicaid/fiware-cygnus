@@ -2,14 +2,14 @@
 Content:
 
 * [Functionality](#section1)
-    * [Mapping NGSI events to flume events](#section1.1)
-    * [Mapping Flume events to MongoDB data structures](#section1.2)
+    * [Mapping NGSI events to `NGSIEvent` objects](#section1.1)
+    * [Mapping `NGSIEvent`s to MongoDB data structures](#section1.2)
         * [MongoDB databases naming conventions](#section1.2.1)
         * [MongoDB collections naming conventions](#section1.2.2)
         * [Row-like storing](#section1.2.3)
         * [Column-like storing](#section1.2.4)
     * [Example](#section1.3)
-        * [Flume event](#section1.3.1)
+        * [`NGSIEvent`](#section1.3.1)
         * [Database and table names](#section1.3.2)
         * [Row-like storing](#section1.3.3)
         * [Column-like storing](#section1.3.4)
@@ -28,21 +28,21 @@ Content:
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIMongoSink`, or simply `NGSIMongoSink` is a sink designed to persist NGSI-like context data events within a MongoDB server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
-Independently of the data generator, NGSI context data is always transformed into internal Flume events at Cygnus sources. In the end, the information within these Flume events must be mapped into specific HDFS data structures at the Cygnus sinks.
+Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific HDFS data structures at the Cygnus sinks.
 
 Next sections will explain this in detail.
 
 [Top](#top)
 
-###<a name="section1.1"></a>Mapping NGSI events to flume events
-Notified NGSI events (containing context data) are transformed into Flume events (such an event is a mix of certain headers and a byte-based body), independently of the NGSI data generator or the final backend where it is persisted.
+###<a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
+Notified NGSI events (containing context data) are transformed into `NGSIEvent` objects (for each context element a `NGSIEvent` is created; such an event is a mix of certain headers and a `ContextElement` object), independently of the NGSI data generator or the final backend where it is persisted.
 
-This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./ngsi_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
+This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_rest_handler.md). Once translated, the data (now, as `NGSIEvent` objects) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
-###<a name="section1.2"></a>Mapping Flume events to MongoDB data structures
-MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `NGSIMongoSink` each time a Flume event is going to be persisted.
+###<a name="section1.2"></a>Mapping `NGSIEvent`s to MongoDB data structures
+MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `NGSIMongoSink` each time a `NGSIEvent` is going to be persisted.
 
 [Top](#top)
 
@@ -80,7 +80,7 @@ Using the new encoding:
 | `/` | `sth_x002f` | `sth_x002fxffff<entityId>xffff<entityType>` | `sth_x002fxffff<entityId>xffff<entityType>xffff<attrName>` |
 | `/<svcPath>` | `sth_x002f<svcPath>` | `sth_x002f<svcPath>xffff<entityId>xffff<entityType>` | `sth_x002f<svcPath>xffff<entityId>xffff<entityType>xffff<attrName>` |
 
-Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event.
+Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
 
 [Top](#top)
 
@@ -129,21 +129,19 @@ Regarding the specific data stored within the above collections, if `attr_persis
 [Top](#top)
 
 ###<a name="section1.3"></a>Example
-####<a name="section1.3.1"></a>Flume event
-Assuming the following Flume event is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
+####<a name="section1.3.1"></a>`NGSIEvent`
+Assuming the following `NGSIEvent` is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
-    flume-event={
+    ngsi-event={
         headers={
 	         content-type=application/json,
 	         timestamp=1429535775,
 	         transactionId=1429535775-308-0000000000,
-	         ttl=10,
+	         correlationId=1429535775-308-0000000000,
 	         fiware-service=vehicles,
 	         fiware-servicepath=/4wheels,
-	         notified-entities=car1_car
-	         notified-servicepaths=/4wheels
-	         grouped-entities=car1_car
-	         grouped-servicepath=/4wheels
+	         <grouping_rules_interceptor_headers>,
+	         <name_mappings_interceptor_headers>
         },
         body={
 	        entityId=car1,
@@ -352,7 +350,7 @@ Use `NGSIMongoSink` if you are looking for a Json-based document storage not gro
 ####<a name="section2.3.1"></a>About batching
 As explained in the [programmers guide](#section3), `NGSIMongoSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
-What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same MongoDB collection. If processing the events one by one, we would need 100 inserts into MongoDB; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination MongoDB collection. In the worst case, the whole 100 entities will be about 100 different entities (100 different MongoDB collections), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
+What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 `NGSIEvent`s. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same MongoDB collection. If processing the events one by one, we would need 100 inserts into MongoDB; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination MongoDB collection. In the worst case, the whole 100 entities will be about 100 different entities (100 different MongoDB collections), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
 
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
@@ -392,7 +390,7 @@ Despite the old encoding will be deprecated in the future, it is possible to swi
 
     void persistBatch(Batch batch) throws Exception;
 
-A `Batch` contains a set of `CygnusEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the MongoDB collection where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `MongoBackend` implementation.
+A `Batch` contains a set of `NGSIEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the MongoDB collection where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `MongoBackend` implementation.
 
     public void start();
 

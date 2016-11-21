@@ -2,14 +2,14 @@
 Content:
 
 * [Functionality](#section1)
-    * [Mapping NGSI events to flume events](#section1.1)
-    * [Mapping Flume events to Carto data structures](#section1.2)
+    * [Mapping NGSI events to `NGSIEvent` objects](#section1.1)
+    * [Mapping `NGSIEvent`s to Carto data structures](#section1.2)
         * [PostgreSQL databases and schemas naming conventions](#section1.2.1)
         * [PostgreSQL tables naming conventions](#section1.2.2)
         * [Raw-based storing](#section1.2.3)
         * [Distance-based storing](#section1.2.4)
     * [Example](#section1.3)
-        * [Flume event](#section1.3.1)
+        * [`NGSIEvent`](#section1.3.1)
         * [Table names](#section1.3.2)
         * [Raw-based storing](#section1.3.3)
         * [Distance-based storing](#section1.3.4)
@@ -32,21 +32,21 @@ Content:
 ##<a name="section2"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSICartoDBSink`, or simply `NGSICartoDBSSink` is a cygnus-ngsi sink designed to persist NGSI-like context data events within [Carto](https://carto.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
-Independently of the data generator, NGSI context data is always transformed into internal Flume events at cygnus-ngsi sources. In the end, the information within these Flume events must be mapped into specific Carto data structures at the Cygnus sinks.
+Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at cygnus-ngsi sources. In the end, the information within these events must be mapped into specific Carto data structures at the Cygnus sinks.
 
 Next sections will explain this in detail.
 
 [Top](#top)
 
-###<a name="section1.1"></a>Mapping NGSI events to flume events
-Notified NGSI events (containing context data) are transformed into Flume events (such an event is a mix of certain headers and a byte-based body), independently of the NGSI data generator or the final backend where it is persisted.
+###<a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
+Notified NGSI events (containing context data) are transformed into `NGSIEvent` objects (for each context element a `NGSIEvent` is created; such an event is a mix of certain headers and a `ContextElement` object), independently of the NGSI data generator or the final backend where it is persisted.
 
-This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
+This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_rest_handler.md). Once translated, the data (now, as `NGSIEvent` objects) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
-###<a name="section1.2"></a>Mapping Flume events to Carto data structures
-Carto is based on [PostgreSQL](http://www.postgresql.org/) and [PostGIS](http://postgis.net/) extensions. It organizes the data in databases (one per organization), schemas (one per user within an organization) and tables (a schema may have one or more tables). Such organization is exploited by `NGSICartoDBSink` each time a Flume event is going to be persisted.
+###<a name="section1.2"></a>Mapping `NGSIEvent`s to Carto data structures
+Carto is based on [PostgreSQL](http://www.postgresql.org/) and [PostGIS](http://postgis.net/) extensions. It organizes the data in databases (one per organization), schemas (one per user within an organization) and tables (a schema may have one or more tables). Such organization is exploited by `NGSICartoDBSink` each time a `NGSIEvent` is going to be persisted.
 
 [Top](#top)
 
@@ -79,7 +79,7 @@ The following table summarizes the table name composition:
 | `/` | `x002f` | `x002fxffff<entityId>xffff<entityType>[xffffdistance]` |
 | `/<svcPath>` | `x002fxffff<svcPath>[xffffdistance]` | `x002fxffff<svcPath>xffff<entityId>xffff<entityType>[xffffdistance]` |
 
-Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the Flume event. 
+Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`. 
 
 [Top](#top)
 
@@ -139,21 +139,19 @@ Different than the raw-based storing, Cygnus is able to create by itself the tab
 [Top](#top)
 
 ###<a name="section1.3"></a>Example
-####<a name="section1.3.1"></a>Flume event
-Assuming the following Flume event is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
+####<a name="section1.3.1"></a>`NGSIEvent`
+Assuming the following `NGSIEvent` is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
-    flume-event={
+    ngsi-event={
         headers={
 	         content-type=application/json,
 	         timestamp=1429535775,
 	         transactionId=1429535775-308-0000000000,
-	         ttl=10,
+	         correlationId=1429535775-308-0000000000,
 	         fiware-service=vehicles,
 	         fiware-servicepath=/4wheels,
-	         notified-entities=car1_car
-	         notified-servicepaths=/4wheels
-	         grouped-entities=car1_car
-	         grouped-servicepath=/4wheels
+	         <grouping_rules_interceptor_headers>,
+	         <name_mappings_interceptor_headers>
         },
         body={
 	        entityId=car1,
@@ -485,7 +483,7 @@ Different than other NGSI sinks, where a single authorized user is able to creat
 ####<a name="section2.3.3"></a>Batching
 As explained in the [programmers guide](#section3), `NGSICartoDBSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
-What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of inserts is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same Carto table. If processing the events one by one, we would need 100 inserts in Carto; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination Carto table. In the worst case, the whole 100 entities will be about 100 different entities (100 different Carto destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
+What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of inserts is dramatically reduced. Let's see an example, let's assume a batch of 100 `NGSIEvent`s. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same Carto table. If processing the events one by one, we would need 100 inserts in Carto; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination Carto table. In the worst case, the whole 100 entities will be about 100 different entities (100 different Carto destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
 
 The batching mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
@@ -533,7 +531,19 @@ You can get more information at [NGSIv2](http://telefonicaid.github.io/fiware-or
 
 ##<a name="section3"></a>Programmers guide
 ###<a name="section3.1"></a>`NGSICartoDBSink` class
-Coming soon.
+As any other NGSI-like sink, `NGSICartoDBSink ` extends the base `NGSISink`. The methods that are extended are:
+
+    void persistBatch(Batch batch) throws Exception;
+
+A `Batch` contains a set of `NGSIEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the CartoDB table where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `CartoDBBackend` implementation.
+
+    public void start();
+
+An implementation of `CartoDBBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSICartoDBSink()` (contructor), `configure()` and `start()`.
+
+    public void configure(Context);
+
+A complete configuration as the described above is read from the given `Context` instance.
 
 [Top](#top)
 
