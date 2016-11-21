@@ -129,7 +129,7 @@ notification={
 }
 ```
 
-As can be seen, two entities (`suite.12` and `other.9`) of the same type (`room`) within the same FIWARE service (`hotel`) but different service paths (`/suites` and `/other`) are notified. `NGSIRestHandler` will crate two `NGSIEvent`'s:
+As can be seen, two entities (`suite.12` and `other.9`) of the same type (`room`) within the same FIWARE service (`hotel`) but different service paths (`/suites` and `/other`) are notified. `NGSIRestHandler` will create two `NGSIEvent`'s:
 
 
 ```

@@ -12,7 +12,7 @@ Content:
 
 ##<a name="section1"></a>Functionality
 ###<a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
-This section explains how a notified NGSI event (a http message containing headers and payloa) is used to crate a `NGSIEvent` object, suitable for being consumed by any of the Cygnus sinks, thanks to `NGSIRestHandler`.
+This section explains how a notified NGSI event (a http message containing headers and payload) is used to create a `NGSIEvent` object, suitable for being consumed by any of the Cygnus sinks, thanks to `NGSIRestHandler`.
 
 It is necessary to remark again this handler is designed for being used by `HttpSource`, the native component of Apache Flume. An http message containing a NGSI-like notification will be received by `HttpSource` and passed to `NGSIRestHandler` in order to create one or more `NGSIEvent` objects (one per notified context element) to be put in a sink's channel (mainly, these channels are objects in memory, but could be files).
 
@@ -24,7 +24,7 @@ As can be seen, there is a quasi-direct translation among http messages and `NGS
 |---|---|
 | `Fiware-Service` header | `fiware-service` header |
 | `Fiware-ServicePath` header | `fiware-servicepath` header |
-| `Fiware-Correlator` header | `fiware-correlator` header. If this header is not sent, the `fiware-correlator` is equals to the `transcation-id` header. |
+| `Fiware-Correlator` header | `fiware-correlator` header. If this header is not sent, the `fiware-correlator` is equals to the `transaction-id` header. |
 || `transaction-id` header (internally added) |
 | any other header | discarded |
 | payload | `ContextElement` object containing the parsed version of the payload |
@@ -66,7 +66,7 @@ notification={
 }
 ```
 
-As can be seen, two entities (`suite.12` and `other.9`) of the same type (`room`) within the same FIWARE service (`hotel`) but different service paths (`/suites` and `/other`) are notified. `NGSIRestHandler` will crate two `NGSIEvent`'s:
+As can be seen, two entities (`suite.12` and `other.9`) of the same type (`room`) within the same FIWARE service (`hotel`) but different service paths (`/suites` and `/other`) are notified. `NGSIRestHandler` will create two `NGSIEvent`'s:
 
 
 ```
