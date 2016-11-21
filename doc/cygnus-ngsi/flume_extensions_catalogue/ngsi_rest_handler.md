@@ -2,9 +2,8 @@
 Content:
 
 * [Functionality](#section1)
-    * [Mapping NGSI events to flume events](#section1.1)
-    * [Additional headers added by Flume interceptors](#section1.2)
-    * [Example](#section1.3)
+    * [Mapping NGSI events to `NGSIEvent` objects](#section1.1)
+    * [Example](#section1.2)
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Accepted character set](#section2.2)
@@ -12,116 +11,103 @@ Content:
     * [`NGSIRestHandler` class](#section3.1)
 
 ##<a name="section1"></a>Functionality
-###<a name="section1.1"></a>Mapping NGSI events to flume events
-This section explains how a notified NGSI event (an http message) containing context data is converted into a Flume event (an object in memory or a file), suitable for being consumed by any of the Cygnus sinks, thanks to `NGSIRestHandler`.
+###<a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
+This section explains how a notified NGSI event (a http message containing headers and payloa) is used to crate a `NGSIEvent` object, suitable for being consumed by any of the Cygnus sinks, thanks to `NGSIRestHandler`.
 
-It is necessary to remark again this handler is designed for being used by `HttpSource`, the native component of Apache Flume. An http message containing a NGSI-like notification will be received by `HttpSource` and passed to `NGSIRestHandler` in order to create one, and only one, Flume event object to be put in a sink's channel (mainly, these channels are objects in memory, or files).
+It is necessary to remark again this handler is designed for being used by `HttpSource`, the native component of Apache Flume. An http message containing a NGSI-like notification will be received by `HttpSource` and passed to `NGSIRestHandler` in order to create one or more `NGSIEvent` objects (one per notified context element) to be put in a sink's channel (mainly, these channels are objects in memory, but could be files).
 
-On the one hand, the http message containing the NGSI-like notification will be composed of a set of http headers, and a payload. On the other hand, a Flume event object is composed of a set of headers, and a body. As can be seen, there is a quasi-direct translation among http message and Flume event object:
+On the one hand, the http message containing the NGSI-like notification will be composed of a set of http headers, and a payload. On the other hand, the `NGSIEvent` objects are composed of a set of headers as well and an object of type `ContextElement` containing the already parsed version of the context elements within the notification; this parsed version of the notified body is ready for being consumed by other components in the agent architecture, such as interceptors or sinks, thus parsing is just made once.
 
-| http message | Flume event object |
+As can be seen, there is a quasi-direct translation among http messages and `NGSIEvent` objects:
+
+| http message | `NGSIEvent` object |
 |---|---|
-| `Content-Type` header | `content-type` header (discarded from 0.14.0) |
 | `Fiware-Service` header | `fiware-service` header |
 | `Fiware-ServicePath` header | `fiware-servicepath` header |
-| `Fiware-Correlator` header | `fiware-correlator` header |
+| `Fiware-Correlator` header | `fiware-correlator` header. If this header is not sent, the `fiware-correlator` is equals to the `transcation-id` header. |
+|| `transaction-id` header (internally added) |
 | any other header | discarded |
-| payload | body |
+| payload | `ContextElement` object containing the parsed version of the payload |
 
-All the FIWARE headers are added to the Flume event object if notified. If not, default values are used (it is the case of `fiware-service` and `fiware-servicepath`, which take the configured value of `default_service` and `default_service_path` respectively, see below the configuration section) or auto-generated (it is the case of `fiware-correlator`).
+All the FIWARE headers are added to the `NGSIEvent` object if notified. If not, default values are used (it is the case of `fiware-service` and `fiware-servicepath`, which take the configured value of `default_service` and `default_service_path` respectively, see below the configuration section) or auto-generated (it is the case of `fiware-correlator`, whose value is the same than `transaction-id`).
 
-In addition to the `fiware-correlator`, a `transaction-id` is created for internally identify a complete Cygnus transaction, i.e. starting at the source when the context data is notified, and finishing in the sink, where such data is finally persisted. If `Fiware-Correlator` header is not notified, then `fiware-correlator` and `transactionid` get the same auto-generated value.
+As already introduced, in addition to the `fiware-correlator`, a `transaction-id` is created for internally identify a complete Cygnus transaction, i.e. starting at the source when the context data is notified, and finishing in the sink, where such data is finally persisted. If `Fiware-Correlator` header is not notified, then `fiware-correlator` and `transactionid` get the same auto-generated value.
 
-[Top](#top)
-
-###<a name="section1.2"></a>Additional headers added by Flume interceptors
-Despite all the details about interceptors used in Cygnus are widely documented [here](./grouping_interceptor.md), it is worth reminding that:
-
-* An interceptor is a piece of code in charge of "intercepting" events before they are put in the sink's channel and modifying them by adding/removing/modifying a header.
-* A `timestamp` header is added by the native `TimestampInterceptor`. It is expressed as a Unix time.
-* A `notified-entities` header is added by the custom `GroupingInterceptor`. This header contains one <i>default destination</i> per each notified context element. It is used by the sinks when the grouping rules are not enabled.
-* A `grouped-entities` header is added by the custom `GroupingInterceptor`. This header contains one <i>grouped destination</i> per each notified context element. It is used by the sinks when the grouping rules are enabled.
-* A `grouped-servicepath` header is added by the custom `GroupingInterceptor`. This header contains one <i>grouped service path</i> per each notified context element. It is used by the sinks when the grouping rules are enabled.
+Finally, it must be said the `NGSIEVent` contains another field, of type `ContextElement` as well, in order the `NGSINameMappingsInterceptor` add a mapped version of the original context element added by this handler.
 
 [Top](#top)
 
-###<a name="section1.3"></a>Example
-A NGSI-like event example could be (the code below is an <i>object representation</i>, not any real data format; look for it at [Orion documentation](https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Publish/Subscribe_Broker_-_Orion_Context_Broker_-_User_and_Programmers_Guide#ONCHANGE)):
+###<a name="section1.2"></a>Example
+Let's assume the following not-intercepted event regarding a received notification (the code below is an <i>object representation</i>, not any real data format):
 
-    ngsi-event={
-        http-headers={
-            Content-Length: 492
-            Host: localhost:1028
-            Accept: application/json
-            Content-Type: application/json
-            Fiware-Service: vehicles
-            Fiware-ServicePath: /4wheels
-            Fiware-Correlator: ABCDEF1234567890
-        },
-        payload={
-            {
-                "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
-                "originator" : "localhost",
-                "contextResponses" : [
-                    {
-                        "contextElement" : {
-                        "attributes" : [
-                            {
-                                "name" : "speed",
-                                "type" : "float",
-                                "value" : "112.9",
-                                "metadatas": []
-                            },
-                            {
-                                "name" : "oil_level",
-                                "type" : "float",
-                                "value" : "74.6",
-                                "metadatas": []
-                            }
-                        ],
-                        "type" : "car",
-                        "isPattern" : "false",
-                        "id" : "car1"
-                    },
-                    "statusCode" : {
-                        "code" : "200",
-                        "reasonPhrase" : "OK"
-                    }
-                ]
-            }
-        }
-    }
+```
+notification={
+   headers={
+	   fiware-service=hotel1,
+	   fiware-servicepath=/other,/suites,
+	   correlation-id=1234567890-0000-1234567890
+   },
+   body={
+      {
+	      entityId=suite.12,
+	      entityType=room,
+	      attributes=[
+	         ...
+	      ]
+	   },
+	   {
+	      entityId=other.9,
+	      entityType=room,
+	      attributes=[
+	         ...
+	      ]
+	   }
+	}
+}
+```
 
-As said, Flume events are not much more different than the above representation: there is a set of headers and a body. This is an advantage, since allows for a quick translation between formats. The equivalent <i>object representation</i> (not any real data format) for such a notified NGSI event could be the following Flume event:
+As can be seen, two entities (`suite.12` and `other.9`) of the same type (`room`) within the same FIWARE service (`hotel`) but different service paths (`/suites` and `/other`) are notified. `NGSIRestHandler` will crate two `NGSIEvent`'s:
 
-    flume-event={
-        headers={
-	         timestamp=1429535775,
-	         transaction-id=0123456789ABCDEF,
-	         fiware-correlator=ABCDEF1234567890,
-	         fiware-service=vehicles,
-	         fiware-servicepath=/4wheels,
-	         notified-entities=car1_car,
-	         grouped-entities=cars,
-	         grouped-servicepath=/mycars
-        },
-        body={
-	         entityId=car1,
-	         entityType=car,
-	         attributes=[
-	             {
-	                  attrName=speed,
-	                  attrType=float,
-	                  attrValue=112.9
-	             },
-	             {
-	                  attrName=oil_level,
-	                  attrType=float,
-	                  attrValue=74.6
-	             }
-	         ]
-	     }
-    }
+
+```
+ngsi-event-1={
+   headers={
+	   fiware-service=hotel,
+	   fiware-servicepath=/suites,
+	   transaction-id=1234567890-0000-1234567890,
+	   correlation-id=1234567890-0000-1234567890,
+	   timestamp=1234567890,
+	   mapped-fiware-service=hotel
+	   mapped-fiware-service-path=/suites
+	},
+   original-context-element={
+	   entityId=suite.12,
+	   entityType=room,
+	   attributes=[
+	      ...
+	   ]
+	}
+}
+    
+ngsi-event-2={
+   headers={
+	   fiware-service=hotel,
+	   fiware-servicepath=/other,
+	   transaction-id=1234567890-0000-1234567890,
+	   correlation-id=1234567890-0000-1234567890,
+	   timestamp=1234567890,
+	   mapped-fiware-service=hotel
+	   mapped-fiware-service-path=/other
+   },
+   original-context-element={
+	   entityId=other.9,
+	   entityType=room,
+	   attributes=[
+	      ...
+	   ]
+	}
+}
+```
 
 [Top](#top)
 

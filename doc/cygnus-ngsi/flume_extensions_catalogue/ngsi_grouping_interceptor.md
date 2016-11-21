@@ -10,16 +10,21 @@ Content:
     * [Management Interface related operations](#section2.2)
 
 ##<a name="section1"></a>Functionality
-This is a custom Interceptor specifically designed for Cygnus. Its goal is to infer the destination entity where the data regarding a notified entity is going to be persisted. This destination entity, depending on the used sinks, may be a HDFS file name, a MySQL table name or a CKAN resource name. In addition, a new `fiware-servicePath` containing the destination entity may be configured; for instance, in case of HDFS, this is a folder; in case of CKAN this is a package; in case of MySQL this is simply a prefix for the table name.
+This is a custom Interceptor specifically designed for Cygnus. Its purpose is to alter an original `NGSIEvent` object (which comes from a NGSI notification handled by [`NGSIRestHandler`](./ngsi_rest_handler.md)) by inferring the destination entity where the data regarding a notified entity is going to be persisted. This destination entity, depending on the used sinks, may be a HDFS file name, a MySQL table name or a CKAN resource name. In addition, a new `fiware-servicePath` containing the destination entity may be configured; for instance, in case of HDFS, this is a folder; in case of CKAN this is a package; in case of MySQL this is simply a prefix for the table name.
 
-Such an inference is made by inspecting (but not modifying) certain configured fields of the body part of the event; if the concatenation of such fields matches a configured regular expression, then the configured destination entity is added as the value of a `destination` header. The already existing `fiware-servicePath` header may be substituted as well by the configured new service path.
+Such an inference is made by inspecting (but not modifying) certain configured fields within the `ContextElement` object of the `NGSIEvent`; if the concatenation of such fields matches a configured regular expression, then:
 
-If a notified entity contains more than one context response, then both the `destination` and the `fiware-servicePath` headers contains a comma-separated list of values.
+* The configured destination entity is added as the value of a `grouped-entity` header.
+* The configured destination FIWARE service path is added as the value of a `grouped-servicepath` header.
+
+Additionally, a `notified-entity` header is added containing the concatenation of the original entity ID and type.
+
+This way, those sinks having enabled the grouping rules will use both the `grouped-entity` and the `grouped-servicepath` headers. If not, i.e. the original notification is aimed to be used, then the `notified-entity` and the `fiware-servicepath` headers will be used.
 
 [Top](#top)
 
 ###<a name="section1.1"></a>Grouping rules syntax
-There exists a <i>grouping rules</i> file containing Json-like <i>rules</i> definition, following this format:
+There exists a file containing Json-like <i>rules</i> definition, following this format:
 
     {
         "grouping_rules": [
@@ -79,9 +84,9 @@ Let's assume these rules:
                     "entityId",
                     "entityType"
                 ],
-                "regex": "Room\\.(\\d*)Room",
-                "destination": "numeric_rooms",
-                "fiware_service_path": "/rooms"
+                "regex": "other\\.(\\d*)room",
+                "destination": "all_other",
+                "fiware_service_path": "/other"
             },
             {
                 "id": 2,
@@ -89,95 +94,131 @@ Let's assume these rules:
                     "entityId",
                     "entityType"
                 ],
-                "regex": "Room\\.(\\D*)Room",
-                "destination": "character_rooms",
-                "fiware_service_path": "/rooms"
-            },
-            {
-                "id": 3,
-                "fields": [
-                    "entityType",
-                    "entityId"
-                ],
-                "regex": "RoomRoom\\.(\\D*)",
-                "destination": "character_rooms",
-                "fiware_service_path": "/rooms"
-            },
-            {
-                "id": 4,
-                "fields": [
-                    "entityType"
-                ],
-                "regex": "Room",
-                "destination": "other_rooms",
-                "fiware_service_path": "/rooms"
+                "regex": "suite\\.(\\D*)room",
+                "destination": "all_suites",
+                "fiware_service_path": "/suites"
             }
         ]
     }
 
-The above rules set that:
-
-* All the `Room` entities having their identifiers composed by a `Room.` and an integer (e.g. `Room.12`) will be persisted in a `numeric_rooms` destination within a `rooms` service path (in the example, the concatenation is equals to `Room.12Room`).
-* All the `Room` entities having their identifiers composed by a `Room.` and any number of characters (no digits) (e.g. `Room.left`) will be persisted in a `character_rooms` destination within a `rooms` service path (in the example, the concatenation is equals to `Room.leftRoom` when applying rule number 2, but `RoomRoom.left` when applying rule number 3; nevertheless, from a semantic point of view they are the same rule).
-* All other rooms will go to `other_rooms` destination within a `rooms` service path.
-
 Now, let's assume the following not-intercepted event regarding a received notification (the code below is an <i>object representation</i>, not any real data format):
 
-    flume-event={
-        headers={
-	         fiware-service=hotel,
-	         fiware-servicepath=/allrooms,/allrooms,
-	         transaction-id=1234567890-0000-1234567890,
-	         correlation-id=1234567890-0000-1234567890
-        },
-        body=[
-           {
-	            entityId=Room.12,
-	            entityType=Room.left,
-	            attributes=[
-	                ...
-	            ]
-	        },
-	        {
-	            entityId=Room2,
-	            entityType=Room,
-	            attributes=[
-	                ...
-	            ]
-	        }
-	    ]
-    }
+```
+notification={
+   headers={
+	   fiware-service=hotel1,
+	   fiware-servicepath=/other,/suites,
+	   correlation-id=1234567890-0000-1234567890
+   },
+   body={
+      {
+	      entityId=suite.12,
+	      entityType=room,
+	      attributes=[
+	         ...
+	      ]
+	   },
+	   {
+	      entityId=other.9,
+	      entityType=room,
+	      attributes=[
+	         ...
+	      ]
+	   }
+	}
+}
+```
 
-As can be seen, two entities (`Room1` and `Room2`) of the same type (`Room`) within the same FIWARE service (`hotel`) and service paths (`/allrooms` for both of them) are notified. Once intercepted, this how the event should look like (the code below is an <i>object representation</i>, not any real data format):
+As can be seen, two entities (`suite.12` and `other.9`) of the same type (`room`) within the same FIWARE service (`hotel`) but different service paths (`/suites` and `/other`) are notified. `NGSIRestHandler` will crate two `NGSIEvent`'s:
 
-    flume-event={
-        headers={
-	         fiware-service=hotel,
-	         fiware-servicepath=/allrooms,/allrooms,
-	         transaction-id=1234567890-0000-1234567890,
-	         correlation-id=1234567890-0000-1234567890,
-	         timestamp=1234567890,
-	         notified-entities=Room.12=Room,Room.left=Room,
-	         grouped-entities=numeric-rooms,character-rooms
-	         grouped-servicepaths=/rooms,/rooms
-        },
-        body=[
-           {
-	            entityId=Room.12,
-	            entityType=Room.left,
-	            attributes=[
-	                ...
-	            ]
-	        },
-	        {
-	            entityId=Room2,
-	            entityType=Room,
-	            attributes=[
-	                ...
-	            ]
-	        }
-	    ]
-    }
+
+```
+ngsi-event-1={
+   headers={
+	   fiware-service=hotel,
+	   fiware-servicepath=/suites,
+	   transaction-id=1234567890-0000-1234567890,
+	   correlation-id=1234567890-0000-1234567890,
+	   timestamp=1234567890,
+	   mapped-fiware-service=hotel,
+	   mapped-fiware-service-path=/suites
+	},
+   original-context-element={
+	   entityId=suite.12,
+	   entityType=room,
+	   attributes=[
+	      ...
+	   ]
+	},
+	mapped-context-element=null
+}
+    
+ngsi-event-2={
+   headers={
+	   fiware-service=hotel,
+	   fiware-servicepath=/other,
+	   transaction-id=1234567890-0000-1234567890,
+	   correlation-id=1234567890-0000-1234567890,
+	   timestamp=1234567890,
+	   mapped-fiware-service=hotel,
+	   mapped-fiware-service-path=/other
+   },
+   original-context-element={
+	   entityId=other.9,
+	   entityType=room,
+	   attributes=[
+	      ...
+	   ]
+	},
+	mapped-context-element=null
+}
+```
+
+Once intercepted, the above events will look like this (the code below is an <i>object representation</i>, not any real data format):
+
+```
+intercepted-ngsi-event-1={
+   headers={
+	   fiware-service=hotel,
+	   fiware-servicepath=/suites,
+	   transaction-id=1234567890-0000-1234567890,
+	   correlation-id=1234567890-0000-1234567890,
+	   timestamp=1234567890,
+	   grouped-entity=all_suites,
+	   grouped-servicepath=/suites,
+	   notified-entity=suite.12_room
+	},
+	original-context-element={
+	   entityId=suite.12,
+	   entityType=room,
+	   attributes=[
+	      ...
+	   ]
+	},
+	mapped-context-element=null
+}
+    
+intercepted-ngsi-event-2={
+   headers={
+	   fiware-service=hotel,
+	   fiware-servicepath=/other,
+	   transaction-id=1234567890-0000-1234567890,
+	   correlation-id=1234567890-0000-1234567890,
+	   timestamp=1234567890,
+	   grouped-entity=all_other,
+	   grouped-servicepath=/other,
+	   notified-entity=other.9_room
+   },
+   original-context-element={
+      entityId=other.9,
+      entityType=room,
+      attributes=[
+	      ...
+	   ]
+	},
+   mapped-context-element=null
+}
+```
 
 [Top](#top)
 
@@ -188,12 +229,14 @@ As can be seen, two entities (`Room1` and `Room2`) of the same type (`Room`) wit
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
 | grouping\_rules\_conf\_file | yes | N/A | It is <b>very important</b> to configure the <b>absolute path to the grouping rules file</b>. The grouping rules file is usually placed at `[FLUME_HOME_DIR]/conf/`, and there exists a template within Cygnus distribution. |
+| enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. |
 
 A configuration example could be:
 
     cygnus-ngsi.sources.http-source.interceptors = gi <other-interceptors>
     cygnus-ngsi.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
     cygnus-ngsi.sources.http-source.interceptors.gi.grouping_rules_conf_file = [FLUME_HOME_DIR]/conf/grouping_rules.conf
+    cygnus-ngsi.sources.http-source.interceptors.gi.enable_encoding = false
 
 [Top](#top)
 
