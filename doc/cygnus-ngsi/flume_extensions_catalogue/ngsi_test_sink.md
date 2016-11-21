@@ -2,8 +2,8 @@
 Content:
 
 * [Functionality](#section1)
-    * [Mapping NGSI events to flume events](#section1.1)
-    * [Mapping Flume events to logs](#section1.2)
+    * [Mapping NGSI events to `NGSIEvent` objects](#section1.1)
+    * [Mapping `NGSIEvent`s to logs](#section1.2)
     * [Example](#section1.3)
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
@@ -14,56 +14,55 @@ Content:
 ##<a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSITestSink`, or simply `NGSITestSink` is a sink designed to test Cygnus when receiving NGSI-like context data events. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
-Independently of the data generator, NGSI context data is always transformed into internal Flume events at Cygnus sources. In the end, the information within these Flume events is not meant to be persisted at any real storage, but simply logged (depending on your `log4j` configuration, the logs will be printed in console, a file...).
+Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` Object at Cygnus sources. In the end, the information within these events is not meant to be persisted at any real storage, but simply logged (depending on your `log4j` configuration, the logs will be printed in console, a file...).
 
 Next sections will explain this in detail.
 
 [Top](#top)
 
-###<a name="section1.1"></a>Mapping NGSI events to flume events
-Notified NGSI events (containing context data) are transformed into Flume events (such an event is a mix of certain headers and a byte-based body), independently of the NGSI data generator or the final backend where it is persisted.
+###<a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
+Notified NGSI events (containing context data) are transformed into `NGSIEvent` objects (for each context element a `NGSIEvent` is created; such an event is a mix of certain headers and a `ContextElement` object), independently of the NGSI data generator or the final backend where it is persisted.
 
-This is done at the Cygnus Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](./ngsi_rest_handler.md). Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
+This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_rest_handler.md). Once translated, the data (now, as `NGSIEvent` objects) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
-###<a name="section1.2"></a>Mapping Flume events lo logs
+###<a name="section1.2"></a>Mapping `NGSIEvent`s lo logs
 The mapping is direct, converting the context data into strings to be written in console, or file...
 
 [Top](#top)
 
 ###<a name="section1.3"></a>Example
-Assuming the following Flume event is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
+####<a name="section1.3.1"></a>`NGSIEvent`
+Assuming the following `NGSIEvent` is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
-    flume-event={
+    ngsi-event={
         headers={
 	         content-type=application/json,
 	         timestamp=1429535775,
 	         transactionId=1429535775-308-0000000000,
-	         ttl=10,
+	         correlationId=1429535775-308-0000000000,
 	         fiware-service=vehicles,
-	         fiware-servicepath=4wheels,
-	         notified-entities=car1_car
-	         notified-servicepaths=4wheels
-	         grouped-entities=car1_car
-	         grouped-servicepath=4wheels
+	         fiware-servicepath=/4wheels,
+	         <grouping_rules_interceptor_headers>,
+	         <name_mappings_interceptor_headers>
         },
         body={
-	         entityId=car1,
-	         entityType=car,
-	         attributes=[
-	             {
-	                 attrName=speed,
-	                 attrType=float,
-	                 attrValue=112.9
-	             },
-	             {
-	                 attrName=oil_level,
-	                 attrType=float,
-	                 attrValue=74.6
-	             }
-	         ]
-	     }
+	        entityId=car1,
+	        entityType=car,
+	        attributes=[
+	            {
+	                attrName=speed,
+	                attrType=float,
+	                attrValue=112.9
+	            },
+	            {
+	                attrName=oil_level,
+	                attrType=float,
+	                attrValue=74.6
+	            }
+	        ]
+	    }
     }
 
 Assuming the log appender is the console, then `NGSITestSink` will log the data within the body as:
