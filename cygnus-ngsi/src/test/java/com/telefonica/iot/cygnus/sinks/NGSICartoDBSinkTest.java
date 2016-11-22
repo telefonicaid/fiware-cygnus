@@ -420,12 +420,12 @@ public class NGSICartoDBSinkTest {
     } // testConfigureEnableDistanceOK
     
     /**
-     * [NGSICartoDBSink.configure] -------- Configured 'enable_snapshot_raw' cannot be different than 'true' or 'false'.
+     * [NGSICartoDBSink.configure] -------- Configured 'enable_raw_snapshot' cannot be different than 'true' or 'false'.
      */
     @Test
     public void testConfigureEnableRawSnapshotOK() {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                + "-------- Configured 'enable_snapshot_raw' cannot be different than 'true' or 'false'");
+                + "-------- Configured 'enable_raw_snapshot' cannot be different than 'true' or 'false'");
         String apiKey = "1234567890abcdef";
         String backendMaxConns = null;
         String backendMaxConnsPerRoute = null;
