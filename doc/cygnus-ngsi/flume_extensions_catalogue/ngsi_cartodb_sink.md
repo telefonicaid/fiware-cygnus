@@ -8,11 +8,13 @@ Content:
         * [PostgreSQL tables naming conventions](#section1.2.2)
         * [Raw-based storing](#section1.2.3)
         * [Distance-based storing](#section1.2.4)
+        * [Raw snapshot-based storing](#section1.2.5)
     * [Example](#section1.3)
         * [`NGSIEvent`](#section1.3.1)
         * [Table names](#section1.3.2)
         * [Raw-based storing](#section1.3.3)
         * [Distance-based storing](#section1.3.4)
+        * [Raw snapshot-based storing](#section1.3.5)
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
@@ -66,7 +68,10 @@ The name of these tables depends on the configured data model and analysis mode 
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table.
 * Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
 
-The above applies both if `enable_raw` or `enable_distance` is set to `true`. In addition, the distance analysis mode adds the sufix `xffffdistance` to the table name.
+The above applies independently of the analysis modes enabled (`enable_raw`, `enable_distance` and `enable_raw_snapshot`). Nevertheless:
+
+* The distance analysis mode adds the sufix `xffffdistance` to the table name.
+* The raw snapshot analysis mode adds the sufix `xffffrawsnapshot` to the table name.
 
 Since based in [PostgreSQL](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. This leads to certain [encoding](#section2.3.4) is applied.
 
@@ -77,7 +82,7 @@ The following table summarizes the table name composition:
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
 |---|---|---|
 | `/` | `x002f` | `x002fxffff<entityId>xffff<entityType>[xffffdistance]` |
-| `/<svcPath>` | `x002fxffff<svcPath>[xffffdistance]` | `x002fxffff<svcPath>xffff<entityId>xffff<entityType>[xffffdistance]` |
+| `/<svcPath>` | `x002fxffff<svcPath>[xffffdistance|xffffrawsnapshot]` | `x002fxffff<svcPath>xffff<entityId>xffff<entityType>[xffffdistance]` |
 
 Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`. 
 
@@ -135,6 +140,14 @@ A single insert is composed for each notified entity, containing such insert the
 * `numStages`: Number of stages.
 
 Different than the raw-based storing, Cygnus is able to create by itself the tables used by the distance-based storing. The reason is columns of the tables are well known in advance.
+
+[Top](#top)
+
+####<a name="section1.2.5"></a>Raw snapshot-based storing
+This analysis mode works the same than the raw-based storing one, except for:
+
+* There is not a table per entity, but a table per FIWARE service path. In these sense, this analysis mode can be seen as always working with the `data_model` parameter set to `dm-by-service-path`.
+* The notified data is not added as a new record in the table, but it is used for updating an already existent record (of course, if there is no previous record for a give FIWARE service path, entity ID and entity type, the record is added to the table).
 
 [Top](#top)
 
@@ -387,6 +400,14 @@ curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsxfff
 
 [Top](#top)
 
+####<a name="section1.3.5"></a>Raw snapshot-based storing
+Everything equals to the raw-based storing, but:
+
+* The table name is `x002f4wheelsxffffcar1xffffcarxffffrawsnapshot`.
+* The data is inserted if the given FIWARE service path, entity ID and entity type are not present in the table; used for update otherwise.
+
+[Top](#top)
+
 ##<a name="section2"></a>Administration guide
 ###<a name="section2.1"></a>Configuration
 `NGSICartoDBSink` is configured through the following parameters:
@@ -403,6 +424,7 @@ curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsxfff
 | flip\_coordinates | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, the latitude and longitude values are exchanged. |
 | enable\_raw | no | true | <i>true</i> or <i>false</i>. If <i>true</i>, a raw based storage is done. |
 | enable\_distance | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, a distance based storage is done. |
+| enable\_raw\_snapshot | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, a raw snapshot based storage is done. |
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
@@ -425,6 +447,7 @@ cygnus-ngsi.sinks.cartodb-sink.keys_conf_file = /usr/cygnus/conf/cartodb_keys.co
 cygnus-ngsi.sinks.cartodb-sink.flip_coordinates = true
 cygnus-ngsi.sinks.cartodb-sink.enable_raw = true
 cygnus-ngsi.sinks.cartodb-sink.enable_distance = false
+cygnus-ngsi.sinks.cartodb-sink.enable_raw_snapshot = false
 cygnus-ngsi.sinks.cartodb-sink.data_model = dm-by-entity
 cygnus-ngsi.sinks.cartodb-sink.batch_size = 10
 cygnus-ngsi.sinks.cartodb-sink.batch_timeout = 5
@@ -466,6 +489,8 @@ The above is avoided by the distance-based storing, which provides pre-computed 
 * Which was the entity with the highest maximum velocity at this time instant?
 * Which is the largest stage an entity traveled?
 * etc.
+
+Finally, the raw snapshot storing simply geolocates an entity over time, without caring about the history.
 
 [Top](#top)
 
@@ -510,7 +535,7 @@ Cygnus applies this specific encoding tailored to Carto data structures:
 [Top](#top)
 
 ####<a name="section2.3.5"></a>About automatically creating the tables
-It has already been commented, but just a reminder: Cygnus does not automatically create the required tables for the raw-based mode. This is because the first notification regarding an entity could not contain the full list of such an entity's attributes, i.e. only the updated attributes could be being notified.
+It has already been commented, but just a reminder: Cygnus does not automatically create the required tables for the raw-based nor the raw snapshot-based mode. This is because the first notification regarding an entity could not contain the full list of such an entity's attributes, i.e. only the updated attributes could be being notified.
 
 On the contrary, the distance-based mode automatically creates the tables since the number and semantic of the table columns is always the same, and it is independent of the entity's attributes.
 
