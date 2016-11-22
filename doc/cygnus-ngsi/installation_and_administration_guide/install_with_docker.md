@@ -60,7 +60,7 @@ centos              6                   273a1eca2d3a        2 weeks ago         
 
 ##<a name="section3"></a>Using the image
 ###<a name="section3.1"></a>As it is
-The cygnus-ngsi image (either built from the scratch, either downloaded from hub.docker.com) allows running a Cygnus agent in charge of receiving NGSI-like notifications and persisting them into wide variety of storages: MySQL (Running in a  `iot-mysql` host), MongoDB and STH (running in a  `iot-mongo` host), CKAN (running in `iot-ckan` host) and HDFS (running in `iot-hdfs` host).
+The cygnus-ngsi image (either built from the scratch, either downloaded from hub.docker.com) allows running a Cygnus agent in charge of receiving NGSI-like notifications and persisting them into wide variety of storages: MySQL (Running in a  `iot-mysql` host), MongoDB and STH (running in a  `iot-mongo` host), CKAN (running in `iot-ckan` host), HDFS (running in `iot-hdfs` host) and Carto (a cloud service at `https://<your_user>.cartodb.com`).
 
 Start a container for this image by typing in a terminal:
 
@@ -174,11 +174,15 @@ As seen above, the default configuration distributed with the image is tied to c
     * The ssl for CKAN is `false` but can be changed through the CYGNUS_CKAN_SSL environment variable.
     * The api_key for CKAN is `` but can be changed through the CYGNUS_CKAN_API_KEY environment variable.
 * HDFS:
-    * It only workf for building historical context data in HDFS.
+    * It only works for building historical context data in HDFS.
     * The endpoint for HDFS is `iot-hdfs` but can be changed through the CYGNUS_HDFS_HOST environment variable.
     * The port for HDFS is `50070` but can be changed through the CYGNUS_HDFS_PORT environment variable.
     * The user for HDFS is `hdfs` but can be changed through the CYGNUS_HDFS_USER environment variable.
     * The token for HDFS is empty but can be set through the CYGNUS_HDFS_TOKEN environment variable
+* Carto:
+    * It only works for building historical context data in Carto.
+    * The user for Carto is `carto` but can be changed through the CYGNUS_CARTO_USER environment variable.
+    * The key for Carto is `carto` but can be changes through the CYGNUS_CARTO_KEY environment variable.
 * Log4j configuration file:
     * The logging level is `INFO` but can be changed through the CYGNUS_LOG_LEVEL environment variable.
     * The logging appender is `console` but can be changed through the CYGNUS_LOG_APPENDER environment variable.

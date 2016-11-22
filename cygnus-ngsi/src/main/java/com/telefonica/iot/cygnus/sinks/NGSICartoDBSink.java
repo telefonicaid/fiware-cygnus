@@ -204,7 +204,7 @@ public class NGSICartoDBSink extends NGSISink {
     private void initializeBackend() throws Exception {
         // Read the keys file
         String jsonStr = JsonUtils.readJsonFile(keysConfFile);
-        LOGGER.info("[" + this.getName() + "] Json containing CartoDB API keys has been read");
+        LOGGER.info("[" + this.getName() + "] Json containing CartoDB API keys has been read: " + jsonStr);
 
         // Parse the Json containing the keys
         JSONArray apiKeys = (JSONArray) JsonUtils.parseJsonString(jsonStr).get("cartodb_keys");
