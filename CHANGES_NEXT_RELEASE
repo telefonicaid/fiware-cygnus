@@ -14,3 +14,4 @@
 - [cygnus-ngsi][hardening] Document how Name Mappings behave in absence of a "newSomething" field (#1302)
 - [cygnus-ngsi][bug] Close BufferedReader used to read notifications (#1304)
 - [cygnus-ngsi][hardening] Deprecate Grouping Rules (#1182)
+- [cygnus-ngsi][feature] Add 'update' mode to NGSICKANSink (#1273)
