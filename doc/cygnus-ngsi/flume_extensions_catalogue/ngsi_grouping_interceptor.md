@@ -1,4 +1,6 @@
 #<a name="top"></a>NGSIGroupingInterceptor
+**IMPORTANT NOTE: from release 1.6.0, this feature is deprecated in favour of Name Mappings.**
+
 Content:
 
 * [Functionality](#section1)
