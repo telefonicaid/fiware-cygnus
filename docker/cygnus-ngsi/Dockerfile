@@ -50,7 +50,7 @@ ENV CYGNUS_CARTO_USER "carto"
 ENV CYGNUS_CARTO_KEY "carto"
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
-ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus"
+ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
 ENV GIT_REV_CYGNUS "master"
 # ENV GIT_REV_CYGNUS "mybranch"
