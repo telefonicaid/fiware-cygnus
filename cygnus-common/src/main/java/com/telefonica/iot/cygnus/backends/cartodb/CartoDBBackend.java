@@ -48,8 +48,19 @@ public interface CartoDBBackend {
      * @param withs
      * @param fields
      * @param rows
-     * @throws java.lang.Exception
+     * @throws Exception
      */
     void insert(String schema, String tableName, String withs, String fields, String rows) throws Exception;
+    
+    /**
+     * Updates the given fields with the given values.
+     * @param schema
+     * @param tableName
+     * @param sets
+     * @param where
+     * @return
+     * @throws Exception
+     */
+    boolean update(String schema, String tableName, String sets, String where) throws Exception;
     
 } // CartoDBBackend
