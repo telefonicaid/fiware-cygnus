@@ -106,4 +106,21 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
         } // if
     } // insert
     
+    @Override
+    public boolean update(String schema, String tableName, String sets, String where) throws Exception {
+        String query = "UPDATE " + schema + "." + tableName + " SET " + sets + " WHERE " + where;
+        String encodedQuery = URLEncoder.encode(query, "UTF-8");
+        String relativeURL = BASE_URL + encodedQuery + "&api_key=" + apiKey;
+        JsonResponse response = doRequest("GET", relativeURL, true, null, null);
+        
+        // check the status
+        if (response.getStatusCode() != 200) {
+            throw new CygnusPersistenceError("The query '" + query + "' could not be executed. CartoDB response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
+        } else {
+            int totalRows = ((Number) response.getJsonObject().get("total_rows")).intValue();
+            return totalRows == 1;
+        } // if else
+    } // update
+    
 } // CartoDBBackendImpl

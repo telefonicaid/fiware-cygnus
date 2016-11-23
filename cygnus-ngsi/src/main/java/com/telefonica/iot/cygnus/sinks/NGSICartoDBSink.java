@@ -50,6 +50,7 @@ public class NGSICartoDBSink extends NGSISink {
     private boolean flipCoordinates;
     private boolean enableRaw;
     private boolean enableDistance;
+    private boolean enableRawSnapshot;
     private int backendMaxConns;
     private int backendMaxConnsPerRoute;
     private HashMap<String, CartoDBBackendImpl> backends;
@@ -108,6 +109,10 @@ public class NGSICartoDBSink extends NGSISink {
     protected boolean getEnableRaw() {
         return enableRaw;
     } // getEnableRaw
+    
+    protected boolean getEnableSnapshotRaw() {
+        return enableRawSnapshot;
+    } // getEnableSnapshotRaw
     
     @Override
     public void configure(Context context) {
@@ -177,6 +182,18 @@ public class NGSICartoDBSink extends NGSISink {
             invalidConfiguration = true;
             LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_distance="
                     + enableDistanceStr + ") -- Must be 'true' or 'false'");
+        } // if else
+        
+        String enableRawSnapshotStr = context.getString("enable_raw_snapshot", "false");
+
+        if (enableRawSnapshotStr.equals("true") || enableRawSnapshotStr.equals("false")) {
+            enableRawSnapshot = enableRawSnapshotStr.equals("true");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_raw_snapshot="
+                    + enableRawSnapshotStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_raw_snapshot="
+                    + enableRawSnapshotStr + ") -- Must be 'true' or 'false'");
         } // if else
         
         backendMaxConns = context.getInteger("backend.max_conns", 500);
@@ -308,6 +325,10 @@ public class NGSICartoDBSink extends NGSISink {
                 
                 if (enableDistance) {
                     persistDistanceEvent(event);
+                } // if
+                
+                if (enableRawSnapshot) {
+                    rawUpdateEvent(event);
                 } // if
             } // for
 
@@ -636,6 +657,81 @@ public class NGSICartoDBSink extends NGSISink {
             } // if
         } // for
     } // persistDistanceEvent
+    
+    private void rawUpdateEvent(NGSIEvent event) throws Exception {
+        long recvTimeTs = event.getRecvTimeTs();
+        String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
+        String schema = buildSchemaName(event.getServiceForNaming(enableNameMappings));
+        String tableName = NGSICharsets.encodePostgreSQL(
+                event.getServicePathForNaming(enableGrouping, enableNameMappings))
+                + CommonConstants.CONCATENATOR + "rawsnapshot";
+
+        // Iterate on the context attribute and build both 'sets' and 'fields' and the 'rows' in a single loop
+        String sets = "";
+        String fields = "";
+        String rows = "";
+        
+        for (ContextAttribute ca : event.getOriginalCE().getAttributes()) {
+            String attrValue = ca.getContextValue(false);
+            String attrType = ca.getType();
+            String attrMetadata = ca.getContextMetadata();
+            ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(attrValue, attrType, attrMetadata,
+                    flipCoordinates);
+            String set;
+            String field;
+            String row;
+            
+            if (location.right) {
+                set = NGSIConstants.CARTO_DB_THE_GEOM + "=" + location.left;
+                field = NGSIConstants.CARTO_DB_THE_GEOM;
+                row = location.left;
+            } else {
+                set = ca.getName() + "='" + ca.getContextValue(false) + "',"
+                        + ca.getName() + "_md='" + ca.getContextMetadata() + "'";
+                field = ca.getName() + "," + ca.getName() + "_md";
+                row = "'" + ca.getContextValue(false) + "','" + ca.getContextMetadata() + "'";
+            } // if else
+            
+            if (sets.isEmpty()) {
+                sets = set;
+            } else {
+                sets += "," + set;
+            } // if else
+            
+            if (fields.isEmpty()) {
+                fields = "(" + NGSIConstants.RECV_TIME + "," + NGSIConstants.FIWARE_SERVICE_PATH + ","
+                        + NGSIConstants.ENTITY_ID + "," + NGSIConstants.ENTITY_TYPE + "," + field;
+            } else {
+                fields += "," + field;
+            } // if else
+            
+            if (rows.isEmpty()) {
+                rows = "('" + recvTime + "','" + event.getServicePathForData() + "','" + event.getOriginalCE().getId()
+                        + "','" + event.getOriginalCE().getType() + "'," + row;
+            } else {
+                rows += "," + row;
+            } // if else
+        } // for
+        
+        fields += ")";
+        rows += ")";
+        
+        // Update
+        String where = "fiwareServicePath='" + event.getServicePathForData()
+                + "' AND entityId='" + event.getOriginalCE().getId()
+                + "' AND entityType='" + event.getOriginalCE().getType() + "'";
+        LOGGER.info("[" + this.getName() + "] Updating data at NGSICartoDBSink. Schema (" + schema
+                + "), Table (" + tableName + "), Sets (" + sets + "), Where (" + where + ")");
+        boolean updated = backends.get(schema).update(schema, tableName, sets, where);
+        
+        if (!updated) {
+            // Insert
+            String withs = "";
+            LOGGER.info("[" + this.getName() + "] Inserting initial data at NGSICartoDBSink. Schema (" + schema
+                    + "), Table (" + tableName + "), Data (" + rows + ")");
+            backends.get(schema).insert(schema, tableName, withs, fields, rows);
+        } // if
+    } // rawUpdateEvent
     
     /**
      * Builds a schema name for CartoDB given a service.
