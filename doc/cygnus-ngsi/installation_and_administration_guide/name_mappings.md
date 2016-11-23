@@ -183,7 +183,7 @@ As seen, the Name Mappings feature is quite similar to the already existent grou
 |Plain Flume `Event`'s are intercepted, and `NGSIEvent`'s are put into the channel. Because the interceptor needs to parse the original notification, a `NGSIEvent` already contains the original notification parsed, and the mapped version of the original notification, <b>freeing the sinks to parse the notification</b>.|Plain Flume `Event`'s are intercepted, and plain `Event`'s are put into the channel. Thus, <b>the sinks must parse the notification</b>, despite the grouping interceptor already parsed it`.|
 |It is expected a `enable_content_mappings` feature is implemented in the future. Such a content mapping will take advantage of the already mapped version on the original notification within `NGSIEvent`'s.|Such a functionality is very hard to implement based on the current grouping interceptor code.|
 
-Most probably, the grouping rules feature is deprecated in future versions of Cygnus.
+**IMPORTANT NOTE: from release 1.6.0, Grouping Rules are deprecated in favour of Name Mappings. More details can be found [here](./deprecated_and_removed.md#section2.1).**
 
 [Top](#top)
 
