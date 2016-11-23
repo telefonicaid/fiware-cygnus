@@ -1,5 +1,5 @@
 #<a name="top"></a>Grouping Rules
-**IMPORTANT NOTE: from release 1.6.0, this feature is deprecated in favour of Name Mappings.**
+**IMPORTANT NOTE: from release 1.6.0, this feature is deprecated in favour of Name Mappings. More details can be found [here](./deprecated_and_removed.md).**
 
 Grouping rules are an advanced global feature of Cygnus. It is global because it is available for all NGSI sinks. They allow changing the notified <b>FIWARE service path</b> and the concatenation of <b>entity ID</b> and <b>entity type</b> (this is called the destination).
 
