@@ -270,14 +270,22 @@ public abstract class HttpBackend {
                 return null;
             } // if
             
+            // get the location header
+            Header locationHeader = null;
+            Header[] headers = httpRes.getHeaders("Location");
+            
+            if (headers.length > 0) {
+                locationHeader = headers[0];
+            } // if
+            
             if (httpRes.getHeaders("Content-Type").length == 0) {
                 return new JsonResponse(null, httpRes.getStatusLine().getStatusCode(),
-                    httpRes.getStatusLine().getReasonPhrase(), null);
+                    httpRes.getStatusLine().getReasonPhrase(), locationHeader);
             } // if
             
             if (!httpRes.getHeaders("Content-Type")[0].getValue().contains("application/json")) {
                 return new JsonResponse(null, httpRes.getStatusLine().getStatusCode(),
-                    httpRes.getStatusLine().getReasonPhrase(), null);
+                    httpRes.getStatusLine().getReasonPhrase(), locationHeader);
             } // if
             
             LOGGER.debug("Http response status line: " + httpRes.getStatusLine().toString());
@@ -311,14 +319,6 @@ public abstract class HttpBackend {
                 } // if
             } // if
 
-            // get the location header
-            Header locationHeader = null;
-            Header[] headers = httpRes.getHeaders("Location");
-            
-            if (headers.length > 0) {
-                locationHeader = headers[0];
-            } // if
-            
             // return the result
             return new JsonResponse(jsonPayload, httpRes.getStatusLine().getStatusCode(),
                     httpRes.getStatusLine().getReasonPhrase(), locationHeader);
