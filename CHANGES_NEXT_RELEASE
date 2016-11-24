@@ -16,3 +16,4 @@
 - [cygnus-ngsi][hardening] Deprecate Grouping Rules (#1182)
 - [cygnus-ngsi][feature] Add raw snapshot analysis mode to NGSICKANSink (#1273)
 - [cygnus-ngsi][bug] Fix getting location header when creating Json responses in HttpBackend (#1318)
+- [cygnus-ngsi][hardening] Improve HDFSBackendImplREST debug logs (#1319)
