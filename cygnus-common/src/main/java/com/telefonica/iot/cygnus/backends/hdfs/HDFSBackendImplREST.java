@@ -76,7 +76,7 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
         
         // add the OAuth2 token as a the unique header that will be sent
         if (oauth2Token != null && oauth2Token.length() > 0) {
-            headers = new ArrayList<Header>();
+            headers = new ArrayList<>();
             headers.add(new BasicHeader("X-Auth-Token", oauth2Token));
             headers.add(new BasicHeader("Content-Type", "text/plain; charset=utf-8"));
         } else {
@@ -92,10 +92,16 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
 
         // check the status
         if (response.getStatusCode() != 200) {
+            LOGGER.debug("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + dirPath + " directory could not be created in HDFS. Server response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
             throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
                     + dirPath + " directory could not be created in HDFS. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
+        
+        LOGGER.debug("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + dirPath + " directory was created in HDFS");
     } // createDir
     
     @Override
@@ -107,10 +113,16 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
         
         // check the status
         if (response.getStatusCode() != 307) {
+            LOGGER.debug("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + filePath + " file could not be created in HDFS. Server response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
             throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
                     + filePath + " file could not be created in HDFS. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
+        
+        LOGGER.debug("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + filePath + " file was created in HDFS");
         
         // get the redirection location
         Header header = response.getLocationHeader();
@@ -118,7 +130,7 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
 
         // do second step
         if (headers == null) {
-            headers = new ArrayList<Header>();
+            headers = new ArrayList<>();
         } // if
         
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
@@ -126,10 +138,16 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
     
         // check the status
         if (response.getStatusCode() != 201) {
+            LOGGER.debug("/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + filePath + " file created in HDFS, but could not write the data. Server response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
             throw new CygnusPersistenceError("/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
                     + filePath + " file created in HDFS, but could not write the data. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
+        
+        LOGGER.debug("Data was written in /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + filePath);
     } // createFile
     
     @Override
@@ -140,10 +158,16 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
 
         // check the status
         if (response.getStatusCode() != 307) {
+            LOGGER.debug("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + filePath + " file seems to not exist in HDFS. Server response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
             throw new CygnusPersistenceError("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
                     + filePath + " file seems to not exist in HDFS. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
+        
+        LOGGER.debug("The /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + filePath + " file was found in HDFS");
 
         // get the redirection location
         Header header = response.getLocationHeader();
@@ -151,7 +175,7 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
 
         // do second step
         if (headers == null) {
-            headers = new ArrayList<Header>();
+            headers = new ArrayList<>();
         } // if
 
         headers.add(new BasicHeader("Content-Type", "application/octet-stream"));
@@ -159,10 +183,16 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
         
         // check the status
         if (response.getStatusCode() != 200) {
+            LOGGER.debug("/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + filePath + " file exists in HDFS, but could not write the data. Server response: "
+                    + response.getStatusCode() + " " + response.getReasonPhrase());
             throw new CygnusPersistenceError("/user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
                     + filePath + " file exists in HDFS, but could not write the data. Server response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
+        
+        LOGGER.debug("Data was written in /user/" + (serviceAsNamespace ? "" : (hdfsUser + "/"))
+                    + filePath);
     } // append
     
     @Override
