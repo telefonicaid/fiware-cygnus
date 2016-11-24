@@ -97,6 +97,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Thu Nov 24 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.5.1
+- [cygnus-ngsi][bug] Fix getting location header when creating Json responses in HttpBackend (#1318)
+
 * Wed Nov 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.5.0
 - [cygnus][hardening] Add NGSICKANSink configuration in docker's agent.conf file (#1193)
 - [cygnus][hardening] Add entry for Grouping Rules in Installation and Administration Guide (#1206)

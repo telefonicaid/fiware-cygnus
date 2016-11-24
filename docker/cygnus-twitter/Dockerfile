@@ -23,7 +23,7 @@ MAINTAINER Javi Palanca <jpalanca@dsic.upv.es>
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "1.5.0"
+ENV CYGNUS_VERSION "1.5.1"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-twitter"
