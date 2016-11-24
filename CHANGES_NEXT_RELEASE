@@ -1,0 +1,1 @@
+- [cygnus-ngsi][bug] Fix getting location header when creating Json responses in HttpBackend (#1318)

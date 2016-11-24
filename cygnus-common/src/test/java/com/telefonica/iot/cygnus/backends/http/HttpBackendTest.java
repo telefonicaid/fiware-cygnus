@@ -18,26 +18,19 @@
 package com.telefonica.iot.cygnus.backends.http;
 
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-import java.util.ArrayList;
-import org.apache.http.Header;
+import java.io.UnsupportedEncodingException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseFactory;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.DefaultHttpResponseFactory;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  *
@@ -61,103 +54,94 @@ public class HttpBackendTest {
    
     } // HttpBackendImpl
     
-    @Mock
-    private HttpClient httpclient;
-    
-    // instance to be tested
-    private HttpBackend httpBackend;
-    
-    private final HttpResponse mockResponse = mock(HttpResponse.class);
-    private final HttpResponse mockArrayResponse = mock(HttpResponse.class);
-    private final HttpRequestBase mockRequest = mock(HttpRequestBase.class);
-    private final HttpRequestBase mockArrayRequest = mock(HttpRequestBase.class);
-    private final ArrayList<Header> headers = new ArrayList<Header>();
-    private StringEntity normalEntity;
-    private StringEntity arrayEntity;
-    private String normalURL;
-    private String arrayURL;
-    private String host;
+    private final String host = "somehost";
+    private final String port = "12345";
     private final int maxConns = 50;
     private final int maxConnsPerRoute = 10;
     
     /**
-     * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
-     * classes.
-     *  
-     * @throws Exception
+     * [HttpBackend.createJsonResponse] -------- A JsonResponse object is created if the response content-type header
+     * is 'application/json' and the response contains a location header.
      */
-    @Before
-    public void setUp() throws Exception {
-        String normalResponse =
-                "{\"somefield\":\"somevalue\",\"somefield2\":\"somevalue2\",\"somefield2\":\"somevalue2\"}";
-        String arrayResponse =
-                "[{\"somefield\":{\"somesubfield1\":\"somevalue1\",\"sumesuffield1\":\"somevalue2\","
-                + "\"http\":{\"field1\":\"value1\"},}},{\"somefield\":{\"somesubfield1\":\"somevalue1\","
-                + "\"sumesuffield1\":\"somevalue2\",\"http\":{\"field1\":\"value1\"},}}]";
-        normalURL = "http://someurl:1234";
-        arrayURL = "http://someurl:1234";
-        normalEntity = new StringEntity(normalResponse);
-        arrayEntity = new StringEntity(arrayResponse);
-        host = "someurl.org";
-        headers.add(new BasicHeader("Content-type", "application/json"));
-        headers.add(new BasicHeader("Accept", "application/json"));
-        headers.add(new BasicHeader("X-Auth-token", "12345"));
-        when(mockResponse.getEntity()).thenReturn(normalEntity);
-        when(mockArrayResponse.getEntity()).thenReturn(arrayEntity);
-        when(httpclient.execute(mockRequest)).thenReturn(mockResponse);
-        when(httpclient.execute(mockArrayRequest)).thenReturn(mockArrayResponse);
-    } // setUp
-    
     @Test
-    public void testDoRequestWithNormalResponse() throws Exception {
-        System.out.println(getTestTraceHead("[HttpBackend.doRequest]")
-                + " - Gets a valid Json object based JSONResponse");
-        httpBackend = new HttpBackendImpl(host, normalURL, false, false, null, null, null, null, maxConns,
-                maxConnsPerRoute);
-        httpBackend.setHttpClient(httpclient);
+    public void testCreateJsonResponseEverythingOK() {
+        System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                + "-------- A JsonResponse object is created if the response content-type header is "
+                + "'application/json' and the response contains a location header");
+        HttpResponseFactory factory = new DefaultHttpResponseFactory();
+        HttpResponse response = factory.newHttpResponse(
+                new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, null), null);
+        String responseStr =
+                "{\"somefield1\":\"somevalue1\",\"somefield2\":\"somevalue2\",\"somefield3\":\"somevalue3\"}";
         
         try {
-            httpBackend.doRequest("GET", normalURL, headers, normalEntity);
-            System.out.println(getTestTraceHead("[HttpBackend.doRequest]") + " -  OK  - Succesfully got");
-        } catch (Exception e) {
-            System.out.println(getTestTraceHead("[HttpBackend.doRequest]")
-                    + " - FAIL - There was some problem when handling the request.");
-            throw e;
+            response.setEntity(new StringEntity(responseStr));
+        } catch (UnsupportedEncodingException e) {
+            System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                    + "- FAIL - There was some problem when creating the HttpResponse object");
+            throw new AssertionError(e.getMessage());
         } // try catch
-    } // testDoRequestWithNormalResponse
-    
-    @Test
-    public void testDoRequestWithArrayResponse() throws Exception {
-        System.out.println(getTestTraceHead("[HttpBackend.doRequest]")
-                + " - Gets a valid Json array based JSONResponse");
-        httpBackend = new HttpBackendImpl(host, arrayURL, false, false, null, null, null, null, maxConns,
-                maxConnsPerRoute);
-        httpBackend.setHttpClient(httpclient);
         
+        response.addHeader("Content-Type", "application/json");
+        response.addHeader("Location", "http://someurl.org");
+        HttpBackend httpBackend = new HttpBackendImpl(host, port, false, false, null, null, null, null, maxConns,
+                maxConnsPerRoute);
+
         try {
-            httpBackend.doRequest("GET", arrayURL, headers, arrayEntity);
-            System.out.println(getTestTraceHead("[HttpBackend.doRequest]") + " -  OK  - Succesfully got");
+            JsonResponse jsonRes = httpBackend.createJsonResponse(response);
+            
+            try {
+                assertTrue(jsonRes.getJsonObject() != null);
+                System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                        + "-  OK  - The JsonResponse object has a Json apyload");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                        + "- FAIL - The JsonResponse object has not a Json payload");
+                throw e;
+            } // try catch
+            
+            try {
+                assertTrue(jsonRes.getLocationHeader() != null);
+                System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                        + "-  OK  - The JsonResponse object has a Location header");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                        + "- FAIL - The JsonResponse object has not a Location header");
+                throw e;
+            } // try catch
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[HttpBackend.doRequest]")
-                    + " - FAIL - There was some problem when handling the request.");
-            throw e;
+            System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                    + "- FAIL - There was some problem when creating the JsonResponse object");
+            throw new AssertionError(e.getMessage());
         } // try catch
-    } // testDoRequestWithArrayResponse
+    } // testCreateJsonResponseEverythingOK
     
     /**
      * [HttpBackend.createJsonResponse] -------- A JsonResponse object is not created if the content-type header does
      * not contains 'application/json'.
      */
     @Test
-    public void testCreateJsonResponseNotJsonPayload() {
+    public void testCreateJsonResponseNoJsonPayload() {
         System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
                 + "-------- A JsonResponse object is not created if the content-type header does not contains "
                 + "'application/json'");
         HttpResponseFactory factory = new DefaultHttpResponseFactory();
         HttpResponse response = factory.newHttpResponse(
                 new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, null), null);
+        String responseStr =
+                "{\"somefield1\":\"somevalue1\",\"somefield2\":\"somevalue2\",\"somefield3\":\"somevalue3\"}";
+        
+        try {
+            response.setEntity(new StringEntity(responseStr));
+        } catch (UnsupportedEncodingException e) {
+            System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                    + "- FAIL - There was some problem when creating the HttpResponse object");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
         response.addHeader("Content-Type", "text/html");
-        httpBackend = new HttpBackendImpl(host, normalURL, false, false, null, null, null, null, maxConns,
+        response.addHeader("Location", "http://someurl.org");
+        HttpBackend httpBackend = new HttpBackendImpl(host, port, false, false, null, null, null, null, maxConns,
                 maxConnsPerRoute);
 
         try {
@@ -173,9 +157,56 @@ public class HttpBackendTest {
                         + "- FAIL - The JsonResponse object was created with a 'text/html' content type header");
                 throw e;
             } // try catch
-        } catch (Exception ex) {
+        } catch (Exception e) {
             System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
-                        + "- FAIL - There was some problem when creating the JsonResponse object");
+                    + "- FAIL - There was some problem when creating the JsonResponse object");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+    } // testCreateJsonResponseNoJsonPayload
+    
+    /**
+     * [HttpBackend.createJsonResponse] -------- A JsonResponse object is created if the content-type header contains
+     * 'application/json' but no location header.
+     */
+    @Test
+    public void testCreateJsonResponseNoLocationHeader() {
+        System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                + "-------- A JsonResponse object is created if the content-type header contains 'application/json' "
+                + "but no location header");
+        HttpResponseFactory factory = new DefaultHttpResponseFactory();
+        HttpResponse response = factory.newHttpResponse(
+                new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, null), null);
+        String responseStr =
+                "{\"somefield1\":\"somevalue1\",\"somefield2\":\"somevalue2\",\"somefield3\":\"somevalue3\"}";
+        
+        try {
+            response.setEntity(new StringEntity(responseStr));
+        } catch (UnsupportedEncodingException e) {
+            System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                    + "- FAIL - There was some problem when creating the HttpResponse object");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        response.addHeader("Content-Type", "text/html");
+        HttpBackend httpBackend = new HttpBackendImpl(host, port, false, false, null, null, null, null, maxConns,
+                maxConnsPerRoute);
+
+        try {
+            JsonResponse jsonRes = httpBackend.createJsonResponse(response);
+            
+            try {
+                assertEquals(null, jsonRes.getLocationHeader());
+                System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                        + "-  OK  - The JsonResponse object was created with null location header");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                        + "- FAIL - The JsonResponse object was not created with null location header");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                    + "- FAIL - There was some problem when creating the JsonResponse object");
+            throw new AssertionError(e.getMessage());
         } // try catch
     } // testCreateJsonResponseNotJsonPayload
 
