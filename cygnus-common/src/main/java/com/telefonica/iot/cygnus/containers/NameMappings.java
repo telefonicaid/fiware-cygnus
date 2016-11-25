@@ -32,7 +32,7 @@ public class NameMappings {
      * Constructor.
      */
     public NameMappings() {
-        serviceMappings = new ArrayList<ServiceMapping>();
+        serviceMappings = new ArrayList<>();
     } // NameMappings
     
     public ArrayList<ServiceMapping> getServiceMappings() {
@@ -56,26 +56,29 @@ public class NameMappings {
     
     /**
      * Overwrite of toString() method.
-     * @return 
+     * @return
      */
     @Override
     public String toString() {
-        String nameMappingsStr = "   \"serviceMapping\": [\n";
-        int lastIndex = serviceMappings.size() - 1;
+        String nameMappingsStr = "{\"serviceMappings\":[";
+        boolean first = true;
         
-        for (ServiceMapping map : serviceMappings) {
-            nameMappingsStr += "      {\n"
-                            + map.toString() + "\n"
-                            + "      }";    
-            
-            if (!map.equals(serviceMappings.get(lastIndex))) {
-                nameMappingsStr += ",\n";
-            } // if
-            
+        for (ServiceMapping serviceMapping : serviceMappings) {
+            if (first) {
+                nameMappingsStr += serviceMapping.toString();
+                first = false;
+            } else {
+                nameMappingsStr += "," + serviceMapping.toString();
+            } // if eslse
         } // for
-        nameMappingsStr += "\n   ]\n}";
+        
+        nameMappingsStr += "]}";
         return nameMappingsStr;
     } // toString
+    
+    public void addServiceMapping(ServiceMapping serviceMapping) {
+        serviceMappings.add(serviceMapping);
+    } // addServiceMapping
     
     /**
      * ServiceMapping class.
@@ -91,7 +94,7 @@ public class NameMappings {
          * Constructor.
          */
         public ServiceMapping() {
-            servicePathMappings = new ArrayList<ServicePathMapping>();
+            servicePathMappings = new ArrayList<>();
         } // NameMappings
         
         public ArrayList<ServicePathMapping> getServicePathMappings() {
@@ -123,23 +126,22 @@ public class NameMappings {
         
         @Override
         public String toString() {
-            int lastIndex = servicePathMappings.size() - 1;
-            String serviceMappingStr = "         \"originalService\":\"" + getOriginalService() + "\",\n"
-                                     + "         \"newService\":\"" + getNewService()+ "\",\n"
-                                     + "         \"servicePathMappings\": [\n";
+            String serviceMappingStr =
+                    "{\"originalService\":\"" + getOriginalService() + "\","
+                    + "\"newService\":\"" + getNewService() + "\","
+                    + "\"servicePathMappings\":[";
+            boolean first = true;
              
-            for (Object originalSP : servicePathMappings) {
-                serviceMappingStr += "            {\n" 
-                                   + originalSP.toString() + "\n"
-                                   + "            }";
-                
-                if (!originalSP.equals(servicePathMappings.get(lastIndex))) {
-                    serviceMappingStr += ",\n";
-                } // if
-                
-            } // for    
+            for (Object servicePathMapping : servicePathMappings) {
+                if (first) {
+                    serviceMappingStr += servicePathMapping.toString();
+                    first = false;
+                } else {
+                    serviceMappingStr += "," + servicePathMapping.toString();
+                } // if else
+            } // for
             
-            serviceMappingStr += "\n         ]";         
+            serviceMappingStr += "]}";
             return serviceMappingStr;
         } // toString
         
@@ -159,7 +161,7 @@ public class NameMappings {
          * Constructor.
          */
         public ServicePathMapping() {
-            entityMappings = new ArrayList<EntityMapping>();
+            entityMappings = new ArrayList<>();
         } // ServicePathMapping
         
         public ArrayList<EntityMapping> getEntityMappings() {
@@ -191,23 +193,22 @@ public class NameMappings {
         
         @Override
         public String toString() {
-            int lastIndex = entityMappings.size() - 1;
-            String entityMappingStr = "               \"originalServicePath\":\"" + getOriginalServicePath()+ "\",\n"
-                                 + "               \"newServicePath\":\"" + getNewServicePath()+ "\",\n"
-                                 + "               \"entityMappings\": [\n";
+            String entityMappingStr =
+                    "{\"originalServicePath\":\"" + getOriginalServicePath() + "\","
+                    + "\"newServicePath\":\"" + getNewServicePath() + "\","
+                    + "\"entityMappings\": [";
+            boolean first = true;
             
-            for (Object entityMap: entityMappings) {
-                entityMappingStr += "                  {\n" 
-                            + entityMap.toString() + "\n"
-                            + "                  }";
-                
-                if (!entityMap.equals(entityMappings.get(lastIndex))) {
-                    entityMappingStr += ",\n";
-                } // if
-                
+            for (Object entityMapping: entityMappings) {
+                if (first) {
+                    entityMappingStr += entityMapping.toString();
+                    first = false;
+                } else {
+                    entityMappingStr += "," + entityMapping.toString();
+                } // if else
             } // for
             
-            entityMappingStr += "\n                ]";  
+            entityMappingStr += "]}";
             return entityMappingStr;
         } // toString
         
@@ -230,7 +231,7 @@ public class NameMappings {
          * Constructor.
          */
         public EntityMapping() {
-            attributeMappings = new ArrayList<AttributeMapping>();
+            attributeMappings = new ArrayList<>();
         } // EntityMapping
         
         public ArrayList<AttributeMapping> getAttributeMappings() {
@@ -275,25 +276,24 @@ public class NameMappings {
         
         @Override
         public String toString() {
-            int lastIndex = attributeMappings.size()-1;
-            String attrMappingStr = "                     \"originalEntityId\":\"" + getOriginalEntityId() + "\",\n"
-                        + "                     \"originalEntityType\":\"" + getOriginalEntityType()+ "\",\n"
-                        + "                     \"newEntityId\":\"" + getNewEntityId() + "\",\n"
-                        + "                     \"newEntityType\":\"" + getNewEntityType() + "\",\n"
-                        + "                     \"attributeMappings\":[\n";
+            String attrMappingStr =
+                    "{\"originalEntityId\":\"" + getOriginalEntityId() + "\","
+                    + "\"originalEntityType\":\"" + getOriginalEntityType() + "\","
+                    + "\"newEntityId\":\"" + getNewEntityId() + "\","
+                    + "\"newEntityType\":\"" + getNewEntityType() + "\","
+                    + "\"attributeMappings\":[";
+            boolean first = true;
             
             for (Object attrMap: attributeMappings) {
-                attrMappingStr += "                        {\n" 
-                            + attrMap.toString() + "\n" 
-                            + "                        }";
-            
-                if (!attrMap.equals(attributeMappings.get(lastIndex))) {
-                    attrMappingStr += ",\n";
-                } // if
-                
+                if (first) {
+                    attrMappingStr += attrMap.toString();
+                    first = false;
+                } else {
+                    attrMappingStr += "," + attrMap.toString();
+                } // if else
             } // for
             
-            attrMappingStr += "\n                    ]";        
+            attrMappingStr += "]}";
             return attrMappingStr;
         } // toString
         
@@ -351,14 +351,11 @@ public class NameMappings {
         
         @Override
         public String toString() {
-            String attrMappingStr = "                           \"originalAttributeName\":\"" 
-                        + getOriginalAttributeName() + "\",\n"
-                        + "                           \"originalAttributeType\":\"" 
-                        + getOriginalAttributeType() + "\",\n"
-                        + "                           \"newAttributeName\":\"" 
-                        + getNewAttributeName() + "\",\n"
-                        + "                           \"newAttributeType\":\"" 
-                        + getNewAttributeType() + "\"";
+            String attrMappingStr =
+                    "\"originalAttributeName\":\"" + getOriginalAttributeName() + "\","
+                    + "\"originalAttributeType\":\"" + getOriginalAttributeType() + "\","
+                    + "\"newAttributeName\":\"" + getNewAttributeName() + "\","
+                    + "\"newAttributeType\":\"" + getNewAttributeType() + "\"";
             return attrMappingStr;
         } // toString
         
