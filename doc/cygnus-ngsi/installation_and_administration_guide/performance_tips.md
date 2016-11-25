@@ -2,6 +2,8 @@
 Content:
 
 * [Batching](#section1)
+    * [Sizing](#section1.1)
+    * [Retries](#section1.2)
 * [Sink parallelization](#section2)
     * [Multiple sinks, single channel](#section2.1)
     * [Multiple sinks, multiple channels](#section2.2)
@@ -9,22 +11,21 @@ Content:
 * [Channel considerations](#section3)
     * [Channel type](#section3.1)
     * [Channel capacity](#section3.2)
-* [Events TTL](#section4)
-* [Grouping rules](#section5)
+* [Name Mappings](#section4)
+* [Grouping Rules](#section5)
 * [Writing logs](#section6)
 
 ##<a name="section1"></a>Batching
-<i>NOTE: The batching mechanism is currently only available for `NGSIHDFSSink` and `NGSIMySQLSink`.</i>
+###<a name="section1.1"></a>Sizing
+Batching is the mechanism Cygnus implements for processing sets of `NGSIEvent`s (a `NGSIEvent` typically comes from a Orion's notification) all together instead of one by one. These sets, or properly said <i>batches</i>, are built by `NGSISink`, the base class all the sinks extend. Thus, having the batches already created in the inherited code the sinks only have to deal with the persistence of the data within them. Typically, the information within a whole batch is aggregated into a large data chunk that is stored at the same time by using a single write/insert/upsert operation. Why?
 
-Batching is the mechanism Cygnus implements for processing sets of events all together instead of one by one. These sets, or properly said <i>batches</i>, are built by `NGSISink`, the base class all the sinks extend. Thus, having the batches already created in the inherited code the sinks only have to deal with the persistence of the data within them. Typically, the information within a whole batch is aggregated into a large data chunk that is stored at the same time by using a single write/insert/upsert operation. Why?
+What is important regarding the batch mechanism is it largely increases the performance of the sink because the number of writes is dramatically reduced. Let's see an example. Let's assume 100 notifications, no batching mechanism at all and a HDFS storage. It seems obvious 100 writes are needed, one per `NGSIEvent`/notification. And writing to disk is largely slow. Now let's assume a batch of size 100. In the best case, all these `NGSIEvent`s/notifications regard to the same entity, which means all the data within them will be persisted in the same HDFS file and therefore only one write is required.
 
-What is important regarding the batch mechanism is it largely increases the performance of the sink because the number of writes is dramatically reduced. Let's see an example. Let's assume 100 notifications, no batching mechanism at all and a HDFS storage. It seems obvious 100 writes are needed, one per notification. And writing to disk is largely slow. Now let's assume a batch of size 100. In the best case, all these notifications regard to the same entity, which means all the data within them will be persisted in the same HDFS file and therefore only one write is required.
-
-Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination HDFS file. In the worst case, the whole 100 entities will be about 100 different entities (100 different HDFS destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 writes of the event by event approach with only 10-15 writes.
+Obviously, not all the `NGSIEvent`s/notifications will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches are created within a batch, one sub-batch per final destination HDFS file. In the worst case, the whole 100 entities will be about 100 different entities (100 different HDFS destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 writes of the event by event approach with only 10-15 writes.
 
 Nevertheless, a couple of risks arise when using batches:
 
-* The first one is the last batch may never get built. I.e. in the above 100 size batch if only 99 events are notified and the 100th event never arrives, then the batch is never ready to be processed by the sink. Thats the reason the batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
+* The first one is the last batch may never get built. I.e. in the above 100 size batch if only 99 `NGSIEvent`s/notifications are notified and the 100th `NGSIEvent`/notifications never arrives, then the batch is never ready to be processed by the sink. Thats the reason the batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 * The second one is the data within the batch may be lost if Cygnus crashes or it is stopped while accumulating it. Please observe until the batch size (or the timeout) is reached the data within the batch is not persisted and it exists nowhere in the data workflow (the NGSI source -typically Orion Context Broker- most probably will not have a copy of the data anymore once it has been notified). There is an under study [issue](https://github.com/telefonicaid/fiware-cygnus/issues/566) regarding this.
 
 By default, all the sinks have a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. These are the parameters all the sinks have for these purpose:
@@ -33,6 +34,22 @@ By default, all the sinks have a configured batch size and batch accumulation ti
     <agent_name>.sinks.<sink_name>.batch_timeout = 30
 
 Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. On the contrary, very large batch sizes and timeouts may have impact on your data persistence if Cygnus crashes or it is stopped in the meantime.
+
+[Top](#top)
+
+###<a name="section1.2"></a>Retries
+Batches could not be persisted. This is someting may occur from time to time because the sink is temporarilly not available, or the communications are failing. In that case, Cygnus has implemented a retry mechanism.
+
+Regarding the retries of not persisted batches, a couple of parameters is used. On the one hand, a Time-To-Live (TTL) is used, specifing the number of retries Cygnus will do before definitely dropping the event (0 means no retries, -1 means infinite retries). On the other hand, a list of retry intervals can be configured. Such a list defines the first retry interval, then se second retry interval, and so on; if the TTL is greater than the length of the list, then the last retry interval is repeated as many times as necessary.
+
+By default, all the sinks have a configured batch ttl and retry intervals of 10 and 5000 miliseconds, respectively. These are the parameters all the sinks have for these purpose:
+
+    <agent_name>.sinks.<sink_name>.batch_ttl = 10
+    <agent_name>.sinks.<sink_name>.batch_retry_intervals = 5000
+    
+With regards to performance, on the one hand retries slow down Cygnus since they are `NGSIEvent`s/notification enqueued that consume CPU when they are attempted. But most important is all the time the persistence backend is not available, new `NGSIEvent`s/notifications will be added to the retry queue. This is specially important when using infinite retries (`batch_ttl = -1`). In that case, the retry queue size will never decrease.
+
+On the other hand, very short retry intervals will make Cygnus working unncessarily if the persistence backend takes a while for recovering. This effect is multiplied if using infinite retries (`batch_ttl = -1`).
 
 [Top](#top)
 
@@ -170,21 +187,28 @@ In order to calculate the appropriate capacity, just have in consideration the f
 
 [Top](#top)
 
-##<a name="section4"></a>Events TTL
-Every Flume event managed by Cygnus has associated a <i>Time-To-Live</i> (TTL), a number specifying how many times that event can be reinjected in the channel the sink got it from. Events are reinjected when a processing error occurs (for instance, the persistence system is not available, there has been a communication breakdown, etc.). This TTL has to be configured very carefully since large TTLs may lead to a quick channel capacity exhaustion, and once reached that capacity new events cannot be put into the channel. In addition, the more large is the TTL, the more will decrease the performance of the Cygnus instance since both new fresh events will have to coexist with old not processed events in the queue.
+##<a name="section4"></a>Name Mappings
+Name Mappings feature is a powerfool tool for changing the original notified FIWARE service, FIWARE service path, entity ID and type, and attributes name and type. As a side effect of this changing, Name Mappings can be used for <i>routing</i> your data, for instance by setting a common alternative FIWARE service path for two or more original service paths, all the data regarding these servivce paths will be stored under the same CKAN package.
 
-If you don't care about not processed events, you may configure a 0 TTL, obtaining the maximum performance regarding this aspect.
+As you may suppose, the usage of Name Mappings slows down Cygnus because the alternative settings are obtained after checking a list of mappings written in Json format. Such a Json must be read, iterated each time a `NGSIEvent`/notification is sent to Cygnus and the conditions for matching checked, usually involving a regular expression (worth remembering that regular expressions matching is slow).
+
+Nevertheless, you may write your Name Mappings in a smart way:
+
+* Place the most probably mappings first. Since the checking is sequential, the sooner the appropriate mapping is found for a certain event the sooner another `NGSIEvent`/notification may be checked. Thus, having those mappings applying to the majority of the `NGSIEvent`s/notifications in the first place of the list will increase the performance; then, put the mappings applying to the second major set of `NGSIEvent`s/notifications, and so on.
+* The simplest set of mappings derive from the simplest way of naming and typing the context entities and attributes, as well as the FIWARE service and FIWARE service path the belong to. Try to use names that can be easily grouped, e.g. <i>numeric rooms</i> and <i>character rooms</i> can be easily modeled by using only 2 regular expressions such as `room\.(\d*)` and `room\.(\D*)`, but more anarchical ways of naming them will lead for sure into much more different more complex mappings.
 
 [Top](#top)
 
-##<a name="section5"></a>Grouping rules
-The grouping rules feature is a powerful tool for <i>routing</i> your data, i.e. deciding the right destination (HDFS file, MySQL table, CKAN resource) for your context data; on the contrary, the default destination is used, i.e. the concatenation of the entity identifier and the entity type.
+##<a name="section5"></a>Grouping Rules
+**IMPORTANT NOTE: from release 1.6.0, this feature is deprecated in favour of Name Mappings. More details can be found [here](./deprecated_and_removed.md#section2.1).**
 
-As you may suppose, the usage of the grouping rules is slower than using the default. This is because the destination is decided after checking a list of rules in a sequential way, trying to find a regex match. Here, worth remembering that regex matching is slow, and that you may configure as many grouping rules as you want/need.
+Grouping Rules feature is a powerful tool for <i>routing</i> your data, i.e. setting an alternative FIWARE service path and entity, whcih in the end decides the HDFS file, MySQL/PostgreSQL/DynamoDB/Carto table, CKAN resource, Kafka queue or MongoDB collection for your context data; on the contrary, the default destination is used.
 
-Nevertheless, you may write your grouping rules in a smart way:
+As you may suppose, the usage of Grouping Rules slows down Cygnus because the alternative FIWARE service path and entity are set after checking a list of rules in a sequential way, trying to find a regex match. Here, worth remembering that regex matching is slow, and that you may configure as many grouping rules as you want/need.
 
-* Place the most probably grouping rules first. Since the checking is sequential, the sooner the appropriate rule is found for a certain event the sooner another event may be checked. Thus, having those rules applying to the majority of the events in the first place of the list will increase the performance; then, put the rules applying to the second major set of evens, and so on.
+Nevertheless, you may write your Grouping Rules in a smart way:
+
+* Place the most probably rules first. Since the checking is sequential, the sooner the appropriate rule is found for a certain event the sooner another event may be checked. Thus, having those rules applying to the majority of the events in the first place of the list will increase the performance; then, put the rules applying to the second major set of evens, and so on.
 * The simplest matching set of rules derive from the simplest way of naming the context entities, their types or the fiware-service they belong to. Try to use names that can be easily grouped, e.g. <i>numeric rooms</i> and <i>character rooms</i> can be easily modeled by using only 2 regular expressions such as `room\.(\d*)` and `room\.(\D*)`, but more anarchical ways of naming them will lead for sure into much more different more complex rules.
 
 [Top](#top)
