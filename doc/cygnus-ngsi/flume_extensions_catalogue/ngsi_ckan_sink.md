@@ -73,7 +73,7 @@ It must be noticed a CKAN Datastore (and a viewer) is also created and associate
 
 Since based in [PostgreSQL](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to  certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
 
-Nevertheless, different than PostgreSQL, resource lengths may be up to 100 characters (minimum, 2 characters).
+Despite there is no real limit on the resource names, Cygnus will keep limiting their lengths up to 100 characters (minimum, 2 characters), accordingly to what's done with organization and package names.
 
 [Top](#top)
 
