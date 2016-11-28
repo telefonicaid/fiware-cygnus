@@ -574,7 +574,7 @@ public class NGSICartoDBSink extends NGSISink {
                             + "stageTime, stageSpeed, sumDistance, sumTime, sumSpeed, sum2Distance, sum2Time,"
                             + "sum2Speed, maxDistance, minDistance, maxTime, mintime, maxSpeed, minSpeed, numSamples)";
                     String rows = "(" + recvTimeTs + ",'" + servicePath + "','" + entityId + "','" + entityType + "',"
-                            + location + ",0,0,0,0,0,0,0,0,0," + Float.MIN_VALUE + "," + Float.MAX_VALUE + ","
+                            + location.getLeft() + ",0,0,0,0,0,0,0,0,0," + Float.MIN_VALUE + "," + Float.MAX_VALUE + ","
                             + Float.MIN_VALUE + "," + Float.MAX_VALUE + "," + Float.MIN_VALUE + "," + Float.MAX_VALUE
                             + ",1)";
                     LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
@@ -583,7 +583,7 @@ public class NGSICartoDBSink extends NGSISink {
                 } catch (Exception e) {
                     String withs = ""
                             + "WITH geom AS ("
-                            + "   SELECT " + location + " AS point"
+                            + "   SELECT " + location.getLeft() + " AS point"
                             + "), calcs AS ("
                             + "   SELECT"
                             + "      cartodb_id,"
