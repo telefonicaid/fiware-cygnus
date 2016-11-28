@@ -51,9 +51,9 @@ public class NGSIUtilsTest {
         String attrMetadataStr = "[]";
         String attrValue = "-3.7167, 40.3833";
         String attrType = "geo:point";
-        boolean flipCoordinates = false; // irrelevant for this test
+        boolean swapCoordinates = false; // irrelevant for this test
         ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(
-                attrValue, attrType, attrMetadataStr, flipCoordinates);
+                attrValue, attrType, attrMetadataStr, swapCoordinates);
 
         try {
             assertEquals("ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326)", geometry.getLeft());
@@ -86,9 +86,9 @@ public class NGSIUtilsTest {
         String attrMetadataStr = metadatasJson.toJSONString();
         String attrValue = "-3.7167, 40.3833";
         String attrType = "coordinates"; // irrelevant for this test
-        boolean flipCoordinates = false; // irrelevant for this test
+        boolean swapCoordinates = false; // irrelevant for this test
         ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(
-                attrValue, attrType, attrMetadataStr, flipCoordinates);
+                attrValue, attrType, attrMetadataStr, swapCoordinates);
 
         try {
             assertEquals("ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326)", geometry.getLeft());
@@ -115,9 +115,9 @@ public class NGSIUtilsTest {
         String attrMetadataStr = "[]";
         String attrValue = "-3.7167, 40.3833";
         String attrType = "coordinates";
-        boolean flipCoordinates = false; // irrelevant for this test
+        boolean swapCoordinates = false; // irrelevant for this test
         ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(
-                attrValue, attrType, attrMetadataStr, flipCoordinates);
+                attrValue, attrType, attrMetadataStr, swapCoordinates);
 
         try {
             assertEquals(attrValue, geometry.getLeft());
@@ -142,9 +142,9 @@ public class NGSIUtilsTest {
         String attrMetadataStr = "[]";
         String attrValue = "{\"coordinates\": [-3.7167, 40.3833], \"type\": \"Point\"}";
         String attrType = "geo:json";
-        boolean flipCoordinates = false; // irrelevant for this test
+        boolean swapCoordinates = false; // irrelevant for this test
         ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(
-                attrValue, attrType, attrMetadataStr, flipCoordinates);
+                attrValue, attrType, attrMetadataStr, swapCoordinates);
 
         try {
             assertEquals("ST_GeomFromGeoJSON('{\"coordinates\": [-3.7167, 40.3833], \"type\": \"Point\"}')", geometry.getLeft());
