@@ -38,11 +38,11 @@ Nevertheless, as explained above, it is highly recommended to increase at least 
 [Top](#top)
 
 ###<a name="section1.2"></a>Retries
-Batches could not be persisted. This is someting may occur from time to time because the sink is temporarilly not available, or the communications are failing. In that case, Cygnus has implemented a retry mechanism.
+Batches may not be persisted. This is something may occur from time to time because the sink is temporarily not available, or the communications are failing. In that case, Cygnus has implemented a retry mechanism.
 
-Regarding the retries of not persisted batches, a couple of parameters is used. On the one hand, a Time-To-Live (TTL) is used, specifing the number of retries Cygnus will do before definitely dropping the event (0 means no retries, -1 means infinite retries). On the other hand, a list of retry intervals can be configured. Such a list defines the first retry interval, then se second retry interval, and so on; if the TTL is greater than the length of the list, then the last retry interval is repeated as many times as necessary.
+Regarding the retries of not persisted batches, a couple of parameters is used. On the one hand, a Time-To-Live (TTL) is used, specifing the number of retries Cygnus will do before definitely dropping the event (0 means no retries, -1 means infinite retries). On the other hand, a list of retry intervals can be configured. Such a list defines the first retry interval, then the second retry interval, and so on; if the TTL is greater than the length of the list, then the last retry interval is repeated as many times as necessary.
 
-By default, all the sinks have a configured batch ttl and retry intervals of 10 and 5000 miliseconds, respectively. These are the parameters all the sinks have for these purpose:
+By default, all the sinks have a configured batch TTL and retry intervals of 10 and 5000 miliseconds, respectively. These are the parameters all the sinks have for these purpose:
 
     <agent_name>.sinks.<sink_name>.batch_ttl = 10
     <agent_name>.sinks.<sink_name>.batch_retry_intervals = 5000
@@ -188,14 +188,14 @@ In order to calculate the appropriate capacity, just have in consideration the f
 [Top](#top)
 
 ##<a name="section4"></a>Name Mappings
-Name Mappings feature is a powerfool tool for changing the original notified FIWARE service, FIWARE service path, entity ID and type, and attributes name and type. As a side effect of this changing, Name Mappings can be used for <i>routing</i> your data, for instance by setting a common alternative FIWARE service path for two or more original service paths, all the data regarding these servivce paths will be stored under the same CKAN package.
+Name Mappings feature is a powerful tool for changing the original notified FIWARE service, FIWARE service path, entity ID and type, and attributes name and type. As a side effect of this changing, Name Mappings can be used for <i>routing</i> your data, for instance by setting a common alternative FIWARE service path for two or more original service paths, all the data regarding these service paths will be stored under the same CKAN package.
 
-As you may suppose, the usage of Name Mappings slows down Cygnus because the alternative settings are obtained after checking a list of mappings written in Json format. Such a Json must be read, iterated each time a `NGSIEvent`/notification is sent to Cygnus and the conditions for matching checked, usually involving a regular expression (worth remembering that regular expressions matching is slow).
+As you may suppose, the usage of Name Mappings slows down Cygnus because the alternative settings are obtained after checking a list of mappings written in Json format. Despite such a Json is loaded into memory and regular expressions are compiled into patterns, it must be iterated each time a `NGSIEvent`/notification is sent to Cygnus and the conditions for matching checked.
 
 Nevertheless, you may write your Name Mappings in a smart way:
 
 * Place the most probably mappings first. Since the checking is sequential, the sooner the appropriate mapping is found for a certain event the sooner another `NGSIEvent`/notification may be checked. Thus, having those mappings applying to the majority of the `NGSIEvent`s/notifications in the first place of the list will increase the performance; then, put the mappings applying to the second major set of `NGSIEvent`s/notifications, and so on.
-* The simplest set of mappings derive from the simplest way of naming and typing the context entities and attributes, as well as the FIWARE service and FIWARE service path the belong to. Try to use names that can be easily grouped, e.g. <i>numeric rooms</i> and <i>character rooms</i> can be easily modeled by using only 2 regular expressions such as `room\.(\d*)` and `room\.(\D*)`, but more anarchical ways of naming them will lead for sure into much more different more complex mappings.
+* The simplest set of mappings derive from the simplest way of naming and typing the context entities and attributes, as well as the FIWARE service and FIWARE service path they belong to. Try to use names that can be easily grouped, e.g. <i>numeric rooms</i> and <i>not numeric rooms</i> can be easily modeled by using only 2 regular expressions such as `room\.(\d*)` and `room\.(\D*)`, but more anarchical ways of naming them will lead for sure into much more different more complex mappings.
 
 [Top](#top)
 
@@ -209,7 +209,7 @@ As you may suppose, the usage of Grouping Rules slows down Cygnus because the al
 Nevertheless, you may write your Grouping Rules in a smart way:
 
 * Place the most probably rules first. Since the checking is sequential, the sooner the appropriate rule is found for a certain event the sooner another event may be checked. Thus, having those rules applying to the majority of the events in the first place of the list will increase the performance; then, put the rules applying to the second major set of evens, and so on.
-* The simplest matching set of rules derive from the simplest way of naming the context entities, their types or the fiware-service they belong to. Try to use names that can be easily grouped, e.g. <i>numeric rooms</i> and <i>character rooms</i> can be easily modeled by using only 2 regular expressions such as `room\.(\d*)` and `room\.(\D*)`, but more anarchical ways of naming them will lead for sure into much more different more complex rules.
+* The simplest matching set of rules derive from the simplest way of naming the context entities, their types or the fiware-service they belong to. Try to use names that can be easily grouped, e.g. <i>numeric rooms</i> and <i>not numeric rooms</i> can be easily modeled by using only 2 regular expressions such as `room\.(\d*)` and `room\.(\D*)`, but more anarchical ways of naming them will lead for sure into much more different more complex rules.
 
 [Top](#top)
 
