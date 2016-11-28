@@ -386,7 +386,7 @@ cygnus-ngsi.sinks.cartodb-sink.channel = cartodb-channel
 # absolute path to the CartoDB file containing the mapping between FIWARE service/CartoDB usernames and CartoDB API Keys
 cygnus-ngsi.sinks.cartodb-sink.keys_conf_file = /usr/cygnus/conf/cartodb_keys.conf
 # if true the latitude and longitude values are exchanged, false otherwise
-#cygnus-ngsi.sinks.cartodb-sink.flip_coordinates = true
+#cygnus-ngsi.sinks.cartodb-sink.swap_coordinates = true
 # if true, a raw based storage is done, false otherwise
 #cygnus-ngsi.sinks.cartodb-sink.enable_raw = true
 # if true, a distance based storage is done, false otherwise
