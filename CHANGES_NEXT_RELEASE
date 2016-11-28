@@ -20,3 +20,4 @@
 - [cygnus-ngsi][hardening] Improve HDFSBackendImplREST debug logs (#1319)
 - [cygnus-ngsi][hardening] Update NGSICKANSink documentation regarding resource name length limit imposed by Cygnus (#1325)
 - [cygnus-ngsi][bug] Obtained geometry not properly used in NGSICartoDBSink (#1327)
+- [cygnus-ngsi][hardening] Replace flip-coordinates by swap coordinates in NGSICartoDBSink (#1313)
