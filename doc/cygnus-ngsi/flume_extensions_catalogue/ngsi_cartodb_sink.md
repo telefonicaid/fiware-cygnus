@@ -421,7 +421,8 @@ Everything equals to the raw-based storing, but:
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data\_model | no | dm-by-entity |  <i>dm-by-service-path</i> or <i>dm-by-entity</i>. |
 | keys\_conf\_file | yes | N/A | Absolute path to the CartoDB file containing the mapping between FIWARE service/Carto usernames and Carto API Keys. |
-| flip\_coordinates | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, the latitude and longitude values are exchanged. |
+| swap\_coordinates | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, the latitude and longitude values are exchanged. |
+| flip\_coordinates | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, the latitude and longitude values are exchanged. **Deprecated from release 1.6.0 in favour of `swap_coordinates`**. |
 | enable\_raw | no | true | <i>true</i> or <i>false</i>. If <i>true</i>, a raw based storage is done. |
 | enable\_distance | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, a distance based storage is done. |
 | enable\_raw\_snapshot | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, a raw snapshot based storage is done. |
@@ -444,7 +445,7 @@ cygnus-ngsi.sinks.cartodb-sink.enable_grouping = false
 cygnus-ngsi.sinks.cartodb-sink.enable_name_mappings = false
 cygnus-ngsi.sinks.cartodb-sink.enable_lowercase = false
 cygnus-ngsi.sinks.cartodb-sink.keys_conf_file = /usr/cygnus/conf/cartodb_keys.conf
-cygnus-ngsi.sinks.cartodb-sink.flip_coordinates = true
+cygnus-ngsi.sinks.cartodb-sink.swap_coordinates = true
 cygnus-ngsi.sinks.cartodb-sink.enable_raw = true
 cygnus-ngsi.sinks.cartodb-sink.enable_distance = false
 cygnus-ngsi.sinks.cartodb-sink.enable_raw_snapshot = false

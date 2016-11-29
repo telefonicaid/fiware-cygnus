@@ -47,7 +47,7 @@ public class NGSICartoDBSink extends NGSISink {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSICartoDBSink.class);
     private String keysConfFile;
-    private boolean flipCoordinates;
+    private boolean swapCoordinates;
     private boolean enableRaw;
     private boolean enableDistance;
     private boolean enableRawSnapshot;
@@ -146,16 +146,41 @@ public class NGSICartoDBSink extends NGSISink {
                     + keysConfFile + ")");
         } // if else
         
-        String flipCoordinatesStr = context.getString("flip_coordinates", "false");
+        String swapCoordinatesStr = context.getString("swap_coordinates");
+        boolean wasFlipCoordinates = false;
         
-        if (flipCoordinatesStr.equals("true") || flipCoordinatesStr.equals("false")) {
-            flipCoordinates = flipCoordinatesStr.equals("true");
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (flip_coordinates="
-                    + flipCoordinatesStr + ")");
+        if (swapCoordinatesStr == null || swapCoordinatesStr.isEmpty()) {
+            swapCoordinatesStr = context.getString("flip_coordinates");
+            
+            if (swapCoordinatesStr == null || swapCoordinatesStr.isEmpty()) {
+                swapCoordinatesStr = "false";
+            } else {
+                wasFlipCoordinates = true;
+            } // if else
+        } // if
+        
+        if (swapCoordinatesStr.equals("true") || swapCoordinatesStr.equals("false")) {
+            swapCoordinates = swapCoordinatesStr.equals("true");
+            
+            if (wasFlipCoordinates) {
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (flip_coordinates="
+                        + swapCoordinatesStr + ") -- Deprecated, please use 'swap_coordinates' instead");
+            } else {
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (swap_coordinates="
+                        + swapCoordinatesStr + ")");
+            } // if else
         } else {
             invalidConfiguration = true;
-            LOGGER.error("[" + this.getName() + "] Invalid configuration (flip_coordinates="
-                    + flipCoordinatesStr + ") -- Must be 'true' or 'false'");
+            
+            if (wasFlipCoordinates) {
+                LOGGER.error("[" + this.getName() + "] Invalid configuration (flip_coordinates="
+                        + swapCoordinatesStr + ") -- Must be 'true' or 'false' -- Deprecated, please use "
+                        + "'swap_coordinates' instead");
+            } else {
+                LOGGER.error("[" + this.getName() + "] Invalid configuration (swap_coordinates="
+                        + swapCoordinatesStr + ") -- Must be 'true' or 'false'");
+            } // if else
+            
             return;
         } // if else
         
@@ -459,7 +484,7 @@ public class NGSICartoDBSink extends NGSISink {
                 String attrValue = contextAttribute.getContextValue(false);
                 String attrMetadata = contextAttribute.getContextMetadata();
                 
-                if (!NGSIUtils.getGeometry(attrValue, attrType, attrMetadata, flipCoordinates).getRight()) {
+                if (!NGSIUtils.getGeometry(attrValue, attrType, attrMetadata, swapCoordinates).getRight()) {
                     aggregation.put(attrName, new ArrayList<String>());
                     aggregation.put(attrName + "_md", new ArrayList<String>());
                 } // if
@@ -505,7 +530,7 @@ public class NGSICartoDBSink extends NGSISink {
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(attrValue, attrType, attrMetadata,
-                        flipCoordinates);
+                        swapCoordinates);
                 
                 if (location.right) {
                     aggregation.get(NGSIConstants.CARTO_DB_THE_GEOM).add(location.getLeft());
@@ -550,7 +575,7 @@ public class NGSICartoDBSink extends NGSISink {
             String attrValue = contextAttribute.getContextValue(false);
             String attrMetadata = contextAttribute.getContextMetadata();
             ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(attrValue, attrType, attrMetadata,
-                    flipCoordinates);
+                    swapCoordinates);
             String tableName = buildTableName(event.getServicePathForNaming(enableGrouping, enableNameMappings),
                     event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding),
                     event.getAttributeForNaming(enableNameMappings))
@@ -676,7 +701,7 @@ public class NGSICartoDBSink extends NGSISink {
             String attrType = ca.getType();
             String attrMetadata = ca.getContextMetadata();
             ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(attrValue, attrType, attrMetadata,
-                    flipCoordinates);
+                    swapCoordinates);
             String set;
             String field;
             String row;
