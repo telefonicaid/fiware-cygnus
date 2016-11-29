@@ -146,16 +146,41 @@ public class NGSICartoDBSink extends NGSISink {
                     + keysConfFile + ")");
         } // if else
         
-        String swapCoordinatesStr = context.getString("swap_coordinates", "false");
+        String swapCoordinatesStr = context.getString("swap_coordinates");
+        boolean wasFlipCoordinates = false;
+        
+        if (swapCoordinatesStr == null || swapCoordinatesStr.isEmpty()) {
+            swapCoordinatesStr = context.getString("flip_coordinates");
+            
+            if (swapCoordinatesStr == null || swapCoordinatesStr.isEmpty()) {
+                swapCoordinatesStr = "false";
+            } else {
+                wasFlipCoordinates = true;
+            } // if else
+        } // if
         
         if (swapCoordinatesStr.equals("true") || swapCoordinatesStr.equals("false")) {
             swapCoordinates = swapCoordinatesStr.equals("true");
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (swap_coordinates="
-                    + swapCoordinatesStr + ")");
+            
+            if (wasFlipCoordinates) {
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (flip_coordinates="
+                        + swapCoordinatesStr + ") -- Deprecated, please use 'swap_coordinates' instead");
+            } else {
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (swap_coordinates="
+                        + swapCoordinatesStr + ")");
+            } // if else
         } else {
             invalidConfiguration = true;
-            LOGGER.error("[" + this.getName() + "] Invalid configuration (swap_coordinates="
-                    + swapCoordinatesStr + ") -- Must be 'true' or 'false'");
+            
+            if (wasFlipCoordinates) {
+                LOGGER.error("[" + this.getName() + "] Invalid configuration (flip_coordinates="
+                        + swapCoordinatesStr + ") -- Must be 'true' or 'false' -- Deprecated, please use "
+                        + "'swap_coordinates' instead");
+            } else {
+                LOGGER.error("[" + this.getName() + "] Invalid configuration (swap_coordinates="
+                        + swapCoordinatesStr + ") -- Must be 'true' or 'false'");
+            } // if else
+            
             return;
         } // if else
         

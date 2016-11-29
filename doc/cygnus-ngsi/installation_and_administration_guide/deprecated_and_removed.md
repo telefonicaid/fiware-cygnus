@@ -4,6 +4,7 @@ Content:
 * [Functionality deprecation and remove policy](#section1)
 * [Deprecated functionalities](#section2)
     * [Grouping Rules](#section2.1)
+    * [`flip_coordinates` parameter](#section2.2)
 * [Removed functionalities](#section3)
     * [`events_ttl` parameter](#section3.1)
     * [XML notifications support](#section3.2)
@@ -30,12 +31,17 @@ Deprecated features are removed not before 3 developement sprints (usually, a de
 [Top](#top)
 
 ##<a name="section2"></a>Deprecated functionalities
-###<a nanem="section2.1"></a>Grouping Rules
+###<a nane="section2.1"></a>Grouping Rules
 Added at version [0.5](https://github.com/telefonicaid/fiware-cygnus/releases/tag/release-0.5) (issue [107](https://github.com/telefonicaid/fiware-cygnus/issues/107)).
 
 Deprecated after releasing version [1.6.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/1.6.0) (issue [1182](https://github.com/telefonicaid/fiware-cygnus/issues/1182)).
 
 [Top](#top)
+
+###<a name="section2.2"></a>`flip_coordinates` parameter
+Added at version [1.0.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/1.0.0) (issue [927](https://github.com/telefonicaid/fiware-cygnus/issues/927)).
+
+Deprecated after releasing version [1.6.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/1.6.0) (issue [1313](https://github.com/telefonicaid/fiware-cygnus/issues/1313)).
 
 [Top](#top)
 
