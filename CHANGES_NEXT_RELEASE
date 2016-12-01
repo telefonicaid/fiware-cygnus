@@ -22,3 +22,4 @@
 - [cygnus-ngsi][bug] Obtained geometry not properly used in NGSICartoDBSink (#1327)
 - [cygnus-ngsi][hardening] Replace flip_coordinates with swap_coordinates in NGSICartoDBSink (#1313)
 - [cygnus-ngsi][bug] Add event to already existent sub-batches in NGSIBatch (#1331)
+- [cygnus-ngsi][hardening] Warn instead of Error when no OAuth2 token is configured for NGSIHDFSSink (#1330)

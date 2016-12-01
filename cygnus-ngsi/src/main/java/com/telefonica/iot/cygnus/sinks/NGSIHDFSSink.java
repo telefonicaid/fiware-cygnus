@@ -281,7 +281,7 @@ public class NGSIHDFSSink extends NGSISink {
         if (oauth2Token != null && oauth2Token.length() > 0) {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (oauth2_token=" + this.oauth2Token + ")");
         } else {
-            LOGGER.error("[" + this.getName() + "] No OAuth2 token provided. Cygnus can continue, but HDFS sink may "
+            LOGGER.warn("[" + this.getName() + "] No OAuth2 token provided. Cygnus can continue, but HDFS sink may "
                     + "not properly work if WebHDFS service is protected with such an authentication and "
                     + "authorization mechanism!");
         } // if else
