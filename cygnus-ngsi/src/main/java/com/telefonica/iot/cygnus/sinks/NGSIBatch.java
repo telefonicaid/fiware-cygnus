@@ -64,9 +64,11 @@ public class NGSIBatch {
             ArrayList<NGSIEvent> events = new ArrayList<>();
             events.add(event);
             subBatch = new SubBatch(false, events);
-        } // if
-        
-        subBatches.put(destination, subBatch);
+            subBatches.put(destination, subBatch);
+        } else {
+            subBatch.getEvents().add(event);
+        } // if else
+
         numEvents++;
     } // addEvent
 
@@ -107,6 +109,10 @@ public class NGSIBatch {
         return ((SubBatch) nextEntry.getValue()).getEvents();
     } // getNextEvent
     
+    /**
+     * Sets the next sub-batch as persisted.
+     * @param persisted
+     */
     public void setNextPersisted(boolean persisted) {
         ((SubBatch) nextEntry.getValue()).setPersisted(persisted);
     } // setNextPersisted
