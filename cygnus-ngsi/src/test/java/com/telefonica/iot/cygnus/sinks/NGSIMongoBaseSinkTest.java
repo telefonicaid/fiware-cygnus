@@ -42,6 +42,16 @@ public class NGSIMongoBaseSinkTest {
         void persistBatch(NGSIBatch batch) throws Exception {
             throw new UnsupportedOperationException("Not supported yet.");
         } // persistBatch
+
+        @Override
+        public void truncateBySize(long size) throws Exception {
+            throw new UnsupportedOperationException("Not supported yet.");
+        } // truncateBySize
+
+        @Override
+        public void truncateByTime(long time) throws Exception {
+            throw new UnsupportedOperationException("Not supported yet.");
+        } // truncateByTime
         
     } // NGSIMongoBaseSinkImpl
     
