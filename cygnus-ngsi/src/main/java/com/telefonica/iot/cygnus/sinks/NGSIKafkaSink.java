@@ -157,6 +157,14 @@ public class NGSIKafkaSink extends NGSISink {
         } // for
     } // persistBatch
     
+    @Override
+    public void truncateBySize(long size) throws Exception {
+    } // truncateBySize
+
+    @Override
+    public void truncateByTime(long time) throws Exception {
+    } // truncateByTime
+    
     /**
      * Builds the topic name.
      * @param service

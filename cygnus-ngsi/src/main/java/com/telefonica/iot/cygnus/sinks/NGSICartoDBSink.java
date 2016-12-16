@@ -366,6 +366,14 @@ public class NGSICartoDBSink extends NGSISink {
         } // for
     } // persistBatch
     
+    @Override
+    public void truncateBySize(long size) throws Exception {
+    } // truncateBySize
+
+    @Override
+    public void truncateByTime(long time) throws Exception {
+    } // truncateByTime
+    
     /**
      * Convenience class for aggregating data.
      */

@@ -94,6 +94,14 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
         } // for
     } // persistBatch
     
+    @Override
+    public void truncateBySize(long size) throws Exception {
+    } // truncateBySize
+
+    @Override
+    public void truncateByTime(long time) throws Exception {
+    } // truncateByTime
+    
     private void persistOne(NGSIEvent event) throws Exception {
         // get some values from the event
         Long notifiedRecvTimeTs = event.getRecvTimeTs();

@@ -164,6 +164,14 @@ public class NGSIDynamoDBSink extends NGSISink {
             batch.setNextPersisted(true);
         } // for
     } // persistBatch
+    
+    @Override
+    public void truncateBySize(long size) throws Exception {
+    } // truncateBySize
+
+    @Override
+    public void truncateByTime(long time) throws Exception {
+    } // truncateByTime
 
     /**
      * Class for aggregating data regarding a destination in a servicePath, in a service.

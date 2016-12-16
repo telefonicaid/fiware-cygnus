@@ -114,6 +114,14 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         } // for
     } // persistBatch
     
+    @Override
+    public void truncateBySize(long size) throws Exception {
+    } // truncateBySize
+
+    @Override
+    public void truncateByTime(long time) throws Exception {
+    } // truncateByTime
+    
     /**
      * Class for aggregating batches.
      */
