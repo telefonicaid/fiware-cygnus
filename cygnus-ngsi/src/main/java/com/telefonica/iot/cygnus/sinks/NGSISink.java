@@ -62,7 +62,7 @@ import org.apache.log4j.MDC;
   - void start()
   - void persistOne(Map<String, String> eventHeaders, NotifyContextRequest notification) throws Exception
  */
-public abstract class NGSISink extends CygnusSink implements Configurable {
+public abstract class NGSISink extends CygnusSink implements Configurable, Truncable {
 
     // logger
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSISink.class);
@@ -77,6 +77,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     protected boolean invalidConfiguration;
     protected boolean enableEncoding;
     protected boolean enableNameMappings;
+    protected long recordsSize;
+    protected long recordsKeepalive;
     // accumulator utility
     private final Accumulator accumulator;
     // rollback queues
@@ -343,6 +345,14 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         try {
             persistBatch(rollbackedAccumulation.getBatch());
             
+            if (recordsSize > -1) {
+                truncateBySize(recordsSize);
+            } // if
+            
+            if (recordsKeepalive > -1) {
+                truncateByTime(recordsKeepalive);
+            } // if
+            
             if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
                 LOGGER.info("Finishing internal transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
             } // if
@@ -503,11 +513,19 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         // save the current index for next run of the process() method
         accumulator.setAccIndex(currentIndex);
 
-        // persist the accumulation
+        // Truncate and persist the accumulation
         try {
             if (accumulator.getAccIndex() != 0) {
-                LOGGER.debug("Batch completed, persisting it");
+                LOGGER.debug("Batch completed");
                 persistBatch(accumulator.getBatch());
+                
+                if (recordsSize > -1) {
+                    truncateBySize(recordsSize);
+                } // if
+
+                if (recordsKeepalive > -1) {
+                    truncateByTime(recordsKeepalive);
+                } // if
             } // if
 
             if (!accumulator.getAccTransactionIds().isEmpty()) {
@@ -827,5 +845,11 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
      * @throws Exception
      */
     abstract void persistBatch(NGSIBatch batch) throws Exception;
+    
+    @Override
+    public abstract void truncateBySize(long size) throws Exception;
+    
+    @Override
+    public abstract void truncateByTime(long time) throws Exception;
 
 } // NGSISink
