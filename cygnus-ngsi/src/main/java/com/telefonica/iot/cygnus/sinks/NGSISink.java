@@ -77,8 +77,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable, Trunc
     protected boolean invalidConfiguration;
     protected boolean enableEncoding;
     protected boolean enableNameMappings;
-    protected long recordsSize;
-    protected long recordsKeepalive;
+    protected long truncationMaxRecords;
+    protected long truncationMaxTime;
     // accumulator utility
     private final Accumulator accumulator;
     // rollback queues
@@ -180,6 +180,14 @@ public abstract class NGSISink extends CygnusSink implements Configurable, Trunc
     protected void setRollbackedAccumulations(ArrayList<Accumulator> rollbackedAccumulations) {
         this.rollbackedAccumulations = rollbackedAccumulations;
     } // setRollbackedAccumulations
+    
+    protected long getTruncationMaxRecords() {
+        return truncationMaxRecords;
+    } // getTruncationMaxRecords
+    
+    protected long getTruncationMaxTime() {
+        return truncationMaxTime;
+    } // getTruncationMaxTime
 
     @Override
     public void configure(Context context) {
@@ -300,6 +308,9 @@ public abstract class NGSISink extends CygnusSink implements Configurable, Trunc
             LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_retry_intervals="
                     + batchRetryIntervalsStr + ")");
         } // if
+        
+        truncationMaxRecords = context.getInteger("truncation.max_records", -1);
+        truncationMaxTime = context.getInteger("truncation.max_time", -1);
     } // configure
 
     @Override
@@ -345,12 +356,12 @@ public abstract class NGSISink extends CygnusSink implements Configurable, Trunc
         try {
             persistBatch(rollbackedAccumulation.getBatch());
             
-            if (recordsSize > -1) {
-                truncateBySize(recordsSize);
+            if (truncationMaxRecords > -1) {
+                truncateBySize(truncationMaxRecords);
             } // if
             
-            if (recordsKeepalive > -1) {
-                truncateByTime(recordsKeepalive);
+            if (truncationMaxTime > -1) {
+                truncateByTime(truncationMaxTime);
             } // if
             
             if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
@@ -519,12 +530,12 @@ public abstract class NGSISink extends CygnusSink implements Configurable, Trunc
                 LOGGER.debug("Batch completed");
                 persistBatch(accumulator.getBatch());
                 
-                if (recordsSize > -1) {
-                    truncateBySize(recordsSize);
+                if (truncationMaxRecords > -1) {
+                    truncateBySize(truncationMaxRecords);
                 } // if
 
-                if (recordsKeepalive > -1) {
-                    truncateByTime(recordsKeepalive);
+                if (truncationMaxTime > -1) {
+                    truncateByTime(truncationMaxTime);
                 } // if
             } // if
 
