@@ -17,6 +17,8 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
+import org.apache.flume.EventDeliveryException;
+
 /**
  *
  * @author frb
@@ -26,15 +28,15 @@ public interface Truncable {
     /**
      * Truncates a persistence element by size.
      * @param size
-     * @throws Exception
+     * @throws org.apache.flume.EventDeliveryException
      */
-    void truncateBySize(long size) throws Exception;
+    void truncateBySize(long size) throws EventDeliveryException;
     
     /**
      * Truncates a persistence element by time.
      * @param time
-     * @throws Exception
+     * @throws org.apache.flume.EventDeliveryException
      */
-    void truncateByTime(long time) throws Exception;
+    void truncateByTime(long time) throws EventDeliveryException;
     
 } // Truncable
