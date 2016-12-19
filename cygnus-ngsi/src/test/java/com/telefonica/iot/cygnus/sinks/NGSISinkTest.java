@@ -239,6 +239,28 @@ public class NGSISinkTest {
                     + "'enable_name_mapping' is '" + sink.getEnableNameMappings() + "'");
             throw e;
         } // try catch
+        
+        try {
+            assertEquals(-1, sink.getTruncationMaxRecords());
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
+                    + "-  OK  - The default configuration value for 'truncation.max_records' is '-1'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
+                    + "- FAIL - The default configuration value for "
+                    + "'truncation.max_records' is '" + sink.getTruncationMaxRecords() + "'");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(-1, sink.getTruncationMaxTime());
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
+                    + "-  OK  - The default configuration value for 'truncation.max_time' is '-1'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
+                    + "- FAIL - The default configuration value for "
+                    + "'truncation.max_time' is '" + sink.getTruncationMaxTime() + "'");
+            throw e;
+        } // try catch
     } // testConfigureNotMandatoryParameters
     
     /**
