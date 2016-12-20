@@ -20,6 +20,7 @@
 
 cd cygnus-common
 mvn test
+mvn clean compile exec:exec assembly:single
 VERSION=$(cat pom.xml | grep version | sed -n '1p' | sed -ne '/<version>/s#\s*<[^>]*>\s*##gp' | sed 's/ //g')
 mvn install:install-file -Dfile=target/cygnus-common-$VERSION-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=$VERSION -Dpackaging=jar -DgeneratePom=true
 cd ../cygnus-ngsi
