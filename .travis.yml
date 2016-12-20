@@ -2,5 +2,5 @@ language: java
 sudo: false
 jdk:
   - openjdk7
-script: ./travis-ci.sh
+script: ./test.sh
 
