@@ -19,9 +19,10 @@
 # Author: frb
 
 cd cygnus-common
-mvn clean compile exec:exec assembly:single
+#mvn clean compile exec:exec assembly:single
 mvn test
-mvn install:install-file -Dfile=target/cygnus-common-1.6.0_SNAPSHOT-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=1.6.0_SNAPSHOT -Dpackaging=jar -DgeneratePom=true
+VERSION=$(cat cygnus-common/pom.xml | grep version | sed -n '1p' | sed -ne '/<version>/s#\s*<[^>]*>\s*##gp' | sed 's/ //g')
+mvn install:install-file -Dfile=target/cygnus-common-$VERSION-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=$VERSION -Dpackaging=jar -DgeneratePom=true
 cd ../cygnus-ngsi
-mvn clean compile exec:exec assembly:single
+#mvn clean compile exec:exec assembly:single
 mvn test
