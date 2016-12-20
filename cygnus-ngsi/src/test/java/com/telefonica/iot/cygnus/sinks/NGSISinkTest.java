@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
 import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.lifecycle.LifecycleState;
 import org.apache.log4j.Level;
@@ -92,12 +93,12 @@ public class NGSISinkTest {
         } // persistBatch
 
         @Override
-        public void truncateBySize(long size) throws Exception {
+        public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
             throw new UnsupportedOperationException("Not supported yet.");
         } // truncateBySize
 
         @Override
-        public void truncateByTime(long time) throws Exception {
+        public void truncateByTime(long time) throws EventDeliveryException {
             throw new UnsupportedOperationException("Not supported yet.");
         } // truncateByTime
         
