@@ -31,7 +31,9 @@ import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
+import java.util.Locale;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
 
 /**
  *
@@ -248,15 +250,56 @@ public class NGSICKANSink extends NGSISink {
             // Persist the aggregation
             persistAggregation(aggregator);
             batch.setNextPersisted(true);
-        } // for
+        } // while
     } // persistBatch
 
     @Override
-    public void truncateBySize(long size) throws Exception {
+    public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
+        if (batch == null) {
+            LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
+            return;
+        } // if
+
+        // Iterate on the destinations
+        batch.startIterator();
+        
+        while (batch.hasNext()) {
+            String destination = batch.getNextDestination();
+            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the "
+                    + destination + " destination");
+            
+            // Get the events within the current sub-batch
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
+
+            // Get a representative from the current destination sub-batch
+            NGSIEvent event = events.get(0);
+            
+            // Do the truncation
+            String service = event.getServiceForNaming(enableNameMappings);
+            String servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            String entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+
+            try {
+                String orgName = buildOrgName(service);
+                String pkgName = buildPkgName(service, servicePathForNaming);
+                String resName = buildResName(entityForNaming);
+                LOGGER.debug("[" + this.getName() + "] Truncating by size (size=" + size + ",orgName=" + orgName
+                        + ", pkgName=" + pkgName + ", resName=" + resName + ")");
+                persistenceBackend.truncateBySize(orgName, pkgName, resName, size);
+            } catch (Exception e) {
+                throw new EventDeliveryException(e.getMessage());
+            } // try catch
+        } // while
     } // truncateBySize
 
     @Override
-    public void truncateByTime(long time) throws Exception {
+    public void truncateByTime(long time) throws EventDeliveryException {
+        try {
+            LOGGER.debug("[" + this.getName() + "] Truncating by size (time=" + time + ")");
+            persistenceBackend.truncateCachedByTime(time);
+        } catch (Exception e) {
+            throw new EventDeliveryException(e.getMessage());
+        } // try catch
     } // truncateByTime
 
     /**
@@ -480,7 +523,7 @@ public class NGSICKANSink extends NGSISink {
         if (enableEncoding) {
             orgName = NGSICharsets.encodeCKAN(fiwareService);
         } else {
-            orgName = NGSIUtils.encode(fiwareService, false, true);
+            orgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);
         } // if else
 
         if (orgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
@@ -513,8 +556,8 @@ public class NGSICKANSink extends NGSISink {
             if (fiwareServicePath.equals("/")) {
                 pkgName = NGSIUtils.encode(fiwareService, false, true);
             } else {
-                pkgName = NGSIUtils.encode(fiwareService, false, true)
-                        + NGSIUtils.encode(fiwareServicePath, false, true);
+                pkgName = (NGSIUtils.encode(fiwareService, false, true)
+                        + NGSIUtils.encode(fiwareServicePath, false, true)).toLowerCase(Locale.ENGLISH);
             } // if else
         } // if else
 
@@ -541,7 +584,7 @@ public class NGSICKANSink extends NGSISink {
         if (enableEncoding) {
             resName = NGSICharsets.encodeCKAN(entity);
         } else {
-            resName = NGSIUtils.encode(entity, false, true);
+            resName = NGSIUtils.encode(entity, false, true).toLowerCase(Locale.ENGLISH);
         } // if else
 
         if (resName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
