@@ -118,7 +118,7 @@ public class NGSISinkTest {
     public void testStart() {
         System.out.println(getTestTraceHead("[NGSISink.start]") + "-------- The sink starts properly");
         NGSISinkImpl sink = new NGSISinkImpl();
-        sink.configure(createContext(null, null, null, null, null, null, null, null)); // default configuration
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null)); // default conf
         sink.setChannel(new MemoryChannel());
         sink.start();
         LifecycleState state = sink.getLifecycleState();
@@ -142,7 +142,7 @@ public class NGSISinkTest {
         System.out.println(getTestTraceHead("[NGSISink.configure]")
                 + "-------- When not configured, the default values are used for non mandatory parameters");
         NGSISinkImpl sink = new NGSISinkImpl();
-        sink.configure(createContext(null, null, null, null, null, null, null, null)); // default configuration
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null)); // default conf
         
         try {
             assertEquals("5000", sink.getBatchRetryIntervals());
@@ -265,6 +265,44 @@ public class NGSISinkTest {
     } // testConfigureNotMandatoryParameters
     
     /**
+     * [CygnusSink.configure] -------- When not configured, the default values are used for non mandatory
+     * parameters.
+     */
+    @Test
+    public void testConfigureModifyNotMandatoryParameters() {
+        System.out.println(getTestTraceHead("[NGSISink.configure]")
+                + "-------- When configured, non mandatory parameters get the appropiate value");
+        NGSISinkImpl sink = new NGSISinkImpl();
+        String truncationMaxRecords = "5";
+        sink.configure(createContext(null, null, null, null, null, null, null, null, truncationMaxRecords, null));
+        
+        try {
+            assertEquals(5, sink.getTruncationMaxRecords());
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
+                    + "-  OK  - The configuration value for 'truncation.max_records' is '5'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
+                    + "- FAIL - The configuration value for 'truncation_max_records' is '"
+                    + sink.getTruncationMaxRecords() + "'");
+            throw e;
+        } // try catch
+        
+        String truncationMaxTime = "60000";
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null, truncationMaxTime));
+        
+        try {
+            assertEquals(60000, sink.getTruncationMaxTime());
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
+                    + "-  OK  - The configuration value for 'truncation.max_time' is '60000'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSISink.configure]")
+                    + "- FAIL - The configuration value for 'truncation_max_time' is '"
+                    + sink.getTruncationMaxTime() + "'");
+            throw e;
+        } // try catch
+    } // testConfigureModifyNotMandatoryParameters
+    
+    /**
      * [CygnusSink.configure] -------- The configuration becomes invalid upon out-of-the-limits configured values for
      * parameters having a discrete set of accepted values, or numerical values having upper or lower limits.
      */
@@ -275,7 +313,7 @@ public class NGSISinkTest {
                 + "having a discrete set of accepted values, or numerical values having upper or lower limits");
         NGSISinkImpl sink = new NGSISinkImpl();
         String configuredBatchSize = "0";
-        sink.configure(createContext(null, configuredBatchSize, null, null, null, null, null, null));
+        sink.configure(createContext(null, configuredBatchSize, null, null, null, null, null, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -291,7 +329,7 @@ public class NGSISinkTest {
         
         sink = new NGSISinkImpl();
         String configuredBatchTimeout = "0";
-        sink.configure(createContext(null, null, configuredBatchTimeout, null, null, null, null, null));
+        sink.configure(createContext(null, null, configuredBatchTimeout, null, null, null, null, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -307,7 +345,7 @@ public class NGSISinkTest {
         
         sink = new NGSISinkImpl();
         String configuredBatchTTL = "-2";
-        sink.configure(createContext(null, null, null, configuredBatchTTL, null, null, null, null));
+        sink.configure(createContext(null, null, null, configuredBatchTTL, null, null, null, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -321,7 +359,7 @@ public class NGSISinkTest {
         
         sink = new NGSISinkImpl();
         String dataModel = "dm-by-other";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, null));
+        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -335,7 +373,7 @@ public class NGSISinkTest {
         
         sink = new NGSISinkImpl();
         String configuredEnableGrouping = "falso";
-        sink.configure(createContext(null, null, null, null, null, configuredEnableGrouping, null, null));
+        sink.configure(createContext(null, null, null, null, null, configuredEnableGrouping, null, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -351,7 +389,7 @@ public class NGSISinkTest {
         
         sink = new NGSISinkImpl();
         String configuredEnableLowercase = "verdadero";
-        sink.configure(createContext(null, null, null, null, null, null, configuredEnableLowercase, null));
+        sink.configure(createContext(null, null, null, null, null, null, configuredEnableLowercase, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -367,7 +405,8 @@ public class NGSISinkTest {
         
         sink = new NGSISinkImpl();
         String configuredEnableNameMappings = "verdadero";
-        sink.configure(createContext(null, null, null, null, null, null, null, configuredEnableNameMappings));
+        sink.configure(createContext(null, null, null, null, null, null, null, configuredEnableNameMappings,
+                null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -383,7 +422,7 @@ public class NGSISinkTest {
         
         sink = new NGSISinkImpl();
         String batchRetryIntervals = "1000,2000,-3000";
-        sink.configure(createContext(batchRetryIntervals, null, null, null, null, null, null, null));
+        sink.configure(createContext(batchRetryIntervals, null, null, null, null, null, null, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -409,7 +448,7 @@ public class NGSISinkTest {
                 + "-------- When data model is by service, a notification is successfully accumulated");
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-service";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, null));
+        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
         Map<String, String> headers = new HashMap<>();
@@ -513,7 +552,7 @@ public class NGSISinkTest {
                 + "-------- When data model is by service path, a notification is successfully accumulated");
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-service-path";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, null));
+        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
         Map<String, String> headers = new HashMap<>();
@@ -617,7 +656,7 @@ public class NGSISinkTest {
                 + "-------- When data model is by entity, a notification is successfully accumulated");
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-entity";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, null));
+        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
         Map<String, String> headers = new HashMap<>();
@@ -723,7 +762,7 @@ public class NGSISinkTest {
                 + "-------- When data model is by attribute, a notification is successfully accumulated");
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-attribute";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, null));
+        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
         Map<String, String> headers = new HashMap<>();
@@ -831,7 +870,7 @@ public class NGSISinkTest {
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-service";
         String enableNameMappings = "true";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings));
+        sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
         Map<String, String> headers = new HashMap<>();
@@ -937,7 +976,7 @@ public class NGSISinkTest {
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-service-path";
         String enableNameMappings = "true";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings));
+        sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
         Map<String, String> headers = new HashMap<>();
@@ -1043,7 +1082,7 @@ public class NGSISinkTest {
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-entity";
         String enableNameMappings = "true";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings));
+        sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
         Map<String, String> headers = new HashMap<>();
@@ -1151,7 +1190,7 @@ public class NGSISinkTest {
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-attribute";
         String enableNameMappings = "true";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings));
+        sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
         Map<String, String> headers = new HashMap<>();
@@ -1256,7 +1295,7 @@ public class NGSISinkTest {
         System.out.println(getTestTraceHead("[NGSISink.getRollbackedAccumulationForRetry]")
                 + "-------- When there are no candidates for retrying, null is returned");
         NGSISinkImpl sink = new NGSISinkImpl();
-        sink.configure(createContext(null, null, null, null, null, null, null, null)); // default configuration
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null)); // default conf
         ArrayList<Accumulator> rollbackedAccumulations = new ArrayList<>();
         sink.setRollbackedAccumulations(rollbackedAccumulations);
         
@@ -1297,7 +1336,7 @@ public class NGSISinkTest {
         System.out.println(getTestTraceHead("[NGSISink.getRollbackedAccumulationForRetry]")
                 + "-------- When there is a candidate for retrying, it is returned");
         NGSISinkImpl sink = new NGSISinkImpl();
-        sink.configure(createContext(null, null, null, null, null, null, null, null)); // default configuration
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null)); // default conf
         ArrayList<Accumulator> rollbackedAccumulations = new ArrayList<>();
         Accumulator acc = sink.new Accumulator();
         // this accumulation has supposedly been retried 10000 miliseconds ago, so it is a candidate
@@ -1327,7 +1366,7 @@ public class NGSISinkTest {
                 + "-------- When rollbacking for the first time, the accumulator is added to the rollbacked "
                 + "accumulations having the maximum TTL");
         NGSISinkImpl sink = new NGSISinkImpl();
-        sink.configure(createContext(null, null, null, null, null, null, null, null)); // default configuration
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null)); // default conf
         Accumulator acc = sink.new Accumulator();
         sink.doRollback(acc);
         
@@ -1363,7 +1402,7 @@ public class NGSISinkTest {
                 + "-------- When rollbacking after the first time, the accumulator is added to the rollbacked "
                 + "accumulations having a decreased TTL");
         NGSISinkImpl sink = new NGSISinkImpl();
-        sink.configure(createContext(null, null, null, null, null, null, null, null)); // default configuration
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null)); // default conf
         Accumulator acc = sink.new Accumulator();
         int ttl = 3;
         acc.setTTL(ttl);
@@ -1392,7 +1431,8 @@ public class NGSISinkTest {
     } // testDoRollbackAgain
     
     private Context createContext(String batchRetryIntervals, String batchSize, String batchTimeout, String batchTTL,
-            String dataModel, String enableGrouping, String enableLowercase, String enableNameMappings) {
+            String dataModel, String enableGrouping, String enableLowercase, String enableNameMappings, 
+            String truncationMaxRecords, String truncationMaxTime) {
         Context context = new Context();
         context.put("batch_retry_intervals", batchRetryIntervals);
         context.put("batch_size", batchSize);
@@ -1402,6 +1442,8 @@ public class NGSISinkTest {
         context.put("enable_grouping", enableGrouping);
         context.put("enable_lowercase", enableLowercase);
         context.put("enable_name_mappings", enableNameMappings);
+        context.put("truncation.max_records", truncationMaxRecords);
+        context.put("truncation.max_time", truncationMaxTime);
         return context;
     } // createContext
     
