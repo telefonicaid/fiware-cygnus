@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
 
 /**
  * Sink for testing purposes. It does not persistOne the notified context data but
@@ -92,11 +93,11 @@ public class NGSITestSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void truncateBySize(long size) throws Exception {
+    public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
     } // truncateBySize
 
     @Override
-    public void truncateByTime(long time) throws Exception {
+    public void truncateByTime(long time) throws EventDeliveryException {
     } // truncateByTime
     
     /**

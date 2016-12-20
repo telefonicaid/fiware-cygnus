@@ -32,6 +32,7 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
 
 /**
  *
@@ -252,11 +253,11 @@ public class NGSICKANSink extends NGSISink {
     } // persistBatch
 
     @Override
-    public void truncateBySize(long size) throws Exception {
+    public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
     } // truncateBySize
 
     @Override
-    public void truncateByTime(long time) throws Exception {
+    public void truncateByTime(long time) throws EventDeliveryException {
     } // truncateByTime
 
     /**
