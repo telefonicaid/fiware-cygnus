@@ -439,6 +439,118 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         } // try catch
     } // existsView
     
+    private JSONObject getRecords(String resId, String filters) throws Exception {
+        try {
+            // create the CKAN request JSON
+            String jsonString = "{\"id\": \"" + resId + "\"";
+        
+            if (filters == null || filters.isEmpty()) {
+                jsonString += "}";
+            } else {
+                jsonString += ",\"filters\":\"" + filters + "\"}";
+            } // if else
+
+            // create the CKAN request URL
+            String urlPath = "/api/3/action/datastore_search";
+
+            // do the CKAN request
+            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+            // check the status
+            if (res.getStatusCode() == 200) {
+                LOGGER.debug("Successful search (resourceId=" + resId + ")");
+                return res.getJsonObject();
+            } else {
+                throw new CygnusPersistenceError("Could not search for the records (resId=" + resId
+                        + ", statusCode=" + res.getStatusCode() + ")");
+            } // if else if else
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
+    } // getRecords
+    
+    private void deleteRecords(String resId, String filters) throws Exception {
+        try {
+            // create the CKAN request JSON
+            String jsonString = "{\"id\": \"" + resId + "\",\"force\":\"true\"";
+        
+            if (filters == null || filters.isEmpty()) {
+                jsonString += "}";
+            } else {
+                jsonString += ",\"filters\":" + filters + "}";
+            } // if else
+
+            // create the CKAN request URL
+            String urlPath = "/api/3/action/datastore_delete";
+
+            // do the CKAN request
+            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+            // check the status
+            if (res.getStatusCode() == 200) {
+                LOGGER.debug("Successful deletion (resourceId=" + resId + ")");
+            } else {
+                throw new CygnusPersistenceError("Could not delete the records (resId=" + resId
+                        + ", statusCode=" + res.getStatusCode() + ")");
+            } // if else if else
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
+    } // deleteRecords
+    
+    @Override
+    public void truncateBySize(String orgName, String pkgName, String resName, long size) throws Exception {
+        // Get the resource ID by querying the cache
+        String resId = cache.getResId(orgName, pkgName, resName);
+        
+        // Get certain information about the records within the resource
+        JSONObject result = (JSONObject) getRecords(resId, null).get("result");
+        long total = (Long) result.get("total");
+        JSONObject firstRecord = (JSONObject) ((JSONArray) result.get("records")).get(0);
+        long firstRecordId = (Long) firstRecord.get("_id");
+        
+        // Create the filters for a datastore deletion
+        String filters = "";
+        
+        if (total > size) {
+            for (long i = firstRecordId; i <= (total - size); i++) {
+                if (filters.isEmpty()) {
+                    filters += "{\"_id\":" + i;
+                } else {
+                    filters += ",\"_id\":" + i;
+                } // if else
+            } // for
+            
+            filters += "}";
+            LOGGER.debug(".......... " + filters);
+        } // if
+
+        // Do the deletion
+        deleteRecords(resId, filters);
+    } // truncateBySize
+    
+    @Override
+    public void truncateByTime(String orgName, String pkgName, String resName, long time) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
+    } // truncateByTime
+
+    @Override
+    public void truncateCachedByTime(long time) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
+    } // truncateCachedByTime
+    
     /**
      * Sets the CKAN cache. This is protected since it is only used by the tests.
      * @param cache
