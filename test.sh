@@ -1,4 +1,27 @@
+#
+# Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+#
+# This file is part of fiware-cygnus (FI-WARE project).
+#
+# fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+# General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+# option) any later version.
+# fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+# for more details.
+#
+# You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
+# http://www.gnu.org/licenses/.
+#
+# For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+#
+
+# Author: frb
+
 cd cygnus-common
+mvn clean compile exec:exec assembly:single
 mvn test
+mvn install:install-file -Dfile=target/cygnus-common-1.6.0_SNAPSHOT-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=1.6.0_SNAPSHOT -Dpackaging=jar -DgeneratePom=true
 cd ../cygnus-ngsi
+mvn clean compile exec:exec assembly:single
 mvn test
