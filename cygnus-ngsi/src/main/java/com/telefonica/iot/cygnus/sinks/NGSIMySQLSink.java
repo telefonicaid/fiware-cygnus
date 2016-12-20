@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
 
 /**
  *
@@ -196,11 +197,11 @@ public class NGSIMySQLSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void truncateBySize(long size) throws Exception {
+    public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
     } // truncateBySize
 
     @Override
-    public void truncateByTime(long time) throws Exception {
+    public void truncateByTime(long time) throws EventDeliveryException {
     } // truncateByTime
     
     /**
