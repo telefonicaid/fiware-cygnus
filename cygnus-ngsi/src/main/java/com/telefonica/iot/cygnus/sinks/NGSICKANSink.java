@@ -31,6 +31,7 @@ import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
+import java.util.Locale;
 import org.apache.flume.Context;
 import org.apache.flume.EventDeliveryException;
 
@@ -481,7 +482,7 @@ public class NGSICKANSink extends NGSISink {
         if (enableEncoding) {
             orgName = NGSICharsets.encodeCKAN(fiwareService);
         } else {
-            orgName = NGSIUtils.encode(fiwareService, false, true);
+            orgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);;
         } // if else
 
         if (orgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
@@ -512,10 +513,10 @@ public class NGSICKANSink extends NGSISink {
                     + NGSICharsets.encodeCKAN(fiwareServicePath);
         } else {
             if (fiwareServicePath.equals("/")) {
-                pkgName = NGSIUtils.encode(fiwareService, false, true);
+                pkgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);;
             } else {
-                pkgName = NGSIUtils.encode(fiwareService, false, true)
-                        + NGSIUtils.encode(fiwareServicePath, false, true);
+                pkgName = (NGSIUtils.encode(fiwareService, false, true)
+                        + NGSIUtils.encode(fiwareServicePath, false, true)).toLowerCase(Locale.ENGLISH);;
             } // if else
         } // if else
 
@@ -542,7 +543,7 @@ public class NGSICKANSink extends NGSISink {
         if (enableEncoding) {
             resName = NGSICharsets.encodeCKAN(entity);
         } else {
-            resName = NGSIUtils.encode(entity, false, true);
+            resName = NGSIUtils.encode(entity, false, true).toLowerCase(Locale.ENGLISH);
         } // if else
 
         if (resName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
