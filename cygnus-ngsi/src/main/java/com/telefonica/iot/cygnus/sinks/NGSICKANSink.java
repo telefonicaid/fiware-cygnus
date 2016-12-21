@@ -264,10 +264,6 @@ public class NGSICKANSink extends NGSISink {
         batch.startIterator();
         
         while (batch.hasNext()) {
-            String destination = batch.getNextDestination();
-            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the "
-                    + destination + " destination");
-            
             // Get the events within the current sub-batch
             ArrayList<NGSIEvent> events = batch.getNextEvents();
 
