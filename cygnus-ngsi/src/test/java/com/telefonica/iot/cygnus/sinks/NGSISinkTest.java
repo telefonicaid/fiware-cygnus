@@ -301,7 +301,7 @@ public class NGSISinkTest {
         sink.configure(createContext(null, null, null, null, null, null, null, null, null, truncationMaxTime, null));
         
         try {
-            assertEquals(60000, sink.getTruncationMaxTime());
+            assertEquals(60, sink.getTruncationMaxTime());
             System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "-  OK  - The configuration value for 'truncation.max_time' is '60'");
         } catch (AssertionError e) {
