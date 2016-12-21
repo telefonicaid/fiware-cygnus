@@ -552,7 +552,7 @@ public class NGSICKANSink extends NGSISink {
                     + NGSICharsets.encodeCKAN(fiwareServicePath);
         } else {
             if (fiwareServicePath.equals("/")) {
-                pkgName = NGSIUtils.encode(fiwareService, false, true);
+                pkgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);
             } else {
                 pkgName = (NGSIUtils.encode(fiwareService, false, true)
                         + NGSIUtils.encode(fiwareServicePath, false, true)).toLowerCase(Locale.ENGLISH);
