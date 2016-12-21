@@ -21,6 +21,7 @@ import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHe
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
+import org.apache.flume.EventDeliveryException;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertEquals;
@@ -42,6 +43,15 @@ public class NGSIMongoBaseSinkTest {
         void persistBatch(NGSIBatch batch) throws Exception {
             throw new UnsupportedOperationException("Not supported yet.");
         } // persistBatch
+
+        @Override
+        public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
+            throw new UnsupportedOperationException("Not supported yet.");
+        } // truncateBySize
+
+        @Override
+        public void truncateByTime(long time) {
+        } // truncateByTime
         
     } // NGSIMongoBaseSinkImpl
     

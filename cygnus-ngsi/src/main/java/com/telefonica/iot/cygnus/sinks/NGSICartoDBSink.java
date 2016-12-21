@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -365,6 +366,14 @@ public class NGSICartoDBSink extends NGSISink {
             batch.setNextPersisted(true);
         } // for
     } // persistBatch
+    
+    @Override
+    public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
+    } // truncateBySize
+
+    @Override
+    public void truncateByTime(long time) {
+    } // truncateByTime
     
     /**
      * Convenience class for aggregating data.

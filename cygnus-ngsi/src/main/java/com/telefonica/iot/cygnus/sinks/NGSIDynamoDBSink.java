@@ -35,6 +35,7 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.util.ArrayList;
 import java.util.Date;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
 
 /**
  *
@@ -164,6 +165,14 @@ public class NGSIDynamoDBSink extends NGSISink {
             batch.setNextPersisted(true);
         } // for
     } // persistBatch
+    
+    @Override
+    public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
+    } // truncateBySize
+
+    @Override
+    public void truncateByTime(long time) {
+    } // truncateByTime
 
     /**
      * Class for aggregating data regarding a destination in a servicePath, in a service.

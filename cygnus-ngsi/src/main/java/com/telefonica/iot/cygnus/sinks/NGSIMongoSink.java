@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import org.bson.Document;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
 
 /**
  * @author frb
@@ -113,6 +114,14 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             batch.setNextPersisted(true);
         } // for
     } // persistBatch
+    
+    @Override
+    public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
+    } // truncateBySize
+
+    @Override
+    public void truncateByTime(long time) {
+    } // truncateByTime
     
     /**
      * Class for aggregating batches.

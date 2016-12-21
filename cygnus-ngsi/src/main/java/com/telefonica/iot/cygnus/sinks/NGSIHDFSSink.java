@@ -42,6 +42,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -505,6 +506,14 @@ public class NGSIHDFSSink extends NGSISink {
             } // if
         } // for
     } // persistBatch
+    
+    @Override
+    public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
+    } // truncateBySize
+
+    @Override
+    public void truncateByTime(long time) {
+    } // truncateByTime
 
     /**
      * Class for aggregating aggregation.
