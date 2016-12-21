@@ -26,6 +26,8 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 import org.json.simple.JSONArray;
@@ -43,6 +45,8 @@ public class CKANCache extends HttpBackend {
     private HashMap<String, String> orgMap; // this cache contains the translation from organization name to identifier
     private HashMap<String, String> pkgMap; // this cache contains the translation from package name to identifier
     private HashMap<String, String> resMap; // this cache contains the translation from resource name to identifier
+    private Iterator entries;
+    private Entry nextEntry;
     
     /**
      * Constructor.
@@ -56,10 +60,12 @@ public class CKANCache extends HttpBackend {
     public CKANCache(String host, String port, boolean ssl, String apiKey, int maxConns, int maxConnsPerRoute) {
         super(host, port, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
         this.apiKey = apiKey;
-        tree = new HashMap<String, HashMap<String, ArrayList<String>>>();
-        orgMap = new HashMap<String, String>();
-        pkgMap = new HashMap<String, String>();
-        resMap = new HashMap<String, String>();
+        tree = new HashMap<>();
+        orgMap = new HashMap<>();
+        pkgMap = new HashMap<>();
+        resMap = new HashMap<>();
+        entries = null;
+        nextEntry = null;
     } // CKANCache
     
     /**
@@ -166,7 +172,7 @@ public class CKANCache extends HttpBackend {
         
         // query CKAN for the organization information
         String ckanURL = "/api/3/action/organization_show?id=" + orgName + "&include_datasets=true";
-        ArrayList<Header> headers = new ArrayList<Header>();
+        ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
         JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
 
@@ -221,7 +227,7 @@ public class CKANCache extends HttpBackend {
         
         // query CKAN for the package information
         String ckanURL = "/api/3/action/package_show?id=" + pkgName;
-        ArrayList<Header> headers = new ArrayList<Header>();
+        ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
         JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
 
@@ -284,7 +290,7 @@ public class CKANCache extends HttpBackend {
         // query CKAN for the organization information
         
         String ckanURL = "/api/3/action/package_show?id=" + pkgName;
-        ArrayList<Header> headers = new ArrayList<Header>();
+        ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
         JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
 
@@ -419,7 +425,7 @@ public class CKANCache extends HttpBackend {
     private JSONArray getResources(String pkgName) throws Exception {
         LOGGER.debug("Going to get the resources list from package " + pkgName);
         String ckanURL = "/api/3/action/package_show?id=" + pkgName;
-        ArrayList<Header> headers = new ArrayList<Header>();
+        ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
         JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
 
@@ -464,5 +470,34 @@ public class CKANCache extends HttpBackend {
     protected void setTree(HashMap<String, HashMap<String, ArrayList<String>>> tree) {
         this.tree = tree;
     } // setTree
+    
+    /**
+     * Starts an iterator for the resource IDs.
+     */
+    public void startResIterator() {
+        entries = resMap.entrySet().iterator();
+    } // getIterator
+
+    /**
+     * Return if there is another element to iterate.
+     * @return True if there is another element to iterare, false otherwise. Internally, gets stores a pointer to the
+     * next entry
+     */
+    public boolean hasNextRes() {
+        if (entries.hasNext()) {
+            nextEntry = (Entry) entries.next();
+            return true;
+        } else {
+            return false;
+        } // if else
+    } // hasNextRes
+    
+    /**
+     * Gets the next resource ID.
+     * @return The next resource ID
+     */
+    public String getNextResId() {
+        return (String) nextEntry.getValue();
+    } // getNextResId
     
 } // CKANCache
