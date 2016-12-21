@@ -87,7 +87,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     // rollback queues
     private ArrayList<Accumulator> rollbackedAccumulations;
     // Time-based truncation thread
-    private final TimeBasedTruncator timeBasedTruncator;
+    private TimeBasedTruncator timeBasedTruncator;
 
     /**
      * Constructor.
@@ -103,9 +103,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
         // Create the rollbacking queue
         rollbackedAccumulations = new ArrayList<>();
-        
-        // Create the time-based truncation thread
-        timeBasedTruncator = new TimeBasedTruncator();
     } // NGSISink
     
     protected String getBatchRetryIntervals() {
@@ -349,7 +346,9 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         } else {
             // The accumulator must be initialized once read the configuration
             accumulator.initialize(new Date().getTime());
-            // Start the time-based truncation thread
+            // Crate and start the time-based truncation thread... this has to be created here in order to have a not
+            // null name for the sink (i.e. after configuration)
+            timeBasedTruncator = new TimeBasedTruncator(this.getName());
             timeBasedTruncator.start();
             
             LOGGER.info("[" + this.getName() + "] Startup completed");
@@ -876,6 +875,16 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
      * Class for truncating the persistence elements in a time basis.
      */
     private class TimeBasedTruncator extends Thread {
+        
+        private final String sinkName;
+        
+        /**
+         * Constructor.
+         * @param sinkName
+         */
+        public TimeBasedTruncator(String sinkName) {
+            this.sinkName = sinkName;
+        } // TimeBasedTruncator
 
         @Override
         public void run() {
@@ -884,7 +893,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 long timeAfter = 0;
                 
                 if (truncationMaxTime > -1) {
-                    LOGGER.debug("[" + this.getName() + "] Calling time-based truncation");
+                    LOGGER.debug("[" + sinkName + "] Calling time-based truncation");
                     timeBefore = new Date().getTime();
                     truncateByTime(truncationMaxTime * 1000);
                     timeAfter = new Date().getTime();
