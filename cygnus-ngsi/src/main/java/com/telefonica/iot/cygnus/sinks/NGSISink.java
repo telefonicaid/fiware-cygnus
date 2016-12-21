@@ -37,6 +37,8 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.flume.Channel;
 import org.apache.flume.Context;
 import org.apache.flume.EventDeliveryException;
@@ -77,12 +79,15 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     protected boolean invalidConfiguration;
     protected boolean enableEncoding;
     protected boolean enableNameMappings;
-    protected long truncationMaxRecords;
-    protected long truncationMaxTime;
+    private long truncationMaxRecords;
+    private long truncationMaxTime;
+    private long truncationCheckingTime; 
     // accumulator utility
     private final Accumulator accumulator;
     // rollback queues
     private ArrayList<Accumulator> rollbackedAccumulations;
+    // Time-based truncation thread
+    private final TimeBasedTruncator timeBasedTruncator;
 
     /**
      * Constructor.
@@ -90,14 +95,17 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     public NGSISink() {
         super();
 
-        // configuration is supposed to be valid
+        // Configuration is supposed to be valid
         invalidConfiguration = false;
 
-        // create the accumulator utility
+        // Create the accumulator utility
         accumulator = new Accumulator();
 
-        // crete the rollbacking queue
+        // Create the rollbacking queue
         rollbackedAccumulations = new ArrayList<>();
+        
+        // Create the time-based truncation thread
+        timeBasedTruncator = new TimeBasedTruncator();
     } // NGSISink
     
     protected String getBatchRetryIntervals() {
@@ -188,6 +196,10 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     protected long getTruncationMaxTime() {
         return truncationMaxTime;
     } // getTruncationMaxTime
+    
+    protected long getTruncationCheckingTime() {
+        return truncationCheckingTime;
+    } // getTruncationCheckingTime
 
     @Override
     public void configure(Context context) {
@@ -310,7 +322,21 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         } // if
         
         truncationMaxRecords = context.getInteger("truncation.max_records", -1);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (truncation.max_records="
+                    + truncationMaxRecords + ")");
         truncationMaxTime = context.getInteger("truncation.max_time", -1);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (truncation.max_time="
+                    + truncationMaxTime + ")");
+        truncationCheckingTime = context.getInteger("truncation.checking_time", 3600);
+        
+        if (truncationCheckingTime <= 0) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (truncation.checking_time="
+                    + truncationCheckingTime + ") -- Must be greater than 0");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (truncation.checking_time="
+                    + truncationCheckingTime + ")");
+        } // if else
     } // configure
 
     @Override
@@ -321,8 +347,11 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             LOGGER.info("[" + this.getName() + "] Startup completed. Nevertheless, there are errors "
                     + "in the configuration, thus this sink will not run the expected logic");
         } else {
-            // the accumulator must be initialized once read the configuration
+            // The accumulator must be initialized once read the configuration
             accumulator.initialize(new Date().getTime());
+            // Start the time-based truncation thread
+            timeBasedTruncator.start();
+            
             LOGGER.info("[" + this.getName() + "] Startup completed");
         } // if else
     } // start
@@ -336,17 +365,11 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     public Status process() throws EventDeliveryException {
         if (invalidConfiguration) {
             return Status.BACKOFF;
+        } else if (rollbackedAccumulations.isEmpty()) {
+            return processNewBatches();
         } else {
-            if (truncationMaxTime > -1) {
-                truncateByTime(truncationMaxTime);
-            } // if
-            
-            if (rollbackedAccumulations.isEmpty()) {
-                return processNewBatches();
-            } else {
-                processRollbackedBatches();
-                return processNewBatches();
-            } // if else
+            processRollbackedBatches();
+            return processNewBatches();
         } // if else
     } // process
 
@@ -850,6 +873,41 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     } // Accumulator
     
     /**
+     * Class for truncating the persistence elements in a time basis.
+     */
+    private class TimeBasedTruncator extends Thread {
+
+        @Override
+        public void run() {
+            while (true) {
+                long timeBefore = 0;
+                long timeAfter = 0;
+                
+                if (truncationMaxTime > -1) {
+                    LOGGER.debug("[" + this.getName() + "] Calling time-based truncation");
+                    timeBefore = new Date().getTime();
+                    truncateByTime(truncationMaxTime * 1000);
+                    timeAfter = new Date().getTime();
+                } // if
+                
+                long timeExpent = timeAfter - timeBefore;
+                long sleepTime = (truncationCheckingTime * 1000) - timeExpent;
+                
+                if (sleepTime <= 0) {
+                    sleepTime = 1000; // sleep at least 1 second
+                } // if
+                
+                try {
+                    sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    LOGGER.error("[" + this.getName() + "] Error while sleeping. Details: " + e.getMessage());
+                } // try
+            } // while
+        } // run
+
+    } // TimeBasedTruncator
+    
+    /**
      * This is the method the classes extending this class must implement when dealing with a batch of events to be
      * persisted.
      * @param batch
@@ -870,6 +928,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
      * @param time
      * @throws EventDeliveryException
      */
-    abstract void truncateByTime(long time) throws EventDeliveryException;
+    abstract void truncateByTime(long time);
 
 } // NGSISink
