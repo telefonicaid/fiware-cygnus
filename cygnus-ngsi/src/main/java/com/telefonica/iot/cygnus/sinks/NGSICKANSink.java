@@ -293,12 +293,14 @@ public class NGSICKANSink extends NGSISink {
     } // truncateBySize
 
     @Override
-    public void truncateByTime(long time) throws EventDeliveryException {
+    public void truncateByTime(long time) {
+        LOGGER.debug("[" + this.getName() + "] Truncating by time (time=" + time + ")");
+        
         try {
-            LOGGER.debug("[" + this.getName() + "] Truncating by size (time=" + time + ")");
             persistenceBackend.truncateCachedByTime(time);
         } catch (Exception e) {
-            throw new EventDeliveryException(e.getMessage());
+            LOGGER.error("[" + this.getName() + "] There was an error while truncating by time. Details= "
+                    + e.getMessage());
         } // try catch
     } // truncateByTime
 

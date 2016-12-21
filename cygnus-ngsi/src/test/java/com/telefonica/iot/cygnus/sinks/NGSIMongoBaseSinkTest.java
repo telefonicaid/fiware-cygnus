@@ -50,8 +50,7 @@ public class NGSIMongoBaseSinkTest {
         } // truncateBySize
 
         @Override
-        public void truncateByTime(long time) throws EventDeliveryException {
-            throw new UnsupportedOperationException("Not supported yet.");
+        public void truncateByTime(long time) {
         } // truncateByTime
         
     } // NGSIMongoBaseSinkImpl

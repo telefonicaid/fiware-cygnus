@@ -236,7 +236,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     } // truncateBySize
 
     @Override
-    public void truncateByTime(long time) throws EventDeliveryException {
+    public void truncateByTime(long time) {
     } // truncateByTime
 
     /**
