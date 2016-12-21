@@ -26,6 +26,7 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import java.util.ArrayList;
+import java.util.Date;
 import org.json.simple.JSONObject;
 import org.apache.http.Header;
 import org.apache.http.entity.StringEntity;
@@ -518,27 +519,30 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         // Get certain information about the records within the resource
         JSONObject result = (JSONObject) getRecords(resId, null).get("result");
         long total = (Long) result.get("total");
-        JSONObject firstRecord = (JSONObject) ((JSONArray) result.get("records")).get(0);
-        long firstRecordId = (Long) firstRecord.get("_id");
+        JSONArray records = (JSONArray) result.get("records");
         
         // Create the filters for a datastore deletion
         String filters = "";
         
         if (total > size) {
-            for (long i = firstRecordId; i <= (total - size); i++) {
+            for (int i = 0; i < (total - size); i++) {
+                long id = (Long) ((JSONObject) records.get(i)).get("_id");
+                
                 if (filters.isEmpty()) {
-                    filters += "{\"_id\":" + i;
+                    filters += "{\"_id\":[" + id;
                 } else {
-                    filters += ",\"_id\":" + i;
+                    filters += "," + id;
                 } // if else
             } // for
-            
-            filters += "}";
-            LOGGER.debug(".......... " + filters);
         } // if
-
-        // Do the deletion
-        deleteRecords(resId, filters);
+        
+        if (filters.isEmpty()) {
+            LOGGER.debug("No records to be deleted");
+        } else {
+            filters += "]}";
+            LOGGER.debug("Records must be deleted (resId=" + resId + ", filters=" + filters + ")");
+            deleteRecords(resId, filters);
+        } // if else
     } // truncateBySize
     
     @Override
@@ -548,7 +552,43 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
     @Override
     public void truncateCachedByTime(long time) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // Iterate on the cached resource IDs
+        cache.startResIterator();
+        
+        while (cache.hasNextRes()) {
+            // Get the next resource ID
+            String resId = cache.getNextResId();
+            
+            // Get the records within the resource
+            JSONObject result = (JSONObject) getRecords(resId, null).get("result");
+            JSONArray records = (JSONArray) result.get("records");
+
+            // Create the filters for a datastore deletion
+            String filters = "";
+
+            for (Object recordObj : records) {
+                JSONObject record = (JSONObject) recordObj;
+                long id = (Long) record.get("_id");
+                long recordTime = (Long) record.get("recvTimeTs");
+                long currentTime = new Date().getTime() / 1000;
+
+                if (recordTime < (currentTime - time)) {
+                    if (filters.isEmpty()) {
+                        filters += "{\"_id\":[" + id;
+                    } else {
+                        filters += "," + id;
+                    } // if else
+                } // if
+            } // for
+            
+            if (filters.isEmpty()) {
+                LOGGER.debug("No records to be deleted");
+            } else {
+                filters += "]}";
+                LOGGER.debug("Records to be deleted, resId=" + resId + ", filters=" + filters);
+                deleteRecords(resId, filters);
+            } // if else
+        } // while
     } // truncateCachedByTime
     
     /**
@@ -560,7 +600,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
     } // setCache
     
     private JsonResponse doCKANRequest(String method, String urlPath, String jsonString) throws Exception {
-        ArrayList<Header> headers = new ArrayList<Header>();
+        ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
         headers.add(new BasicHeader("Content-Type", "application/json; charset=utf-8"));
         return doRequest(method, urlPath, true, headers, new StringEntity(jsonString, "UTF-8"));
