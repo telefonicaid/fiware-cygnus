@@ -254,7 +254,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                     
                     break;
                 default:
-                    LOGGER.warn("[NGSIRestHandler] Unnecessary header");
+                    LOGGER.debug("[NGSIRestHandler] Unnecessary header");
             } // switch
         } // while
         
