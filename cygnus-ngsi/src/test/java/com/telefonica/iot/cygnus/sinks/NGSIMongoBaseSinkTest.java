@@ -45,13 +45,13 @@ public class NGSIMongoBaseSinkTest {
         } // persistBatch
 
         @Override
-        public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
+        public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
             throw new UnsupportedOperationException("Not supported yet.");
-        } // truncateBySize
+        } // capRecords
 
         @Override
-        public void truncateByTime(long time) {
-        } // truncateByTime
+        public void expirateRecords(long time) {
+        } // expirateRecords
         
     } // NGSIMongoBaseSinkImpl
     
