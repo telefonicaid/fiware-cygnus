@@ -93,13 +93,13 @@ public class NGSISinkTest {
         } // persistBatch
 
         @Override
-        public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
+        public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
             throw new UnsupportedOperationException("Not supported yet.");
-        } // truncateBySize
+        } // capRecords
 
         @Override
-        public void truncateByTime(long time) {
-        } // truncateByTime
+        public void expirateRecords(long time) {
+        } // expirateRecords
         
     } // NGSISinkImpl
     
@@ -241,35 +241,35 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(-1, sink.getTruncationMaxRecords());
+            assertEquals(-1, sink.getPersistencePolicyMaxRecords());
             System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "-  OK  - The default configuration value for 'truncation.max_records' is '-1'");
+                    + "-  OK  - The default configuration value for 'persistence_poilicy.max_records' is '-1'");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - The default configuration value for "
-                    + "'truncation.max_records' is '" + sink.getTruncationMaxRecords() + "'");
+                    + "'persistence_poilicy.max_records' is '" + sink.getPersistencePolicyMaxRecords() + "'");
             throw e;
         } // try catch
         
         try {
-            assertEquals(-1, sink.getTruncationMaxTime());
+            assertEquals(-1, sink.getPersistencePolicyExpirationTime());
             System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "-  OK  - The default configuration value for 'truncation.max_time' is '-1'");
+                    + "-  OK  - The default configuration value for 'persistence_poilicy.expiration_time' is '-1'");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - The default configuration value for "
-                    + "'truncation.max_time' is '" + sink.getTruncationMaxTime() + "'");
+                    + "'persistence_poilicy.expiration_time' is '" + sink.getPersistencePolicyExpirationTime() + "'");
             throw e;
         } // try catch
         
         try {
-            assertEquals(3600, sink.getTruncationCheckingTime());
+            assertEquals(3600, sink.getPersistencePolicyCheckingTime());
             System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "-  OK  - The default configuration value for 'truncation.checking_time' is '3600000'");
+                    + "-  OK  - The default configuration value for 'persistence_poilicy.checking_time' is '3600000'");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - The default configuration value for "
-                    + "'truncation.checking_time' is '" + sink.getTruncationCheckingTime() + "'");
+                    + "'persistence_poilicy.checking_time' is '" + sink.getPersistencePolicyCheckingTime() + "'");
             throw e;
         } // try catch
     } // testConfigureNotMandatoryParameters
@@ -283,46 +283,46 @@ public class NGSISinkTest {
         System.out.println(getTestTraceHead("[NGSISink.configure]")
                 + "-------- When configured, non mandatory parameters get the appropiate value");
         NGSISinkImpl sink = new NGSISinkImpl();
-        String truncationMaxRecords = "5";
-        sink.configure(createContext(null, null, null, null, null, null, null, null, truncationMaxRecords, null, null));
+        String maxRecords = "5";
+        sink.configure(createContext(null, null, null, null, null, null, null, null, maxRecords, null, null));
         
         try {
-            assertEquals(5, sink.getTruncationMaxRecords());
+            assertEquals(5, sink.getPersistencePolicyMaxRecords());
             System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "-  OK  - The configuration value for 'truncation.max_records' is '5'");
+                    + "-  OK  - The configuration value for 'persistence_policy.max_records' is '5'");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "- FAIL - The configuration value for 'truncation_max_records' is '"
-                    + sink.getTruncationMaxRecords() + "'");
+                    + "- FAIL - The configuration value for 'persistence_policy.max_records' is '"
+                    + sink.getPersistencePolicyMaxRecords() + "'");
             throw e;
         } // try catch
         
-        String truncationMaxTime = "60";
-        sink.configure(createContext(null, null, null, null, null, null, null, null, null, truncationMaxTime, null));
+        String expirationTime = "60";
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null, expirationTime, null));
         
         try {
-            assertEquals(60, sink.getTruncationMaxTime());
+            assertEquals(60, sink.getPersistencePolicyExpirationTime());
             System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "-  OK  - The configuration value for 'truncation.max_time' is '60'");
+                    + "-  OK  - The configuration value for 'persistence_policy.expiration_time' is '60'");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "- FAIL - The configuration value for 'truncation.max_time' is '"
-                    + sink.getTruncationMaxTime() + "'");
+                    + "- FAIL - The configuration value for 'persistence_policy.expiration_time' is '"
+                    + sink.getPersistencePolicyExpirationTime() + "'");
             throw e;
         } // try catch
         
-        String truncationCheckingTime = "7200";
+        String checkingTime = "7200";
         sink.configure(createContext(null, null, null, null, null, null, null, null, null, null,
-                truncationCheckingTime));
+                checkingTime));
         
         try {
-            assertEquals(7200, sink.getTruncationCheckingTime());
+            assertEquals(7200, sink.getPersistencePolicyCheckingTime());
             System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "-  OK  - The configuration value for 'truncation.checking_time' is '7200'");
+                    + "-  OK  - The configuration value for 'persistence_policy.checking_time' is '7200'");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "- FAIL - The configuration value for 'truncation.checking_time' is '"
-                    + sink.getTruncationCheckingTime() + "'");
+                    + "- FAIL - The configuration value for 'persistence_policy.checking_time' is '"
+                    + sink.getPersistencePolicyCheckingTime() + "'");
             throw e;
         } // try catch
     } // testConfigureModifyNotMandatoryParameters
@@ -465,21 +465,21 @@ public class NGSISinkTest {
         } // try catch
         
         sink = new NGSISinkImpl();
-        String truncationCheckingTime = "-1000";
+        String checkingTime = "-1000";
         sink.configure(createContext(null, null, null, null, null, null, null, null, null, null,
-                truncationCheckingTime));
+                checkingTime));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "-  OK  - A wrong configuration 'truncation.checking_time='"
-                    + truncationCheckingTime + "' has been detected");
+                    + "-  OK  - A wrong configuration 'persistence_policy.checking_time='"
+                    + checkingTime + "' has been detected");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "- FAIL - A wrong configuration 'truncation.checking_time='"
-                    + truncationCheckingTime + "' has not been detected");
+                    + "- FAIL - A wrong configuration 'persistence_policy.checking_time='"
+                    + checkingTime + "' has not been detected");
             throw e;
-        } // try catch
+        } // try catch // try catch
     } // testConfigureInvalidConfiguration
     
     /**
@@ -1480,7 +1480,8 @@ public class NGSISinkTest {
     
     private Context createContext(String batchRetryIntervals, String batchSize, String batchTimeout, String batchTTL,
             String dataModel, String enableGrouping, String enableLowercase, String enableNameMappings,
-            String truncationMaxRecords, String truncationMaxTime, String truncationCheckingTime) {
+            String perisistencePolicyMaxRecords, String perisistencePolicyExpirationTime,
+            String perisistencePolicyCheckingTime) {
         Context context = new Context();
         context.put("batch_retry_intervals", batchRetryIntervals);
         context.put("batch_size", batchSize);
@@ -1490,9 +1491,9 @@ public class NGSISinkTest {
         context.put("enable_grouping", enableGrouping);
         context.put("enable_lowercase", enableLowercase);
         context.put("enable_name_mappings", enableNameMappings);
-        context.put("truncation.max_records", truncationMaxRecords);
-        context.put("truncation.max_time", truncationMaxTime);
-        context.put("truncation.checking_time", truncationCheckingTime);
+        context.put("persistence_policy.max_records", perisistencePolicyMaxRecords);
+        context.put("persistence_policy.expiration_time", perisistencePolicyExpirationTime);
+        context.put("persistence_policy.checking_time", perisistencePolicyCheckingTime);
         return context;
     } // createContext
     

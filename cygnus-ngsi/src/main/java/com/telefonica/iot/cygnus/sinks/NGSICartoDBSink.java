@@ -368,12 +368,12 @@ public class NGSICartoDBSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
-    } // truncateBySize
+    public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+    } // capRecords
 
     @Override
-    public void truncateByTime(long time) throws Exception {
-    } // truncateByTime
+    public void expirateRecords(long time) throws Exception {
+    } // expirateRecords
     
     /**
      * Convenience class for aggregating data.
