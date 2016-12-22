@@ -512,7 +512,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
     } // deleteRecords
     
     @Override
-    public void truncateBySize(String orgName, String pkgName, String resName, long size) throws Exception {
+    public void capRecords(String orgName, String pkgName, String resName, long maxRecords) throws Exception {
         // Get the resource ID by querying the cache
         String resId = cache.getResId(orgName, pkgName, resName);
         
@@ -524,8 +524,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         // Create the filters for a datastore deletion
         String filters = "";
         
-        if (total > size) {
-            for (int i = 0; i < (total - size); i++) {
+        if (total > maxRecords) {
+            for (int i = 0; i < (total - maxRecords); i++) {
                 long id = (Long) ((JSONObject) records.get(i)).get("_id");
                 
                 if (filters.isEmpty()) {
@@ -543,15 +543,15 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             LOGGER.debug("Records must be deleted (resId=" + resId + ", filters=" + filters + ")");
             deleteRecords(resId, filters);
         } // if else
-    } // truncateBySize
+    } // capRecords
     
     @Override
-    public void truncateByTime(String orgName, String pkgName, String resName, long time) throws Exception {
+    public void expirateRecords(String orgName, String pkgName, String resName, long expirationTime) throws Exception {
         throw new UnsupportedOperationException("Not supported yet.");
-    } // truncateByTime
+    } // expirateRecords
 
     @Override
-    public void truncateCachedByTime(long time) throws Exception {
+    public void expireRecordsCache(long expirationTime) throws Exception {
         // Iterate on the cached resource IDs
         cache.startResIterator();
         
@@ -572,7 +572,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 long recordTime = (Long) record.get("recvTimeTs");
                 long currentTime = new Date().getTime() / 1000;
 
-                if (recordTime < (currentTime - time)) {
+                if (recordTime < (currentTime - expirationTime)) {
                     if (filters.isEmpty()) {
                         filters += "{\"_id\":[" + id;
                     } else {
@@ -589,7 +589,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 deleteRecords(resId, filters);
             } // if else
         } // while
-    } // truncateCachedByTime
+    } // expireRecordsCache
     
     /**
      * Sets the CKAN cache. This is protected since it is only used by the tests.
