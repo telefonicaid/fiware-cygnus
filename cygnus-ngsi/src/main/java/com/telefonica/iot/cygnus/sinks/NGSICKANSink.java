@@ -289,15 +289,9 @@ public class NGSICKANSink extends NGSISink {
     } // truncateBySize
 
     @Override
-    public void truncateByTime(long time) {
+    public void truncateByTime(long time) throws Exception {
         LOGGER.debug("[" + this.getName() + "] Truncating by time (time=" + time + ")");
-        
-        try {
-            persistenceBackend.truncateCachedByTime(time);
-        } catch (Exception e) {
-            LOGGER.error("[" + this.getName() + "] There was an error while truncating by time. Details= "
-                    + e.getMessage());
-        } // try catch
+        persistenceBackend.truncateCachedByTime(time);
     } // truncateByTime
 
     /**

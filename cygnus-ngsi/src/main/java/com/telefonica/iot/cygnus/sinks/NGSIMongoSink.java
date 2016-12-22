@@ -120,7 +120,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
     } // truncateBySize
 
     @Override
-    public void truncateByTime(long time) {
+    public void truncateByTime(long time) throws Exception {
     } // truncateByTime
     
     /**
