@@ -100,7 +100,7 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
     } // truncateBySize
 
     @Override
-    public void truncateByTime(long time) {
+    public void truncateByTime(long time) throws Exception {
     } // truncateByTime
     
     private void persistOne(NGSIEvent event) throws Exception {

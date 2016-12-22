@@ -37,8 +37,6 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.flume.Channel;
 import org.apache.flume.Context;
 import org.apache.flume.EventDeliveryException;
@@ -895,7 +893,14 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 if (truncationMaxTime > -1) {
                     LOGGER.debug("[" + sinkName + "] Calling time-based truncation");
                     timeBefore = new Date().getTime();
-                    truncateByTime(truncationMaxTime);
+                    
+                    try {
+                        truncateByTime(truncationMaxTime);
+                    } catch (Exception e) {
+                        LOGGER.error("[" + sinkName + "] Error while performing time-based truncation. Details: "
+                                + e.getMessage());
+                    } // try catch
+                    
                     timeAfter = new Date().getTime();
                 } // if
                 
@@ -909,7 +914,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 try {
                     sleep(sleepTime);
                 } catch (InterruptedException e) {
-                    LOGGER.error("[" + this.getName() + "] Error while sleeping. Details: " + e.getMessage());
+                    LOGGER.error("[" + sinkName + "] Error while sleeping. Details: " + e.getMessage());
                 } // try
             } // while
         } // run
@@ -935,8 +940,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     /**
      * This is the method the classes extending this class must implement when dealing with time-based truncation.
      * @param time
-     * @throws EventDeliveryException
+     * @throws Exception
      */
-    abstract void truncateByTime(long time);
+    abstract void truncateByTime(long time) throws Exception;
 
 } // NGSISink
