@@ -2,4 +2,4 @@
 - [cygnus-ngsi][feature] Add specific data truncation implementation for NGSICKANSink (#1344)
 - [cygnus] Add Travis CI (#1347)
 - [cygnus-ngsi][hardening] Force lowercase organization, dataset and resource names in NGSICKANSink (#1352)
-- [cygnus-ngsi][hardening] Replace warnings upon unnecessary herader received with debug traces at NGSIRestHandler (#1354)
+- [cygnus-ngsi][hardening] Replace warnings upon unnecessary header received with debug traces at NGSIRestHandler (#1354)
