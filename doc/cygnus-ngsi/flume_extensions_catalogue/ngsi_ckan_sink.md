@@ -339,8 +339,8 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 | batch\_retry\_intervals | no | 5000 | Comma-separated list of intervals (in miliseconds) at which the retries regarding not persisted batches will be done. First retry will be done as many miliseconds after as the first value, then the second retry will be done as many miliseconds after as second value, and so on. If the batch\_ttl is greater than the number of intervals, the last interval is repeated. |
 | backend.max\_conns | no | 500 | Maximum number of connections allowed for a Http-based HDFS backend. |
 | backend.max\_conns\_per\_route | no | 100 | Maximum number of connections per route allowed for a Http-based HDFS backend. |
-| truncation.max_records | no | -1 | Maximum number of records allowed for a resource before a size-based truncation is performed. |
-| truncation.max_time | no | -1 | Maximum number of seconds a record is maintained in a resource before a time-based truncation is performed. |
+| truncation.max_records | no | -1 | Maximum number of records allowed for a resource before a size-based truncation is performed. `-1` disables this kind of truncation. |
+| truncation.max_time | no | -1 | Maximum number of seconds a record is maintained in a resource before a time-based truncation is performed. `-1` disables this kind of truncation. |
 | truncation.checking_time | no | 3600 | Frequency (in seconds) at which the sink ckecks for time-based truncations. |
 
 A configuration example could be:

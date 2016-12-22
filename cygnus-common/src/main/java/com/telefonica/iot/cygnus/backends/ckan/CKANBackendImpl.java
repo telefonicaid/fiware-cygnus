@@ -218,7 +218,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             } else {
                 throw new CygnusPersistenceError("Could not create the orgnaization (orgName=" + orgName
                         + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else if else
+            } // if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
                     || e instanceof CygnusPersistenceError
@@ -271,7 +271,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             } else {
                 throw new CygnusPersistenceError("Could not create the package (orgId=" + orgId
                         + ", pkgName=" + pkgName + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else if else
+            } // if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
                     || e instanceof CygnusPersistenceError
@@ -313,7 +313,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             } else {
                 throw new CygnusPersistenceError("Could not create the resource (pkgId=" + pkgId
                         + ", resName=" + resName + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else if else
+            } // if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
                     || e instanceof CygnusPersistenceError
@@ -360,7 +360,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             } else {
                 throw new CygnusPersistenceError("Could not create the datastore (resId=" + resId
                         + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else if else
+            } // if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
                     || e instanceof CygnusPersistenceError
@@ -397,7 +397,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 } else {
                     throw new CygnusPersistenceError("Could not create the datastore (resId=" + resId
                         + ", statusCode=" + res.getStatusCode() + ")");
-                } // if else if else
+                } // if else
             } catch (Exception e) {
                 if (e instanceof CygnusRuntimeError
                         || e instanceof CygnusPersistenceError
@@ -428,7 +428,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             } else {
                 throw new CygnusPersistenceError("Could not check if the view exists (resId=" + resId
                         + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else if else
+            } // if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
                     || e instanceof CygnusPersistenceError
@@ -464,7 +464,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             } else {
                 throw new CygnusPersistenceError("Could not search for the records (resId=" + resId
                         + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else if else
+            } // if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
                     || e instanceof CygnusPersistenceError
@@ -499,7 +499,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             } else {
                 throw new CygnusPersistenceError("Could not delete the records (resId=" + resId
                         + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else if else
+            } // if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
                     || e instanceof CygnusPersistenceError
