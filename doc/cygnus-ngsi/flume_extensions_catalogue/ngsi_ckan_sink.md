@@ -22,6 +22,7 @@ Content:
         * [About batching](#section2.3.2)
         * [About the encoding](#section2.3.3)
         * [About geolocation attributes](#section2.3.4)
+        * [About truncating resources](#section2.3.5)
 * [Programmers guide](#section3)
     * [`NGSICKANSink` class](#section3.1)
 * [Annexes](#section4)
@@ -338,6 +339,9 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 | batch\_retry\_intervals | no | 5000 | Comma-separated list of intervals (in miliseconds) at which the retries regarding not persisted batches will be done. First retry will be done as many miliseconds after as the first value, then the second retry will be done as many miliseconds after as second value, and so on. If the batch\_ttl is greater than the number of intervals, the last interval is repeated. |
 | backend.max\_conns | no | 500 | Maximum number of connections allowed for a Http-based HDFS backend. |
 | backend.max\_conns\_per\_route | no | 100 | Maximum number of connections per route allowed for a Http-based HDFS backend. |
+| truncation.max_records | no | -1 | Maximum number of records allowed for a resource before a size-based truncation is performed. `-1` disables this kind of truncation. |
+| truncation.max_time | no | -1 | Maximum number of seconds a record is maintained in a resource before a time-based truncation is performed. `-1` disables this kind of truncation. |
+| truncation.checking_time | no | 3600 | Frequency (in seconds) at which the sink ckecks for time-based truncations. |
 
 A configuration example could be:
 
@@ -363,6 +367,9 @@ A configuration example could be:
     cygnus-ngsi.sinks.ckan-sink.batch_retry_intervals = 5000
     cygnus-ngsi.sinks.ckan-sink.backend.max_conns = 500
     cygnus-ngsi.sinks.ckan-sink.backend.max_conns_per_route = 100
+    cygnus-ngsi.sinks.ckan-sink.truncation.max_records = 5
+    cygnus-ngsi.sinks.ckan-sink.truncation.max_time = 86400
+    cygnus-ngsi.sinks.ckan-sink.truncation.checking_time = 600
 
 [Top](#top)
 
@@ -434,13 +441,29 @@ Finally, it must be said this way of mapping geolocated context information into
 
 [Top](#top)
 
+####<a name="section2.3.5"></a>About truncating resources
+Truncation is disabled by default. Nevertheless, if desired, this can be achieved in two ways:
+
+* Truncating by the number of records. This kind of truncation allows the resource growing up until certain configured maximum number of records is reached (`truncation.max_records`), and then maintains a such a constant number of records.
+* Truncating by time the record was upserted. This kind of truncation allows the resource growing up until records become old, i.e. overcome certain configured maximum time (`truncation.max_time`).
+
+[Top](#top)
+
 ##<a name="section3"></a>Programmers guide
 ###<a name="section3.1"></a>`NGSICKANSink` class
 As any other NGSI-like sink, `NGSICKANSink` extends the base `NGSISink`. The methods that are extended are:
 
-    void persistBatch(Batch batch) throws Exception;
+    void persistBatch(NGSIBatch batch) throws Exception;
 
-A `Batch` contains a set of `NGSIEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the CKAN resource where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `CKANBackend` implementation.
+A `NGSIBatch` contains a set of `NGSIEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the CKAN resource where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `CKANBackend` implementation.
+
+    void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException;
+    
+This method is always called immediatelly after `persistBacth()`. The same destination resources that were upserted are now checked in terms of number of records: if the configured maximum (`truncation.max_records`) is overcome for any of the updated resources, then as many oldest records are deleted as required until the maximum number of records is reached.
+    
+    void truncateByTime(long time);
+    
+This method is called in a peridocial way (based on `truncation.checking_time`), and if the configured maximum time (`truncation.max_time`) is overcome for any of the records within any of the updated resources, then it is deleted.
 
     public void start();
 

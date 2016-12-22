@@ -895,7 +895,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 if (truncationMaxTime > -1) {
                     LOGGER.debug("[" + sinkName + "] Calling time-based truncation");
                     timeBefore = new Date().getTime();
-                    truncateByTime(truncationMaxTime * 1000);
+                    truncateByTime(truncationMaxTime);
                     timeAfter = new Date().getTime();
                 } // if
                 

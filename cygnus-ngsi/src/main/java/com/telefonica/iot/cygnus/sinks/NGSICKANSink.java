@@ -250,15 +250,54 @@ public class NGSICKANSink extends NGSISink {
             // Persist the aggregation
             persistAggregation(aggregator);
             batch.setNextPersisted(true);
-        } // for
+        } // while
     } // persistBatch
 
     @Override
     public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
+        if (batch == null) {
+            LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
+            return;
+        } // if
+
+        // Iterate on the destinations
+        batch.startIterator();
+        
+        while (batch.hasNext()) {
+            // Get the events within the current sub-batch
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
+
+            // Get a representative from the current destination sub-batch
+            NGSIEvent event = events.get(0);
+            
+            // Do the truncation
+            String service = event.getServiceForNaming(enableNameMappings);
+            String servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            String entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+
+            try {
+                String orgName = buildOrgName(service);
+                String pkgName = buildPkgName(service, servicePathForNaming);
+                String resName = buildResName(entityForNaming);
+                LOGGER.debug("[" + this.getName() + "] Truncating by size (size=" + size + ",orgName=" + orgName
+                        + ", pkgName=" + pkgName + ", resName=" + resName + ")");
+                persistenceBackend.truncateBySize(orgName, pkgName, resName, size);
+            } catch (Exception e) {
+                throw new EventDeliveryException(e.getMessage());
+            } // try catch
+        } // while
     } // truncateBySize
 
     @Override
     public void truncateByTime(long time) {
+        LOGGER.debug("[" + this.getName() + "] Truncating by time (time=" + time + ")");
+        
+        try {
+            persistenceBackend.truncateCachedByTime(time);
+        } catch (Exception e) {
+            LOGGER.error("[" + this.getName() + "] There was an error while truncating by time. Details= "
+                    + e.getMessage());
+        } // try catch
     } // truncateByTime
 
     /**
@@ -482,7 +521,7 @@ public class NGSICKANSink extends NGSISink {
         if (enableEncoding) {
             orgName = NGSICharsets.encodeCKAN(fiwareService);
         } else {
-            orgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);;
+            orgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);
         } // if else
 
         if (orgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
@@ -513,10 +552,10 @@ public class NGSICKANSink extends NGSISink {
                     + NGSICharsets.encodeCKAN(fiwareServicePath);
         } else {
             if (fiwareServicePath.equals("/")) {
-                pkgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);;
+                pkgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);
             } else {
                 pkgName = (NGSIUtils.encode(fiwareService, false, true)
-                        + NGSIUtils.encode(fiwareServicePath, false, true)).toLowerCase(Locale.ENGLISH);;
+                        + NGSIUtils.encode(fiwareServicePath, false, true)).toLowerCase(Locale.ENGLISH);
             } // if else
         } // if else
 
