@@ -291,7 +291,7 @@ public class NGSICKANSink extends NGSISink {
     @Override
     public void expirateRecords(long expirationTime) throws Exception {
         LOGGER.debug("[" + this.getName() + "] Expirating records (time=" + expirationTime + ")");
-        persistenceBackend.expireRecordsCache(expirationTime);
+        persistenceBackend.expirateRecordsCache(expirationTime);
     } // expirateRecords
 
     /**

@@ -63,6 +63,6 @@ public interface CKANBackend {
      * @param expirationTime
      * @throws Exception
      */
-    void expireRecordsCache(long expirationTime) throws Exception;
+    void expirateRecordsCache(long expirationTime) throws Exception;
     
 } // CKANBackend

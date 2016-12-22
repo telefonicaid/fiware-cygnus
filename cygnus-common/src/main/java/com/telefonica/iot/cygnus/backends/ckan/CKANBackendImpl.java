@@ -551,7 +551,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
     } // expirateRecords
 
     @Override
-    public void expireRecordsCache(long expirationTime) throws Exception {
+    public void expirateRecordsCache(long expirationTime) throws Exception {
         // Iterate on the cached resource IDs
         cache.startResIterator();
         
@@ -589,7 +589,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 deleteRecords(resId, filters);
             } // if else
         } // while
-    } // expireRecordsCache
+    } // expirateRecordsCache
     
     /**
      * Sets the CKAN cache. This is protected since it is only used by the tests.
