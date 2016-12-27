@@ -22,11 +22,11 @@ import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
@@ -159,9 +159,12 @@ public class CKANCache extends HttpBackend {
      * Checks if the organization is cached. If not cached, CKAN is queried in order to update the cache.
      * @param orgName Organization name
      * @return True if the organization was cached, false otherwise
-     * @throws Exception
+     * @throws CygnusBadConfiguration
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
      */
-    public boolean isCachedOrg(String orgName) throws Exception {
+    public boolean isCachedOrg(String orgName)
+        throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         // check if the organization has already been cached
         if (tree.containsKey(orgName)) {
             LOGGER.debug("Organization found in the cache (orgName=" + orgName + ")");
@@ -213,9 +216,12 @@ public class CKANCache extends HttpBackend {
      * @param orgName Organization name
      * @param pkgName Package name
      * @return True if the organization was cached, false otherwise
-     * @throws Exception
+     * @throws CygnusBadConfiguration
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
      */
-    public boolean isCachedPkg(String orgName, String pkgName) throws Exception {
+    public boolean isCachedPkg(String orgName, String pkgName)
+        throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         // check if the package has already been cached
         if (tree.get(orgName).containsKey(pkgName)) {
             LOGGER.debug("Package found in the cache (orgName=" + orgName + ", pkgName=" + pkgName + ")");
@@ -271,9 +277,12 @@ public class CKANCache extends HttpBackend {
      * @param pkgName Package name
      * @param resName Resource name
      * @return True if the organization was cached, false otherwise
-     * @throws Exception
+     * @throws CygnusBadConfiguration
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
      */
-    public boolean isCachedRes(String orgName, String pkgName, String resName) throws Exception {
+    public boolean isCachedRes(String orgName, String pkgName, String resName)
+        throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         // check if the resource has already been cached
         if (tree.get(orgName).get(pkgName).contains(resName)) {
             LOGGER.debug("Resource found in the cache (orgName=" + orgName + ", pkgName=" + pkgName + ", resName="
@@ -338,9 +347,12 @@ public class CKANCache extends HttpBackend {
      * Populates the package map of a given orgName with the package information from the CKAN response.
      * @param packages JSON vector from the CKAN response containing package information
      * @param orgName Organization name
-     * @throws Exception
+     * @throws CygnusBadConfiguration
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
      */
-    private void populatePackagesMap(JSONArray packages, String orgName) throws Exception {
+    private void populatePackagesMap(JSONArray packages, String orgName)
+        throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         // this check is for debuging purposes
         if (packages == null || packages.size() == 0) {
             LOGGER.debug("The pacakges list is empty, nothing to cache");
@@ -422,7 +434,7 @@ public class CKANCache extends HttpBackend {
         } // while
     } // populateResourcesMap
     
-    private JSONArray getResources(String pkgName) throws Exception {
+    private JSONArray getResources(String pkgName) throws CygnusRuntimeError, CygnusPersistenceError {
         LOGGER.debug("Going to get the resources list from package " + pkgName);
         String ckanURL = "/api/3/action/package_show?id=" + pkgName;
         ArrayList<Header> headers = new ArrayList<>();
