@@ -26,6 +26,9 @@ import com.telefonica.iot.cygnus.backends.hive.HiveBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
@@ -41,11 +44,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 /**
  *
  * @author frb
@@ -456,7 +461,7 @@ public class NGSIHDFSSink extends NGSISink {
     } // start
 
     @Override
-    void persistBatch(NGSIBatch batch) throws Exception {
+    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusBadContextData, CygnusPersistenceError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -508,11 +513,11 @@ public class NGSIHDFSSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
+    public void truncateBySize(NGSIBatch batch, long size) throws CygnusCappingError {
     } // truncateBySize
 
     @Override
-    public void truncateByTime(long time) throws Exception {
+    public void truncateByTime(long time) throws CygnusExpiratingError {
     } // truncateByTime
 
     /**
@@ -569,7 +574,7 @@ public class NGSIHDFSSink extends NGSISink {
             return hiveFields;
         } // getHiveFields
 
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
@@ -578,7 +583,7 @@ public class NGSIHDFSSink extends NGSISink {
             hdfsFile = buildFilePath(service, servicePathForNaming, entityForNaming);
         } // initialize
 
-        public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
+        public abstract void aggregate(NGSIEvent cygnusEvent) throws CygnusBadContextData;
 
     } // HDFSAggregator
 
@@ -588,7 +593,7 @@ public class NGSIHDFSSink extends NGSISink {
     private class JSONRowAggregator extends HDFSAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
             hiveFields = NGSICharsets.encodeHive(NGSIConstants.RECV_TIME_TS) + " bigint,"
                     + NGSICharsets.encodeHive(NGSIConstants.RECV_TIME) + " string,"
@@ -603,7 +608,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) throws CygnusBadContextData {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -661,7 +666,7 @@ public class NGSIHDFSSink extends NGSISink {
     private class JSONColumnAggregator extends HDFSAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
 
             // particular initialization
@@ -685,7 +690,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -739,7 +744,7 @@ public class NGSIHDFSSink extends NGSISink {
     private class CSVRowAggregator extends HDFSAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
             hiveFields = NGSICharsets.encodeHive(NGSIConstants.RECV_TIME_TS) + " bigint,"
                     + NGSICharsets.encodeHive(NGSIConstants.RECV_TIME) + " string,"
@@ -753,7 +758,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) throws CygnusBadContextData {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -821,12 +826,18 @@ public class NGSIHDFSSink extends NGSISink {
             } // for
         } // aggregate
 
-        private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws Exception {
+        private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws CygnusBadContextData {
             String csvMd = "";
 
             // metadata is in JSON format, decode it
             JSONParser jsonParser = new JSONParser();
-            JSONArray attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+            JSONArray attrMetadataJSON;
+            
+            try {
+                attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+            } catch (ParseException e) {
+                throw new CygnusBadContextData ("ParseException, " + e.getMessage());
+            } // try catch
 
             // iterate on the metadata
             for (Object mdObject : attrMetadataJSON) {
@@ -854,7 +865,7 @@ public class NGSIHDFSSink extends NGSISink {
     private class CSVColumnAggregator extends HDFSAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
 
             // particular initialization
@@ -882,7 +893,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) throws CygnusBadContextData {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -948,12 +959,18 @@ public class NGSIHDFSSink extends NGSISink {
             } // if else
         } // aggregate
 
-        private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws Exception {
+        private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws CygnusBadContextData {
             String csvMd = "";
 
             // metadata is in JSON format, decode it
             JSONParser jsonParser = new JSONParser();
-            JSONArray attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+            JSONArray attrMetadataJSON;
+            
+            try {
+                attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+            } catch (ParseException e) {
+                throw new CygnusBadContextData("ParseException, " + e.getMessage());
+            } // try catch
 
             // iterate on the metadata
             for (Object mdObject : attrMetadataJSON) {
@@ -990,7 +1007,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // switch
     } // getAggregator
 
-    private void persistAggregation(HDFSAggregator aggregator) throws Exception {
+    private void persistAggregation(HDFSAggregator aggregator) throws CygnusPersistenceError {
         String aggregation = aggregator.getAggregation();
         String hdfsFolder = aggregator.getFolder(enableLowercase);
         String hdfsFile = aggregator.getFile(enableLowercase);
@@ -1027,7 +1044,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // if
     } // persistAggregation
 
-    private void persistMDAggregations(HDFSAggregator aggregator) throws Exception {
+    private void persistMDAggregations(HDFSAggregator aggregator) throws CygnusPersistenceError {
         Set<String> attrMDFiles = aggregator.getAggregatedAttrMDFiles();
 
         for (String hdfsMDFile : attrMDFiles) {
@@ -1062,7 +1079,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // for
     } // persistMDAggregations
 
-    private void provisionHiveTable(HDFSAggregator aggregator, String dbName) throws Exception {
+    private void provisionHiveTable(HDFSAggregator aggregator, String dbName) throws CygnusPersistenceError {
         String dirPath = aggregator.getFolder(enableLowercase);
         String fields = aggregator.getHiveFields();
         String tag;

@@ -21,6 +21,9 @@ import com.telefonica.iot.cygnus.backends.cartodb.CartoDBBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
@@ -34,9 +37,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -320,7 +324,7 @@ public class NGSICartoDBSink extends NGSISink {
     } // initializeBackend
 
     @Override
-    void persistBatch(NGSIBatch batch) throws Exception {
+    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -368,11 +372,11 @@ public class NGSICartoDBSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
+    public void truncateBySize(NGSIBatch batch, long size) throws CygnusCappingError {
     } // truncateBySize
 
     @Override
-    public void truncateByTime(long time) throws Exception {
+    public void truncateByTime(long time) throws CygnusExpiratingError {
     } // truncateByTime
     
     /**
@@ -461,9 +465,9 @@ public class NGSICartoDBSink extends NGSISink {
         /**
          * Initializes an aggregation.
          * @param event
-         * @throws Exception
+         * @throws CygnusBadConfiguration
          */
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
@@ -503,9 +507,8 @@ public class NGSICartoDBSink extends NGSISink {
         /**
          * Aggregates a given Cygnus getRecvTimeTs.
          * @param event
-         * @throws Exception
          */
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -552,7 +555,7 @@ public class NGSICartoDBSink extends NGSISink {
         
     } // CartoDBAggregator
 
-    private void persistRawAggregation(CartoDBAggregator aggregator) throws Exception {
+    private void persistRawAggregation(CartoDBAggregator aggregator) throws CygnusPersistenceError {
         //String dbName = aggregator.getDbName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
         String tableName = aggregator.getTableName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
         String schema = aggregator.getSchemaName();
@@ -561,10 +564,15 @@ public class NGSICartoDBSink extends NGSISink {
         String rows = aggregator.getRows();
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
                 + "), Table (" + tableName + "), Data (" + rows + ")");
-        backends.get(schema).insert(schema, tableName, withs, fields, rows);
+        
+        try {
+            backends.get(schema).insert(schema, tableName, withs, fields, rows);
+        } catch (Exception e) {
+            throw new CygnusPersistenceError("-, " + e.getMessage());
+        } // try catch
     } // persistRawAggregation
     
-    private void persistDistanceEvent(NGSIEvent event) throws Exception {
+    private void persistDistanceEvent(NGSIEvent event) throws CygnusBadConfiguration, CygnusPersistenceError {
         // Get some values
         String schema = buildSchemaName(event.getServiceForNaming(enableNameMappings));
         String servicePath = event.getServicePathForData();
@@ -614,7 +622,7 @@ public class NGSICartoDBSink extends NGSISink {
                     LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
                             + "), Table (" + tableName + "), Data (" + rows + ")");
                     backends.get(schema).insert(schema, tableName, withs, fields, rows);
-                } catch (Exception e) {
+                } catch (Exception e1) {
                     String withs = ""
                             + "WITH geom AS ("
                             + "   SELECT " + location.getLeft() + " AS point"
@@ -686,13 +694,18 @@ public class NGSICartoDBSink extends NGSISink {
                             + "(SELECT num_samples FROM inserts))";
                     LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
                             + "), Table (" + tableName + "), Data (" + rows + ")");
-                    backends.get(schema).insert(schema, tableName, withs, fields, rows);
+                    
+                    try {
+                        backends.get(schema).insert(schema, tableName, withs, fields, rows);
+                    } catch (Exception e2) {
+                        throw new CygnusPersistenceError("-, " + e2.getMessage());
+                    } // try catch
                 } // try catch
             } // if
         } // for
     } // persistDistanceEvent
     
-    private void rawUpdateEvent(NGSIEvent event) throws Exception {
+    private void rawUpdateEvent(NGSIEvent event) throws CygnusBadConfiguration, CygnusPersistenceError {
         long recvTimeTs = event.getRecvTimeTs();
         String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
         String schema = buildSchemaName(event.getServiceForNaming(enableNameMappings));
@@ -756,14 +769,25 @@ public class NGSICartoDBSink extends NGSISink {
                 + "' AND entityType='" + event.getOriginalCE().getType() + "'";
         LOGGER.info("[" + this.getName() + "] Updating data at NGSICartoDBSink. Schema (" + schema
                 + "), Table (" + tableName + "), Sets (" + sets + "), Where (" + where + ")");
-        boolean updated = backends.get(schema).update(schema, tableName, sets, where);
+        boolean updated = false;
+        
+        try {
+            updated = backends.get(schema).update(schema, tableName, sets, where);
+        } catch (Exception e) {
+            throw new CygnusPersistenceError("-, " + e.getMessage());
+        } // try catch
         
         if (!updated) {
             // Insert
             String withs = "";
             LOGGER.info("[" + this.getName() + "] Inserting initial data at NGSICartoDBSink. Schema (" + schema
                     + "), Table (" + tableName + "), Data (" + rows + ")");
-            backends.get(schema).insert(schema, tableName, withs, fields, rows);
+            
+            try {
+                backends.get(schema).insert(schema, tableName, withs, fields, rows);
+            } catch (Exception e) {
+                throw new CygnusPersistenceError("-, " + e.getMessage());
+            } // try catch
         } // if
     } // rawUpdateEvent
     
@@ -771,9 +795,9 @@ public class NGSICartoDBSink extends NGSISink {
      * Builds a schema name for CartoDB given a service.
      * @param service
      * @return The schema name for CartoDB
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
-    protected String buildSchemaName(String service) throws Exception {
+    protected String buildSchemaName(String service) throws CygnusBadConfiguration {
         String name = NGSICharsets.encodePostgreSQL(service);
 
         if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
@@ -790,9 +814,10 @@ public class NGSICartoDBSink extends NGSISink {
      * @param entity
      * @param attribute
      * @return The table name for CartoDB
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
-    protected String buildTableName(String servicePath, String entity, String attribute) throws Exception {
+    protected String buildTableName(String servicePath, String entity, String attribute)
+        throws CygnusBadConfiguration {
         String name;
         
         switch(dataModel) {

@@ -19,6 +19,11 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import static com.telefonica.iot.cygnus.sinks.NGSIMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
@@ -26,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import org.bson.Document;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 
 /**
  * @author frb
@@ -84,7 +88,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
     } // configure
 
     @Override
-    void persistBatch(NGSIBatch batch) throws Exception {
+    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -116,11 +120,11 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
     } // persistBatch
     
     @Override
-    public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
+    public void truncateBySize(NGSIBatch batch, long size) throws CygnusCappingError {
     } // truncateBySize
 
     @Override
-    public void truncateByTime(long time) throws Exception {
+    public void truncateByTime(long time) throws CygnusExpiratingError {
     } // truncateByTime
     
     /**
@@ -163,7 +167,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             } // if else
         } // getCollectionName
         
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
@@ -173,7 +177,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             collectionName = buildCollectionName(servicePathForNaming, entityForNaming, attributeForNaming);
         } // initialize
         
-        public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
+        public abstract void aggregate(NGSIEvent cygnusEvent);
         
     } // MongoDBAggregator
     
@@ -183,12 +187,12 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
     private class RowAggregator extends MongoDBAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
         } // initialize
         
         @Override
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
+        public void aggregate(NGSIEvent cygnusEvent) {
             // get the event headers
             long notifiedRecvTimeTs = cygnusEvent.getRecvTimeTs();
 
@@ -273,12 +277,12 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
     private class ColumnAggregator extends MongoDBAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
         } // initialize
         
         @Override
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
+        public void aggregate(NGSIEvent cygnusEvent) {
             // get the event headers
             long recvTimeTs = cygnusEvent.getRecvTimeTs();
 
@@ -346,7 +350,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         } // if else
     } // getAggregator
     
-    private void persistAggregation(MongoDBAggregator aggregator) throws Exception {
+    private void persistAggregation(MongoDBAggregator aggregator) throws CygnusPersistenceError {
         ArrayList<Document> aggregation = aggregator.getAggregation();
         
         if (aggregation.isEmpty()) {
@@ -357,9 +361,14 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         String collectionName = aggregator.getCollectionName(enableLowercase);
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIMongoSink. Database: "
                 + dbName + ", Collection: " + collectionName + ", Data: " + aggregation.toString());
-        backend.createDatabase(dbName);
-        backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);
-        backend.insertContextDataRaw(dbName, collectionName, aggregation);
+        
+        try {
+            backend.createDatabase(dbName);
+            backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);
+            backend.insertContextDataRaw(dbName, collectionName, aggregation);
+        } catch (Exception e) {
+            throw new CygnusPersistenceError("-, " + e.getMessage());
+        }
     } // persistAggregation
 
 } // NGSIMongoSink
