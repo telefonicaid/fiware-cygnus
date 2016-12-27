@@ -505,7 +505,7 @@ public class NGSISinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
         ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
@@ -609,7 +609,7 @@ public class NGSISinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
         ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
@@ -713,7 +713,7 @@ public class NGSISinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
         ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
@@ -819,7 +819,7 @@ public class NGSISinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
         ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
@@ -927,7 +927,7 @@ public class NGSISinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
         ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
@@ -1034,7 +1034,7 @@ public class NGSISinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
         ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
@@ -1141,7 +1141,7 @@ public class NGSISinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
         ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
@@ -1250,7 +1250,7 @@ public class NGSISinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
         ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
