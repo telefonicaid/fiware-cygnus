@@ -345,7 +345,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                     + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + ": " + transId + ")");
             
             // Create the NGSIEvent and add it to the list
-            NGSIEvent ngsiEvent = new NGSIEvent(headers, cer.getContextElement(), null);
+            NGSIEvent ngsiEvent = new NGSIEvent(headers, cer.toString().getBytes(), cer.getContextElement(), null);
             ngsiEvents.add(ngsiEvent);
             
             if (ids.isEmpty()) {

@@ -528,36 +528,6 @@ public class NGSIRestHandlerTest {
     } // testGetEventsMultiValuedServicePath
     
     /**
-     * [NGSIRestHandler.getEvents] -------- When a Flume event is generated, the Flume body is null.
-     */
-    @Test
-    public void testGetEventsBodyInFlumeEvent() {
-        System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                + "-------- When a Flume event is generated, the Flume body is null");
-        NGSIRestHandler handler = new NGSIRestHandler();
-        handler.configure(createContext(null, null, null)); // default configuration
-        byte[] body;
-        
-        try {
-            body = handler.getEvents(mockHttpServletRequest).get(0).getBody();
-            
-            try {
-                Assert.assertArrayEquals(null, body);
-                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                        + "-  OK  - The event body is null");
-            } catch (AssertionError e1) {
-                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                        + "- FAIL - The event body is not null");
-                throw e1;
-            } // try catch
-        } catch (Exception e) {
-            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                    + "- FAIL - There was some problem while processing the events");
-            assertTrue(false);
-        } // try catch
-    } // testGetEventsBodyInFlumeEvent
-    
-    /**
      * [NGSIRestHandler.generateUniqueId] -------- An internal transaction ID is generated.
      */
     @Test
