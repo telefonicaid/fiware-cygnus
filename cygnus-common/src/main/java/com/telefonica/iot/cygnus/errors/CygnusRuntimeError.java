@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -29,7 +29,7 @@ public class CygnusRuntimeError extends Exception {
      * @param message
      */
     public CygnusRuntimeError(String message) {
-        super("Runtime error (" + message + ")");
+        super("Runtime error. Message: " + message);
     } // CygnusRuntimeError
     
 } // CygnusRuntimeError
