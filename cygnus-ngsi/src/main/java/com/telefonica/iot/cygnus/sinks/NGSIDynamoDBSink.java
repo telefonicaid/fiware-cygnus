@@ -169,12 +169,12 @@ public class NGSIDynamoDBSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void truncateBySize(NGSIBatch batch, long size) throws CygnusCappingError {
-    } // truncateBySize
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
+    } // capRecords
 
     @Override
-    public void truncateByTime(long time) throws CygnusExpiratingError {
-    } // truncateByTime
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
+    } // expirateRecords
 
     /**
      * Class for aggregating data regarding a destination in a servicePath, in a service.

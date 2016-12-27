@@ -25,7 +25,6 @@ import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
 import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
-import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -235,12 +234,12 @@ public class NGSIPostgreSQLSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void truncateBySize(NGSIBatch batch, long size) throws CygnusCappingError {
-    } // truncateBySize
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
+    } // capRecords
 
     @Override
-    public void truncateByTime(long time) throws CygnusExpiratingError {
-    } // truncateByTime
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
+    } // expirateRecords
 
     /**
      * Class for aggregating fieldValues.
@@ -510,7 +509,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
      * Creates a PostgreSQL DB name given the FIWARE service.
      * @param service
      * @return The PostgreSQL DB name
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
     public String buildSchemaName(String service) throws CygnusBadConfiguration {
         String name;
@@ -535,7 +534,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
      * @param entity
      * @param attribute
      * @return The PostgreSQL table name
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
     public String buildTableName(String servicePath, String entity, String attribute) throws CygnusBadConfiguration {
         String name;

@@ -47,13 +47,14 @@ public class NGSIMongoBaseSinkTest {
         } // persistBatch
 
         @Override
-        public void truncateBySize(NGSIBatch batch, long size) throws CygnusCappingError {
+        public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
             throw new UnsupportedOperationException("Not supported yet.");
-        } // truncateBySize
+        } // capRecords
 
         @Override
-        public void truncateByTime(long time) throws CygnusExpiratingError {
-        } // truncateByTime
+        public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
+            throw new UnsupportedOperationException("Not supported yet.");
+        } // expirateRecords
         
     } // NGSIMongoBaseSinkImpl
     

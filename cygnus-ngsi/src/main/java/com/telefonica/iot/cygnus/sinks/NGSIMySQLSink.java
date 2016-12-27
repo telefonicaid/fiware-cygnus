@@ -25,7 +25,6 @@ import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
 import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
-import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -200,12 +199,13 @@ public class NGSIMySQLSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void truncateBySize(NGSIBatch batch, long size) throws CygnusCappingError {
-    } // truncateBySize
+
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
+    } // capRecords
 
     @Override
-    public void truncateByTime(long time) throws CygnusExpiratingError {
-    } // truncateByTime
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
+    } // expirateRecords
     
     /**
      * Class for aggregating.

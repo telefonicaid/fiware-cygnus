@@ -256,7 +256,7 @@ public class NGSICKANSink extends NGSISink {
     } // persistBatch
 
     @Override
-    public void truncateBySize(NGSIBatch batch, long size) throws CygnusCappingError {
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -272,7 +272,7 @@ public class NGSICKANSink extends NGSISink {
             // Get a representative from the current destination sub-batch
             NGSIEvent event = events.get(0);
             
-            // Do the truncation
+            // Do the capping
             String service = event.getServiceForNaming(enableNameMappings);
             String servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
             String entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
@@ -281,21 +281,21 @@ public class NGSICKANSink extends NGSISink {
                 String orgName = buildOrgName(service);
                 String pkgName = buildPkgName(service, servicePathForNaming);
                 String resName = buildResName(entityForNaming);
-                LOGGER.debug("[" + this.getName() + "] Truncating by size (size=" + size + ",orgName=" + orgName
-                        + ", pkgName=" + pkgName + ", resName=" + resName + ")");
-                persistenceBackend.truncateBySize(orgName, pkgName, resName, size);
+                LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",orgName="
+                        + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
+                persistenceBackend.capRecords(orgName, pkgName, resName, maxRecords);
             } catch (Exception e) {
                 throw new CygnusCappingError(e.getMessage());
             } // try catch
         } // while
-    } // truncateBySize
+    } // capRecords
 
     @Override
-    public void truncateByTime(long time) throws CygnusExpiratingError {
-        LOGGER.debug("[" + this.getName() + "] Truncating by time (time=" + time + ")");
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
+        LOGGER.debug("[" + this.getName() + "] Expirating records (time=" + expirationTime + ")");
         
         try {
-            persistenceBackend.truncateCachedByTime(time);
+            persistenceBackend.expirateRecordsCache(expirationTime);
         } catch (Exception e) {
             throw new CygnusExpiratingError(e.getMessage());
         } // try catch

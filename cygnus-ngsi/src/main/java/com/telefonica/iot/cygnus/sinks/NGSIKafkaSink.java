@@ -30,8 +30,6 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.flume.Context;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -164,12 +162,12 @@ public class NGSIKafkaSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void truncateBySize(NGSIBatch batch, long size) throws CygnusCappingError {
-    } // truncateBySize
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
+    } // capRecords
 
     @Override
-    public void truncateByTime(long time) throws CygnusExpiratingError {
-    } // truncateByTime
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
+    } // expirateRecords
     
     /**
      * Builds the topic name.

@@ -37,8 +37,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
 import org.json.simple.JSONArray;
@@ -372,12 +370,12 @@ public class NGSICartoDBSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void truncateBySize(NGSIBatch batch, long size) throws CygnusCappingError {
-    } // truncateBySize
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
+    } // capRecords
 
     @Override
-    public void truncateByTime(long time) throws CygnusExpiratingError {
-    } // truncateByTime
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
+    } // expirateRecords
     
     /**
      * Convenience class for aggregating data.

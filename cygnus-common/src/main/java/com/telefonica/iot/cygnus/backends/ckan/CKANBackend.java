@@ -38,30 +38,31 @@ public interface CKANBackend {
         throws Exception;
     
     /**
-     * Trucates the resource within the given package, within the given organization, by size.
+     * Caps the resource within the given package, within the given organization up to the maximum number of records.
      * @param orgName
      * @param pkgName
      * @param resName
-     * @param size
+     * @param maxRecords
      * @throws Exception
      */
-    void truncateBySize(String orgName, String pkgName, String resName, long size) throws Exception;
+    void capRecords(String orgName, String pkgName, String resName, long maxRecords) throws Exception;
     
     /**
-     * Truncates the given resource within the given package, within the given organization, by time.
+     * Expirates records within the given resource within the given package, within the given organization, based on
+     * the expiration time.
      * @param orgName
      * @param pkgName
      * @param resName
-     * @param time
+     * @param expirationTime
      * @throws Exception
      */
-    void truncateByTime(String orgName, String pkgName, String resName, long time) throws Exception;
+    void expirateRecords(String orgName, String pkgName, String resName, long expirationTime) throws Exception;
     
     /**
-     * Trucates all the cached resources by time.
-     * @param time
+     * Expirates records within all the cached resources based on the expiration time.
+     * @param expirationTime
      * @throws Exception
      */
-    void truncateCachedByTime(long time) throws Exception;
+    void expirateRecordsCache(long expirationTime) throws Exception;
     
 } // CKANBackend
