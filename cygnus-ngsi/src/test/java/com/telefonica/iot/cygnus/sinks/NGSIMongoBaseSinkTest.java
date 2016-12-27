@@ -17,11 +17,13 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
-import org.apache.flume.EventDeliveryException;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertEquals;
@@ -40,17 +42,17 @@ public class NGSIMongoBaseSinkTest {
     private class NGSIMongoBaseSinkImpl extends NGSIMongoBaseSink {
 
         @Override
-        void persistBatch(NGSIBatch batch) throws Exception {
+        void persistBatch(NGSIBatch batch) throws CygnusPersistenceError {
             throw new UnsupportedOperationException("Not supported yet.");
         } // persistBatch
 
         @Override
-        public void truncateBySize(NGSIBatch batch, long size) throws EventDeliveryException {
+        public void truncateBySize(NGSIBatch batch, long size) throws CygnusCappingError {
             throw new UnsupportedOperationException("Not supported yet.");
         } // truncateBySize
 
         @Override
-        public void truncateByTime(long time) {
+        public void truncateByTime(long time) throws CygnusExpiratingError {
         } // truncateByTime
         
     } // NGSIMongoBaseSinkImpl
