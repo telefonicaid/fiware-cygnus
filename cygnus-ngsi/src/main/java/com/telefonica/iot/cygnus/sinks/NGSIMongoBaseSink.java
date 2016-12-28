@@ -24,8 +24,6 @@ import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
-import java.security.MessageDigest;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.flume.Context;
 
 /**

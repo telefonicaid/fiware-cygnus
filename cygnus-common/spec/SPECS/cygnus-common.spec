@@ -169,6 +169,9 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Fri Dec 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.6.0
+- [cygnus][hardening] Add IPv6 support to API and GUI (#1261)
+
 * Wed Nov 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.5.0
 - [cygnus][hardening] Add entry for Grouping Rules in Installation and Administration Guide (#1206)
 - [cygnus][hardening] Add missing creation of log4j path (#1212)

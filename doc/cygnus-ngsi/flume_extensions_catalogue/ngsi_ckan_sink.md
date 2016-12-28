@@ -22,6 +22,7 @@ Content:
         * [About batching](#section2.3.2)
         * [About the encoding](#section2.3.3)
         * [About geolocation attributes](#section2.3.4)
+        * [About capping resources/expirating records](#section2.3.5)
 * [Programmers guide](#section3)
     * [`NGSICKANSink` class](#section3.1)
 * [Annexes](#section4)
@@ -73,7 +74,7 @@ It must be noticed a CKAN Datastore (and a viewer) is also created and associate
 
 Since based in [PostgreSQL](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to  certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
 
-Nevertheless, different than PostgreSQL, resource lengths may be up to 100 characters (minimum, 2 characters).
+Despite there is no real limit on the resource names, Cygnus will keep limiting their lengths up to 100 characters (minimum, 2 characters), accordingly to what's done with organization and package names.
 
 [Top](#top)
 
@@ -338,6 +339,9 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 | batch\_retry\_intervals | no | 5000 | Comma-separated list of intervals (in miliseconds) at which the retries regarding not persisted batches will be done. First retry will be done as many miliseconds after as the first value, then the second retry will be done as many miliseconds after as second value, and so on. If the batch\_ttl is greater than the number of intervals, the last interval is repeated. |
 | backend.max\_conns | no | 500 | Maximum number of connections allowed for a Http-based HDFS backend. |
 | backend.max\_conns\_per\_route | no | 100 | Maximum number of connections per route allowed for a Http-based HDFS backend. |
+| persistence\_policy.max_records | no | -1 | Maximum number of records allowed for a resource before it is capped. `-1` disables this policy. |
+| persistence\_policy.expiration_time | no | -1 | Maximum number of seconds a record is maintained in a resource before expiration. `-1` disables this policy. |
+| persistence\_policy.checking_time | no | 3600 | Frequency (in seconds) at which the sink ckecks for record expiration. |
 
 A configuration example could be:
 
@@ -363,6 +367,9 @@ A configuration example could be:
     cygnus-ngsi.sinks.ckan-sink.batch_retry_intervals = 5000
     cygnus-ngsi.sinks.ckan-sink.backend.max_conns = 500
     cygnus-ngsi.sinks.ckan-sink.backend.max_conns_per_route = 100
+    cygnus-ngsi.sinks.ckan-sink.persistence_policy.max_records = 5
+    cygnus-ngsi.sinks.ckan-sink.persistence_policy.expiration_time = 86400
+    cygnus-ngsi.sinks.ckan-sink.persistence_policy.checking_time = 600
 
 [Top](#top)
 
@@ -434,13 +441,29 @@ Finally, it must be said this way of mapping geolocated context information into
 
 [Top](#top)
 
+####<a name="section2.3.5"></a>About capping resources and expirating records
+Capping and expiration are disabled by default. Nevertheless, if desired, this can be enabled:
+
+* Capping by the number of records. This allows the resource growing up until certain configured maximum number of records is reached (`persistence_policy.max_records`), and then maintains a such a constant number of records.
+* Expirating by time the records. This allows the resource growing up until records become old, i.e. overcome certain configured expiration time (`persistence_policy.expiration_time`).
+
+[Top](#top)
+
 ##<a name="section3"></a>Programmers guide
 ###<a name="section3.1"></a>`NGSICKANSink` class
 As any other NGSI-like sink, `NGSICKANSink` extends the base `NGSISink`. The methods that are extended are:
 
-    void persistBatch(Batch batch) throws Exception;
+    void persistBatch(NGSIBatch batch) throws Exception;
 
-A `Batch` contains a set of `NGSIEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the CKAN resource where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `CKANBackend` implementation.
+A `NGSIBatch` contains a set of `NGSIEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the CKAN resource where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `CKANBackend` implementation.
+
+    void capRecords(NGSIBatch batch, long maxRecords) throws EventDeliveryException;
+    
+This method is always called immediatelly after `persistBacth()`. The same destination resources that were upserted are now checked in terms of number of records: if the configured maximum (`persistence_policy.max_records`) is overcome for any of the updated resources, then as many oldest records are deleted as required until the maximum number of records is reached.
+    
+    void expirateRecords(long expirationTime);
+    
+This method is called in a peridocial way (based on `persistence_policy.checking_time`), and if the configured expiration time (`persistence_policy.expiration_time`) is overcome for any of the records within any of the resources, then it is deleted.
 
     public void start();
 

@@ -64,9 +64,9 @@ import org.apache.log4j.MDC;
  */
 public abstract class NGSISink extends CygnusSink implements Configurable {
 
-    // logger
+    // Logger
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSISink.class);
-    // general parameters for all the sinks
+    // General parameters for all the sinks
     protected DataModel dataModel;
     protected boolean enableGrouping;
     protected int batchSize;
@@ -77,10 +77,15 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     protected boolean invalidConfiguration;
     protected boolean enableEncoding;
     protected boolean enableNameMappings;
-    // accumulator utility
+    private long persistencePolicyMaxRecords;
+    private long persistencePolicyExpirationTime;
+    private long persistencePolicyCheckingTime; 
+    // Accumulator utility
     private final Accumulator accumulator;
-    // rollback queues
+    // Rollback queues
     private ArrayList<Accumulator> rollbackedAccumulations;
+    // Expiration thread
+    private ExpirationTimeChecker expirationTimeChecker;
 
     /**
      * Constructor.
@@ -88,13 +93,13 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     public NGSISink() {
         super();
 
-        // configuration is supposed to be valid
+        // Configuration is supposed to be valid
         invalidConfiguration = false;
 
-        // create the accumulator utility
+        // Create the accumulator utility
         accumulator = new Accumulator();
 
-        // crete the rollbacking queue
+        // Create the rollbacking queue
         rollbackedAccumulations = new ArrayList<>();
     } // NGSISink
     
@@ -178,6 +183,18 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     protected void setRollbackedAccumulations(ArrayList<Accumulator> rollbackedAccumulations) {
         this.rollbackedAccumulations = rollbackedAccumulations;
     } // setRollbackedAccumulations
+    
+    protected long getPersistencePolicyMaxRecords() {
+        return persistencePolicyMaxRecords;
+    } // getPersistencePolicyMaxRecords
+    
+    protected long getPersistencePolicyExpirationTime() {
+        return persistencePolicyExpirationTime;
+    } // getPersistencePolicyExpirationTime
+    
+    protected long getPersistencePolicyCheckingTime() {
+        return persistencePolicyCheckingTime;
+    } // getPersistencePolicyCheckingTime
 
     @Override
     public void configure(Context context) {
@@ -298,6 +315,23 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_retry_intervals="
                     + batchRetryIntervalsStr + ")");
         } // if
+        
+        persistencePolicyMaxRecords = context.getInteger("persistence_policy.max_records", -1);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (persistence_policy.max_records="
+                    + persistencePolicyMaxRecords + ")");
+        persistencePolicyExpirationTime = context.getInteger("persistence_policy.expiration_time", -1);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (persistence_policy.expiration_time="
+                    + persistencePolicyExpirationTime + ")");
+        persistencePolicyCheckingTime = context.getInteger("persistence_policy.checking_time", 3600);
+        
+        if (persistencePolicyCheckingTime <= 0) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (persistence_policy.checking_time="
+                    + persistencePolicyCheckingTime + ") -- Must be greater than 0");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (persistence_policy.checking_time="
+                    + persistencePolicyCheckingTime + ")");
+        } // if else
     } // configure
 
     @Override
@@ -308,8 +342,13 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             LOGGER.info("[" + this.getName() + "] Startup completed. Nevertheless, there are errors "
                     + "in the configuration, thus this sink will not run the expected logic");
         } else {
-            // the accumulator must be initialized once read the configuration
+            // The accumulator must be initialized once read the configuration
             accumulator.initialize(new Date().getTime());
+            // Crate and start the expiration time checker thread... this has to be created here in order to have a not
+            // null name for the sink (i.e. after configuration)
+            expirationTimeChecker = new ExpirationTimeChecker(this.getName());
+            expirationTimeChecker.start();
+            
             LOGGER.info("[" + this.getName() + "] Startup completed");
         } // if else
     } // start
@@ -341,7 +380,12 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             
         // Try persisting the rollbacked accumulation
         try {
-            persistBatch(rollbackedAccumulation.getBatch());
+            NGSIBatch batch = rollbackedAccumulation.getBatch();
+            persistBatch(batch);
+            
+            if (persistencePolicyMaxRecords > -1) {
+                capRecords(batch, persistencePolicyMaxRecords);
+            } // if
             
             if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
                 LOGGER.info("Finishing internal transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
@@ -506,8 +550,13 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         // persist the accumulation
         try {
             if (accumulator.getAccIndex() != 0) {
-                LOGGER.debug("Batch completed, persisting it");
-                persistBatch(accumulator.getBatch());
+                LOGGER.debug("Batch completed");
+                NGSIBatch batch = accumulator.getBatch();
+                persistBatch(batch);
+                
+                if (persistencePolicyMaxRecords > -1) {
+                    capRecords(batch, persistencePolicyMaxRecords);
+                } // if
             } // if
 
             if (!accumulator.getAccTransactionIds().isEmpty()) {
@@ -821,11 +870,78 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     } // Accumulator
     
     /**
+     * Class for checking about expired records.
+     */
+    private class ExpirationTimeChecker extends Thread {
+        
+        private final String sinkName;
+        
+        /**
+         * Constructor.
+         * @param sinkName
+         */
+        public ExpirationTimeChecker(String sinkName) {
+            this.sinkName = sinkName;
+        } // ExpirationTimeChecker
+
+        @Override
+        public void run() {
+            while (true) {
+                long timeBefore = 0;
+                long timeAfter = 0;
+                
+                if (persistencePolicyExpirationTime > -1) {
+                    timeBefore = new Date().getTime();
+                    
+                    try {
+                        LOGGER.debug("[" + sinkName + "] Expirating records");
+                        expirateRecords(persistencePolicyExpirationTime);
+                    } catch (Exception e) {
+                        LOGGER.error("[" + sinkName + "] Error while expirating records. Details: "
+                                + e.getMessage());
+                    } // try catch
+                    
+                    timeAfter = new Date().getTime();
+                } // if
+                
+                long timeExpent = timeAfter - timeBefore;
+                long sleepTime = (persistencePolicyCheckingTime * 1000) - timeExpent;
+                
+                if (sleepTime <= 0) {
+                    sleepTime = 1000; // sleep at least 1 second
+                } // if
+                
+                try {
+                    sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    LOGGER.error("[" + sinkName + "] Error while sleeping. Details: " + e.getMessage());
+                } // try
+            } // while
+        } // run
+
+    } // ExpirationTimeChecker
+    
+    /**
      * This is the method the classes extending this class must implement when dealing with a batch of events to be
      * persisted.
      * @param batch
      * @throws Exception
      */
     abstract void persistBatch(NGSIBatch batch) throws Exception;
+    
+    /**
+     * This is the method the classes extending this class must implement when dealing with size-based capping.
+     * @param batch
+     * @param maxRecords
+     * @throws EventDeliveryException
+     */
+    abstract void capRecords(NGSIBatch batch, long maxRecords) throws EventDeliveryException;
+    
+    /**
+     * This is the method the classes extending this class must implement when dealing with time-based expiration.
+     * @param expirationTime
+     * @throws Exception
+     */
+    abstract void expirateRecords(long expirationTime) throws Exception;
 
 } // NGSISink

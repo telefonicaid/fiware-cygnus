@@ -26,6 +26,7 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import java.util.ArrayList;
+import java.util.Date;
 import org.json.simple.JSONObject;
 import org.apache.http.Header;
 import org.apache.http.entity.StringEntity;
@@ -217,7 +218,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             } else {
                 throw new CygnusPersistenceError("Could not create the orgnaization (orgName=" + orgName
                         + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else if else
+            } // if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
                     || e instanceof CygnusPersistenceError
@@ -270,7 +271,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             } else {
                 throw new CygnusPersistenceError("Could not create the package (orgId=" + orgId
                         + ", pkgName=" + pkgName + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else if else
+            } // if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
                     || e instanceof CygnusPersistenceError
@@ -312,7 +313,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             } else {
                 throw new CygnusPersistenceError("Could not create the resource (pkgId=" + pkgId
                         + ", resName=" + resName + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else if else
+            } // if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
                     || e instanceof CygnusPersistenceError
@@ -359,7 +360,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             } else {
                 throw new CygnusPersistenceError("Could not create the datastore (resId=" + resId
                         + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else if else
+            } // if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
                     || e instanceof CygnusPersistenceError
@@ -396,7 +397,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 } else {
                     throw new CygnusPersistenceError("Could not create the datastore (resId=" + resId
                         + ", statusCode=" + res.getStatusCode() + ")");
-                } // if else if else
+                } // if else
             } catch (Exception e) {
                 if (e instanceof CygnusRuntimeError
                         || e instanceof CygnusPersistenceError
@@ -427,7 +428,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             } else {
                 throw new CygnusPersistenceError("Could not check if the view exists (resId=" + resId
                         + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else if else
+            } // if else
         } catch (Exception e) {
             if (e instanceof CygnusRuntimeError
                     || e instanceof CygnusPersistenceError
@@ -439,6 +440,157 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         } // try catch
     } // existsView
     
+    private JSONObject getRecords(String resId, String filters) throws Exception {
+        try {
+            // create the CKAN request JSON
+            String jsonString = "{\"id\": \"" + resId + "\"";
+        
+            if (filters == null || filters.isEmpty()) {
+                jsonString += "}";
+            } else {
+                jsonString += ",\"filters\":\"" + filters + "\"}";
+            } // if else
+
+            // create the CKAN request URL
+            String urlPath = "/api/3/action/datastore_search";
+
+            // do the CKAN request
+            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+            // check the status
+            if (res.getStatusCode() == 200) {
+                LOGGER.debug("Successful search (resourceId=" + resId + ")");
+                return res.getJsonObject();
+            } else {
+                throw new CygnusPersistenceError("Could not search for the records (resId=" + resId
+                        + ", statusCode=" + res.getStatusCode() + ")");
+            } // if else
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
+    } // getRecords
+    
+    private void deleteRecords(String resId, String filters) throws Exception {
+        try {
+            // create the CKAN request JSON
+            String jsonString = "{\"id\": \"" + resId + "\",\"force\":\"true\"";
+        
+            if (filters == null || filters.isEmpty()) {
+                jsonString += "}";
+            } else {
+                jsonString += ",\"filters\":" + filters + "}";
+            } // if else
+
+            // create the CKAN request URL
+            String urlPath = "/api/3/action/datastore_delete";
+
+            // do the CKAN request
+            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+            // check the status
+            if (res.getStatusCode() == 200) {
+                LOGGER.debug("Successful deletion (resourceId=" + resId + ")");
+            } else {
+                throw new CygnusPersistenceError("Could not delete the records (resId=" + resId
+                        + ", statusCode=" + res.getStatusCode() + ")");
+            } // if else
+        } catch (Exception e) {
+            if (e instanceof CygnusRuntimeError
+                    || e instanceof CygnusPersistenceError
+                    || e instanceof CygnusBadConfiguration) {
+                throw e;
+            } else {
+                throw new CygnusRuntimeError(e.getMessage());
+            } // if else
+        } // try catch
+    } // deleteRecords
+    
+    @Override
+    public void capRecords(String orgName, String pkgName, String resName, long maxRecords) throws Exception {
+        // Get the resource ID by querying the cache
+        String resId = cache.getResId(orgName, pkgName, resName);
+        
+        // Get certain information about the records within the resource
+        JSONObject result = (JSONObject) getRecords(resId, null).get("result");
+        long total = (Long) result.get("total");
+        JSONArray records = (JSONArray) result.get("records");
+        
+        // Create the filters for a datastore deletion
+        String filters = "";
+        
+        if (total > maxRecords) {
+            for (int i = 0; i < (total - maxRecords); i++) {
+                long id = (Long) ((JSONObject) records.get(i)).get("_id");
+                
+                if (filters.isEmpty()) {
+                    filters += "{\"_id\":[" + id;
+                } else {
+                    filters += "," + id;
+                } // if else
+            } // for
+        } // if
+        
+        if (filters.isEmpty()) {
+            LOGGER.debug("No records to be deleted");
+        } else {
+            filters += "]}";
+            LOGGER.debug("Records must be deleted (resId=" + resId + ", filters=" + filters + ")");
+            deleteRecords(resId, filters);
+        } // if else
+    } // capRecords
+    
+    @Override
+    public void expirateRecords(String orgName, String pkgName, String resName, long expirationTime) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
+    } // expirateRecords
+
+    @Override
+    public void expirateRecordsCache(long expirationTime) throws Exception {
+        // Iterate on the cached resource IDs
+        cache.startResIterator();
+        
+        while (cache.hasNextRes()) {
+            // Get the next resource ID
+            String resId = cache.getNextResId();
+            
+            // Get the records within the resource
+            JSONObject result = (JSONObject) getRecords(resId, null).get("result");
+            JSONArray records = (JSONArray) result.get("records");
+
+            // Create the filters for a datastore deletion
+            String filters = "";
+
+            for (Object recordObj : records) {
+                JSONObject record = (JSONObject) recordObj;
+                long id = (Long) record.get("_id");
+                long recordTime = (Long) record.get("recvTimeTs");
+                long currentTime = new Date().getTime() / 1000;
+
+                if (recordTime < (currentTime - expirationTime)) {
+                    if (filters.isEmpty()) {
+                        filters += "{\"_id\":[" + id;
+                    } else {
+                        filters += "," + id;
+                    } // if else
+                } // if
+            } // for
+            
+            if (filters.isEmpty()) {
+                LOGGER.debug("No records to be deleted");
+            } else {
+                filters += "]}";
+                LOGGER.debug("Records to be deleted, resId=" + resId + ", filters=" + filters);
+                deleteRecords(resId, filters);
+            } // if else
+        } // while
+    } // expirateRecordsCache
+    
     /**
      * Sets the CKAN cache. This is protected since it is only used by the tests.
      * @param cache
@@ -448,7 +600,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
     } // setCache
     
     private JsonResponse doCKANRequest(String method, String urlPath, String jsonString) throws Exception {
-        ArrayList<Header> headers = new ArrayList<Header>();
+        ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
         headers.add(new BasicHeader("Content-Type", "application/json; charset=utf-8"));
         return doRequest(method, urlPath, true, headers, new StringEntity(jsonString, "UTF-8"));

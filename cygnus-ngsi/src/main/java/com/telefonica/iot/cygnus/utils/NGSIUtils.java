@@ -88,16 +88,16 @@ public final class NGSIUtils {
      * @param attrValue
      * @param attrType
      * @param metadata
-     * @param flipCoordinates
+     * @param swapCoordinates
      * @return The geometry value, ready for insertion in CartoDB, or the value as it is
      */
     public static ImmutablePair<String, Boolean> getGeometry(String attrValue, String attrType, String metadata,
-            boolean flipCoordinates) {
+            boolean swapCoordinates) {
         // First, check the attribute type
         if (attrType.equals("geo:point")) {
             String[] split = attrValue.split(",");
                 
-            if (flipCoordinates) {
+            if (swapCoordinates) {
                 return new ImmutablePair(
                         "ST_SetSRID(ST_MakePoint(" + split[1].trim() + "," + split[0].trim() + "), 4326)", true);
             } else {
@@ -130,7 +130,7 @@ public final class NGSIUtils {
             if (mdName.equals("location") && mdType.equals("string") && mdValue.equals("WGS84")) {
                 String[] split = attrValue.split(",");
                 
-                if (flipCoordinates) {
+                if (swapCoordinates) {
                     return new ImmutablePair(
                             "ST_SetSRID(ST_MakePoint(" + split[1].trim() + "," + split[0].trim() + "), 4326)", true);
                 } else {

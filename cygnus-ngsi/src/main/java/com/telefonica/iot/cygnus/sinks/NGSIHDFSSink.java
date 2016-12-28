@@ -42,6 +42,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -281,7 +282,7 @@ public class NGSIHDFSSink extends NGSISink {
         if (oauth2Token != null && oauth2Token.length() > 0) {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (oauth2_token=" + this.oauth2Token + ")");
         } else {
-            LOGGER.error("[" + this.getName() + "] No OAuth2 token provided. Cygnus can continue, but HDFS sink may "
+            LOGGER.warn("[" + this.getName() + "] No OAuth2 token provided. Cygnus can continue, but HDFS sink may "
                     + "not properly work if WebHDFS service is protected with such an authentication and "
                     + "authorization mechanism!");
         } // if else
@@ -505,6 +506,14 @@ public class NGSIHDFSSink extends NGSISink {
             } // if
         } // for
     } // persistBatch
+    
+    @Override
+    public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+    } // capRecords
+
+    @Override
+    public void expirateRecords(long time) throws Exception {
+    } // expirateRecords
 
     /**
      * Class for aggregating aggregation.

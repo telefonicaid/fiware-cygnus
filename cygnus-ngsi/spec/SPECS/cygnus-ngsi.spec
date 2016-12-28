@@ -97,6 +97,31 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Dec 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.6.0
+- [cygnus-ngsi][hardening] Update migration script for HDFS regarding new encoding (#1271)
+- [cygnus-ngsi][feature] Add support for geo:json Orion's type in NGSICartoDBSink (#1275)
+- [cygnus-ngsi][hardening] Produce NGSIEvent's at Grouping Rules interceptor (#1280)
+- [cygnus-ngsi][hardening] NGSIEvent must contain ContextElement's instead of NotifyContextRequest's (#1203)
+- [cygnus-ngsi][hardening] Add a note regarding supported NGSI version (#1288)
+- [cygnus-ngsi][hardening] Produce NGSIEvent's at NGSIRestHandler (#1204)
+- [cygnus-ngsi][hardening] Avoid concatenation on entities naming when the type is null or empty (#1279)
+- [cygnus-ngsi][bug] Add concatenator to CKAN packages when new encoding is enabled (#1291)
+- [cygnus-ngsi][hardening] Add a documentation piece regarding deprecated functionality (#1289)
+- [cygnus-ngsi][hardening] Add a note regarding geolocation attributes in NGSICKANSink documentation (#1293)
+- [cygnus-ngsi][hardening] Add OLD_CONCATENATOR constant (#1284)
+- [cygnus-ngsi][hardening] Document how Name Mappings behave in absence of a "newSomething" field (#1302)
+- [cygnus-ngsi][bug] Close BufferedReader used to read notifications (#1304)
+- [cygnus-ngsi][hardening] Deprecate Grouping Rules (#1182)
+- [cygnus-ngsi][feature] Add raw snapshot analysis mode to NGSICKANSink (#1273)
+- [cygnus-ngsi][bug] Fix getting location header when creating Json responses in HttpBackend (#1318)
+- [cygnus-ngsi][hardening] Update performance document (#1306)
+- [cygnus-ngsi][hardening] Improve HDFSBackendImplREST debug logs (#1319)
+- [cygnus-ngsi][hardening] Update NGSICKANSink documentation regarding resource name length limit imposed by Cygnus (#1325)
+- [cygnus-ngsi][bug] Obtained geometry not properly used in NGSICartoDBSink (#1327)
+- [cygnus-ngsi][hardening] Replace flip_coordinates with swap_coordinates in NGSICartoDBSink (#1313)
+- [cygnus-ngsi][bug] Add event to already existent sub-batches in NGSIBatch (#1331)
+- [cygnus-ngsi][hardening] Warn instead of Error when no OAuth2 token is configured for NGSIHDFSSink (#1330)
+
 * Wed Nov 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.5.0
 - [cygnus][hardening] Add NGSICKANSink configuration in docker's agent.conf file (#1193)
 - [cygnus][hardening] Add entry for Grouping Rules in Installation and Administration Guide (#1206)

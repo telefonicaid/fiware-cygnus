@@ -28,6 +28,7 @@ import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import java.util.ArrayList;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 /**
@@ -156,6 +157,14 @@ public class NGSIKafkaSink extends NGSISink {
             batch.setNextPersisted(true);
         } // for
     } // persistBatch
+    
+    @Override
+    public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+    } // capRecords
+
+    @Override
+    public void expirateRecords(long time) throws Exception {
+    } // expirateRecords
     
     /**
      * Builds the topic name.

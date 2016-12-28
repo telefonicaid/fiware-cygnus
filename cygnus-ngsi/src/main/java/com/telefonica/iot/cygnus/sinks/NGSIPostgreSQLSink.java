@@ -31,6 +31,7 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
 
 /**
  *
@@ -229,6 +230,14 @@ public class NGSIPostgreSQLSink extends NGSISink {
             batch.setNextPersisted(true);
         } // for
     } // persistBatch
+    
+    @Override
+    public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+    } // capRecords
+
+    @Override
+    public void expirateRecords(long time) throws Exception {
+    } // expirateRecords
 
     /**
      * Class for aggregating fieldValues.

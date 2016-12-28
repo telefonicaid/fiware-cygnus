@@ -25,6 +25,7 @@ import static com.telefonica.iot.cygnus.sinks.NGSIMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.util.ArrayList;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
 
 /**
  *
@@ -93,6 +94,14 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
             batch.setNextPersisted(true);
         } // for
     } // persistBatch
+    
+    @Override
+    public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+    } // capRecords
+
+    @Override
+    public void expirateRecords(long time) throws Exception {
+    } // expirateRecords
     
     private void persistOne(NGSIEvent event) throws Exception {
         // get some values from the event

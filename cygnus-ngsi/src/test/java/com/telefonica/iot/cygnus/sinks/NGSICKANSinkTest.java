@@ -503,7 +503,7 @@ public class NGSICKANSinkTest {
         
         try {
             String builtOrgName = sink.buildOrgName(service);
-            String expectedOrgName = "someService";
+            String expectedOrgName = "someservice";
         
             try {
                 assertEquals(expectedOrgName, builtOrgName);
@@ -607,7 +607,7 @@ public class NGSICKANSinkTest {
         
         try {
             String builtPkgName = sink.buildPkgName(service, servicePath);
-            String expectedPkgName = "someService_someServicePath";
+            String expectedPkgName = "someservice_someservicepath";
         
             try {
                 assertEquals(expectedPkgName, builtPkgName);
@@ -719,7 +719,7 @@ public class NGSICKANSinkTest {
         
         try {
             String builtPkgName = sink.buildPkgName(service, servicePath);
-            String expectedPkgName = "someService";
+            String expectedPkgName = "someservice";
         
             try {
                 assertEquals(expectedPkgName, builtPkgName);
@@ -828,7 +828,7 @@ public class NGSICKANSinkTest {
         
         try {
             String builtResName = sink.buildResName(entity);
-            String expecetedResName = "someId_someType";
+            String expecetedResName = "someid_sometype";
         
             try {
                 assertEquals(expecetedResName, builtResName);
