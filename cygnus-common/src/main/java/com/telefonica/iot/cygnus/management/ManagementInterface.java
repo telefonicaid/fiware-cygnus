@@ -174,10 +174,10 @@ public class ManagementInterface extends AbstractHandler {
                 } else if (uri.startsWith("/v1/admin/log/appenders")) {
                     handleGetAdminLogAppenders(request, response);
                 } else if (uri.startsWith("/v1/namemappings")) {
-                    NameMappingsHandlers.handleGetNameMappings(request, response, nameMappingsConfFile);
+                    NameMappingsHandlers.get(request, response, nameMappingsConfFile);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                    response.getWriter().println(method + " " + uri + " Not implemented");
+                    response.getWriter().println(method + " " + uri + " not implemented");
                 } // if else
             } else if (method.equals("POST")) {
                 if (uri.equals("/v1/groupingrules")) {
@@ -196,17 +196,11 @@ public class ManagementInterface extends AbstractHandler {
                     handlePostAdminLogLoggers(request, response);
                 } else if (uri.startsWith("/v1/admin/log/appenders")) {
                     handlePostAdminLogAppenders(request, response);
-                } else if (uri.startsWith("/v1/namemappings/servicemapping")) {
-                    NameMappingsHandlers.handlePostServiceMapping(request, response, nameMappingsConfFile);
-                } else if (uri.startsWith("/v1/namemappings/servicemapping")) {
-                    NameMappingsHandlers.handlePostServicePathMapping(request, response, nameMappingsConfFile);
-                } else if (uri.startsWith("/v1/namemappings/servicemapping")) {
-                    NameMappingsHandlers.handlePostEntityMapping(request, response, nameMappingsConfFile);
-                } else if (uri.startsWith("/v1/namemappings/servicemapping")) {
-                    NameMappingsHandlers.handlePostAttributeMapping(request, response, nameMappingsConfFile);
+                } else if (uri.startsWith("/v1/namemappings")) {
+                    NameMappingsHandlers.post(request, response, nameMappingsConfFile);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                    response.getWriter().println(method + " " + uri + " Not implemented");
+                    response.getWriter().println(method + " " + uri + " not implemented");
                 } // if else
             } else if (method.equals("PUT")) {
                 if (uri.equals("/v1/stats")) {
@@ -227,9 +221,11 @@ public class ManagementInterface extends AbstractHandler {
                     handlePutAdminLogLoggers(request, response);
                 } else if (uri.startsWith("/v1/admin/log/appenders")) {
                     handlePutAdminLogAppenders(request, response);
+                } else if (uri.startsWith("/v1/namemappings")) {
+                    NameMappingsHandlers.put(request, response, nameMappingsConfFile);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                    response.getWriter().println(method + " " + uri + " Not implemented");
+                    response.getWriter().println(method + " " + uri + " not implemented");
                 } // if else
             } else if (method.equals("DELETE")) {
                 if (uri.equals("/v1/groupingrules")) {
@@ -248,13 +244,15 @@ public class ManagementInterface extends AbstractHandler {
                     handleDeleteAdminLogLoggers(request, response);
                 } else if (uri.startsWith("/v1/admin/log/appenders")) {
                     handleDeleteAdminLogAppenders(request, response);
+                } else if (uri.startsWith("/v1/namemappings")) {
+                    NameMappingsHandlers.delete(request, response, nameMappingsConfFile);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                    response.getWriter().println(method + " " + uri + " Not implemented");
+                    response.getWriter().println(method + " " + uri + " not implemented");
                 } // if else
             } else {
                 response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                response.getWriter().println(method + " " + uri + " Not implemented");
+                response.getWriter().println(method + " " + uri + " not implemented");
             } // if else
         } else if (port == guiPort) {
             if (method.equals("GET")) {
@@ -266,11 +264,11 @@ public class ManagementInterface extends AbstractHandler {
                     handleGetStats(response);
                 } else {
                     response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                    response.getWriter().println(method + " " + uri + " Not implemented");
+                    response.getWriter().println(method + " " + uri + " not implemented");
                 } // if else
             } else {
                 response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                response.getWriter().println(method + " " + uri + " Not implemented");
+                response.getWriter().println(method + " " + uri + " not implemented");
             } // if else
         } else {
             LOGGER.info("Attending a request in a non expected port: " + port);
