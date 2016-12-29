@@ -21,8 +21,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.telefonica.iot.cygnus.containers.NameMappings;
-import com.telefonica.iot.cygnus.containers.NameMappings.ServiceMapping;
-import com.telefonica.iot.cygnus.containers.NameMappings.ServicePathMapping;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.JsonUtils;
 import java.io.BufferedReader;
@@ -50,8 +48,8 @@ public final class NameMappingsHandlers {
 
         try {
             nameMappingsStr = JsonUtils.readJsonFile(nameMappingsConfFile);
-            LOGGER.debug("Reading name mappings, Json read: " + nameMappingsStr);
-        } catch (Exception e) {
+            LOGGER.debug("Reading name mappings from " + nameMappingsConfFile + ", Json read: " + nameMappingsStr);
+        } catch (IOException e) {
             LOGGER.error("Runtime error (" + e.getMessage() + ")");
             return null;
         } // try catch
@@ -74,7 +72,7 @@ public final class NameMappingsHandlers {
 
         try {
             nameMappings = gson.fromJson(jsonStr, NameMappings.class);
-            LOGGER.debug("Json parsed");
+            LOGGER.debug("Name mappings Json parsed: " + nameMappings.toString());
         } catch (JsonIOException | JsonSyntaxException e) {
             LOGGER.error("Runtime error (" + e.getMessage() + ")");
             return null;
@@ -82,11 +80,11 @@ public final class NameMappingsHandlers {
 
         // Check if any of the mappings is not valid, e.g. some field is missing
         nameMappings.purge();
-        LOGGER.debug("Json purged");
+        LOGGER.debug("Name mappings Json purged: " + nameMappings.toString());
         
         // Pre-compile the regular expressions
         nameMappings.compilePatterns();
-        LOGGER.debug("Regular expressions with Json pre-compiled");
+        LOGGER.debug("Regular expressions within name mappings Json were pre-compiled");
         
         return nameMappings;
     } // parseNameMappings
@@ -101,9 +99,19 @@ public final class NameMappingsHandlers {
                 payload += line;
             } // while
             
+            LOGGER.debug("Payload rad from request: " + payload);
             return payload;
         } // try
     } // readPayload
+    
+    private static void saveNameMappings(String nameMappingsConfFile, NameMappings nameMappings) {
+        try {
+            JsonUtils.writeJsonFile(nameMappingsConfFile, nameMappings.toString());
+            LOGGER.debug("Name mappings Json wrote");
+        } catch (IOException e) {
+            LOGGER.error("Runtime error (" + e.getMessage() + ")");
+        } // try catch
+    } // loadNameMappings
 
     /**
      * Handles GET /v1/namemappings.
@@ -112,9 +120,9 @@ public final class NameMappingsHandlers {
      * @param nameMappingsConfFile
      * @throws IOException
      */
-    public static void handleGetNameMappings(HttpServletRequest request, HttpServletResponse response,
+    public static void get(HttpServletRequest request, HttpServletResponse response,
             String nameMappingsConfFile) throws IOException {
-        LOGGER.debug("Request: GET /v1/namemappings");
+        LOGGER.info("Request: GET /v1/namemappings");
         
         // Set the content type of the response
         response.setContentType("application/json; charset=utf-8");
@@ -137,19 +145,19 @@ public final class NameMappingsHandlers {
         response.setStatus(HttpServletResponse.SC_OK);
         String responseStr = "{\"success\":\"true\",\"result\":" + nameMappings.toString() + "}";
         response.getWriter().println(responseStr);
-        LOGGER.debug("Response:" + responseStr);
-    } // handleGetNameMappings
+        LOGGER.info("Response:" + responseStr);
+    } // get
     
     /**
-     * Handles POST /v1/namemappings/servicemapping.
+     * Handles POST /v1/namemappings.
      * @param request
      * @param response
      * @param nameMappingsConfFile
      * @throws IOException
      */
-    public static void handlePostServiceMapping(HttpServletRequest request, HttpServletResponse response,
+    public static void post(HttpServletRequest request, HttpServletResponse response,
             String nameMappingsConfFile) throws IOException {
-        LOGGER.debug("Request: POST /v1/namemappings/servicemapping");
+        LOGGER.info("Request: POST /v1/namemappings");
         
         // Set the content type of the response
         response.setContentType("application/json; charset=utf-8");
@@ -169,131 +177,32 @@ public final class NameMappingsHandlers {
             return;
         } // if
         
+        // Read the payload
         String payload = readPayload(request);
 
         if (payload == null || payload.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             String responseStr =
                     "{\"success\":\"false\","
-                    + "\"error\":\"Given service mapping is null or empty\"}";
+                    + "\"error\":\"Given name mappings are null or empty\"}";
             response.getWriter().println(responseStr);
             LOGGER.debug("Response: " + responseStr);
             return;
         } // if
 
-        Gson gson = new Gson();
-        ServiceMapping serviceMapping;
-
-        try {
-            serviceMapping = gson.fromJson(payload, ServiceMapping.class);
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            String responseStr =
-                    "{\"success\":\"false\","
-                    + "\"error\":\"Given service mapping has errors. Details: " + e.getMessage() + "\"}";
-            response.getWriter().println(responseStr);
-            LOGGER.debug("Response: " + responseStr);
-            return;
-        } // try catch
-
-        nameMappings.addServiceMapping(serviceMapping);
+        // Do the POST
+        NameMappings newNameMappings = parseNameMappings(payload);
+        nameMappings.add(newNameMappings.getServiceMappings(), false);
+        
+        // Save the name mappings
+        saveNameMappings(nameMappingsConfFile, nameMappings);
+        
+        // Response
         response.setStatus(HttpServletResponse.SC_OK);
         String responseStr = "{\"success\":\"true\",\"result\":" + nameMappings.toString() + "}";
         response.getWriter().println(responseStr);
-        LOGGER.debug("Response:" + responseStr);
-    } // handlePostServiceMapping
-    
-    /**
-     * Handles POST /v1/namemappings/servicepathmapping.
-     * @param request
-     * @param response
-     * @param nameMappingsConfFile
-     * @throws IOException
-     */
-    public static void handlePostServicePathMapping(HttpServletRequest request, HttpServletResponse response,
-            String nameMappingsConfFile) throws IOException {
-        LOGGER.debug("Request: POST /v1/namemappings/servicepathmapping");
-        
-        // Set the content type of the response
-        response.setContentType("application/json; charset=utf-8");
-        
-        // Get the name mappings from the configuration file
-        NameMappings nameMappings = loadNameMappings(nameMappingsConfFile);
-
-        // Check if the name mappings are null
-        if (nameMappings == null) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            String responseStr =
-                    "{\"success\":\"false\","
-                    + "\"error\":\"Configuration file for Name Mappings not found. Details: "
-                    + nameMappingsConfFile + "\"}";
-            response.getWriter().println(responseStr);
-            LOGGER.debug("Response: " + responseStr);
-            return;
-        } // if
-        
-        String payload = readPayload(request);
-
-        if (payload == null || payload.isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            String responseStr =
-                    "{\"success\":\"false\","
-                    + "\"error\":\"Given service path mapping is null or empty\"}";
-            response.getWriter().println(responseStr);
-            LOGGER.debug("Response: " + responseStr);
-            return;
-        } // if
-
-        Gson gson = new Gson();
-        ServicePathMapping servicePathMapping;
-
-        try {
-            servicePathMapping = gson.fromJson(payload, ServicePathMapping.class);
-        } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            String responseStr =
-                    "{\"success\":\"false\","
-                    + "\"error\":\"Given service path mapping has errors. Details: " + e.getMessage() + "\"}";
-            response.getWriter().println(responseStr);
-            LOGGER.debug("Response: " + responseStr);
-            return;
-        } // try catch
-
-        for (ServiceMapping serviceMapping : nameMappings.getServiceMappings()) {
-            if (serviceMapping.getOriginalService().equals(request)) {
-                
-            }
-        } // for
-        
-        response.setStatus(HttpServletResponse.SC_OK);
-        String responseStr = "{\"success\":\"true\",\"result\":" + nameMappings.toString() + "}";
-        response.getWriter().println(responseStr);
-        LOGGER.debug("Response:" + responseStr);
-    } // handlePostServicePathMapping
-    
-    /**
-     * Handles POST /v1/namemappings/enttymapping.
-     * @param request
-     * @param response
-     * @param nameMappingsConfFile
-     * @throws IOException
-     */
-    public static void handlePostEntityMapping(HttpServletRequest request, HttpServletResponse response,
-            String nameMappingsConfFile) throws IOException {
-        
-    } // handlePostEntityMapping
-    
-    /**
-     * Handles POST /v1/namemappings/attributemapping.
-     * @param request
-     * @param response
-     * @param nameMappingsConfFile
-     * @throws IOException
-     */
-    public static void handlePostAttributeMapping(HttpServletRequest request, HttpServletResponse response,
-            String nameMappingsConfFile) throws IOException {
-        
-    } // handlePostAttributeMapping
+        LOGGER.info("Response:" + responseStr);
+    } // post
     
     /**
      * Handles PUT /v1/namemappings.
@@ -302,7 +211,7 @@ public final class NameMappingsHandlers {
      * @param nameMappingsConfFile
      * @throws IOException
      */
-    public static void handlePutNameMappings(HttpServletRequest request, HttpServletResponse response,
+    public static void put(HttpServletRequest request, HttpServletResponse response,
             String nameMappingsConfFile) throws IOException {
         LOGGER.info("Request: PUT /v1/namemappings");
         
@@ -320,14 +229,36 @@ public final class NameMappingsHandlers {
                     + "\"error\":\"Configuration file for Name Mappings not found. Details: "
                     + nameMappingsConfFile + "\"}";
             response.getWriter().println(responseStr);
-            LOGGER.info("Response: " + responseStr);
-        } else {
-            response.setStatus(HttpServletResponse.SC_OK);
-            String responseStr = "{\"success\":\"true\",\"result\":" + nameMappings.toString() + "}";
+            LOGGER.debug("Response: " + responseStr);
+            return;
+        } // if
+        
+        // Read the payload
+        String payload = readPayload(request);
+
+        if (payload == null || payload.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            String responseStr =
+                    "{\"success\":\"false\","
+                    + "\"error\":\"Given name mappings are null or empty\"}";
             response.getWriter().println(responseStr);
-            LOGGER.info("Response:" + responseStr);
-        } // if else
-    } // handlePutNameMappings
+            LOGGER.debug("Response: " + responseStr);
+            return;
+        } // if
+
+        // Do the PUT
+        NameMappings newNameMappings = parseNameMappings(payload);
+        nameMappings.add(newNameMappings.getServiceMappings(), true);
+        
+        // Save the name mappings
+        saveNameMappings(nameMappingsConfFile, nameMappings);
+        
+        // Response
+        response.setStatus(HttpServletResponse.SC_OK);
+        String responseStr = "{\"success\":\"true\",\"result\":" + nameMappings.toString() + "}";
+        response.getWriter().println(responseStr);
+        LOGGER.info("Response:" + responseStr);
+    } // put
     
     /**
      * Handles DELETE /v1/namemappings.
@@ -336,7 +267,7 @@ public final class NameMappingsHandlers {
      * @param nameMappingsConfFile
      * @throws IOException
      */
-    public static void handleDeleteNameMappings(HttpServletRequest request, HttpServletResponse response,
+    public static void delete(HttpServletRequest request, HttpServletResponse response,
             String nameMappingsConfFile) throws IOException {
         LOGGER.info("Request: DELETE /v1/namemappings");
         
@@ -354,13 +285,35 @@ public final class NameMappingsHandlers {
                     + "\"error\":\"Configuration file for Name Mappings not found. Details: "
                     + nameMappingsConfFile + "\"}";
             response.getWriter().println(responseStr);
-            LOGGER.info("Response: " + responseStr);
-        } else {
-            response.setStatus(HttpServletResponse.SC_OK);
-            String responseStr = "{\"success\":\"true\",\"result\":" + nameMappings.toString() + "}";
+            LOGGER.debug("Response: " + responseStr);
+            return;
+        } // if
+        
+        // Read the payload
+        String payload = readPayload(request);
+
+        if (payload == null || payload.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            String responseStr =
+                    "{\"success\":\"false\","
+                    + "\"error\":\"Given name mappings are null or empty\"}";
             response.getWriter().println(responseStr);
-            LOGGER.info("Response:" + responseStr);
-        } // if else
-    } // handleDeleteNameMappings
+            LOGGER.debug("Response: " + responseStr);
+            return;
+        } // if
+
+        // Do the DELETE
+        NameMappings newNameMappings = parseNameMappings(payload);
+        nameMappings.remove(newNameMappings.getServiceMappings());
+        
+        // Save the name mappings
+        saveNameMappings(nameMappingsConfFile, nameMappings);
+        
+        // Response
+        response.setStatus(HttpServletResponse.SC_OK);
+        String responseStr = "{\"success\":\"true\",\"result\":" + nameMappings.toString() + "}";
+        response.getWriter().println(responseStr);
+        LOGGER.info("Response:" + responseStr);
+    } // delete
     
 } // NameMappingsHandlers
