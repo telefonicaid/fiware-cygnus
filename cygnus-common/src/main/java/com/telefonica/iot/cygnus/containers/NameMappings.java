@@ -49,9 +49,11 @@ public class NameMappings {
      * Compiles the regular expressions into Java Patterns.
      */
     public void compilePatterns() {
-        for (ServiceMapping serviceMapping : serviceMappings) {
-            serviceMapping.compilePatterns();
-        } // for
+        if (serviceMappings != null) {
+            for (ServiceMapping serviceMapping : serviceMappings) {
+                serviceMapping.compilePatterns();
+            } // for
+        } // if
     } // compilePatterns
     
     /**
@@ -61,24 +63,77 @@ public class NameMappings {
     @Override
     public String toString() {
         String nameMappingsStr = "{\"serviceMappings\":[";
-        boolean first = true;
         
-        for (ServiceMapping serviceMapping : serviceMappings) {
-            if (first) {
-                nameMappingsStr += serviceMapping.toString();
-                first = false;
-            } else {
-                nameMappingsStr += "," + serviceMapping.toString();
-            } // if eslse
-        } // for
+        if (serviceMappings != null) {
+            boolean first = true;
+
+            for (ServiceMapping serviceMapping : serviceMappings) {
+                if (first) {
+                    nameMappingsStr += serviceMapping.toString();
+                    first = false;
+                } else {
+                    nameMappingsStr += "," + serviceMapping.toString();
+                } // if eslse
+            } // for
+        } // if
         
         nameMappingsStr += "]}";
         return nameMappingsStr;
     } // toString
     
-    public void addServiceMapping(ServiceMapping serviceMapping) {
-        serviceMappings.add(serviceMapping);
-    } // addServiceMapping
+    /**
+     * Adds new service mappings to these name mappings.
+     * @param newServiceMappings
+     * @param update
+     */
+    public void add(ArrayList<ServiceMapping> newServiceMappings, boolean update) {
+        for (ServiceMapping newServiceMapping : newServiceMappings) {
+            ServiceMapping serviceMapping = get(newServiceMapping.originalService);
+            
+            if (serviceMapping == null) {
+                serviceMappings.add(newServiceMapping);
+            } else {
+                if (update) {
+                    serviceMapping.newService = newServiceMapping.newService;
+                } // if
+                
+                serviceMapping.add(newServiceMapping.getServicePathMappings(), update);
+            } // if else
+        } // for
+    } // add
+    
+    /**
+     * Removes service mappings from these name mappings if there are no service path mappings.
+     * @param newServiceMappings
+     */
+    public void remove(ArrayList<ServiceMapping> newServiceMappings) {
+        for (ServiceMapping newServiceMapping : newServiceMappings) {
+            ServiceMapping serviceMapping = get(newServiceMapping.originalService);
+            
+            if (serviceMapping != null) {
+                ArrayList<ServicePathMapping> newServicePathMappings = newServiceMapping.getServicePathMappings();
+                
+                if (newServicePathMappings == null) {
+                    serviceMappings.remove(serviceMapping);
+                } else {
+                    serviceMapping.remove(newServicePathMappings);
+                } // if else
+            } // if
+            // else {
+            //     Nothing is done if the service mapping is null
+            // }
+        } // for
+    } // remove
+    
+    private ServiceMapping get(String originalService) {
+        for (ServiceMapping serviceMapping : serviceMappings) {
+            if (serviceMapping.originalService.equals(originalService)) {
+                return serviceMapping;
+            } // if
+        } // for
+        
+        return null;
+    } // get
     
     /**
      * ServiceMapping class.
@@ -119,9 +174,11 @@ public class NameMappings {
         public void compilePatterns() {
             originalServicePattern = Pattern.compile(originalService);
 
-            for (ServicePathMapping servicePathMapping : servicePathMappings) {
-                servicePathMapping.compilePatterns();
-            } // for
+            if (servicePathMappings != null) {
+                for (ServicePathMapping servicePathMapping : servicePathMappings) {
+                    servicePathMapping.compilePatterns();
+                } // for
+            } // if
         } // compilePatterns
         
         @Override
@@ -130,20 +187,77 @@ public class NameMappings {
                     "{\"originalService\":\"" + getOriginalService() + "\","
                     + "\"newService\":\"" + getNewService() + "\","
                     + "\"servicePathMappings\":[";
-            boolean first = true;
-             
-            for (Object servicePathMapping : servicePathMappings) {
-                if (first) {
-                    serviceMappingStr += servicePathMapping.toString();
-                    first = false;
-                } else {
-                    serviceMappingStr += "," + servicePathMapping.toString();
-                } // if else
-            } // for
+            
+            if (servicePathMappings != null) {
+                boolean first = true;
+
+                for (Object servicePathMapping : servicePathMappings) {
+                    if (first) {
+                        serviceMappingStr += servicePathMapping.toString();
+                        first = false;
+                    } else {
+                        serviceMappingStr += "," + servicePathMapping.toString();
+                    } // if else
+                } // for
+            } // if
             
             serviceMappingStr += "]}";
             return serviceMappingStr;
         } // toString
+        
+        /**
+         * Adds new service path mappings to this service mapping.
+         * @param newServicePathMappings
+         * @param update
+         */
+        public void add(ArrayList<ServicePathMapping> newServicePathMappings, boolean update) {
+            for (ServicePathMapping newServicePathMapping : newServicePathMappings) {
+                ServicePathMapping servicePathMapping = get(newServicePathMapping.originalServicePath);
+
+                if (servicePathMapping == null) {
+                    servicePathMappings.add(newServicePathMapping);
+                } else {
+                    if (update) {
+                        servicePathMapping.newServicePath = newServicePathMapping.newServicePath;
+                    } // if
+                    
+                    servicePathMapping.add(newServicePathMapping.getEntityMappings(), update);
+                } // if else
+            } // for
+        } // add
+        
+        /**
+         * Removes service path mappings from these service mappings if there are no entity mappings.
+         * @param newServicePathMappings
+         */
+        public void remove(ArrayList<ServicePathMapping> newServicePathMappings) {
+            for (ServicePathMapping newServicePathMapping : newServicePathMappings) {
+                ServicePathMapping servicePathMapping = get(newServicePathMapping.originalServicePath);
+
+                if (servicePathMapping != null) {
+                    ArrayList<EntityMapping> newEntityMappings = newServicePathMapping.getEntityMappings();
+
+                    if (newEntityMappings == null) {
+                        servicePathMappings.remove(servicePathMapping);
+                    } else {
+                        servicePathMapping.remove(newEntityMappings);
+                    } // if else
+                } // if
+                // else {
+                //     Nothing is done if the service path mapping is null
+                // }
+            } // for
+        } // remove
+        
+        private ServicePathMapping get(String originalServicePath) {
+            for (ServicePathMapping servicePathMapping : servicePathMappings) {
+                if (servicePathMapping.originalServicePath.equals(originalServicePath)) {
+                    return servicePathMapping;
+                } // if
+            } // for
+
+            return null;
+        } // get
         
     } // ServiceMapping
     
@@ -186,9 +300,11 @@ public class NameMappings {
         public void compilePatterns() {
             originalServicePathPattern = Pattern.compile(originalServicePath);
 
-            for (EntityMapping entityMapping : entityMappings) {
-                entityMapping.compilePatterns();
-            } // for
+            if (entityMappings != null) {
+                for (EntityMapping entityMapping : entityMappings) {
+                    entityMapping.compilePatterns();
+                } // for
+            } // if
         } // compilePatterns
         
         @Override
@@ -197,20 +313,81 @@ public class NameMappings {
                     "{\"originalServicePath\":\"" + getOriginalServicePath() + "\","
                     + "\"newServicePath\":\"" + getNewServicePath() + "\","
                     + "\"entityMappings\": [";
-            boolean first = true;
             
-            for (Object entityMapping: entityMappings) {
-                if (first) {
-                    entityMappingStr += entityMapping.toString();
-                    first = false;
-                } else {
-                    entityMappingStr += "," + entityMapping.toString();
-                } // if else
-            } // for
+            if (entityMappings != null) {
+                boolean first = true;
+
+                for (Object entityMapping: entityMappings) {
+                    if (first) {
+                        entityMappingStr += entityMapping.toString();
+                        first = false;
+                    } else {
+                        entityMappingStr += "," + entityMapping.toString();
+                    } // if else
+                } // for
+            } // if
             
             entityMappingStr += "]}";
             return entityMappingStr;
         } // toString
+        
+        /**
+         * Adds new entity mappings to this service path mapping.
+         * @param newEntityMappings
+         * @param update
+         */
+        public void add(ArrayList<EntityMapping> newEntityMappings, boolean update) {
+            for (EntityMapping newEntityMapping : newEntityMappings) {
+                EntityMapping entityMapping = get(newEntityMapping.originalEntityId,
+                        newEntityMapping.originalEntityType);
+
+                if (entityMapping == null) {
+                    entityMappings.add(newEntityMapping);
+                } else {
+                    if (update) {
+                        entityMapping.newEntityId = newEntityMapping.newEntityId;
+                        entityMapping.newEntityType = newEntityMapping.newEntityType;
+                    } // if
+                    
+                    entityMapping.add(newEntityMapping.getAttributeMappings(), update);
+                } // if else
+            } // for
+        } // add
+        
+        /**
+         * Removes entity mappings from these service path mappings if there are no attribute mappings.
+         * @param newEntityMappings
+         */
+        public void remove(ArrayList<EntityMapping> newEntityMappings) {
+            for (EntityMapping newEntityMapping : newEntityMappings) {
+                EntityMapping entityMapping = get(newEntityMapping.originalEntityId,
+                        newEntityMapping.originalEntityType);
+
+                if (entityMapping != null) {
+                    ArrayList<AttributeMapping> newAttributeMappings = newEntityMapping.getAttributeMappings();
+
+                    if (newAttributeMappings == null) {
+                        entityMappings.remove(entityMapping);
+                    } else {
+                        entityMapping.remove(newAttributeMappings);
+                    } // if else
+                } // if
+                // else {
+                //     Nothing is done if the entity mapping is null
+                // }
+            } // for
+        } // remove
+        
+        private EntityMapping get(String originalEntityId, String originalEntityType) {
+            for (EntityMapping entityMapping : entityMappings) {
+                if (entityMapping.originalEntityId.equals(originalEntityId)
+                        && entityMapping.originalEntityType.equals(originalEntityType)) {
+                    return entityMapping;
+                } // if
+            } // for
+
+            return null;
+        } // get
         
     } // ServicePathMapping
     
@@ -269,9 +446,11 @@ public class NameMappings {
             originalEntityIdPattern = Pattern.compile(originalEntityId);
             originalEntityTypePattern = Pattern.compile(originalEntityType);
 
-            for (AttributeMapping attributeMapping : attributeMappings) {
-                attributeMapping.compilePatterns();
-            } // for
+            if (attributeMappings != null) {
+                for (AttributeMapping attributeMapping : attributeMappings) {
+                    attributeMapping.compilePatterns();
+                } // for
+            } // if
         } // compilePatterns
         
         @Override
@@ -282,20 +461,74 @@ public class NameMappings {
                     + "\"newEntityId\":\"" + getNewEntityId() + "\","
                     + "\"newEntityType\":\"" + getNewEntityType() + "\","
                     + "\"attributeMappings\":[";
-            boolean first = true;
-            
-            for (Object attrMap: attributeMappings) {
-                if (first) {
-                    attrMappingStr += attrMap.toString();
-                    first = false;
-                } else {
-                    attrMappingStr += "," + attrMap.toString();
-                } // if else
+
+            if (attributeMappings != null) {
+                boolean first = true;
+                
+                for (Object attrMap: attributeMappings) {
+                    if (first) {
+                        attrMappingStr += attrMap.toString();
+                        first = false;
+                    } else {
+                        attrMappingStr += "," + attrMap.toString();
+                    } // if else
+                } // for
             } // for
             
             attrMappingStr += "]}";
             return attrMappingStr;
         } // toString
+        
+        /**
+         * Adds new attribute mappings to this entity mapping.
+         * @param newAttributeMappings
+         * @param update
+         */
+        public void add(ArrayList<AttributeMapping> newAttributeMappings, boolean update) {
+            for (AttributeMapping newAttributeMapping : newAttributeMappings) {
+                AttributeMapping attributeMapping = get(newAttributeMapping.originalAttributeName,
+                        newAttributeMapping.originalAttributeType);
+
+                if (attributeMapping == null) {
+                    attributeMappings.add(newAttributeMapping);
+                } else if (update) {
+                    attributeMapping.newAttributeName = newAttributeMapping.newAttributeName;
+                    attributeMapping.newAttributeType = newAttributeMapping.newAttributeType;
+                } // if else
+                // else {
+                //     Nothing is done if the attribute mapping already exists and updating is not enabled
+                // }
+            } // for
+        } // add
+        
+        /**
+         * Removes attribute mappings from these entity mappings.
+         * @param newAttributeMappings
+         */
+        public void remove(ArrayList<AttributeMapping> newAttributeMappings) {
+            for (AttributeMapping newAttributeMapping : newAttributeMappings) {
+                AttributeMapping attributeMapping = get(newAttributeMapping.originalAttributeName,
+                        newAttributeMapping.originalAttributeType);
+
+                if (attributeMapping != null) {
+                    attributeMappings.remove(attributeMapping);
+                } // if
+                // else {
+                //     Nothing is done if the attribute mapping is null
+                // }
+            } // for
+        } // remove
+        
+        private AttributeMapping get(String originalAttributeName, String originalAttributeType) {
+            for (AttributeMapping attributeMapping : attributeMappings) {
+                if (attributeMapping.originalAttributeName.equals(originalAttributeName)
+                        && attributeMapping.originalAttributeType.equals(originalAttributeType)) {
+                    return attributeMapping;
+                } // if
+            } // for
+
+            return null;
+        } // get
         
     } // EntityMapping
     
@@ -352,10 +585,10 @@ public class NameMappings {
         @Override
         public String toString() {
             String attrMappingStr =
-                    "\"originalAttributeName\":\"" + getOriginalAttributeName() + "\","
+                    "{\"originalAttributeName\":\"" + getOriginalAttributeName() + "\","
                     + "\"originalAttributeType\":\"" + getOriginalAttributeType() + "\","
                     + "\"newAttributeName\":\"" + getNewAttributeName() + "\","
-                    + "\"newAttributeType\":\"" + getNewAttributeType() + "\"";
+                    + "\"newAttributeType\":\"" + getNewAttributeType() + "\"}";
             return attrMappingStr;
         } // toString
         
