@@ -32,17 +32,20 @@ import org.apache.flume.Event;
 public class NGSIEvent implements Event {
     
     private Map<String, String> headers;
+    private final byte[] body;
     private ContextElement originalCE;
     private ContextElement mappedCE;
     
     /**
      * Constructor.
      * @param headers
+     * @param body
      * @param originalCE
      * @param mappedCE
      */
-    public NGSIEvent(Map<String, String> headers, ContextElement originalCE, ContextElement mappedCE) {
+    public NGSIEvent(Map<String, String> headers, byte[] body, ContextElement originalCE, ContextElement mappedCE) {
         this.headers = headers;
+        this.body = body;
         this.originalCE = originalCE;
         this.mappedCE = mappedCE;
     } // NGSIEvent
@@ -59,7 +62,7 @@ public class NGSIEvent implements Event {
 
     @Override
     public byte[] getBody() {
-        return null;
+        return body;
     } // getBody
 
     @Override
