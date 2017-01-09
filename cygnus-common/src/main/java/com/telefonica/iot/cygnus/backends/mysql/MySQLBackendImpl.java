@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -41,9 +41,10 @@ import javax.sql.rowset.CachedRowSet;
  */
 public class MySQLBackendImpl implements MySQLBackend {
     
+    private static final CygnusLogger LOGGER = new CygnusLogger(MySQLBackendImpl.class);
     private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
     private MySQLDriver driver;
-    private static final CygnusLogger LOGGER = new CygnusLogger(MySQLBackendImpl.class);
+    private final MySQLCache cache;
             
     /**
      * Constructor.
@@ -54,6 +55,7 @@ public class MySQLBackendImpl implements MySQLBackend {
      */
     public MySQLBackendImpl(String mysqlHost, String mysqlPort, String mysqlUsername, String mysqlPassword) {
         driver = new MySQLDriver(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword);
+        cache = new MySQLCache();
     } // MySQLBackendImpl
     
     /**
@@ -75,6 +77,11 @@ public class MySQLBackendImpl implements MySQLBackend {
      */
     @Override
     public void createDatabase(String dbName) throws Exception {
+        if (cache.isCachedDb(dbName)) {
+            LOGGER.debug("'" + dbName + "' is cached, thus it is not created");
+            return;
+        } // if
+
         Statement stmt = null;
         
         // get a connection to an empty database
@@ -95,6 +102,8 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
         
         closeMySQLObjects(con, stmt);
+        LOGGER.debug("Trying to add '" + dbName + "' to the cache");
+        cache.addDb(dbName);
     } // createDatabase
     
     /**
@@ -106,6 +115,11 @@ public class MySQLBackendImpl implements MySQLBackend {
      */
     @Override
     public void createTable(String dbName, String tableName, String typedFieldNames) throws Exception {
+        if (cache.isCachedTable(dbName, tableName)) {
+            LOGGER.debug("'" + tableName + "' is cached, thus it is not created");
+            return;
+        } // if
+        
         Statement stmt = null;
         
         // get a connection to the given database
@@ -126,6 +140,8 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
         
         closeMySQLObjects(con, stmt);
+        LOGGER.debug("Trying to add '" + tableName + "' to the cache");
+        cache.addTable(dbName, tableName);
     } // createTable
     
     @Override
