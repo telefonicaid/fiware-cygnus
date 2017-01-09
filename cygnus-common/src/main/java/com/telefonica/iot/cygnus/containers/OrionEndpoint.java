@@ -15,23 +15,22 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
-
 package com.telefonica.iot.cygnus.containers;
-
-import com.telefonica.iot.cygnus.log.CygnusLogger;
 
 /**
  *
- * @author pcoello25
+ * @author pcoello25, frb
  */
 public class OrionEndpoint {
     
-    private static final CygnusLogger LOGGER = new CygnusLogger(OrionEndpoint.class);
     private String host;
     private String port;
     private String ssl;
-    private String xauthtoken;
+    private String authToken;
         
+    /**
+     * Constructor.
+     */
     public OrionEndpoint() {
     } // endpoint
 
@@ -43,89 +42,42 @@ public class OrionEndpoint {
         return port;
     } // getport
 
-    public String getSsl() {
-        return ssl;
+    public boolean getSsl() {
+        return ssl.equals("true");
     } // getSsl
 
     public String getAuthToken() {
-        return xauthtoken;
+        return authToken;
     } // getAuthToken
     
-    public int isValid () {
-        
-        // get host, port and ssl
-        host = this.getHost();
-        port = this.getPort();
-        ssl = this.getSsl();
-        xauthtoken = this.getAuthToken();
-        boolean isValidSsl;
-        
-        // check if entire endpoint is missing        
-        if ((host == null) && (port == null) && (ssl == null) 
-                && (xauthtoken == null)) {
-            LOGGER.debug("Missing endpoint in the request");
-            return 21;
-        } // if
-        
-        // check if endpoint contains ssl
-        if (ssl == null) {
-            LOGGER.debug("Field 'ssl' is missing in the endpoint");
-            return 223;
-        } else if ((ssl.equals("true") || ssl.equals("false")) ? 
-                (isValidSsl=true):(isValidSsl=false));  
-        // if else
-        
-        // check if endpoint contains host
+    /**
+     * Checks if this endpoint is valid (i.e. it contains all the rquired fields, with valid content).
+     * @throws Exception
+     */
+    public void validate() throws Exception {
         if (host == null) {
-            LOGGER.debug("Field 'host' is missing in the endpoint");
-            return 221;
-        } // if
+            throw new Exception("Invalid Orion endpoint, missing host");
+        } else if (host.isEmpty()) {
+            throw new Exception("Invalid Orion endpoint, empty host");
+        } // if else
         
-        // check if endpoint contains port 
         if (port == null) {
-            LOGGER.debug("Field 'port' is missing in the endpoint");
-            return 222;
-        } // if
+            throw new Exception("Invalid Orion endpoint, missing port");
+        } else if (port.isEmpty()) {
+            throw new Exception("Invalid Orion endpoint, empty port");
+        } // if else
         
-        // check if endpoint has an empty host
-        if (host.length() == 0) {
-            LOGGER.debug("Field 'host' is empty in the endpoint");
-            return 231;
-        } // if
+        if (ssl == null) {
+            throw new Exception("Invalid Orion endpoint, missing ssl flag");
+        } else if (!ssl.equals("true") && !ssl.equals("false")) {
+            throw new Exception("Invalid Orion endpoint, ssl flag must be 'true' or 'false'");
+        }
         
-        // check if endpoint has an empty port
-        if (port.length() == 0) {
-            LOGGER.debug("Field 'port' is empty in the endpoint");
-            return 232;
-        } // if
-        
-        // check if endpoint has an empty ssl
-        if (ssl.length() == 0) {
-            LOGGER.debug("Field 'ssl' is empty in the endpoint");
-            return 233;
-        } // if
-        
-        // check if endpoint contains invalid fields
-        if (!(isValidSsl)) {
-            LOGGER.debug("Field 'ssl' has an invalid value");
-            return 24;
-        } // if
-                
-        // API CHECK: authtoken neccesary 
-        if (xauthtoken == null) {
-            LOGGER.debug("Auth-Token not given: Required for use API");
-            return 51;
-        } // if
-        
-        // API CHECK: authtoken empty
-        if (xauthtoken.length() == 0) {
-            LOGGER.debug("Auth-Token given is empty: Required for use API");
-            return 52;
-        } // if
-        
-        LOGGER.debug("Valid endpoint");
-        return 0;
-        
-    } // isValid
+        if (authToken == null) {
+            throw new Exception("Invalid Orion endpoint, missing X-Auth-Token");
+        } else if (authToken.isEmpty()) {
+            throw new Exception("Invalid Orion endpoint, empty X-Auth-Token");
+        } // if else
+    } // validate
 
 } // OrionEndpoint
