@@ -22,6 +22,9 @@ import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -33,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 
 /**
  *
@@ -165,7 +167,7 @@ public class NGSIMySQLSink extends NGSISink {
     } // start
     
     @Override
-    void persistBatch(NGSIBatch batch) throws Exception {
+    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -197,11 +199,12 @@ public class NGSIMySQLSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
     } // capRecords
 
     @Override
-    public void expirateRecords(long time) throws Exception {
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
     } // expirateRecords
     
     /**
@@ -304,7 +307,7 @@ public class NGSIMySQLSink extends NGSISink {
             return fieldsForInsert + ")";
         } // getFieldsForInsert
         
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
@@ -314,7 +317,7 @@ public class NGSIMySQLSink extends NGSISink {
             tableName = buildTableName(servicePathForNaming, entityForNaming, attribute);
         } // initialize
         
-        public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
+        public abstract void aggregate(NGSIEvent cygnusEvent);
         
     } // MySQLAggregator
     
@@ -324,7 +327,7 @@ public class NGSIMySQLSink extends NGSISink {
     private class RowAggregator extends MySQLAggregator {
         
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
             aggregation.put(NGSIConstants.RECV_TIME_TS, new ArrayList<String>());
             aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<String>());
@@ -338,7 +341,7 @@ public class NGSIMySQLSink extends NGSISink {
         } // initialize
         
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, false);
@@ -388,7 +391,7 @@ public class NGSIMySQLSink extends NGSISink {
     private class ColumnAggregator extends MySQLAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
             
             // particular initialization
@@ -412,7 +415,7 @@ public class NGSIMySQLSink extends NGSISink {
         } // initialize
         
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, false);
@@ -460,7 +463,7 @@ public class NGSIMySQLSink extends NGSISink {
         } // if else
     } // getAggregator
     
-    private void persistAggregation(MySQLAggregator aggregator) throws Exception {
+    private void persistAggregation(MySQLAggregator aggregator) throws CygnusPersistenceError {
         String fieldsForCreate = aggregator.getFieldsForCreate();
         String fieldsForInsert = aggregator.getFieldsForInsert();
         String valuesForInsert = aggregator.getValuesForInsert();
@@ -473,21 +476,25 @@ public class NGSIMySQLSink extends NGSISink {
         
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
-        if (aggregator instanceof RowAggregator) {
-            persistenceBackend.createDatabase(dbName);
-            persistenceBackend.createTable(dbName, tableName, fieldsForCreate);
-        } // if
-        
-        persistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
+        try {
+            if (aggregator instanceof RowAggregator) {
+                persistenceBackend.createDatabase(dbName);
+                persistenceBackend.createTable(dbName, tableName, fieldsForCreate);
+            } // if
+
+            persistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
+        } catch (Exception e) {
+            throw new CygnusPersistenceError("-, " + e.getMessage());
+        } // try catch
     } // persistAggregation
     
     /**
      * Creates a MySQL DB name given the FIWARE service.
      * @param service
      * @return The MySQL DB name
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
-    protected String buildDbName(String service) throws Exception {
+    protected String buildDbName(String service) throws CygnusBadConfiguration {
         String name;
         
         if (enableEncoding) {
@@ -510,9 +517,9 @@ public class NGSIMySQLSink extends NGSISink {
      * @param entity
      * @param attribute
      * @return The MySQL table name
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
-    protected String buildTableName(String servicePath, String entity, String attribute) throws Exception {
+    protected String buildTableName(String servicePath, String entity, String attribute) throws CygnusBadConfiguration {
         String name;
 
         if (enableEncoding) {

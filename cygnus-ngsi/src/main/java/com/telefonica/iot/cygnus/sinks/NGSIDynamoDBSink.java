@@ -23,6 +23,9 @@ import com.telefonica.iot.cygnus.backends.dynamo.DynamoDBBackend;
 import com.telefonica.iot.cygnus.backends.dynamo.DynamoDBBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
@@ -35,7 +38,6 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.util.ArrayList;
 import java.util.Date;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 
 /**
  *
@@ -135,7 +137,7 @@ public class NGSIDynamoDBSink extends NGSISink {
     } // start
 
     @Override
-    void persistBatch(NGSIBatch batch) throws Exception {
+    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -167,11 +169,11 @@ public class NGSIDynamoDBSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
     } // capRecords
 
     @Override
-    public void expirateRecords(long time) throws Exception {
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
     } // expirateRecords
 
     /**
@@ -199,7 +201,7 @@ public class NGSIDynamoDBSink extends NGSISink {
             } // if else
         } // getTableName
 
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
@@ -208,7 +210,7 @@ public class NGSIDynamoDBSink extends NGSISink {
             aggregation = new ArrayList<>();
         } // initialize
 
-        public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
+        public abstract void aggregate(NGSIEvent cygnusEvent);
 
     } // DynamoDBAggregator
 
@@ -218,12 +220,12 @@ public class NGSIDynamoDBSink extends NGSISink {
     private class DynamoDBRowAggregator extends DynamoDBAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -279,12 +281,12 @@ public class NGSIDynamoDBSink extends NGSISink {
     private class DynamoDBColumnAggregator extends DynamoDBAggregator {
 
         @Override
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             super.initialize(event);
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -342,7 +344,7 @@ public class NGSIDynamoDBSink extends NGSISink {
         } // if else
     } // getAggregator
 
-    private void persistAggregation(DynamoDBAggregator aggregator) throws Exception {
+    private void persistAggregation(DynamoDBAggregator aggregator) throws CygnusPersistenceError {
         ArrayList aggregation = aggregator.getAggregation();
         String tableName = aggregator.getTableName(enableLowercase);
 
@@ -351,12 +353,17 @@ public class NGSIDynamoDBSink extends NGSISink {
 
         // tables can be always created in DynamoDB, independedntly of the attribute persistence mode,
         // since it is NoSQL and there is no fixed structure
-        persistenceBackend.createTable(tableName, NGSIConstants.DYNAMO_DB_PRIMARY_KEY);
-        persistenceBackend.putItems(tableName, aggregation);
+        
+        try {
+            persistenceBackend.createTable(tableName, NGSIConstants.DYNAMO_DB_PRIMARY_KEY);
+            persistenceBackend.putItems(tableName, aggregation);
+        } catch (Exception e) {
+            throw new CygnusPersistenceError("-, " + e.getMessage());
+        } // try catch
     } // persistAggregation
 
     private String buildTableName(String service, String servicePath, String destination, DataModel dataModel)
-        throws Exception {
+        throws CygnusBadConfiguration {
         String tableName;
 
         switch (dataModel) {

@@ -15,21 +15,20 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
-
 package com.telefonica.iot.cygnus.errors;
 
 /**
  *
  * @author frb
  */
-public class CygnusRuntimeError extends Exception {
+public class CygnusCappingError extends Exception {
     
     /**
      * Constructor.
      * @param message
      */
-    public CygnusRuntimeError(String message) {
-        super("Runtime error. Message: " + message);
-    } // CygnusRuntimeError
+    public CygnusCappingError(String message) {
+        super("Error while capping persistence elements. Message: " + message);
+    } // CygnusCappingError
     
-} // CygnusRuntimeError
+} // CygnusCappingError

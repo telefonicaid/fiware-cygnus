@@ -166,9 +166,9 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
      * Builds a database name given a fiwareService. It throws an exception if the naming conventions are violated.
      * @param fiwareService
      * @return
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
-    protected String buildDbName(String fiwareService) throws Exception {
+    protected String buildDbName(String fiwareService) throws CygnusBadConfiguration {
         String dbName;
         
         if (enableEncoding) {
@@ -192,10 +192,10 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
      * @param entity
      * @param attribute
      * @return
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
     protected String buildCollectionName(String fiwareServicePath, String entity, String attribute)
-        throws Exception {
+        throws CygnusBadConfiguration {
         String collectionName;
 
         if (enableEncoding) {

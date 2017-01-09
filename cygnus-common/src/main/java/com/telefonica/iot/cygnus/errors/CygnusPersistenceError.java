@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FI-WARE project).
  *
@@ -29,7 +29,7 @@ public class CygnusPersistenceError extends Exception {
      * @param message
      */
     public CygnusPersistenceError(String message) {
-        super("Persistence error (" + message + ")");
+        super("Persistence error. Message: " + message);
     } // CygnusPersistenceError
     
 } // CygnusPersistenceError

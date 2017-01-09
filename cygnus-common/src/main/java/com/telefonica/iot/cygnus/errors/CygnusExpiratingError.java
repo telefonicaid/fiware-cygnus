@@ -15,21 +15,20 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
-
 package com.telefonica.iot.cygnus.errors;
 
 /**
  *
  * @author frb
  */
-public class CygnusRuntimeError extends Exception {
+public class CygnusExpiratingError extends Exception {
     
     /**
      * Constructor.
      * @param message
      */
-    public CygnusRuntimeError(String message) {
-        super("Runtime error. Message: " + message);
-    } // CygnusRuntimeError
+    public CygnusExpiratingError(String message) {
+        super("Error while expirating records. Message: " + message);
+    } // CygnusExpiratingError
     
-} // CygnusRuntimeError
+} // CygnusExpiratingError

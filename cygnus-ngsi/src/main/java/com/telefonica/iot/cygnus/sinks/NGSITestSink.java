@@ -21,6 +21,8 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
@@ -28,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 
 /**
  * Sink for testing purposes. It does not persistOne the notified context data but
@@ -61,7 +62,7 @@ public class NGSITestSink extends NGSISink {
     } // start
     
     @Override
-    void persistBatch(NGSIBatch batch) throws Exception {
+    void persistBatch(NGSIBatch batch) {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -93,11 +94,11 @@ public class NGSITestSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
     } // capRecords
 
     @Override
-    public void expirateRecords(long time) throws Exception {
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
     } // expirateRecords
     
     /**
@@ -116,10 +117,10 @@ public class NGSITestSink extends NGSISink {
             return aggregation;
         } // getAggregation
         
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) {
         } // initialize
         
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) {
             String line = "Processing event={";
             
             // get the getRecvTimeTs headers
@@ -174,7 +175,7 @@ public class NGSITestSink extends NGSISink {
         
     } // TestAggregator
     
-    private void persistAggregation(TestAggregator aggregator) throws Exception {
+    private void persistAggregation(TestAggregator aggregator) {
         String aggregation = aggregator.getAggregation();
         
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSITestSink. Data (" + aggregation + ")");

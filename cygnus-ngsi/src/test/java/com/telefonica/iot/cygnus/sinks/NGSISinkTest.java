@@ -18,6 +18,9 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.sinks.NGSISink.Accumulator;
@@ -30,7 +33,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.lifecycle.LifecycleState;
 import org.apache.log4j.Level;
@@ -88,17 +90,18 @@ public class NGSISinkTest {
     private class NGSISinkImpl extends NGSISink {
 
         @Override
-        void persistBatch(NGSIBatch batch) throws Exception {
+        void persistBatch(NGSIBatch batch) throws CygnusPersistenceError {
             throw new UnsupportedOperationException("Not supported yet.");
         } // persistBatch
 
         @Override
-        public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+        public void capRecords(NGSIBatch batch, long size) throws CygnusCappingError {
             throw new UnsupportedOperationException("Not supported yet.");
         } // capRecords
 
         @Override
-        public void expirateRecords(long time) {
+        public void expirateRecords(long time) throws CygnusExpiratingError {
+            throw new UnsupportedOperationException("Not supported yet.");
         } // expirateRecords
         
     } // NGSISinkImpl
