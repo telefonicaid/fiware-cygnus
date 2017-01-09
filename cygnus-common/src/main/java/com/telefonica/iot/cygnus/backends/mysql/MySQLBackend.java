@@ -18,6 +18,10 @@
 
 package com.telefonica.iot.cygnus.backends.mysql;
 
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
+
 /**
  * Interface for those backends implementing the persistence in MySQL.
  * 
@@ -50,5 +54,15 @@ public interface MySQLBackend {
      * @throws Exception
      */
     void insertContextData(String dbName, String tableName, String fieldNames, String fieldValues) throws Exception;
+    
+    /**
+     * Caps records from the given table within the given database according to the given maximum number.
+     * @param dbName
+     * @param tableName
+     * @param maxRecords
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
+     */
+    void capRecords(String dbName, String tableName, long maxRecords) throws CygnusRuntimeError, CygnusPersistenceError;
     
 } // MySQLBackend

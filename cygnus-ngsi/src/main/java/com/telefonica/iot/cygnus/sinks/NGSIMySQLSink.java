@@ -25,6 +25,7 @@ import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
 import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -199,8 +200,38 @@ public class NGSIMySQLSink extends NGSISink {
     } // persistBatch
     
     @Override
-
     public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
+        if (batch == null) {
+            LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
+            return;
+        } // if
+
+        // Iterate on the destinations
+        batch.startIterator();
+        
+        while (batch.hasNext()) {
+            // Get the events within the current sub-batch
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
+
+            // Get a representative from the current destination sub-batch
+            NGSIEvent event = events.get(0);
+            
+            // Do the capping
+            String service = event.getServiceForNaming(enableNameMappings);
+            String servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            String entity = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            String attribute = event.getAttributeForNaming(enableNameMappings);
+            
+            try {
+                String dbName = buildDbName(service);
+                String tableName = buildTableName(servicePathForNaming, entity, attribute);
+                LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",dbName="
+                        + dbName + ", tableName=" + tableName + ")");
+                persistenceBackend.capRecords(dbName, tableName, maxRecords);
+            } catch (CygnusBadConfiguration | CygnusRuntimeError | CygnusPersistenceError e) {
+                throw new CygnusCappingError(e.getMessage());
+            } // catch
+        } // while
     } // capRecords
 
     @Override

@@ -18,6 +18,7 @@
 
 package com.telefonica.iot.cygnus.backends.mysql;
 
+import com.sun.rowset.CachedRowSetImpl;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
@@ -25,9 +26,11 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
 import java.util.HashMap;
+import javax.sql.rowset.CachedRowSet;
 
 /**
  *
@@ -98,6 +101,7 @@ public class MySQLBackendImpl implements MySQLBackend {
      * Creates a table, given its name, if not exists in the given database.
      * @param dbName
      * @param tableName
+     * @param typedFieldNames
      * @throws Exception
      */
     @Override
@@ -147,7 +151,112 @@ public class MySQLBackendImpl implements MySQLBackend {
         } catch (SQLException e) {
             throw new CygnusBadContextData(e.getMessage());
         } // try catch
+        
+        closeMySQLObjects(con, stmt);
     } // insertContextData
+    
+    private CachedRowSet select(String dbName, String tableName, String selection)
+        throws CygnusRuntimeError, CygnusPersistenceError {
+        Statement stmt = null;
+        
+        // get a connection to the given database
+        Connection con = driver.getConnection(dbName);
+            
+        try {
+            stmt = con.createStatement();
+        } catch (SQLException e) {
+            throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+        } // try catch
+        
+        try {
+            // to-do: refactor after implementing https://github.com/telefonicaid/fiware-cygnus/issues/1371
+            String query = "select " + selection + " from `" + tableName + "` order by recvTime";
+            LOGGER.debug("Executing MySQL query '" + query + "'");
+            ResultSet rs = stmt.executeQuery(query);
+            // A CachedRowSet is "disconnected" from the source, thus can be used once the statement is closed
+            CachedRowSet crs = new CachedRowSetImpl();
+            crs.populate(rs);
+            closeMySQLObjects(con, stmt);
+            return crs;
+        } catch (SQLException e) {
+            closeMySQLObjects(con, stmt);
+            throw new CygnusPersistenceError("SQLException, " + e.getMessage());
+        } // try catch
+    } // select
+    
+    private void delete(String dbName, String tableName, String filters)
+        throws CygnusRuntimeError, CygnusPersistenceError {
+        Statement stmt = null;
+        
+        // get a connection to the given database
+        Connection con = driver.getConnection(dbName);
+            
+        try {
+            stmt = con.createStatement();
+        } catch (SQLException e) {
+            throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+        } // try catch
+        
+        try {
+            String query = "delete from `" + tableName + "` where " + filters;
+            LOGGER.debug("Executing MySQL query '" + query + "'");
+            stmt.executeUpdate(query);
+        } catch (SQLException e) {
+            throw new CygnusPersistenceError("SQLException, " + e.getMessage());
+        } // try catch
+        
+        closeMySQLObjects(con, stmt);
+    } // delete
+    
+    @Override
+    public void capRecords(String dbName, String tableName, long maxRecords)
+        throws CygnusRuntimeError, CygnusPersistenceError {
+        // Get the records within the table
+        CachedRowSet records = select(dbName, tableName, "*");
+        
+        // Get the number of records
+        int numRecords = 0;
+        
+        try {
+            if (records.last()) {
+                numRecords = records.getRow();
+                records.beforeFirst();
+            } // if
+        } catch (SQLException e) {
+            throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+        } // try catch
+        
+        // Get the reception times (they work as IDs) for future deletion
+        // to-do: refactor after implementing https://github.com/telefonicaid/fiware-cygnus/issues/1371
+        String filters = "";
+        
+        try {
+            if (numRecords > maxRecords) {
+                for (int i = 0; i < (numRecords - maxRecords); i++) {
+                    records.next();
+                    String recvTime = records.getString("recvTime");
+
+                    if (filters.isEmpty()) {
+                        filters += "recvTime='" + recvTime + "'";
+                    } else {
+                        filters += " or recvTime='" + recvTime + "'";
+                    } // if else
+                } // for
+            } // if
+            
+            records.close();
+        } catch (SQLException e) {
+            throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+        } // try catch
+        
+        if (filters.isEmpty()) {
+            LOGGER.debug("No records to be deleted");
+        } else {
+            LOGGER.debug("Records must be deleted (dbName=" + dbName + ",tableName=" + tableName
+                    + ", filters=" + filters + ")");
+            delete(dbName, tableName, filters);
+        } // if else
+    } // capRecords
     
     /**
      * Close all the MySQL objects previously opened by doCreateTable and doQuery.
@@ -155,13 +264,12 @@ public class MySQLBackendImpl implements MySQLBackend {
      * @param stmt
      * @return True if the MySQL objects have been closed, false otherwise.
      */
-    private void closeMySQLObjects(Connection con, Statement stmt) throws Exception {
+    private void closeMySQLObjects(Connection con, Statement stmt) throws CygnusRuntimeError {
         if (con != null) {
             try {
                 con.close();
             } catch (SQLException e) {
-                throw new CygnusRuntimeError("The Hive connection could not be closed. Details="
-                        + e.getMessage());
+                throw new CygnusRuntimeError("SQLException, " + e.getMessage());
             } // try catch
         } // if
 
@@ -169,8 +277,7 @@ public class MySQLBackendImpl implements MySQLBackend {
             try {
                 stmt.close();
             } catch (SQLException e) {
-                throw new CygnusRuntimeError("The Hive statement could not be closed. Details="
-                        + e.getMessage());
+                throw new CygnusRuntimeError("SQLException, " + e.getMessage());
             } // try catch
         } // if
     } // closeMySQLObjects
@@ -195,7 +302,7 @@ public class MySQLBackendImpl implements MySQLBackend {
          * @param mysqlPassword
          */
         public MySQLDriver(String mysqlHost, String mysqlPort, String mysqlUsername, String mysqlPassword) {
-            connections = new HashMap<String, Connection>();
+            connections = new HashMap<>();
             this.mysqlHost = mysqlHost;
             this.mysqlPort = mysqlPort;
             this.mysqlUsername = mysqlUsername;
@@ -206,9 +313,9 @@ public class MySQLBackendImpl implements MySQLBackend {
          * Gets a connection to the MySQL server.
          * @param dbName
          * @return
-         * @throws Exception
+         * @throws CygnusPersistenceError
          */
-        public Connection getConnection(String dbName) throws Exception {
+        public Connection getConnection(String dbName) throws CygnusPersistenceError {
             try {
                 // FIXME: the number of cached connections should be limited to a certain number; with such a limit
                 //        number, if a new connection is needed, the oldest one is closed
@@ -225,9 +332,9 @@ public class MySQLBackendImpl implements MySQLBackend {
 
                 return con;
             } catch (ClassNotFoundException e) {
-                throw new CygnusPersistenceError(e.getMessage());
+                throw new CygnusPersistenceError("ClassNotFoundException, " + e.getMessage());
             } catch (SQLException e) {
-                throw new CygnusPersistenceError(e.getMessage());
+                throw new CygnusPersistenceError("SQLException, " + e.getMessage());
             } // try catch
         } // getConnection
         
@@ -256,10 +363,10 @@ public class MySQLBackendImpl implements MySQLBackend {
          * @param user
          * @param password
          * @return A MySQL connection
-         * @throws Exception
+         * @throws ClassNotFoundException
+         * @throws SQLException
          */
-        private Connection createConnection(String dbName)
-            throws Exception {
+        private Connection createConnection(String dbName) throws ClassNotFoundException, SQLException {
             // dynamically load the MySQL JDBC driver
             Class.forName(DRIVER_NAME);
 

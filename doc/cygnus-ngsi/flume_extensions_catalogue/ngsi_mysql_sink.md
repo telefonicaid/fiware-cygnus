@@ -22,6 +22,7 @@ Content:
         * [About batching](#section2.3.3)
         * [Time zone information](#section2.3.4)
         * [About the encoding](#section2.3.5)
+        * [About capping resources/expirating records](#section2.3.6)
 * [Programmers guide](#section3)
     * [`NGSIMySQLSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
@@ -214,6 +215,9 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 | batch\_retry\_intervals | no | 5000 | Comma-separated list of intervals (in miliseconds) at which the retries regarding not persisted batches will be done. First retry will be done as many miliseconds after as the first value, then the second retry will be done as many miliseconds after as second value, and so on. If the batch\_ttl is greater than the number of intervals, the last interval is repeated. |
+| persistence\_policy.max_records | no | -1 | Maximum number of records allowed for a table before it is capped. `-1` disables this policy. |
+| persistence\_policy.expiration_time | no | -1 | Maximum number of seconds a record is maintained in a table before expiration. `-1` disables this policy. |
+| persistence\_policy.checking_time | no | 3600 | Frequency (in seconds) at which the sink checks for record expiration. |
 
 A configuration example could be:
 
@@ -236,6 +240,9 @@ A configuration example could be:
     cygnus-ngsi.sinks.mysql-sink.batch_timeout = 30
     cygnus-ngsi.sinks.mysql-sink.batch_ttl = 10
     cygnus-ngsi.sinks.mysql-sink.batch_retry_intervals = 5000
+    cygnus-ngsi.sinks.mysql-sink.persistence_policy.max_records = 5
+    cygnus-ngsi.sinks.mysql-sink.persistence_policy.expiration_time = 86400
+    cygnus-ngsi.sinks.mysql-sink.persistence_policy.checking_time = 600
 
 [Top](#top)
 
@@ -301,6 +308,14 @@ Despite the old encoding will be deprecated in the future, it is possible to swi
 
 [Top](#top)
 
+####<a name="section2.3.6"></a>About capping resources and expirating records
+Capping and expiration are disabled by default. Nevertheless, if desired, this can be enabled:
+
+* Capping by the number of records. This allows the resource growing up until certain configured maximum number of records is reached (`persistence_policy.max_records`), and then maintains such a constant number of records.
+* Expirating by time the records. This allows the resource growing up until records become old, i.e. exceed certain configured expiration time (`persistence_policy.expiration_time`).
+
+[Top](#top)
+
 ##<a name="section3"></a>Programmers guide
 ###<a name="section3.1"></a>`NGSIMySQLSink` class
 As any other NGSI-like sink, `NGSIMySQLSink` extends the base `NGSISink`. The methods that are extended are:
@@ -308,6 +323,14 @@ As any other NGSI-like sink, `NGSIMySQLSink` extends the base `NGSISink`. The me
     void persistBatch(Batch batch) throws Exception;
 
 A `Batch` contains a set of `NGSIEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the MySQL table where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `MySQLBackend` implementation.
+
+    void capRecords(NGSIBatch batch, long maxRecords) throws EventDeliveryException;
+    
+This method is always called immediatelly after `persistBacth()`. The same destination tables that were upserted are now checked in terms of number of records: if the configured maximum (`persistence_policy.max_records`) is exceeded for any of the updated tables, then as many oldest records are deleted as required until the maximum number of records is reached.
+    
+    void expirateRecords(long expirationTime);
+    
+This method is called in a periodical way (based on `persistence_policy.checking_time`), and if the configured expiration time (`persistence_policy.expiration_time`) is exceeded for any of the records within any of the tables, then it is deleted.
 
     public void start();
 
