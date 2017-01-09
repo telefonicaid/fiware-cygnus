@@ -248,7 +248,7 @@ public class NGSICKANSink extends NGSISink {
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
-            
+
             // Persist the aggregation
             persistAggregation(aggregator);
             batch.setNextPersisted(true);
