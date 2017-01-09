@@ -41,6 +41,7 @@ import org.json.simple.JSONArray;
 public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(CKANBackendImpl.class);
+    private static final int RECORDSPERPAGE = 100;
     private final String orionUrl;
     private final String apiKey;
     private final String viewer;
@@ -440,10 +441,11 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         } // try catch
     } // existsView
     
-    private JSONObject getRecords(String resId, String filters) throws Exception {
+    private JSONObject getRecords(String resId, String filters, int offset, int limit) throws Exception {
         try {
             // create the CKAN request JSON
-            String jsonString = "{\"id\": \"" + resId + "\"";
+            String jsonString = "{\"id\": \"" + resId + "\",\"sort\":\"_id\",\"offset\":" + offset
+                    + ",\"limit\":" + limit;
         
             if (filters == null || filters.isEmpty()) {
                 jsonString += "}";
@@ -516,25 +518,45 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         // Get the resource ID by querying the cache
         String resId = cache.getResId(orgName, pkgName, resName);
         
-        // Get certain information about the records within the resource
-        JSONObject result = (JSONObject) getRecords(resId, null).get("result");
-        long total = (Long) result.get("total");
-        JSONArray records = (JSONArray) result.get("records");
-        
         // Create the filters for a datastore deletion
         String filters = "";
         
-        if (total > maxRecords) {
-            for (int i = 0; i < (total - maxRecords); i++) {
+        // Get the record pages, some variables
+        int offset = 0;
+        long toBeDeleted = 0;
+        long alreadyDeleted = 0;
+        
+        do {
+            // Get the number of records to be deleted
+            JSONObject result = (JSONObject) getRecords(resId, null, offset, RECORDSPERPAGE).get("result");
+            long total = (Long) result.get("total");
+            toBeDeleted = total - maxRecords;
+            
+            if (toBeDeleted < 0) {
+                break;
+            } // if
+            
+            // Get how much records within the current page must be deleted
+            long remaining = toBeDeleted - alreadyDeleted;
+            long toBeDeletedNow = (remaining > RECORDSPERPAGE ? RECORDSPERPAGE : remaining);
+            
+            // Get the records to be deleted from the current page and get their ID
+            JSONArray records = (JSONArray) result.get("records");
+
+            for (int i = 0; i < toBeDeletedNow; i++) {
                 long id = (Long) ((JSONObject) records.get(i)).get("_id");
-                
+
                 if (filters.isEmpty()) {
                     filters += "{\"_id\":[" + id;
                 } else {
                     filters += "," + id;
                 } // if else
             } // for
-        } // if
+            
+            // Updates
+            alreadyDeleted += toBeDeletedNow;
+            offset += RECORDSPERPAGE;
+        } while (alreadyDeleted < toBeDeleted);
         
         if (filters.isEmpty()) {
             LOGGER.debug("No records to be deleted");
@@ -559,27 +581,44 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             // Get the next resource ID
             String resId = cache.getNextResId();
             
-            // Get the records within the resource
-            JSONObject result = (JSONObject) getRecords(resId, null).get("result");
-            JSONArray records = (JSONArray) result.get("records");
-
             // Create the filters for a datastore deletion
             String filters = "";
 
-            for (Object recordObj : records) {
-                JSONObject record = (JSONObject) recordObj;
-                long id = (Long) record.get("_id");
-                long recordTime = (Long) record.get("recvTimeTs");
-                long currentTime = new Date().getTime() / 1000;
+            // Get the record pages, some variables
+            int offset = 0;
+            boolean morePages = true;
 
-                if (recordTime < (currentTime - expirationTime)) {
-                    if (filters.isEmpty()) {
-                        filters += "{\"_id\":[" + id;
+            do {
+                // Get the records within the current page
+                JSONObject result = (JSONObject) getRecords(resId, null, offset, RECORDSPERPAGE).get("result");
+                JSONArray records = (JSONArray) result.get("records");
+
+                for (Object recordObj : records) {
+                    JSONObject record = (JSONObject) recordObj;
+                    long id = (Long) record.get("_id");
+                    long recordTime = (Long) record.get("recvTimeTs");
+                    long currentTime = new Date().getTime() / 1000;
+
+                    if (recordTime < (currentTime - expirationTime)) {
+                        if (filters.isEmpty()) {
+                            filters += "{\"_id\":[" + id;
+                        } else {
+                            filters += "," + id;
+                        } // if else
                     } else {
-                        filters += "," + id;
+                        // Since records are sorted by _id, once the first not expirated record is found the loop
+                        // can finish
+                        morePages = false;
+                        break;
                     } // if else
-                } // if
-            } // for
+                } // for
+
+                if (records.size() == 0) {
+                    morePages = false;
+                } else {
+                    offset += RECORDSPERPAGE;
+                } // if else
+            } while (morePages);
             
             if (filters.isEmpty()) {
                 LOGGER.debug("No records to be deleted");
