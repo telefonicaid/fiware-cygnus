@@ -217,7 +217,7 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | batch\_retry\_intervals | no | 5000 | Comma-separated list of intervals (in miliseconds) at which the retries regarding not persisted batches will be done. First retry will be done as many miliseconds after as the first value, then the second retry will be done as many miliseconds after as second value, and so on. If the batch\_ttl is greater than the number of intervals, the last interval is repeated. |
 | persistence\_policy.max_records | no | -1 | Maximum number of records allowed for a table before it is capped. `-1` disables this policy. |
 | persistence\_policy.expiration_time | no | -1 | Maximum number of seconds a record is maintained in a table before expiration. `-1` disables this policy. |
-| persistence\_policy.checking_time | no | 3600 | Frequency (in seconds) at which the sink ckecks for record expiration. |
+| persistence\_policy.checking_time | no | 3600 | Frequency (in seconds) at which the sink checks for record expiration. |
 
 A configuration example could be:
 
@@ -311,8 +311,8 @@ Despite the old encoding will be deprecated in the future, it is possible to swi
 ####<a name="section2.3.6"></a>About capping resources and expirating records
 Capping and expiration are disabled by default. Nevertheless, if desired, this can be enabled:
 
-* Capping by the number of records. This allows the resource growing up until certain configured maximum number of records is reached (`persistence_policy.max_records`), and then maintains a such a constant number of records.
-* Expirating by time the records. This allows the resource growing up until records become old, i.e. overcome certain configured expiration time (`persistence_policy.expiration_time`).
+* Capping by the number of records. This allows the resource growing up until certain configured maximum number of records is reached (`persistence_policy.max_records`), and then maintains such a constant number of records.
+* Expirating by time the records. This allows the resource growing up until records become old, i.e. exceed certain configured expiration time (`persistence_policy.expiration_time`).
 
 [Top](#top)
 
@@ -326,11 +326,11 @@ A `Batch` contains a set of `NGSIEvent` objects, which are the result of parsing
 
     void capRecords(NGSIBatch batch, long maxRecords) throws EventDeliveryException;
     
-This method is always called immediatelly after `persistBacth()`. The same destination tables that were upserted are now checked in terms of number of records: if the configured maximum (`persistence_policy.max_records`) is overcome for any of the updated tables, then as many oldest records are deleted as required until the maximum number of records is reached.
+This method is always called immediatelly after `persistBacth()`. The same destination tables that were upserted are now checked in terms of number of records: if the configured maximum (`persistence_policy.max_records`) is exceeded for any of the updated tables, then as many oldest records are deleted as required until the maximum number of records is reached.
     
     void expirateRecords(long expirationTime);
     
-This method is called in a periodical way (based on `persistence_policy.checking_time`), and if the configured expiration time (`persistence_policy.expiration_time`) is overcome for any of the records within any of the tables, then it is deleted.
+This method is called in a periodical way (based on `persistence_policy.checking_time`), and if the configured expiration time (`persistence_policy.expiration_time`) is exceeded for any of the records within any of the tables, then it is deleted.
 
     public void start();
 
