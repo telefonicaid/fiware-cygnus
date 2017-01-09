@@ -169,6 +169,7 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
         
         try {
+            // to-do: refactor after implementing https://github.com/telefonicaid/fiware-cygnus/issues/1371
             String query = "select " + selection + " from `" + tableName + "` order by recvTime";
             LOGGER.debug("Executing MySQL query '" + query + "'");
             ResultSet rs = stmt.executeQuery(query);
