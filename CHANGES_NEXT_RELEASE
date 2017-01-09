@@ -4,3 +4,4 @@
 - [cygnus-ngsi][hardening] Force lowercase organization, dataset and resource names in NGSICKANSink (#1352)
 - [cygnus-ngsi][hardening] Replace warnings upon unnecessary header received with debug traces at NGSIRestHandler (#1354)
 - [cygnus-common][feature] Add /v1/namemappings route to API (#1277)
+- [cygnus-common][hardening] Clean and modularize ManagementInterface.java (#1368)
