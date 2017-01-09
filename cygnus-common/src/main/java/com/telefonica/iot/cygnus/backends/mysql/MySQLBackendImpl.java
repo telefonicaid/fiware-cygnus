@@ -226,6 +226,7 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
         
         // Get the reception times (they work as IDs) for future deletion
+        // to-do: refactor after implementing https://github.com/telefonicaid/fiware-cygnus/issues/1371
         String filters = "";
         
         try {
