@@ -41,7 +41,7 @@ import org.json.simple.JSONArray;
 public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(CKANBackendImpl.class);
-    private static final RECORDSPERPAGE = 100;
+    private static final int RECORDSPERPAGE = 100;
     private final String orionUrl;
     private final String apiKey;
     private final String viewer;
@@ -523,13 +523,12 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         
         // Get the record pages, some variables
         int offset = 0;
-        int limit = 100;
         long toBeDeleted = 0;
         long alreadyDeleted = 0;
         
         do {
             // Get the number of records to be deleted
-            JSONObject result = (JSONObject) getRecords(resId, null, offset, limit).get("result");
+            JSONObject result = (JSONObject) getRecords(resId, null, offset, RECORDSPERPAGE).get("result");
             long total = (Long) result.get("total");
             toBeDeleted = total - maxRecords;
             
@@ -539,7 +538,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             
             // Get how much records within the current page must be deleted
             long remaining = toBeDeleted - alreadyDeleted;
-            long toBeDeletedNow = (remaining > limit ? limit : remaining);
+            long toBeDeletedNow = (remaining > RECORDSPERPAGE ? RECORDSPERPAGE : remaining);
             
             // Get the records to be deleted from the current page and get their ID
             JSONArray records = (JSONArray) result.get("records");
@@ -556,7 +555,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             
             // Updates
             alreadyDeleted += toBeDeletedNow;
-            offset += limit;
+            offset += RECORDSPERPAGE;
         } while (alreadyDeleted < toBeDeleted);
         
         if (filters.isEmpty()) {
@@ -587,12 +586,11 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
             // Get the record pages, some variables
             int offset = 0;
-            int limit = 100;
             boolean morePages = true;
 
             do {
                 // Get the records within the current page
-                JSONObject result = (JSONObject) getRecords(resId, null, offset, limit).get("result");
+                JSONObject result = (JSONObject) getRecords(resId, null, offset, RECORDSPERPAGE).get("result");
                 JSONArray records = (JSONArray) result.get("records");
 
                 for (Object recordObj : records) {
@@ -618,7 +616,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 if (records.size() == 0) {
                     morePages = false;
                 } else {
-                    offset += limit;
+                    offset += RECORDSPERPAGE;
                 } // if else
             } while (morePages);
             
