@@ -25,6 +25,7 @@ import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
 import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
@@ -224,7 +225,7 @@ public class NGSICKANSink extends NGSISink {
     } // start
 
     @Override
-    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError {
+    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -248,7 +249,7 @@ public class NGSICKANSink extends NGSISink {
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
-            
+
             // Persist the aggregation
             persistAggregation(aggregator);
             batch.setNextPersisted(true);
@@ -284,7 +285,7 @@ public class NGSICKANSink extends NGSISink {
                 LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",orgName="
                         + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
                 persistenceBackend.capRecords(orgName, pkgName, resName, maxRecords);
-            } catch (Exception e) {
+            } catch (CygnusBadConfiguration | CygnusRuntimeError | CygnusPersistenceError e) {
                 throw new CygnusCappingError(e.getMessage());
             } // try catch
         } // while
@@ -296,7 +297,7 @@ public class NGSICKANSink extends NGSISink {
         
         try {
             persistenceBackend.expirateRecordsCache(expirationTime);
-        } catch (Exception e) {
+        } catch (CygnusRuntimeError | CygnusPersistenceError e) {
             throw new CygnusExpiratingError(e.getMessage());
         } // try catch
     } // truncateByTime
@@ -494,7 +495,8 @@ public class NGSICKANSink extends NGSISink {
         } // if else
     } // getAggregator
 
-    private void persistAggregation(CKANAggregator aggregator) throws CygnusPersistenceError {
+    private void persistAggregation(CKANAggregator aggregator)
+        throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         String aggregation = aggregator.getAggregation();
         String orgName = aggregator.getOrgName(enableLowercase);
         String pkgName = aggregator.getPkgName(enableLowercase);
@@ -504,17 +506,9 @@ public class NGSICKANSink extends NGSISink {
                 + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + aggregation + ")");
 
         if (aggregator instanceof RowAggregator) {
-            try {
-                persistenceBackend.persist(orgName, pkgName, resName, aggregation, true);
-            } catch (Exception e) {
-                throw new CygnusPersistenceError("-, " + e.getMessage());
-            } // try catch
+            persistenceBackend.persist(orgName, pkgName, resName, aggregation, true);
         } else {
-            try {
-                persistenceBackend.persist(orgName, pkgName, resName, aggregation, false);
-            } catch (Exception e) {
-                throw new CygnusPersistenceError("-, " + e.getMessage());
-            } // try catch
+            persistenceBackend.persist(orgName, pkgName, resName, aggregation, false);
         } // if else
     } // persistAggregation
 

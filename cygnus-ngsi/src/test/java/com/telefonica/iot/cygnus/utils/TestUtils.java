@@ -89,7 +89,8 @@ public final class TestUtils {
         headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, correlatorID);
         ContextElement originalCE = createJsonContextElement(originalCEStr);
         ContextElement mappedCE = createJsonContextElement(mappedCEStr);
-        return new NGSIEvent(headers, originalCE, mappedCE);
+        return new NGSIEvent(headers, (originalCE == null ? null : originalCE.toString().getBytes()),
+                originalCE, mappedCE);
     } // createNGSIEvent
     
     /**
@@ -103,7 +104,8 @@ public final class TestUtils {
         HashMap<String, String> headers = new HashMap<>();
         ContextElement originalCE = createJsonContextElement(originalCEStr);
         ContextElement mappedCE = createJsonContextElement(mappedCEStr);
-        return new NGSIEvent(headers, originalCE, mappedCE);
+        return new NGSIEvent(headers, (originalCE == null ? null : originalCE.toString().getBytes()),
+                originalCE, mappedCE);
     } // createInterceptedNGSIEvent
     
 } // TestUtils
