@@ -41,6 +41,7 @@ import org.json.simple.JSONArray;
 public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(CKANBackendImpl.class);
+    private static final RECORDSPERPAGE = 100;
     private final String orionUrl;
     private final String apiKey;
     private final String viewer;
