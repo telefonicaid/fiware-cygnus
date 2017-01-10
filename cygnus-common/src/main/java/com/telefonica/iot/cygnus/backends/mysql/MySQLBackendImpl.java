@@ -23,12 +23,15 @@ import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.HashMap;
 import javax.sql.rowset.CachedRowSet;
 
@@ -279,6 +282,71 @@ public class MySQLBackendImpl implements MySQLBackend {
             delete(dbName, tableName, filters);
         } // if else
     } // capRecords
+    
+    @Override
+    public void expirateRecordsCache(long expirationTime) throws CygnusRuntimeError, CygnusPersistenceError {
+        // Iterate on the cached resource IDs
+        cache.startDbIterator();
+        
+        while (cache.hasNextDb()) {
+            String dbName = cache.nextDb();
+            cache.startTableIterator(dbName);
+            
+            while (cache.hasNextTable(dbName)) {
+                String tableName = cache.nextTable(dbName);
+                
+                // Get the records within the table
+                CachedRowSet records = select(dbName, tableName, "*");
+                
+                // Get the number of records
+                int numRecords = 0;
+
+                try {
+                    if (records.last()) {
+                        numRecords = records.getRow();
+                        records.beforeFirst();
+                    } // if
+                } catch (SQLException e) {
+                    throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+                } // try catch
+
+                // Get the reception times (they work as IDs) for future deletion
+                // to-do: refactor after implementing https://github.com/telefonicaid/fiware-cygnus/issues/1371
+                String filters = "";
+                
+                try {
+                    for (int i = 0; i < numRecords; i++) {
+                        records.next();
+                        String recvTime = records.getString("recvTime");
+                        long recordTime = CommonUtils.getMilliseconds(recvTime);
+                        long currentTime = new Date().getTime();
+
+                        if (recordTime < (currentTime - (expirationTime * 1000))) {
+                            if (filters.isEmpty()) {
+                                filters += "recvTime='" + recvTime + "'";
+                            } else {
+                                filters += " or recvTime='" + recvTime + "'";
+                            } // if else
+                        } else {
+                            break;
+                        } // if else
+                    } // for
+                } catch (SQLException e) {
+                    throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+                } catch (ParseException e) {
+                    throw new CygnusRuntimeError("ParseException, " + e.getMessage());
+                } // try catch
+
+                if (filters.isEmpty()) {
+                    LOGGER.debug("No records to be deleted");
+                } else {
+                    LOGGER.debug("Records must be deleted (dbName=" + dbName + ",tableName=" + tableName
+                            + ", filters=" + filters + ")");
+                    delete(dbName, tableName, filters);
+                } // if else
+            } // while
+        } // while
+    } // expirateRecordsCache
     
     /**
      * Close all the MySQL objects previously opened by doCreateTable and doQuery.
