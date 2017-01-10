@@ -162,13 +162,13 @@ public final class CommonUtils {
         return humanRedable;
     } // getHumanRedable
     
+    /**
+     * Gets the milliseconds version of the given timestamp.
+     * @param timestamp
+     * @return The milliseconds version of the given timestamp
+     * @throws java.text.ParseException
+     */
     public static long getMilliseconds(String timestamp) throws java.text.ParseException {
-        /*
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date date = sdf.parse(timestamp.replaceFirst("T", " ").replaceFirst("Z", ""));
-        return date.getTime();
-        */
         return DatatypeConverter.parseDateTime(timestamp).getTime().getTime();
     } // getMilliseconds
     
@@ -371,7 +371,8 @@ public final class CommonUtils {
         LOGGER.debug("Loading junit from " + myClassURL.toExternalForm());
         
         // trace the file containing the flume-ng-node library
-        myClassURL = RegexExtractorInterceptorMillisSerializer.class.getProtectionDomain().getCodeSource().getLocation();
+        myClassURL =
+                RegexExtractorInterceptorMillisSerializer.class.getProtectionDomain().getCodeSource().getLocation();
         LOGGER.debug("Loading flume-ng-node from " + myClassURL.toExternalForm());
         
         // trace the file containing the libthrift library
