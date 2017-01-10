@@ -236,6 +236,13 @@ public class NGSIMySQLSink extends NGSISink {
 
     @Override
     public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
+        LOGGER.debug("[" + this.getName() + "] Expirating records (time=" + expirationTime + ")");
+        
+        try {
+            persistenceBackend.expirateRecordsCache(expirationTime);
+        } catch (CygnusRuntimeError | CygnusPersistenceError e) {
+            throw new CygnusExpiratingError(e.getMessage());
+        } // try catch
     } // expirateRecords
     
     /**
