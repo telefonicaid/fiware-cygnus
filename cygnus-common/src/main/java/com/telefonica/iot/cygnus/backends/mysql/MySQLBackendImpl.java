@@ -102,7 +102,8 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
         
         closeMySQLObjects(con, stmt);
-        LOGGER.debug("Trying to add '" + dbName + "' to the cache");
+        
+        LOGGER.debug("Trying to add '" + dbName + "' to the cache after database creation");
         cache.addDb(dbName);
     } // createDatabase
     
@@ -140,7 +141,8 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
         
         closeMySQLObjects(con, stmt);
-        LOGGER.debug("Trying to add '" + tableName + "' to the cache");
+        
+        LOGGER.debug("Trying to add '" + tableName + "' to the cache after table creation");
         cache.addTable(dbName, tableName);
     } // createTable
     
@@ -169,6 +171,10 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
         
         closeMySQLObjects(con, stmt);
+        
+        LOGGER.debug("Trying to add '" + dbName + "' and '" + tableName + "' to the cache after insertion");
+        cache.addDb(dbName);
+        cache.addTable(dbName, tableName);
     } // insertContextData
     
     private CachedRowSet select(String dbName, String tableName, String selection)
