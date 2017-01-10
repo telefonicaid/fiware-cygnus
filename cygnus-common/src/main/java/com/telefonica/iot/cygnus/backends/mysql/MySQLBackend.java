@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.backends.mysql;
 
-import com.telefonica.iot.cygnus.errors.CygnusCappingError;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 
@@ -64,5 +63,13 @@ public interface MySQLBackend {
      * @throws CygnusPersistenceError
      */
     void capRecords(String dbName, String tableName, long maxRecords) throws CygnusRuntimeError, CygnusPersistenceError;
+    
+    /**
+     * Expirates records within all the cached tables based on the expiration time.
+     * @param expirationTime
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
+     */
+    void expirateRecordsCache(long expirationTime) throws CygnusRuntimeError, CygnusPersistenceError;
     
 } // MySQLBackend

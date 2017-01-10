@@ -20,6 +20,8 @@ package com.telefonica.iot.cygnus.backends.mysql;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 /**
  *
@@ -29,12 +31,18 @@ public class MySQLCache {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(MySQLCache.class);
     private final HashMap<String, ArrayList<String>> hierarchy;
+    private Iterator dbEntries;
+    private Entry nextDbEntry;
+    private final HashMap<String, Iterator> tableEntries;
+    private final HashMap<String, String> nextTableEntry;
     
     /**
      * Constructor.
      */
     public MySQLCache() {
         hierarchy = new HashMap<>();
+        tableEntries = new HashMap<>();
+        nextTableEntry = new HashMap<>();
     } // MySQLCache
     
     /**
@@ -101,5 +109,66 @@ public class MySQLCache {
             return tables.contains(tableName);
         } // if else
     } // isCachedTable
+    
+    /**
+     * Starts an interator for all the databases.
+     */
+    public void startDbIterator() {
+        dbEntries = hierarchy.entrySet().iterator();
+    } // startDbIterator
+    
+    /**
+     * Checks if there is a next database for iteration.
+     * @return True if there is a next database for iteration, false otherwise.
+     */
+    public boolean hasNextDb() {
+        if (dbEntries.hasNext()) {
+            nextDbEntry = (Entry) dbEntries.next();
+            return true;
+        } else {
+            return false;
+        } // if else
+    } // hasNextDb
+    
+    /**
+     * Gets the next database for iteration.
+     * @return The next database for iteration.
+     */
+    public String nextDb() {
+        return (String) nextDbEntry.getKey();
+    } // nextDb
+    
+    /**
+     * Starts an iterator for all the tables within the given database.
+     * @param dbName
+     */
+    public void startTableIterator(String dbName) {
+        tableEntries.put(dbName, hierarchy.get(dbName).iterator());
+    } // startTableIterator
+    
+    /**
+     * Checks if there is a next table for iteration within the given database.
+     * @param dbName
+     * @return True if there is a next table for iteration, false otherwise.
+     */
+    public boolean hasNextTable(String dbName) {
+        Iterator it = tableEntries.get(dbName);
+        
+        if (it.hasNext()) {
+            nextTableEntry.put(dbName, (String) it.next());
+            return true;
+        } else {
+            return false;
+        } // if else
+    } // hasNextTable
+    
+    /**
+     * Gets the next table for iteration.
+     * @param dbName
+     * @return The next table for iteration.
+     */
+    public String nextTable(String dbName) {
+        return (String) nextTableEntry.get(dbName);
+    } // nextTable
     
 } // MySQLCache

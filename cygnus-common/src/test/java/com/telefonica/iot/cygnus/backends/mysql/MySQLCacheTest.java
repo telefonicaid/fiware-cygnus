@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.backends.mysql;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -242,5 +243,80 @@ public class MySQLCacheTest {
             throw e;
         } // try catch
     } // testIsCachedTableNotExists
+    
+    /**
+     * [MySQLCache.db_iteration_methods] -------- Database iteration methods work.
+     */
+    @Test
+    public void testDbIterationMethods() {
+        System.out.println(getTestTraceHead("[MySQLCache.db_iteration_methods]")
+                + "-------- Database iteration methods work");
+        MySQLCache cache = new MySQLCache();
+        String dbName1 = "dbname1";
+        String tableName11 = "tablename11";
+        String tableName12 = "tablename12";
+        String dbName2 = "dbname2";
+        String tableName21 = "tablename21";
+        String tableName22 = "tablename22";
+        cache.addDb(dbName1);
+        cache.addTable(dbName1, tableName11);
+        cache.addTable(dbName1, tableName12);
+        cache.addDb(dbName2);
+        cache.addTable(dbName2, tableName21);
+        cache.addTable(dbName2, tableName22);
+        
+        try {
+            cache.startDbIterator();
+            assertTrue(cache.hasNextDb());
+            String db1 = cache.nextDb();
+            assertTrue(cache.hasNextDb());
+            String db2 = cache.nextDb();
+            assertTrue(!cache.hasNextDb());
+            assertTrue(!db1.equals(db2) && (db1.equals("dbname1") || db1.equals("dbname2"))
+                    && (db2.equals("dbname1") || db2.equals("dbname2")));
+            System.out.println(getTestTraceHead("[MySQLCache.db_iteration_methods]")
+                    + "-  OK  - Database iteration methods work");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[MySQLCache.db_iteration_methods]")
+                    + "- FAIL - Database iteration methods don't work");
+            throw e;
+        } // try catch
+    } // testDbIterationMethods
+    
+    /**
+     * [MySQLCache.table_iteration_methods] -------- Table iteration methods work.
+     */
+    @Test
+    public void testTableIterationMethods() {
+        System.out.println(getTestTraceHead("[MySQLCache.table_iteration_methods]")
+                + "-------- Table iteration methods work");
+        MySQLCache cache = new MySQLCache();
+        String dbName1 = "dbname";
+        String tableName11 = "tablename1";
+        String tableName12 = "tablename2";
+        cache.addDb(dbName1);
+        cache.addTable(dbName1, tableName11);
+        cache.addTable(dbName1, tableName12);
+        
+        try {
+            cache.startDbIterator();
+            cache.hasNextDb();
+            String dbName = cache.nextDb();
+            cache.startTableIterator(dbName);
+            cache.hasNextTable(dbName);
+            String table1 = cache.nextTable(dbName);
+            cache.hasNextTable(dbName);
+            String table2 = cache.nextTable(dbName);
+            
+            assertTrue(!table1.equals(table2) && (table1.equals("tablename1") || table1.equals("tablename2"))
+                    && (table2.equals("tablename1") || table2.equals("tablename2")));
+            System.out.println(getTestTraceHead("[MySQLCache.table_iteration_methods]")
+                    + "-  OK  - Table iteration methods work");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[MySQLCache.table_iteration_methods]")
+                    + "- FAIL - Table iteration methods don't work");
+            throw e;
+        } // try catch
+    } // testTableIterationMethods
     
 } // MySQLCacheTest

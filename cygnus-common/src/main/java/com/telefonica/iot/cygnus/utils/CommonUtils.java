@@ -39,6 +39,7 @@ import java.util.Properties;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import javax.xml.bind.DatatypeConverter;
 import kafka.common.OffsetOutOfRangeException;
 import kafka.tools.KafkaMigrationTool;
 import org.I0Itec.zkclient.exception.ZkNoNodeException;
@@ -160,6 +161,16 @@ public final class CommonUtils {
         humanRedable += sdf.format(new Date(ts)) + (addUTC ? "Z" : "");
         return humanRedable;
     } // getHumanRedable
+    
+    /**
+     * Gets the milliseconds version of the given timestamp.
+     * @param timestamp
+     * @return The milliseconds version of the given timestamp
+     * @throws java.text.ParseException
+     */
+    public static long getMilliseconds(String timestamp) throws java.text.ParseException {
+        return DatatypeConverter.parseDateTime(timestamp).getTime().getTime();
+    } // getMilliseconds
     
     /**
      * Decides if a given string is a number.
@@ -345,10 +356,10 @@ public final class CommonUtils {
     /**
      * Only works in DEBUG level.
      * Prints the loaded .jar files at the start of Cygnus run.
-     */ 
+     */
     public static void printLoadedJars() {
-        // trace the file containing the httpclient library        
-        URL myClassURL = PoolingClientConnectionManager.class.getProtectionDomain().getCodeSource().getLocation();        
+        // trace the file containing the httpclient library
+        URL myClassURL = PoolingClientConnectionManager.class.getProtectionDomain().getCodeSource().getLocation();
         LOGGER.debug("Loading httpclient from " + myClassURL.toExternalForm());
         
         // trace the file containing the httpcore library
@@ -360,7 +371,8 @@ public final class CommonUtils {
         LOGGER.debug("Loading junit from " + myClassURL.toExternalForm());
         
         // trace the file containing the flume-ng-node library
-        myClassURL = RegexExtractorInterceptorMillisSerializer.class.getProtectionDomain().getCodeSource().getLocation();
+        myClassURL =
+                RegexExtractorInterceptorMillisSerializer.class.getProtectionDomain().getCodeSource().getLocation();
         LOGGER.debug("Loading flume-ng-node from " + myClassURL.toExternalForm());
         
         // trace the file containing the libthrift library
@@ -381,7 +393,7 @@ public final class CommonUtils {
         
         // trace the file containing the postgresql library
         myClassURL = BlobOutputStream.class.getProtectionDomain().getCodeSource().getLocation();
-        LOGGER.debug("Loading postgresql from " + myClassURL.toExternalForm());      
+        LOGGER.debug("Loading postgresql from " + myClassURL.toExternalForm());
         
         // trace the file containing the log4j library
         myClassURL = SequenceNumberPatternConverter.class.getProtectionDomain().getCodeSource().getLocation();
