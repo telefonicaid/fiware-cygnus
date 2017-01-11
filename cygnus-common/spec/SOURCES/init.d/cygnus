@@ -1,7 +1,8 @@
 #!/bin/bash
-# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+#
+# Copyright 2014-2017 Telefonica Investigación y Desarrollo, S.A.U
 # 
-# This file is part of fiware-cygnus (FI-WARE project).
+# This file is part of fiware-cygnus (FIWARE project).
 # 
 # fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
 # Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
@@ -19,6 +20,7 @@
 #
 # chkconfig: 2345 99 60
 # description: cygnus
+#
 
 # Load some fancy functions for init.d
 . /etc/rc.d/init.d/functions
