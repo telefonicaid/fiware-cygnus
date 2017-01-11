@@ -4,6 +4,7 @@
 - [cygnus] Add Travis CI (#1347)
 - [cygnus-ngsi][hardening] Force lowercase organization, dataset and resource names in NGSICKANSink (#1352)
 - [cygnus-ngsi][hardening] Replace warnings upon unnecessary header received with debug traces at NGSIRestHandler (#1354)
+- [cygnus-common][hardening] Clean and modularize ManagementInterface.java (#1368)
 - [cygnus-ngsi][hardening] Improve persistence error logs at NGSISink (#1358)
 - [cygnus-ngsi][hardening] Add raw bytes to NGSIEvent (#1345)
 - [cygnus-ngsi][hardening] Add cache to NGSIMySQLSink (#130)
