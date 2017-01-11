@@ -1,7 +1,7 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -17,6 +17,9 @@
  */
 
 package com.telefonica.iot.cygnus.backends.mysql;
+
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 
 /**
  * Interface for those backends implementing the persistence in MySQL.
@@ -50,5 +53,23 @@ public interface MySQLBackend {
      * @throws Exception
      */
     void insertContextData(String dbName, String tableName, String fieldNames, String fieldValues) throws Exception;
+    
+    /**
+     * Caps records from the given table within the given database according to the given maximum number.
+     * @param dbName
+     * @param tableName
+     * @param maxRecords
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
+     */
+    void capRecords(String dbName, String tableName, long maxRecords) throws CygnusRuntimeError, CygnusPersistenceError;
+    
+    /**
+     * Expirates records within all the cached tables based on the expiration time.
+     * @param expirationTime
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
+     */
+    void expirateRecordsCache(long expirationTime) throws CygnusRuntimeError, CygnusPersistenceError;
     
 } // MySQLBackend

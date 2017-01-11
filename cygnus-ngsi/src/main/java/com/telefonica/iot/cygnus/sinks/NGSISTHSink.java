@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -19,13 +19,16 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import static com.telefonica.iot.cygnus.sinks.NGSIMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.util.ArrayList;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 
 /**
  *
@@ -68,7 +71,7 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
     } // configure
     
     @Override
-    public void persistBatch(NGSIBatch batch) throws Exception {
+    public void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -96,14 +99,14 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
     } // persistBatch
     
     @Override
-    public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
     } // capRecords
 
     @Override
-    public void expirateRecords(long time) throws Exception {
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
     } // expirateRecords
     
-    private void persistOne(NGSIEvent event) throws Exception {
+    private void persistOne(NGSIEvent event) throws CygnusBadConfiguration, CygnusPersistenceError {
         // get some values from the event
         Long notifiedRecvTimeTs = event.getRecvTimeTs();
         String service = event.getServiceForNaming(enableNameMappings);
@@ -115,7 +118,12 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
         // create the database for this service if not yet existing... the cost of trying to create it is the same
         // than checking if it exits and then creating it
         String dbName = enableLowercase ? buildDbName(service).toLowerCase() : buildDbName(service);
-        backend.createDatabase(dbName);
+        
+        try {
+            backend.createDatabase(dbName);
+        } catch (Exception e) {
+            throw new CygnusPersistenceError("-, " + e.getMessage());
+        } // try catch
         
         // collection name container
         String collectionName = null;
@@ -125,7 +133,12 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
             collectionName = enableLowercase
                     ? (buildCollectionName(servicePathForNaming, null, null) + ".aggr").toLowerCase()
                     : buildCollectionName(servicePathForNaming, null, null) + ".aggr";
-            backend.createCollection(dbName, collectionName, dataExpiration);
+            
+            try {
+                backend.createCollection(dbName, collectionName, dataExpiration);
+            } catch (Exception e) {
+                throw new CygnusPersistenceError("-, " + e.getMessage());
+            } // try catch
         } // if
         
         String entityId = contextElement.getId();
@@ -138,7 +151,12 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
             collectionName = enableLowercase
                     ? (buildCollectionName(servicePathForNaming, entityForNaming, null) + ".aggr").toLowerCase()
                     : buildCollectionName(servicePathForNaming, entityForNaming, null) + ".aggr";
-            backend.createCollection(dbName, collectionName, dataExpiration);
+            
+            try {
+                backend.createCollection(dbName, collectionName, dataExpiration);
+            } catch (Exception e) {
+                throw new CygnusPersistenceError("-, " + e.getMessage());
+            } // try catch
         } // if
 
         // iterate on all this entity's attributes, if there are attributes
@@ -180,7 +198,12 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
                 collectionName = enableLowercase
                         ? (buildCollectionName(servicePathForNaming, entityForNaming, attrName) + ".aggr").toLowerCase()
                         : buildCollectionName(servicePathForNaming, entityForNaming, attrName) + ".aggr";
-                backend.createCollection(dbName, collectionName, dataExpiration);
+                
+                try {
+                    backend.createCollection(dbName, collectionName, dataExpiration);
+                } catch (Exception e) {
+                    throw new CygnusPersistenceError("-, " + e.getMessage());
+                } // try catch
             } // if
 
             // insert the data
@@ -188,8 +211,13 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
                     + ", Collection: " + collectionName + ", Data: " + recvTimeTs + ","
                     + entityId + "," + entityType + "," + attrName + "," + attrType + "," + attrValue + ","
                     + attrMetadata);
-            backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs,
-                    entityId, entityType, attrName, attrType, attrValue, attrMetadata, resolutions);
+            
+            try {
+                backend.insertContextDataAggregated(dbName, collectionName, recvTimeTs,
+                        entityId, entityType, attrName, attrType, attrValue, attrMetadata, resolutions);
+            } catch (Exception e) {
+                throw new CygnusPersistenceError("-, " + e.getMessage());
+            } // try catch
         } // for
     } // persistOne
     

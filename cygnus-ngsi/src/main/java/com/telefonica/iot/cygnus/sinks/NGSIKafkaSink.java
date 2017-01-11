@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -21,6 +21,10 @@ import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.backends.kafka.KafkaBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -28,7 +32,6 @@ import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import java.util.ArrayList;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 /**
@@ -127,7 +130,7 @@ public class NGSIKafkaSink extends NGSISink {
     } // start
 
     @Override
-    void persistBatch(NGSIBatch batch) throws Exception {
+    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusBadContextData, CygnusPersistenceError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -159,11 +162,11 @@ public class NGSIKafkaSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
     } // capRecords
 
     @Override
-    public void expirateRecords(long time) throws Exception {
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
     } // expirateRecords
     
     /**
@@ -173,10 +176,10 @@ public class NGSIKafkaSink extends NGSISink {
      * @param entity
      * @param attribute
      * @return
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
-    protected String buildTopicName(String service, String servicePath,
-        String entity, String attribute) throws Exception {
+    protected String buildTopicName(String service, String servicePath, String entity, String attribute)
+    throws CygnusBadConfiguration {
         String name;
 
         switch (dataModel) {
@@ -257,7 +260,7 @@ public class NGSIKafkaSink extends NGSISink {
             return attributeForNaming;
         } // getAttributeForNaming
 
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
@@ -265,7 +268,7 @@ public class NGSIKafkaSink extends NGSISink {
             attributeForNaming = event.getAttributeForNaming(enableNameMappings);
         } // initialize
 
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
 
@@ -281,7 +284,7 @@ public class NGSIKafkaSink extends NGSISink {
 
     } // KafkaAggregator
 
-    private void persistAggregation(KafkaAggregator aggregator) throws Exception {
+    private void persistAggregation(KafkaAggregator aggregator) throws CygnusBadConfiguration, CygnusPersistenceError {
         String aggregation = aggregator.getAggregation();
         String topicName = buildTopicName(aggregator.getService(),
                 aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(),
@@ -289,8 +292,15 @@ public class NGSIKafkaSink extends NGSISink {
 
         // build the message/record to be sent to Kafka
         ProducerRecord<String, String> record;
+        Boolean topicExists;
 
-        if (!persistenceBackend.topicExists(topicName)) {
+        try {
+            topicExists = persistenceBackend.topicExists(topicName);
+        } catch (Exception e) {
+            throw new CygnusPersistenceError("-, " + e.getMessage());
+        } // try catch
+        
+        if (!topicExists) {
             LOGGER.info("[" + this.getName() + "] Creating topic at NGSIKafkaSink. "
                     + "Topic: " + topicName + " , partitions: " + partitions + " , "
                     + "replication factor: " + replicationFactor);

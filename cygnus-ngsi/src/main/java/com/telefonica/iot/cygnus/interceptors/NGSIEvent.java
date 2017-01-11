@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -32,17 +32,20 @@ import org.apache.flume.Event;
 public class NGSIEvent implements Event {
     
     private Map<String, String> headers;
+    private final byte[] body;
     private ContextElement originalCE;
     private ContextElement mappedCE;
     
     /**
      * Constructor.
      * @param headers
+     * @param body
      * @param originalCE
      * @param mappedCE
      */
-    public NGSIEvent(Map<String, String> headers, ContextElement originalCE, ContextElement mappedCE) {
+    public NGSIEvent(Map<String, String> headers, byte[] body, ContextElement originalCE, ContextElement mappedCE) {
         this.headers = headers;
+        this.body = body;
         this.originalCE = originalCE;
         this.mappedCE = mappedCE;
     } // NGSIEvent
@@ -59,7 +62,7 @@ public class NGSIEvent implements Event {
 
     @Override
     public byte[] getBody() {
-        return null;
+        return body;
     } // getBody
 
     @Override

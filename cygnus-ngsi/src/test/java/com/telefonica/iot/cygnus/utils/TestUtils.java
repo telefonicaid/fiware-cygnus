@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
@@ -89,7 +89,8 @@ public final class TestUtils {
         headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, correlatorID);
         ContextElement originalCE = createJsonContextElement(originalCEStr);
         ContextElement mappedCE = createJsonContextElement(mappedCEStr);
-        return new NGSIEvent(headers, originalCE, mappedCE);
+        return new NGSIEvent(headers, (originalCE == null ? null : originalCE.toString().getBytes()),
+                originalCE, mappedCE);
     } // createNGSIEvent
     
     /**
@@ -103,7 +104,8 @@ public final class TestUtils {
         HashMap<String, String> headers = new HashMap<>();
         ContextElement originalCE = createJsonContextElement(originalCEStr);
         ContextElement mappedCE = createJsonContextElement(mappedCEStr);
-        return new NGSIEvent(headers, originalCE, mappedCE);
+        return new NGSIEvent(headers, (originalCE == null ? null : originalCE.toString().getBytes()),
+                originalCE, mappedCE);
     } // createInterceptedNGSIEvent
     
 } // TestUtils

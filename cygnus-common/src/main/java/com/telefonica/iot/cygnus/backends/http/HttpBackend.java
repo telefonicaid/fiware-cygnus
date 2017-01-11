@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -45,6 +45,7 @@ import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  *
@@ -106,26 +107,22 @@ public abstract class HttpBackend {
      * @param headers
      * @param entity
      * @return A Http httpRes
-     * @throws Exception
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
      */
     public JsonResponse doRequest(String method, String url, boolean relative, ArrayList<Header> headers,
-            StringEntity entity) throws Exception {
+            StringEntity entity) throws CygnusRuntimeError, CygnusPersistenceError {
         JsonResponse response;
         
         if (relative) {
             // create the HttpFS URL
             String effectiveURL = (ssl ? "https://" : "http://") + host + ":" + port + url;
 
-            try {
-                if (krb5) {
-                    response = doPrivilegedRequest(method, effectiveURL, headers, entity);
-                } else {
-                    response = doRequest(method, effectiveURL, headers, entity);
-                } // if else
-            } catch (Exception e) {
-                LOGGER.debug("There was a problem when performing the request. Details: " + e.getMessage());
-                throw e;
-            } // try catch
+            if (krb5) {
+                response = doPrivilegedRequest(method, effectiveURL, headers, entity);
+            } else {
+                response = doRequest(method, effectiveURL, headers, entity);
+            } // if else
 
             return response;
         } else {
@@ -145,37 +142,43 @@ public abstract class HttpBackend {
      * @param headers
      * @param entity
      * @return The result of the request
-     * @throws java.lang.Exception
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
      */
         
     protected JsonResponse doRequest(String method, String url, ArrayList<Header> headers, StringEntity entity)
-        throws Exception {
+        throws CygnusRuntimeError, CygnusPersistenceError {
         HttpResponse httpRes = null;
-        HttpRequestBase request = null;
+        HttpRequestBase request;
 
-        if (method.equals("PUT")) {
-            HttpPut req = new HttpPut(url);
-
-            if (entity != null) {
-                req.setEntity(entity);
-            } // if
-
-            request = req;
-        } else if (method.equals("POST")) {
-            HttpPost req = new HttpPost(url);
-
-            if (entity != null) {
-                req.setEntity(entity);
-            } // if
-
-            request = req;
-        } else if (method.equals("GET")) {
-            request = new HttpGet(url);
-        } else if (method.equals("DELETE")) {
-            request = new HttpDelete(url);
-        } else {
-            throw new CygnusRuntimeError("HTTP method not supported: " + method);
-        } // if else
+        switch (method) {
+            case "PUT":
+                HttpPut reqPut = new HttpPut(url);
+                
+                if (entity != null) {
+                    reqPut.setEntity(entity);
+                } // if
+                
+                request = reqPut;
+                break;
+            case "POST":
+                HttpPost reqPost = new HttpPost(url);
+                
+                if (entity != null) {
+                    reqPost.setEntity(entity);
+                } // if
+                
+                request = reqPost;
+                break;
+            case "GET":
+                request = new HttpGet(url);
+                break;
+            case "DELETE":
+                request = new HttpDelete(url);
+                break;
+            default:
+                throw new CygnusRuntimeError("-, Http " + method + " method not supported"); // if else
+        } // switch
 
         if (headers != null) {
             for (Header header : headers) {
@@ -189,7 +192,7 @@ public abstract class HttpBackend {
             httpRes = httpClient.execute(request);
         } catch (IOException e) {
             request.releaseConnection();
-            throw new CygnusPersistenceError(e.getMessage());
+            throw new CygnusPersistenceError("IOException, " + e.getMessage());
         } // try catch
 
         JsonResponse response = createJsonResponse(httpRes);
@@ -200,7 +203,7 @@ public abstract class HttpBackend {
     // from here on, consider this link:
     // http://stackoverflow.com/questions/21629132/httpclient-set-credentials-for-kerberos-authentication
     private JsonResponse doPrivilegedRequest(String method, String url, ArrayList<Header> headers,
-            StringEntity entity) throws Exception {
+            StringEntity entity) throws CygnusRuntimeError {
         try {
             LoginContext loginContext = new LoginContext("cygnus_krb5_login",
                     new KerberosCallbackHandler(krb5User, krb5Password));
@@ -208,9 +211,8 @@ public abstract class HttpBackend {
             PrivilegedRequest req = new PrivilegedRequest(method, url, headers, entity);
             return createJsonResponse((HttpResponse) Subject.doAs(loginContext.getSubject(), req));
         } catch (LoginException e) {
-            LOGGER.error(e.getMessage());
-            return null;
-        } // try catch // try catch
+            throw new CygnusRuntimeError("LoginException, " + e.getMessage());
+        } // try catch
     } // doPrivilegedRequest
     
     /**
@@ -241,16 +243,16 @@ public abstract class HttpBackend {
 
         @Override
         public Object run() {
-            try {
-                Subject current = Subject.getSubject(AccessController.getContext());
-                Set<Principal> principals = current.getPrincipals();
-                
-                for (Principal next : principals) {
-                    logger.info("DOAS Principal: " + next.getName());
-                } // for
+            Subject current = Subject.getSubject(AccessController.getContext());
+            Set<Principal> principals = current.getPrincipals();
 
+            for (Principal next : principals) {
+                logger.info("DOAS Principal: " + next.getName());
+            } // for
+
+            try {
                 return doRequest(method, url, headers, entity);
-            } catch (Exception e) {
+            } catch (CygnusRuntimeError | CygnusPersistenceError e) {
                 logger.error(e.getMessage());
                 return null;
             } // try catch
@@ -262,69 +264,94 @@ public abstract class HttpBackend {
      * Creates a JsonResponse object based on the given HttpResponse. It is protected for testing purposes.
      * @param httpRes
      * @return A JsonResponse object
-     * @throws Exception
+     * @throws CygnusRuntimeError
      */
-    protected JsonResponse createJsonResponse(HttpResponse httpRes) throws Exception {
-        try {
-            if (httpRes == null) {
-                return null;
-            } // if
-            
-            // get the location header
-            Header locationHeader = null;
-            Header[] headers = httpRes.getHeaders("Location");
-            
-            if (headers.length > 0) {
-                locationHeader = headers[0];
-            } // if
-            
-            if (httpRes.getHeaders("Content-Type").length == 0) {
-                return new JsonResponse(null, httpRes.getStatusLine().getStatusCode(),
-                    httpRes.getStatusLine().getReasonPhrase(), locationHeader);
-            } // if
-            
-            if (!httpRes.getHeaders("Content-Type")[0].getValue().contains("application/json")) {
-                return new JsonResponse(null, httpRes.getStatusLine().getStatusCode(),
-                    httpRes.getStatusLine().getReasonPhrase(), locationHeader);
-            } // if
-            
-            LOGGER.debug("Http response status line: " + httpRes.getStatusLine().toString());
-            
-            // parse the httpRes payload
-            JSONObject jsonPayload = null;
-            HttpEntity entity = httpRes.getEntity();
-            
-            if (entity != null) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(httpRes.getEntity().getContent()));
-                String res = "";
-                String line;
+    protected JsonResponse createJsonResponse(HttpResponse httpRes) throws CygnusRuntimeError {
+        if (httpRes == null) {
+            return null;
+        } // if
 
+        // get the location header
+        Header locationHeader = null;
+        Header[] headers = httpRes.getHeaders("Location");
+
+        if (headers.length > 0) {
+            locationHeader = headers[0];
+        } // if
+
+        if (httpRes.getHeaders("Content-Type").length == 0) {
+            return new JsonResponse(null, httpRes.getStatusLine().getStatusCode(),
+                httpRes.getStatusLine().getReasonPhrase(), locationHeader);
+        } // if
+
+        if (!httpRes.getHeaders("Content-Type")[0].getValue().contains("application/json")) {
+            return new JsonResponse(null, httpRes.getStatusLine().getStatusCode(),
+                httpRes.getStatusLine().getReasonPhrase(), locationHeader);
+        } // if
+
+        LOGGER.debug("Http response status line: " + httpRes.getStatusLine().toString());
+
+        // parse the httpRes payload
+        JSONObject jsonPayload = null;
+        HttpEntity entity = httpRes.getEntity();
+
+        if (entity != null) {
+            BufferedReader reader;
+            
+            try {
+                reader = new BufferedReader(new InputStreamReader(httpRes.getEntity().getContent()));
+            } catch (IOException e) {
+                throw new CygnusRuntimeError("IOException, " + e.getMessage());
+            } catch (IllegalStateException e) {
+                throw new CygnusRuntimeError("IllegalStateException, " + e.getMessage());
+            } // try catch
+            
+            String res = "";
+            String line;
+
+            try {
                 while ((line = reader.readLine()) != null) {
                     res += line;
                 } // while
+            } catch (IOException e) {
+                throw new CygnusRuntimeError("IOException, " + e.getMessage());
+            } // try catch
 
+            try {
                 reader.close();
-                LOGGER.debug("Http response payload: " + res);
-                
-                if (!res.isEmpty()) {
-                    JSONParser jsonParser = new JSONParser();
-                    
-                    if (res.startsWith("[")) {
-                        Object object = jsonParser.parse(res);
-                        jsonPayload = new JSONObject();
-                        jsonPayload.put("result", (JSONArray) object);
-                    } else {
-                        jsonPayload = (JSONObject) jsonParser.parse(res);
-                    } // if else
-                } // if
-            } // if
+            } catch (IOException e) {
+                throw new CygnusRuntimeError("IOException, " + e.getMessage());
+            } // try catch
 
-            // return the result
-            return new JsonResponse(jsonPayload, httpRes.getStatusLine().getStatusCode(),
-                    httpRes.getStatusLine().getReasonPhrase(), locationHeader);
-        } catch (IOException | IllegalStateException e) {
-            throw new CygnusRuntimeError(e.getMessage());
-        } // try catch
+            LOGGER.debug("Http response payload: " + res);
+
+            if (!res.isEmpty()) {
+                JSONParser jsonParser = new JSONParser();
+
+                if (res.startsWith("[")) {
+                    Object object;
+
+                    try {
+                        object = jsonParser.parse(res);
+                    } catch (ParseException e) {
+                        throw new CygnusRuntimeError("ParseException, " + e.getMessage());
+                    } // try catch
+
+                    jsonPayload = new JSONObject();
+                    jsonPayload.put("result", (JSONArray) object);
+                } else {
+                    try {
+                        jsonPayload = (JSONObject) jsonParser.parse(res);
+                    } catch (ParseException e) {
+                        throw new CygnusRuntimeError("ParseException, " + e.getMessage());
+                    } // try catch
+                } // if else
+            } // if
+        } // if
+
+        // return the result
+        return new JsonResponse(jsonPayload, httpRes.getStatusLine().getStatusCode(),
+                httpRes.getStatusLine().getReasonPhrase(), locationHeader);
     } // createJsonResponse
 
 } // HttpBackend

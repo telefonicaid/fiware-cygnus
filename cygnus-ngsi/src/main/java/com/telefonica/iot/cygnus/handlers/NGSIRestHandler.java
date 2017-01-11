@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2014-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -345,7 +345,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                     + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + ": " + transId + ")");
             
             // Create the NGSIEvent and add it to the list
-            NGSIEvent ngsiEvent = new NGSIEvent(headers, cer.getContextElement(), null);
+            NGSIEvent ngsiEvent = new NGSIEvent(headers, cer.toString().getBytes(), cer.getContextElement(), null);
             ngsiEvents.add(ngsiEvent);
             
             if (ids.isEmpty()) {

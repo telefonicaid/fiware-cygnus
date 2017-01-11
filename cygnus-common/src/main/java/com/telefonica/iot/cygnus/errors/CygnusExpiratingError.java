@@ -1,5 +1,5 @@
 /**
- * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FIWARE project).
  *
@@ -15,21 +15,20 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
-
 package com.telefonica.iot.cygnus.errors;
 
 /**
  *
  * @author frb
  */
-public class CygnusBadContextData extends Exception {
+public class CygnusExpiratingError extends Exception {
     
     /**
      * Constructor.
      * @param message
      */
-    public CygnusBadContextData(String message) {
-        super("Bad context data. Message: " + message);
-    } // CygnusBadContextData
+    public CygnusExpiratingError(String message) {
+        super("Error while expirating records. Message: " + message);
+    } // CygnusExpiratingError
     
-} // CygnusBadContextData
+} // CygnusExpiratingError

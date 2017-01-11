@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -166,9 +166,9 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
      * Builds a database name given a fiwareService. It throws an exception if the naming conventions are violated.
      * @param fiwareService
      * @return
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
-    protected String buildDbName(String fiwareService) throws Exception {
+    protected String buildDbName(String fiwareService) throws CygnusBadConfiguration {
         String dbName;
         
         if (enableEncoding) {
@@ -192,10 +192,10 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
      * @param entity
      * @param attribute
      * @return
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
     protected String buildCollectionName(String fiwareServicePath, String entity, String attribute)
-        throws Exception {
+        throws CygnusBadConfiguration {
         String collectionName;
 
         if (enableEncoding) {

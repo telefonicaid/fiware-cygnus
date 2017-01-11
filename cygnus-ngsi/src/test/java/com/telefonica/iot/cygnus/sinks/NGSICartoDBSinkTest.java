@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -1291,7 +1291,7 @@ public class NGSICartoDBSinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = createContextElement();
-        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1365,7 +1365,7 @@ public class NGSICartoDBSinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = createContextElement();
-        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1458,7 +1458,7 @@ public class NGSICartoDBSinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = createContextElement();
-        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1553,7 +1553,7 @@ public class NGSICartoDBSinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = createContextElement();
-        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1654,7 +1654,7 @@ public class NGSICartoDBSinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = createContextElement();
-        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1738,7 +1738,7 @@ public class NGSICartoDBSinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = createContextElement();
-        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1935,7 +1935,7 @@ public class NGSICartoDBSinkTest {
         contextAttribute2.setType("someType2");
         contextAttribute2.setContextValue(new JsonPrimitive("someValue2"));
         contextAttribute2.setContextMetadata(null);
-        ArrayList<ContextAttribute> attributes = new ArrayList<ContextAttribute>();
+        ArrayList<ContextAttribute> attributes = new ArrayList<>();
         attributes.add(contextAttribute1);
         attributes.add(contextAttribute2);
         ContextElement contextElement = notifyContextRequest.new ContextElement();

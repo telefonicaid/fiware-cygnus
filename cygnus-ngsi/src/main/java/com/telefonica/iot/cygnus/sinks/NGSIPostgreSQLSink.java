@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -22,6 +22,9 @@ import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -31,7 +34,6 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 
 /**
  *
@@ -200,7 +202,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     } // start
 
     @Override
-    void persistBatch(NGSIBatch batch) throws Exception {
+    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -232,11 +234,11 @@ public class NGSIPostgreSQLSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
     } // capRecords
 
     @Override
-    public void expirateRecords(long time) throws Exception {
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
     } // expirateRecords
 
     /**
@@ -289,7 +291,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             return fieldNames;
         } // getFieldNames
 
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
@@ -299,7 +301,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             tableName = buildTableName(servicePathForNaming, entityForNaming, attributeForNaming);
         } // initialize
 
-        public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
+        public abstract void aggregate(NGSIEvent cygnusEvent);
 
     } // PostgreSQLAggregator
 
@@ -309,7 +311,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private class RowAggregator extends PostgreSQLAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
             typedFieldNames = "("
                     + NGSIConstants.RECV_TIME_TS + " bigint,"
@@ -336,7 +338,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -394,7 +396,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private class ColumnAggregator extends PostgreSQLAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
 
             // particulat initialization
@@ -425,7 +427,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
+        public void aggregate(NGSIEvent cygnusEvent) {
             // get the getRecvTimeTs headers
             long recvTimeTs = cygnusEvent.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -478,7 +480,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
         } // if else
     } // getAggregator
 
-    private void persistAggregation(PostgreSQLAggregator aggregator) throws Exception {
+    private void persistAggregation(PostgreSQLAggregator aggregator) throws CygnusPersistenceError {
         String typedFieldNames = aggregator.getTypedFieldNames();
         String fieldNames = aggregator.getFieldNames();
         String fieldValues = aggregator.getAggregation();
@@ -489,24 +491,27 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
                 + fieldValues + ")");
         
-        if (aggregator instanceof RowAggregator) {
-            persistenceBackend.createSchema(schemaName);
-            persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
-        } // if
-        // creating the database and the table has only sense if working in row mode, in column node
-        // everything must be provisioned in advance
-        
+        try {
+            if (aggregator instanceof RowAggregator) {
+                persistenceBackend.createSchema(schemaName);
+                persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+            } // if
+            // creating the database and the table has only sense if working in row mode, in column node
+            // everything must be provisioned in advance
 
-        persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
+            persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
+        } catch (Exception e) {
+            throw new CygnusPersistenceError("-, " + e.getMessage());
+        } // try catch
     } // persistAggregation
     
     /**
      * Creates a PostgreSQL DB name given the FIWARE service.
      * @param service
      * @return The PostgreSQL DB name
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
-    public String buildSchemaName(String service) throws Exception {
+    public String buildSchemaName(String service) throws CygnusBadConfiguration {
         String name;
         
         if (enableEncoding) {
@@ -529,9 +534,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
      * @param entity
      * @param attribute
      * @return The PostgreSQL table name
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
-    public String buildTableName(String servicePath, String entity, String attribute) throws Exception {
+    public String buildTableName(String servicePath, String entity, String attribute) throws CygnusBadConfiguration {
         String name;
 
         if (enableEncoding) {
