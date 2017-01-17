@@ -289,6 +289,6 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
 [Top](#top)
 
 ##<a name="section5"></a>Reporting issues and contact information
-Any doubt you may have, please refer to the [Cygnus Core Team](../../doc/cygnus-ngsi/user_and_programmer_guide/issues_and_contact.md).
+Any doubt you may have, please refer to the [Cygnus Core Team](../doc/cygnus-ngsi/user_and_programmer_guide/issues_and_contact.md).
 
 [Top](#top)
