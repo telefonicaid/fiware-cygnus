@@ -37,6 +37,10 @@ Content:
     * [DELETE `/v1/admin/log/loggers`](#section6.5)
         * [DELETE logger by name](#section6.5.1)
         * [DELETE all loggers](#section6.5.2)
+* [Metrics](#section7)
+    * [GET `/v1/admin/metrics`](#section7.1)
+    * [DELTE `/v1/admin/metrics`](#section7.2)
+* [Available aliases](#section8)
 
 ##<a name="section1"></a>Apiary version of this document
 This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/latests) as well.
@@ -927,5 +931,101 @@ When an invalid `transient` parameter is given:
 ```
 {"success":"false","result":"Invalid 'transient' parameter"}
 ```
+
+[Top](#top)
+
+##<a name="section7"></a>Metrics
+###<a name="section7.1"></a>`GET /v1/admin/metrics`
+Gets metrics for a whole Cygnus agent. Specifically:
+
+* Number of <b>incoming transactions</b> (a transaction involves a request and a response).
+* Total <b>size of the requests</b>, in bytes.
+* Total <b>size of the responses</b>, in bytes.
+* Number of <b>transactions causing an error</b>.
+* <b>Average time</b> between transaction requests reception and transaction responses sending.
+
+Metrics are only gathered if the following custom Cygnus components are used:
+
+* `NGISRestHandler`
+* Any sink extending `NGSISink`.
+
+```
+GET http://<cygnus_host>:<management_port>/v1/admin/metrics[?reset=true|false]
+```
+
+Response:
+
+```
+200 OK
+
+{
+    "services": {
+        "service1": {
+            "subservs": {
+                "/subservice1": {
+                    <metrics for subservice1 within service1>
+                },
+                "/subservice1": {
+                    <metrics for subservice2 within service1>
+                }
+            },
+            "sum": {
+                <aggregated metrics for all subservices within service1>
+            }
+        },
+        "service2": {
+            "subservs": {
+                "/subservice1": {
+                    <metrics for subservice1 within service2>
+                },
+                "/subservice2": {
+                    <metrics for subservice2 within service2>
+                }
+            },
+            "sum": {
+                <aggregated metrics for all subservices within service2>
+            }
+        }
+    },
+    "sum": {
+        "subservs": {
+            "/subservice1": {
+                <aggregated metrics for subservice1 within all the services>
+            },
+            "/subservice2": {
+                <aggregated metrics for subservice2 within all the services>
+            }
+        },
+        "sum": {
+            <aggregated metrics for all subservices within all the services>
+        }
+    }
+}
+```
+
+If `reset=true` then metrics and returned and immediatelly after they are deleted (gathering the metrics and deleting them is an atomic operation, i.e. another interleaved GET operation will wait until the deletion is done).
+
+[Top](#top)
+
+###<a name="section7.2"></a>`DELETE /v1/admin/metrics`
+Deletes metrics, putting counters to zero.
+
+```
+DELETE http://<cygnus_host>:<management_port>/v1/admin/metrics
+```
+
+Response:
+
+```
+200 OK
+```
+
+[Top](#top)
+
+##<a name="section8"></a>Available aliases
+|Alias|Operation|
+|---|---|
+|GET /admin/metrics|GET /v1/admin/metrics|
+|DELETE /admin/metrics|DELETE /v1/admin/metrics|
 
 [Top](#top)
