@@ -311,9 +311,22 @@ public class NGSICartoDBSink extends NGSISink {
                 LOGGER.warn("[" + this.getName() + "] Invalid API key entry, key is null or empty. Discarding it.");
                 continue;
             } // if
-
-            backends.put(username, new CartoDBBackendImpl(host, port, ssl, key, backendMaxConns,
-                    backendMaxConnsPerRoute));
+            
+            String type = (String) obj.get("type");
+            
+            if (type == null || type.isEmpty()) {
+                LOGGER.warn("[" + this.getName() + "] Invalid API key entry, type is null or empty. Discarding it.");
+                continue;
+            } // if
+            
+            if (!type.equals("personal") && !type.equals("enterprise")) {
+                LOGGER.warn("[" + this.getName() + "] Invalid API key entry, type is not 'personal' or 'enterprise'. "
+                        + "Discarding it.");
+                continue;
+            } // if
+            
+            backends.put(username, new CartoDBBackendImpl(host, port, ssl, key, type.equals("personal"),
+                    backendMaxConns, backendMaxConnsPerRoute));
         } // for
         
         if (backends.isEmpty()) {
