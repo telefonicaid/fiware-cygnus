@@ -39,7 +39,7 @@ Content:
         * [DELETE all loggers](#section6.5.2)
 * [Metrics](#section7)
     * [GET `/v1/admin/metrics`](#section7.1)
-    * [DELTE `/v1/admin/metrics`](#section7.2)
+    * [DELETE `/v1/admin/metrics`](#section7.2)
 * [Available aliases](#section8)
 
 ##<a name="section1"></a>Apiary version of this document
@@ -938,11 +938,11 @@ When an invalid `transient` parameter is given:
 ###<a name="section7.1"></a>`GET /v1/admin/metrics`
 Gets metrics for a whole Cygnus agent. Specifically:
 
-* Number of <b>incoming transactions</b> (a transaction involves a request and a response).
-* Total <b>size of the requests</b>, in bytes.
-* Total <b>size of the responses</b>, in bytes.
-* Number of <b>transactions causing an error</b>.
-* <b>Average time</b> between transaction requests reception and transaction responses sending.
+* `incomingTransactions`. Number of incoming transactions (a transaction involves a request and a response).
+* `incomingTransactionRequestSize`. Total size of the requests, in bytes.
+* `incomingTransactionResponseSize`. Total size of the responses, in bytes.
+* `incomingTransactionError`. Number of transactions causing an error.
+* `serviceTime`. Average time between transaction requests reception and transaction responses sending.
 
 Metrics are only gathered if the following custom Cygnus components are used:
 

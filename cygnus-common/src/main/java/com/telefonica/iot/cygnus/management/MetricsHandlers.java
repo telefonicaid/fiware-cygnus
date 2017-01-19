@@ -48,7 +48,8 @@ public final class MetricsHandlers {
     } // MetricsHandlers
     
     /**
-     * Handles GET /v1/admin/mergeMetrics and /admin/mergeMetrics.
+     * Handles GET /v1/admin/metrics and /admin/metrics. It is synchronized in order to ensure atomic modifications
+     * on the metrics.
      * @param request
      * @param response
      * @param sources
@@ -78,10 +79,11 @@ public final class MetricsHandlers {
             response.getWriter().println(metrics.toJsonString());
             response.setContentType("application/json; charset=utf-8");
         } // else
-    } // getServiceSubserviceMetrics
+    } // get
     
     /**
-     * Handles DELETE /v1/admin/mergeMetrics and /admin/mergeMetrics.
+     * Handles DELETE /v1/admin/metrics and /admin/metrics. It is synchronized in order to ensure atomic modifications
+     * on the metrics.
      * @param response
      * @param sources
      * @param sinks
@@ -101,7 +103,7 @@ public final class MetricsHandlers {
      */
     protected static CygnusMetrics mergeMetrics(ImmutableMap<String, SourceRunner> sources,
             ImmutableMap<String, SinkRunner> sinks) {
-        CygnusMetrics mergeServices = new CygnusMetrics();
+        CygnusMetrics mergedMetrics = new CygnusMetrics();
     
         if (sources != null) {
             for (String key : sources.keySet()) {
@@ -122,8 +124,8 @@ public final class MetricsHandlers {
 
                 if (handler instanceof CygnusHandler) {
                     CygnusHandler ch = (CygnusHandler) handler;
-                    CygnusMetrics sourceServices = ch.getServiceMetrics();
-                    mergeServices.merge(sourceServices);
+                    CygnusMetrics sourceMetrics = ch.getServiceMetrics();
+                    mergedMetrics.merge(sourceMetrics);
                 } // if
             } // for
         } // if
@@ -146,14 +148,14 @@ public final class MetricsHandlers {
 
                 if (sink instanceof CygnusSink) {
                     CygnusSink cs = (CygnusSink) sink;
-                    CygnusMetrics sinkServices = cs.getServiceMetrics();
-                    mergeServices.merge(sinkServices);
+                    CygnusMetrics sinkMetrics = cs.getServiceMetrics();
+                    mergedMetrics.merge(sinkMetrics);
                 } // if
             } // for
         } // if
 
-        return mergeServices;
-    } // mergeServices
+        return mergedMetrics;
+    } // mergeMetrics
     
     /**
      * Deletes metrics from all the given sources and sinks.
