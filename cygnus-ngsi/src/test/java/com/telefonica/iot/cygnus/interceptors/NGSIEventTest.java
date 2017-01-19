@@ -121,6 +121,31 @@ public class NGSIEventTest {
     } // testGetRecvTimeTs
     
     /**
+     * [NGSIEvent.getServiceForData] -------- The original service is returned.
+     */
+    @Test
+    public void testGetServiceForData() {
+        System.out.println(getTestTraceHead("[NGSIEvent.getServiceForData]")
+                + "-------- The original service is returned");
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        byte[] body = null; // irrelevant for this test
+        ContextElement originalCE = null; // irrelevant for this test
+        ContextElement mappedCE = null; // irrelevant for this test
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
+        
+        try {
+            assertEquals(originalService, event.getServiceForData());
+            System.out.println(getTestTraceHead("[NGSIEvent.getServiceForData]")
+                    + "-  OK  - The original service has been returned");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIEvent.getServiceForData]")
+                    + "- FAIL - The original service has not been returned");
+            throw e;
+        } // try catch
+    } // testGetServiceForData
+    
+    /**
      * [NGSIEvent.getServiceForNaming] -------- When name mappings are not enabled, the original service is returned.
      */
     @Test
