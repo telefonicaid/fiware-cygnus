@@ -9,3 +9,4 @@
 - [cygnus-ngsi][hardening] Add cache to NGSIMySQLSink (#130)
 - [cygnus][hardening] Fix "FIWARE" name in license headers (#1369)
 - [cygnus-common][hardening] Clean and modularize ManagementInterface.java (#1368)
+- [cygnus-common][feature] Add KPIs API (#1339)

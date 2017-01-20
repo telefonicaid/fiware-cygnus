@@ -122,6 +122,8 @@ public class ManagementInterface extends AbstractHandler {
                         LogHandlers.getLoggers(request, response, configurationPath);
                     } else if (uri.startsWith("/v1/admin/log/appenders")) {
                         LogHandlers.getAppenders(request, response, configurationPath);
+                    } else if (uri.startsWith("/v1/admin/metrics") || uri.startsWith("/admin/metrics")) {
+                        MetricsHandlers.get(request, response, sources, sinks);
                     } else {
                         response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                         response.getWriter().println(method + " " + uri + " not implemented");
@@ -193,6 +195,8 @@ public class ManagementInterface extends AbstractHandler {
                         LogHandlers.deleteLoggers(request, response, configurationPath);
                     } else if (uri.startsWith("/v1/admin/log/appenders")) {
                         LogHandlers.deleteAppenders(request, response, configurationPath);
+                    } else if (uri.startsWith("/v1/admin/metrics") || uri.startsWith("/admin/metrics")) {
+                        MetricsHandlers.delete(response, sources, sinks);
                     } else {
                         response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                         response.getWriter().println(method + " " + uri + " not implemented");

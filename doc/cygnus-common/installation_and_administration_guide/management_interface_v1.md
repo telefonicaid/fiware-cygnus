@@ -37,6 +37,10 @@ Content:
     * [DELETE `/v1/admin/log/loggers`](#section6.5)
         * [DELETE logger by name](#section6.5.1)
         * [DELETE all loggers](#section6.5.2)
+* [Metrics](#section7)
+    * [GET `/v1/admin/metrics`](#section7.1)
+    * [DELETE `/v1/admin/metrics`](#section7.2)
+* [Available aliases](#section8)
 
 ##<a name="section1"></a>Apiary version of this document
 This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/latests) as well.
@@ -927,5 +931,107 @@ When an invalid `transient` parameter is given:
 ```
 {"success":"false","result":"Invalid 'transient' parameter"}
 ```
+
+[Top](#top)
+
+##<a name="section7"></a>Metrics
+###<a name="section7.1"></a>`GET /v1/admin/metrics`
+Gets metrics for a whole Cygnus agent. Specifically:
+
+* `incomingTransactions`. Number of incoming transactions (a transaction involves a request and a response).
+* `incomingTransactionRequestSize`. Total size of the requests, in bytes.
+* `incomingTransactionResponseSize`. Total size of the responses, in bytes.
+* `incomingTransactionError`. Number of transactions causing an error.
+* `serviceTime`. Average time between transaction requests reception and transaction responses sending.
+
+Metrics are only gathered if the following custom Cygnus components are used:
+
+* `NGISRestHandler`
+* Any sink extending `NGSISink`.
+
+```
+GET http://<cygnus_host>:<management_port>/v1/admin/metrics[?reset=true|false]
+```
+
+Response:
+
+```
+200 OK
+
+{
+    "services": {
+        "service1": {
+            "subservs": {
+                "/subservice1": {
+                    <metrics for subservice1 within service1>
+                },
+                "/subservice1": {
+                    <metrics for subservice2 within service1>
+                }
+            },
+            "sum": {
+                <aggregated metrics for all subservices within service1>
+            }
+        },
+        "service2": {
+            "subservs": {
+                "/subservice1": {
+                    <metrics for subservice1 within service2>
+                },
+                "/subservice2": {
+                    <metrics for subservice2 within service2>
+                }
+            },
+            "sum": {
+                <aggregated metrics for all subservices within service2>
+            }
+        }
+    },
+    "sum": {
+        "subservs": {
+            "/subservice1": {
+                <aggregated metrics for subservice1 within all the services>
+            },
+            "/subservice2": {
+                <aggregated metrics for subservice2 within all the services>
+            }
+        },
+        "sum": {
+            <aggregated metrics for all subservices within all the services>
+        }
+    }
+}
+```
+
+If `reset=true` then metrics and returned and immediatelly after they are deleted (gathering the metrics and deleting them is an atomic operation, i.e. another interleaved GET operation will wait until the deletion is done).
+
+Additionally, because Cygnus distributes event processing among sources (responsible for event reception) and sinks (responsible for event persistence; an event may be processed by 2 or more sinks in parallel), some considerations when retrieving metrics must be had into account:
+
+* The number of incoming transactions may be eventually inconsistent with regards to the service time, because certain events may be in a reception state, but not in a processed state.
+* The service time is computed as the total sum of processing times (understanding processing time in this context as the time between even reception in the source and processing in one of the invidual sinks) divided by the number of times the same incoming event is persisted (in other words, it is not divided by the number of incoming transactions). Thus, it could occur N events are persisted M times (M > N), and that impacts in the average service time.
+* The same occurs with the number of transaction errors. Thus, it could be this number is greater than the number of incoming transactions because the events are being processed by 2 or more sinks, and all of them are failing.
+
+[Top](#top)
+
+###<a name="section7.2"></a>`DELETE /v1/admin/metrics`
+Deletes metrics, putting counters to zero.
+
+```
+DELETE http://<cygnus_host>:<management_port>/v1/admin/metrics
+```
+
+Response:
+
+```
+200 OK
+```
+
+[Top](#top)
+
+##<a name="section8"></a>Available aliases
+|Alias|Operation|
+|---|---|
+|GET /admin/metrics|GET /v1/admin/metrics|
+|DELETE /admin/metrics|DELETE /v1/admin/metrics|
 
 [Top](#top)

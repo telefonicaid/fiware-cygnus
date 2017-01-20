@@ -17,6 +17,7 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
+import com.telefonica.iot.cygnus.metrics.CygnusMetrics;
 import java.util.Date;
 import org.apache.flume.sink.AbstractSink;
 
@@ -30,6 +31,7 @@ public abstract class CygnusSink extends AbstractSink {
     protected final long setupTime = new Date().getTime();
     protected long numProcessedEvents = 0;
     protected long numPersistedEvents = 0;
+    protected CygnusMetrics serviceMetrics = new CygnusMetrics();
     
     /**
      * Gets the setup time.
@@ -70,5 +72,21 @@ public abstract class CygnusSink extends AbstractSink {
     public void setNumPersistedEvents(long n) {
         numPersistedEvents = n;
     } // setNumPersistedEvents
+    
+    /**
+     * Gets serviceMetrics.
+     * @return serviceMetrics
+     */
+    public CygnusMetrics getServiceMetrics() {
+        return serviceMetrics;
+    } // getServiceSubserviceMetrics
+    
+    /**
+     * Sets serviceMetrics.
+     * @param serviceMetrics
+     */
+    public void setServiceMetrics(CygnusMetrics serviceMetrics) {
+        this.serviceMetrics = serviceMetrics;
+    } // setServiceMetrics
     
 } // CygnusSink
