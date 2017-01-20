@@ -1005,6 +1005,12 @@ Response:
 
 If `reset=true` then metrics and returned and immediatelly after they are deleted (gathering the metrics and deleting them is an atomic operation, i.e. another interleaved GET operation will wait until the deletion is done).
 
+Additionally, because Cygnus distributes event processing among sources (responsible for event reception) and sinks (responsible for event persistence; an event may be processed by 2 or more sinks in parallel), some considerations when retrieving metrics must be had into account:
+
+* The number of incoming transactions may be inconsistent with regards to the service time, because certain events may be in a reception state, but not in a processed state.
+* The service time is computed as the total sum of processing times divided by the number of times the same incoming event is persisted (in other words, it is not divided by the number of incoming transactions). Thus, it could occur N events are persisted M times (M > N), and that impacts in the average service time.
+* The same occurs with the number of transaction errors. Thus, it could be this number is greater than the number of incoming transactions because the events are being processed by 2 or more sinks, and all of them are failing.
+
 [Top](#top)
 
 ###<a name="section7.2"></a>`DELETE /v1/admin/metrics`
