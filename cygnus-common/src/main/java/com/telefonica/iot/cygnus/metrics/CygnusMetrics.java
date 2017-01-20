@@ -271,6 +271,7 @@ public class CygnusMetrics {
         private long incomingTransactionRequestSize;
         private long incomingTransactionResponseSize;
         private long incomingTransactionErrors;
+        private long outgoingTransactions; // Hidden metric just for service time compautations
         private double serviceTime;
 
         /**
@@ -281,6 +282,7 @@ public class CygnusMetrics {
             incomingTransactionRequestSize = 0;
             incomingTransactionResponseSize = 0;
             incomingTransactionErrors = 0;
+            outgoingTransactions = 0;
             serviceTime = 0;
         } // Metrics
 
@@ -341,6 +343,7 @@ public class CygnusMetrics {
          * @param serviceTime
          */
         public void addServiceTime(double serviceTime) {
+            this.outgoingTransactions++;
             this.serviceTime += serviceTime;
         } // addIncomingTransactionErrors
 
@@ -353,6 +356,7 @@ public class CygnusMetrics {
             incomingTransactionRequestSize += metrics.incomingTransactionRequestSize;
             incomingTransactionResponseSize += metrics.incomingTransactionResponseSize;
             incomingTransactionErrors += metrics.incomingTransactionErrors;
+            outgoingTransactions += metrics.outgoingTransactions;
             serviceTime += metrics.serviceTime;
         } // merge
         
@@ -361,7 +365,7 @@ public class CygnusMetrics {
          * @return The Json string for this metrics
          */
         public String toJsonString() {
-            double avg = (incomingTransactions == 0 ? 0 : serviceTime / incomingTransactions);
+            double avg = (incomingTransactions == 0 ? 0 : serviceTime / outgoingTransactions);
             
             return "{\"incomingTransactions\":" + incomingTransactions + ","
                     + "\"incomingTransactionRequestSize\":" + incomingTransactionRequestSize + ","
