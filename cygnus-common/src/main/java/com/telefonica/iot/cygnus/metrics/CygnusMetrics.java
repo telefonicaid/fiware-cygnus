@@ -271,7 +271,7 @@ public class CygnusMetrics {
         private long incomingTransactionRequestSize;
         private long incomingTransactionResponseSize;
         private long incomingTransactionErrors;
-        private long outgoingTransactions; // Hidden metric just for service time compautations
+        private long outgoingTransactions; // Hidden metric just for service time computations
         private double serviceTime;
 
         /**
@@ -365,7 +365,7 @@ public class CygnusMetrics {
          * @return The Json string for this metrics
          */
         public String toJsonString() {
-            double avg = (incomingTransactions == 0 ? 0 : serviceTime / outgoingTransactions);
+            double avg = (outgoingTransactions == 0 ? 0 : serviceTime / outgoingTransactions);
             
             return "{\"incomingTransactions\":" + incomingTransactions + ","
                     + "\"incomingTransactionRequestSize\":" + incomingTransactionRequestSize + ","
