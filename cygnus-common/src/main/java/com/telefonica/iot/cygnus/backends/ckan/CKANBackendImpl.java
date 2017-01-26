@@ -382,12 +382,6 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             jsonString += ",\"filters\":\"" + filters + "\"}";
         } // if else
 
-        if (filters == null || filters.isEmpty()) {
-            jsonString += "}";
-        } else {
-            jsonString += ",\"filters\":\"" + filters + "\"}";
-        } // if else
-
         // create the CKAN request URL
         String urlPath = "/api/3/action/datastore_search";
 
