@@ -31,6 +31,7 @@ import java.util.Set;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -61,6 +62,8 @@ public abstract class HttpBackend {
     private final String krb5Password;
     private final HttpClientFactory httpClientFactory;
     private HttpClient httpClient;
+    private long transactionRequestBytes;
+    private long transactionResponseBytes;
     private static final CygnusLogger LOGGER = new CygnusLogger(HttpBackend.class);
     
     /**
@@ -112,6 +115,10 @@ public abstract class HttpBackend {
      */
     public JsonResponse doRequest(String method, String url, boolean relative, ArrayList<Header> headers,
             StringEntity entity) throws CygnusRuntimeError, CygnusPersistenceError {
+        if (entity != null) {
+            transactionRequestBytes += entity.getContentLength();
+        } // if
+        
         JsonResponse response;
         
         if (relative) {
@@ -316,6 +323,8 @@ public abstract class HttpBackend {
             } catch (IOException e) {
                 throw new CygnusRuntimeError("IOException, " + e.getMessage());
             } // try catch
+            
+            transactionResponseBytes += res.length();
 
             try {
                 reader.close();
@@ -353,5 +362,21 @@ public abstract class HttpBackend {
         return new JsonResponse(jsonPayload, httpRes.getStatusLine().getStatusCode(),
                 httpRes.getStatusLine().getReasonPhrase(), locationHeader);
     } // createJsonResponse
+    
+    /**
+     * Starts a transaction. Basically, this means the byte counters are reseted.
+     */
+    public void startTransaction() {
+        transactionRequestBytes = 0;
+        transactionResponseBytes = 0;
+    } // startTransaction
+
+    /**
+     * Finishes a transaction. Basically, this means the the bytes counters are retrieved.
+     * @return
+     */
+    public ImmutablePair<Long, Long> finishTransaction() {
+        return new ImmutablePair(transactionRequestBytes, transactionResponseBytes);
+    } // finishTransaction
 
 } // HttpBackend

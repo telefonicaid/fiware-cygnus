@@ -19,6 +19,7 @@ package com.telefonica.iot.cygnus.backends.http;
 
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import java.io.UnsupportedEncodingException;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseFactory;
 import org.apache.http.HttpStatus;
@@ -187,7 +188,7 @@ public class HttpBackendTest {
             throw new AssertionError(e.getMessage());
         } // try catch
         
-        response.addHeader("Content-Type", "text/html");
+        response.addHeader("Content-Type", "application/json");
         HttpBackend httpBackend = new HttpBackendImpl(host, port, false, false, null, null, null, null, maxConns,
                 maxConnsPerRoute);
 
@@ -209,5 +210,104 @@ public class HttpBackendTest {
             throw new AssertionError(e.getMessage());
         } // try catch
     } // testCreateJsonResponseNotJsonPayload
+    
+    /**
+     * [HttpBackend.startTransaction] -------- Once a transaction is started, the byte counts are equals to 0.
+     */
+    @Test
+    public void testStartTransaction() {
+        System.out.println(getTestTraceHead("[HttpBackend.startTransaction]")
+                + "-------- Once a transaction is started, the byte counts are equals to 0");
+        HttpBackend httpBackend = new HttpBackendImpl(host, port, false, false, null, null, null, null, maxConns,
+                maxConnsPerRoute);
+        httpBackend.startTransaction();
+        ImmutablePair<Long, Long> transactionBytes = httpBackend.finishTransaction();
+
+        try {
+            assertEquals(0, transactionBytes.left.longValue());
+            System.out.println(getTestTraceHead("[HttpBackend.startTransaction]")
+                    + "-  OK  - Request bytes is equals to 0");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[HttpBackend.startTransaction]")
+                    + "- FAIL - Request bytes is not equals to 0");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(0, transactionBytes.right.longValue());
+            System.out.println(getTestTraceHead("[HttpBackend.startTransaction]")
+                    + "-  OK  - Response bytes is equals to 0");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[HttpBackend.startTransaction]")
+                    + "- FAIL - Response bytes is not equals to 0");
+            throw e;
+        } // try catch
+    } // testStartTransaction
+    
+    /**
+     * [HttpBackend.finishTransaction] -------- Once a transaction is finished, the byte counts are correct.
+     */
+    @Test
+    public void testFinishTransaction() {
+        System.out.println(getTestTraceHead("[HttpBackend.finishTransaction]")
+                + "-------- Once a transaction is finished, the byte counts are correct");
+                
+        // Create a response
+        HttpResponseFactory factory = new DefaultHttpResponseFactory();
+        HttpResponse response = factory.newHttpResponse(
+                new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, null), null);
+        String responseStr =
+                "{\"somefield1\":\"somevalue1\",\"somefield2\":\"somevalue2\",\"somefield3\":\"somevalue3\"}";
+        
+        try {
+            response.setEntity(new StringEntity(responseStr));
+        } catch (UnsupportedEncodingException e) {
+            System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                    + "- FAIL - There was some problem when creating the HttpResponse object");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        response.addHeader("Content-Type", "application/json");
+        
+        // Create the http backend
+        HttpBackend httpBackend = new HttpBackendImpl(host, port, false, false, null, null, null, null, maxConns,
+                maxConnsPerRoute);
+        
+        // Start transaction
+        httpBackend.startTransaction();
+        
+        // Process the response
+        try {
+            httpBackend.createJsonResponse(response);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[HttpBackend.createJsonResponse]")
+                    + "- FAIL - There was some problem when creating the JsonResponse object");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        // Finish transaction
+        ImmutablePair<Long, Long> transactionBytes = httpBackend.finishTransaction();
+
+        // Check the byte counts
+        try {
+            assertEquals(0, transactionBytes.left.longValue());
+            System.out.println(getTestTraceHead("[HttpBackend.finishTransaction]")
+                    + "-  OK  - Request bytes is equals to 0");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[HttpBackend.finishTransaction]")
+                    + "- FAIL - Request bytes is not equals to 0");
+            throw e;
+        } // try catch
+        
+        try {
+            assertEquals(79, transactionBytes.right.longValue());
+            System.out.println(getTestTraceHead("[HttpBackend.finishTransaction]")
+                    + "-  OK  - Response bytes is equals to 79");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[HttpBackend.finishTransaction]")
+                    + "- FAIL - Response bytes is not equals to 79");
+            throw e;
+        } // try catch
+    } // testFinishTransaction
 
 } // HttpBackendTest
