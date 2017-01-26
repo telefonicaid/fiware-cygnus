@@ -938,11 +938,15 @@ When an invalid `transient` parameter is given:
 ###<a name="section7.1"></a>`GET /v1/admin/metrics`
 Gets metrics for a whole Cygnus agent. Specifically:
 
-* `incomingTransactions`. Number of incoming transactions (a transaction involves a request and a response).
-* `incomingTransactionRequestSize`. Total size of the requests, in bytes.
-* `incomingTransactionResponseSize`. Total size of the responses, in bytes.
-* `incomingTransactionError`. Number of transactions causing an error.
+* `incomingTransactions`. Number of incoming transactions (a transaction involves a request and a response). In other words, number of NGSI notifications received.
+* `incomingTransactionRequestSize`. Total size of the requests related to incoming transactions, in bytes.
+* `incomingTransactionResponseSize`. Total size of the responses related to incoming transactions, in bytes.
+* `incomingTransactionError`. Number of incoming transactions causing an error.
 * `serviceTime`. Average time between transaction requests reception and transaction responses sending.
+* `outgoingTransactions`. Number of outgoing transactions (a transaction involves a request and a response). In other words, number of persistence operations.
+* `outgoingTransactionRequestSize`. Total size of the requests related to outgoing transactions, in bytes.
+* `outgoingTransactionResponseSize`. Total size of the responses related to outgoing transactions, in bytes.
+* `outgoingTransactionError`. Number of outgoing transactions causing an error.
 
 Metrics are only gathered if the following custom Cygnus components are used:
 
@@ -1010,6 +1014,8 @@ Additionally, because Cygnus distributes event processing among sources (respons
 * The number of incoming transactions may be eventually inconsistent with regards to the service time, because certain events may be in a reception state, but not in a processed state.
 * The service time is computed as the total sum of processing times (understanding processing time in this context as the time between even reception in the source and processing in one of the invidual sinks) divided by the number of times the same incoming event is persisted (in other words, it is not divided by the number of incoming transactions). Thus, it could occur N events are persisted M times (M > N), and that impacts in the average service time.
 * The same occurs with the number of transaction errors. Thus, it could be this number is greater than the number of incoming transactions because the events are being processed by 2 or more sinks, and all of them are failing.
+
+Finally, because Cygnus implements a retry mechanism for those persistence operations that failed, it must be noticed the number of outgoing transactions (and its related metrics) may be much higher than the number of icoming transactions (even when a single a sink is used).
 
 [Top](#top)
 
