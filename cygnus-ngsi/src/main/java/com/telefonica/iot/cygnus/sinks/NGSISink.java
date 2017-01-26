@@ -386,9 +386,11 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         try {
             persistBatch(batch);
         } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
+            updateServiceMetrics(batch, true);
             LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
             return Status.READY;
         } catch (CygnusPersistenceError e) {
+            updateServiceMetrics(batch, true);
             LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
             doRollbackAgain(rollbackedAccumulation);
             return Status.BACKOFF; // Slow down the sink since there are problems with the persistence backend
@@ -401,6 +403,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
             } // try catch
         } // if
+        
+        updateServiceMetrics(batch, false);
 
         if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
             LOGGER.info("Finishing internal transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
@@ -443,7 +447,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
      * Rollbacks the accumulation once more.
      * @param rollbackedAccumulation
      */
-    protected void doRollbackAgain(Accumulator rollbackedAccumulation) {
+    protected void doRollbackAgain(Accumulator rollbackedAccumulation) {        
         if (rollbackedAccumulation.getTTL() == -1) {
             rollbackedAccumulation.setLastRetry(new Date().getTime());
             LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + "), "
@@ -588,7 +592,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             String service = event.getServiceForData();
             String servicePath = event.getServicePathForData();
             long time = (new Date().getTime() - event.getRecvTimeTs()) * events.size();
-            serviceMetrics.add(service, servicePath, 0, 0, 0, error ? events.size() : 0, time);
+            serviceMetrics.add(service, servicePath, 0, 0, 0, 0, time, events.size(), 0, 0, error ? events.size() : 0);
         } // while
     } // updateServiceMetrics
 
