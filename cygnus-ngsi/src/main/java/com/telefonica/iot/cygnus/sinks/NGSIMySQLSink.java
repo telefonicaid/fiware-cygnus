@@ -22,6 +22,7 @@ import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
 import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
@@ -168,7 +169,8 @@ public class NGSIMySQLSink extends NGSISink {
     } // start
     
     @Override
-    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError {
+    void persistBatch(NGSIBatch batch)
+        throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -501,7 +503,8 @@ public class NGSIMySQLSink extends NGSISink {
         } // if else
     } // getAggregator
     
-    private void persistAggregation(MySQLAggregator aggregator) throws CygnusPersistenceError {
+    private void persistAggregation(MySQLAggregator aggregator)
+        throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         String fieldsForCreate = aggregator.getFieldsForCreate();
         String fieldsForInsert = aggregator.getFieldsForInsert();
         String valuesForInsert = aggregator.getValuesForInsert();
@@ -514,16 +517,12 @@ public class NGSIMySQLSink extends NGSISink {
         
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
-        try {
-            if (aggregator instanceof RowAggregator) {
-                persistenceBackend.createDatabase(dbName);
-                persistenceBackend.createTable(dbName, tableName, fieldsForCreate);
-            } // if
+        if (aggregator instanceof RowAggregator) {
+            persistenceBackend.createDatabase(dbName);
+            persistenceBackend.createTable(dbName, tableName, fieldsForCreate);
+        } // if
 
-            persistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
-        } catch (Exception e) {
-            throw new CygnusPersistenceError("-, " + e.getMessage());
-        } // try catch
+        persistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
     } // persistAggregation
     
     /**
