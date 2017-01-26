@@ -242,7 +242,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
 
         // If the configuration is invalid, nothing has to be done but to return null
         if (invalidConfiguration) {
-            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 0, 0);
+            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 0, 0, 0, 0, 0, 0);
             LOGGER.debug("[NGSIRestHandler] Invalid configuration, thus returning an empty list of Flume events");
             return new ArrayList<>();
         } // if
@@ -251,7 +251,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         String method = request.getMethod().toUpperCase(Locale.ENGLISH);
         
         if (!method.equals("POST")) {
-            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0);
+            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
             LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (" + method + " method not supported)");
             throw new MethodNotSupportedException(method + " method not supported");
         } // if
@@ -260,14 +260,14 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         String target = request.getRequestURI();
         
         if (!target.equals(notificationTarget)) {
-            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0);
+            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
             LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (" + target + " target not supported)");
             throw new HTTPBadRequestException(target + " target not supported");
         } // if
 
         // Check if received content type is null
         if (contentType == null) {
-            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0);
+            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
             LOGGER.warn("[NGSIRestHandler] Missing content type. Required 'application/json; charset=utf-8'");
             throw new HTTPBadRequestException("Missing content type. Required 'application/json; charset=utf-8'");
         } // if
@@ -296,7 +296,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         } // try
                 
         if (data.length() == 0) {
-            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0);
+            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
             LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (No content in the request)");
             throw new HTTPBadRequestException("No content in the request");
         } // if
@@ -311,7 +311,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             ncr = gson.fromJson(data, NotifyContextRequest.class);
             LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest: " + ncr.toString());
         } catch (Exception e) {
-            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0);
+            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
             LOGGER.error("[NGSIRestHandler] Runtime error (" + e.getMessage() + ")");
             return null;
         } // try catch
@@ -320,7 +320,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         String[] servicePaths = servicePath.split(",");
         
         if (servicePaths.length != ncr.getContextResponses().size()) {
-            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0);
+            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
             LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('"
                     + CommonConstants.HEADER_FIWARE_SERVICE_PATH
                     + "' header value does not match the number of notified context responses");
@@ -363,7 +363,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         } // for
 
         // Return the NGSIEvent list
-        serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 0, 0);
+        serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 0, 0, 0, 0, 0, 0);
         LOGGER.debug("[NGSIRestHandler] NGSI events put in the channel, ids=" + ids);
         numProcessedEvents++;
         return ngsiEvents;
