@@ -40,15 +40,15 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
      * @param port
      * @param ssl
      * @param apiKey
-     * @param isPersonal
+     * @param isPersonalAccount
      * @param maxConns
      * @param maxConnsPerRoute
      */
-    public CartoDBBackendImpl(String host, String port, boolean ssl, String apiKey, boolean isPersonal, int maxConns,
-            int maxConnsPerRoute) {
+    public CartoDBBackendImpl(String host, String port, boolean ssl, String apiKey, boolean isPersonalAccount,
+            int maxConns, int maxConnsPerRoute) {
         super(host, port, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
         this.apiKey = apiKey;
-        this.isPersonalAccount = isPersonal;
+        this.isPersonalAccount = isPersonalAccount;
     } // CartoDBBackendImpl
     
     @Override
