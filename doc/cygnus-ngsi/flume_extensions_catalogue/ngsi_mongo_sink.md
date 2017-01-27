@@ -20,6 +20,7 @@ Content:
         * [About batching](#section2.3.1)
         * [About `recvTime` and `TimeInstant` metadata](#section2.3.2)
         * [About the encoding](#section2.3.3)
+        * [About supported versions of MongoDB](#section2.3.4)
 * [Programmers guide](#section3)
     * [`NGSIMongoSink` class](#section3.1)
     * [`NGSIMongoBackend` class](#section3.2)
@@ -381,6 +382,14 @@ From version 1.3.0 (included), Cygnus applies this specific encoding tailored to
 * `xffff` is used as concatenator character.
 
 Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
+
+[Top](#top)
+
+####<a name="section2.3.4"></a>About supported versions of MongoDB
+This sink has been tested with the following versions of Mongo:
+
+* 3.2.6
+* 3.4
 
 [Top](#top)
 
