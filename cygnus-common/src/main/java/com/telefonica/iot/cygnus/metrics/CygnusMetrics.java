@@ -251,10 +251,10 @@ public class CygnusMetrics {
                 Metrics metrics = subserviceMetrics.get(subservice);
                 
                 if (firstSubservice) {
-                    json += "\"" + subservice + "\":" + metrics.toJsonString();
+                    json += "\"" + subservice.substring(1) + "\":" + metrics.toJsonString();
                     firstSubservice = false;
                 } else {
-                    json += ",\"" + subservice + "\":" + metrics.toJsonString();
+                    json += ",\"" + subservice.substring(1) + "\":" + metrics.toJsonString();
                 } // if else
             } // for
             
@@ -268,10 +268,10 @@ public class CygnusMetrics {
             Metrics metrics = perSubserviceAggrMetrics.get(subservice);
             
             if (firstSubservice) {
-                json += "\"" + subservice + "\":" + metrics.toJsonString();
+                json += "\"" + subservice.substring(1) + "\":" + metrics.toJsonString();
                 firstSubservice = false;
             } else {
-                json += ",\"" + subservice + "\":" + metrics.toJsonString();
+                json += ",\"" + subservice.substring(1) + "\":" + metrics.toJsonString();
             } // if else
         } // for
 
@@ -283,7 +283,7 @@ public class CygnusMetrics {
         
         return json;
     } // toJsonString
-    
+
     /**
      * Metrics class.
      */

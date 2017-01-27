@@ -966,10 +966,10 @@ Response:
     "services": {
         "service1": {
             "subservs": {
-                "/subservice1": {
+                "subservice1": {
                     <metrics for subservice1 within service1>
                 },
-                "/subservice1": {
+                "subservice1": {
                     <metrics for subservice2 within service1>
                 }
             },
@@ -979,10 +979,10 @@ Response:
         },
         "service2": {
             "subservs": {
-                "/subservice1": {
+                "subservice1": {
                     <metrics for subservice1 within service2>
                 },
-                "/subservice2": {
+                "subservice2": {
                     <metrics for subservice2 within service2>
                 }
             },
@@ -993,10 +993,10 @@ Response:
     },
     "sum": {
         "subservs": {
-            "/subservice1": {
+            "subservice1": {
                 <aggregated metrics for subservice1 within all the services>
             },
-            "/subservice2": {
+            "subservice2": {
                 <aggregated metrics for subservice2 within all the services>
             }
         },
