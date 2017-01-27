@@ -49,9 +49,15 @@ public class CygnusMetrics {
      * @param incomingTransactionResponseSize
      * @param incomingTransactionErrors
      * @param serviceTime
+     * @param outgoingTransactions
+     * @param outgoingTransactionRequestSize
+     * @param outgoingTransactionResponseSize
+     * @param outgoingTransactionErrors
      */
     public void add(String service, String subservice, long incomingTransaction, long incomingTransactionRequestSize,
-            long incomingTransactionResponseSize, long incomingTransactionErrors, long serviceTime) {
+            long incomingTransactionResponseSize, long incomingTransactionErrors, double serviceTime,
+            long outgoingTransactions, long outgoingTransactionRequestSize, long outgoingTransactionResponseSize,
+            long outgoingTransactionErrors) {
         // Add to per-service metrics
         HashMap<String, Metrics> subserviceMetrics = perServiceSubserviceMetrics.get(service);
         
@@ -72,6 +78,10 @@ public class CygnusMetrics {
         metrics.addIncomingTransactionResponseSize(incomingTransactionResponseSize);
         metrics.addIncomingTransactionErrors(incomingTransactionErrors);
         metrics.addServiceTime(serviceTime);
+        metrics.addOutgoingTransactions(outgoingTransactions);
+        metrics.addOutgoingTransactionRequestSize(outgoingTransactionRequestSize);
+        metrics.addOutgoingTransactionResponseSize(outgoingTransactionResponseSize);
+        metrics.addOutgoingTransactionErrors(outgoingTransactionErrors);
         
         // Add to per-service aggregated metrics
         Metrics allsubserviceMetrics = perServiceAggrMetrics.get(service);
@@ -86,6 +96,10 @@ public class CygnusMetrics {
         allsubserviceMetrics.addIncomingTransactionResponseSize(incomingTransactionResponseSize);
         allsubserviceMetrics.addIncomingTransactionErrors(incomingTransactionErrors);
         allsubserviceMetrics.addServiceTime(serviceTime);
+        allsubserviceMetrics.addOutgoingTransactions(outgoingTransactions);
+        allsubserviceMetrics.addOutgoingTransactionRequestSize(outgoingTransactionRequestSize);
+        allsubserviceMetrics.addOutgoingTransactionResponseSize(outgoingTransactionResponseSize);
+        allsubserviceMetrics.addOutgoingTransactionErrors(outgoingTransactionErrors);
         
         // Add to per-subservice metrics
         Metrics subsvcMetrics = perSubserviceAggrMetrics.get(subservice);
@@ -100,6 +114,10 @@ public class CygnusMetrics {
         subsvcMetrics.addIncomingTransactionResponseSize(incomingTransactionResponseSize);
         subsvcMetrics.addIncomingTransactionErrors(incomingTransactionErrors);
         subsvcMetrics.addServiceTime(serviceTime);
+        subsvcMetrics.addOutgoingTransactions(outgoingTransactions);
+        subsvcMetrics.addOutgoingTransactionRequestSize(outgoingTransactionRequestSize);
+        subsvcMetrics.addOutgoingTransactionResponseSize(outgoingTransactionResponseSize);
+        subsvcMetrics.addOutgoingTransactionErrors(outgoingTransactionErrors);
         
         // Add to per-subservice aggregated metrics
         allAggrMetrics.addIncomingTransactions(incomingTransaction);
@@ -107,6 +125,10 @@ public class CygnusMetrics {
         allAggrMetrics.addIncomingTransactionResponseSize(incomingTransactionResponseSize);
         allAggrMetrics.addIncomingTransactionErrors(incomingTransactionErrors);
         allAggrMetrics.addServiceTime(serviceTime);
+        allAggrMetrics.addOutgoingTransactions(outgoingTransactions);
+        allAggrMetrics.addOutgoingTransactionRequestSize(outgoingTransactionRequestSize);
+        allAggrMetrics.addOutgoingTransactionResponseSize(outgoingTransactionResponseSize);
+        allAggrMetrics.addOutgoingTransactionErrors(outgoingTransactionErrors);
     } // add
     
     /**
@@ -271,8 +293,12 @@ public class CygnusMetrics {
         private long incomingTransactionRequestSize;
         private long incomingTransactionResponseSize;
         private long incomingTransactionErrors;
-        private long outgoingTransactions; // Hidden metric just for service time computations
         private double serviceTime;
+        private long outgoingTransactions;
+        private long outgoingTransactionRequestSize;
+        private long outgoingTransactionResponseSize;
+        private long outgoingTransactionErrors;
+        
 
         /**
          * Constructor.
@@ -282,8 +308,11 @@ public class CygnusMetrics {
             incomingTransactionRequestSize = 0;
             incomingTransactionResponseSize = 0;
             incomingTransactionErrors = 0;
-            outgoingTransactions = 0;
             serviceTime = 0;
+            outgoingTransactions = 0;
+            outgoingTransactionRequestSize = 0;
+            outgoingTransactionResponseSize = 0;
+            outgoingTransactionErrors = 0;
         } // Metrics
 
         public long getIncomingTransactions() {
@@ -305,6 +334,22 @@ public class CygnusMetrics {
         public double getServiceTime() {
             return serviceTime;
         } // getServiceTime
+        
+        public long getOutgoingTransactions() {
+            return outgoingTransactions;
+        } // getOutgoingTransactions
+
+        public long getOutgoingTransactionRequestSize() {
+            return outgoingTransactionRequestSize;
+        } // getOutgoingTransactionRequestSize
+
+        public long getOutgoingTransactionResponseSize() {
+            return outgoingTransactionResponseSize;
+        } // getOutgoingTransactionResponseSize
+
+        public long getOutgoingTransactionErrors() {
+            return outgoingTransactionErrors;
+        } // getOutgoingTransactionErrors
 
         /**
          * Adds as many incoming transactions as given.
@@ -343,9 +388,40 @@ public class CygnusMetrics {
          * @param serviceTime
          */
         public void addServiceTime(double serviceTime) {
-            this.outgoingTransactions++;
             this.serviceTime += serviceTime;
         } // addIncomingTransactionErrors
+        
+        /**
+         * Adds as many outgoing transactions as given.
+         * @param outgoingTransactions
+         */
+        public void addOutgoingTransactions(long outgoingTransactions) {
+            this.outgoingTransactions += outgoingTransactions;
+        } // addOutgoingTransactions
+
+        /**
+         * Adds as many bytes for outgoing transaction requests as given.
+         * @param outgoingTransactionRequestSize
+         */
+        public void addOutgoingTransactionRequestSize(long outgoingTransactionRequestSize) {
+            this.outgoingTransactionRequestSize += outgoingTransactionRequestSize;
+        } // addOutgoingTransactionRequestSize
+
+        /**
+         * Adds as many bytes for outgoing transaction responses as given.
+         * @param outgoingTransactionResponseSize
+         */
+        public void addOutgoingTransactionResponseSize(long outgoingTransactionResponseSize) {
+            this.outgoingTransactionResponseSize += outgoingTransactionResponseSize;
+        } // addOutgoingTransactionResponseSize
+
+        /**
+         * Adds as many outgoing transaction errors as given.
+         * @param outgoingTransactionErrors
+         */
+        public void addOutgoingTransactionErrors(long outgoingTransactionErrors) {
+            this.outgoingTransactionErrors += outgoingTransactionErrors;
+        } // addOutgoingTransactionErrors
 
         /**
          * Merges given metrics with these ones.
@@ -356,8 +432,11 @@ public class CygnusMetrics {
             incomingTransactionRequestSize += metrics.incomingTransactionRequestSize;
             incomingTransactionResponseSize += metrics.incomingTransactionResponseSize;
             incomingTransactionErrors += metrics.incomingTransactionErrors;
-            outgoingTransactions += metrics.outgoingTransactions;
             serviceTime += metrics.serviceTime;
+            outgoingTransactions += metrics.outgoingTransactions;
+            outgoingTransactionRequestSize += metrics.outgoingTransactionRequestSize;
+            outgoingTransactionResponseSize += metrics.outgoingTransactionResponseSize;
+            outgoingTransactionErrors += metrics.outgoingTransactionErrors;
         } // merge
         
         /**
@@ -371,7 +450,11 @@ public class CygnusMetrics {
                     + "\"incomingTransactionRequestSize\":" + incomingTransactionRequestSize + ","
                     + "\"incomingTransactionResponseSize\":" + incomingTransactionResponseSize + ","
                     + "\"incomingTransactionErrors\":" + incomingTransactionErrors + ","
-                    + "\"serviceTime\":" + avg + "}";
+                    + "\"serviceTime\":" + avg + ","
+                    + "\"outgoingTransactions\":" + outgoingTransactions + ","
+                    + "\"outgoingTransactionRequestSize\":" + outgoingTransactionRequestSize + ","
+                    + "\"outgoingTransactionResponseSize\":" + outgoingTransactionResponseSize + ","
+                    + "\"outgoingTransactionErrors\":" + outgoingTransactionErrors + "}";
         } // toJsonString
         
     } // Metrics

@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -475,17 +476,22 @@ public class NGSIHDFSSink extends NGSISink {
 
             // Get the events within the current sub-batch
             ArrayList<NGSIEvent> events = batch.getNextEvents();
+            
+            // Get the first event, it will give us useful information
+            NGSIEvent firstEvent = events.get(0);
+            String service = firstEvent.getServiceForData();
+            String servicePath = firstEvent.getServicePathForData();
 
-            // Get an aggregator for this destination and initialize it
+            // Get an aggregator for this entity and initialize it based on the first event
             HDFSAggregator aggregator = getAggregator(fileFormat);
-            aggregator.initialize(events.get(0));
+            aggregator.initialize(firstEvent);
 
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
 
             // Persist the aggregation
-            persistAggregation(aggregator);
+            persistAggregation(aggregator, service, servicePath);
             batch.setNextPersisted(true);
 
             // Persist the metadata aggregations only in CSV-like file formats
@@ -834,7 +840,7 @@ public class NGSIHDFSSink extends NGSISink {
             try {
                 attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
             } catch (ParseException e) {
-                throw new CygnusBadContextData ("ParseException, " + e.getMessage());
+                throw new CygnusBadContextData("ParseException, " + e.getMessage());
             } // try catch
 
             // iterate on the metadata
@@ -1005,15 +1011,26 @@ public class NGSIHDFSSink extends NGSISink {
         } // switch
     } // getAggregator
 
-    private void persistAggregation(HDFSAggregator aggregator) throws CygnusPersistenceError {
+    private void persistAggregation(HDFSAggregator aggregator, String service, String servicePath)
+        throws CygnusPersistenceError {
         String aggregation = aggregator.getAggregation();
         String hdfsFolder = aggregator.getFolder(enableLowercase);
         String hdfsFile = aggregator.getFile(enableLowercase);
+        
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIHDFSSink. HDFS file ("
                 + hdfsFile + "), Data (" + aggregation + ")");
+        
+        // Some variables related to persistence backends looping
         boolean persisted = false;
+        long transactionRequestBytes = 0;
+        long transactionResponseBytes = 0;
 
+        // Iterate on all the available persistence backends
         for (HDFSBackend persistenceBackend: persistenceBackends) {
+            if (persistenceBackend instanceof HDFSBackendImplREST) {
+                ((HDFSBackendImplREST) persistenceBackend).startTransaction();
+            } // if
+            
             try {
                 if (persistenceBackend.exists(hdfsFile)) {
                     persistenceBackend.append(hdfsFile, aggregation);
@@ -1022,6 +1039,7 @@ public class NGSIHDFSSink extends NGSISink {
                     persistenceBackend.createFile(hdfsFile, aggregation);
                 } // if else
 
+                // Set the current persistence backend as the favourite one
                 if (!persistenceBackends.getFirst().equals(persistenceBackend)) {
                     persistenceBackends.remove(persistenceBackend);
                     persistenceBackends.add(0, persistenceBackend);
@@ -1030,12 +1048,29 @@ public class NGSIHDFSSink extends NGSISink {
                 } // if
 
                 persisted = true;
+                
+                if (persistenceBackend instanceof HDFSBackendImplREST) {
+                    ImmutablePair<Long, Long> bytes = ((HDFSBackendImplREST) persistenceBackend).finishTransaction();
+                    transactionRequestBytes += bytes.left;
+                    transactionResponseBytes += bytes.right;
+                } // if
+                
                 break;
             } catch (Exception e) {
+                if (persistenceBackend instanceof HDFSBackendImplREST) {
+                    ImmutablePair<Long, Long> bytes = ((HDFSBackendImplREST) persistenceBackend).finishTransaction();
+                    transactionRequestBytes += bytes.left;
+                    transactionResponseBytes += bytes.right;
+                } // if
+                
                 LOGGER.info("[" + this.getName() + "] There was some problem with the current endpoint, "
                         + "trying other one. Details: " + e.getMessage());
             } // try catch
         } // for
+        
+        // Add metrics after iterating on the persistence backends
+        serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0,
+                transactionRequestBytes, transactionResponseBytes, 0);
         
         if (!persisted) {
             throw new CygnusPersistenceError("[" + this.getName() + "] No endpoint was available");

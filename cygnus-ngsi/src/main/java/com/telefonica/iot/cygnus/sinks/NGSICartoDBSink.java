@@ -338,12 +338,19 @@ public class NGSICartoDBSink extends NGSISink {
 
             // Get the events within the current sub-batch
             ArrayList<NGSIEvent> events = batch.getNextEvents();
+            
+            // Get the first event, it will give us useful information
+            NGSIEvent firstEvent = events.get(0);
+            String service = firstEvent.getServiceForData();
+            String servicePath = firstEvent.getServicePathForData();
+            
+            // Raw aggregator
             CartoDBAggregator aggregator = null;
 
             if (enableRaw) {
                 // Get an aggregator for this destination and initialize it
                 aggregator = new CartoDBAggregator();
-                aggregator.initialize(events.get(0));
+                aggregator.initialize(firstEvent);
             } // if
 
             for (NGSIEvent event : events) {
@@ -362,7 +369,7 @@ public class NGSICartoDBSink extends NGSISink {
 
             if (enableRaw) {
                 // Persist the aggregation
-                persistRawAggregation(aggregator);
+                persistRawAggregation(aggregator, service, servicePath);
             } // if
             
             batch.setNextPersisted(true);
@@ -553,7 +560,8 @@ public class NGSICartoDBSink extends NGSISink {
         
     } // CartoDBAggregator
 
-    private void persistRawAggregation(CartoDBAggregator aggregator) throws CygnusPersistenceError {
+    private void persistRawAggregation(CartoDBAggregator aggregator, String service, String servicePath)
+        throws CygnusPersistenceError {
         //String dbName = aggregator.getDbName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
         String tableName = aggregator.getTableName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
         String schema = aggregator.getSchemaName();
@@ -564,8 +572,13 @@ public class NGSICartoDBSink extends NGSISink {
                 + "), Table (" + tableName + "), Data (" + rows + ")");
         
         try {
+            ((CartoDBBackendImpl) backends.get(schema)).startTransaction();
             backends.get(schema).insert(schema, tableName, withs, fields, rows);
+            ImmutablePair<Long, Long> bytes = ((CartoDBBackendImpl) backends.get(schema)).finishTransaction();
+            serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
         } catch (Exception e) {
+            ImmutablePair<Long, Long> bytes = ((CartoDBBackendImpl) backends.get(schema)).finishTransaction();
+            serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
             throw new CygnusPersistenceError("-, " + e.getMessage());
         } // try catch
     } // persistRawAggregation
@@ -573,6 +586,7 @@ public class NGSICartoDBSink extends NGSISink {
     private void persistDistanceEvent(NGSIEvent event) throws CygnusBadConfiguration, CygnusPersistenceError {
         // Get some values
         String schema = buildSchemaName(event.getServiceForNaming(enableNameMappings));
+        String service = event.getServiceForData();
         String servicePath = event.getServicePathForData();
         String entityId = event.getContextElement().getId();
         String entityType = event.getContextElement().getType();
@@ -584,6 +598,8 @@ public class NGSICartoDBSink extends NGSISink {
             return;
         } // if
 
+        ((CartoDBBackendImpl) backends.get(schema)).startTransaction();
+        
         for (ContextAttribute contextAttribute : contextAttributes) {
             long recvTimeTs = event.getRecvTimeTs();
             String attrType = contextAttribute.getType();
@@ -696,14 +712,21 @@ public class NGSICartoDBSink extends NGSISink {
                     try {
                         backends.get(schema).insert(schema, tableName, withs, fields, rows);
                     } catch (Exception e2) {
+                        ImmutablePair<Long, Long> bytes = ((CartoDBBackendImpl) backends.get(schema)).finishTransaction();
+                        serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
                         throw new CygnusPersistenceError("-, " + e2.getMessage());
                     } // try catch
                 } // try catch
             } // if
         } // for
+        
+        ImmutablePair<Long, Long> bytes = ((CartoDBBackendImpl) backends.get(schema)).finishTransaction();
+        serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
     } // persistDistanceEvent
     
     private void rawUpdateEvent(NGSIEvent event) throws CygnusBadConfiguration, CygnusPersistenceError {
+        String service = event.getServiceForData();
+        String servicePath = event.getServicePathForData();
         long recvTimeTs = event.getRecvTimeTs();
         String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
         String schema = buildSchemaName(event.getServiceForNaming(enableNameMappings));
@@ -769,9 +792,13 @@ public class NGSICartoDBSink extends NGSISink {
                 + "), Table (" + tableName + "), Sets (" + sets + "), Where (" + where + ")");
         boolean updated = false;
         
+        ((CartoDBBackendImpl) backends.get(schema)).startTransaction();
+        
         try {
             updated = backends.get(schema).update(schema, tableName, sets, where);
         } catch (Exception e) {
+            ImmutablePair<Long, Long> bytes = ((CartoDBBackendImpl) backends.get(schema)).finishTransaction();
+            serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
             throw new CygnusPersistenceError("-, " + e.getMessage());
         } // try catch
         
@@ -784,9 +811,14 @@ public class NGSICartoDBSink extends NGSISink {
             try {
                 backends.get(schema).insert(schema, tableName, withs, fields, rows);
             } catch (Exception e) {
+                ImmutablePair<Long, Long> bytes = ((CartoDBBackendImpl) backends.get(schema)).finishTransaction();
+                serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
                 throw new CygnusPersistenceError("-, " + e.getMessage());
             } // try catch
         } // if
+        
+        ImmutablePair<Long, Long> bytes = ((CartoDBBackendImpl) backends.get(schema)).finishTransaction();
+        serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
     } // rawUpdateEvent
     
     /**

@@ -40,15 +40,10 @@ public class CygnusMetricsTest {
         String subservice22 = "subservice22";
         
         // Metrics
-        // service1
-        //    subservice11 -> 1000, 12000, 500, 5
-        // service2
-        //    subservice21 -> 8000, 340000, 3700, 90
-        //    subservice22 -> 1500, 10000, 1000, 10
         CygnusMetrics metrics = new CygnusMetrics();
-        metrics.add(service1, subservice11, 1000, 12000, 500, 5, 0);
-        metrics.add(service2, subservice21, 8000, 340000, 3700, 90, 0);
-        metrics.add(service2, subservice22, 1500, 10000, 1000, 10, 0);
+        metrics.add(service1, subservice11, 1000, 12000, 500, 5, 400.3, 1000, 25000, 0, 0);
+        metrics.add(service2, subservice21, 8000, 340000, 3700, 90, 430.1, 9000, 234000, 1200, 10);
+        metrics.add(service2, subservice22, 1500, 10000, 1000, 10, 501.2, 1500, 230000, 100, 1);
         
         // Check the merge for subservice 11 within service 1
         Metrics subservice11metrics = metrics.getServiceSubserviceMetrics(service1, subservice11);
@@ -58,6 +53,11 @@ public class CygnusMetricsTest {
             assertEquals(12000, subservice11metrics.getIncomingTransactionRequestSize());
             assertEquals(500, subservice11metrics.getIncomingTransactionResponseSize());
             assertEquals(5, subservice11metrics.getIncomingTransactionErrors());
+            assertEquals(400.3, subservice11metrics.getServiceTime(), 0);
+            assertEquals(1000, subservice11metrics.getOutgoingTransactions());
+            assertEquals(25000, subservice11metrics.getOutgoingTransactionRequestSize());
+            assertEquals(0, subservice11metrics.getOutgoingTransactionResponseSize());
+            assertEquals(0, subservice11metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.add]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -74,6 +74,11 @@ public class CygnusMetricsTest {
             assertEquals(340000, subservice21metrics.getIncomingTransactionRequestSize());
             assertEquals(3700, subservice21metrics.getIncomingTransactionResponseSize());
             assertEquals(90, subservice21metrics.getIncomingTransactionErrors());
+            assertEquals(430.1, subservice21metrics.getServiceTime(), 0);
+            assertEquals(9000, subservice21metrics.getOutgoingTransactions());
+            assertEquals(234000, subservice21metrics.getOutgoingTransactionRequestSize());
+            assertEquals(1200, subservice21metrics.getOutgoingTransactionResponseSize());
+            assertEquals(10, subservice21metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.add]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -90,6 +95,11 @@ public class CygnusMetricsTest {
             assertEquals(10000, subservice22metrics.getIncomingTransactionRequestSize());
             assertEquals(1000, subservice22metrics.getIncomingTransactionResponseSize());
             assertEquals(10, subservice22metrics.getIncomingTransactionErrors());
+            assertEquals(501.2, subservice22metrics.getServiceTime(), 0);
+            assertEquals(1500, subservice22metrics.getOutgoingTransactions());
+            assertEquals(230000, subservice22metrics.getOutgoingTransactionRequestSize());
+            assertEquals(100, subservice22metrics.getOutgoingTransactionResponseSize());
+            assertEquals(1, subservice22metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.add]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -106,6 +116,11 @@ public class CygnusMetricsTest {
             assertEquals(12000, service1metrics.getIncomingTransactionRequestSize());
             assertEquals(500, service1metrics.getIncomingTransactionResponseSize());
             assertEquals(5, service1metrics.getIncomingTransactionErrors());
+            assertEquals(400.3, service1metrics.getServiceTime(), 0);
+            assertEquals(1000, service1metrics.getOutgoingTransactions());
+            assertEquals(25000, service1metrics.getOutgoingTransactionRequestSize());
+            assertEquals(0, service1metrics.getOutgoingTransactionResponseSize());
+            assertEquals(0, service1metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.add]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -122,6 +137,11 @@ public class CygnusMetricsTest {
             assertEquals(350000, service2metrics.getIncomingTransactionRequestSize());
             assertEquals(4700, service2metrics.getIncomingTransactionResponseSize());
             assertEquals(100, service2metrics.getIncomingTransactionErrors());
+            assertEquals(931.3, service2metrics.getServiceTime(), 0);
+            assertEquals(10500, service2metrics.getOutgoingTransactions());
+            assertEquals(464000, service2metrics.getOutgoingTransactionRequestSize());
+            assertEquals(1300, service2metrics.getOutgoingTransactionResponseSize());
+            assertEquals(11, service2metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.add]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -139,6 +159,11 @@ public class CygnusMetricsTest {
             assertEquals(12000, subservice11metrics.getIncomingTransactionRequestSize());
             assertEquals(500, subservice11metrics.getIncomingTransactionResponseSize());
             assertEquals(5, subservice11metrics.getIncomingTransactionErrors());
+            assertEquals(400.3, subservice11metrics.getServiceTime(), 0);
+            assertEquals(1000, subservice11metrics.getOutgoingTransactions());
+            assertEquals(25000, subservice11metrics.getOutgoingTransactionRequestSize());
+            assertEquals(0, subservice11metrics.getOutgoingTransactionResponseSize());
+            assertEquals(0, subservice11metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.add]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -155,6 +180,11 @@ public class CygnusMetricsTest {
             assertEquals(340000, subservice21metrics.getIncomingTransactionRequestSize());
             assertEquals(3700, subservice21metrics.getIncomingTransactionResponseSize());
             assertEquals(90, subservice21metrics.getIncomingTransactionErrors());
+            assertEquals(430.1, subservice21metrics.getServiceTime(), 0);
+            assertEquals(9000, subservice21metrics.getOutgoingTransactions());
+            assertEquals(234000, subservice21metrics.getOutgoingTransactionRequestSize());
+            assertEquals(1200, subservice21metrics.getOutgoingTransactionResponseSize());
+            assertEquals(10, subservice21metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.add]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -171,6 +201,11 @@ public class CygnusMetricsTest {
             assertEquals(10000, subservice22metrics.getIncomingTransactionRequestSize());
             assertEquals(1000, subservice22metrics.getIncomingTransactionResponseSize());
             assertEquals(10, subservice22metrics.getIncomingTransactionErrors());
+            assertEquals(501.2, subservice22metrics.getServiceTime(), 0);
+            assertEquals(1500, subservice22metrics.getOutgoingTransactions());
+            assertEquals(230000, subservice22metrics.getOutgoingTransactionRequestSize());
+            assertEquals(100, subservice22metrics.getOutgoingTransactionResponseSize());
+            assertEquals(1, subservice22metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.add]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -187,6 +222,11 @@ public class CygnusMetricsTest {
             assertEquals(362000, allMetrics.getIncomingTransactionRequestSize());
             assertEquals(5200, allMetrics.getIncomingTransactionResponseSize());
             assertEquals(105, allMetrics.getIncomingTransactionErrors());
+            assertEquals(1331.6, allMetrics.getServiceTime(), 0.001);
+            assertEquals(11500, allMetrics.getOutgoingTransactions());
+            assertEquals(489000, allMetrics.getOutgoingTransactionRequestSize());
+            assertEquals(1300, allMetrics.getOutgoingTransactionResponseSize());
+            assertEquals(11, allMetrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.add]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -211,24 +251,15 @@ public class CygnusMetricsTest {
         String subservice22 = "subservice22";
         
         // First metrics
-        // service1
-        //    subservice11 -> 1000, 12000, 500, 5
-        // service2
-        //    subservice21 -> 8000, 340000, 3700, 90
-        //    subservice22 -> 1500, 10000, 1000, 10
         CygnusMetrics metrics1 = new CygnusMetrics();
-        metrics1.add(service1, subservice11, 1000, 12000, 500, 5, 0);
-        metrics1.add(service2, subservice21, 8000, 340000, 3700, 90, 0);
-        metrics1.add(service2, subservice22, 1500, 10000, 1000, 10, 0);
+        metrics1.add(service1, subservice11, 1000, 12000, 500, 5, 400.3, 1000, 25000, 0, 0);
+        metrics1.add(service2, subservice21, 8000, 340000, 3700, 90, 430.1, 9000, 234000, 1200, 10);
+        metrics1.add(service2, subservice22, 1500, 10000, 1000, 10, 501.2, 1500, 230000, 100, 1);
         
         // Second metrics
-        // service1
-        //    subservice11 -> 12500, 256700, 10500, 215
-        // service2
-        //    subservice22 -> 10, 100, 30, 0
         CygnusMetrics metrics2 = new CygnusMetrics();
-        metrics2.add(service1, subservice11, 12500, 256700, 10500, 215, 0);
-        metrics2.add(service2, subservice22, 10, 100, 30, 0, 0);
+        metrics2.add(service1, subservice11, 12500, 256700, 10500, 215, 799.9, 50000, 1000000, 10000, 2000);
+        metrics2.add(service2, subservice22, 10, 100, 30, 0, 569.5, 10, 1000, 500, 10);
 
         // Merge second metrics in first one
         metrics1.merge(metrics2);
@@ -241,6 +272,11 @@ public class CygnusMetricsTest {
             assertEquals(268700, subservice11metrics.getIncomingTransactionRequestSize());
             assertEquals(11000, subservice11metrics.getIncomingTransactionResponseSize());
             assertEquals(220, subservice11metrics.getIncomingTransactionErrors());
+            assertEquals(1200.2, subservice11metrics.getServiceTime(), 0);
+            assertEquals(51000, subservice11metrics.getOutgoingTransactions());
+            assertEquals(1025000, subservice11metrics.getOutgoingTransactionRequestSize());
+            assertEquals(10000, subservice11metrics.getOutgoingTransactionResponseSize());
+            assertEquals(2000, subservice11metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.merge]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -257,6 +293,11 @@ public class CygnusMetricsTest {
             assertEquals(340000, subservice21metrics.getIncomingTransactionRequestSize());
             assertEquals(3700, subservice21metrics.getIncomingTransactionResponseSize());
             assertEquals(90, subservice21metrics.getIncomingTransactionErrors());
+            assertEquals(430.1, subservice21metrics.getServiceTime(), 0);
+            assertEquals(9000, subservice21metrics.getOutgoingTransactions());
+            assertEquals(234000, subservice21metrics.getOutgoingTransactionRequestSize());
+            assertEquals(1200, subservice21metrics.getOutgoingTransactionResponseSize());
+            assertEquals(10, subservice21metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.merge]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -273,6 +314,11 @@ public class CygnusMetricsTest {
             assertEquals(10100, subservice22metrics.getIncomingTransactionRequestSize());
             assertEquals(1030, subservice22metrics.getIncomingTransactionResponseSize());
             assertEquals(10, subservice22metrics.getIncomingTransactionErrors());
+            assertEquals(1070.7, subservice22metrics.getServiceTime(), 0);
+            assertEquals(1510, subservice22metrics.getOutgoingTransactions());
+            assertEquals(231000, subservice22metrics.getOutgoingTransactionRequestSize());
+            assertEquals(600, subservice22metrics.getOutgoingTransactionResponseSize());
+            assertEquals(11, subservice22metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.merge]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -289,6 +335,11 @@ public class CygnusMetricsTest {
             assertEquals(268700, service1metrics.getIncomingTransactionRequestSize());
             assertEquals(11000, service1metrics.getIncomingTransactionResponseSize());
             assertEquals(220, service1metrics.getIncomingTransactionErrors());
+            assertEquals(1200.2, service1metrics.getServiceTime(), 0);
+            assertEquals(51000, service1metrics.getOutgoingTransactions());
+            assertEquals(1025000, service1metrics.getOutgoingTransactionRequestSize());
+            assertEquals(10000, service1metrics.getOutgoingTransactionResponseSize());
+            assertEquals(2000, service1metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.merge]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -305,6 +356,11 @@ public class CygnusMetricsTest {
             assertEquals(350100, service2metrics.getIncomingTransactionRequestSize());
             assertEquals(4730, service2metrics.getIncomingTransactionResponseSize());
             assertEquals(100, service2metrics.getIncomingTransactionErrors());
+            assertEquals(1500.8, service2metrics.getServiceTime(), 0);
+            assertEquals(10510, service2metrics.getOutgoingTransactions());
+            assertEquals(465000, service2metrics.getOutgoingTransactionRequestSize());
+            assertEquals(1800, service2metrics.getOutgoingTransactionResponseSize());
+            assertEquals(21, service2metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.merge]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -322,6 +378,11 @@ public class CygnusMetricsTest {
             assertEquals(268700, subservice11metrics.getIncomingTransactionRequestSize());
             assertEquals(11000, subservice11metrics.getIncomingTransactionResponseSize());
             assertEquals(220, subservice11metrics.getIncomingTransactionErrors());
+            assertEquals(1200.2, subservice11metrics.getServiceTime(), 0);
+            assertEquals(51000, subservice11metrics.getOutgoingTransactions());
+            assertEquals(1025000, subservice11metrics.getOutgoingTransactionRequestSize());
+            assertEquals(10000, subservice11metrics.getOutgoingTransactionResponseSize());
+            assertEquals(2000, subservice11metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.merge]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -338,6 +399,11 @@ public class CygnusMetricsTest {
             assertEquals(340000, subservice21metrics.getIncomingTransactionRequestSize());
             assertEquals(3700, subservice21metrics.getIncomingTransactionResponseSize());
             assertEquals(90, subservice21metrics.getIncomingTransactionErrors());
+            assertEquals(430.1, subservice21metrics.getServiceTime(), 0);
+            assertEquals(9000, subservice21metrics.getOutgoingTransactions());
+            assertEquals(234000, subservice21metrics.getOutgoingTransactionRequestSize());
+            assertEquals(1200, subservice21metrics.getOutgoingTransactionResponseSize());
+            assertEquals(10, subservice21metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.merge]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -354,6 +420,11 @@ public class CygnusMetricsTest {
             assertEquals(10100, subservice22metrics.getIncomingTransactionRequestSize());
             assertEquals(1030, subservice22metrics.getIncomingTransactionResponseSize());
             assertEquals(10, subservice22metrics.getIncomingTransactionErrors());
+            assertEquals(1070.7, subservice22metrics.getServiceTime(), 0);
+            assertEquals(1510, subservice22metrics.getOutgoingTransactions());
+            assertEquals(231000, subservice22metrics.getOutgoingTransactionRequestSize());
+            assertEquals(600, subservice22metrics.getOutgoingTransactionResponseSize());
+            assertEquals(11, subservice22metrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.merge]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -370,6 +441,11 @@ public class CygnusMetricsTest {
             assertEquals(618800, allMetrics.getIncomingTransactionRequestSize());
             assertEquals(15730, allMetrics.getIncomingTransactionResponseSize());
             assertEquals(320, allMetrics.getIncomingTransactionErrors());
+            assertEquals(2701, allMetrics.getServiceTime(), 0);
+            assertEquals(61510, allMetrics.getOutgoingTransactions());
+            assertEquals(1490000, allMetrics.getOutgoingTransactionRequestSize());
+            assertEquals(11800, allMetrics.getOutgoingTransactionResponseSize());
+            assertEquals(2021, allMetrics.getOutgoingTransactionErrors());
             System.out.println(getTestTraceHead("[CygnusMetrics.merge]")
                     + " -  OK  - Metrics merge was correct");
         } catch (AssertionError e) {
@@ -395,50 +471,68 @@ public class CygnusMetricsTest {
         String subservice22 = "subservice22";
         
         // Source 1 organization and metrics
-        // service1
-        //    subservice11 -> 1000, 12000, 500, 5
-        // service2
-        //    subservice21 -> 8000, 340000, 3700, 90
-        //    subservice22 -> 1500, 10000, 1000, 10
-        CygnusMetrics source1Metrics = new CygnusMetrics();
-        source1Metrics.add(service1, subservice11, 1000, 12000, 500, 5, 0);
-        source1Metrics.add(service2, subservice21, 8000, 340000, 3700, 90, 0);
-        source1Metrics.add(service2, subservice22, 1500, 10000, 1000, 10, 0);
+        CygnusMetrics metrics = new CygnusMetrics();
+        metrics.add(service1, subservice11, 1000, 12000, 500, 5, 400.3, 1000, 25000, 0, 0);
+        metrics.add(service2, subservice21, 8000, 340000, 3700, 90, 430.1, 9000, 234000, 1200, 10);
+        metrics.add(service2, subservice22, 1500, 10000, 1000, 10, 501.2, 1500, 230000, 100, 1);
         
         // To Json string
-        String jsonStr = source1Metrics.toJsonString();
-        String expectedJsonStr = "{\"services\":{\"service2\":{\"subservs\":{"
+        String jsonStr = metrics.toJsonString();
+        String expectedJsonStr = "{\"services\":{"
+                + "\"service2\":{"
+                + "\"subservs\":{"
                 + "\"subservice22\":{"
                 + "\"incomingTransactions\":1500,"
                 + "\"incomingTransactionRequestSize\":10000,"
                 + "\"incomingTransactionResponseSize\":1000,"
                 + "\"incomingTransactionErrors\":10,"
-                + "\"serviceTime\":0.0},"
+                + "\"serviceTime\":0.33413333333333334,"
+                + "\"outgoingTransactions\":1500,"
+                + "\"outgoingTransactionRequestSize\":230000,"
+                + "\"outgoingTransactionResponseSize\":100,"
+                + "\"outgoingTransactionErrors\":1},"
                 + "\"subservice21\":{"
                 + "\"incomingTransactions\":8000,"
                 + "\"incomingTransactionRequestSize\":340000,"
                 + "\"incomingTransactionResponseSize\":3700,"
                 + "\"incomingTransactionErrors\":90,"
-                + "\"serviceTime\":0.0}},"
+                + "\"serviceTime\":0.047788888888888895,"
+                + "\"outgoingTransactions\":9000,"
+                + "\"outgoingTransactionRequestSize\":234000,"
+                + "\"outgoingTransactionResponseSize\":1200,"
+                + "\"outgoingTransactionErrors\":10}},"
                 + "\"sum\":{"
                 + "\"incomingTransactions\":9500,"
                 + "\"incomingTransactionRequestSize\":350000,"
                 + "\"incomingTransactionResponseSize\":4700,"
                 + "\"incomingTransactionErrors\":100,"
-                + "\"serviceTime\":0.0}},"
-                + "\"service1\":{\"subservs\":{"
+                + "\"serviceTime\":0.08869523809523809,"
+                + "\"outgoingTransactions\":10500,"
+                + "\"outgoingTransactionRequestSize\":464000,"
+                + "\"outgoingTransactionResponseSize\":1300,"
+                + "\"outgoingTransactionErrors\":11}},"
+                + "\"service1\":{"
+                + "\"subservs\":{"
                 + "\"subservice11\":{"
                 + "\"incomingTransactions\":1000,"
                 + "\"incomingTransactionRequestSize\":12000,"
                 + "\"incomingTransactionResponseSize\":500,"
                 + "\"incomingTransactionErrors\":5,"
-                + "\"serviceTime\":0.0}},"
+                + "\"serviceTime\":0.4003,"
+                + "\"outgoingTransactions\":1000,"
+                + "\"outgoingTransactionRequestSize\":25000,"
+                + "\"outgoingTransactionResponseSize\":0,"
+                + "\"outgoingTransactionErrors\":0}},"
                 + "\"sum\":{"
                 + "\"incomingTransactions\":1000,"
                 + "\"incomingTransactionRequestSize\":12000,"
                 + "\"incomingTransactionResponseSize\":500,"
                 + "\"incomingTransactionErrors\":5,"
-                + "\"serviceTime\":0.0}}},"
+                + "\"serviceTime\":0.4003,"
+                + "\"outgoingTransactions\":1000,"
+                + "\"outgoingTransactionRequestSize\":25000,"
+                + "\"outgoingTransactionResponseSize\":0,"
+                + "\"outgoingTransactionErrors\":0}}},"
                 + "\"sum\": {"
                 + "\"subservs\":{"
                 + "\"subservice11\":{"
@@ -446,25 +540,41 @@ public class CygnusMetricsTest {
                 + "\"incomingTransactionRequestSize\":12000,"
                 + "\"incomingTransactionResponseSize\":500,"
                 + "\"incomingTransactionErrors\":5,"
-                + "\"serviceTime\":0.0},"
+                + "\"serviceTime\":0.4003,"
+                + "\"outgoingTransactions\":1000,"
+                + "\"outgoingTransactionRequestSize\":25000,"
+                + "\"outgoingTransactionResponseSize\":0,"
+                + "\"outgoingTransactionErrors\":0},"
                 + "\"subservice22\":{"
                 + "\"incomingTransactions\":1500,"
                 + "\"incomingTransactionRequestSize\":10000,"
                 + "\"incomingTransactionResponseSize\":1000,"
                 + "\"incomingTransactionErrors\":10,"
-                + "\"serviceTime\":0.0},"
+                + "\"serviceTime\":0.33413333333333334,"
+                + "\"outgoingTransactions\":1500,"
+                + "\"outgoingTransactionRequestSize\":230000,"
+                + "\"outgoingTransactionResponseSize\":100,"
+                + "\"outgoingTransactionErrors\":1},"
                 + "\"subservice21\":{"
                 + "\"incomingTransactions\":8000,"
                 + "\"incomingTransactionRequestSize\":340000,"
                 + "\"incomingTransactionResponseSize\":3700,"
                 + "\"incomingTransactionErrors\":90,"
-                + "\"serviceTime\":0.0}},"
+                + "\"serviceTime\":0.047788888888888895,"
+                + "\"outgoingTransactions\":9000,"
+                + "\"outgoingTransactionRequestSize\":234000,"
+                + "\"outgoingTransactionResponseSize\":1200,"
+                + "\"outgoingTransactionErrors\":10}},"
                 + "\"sum\":{"
                 + "\"incomingTransactions\":10500,"
                 + "\"incomingTransactionRequestSize\":362000,"
                 + "\"incomingTransactionResponseSize\":5200,"
                 + "\"incomingTransactionErrors\":105,"
-                + "\"serviceTime\":0.0}}}";
+                + "\"serviceTime\":0.1157913043478261,"
+                + "\"outgoingTransactions\":11500,"
+                + "\"outgoingTransactionRequestSize\":489000,"
+                + "\"outgoingTransactionResponseSize\":1300,"
+                + "\"outgoingTransactionErrors\":11}}}";
         
         try {
             assertEquals(expectedJsonStr, jsonStr);
