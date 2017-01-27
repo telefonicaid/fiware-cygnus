@@ -505,7 +505,8 @@ public class NGSICartoDBSinkTest {
         try {
             file = folder.newFile("keys.conf");
             PrintWriter out = new PrintWriter(file);
-            out.println("{\"cartodb_keys\":[{\"username\":\"frb\",\"endpoint\":\"http://frb.com\",\"key\":\"xxx\"}]}");
+            out.println("{\"cartodb_keys\":[{\"username\":\"frb\",\"endpoint\":\"http://frb.com\","
+                    + "\"key\":\"xxx\",\"type\":\"personal\"}]}");
             out.flush();
             out.close();
         } catch (IOException e) {
