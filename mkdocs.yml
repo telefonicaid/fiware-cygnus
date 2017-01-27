@@ -54,6 +54,7 @@ pages:
           - 'Configuration examples': 'cygnus-ngsi/installation_and_administration_guide/configuration_examples.md'
           - 'Running as a service': 'cygnus-ngsi/installation_and_administration_guide/running_as_service.md'
           - 'Testing': 'cygnus-ngsi/installation_and_administration_guide/testing.md'
+          - 'Backends as short-term historics': 'cygnus-ngsi/installation_and_administration_guide/backends_as_sth.md'
           - 'Name mappings': 'cygnus-ngsi/installation_and_administration_guide/name_mappings.md'
           - 'Grouping Rules': 'cygnus-ngsi/installation_and_administration_guide/grouping_rules.md'
           - 'Multitenancy': 'cygnus-ngsi/installation_and_administration_guide/multitenancy.md'
