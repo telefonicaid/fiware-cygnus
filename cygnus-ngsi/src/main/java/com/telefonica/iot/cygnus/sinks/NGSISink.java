@@ -447,7 +447,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
      * Rollbacks the accumulation once more.
      * @param rollbackedAccumulation
      */
-    protected void doRollbackAgain(Accumulator rollbackedAccumulation) {        
+    protected void doRollbackAgain(Accumulator rollbackedAccumulation) {
         if (rollbackedAccumulation.getTTL() == -1) {
             rollbackedAccumulation.setLastRetry(new Date().getTime());
             LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + "), "
