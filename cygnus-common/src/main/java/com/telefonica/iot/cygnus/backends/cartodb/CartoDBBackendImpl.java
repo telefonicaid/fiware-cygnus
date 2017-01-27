@@ -31,7 +31,7 @@ import org.json.simple.JSONObject;
 public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
     
     private final String apiKey;
-    private final boolean isPersonal;
+    private final boolean isPersonalAccount;
     private static final String BASE_URL = "/api/v2/sql?q=";
     
     /**
@@ -48,13 +48,13 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
             int maxConnsPerRoute) {
         super(host, port, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
         this.apiKey = apiKey;
-        this.isPersonal = isPersonal;
+        this.isPersonalAccount = isPersonal;
     } // CartoDBBackendImpl
     
     @Override
     public boolean isEmpty(String schema, String tableName) throws Exception {
         // Set the appropiate schema depending on the account type
-        schema = (isPersonal ? "public" : schema);
+        schema = (isPersonalAccount ? "public" : schema);
         
         // Do the check
         String query = "SELECT COUNT(*) FROM " + schema + "." + tableName;
@@ -77,7 +77,7 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
     @Override
     public void createTable(String schema, String tableName, String fields) throws Exception {
         // Set the appropiate schema depending on the account type
-        schema = (isPersonal ? "public" : schema);
+        schema = (isPersonalAccount ? "public" : schema);
 
         // Create the table
         String query = "CREATE TABLE " + schema + "." + tableName + " " + fields;
@@ -105,7 +105,7 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
     @Override
     public void insert(String schema, String tableName, String withs, String fields, String rows) throws Exception {
         // Set the appropiate schema depending on the account type
-        schema = (isPersonal ? "public" : schema);
+        schema = (isPersonalAccount ? "public" : schema);
         
         // Do the insertion
         String query = withs + "INSERT INTO " + schema + "." + tableName + " " + fields + " VALUES " + rows;
