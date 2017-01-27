@@ -107,7 +107,7 @@ public class MongoBackendImpl implements MongoBackend {
         try {
             db.createCollection(collectionName);
         } catch (Exception e) {
-            if (e.getMessage().contains("collection already exists")) {
+            if (e.getMessage().contains("\"code\" : 48")) {
                 LOGGER.debug("Collection already exists, nothing to create");
             } else {
                 throw e;
@@ -155,7 +155,7 @@ public class MongoBackendImpl implements MongoBackend {
                 db.createCollection(collectionName);
             } // if else
         } catch (Exception e) {
-            if (e.getMessage().contains("collection already exists")) {
+            if (e.getMessage().contains("\"code\" : 48")) {
                 LOGGER.debug("Collection already exists, nothing to create");
             } else {
                 throw e;

@@ -18,6 +18,7 @@
 
 package com.telefonica.iot.cygnus.backends.mysql;
 
+import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 
@@ -31,18 +32,21 @@ public interface MySQLBackend {
     /**
      * Creates a database, given its name, if not exists.
      * @param dbName
-     * @throws Exception
+     * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
+     * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
      */
-    void createDatabase(String dbName) throws Exception;
+    void createDatabase(String dbName) throws CygnusRuntimeError, CygnusPersistenceError;
     
     /**
      * Creates a table, given its name, if not exists in the given database.
      * @param dbName
      * @param tableName
      * @param fieldNames
-     * @throws Exception
+     * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
+     * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
      */
-    void createTable(String dbName, String tableName, String fieldNames) throws Exception;
+    void createTable(String dbName, String tableName, String fieldNames)
+        throws CygnusRuntimeError, CygnusPersistenceError;
     
     /**
      * Insert already processed context data into the given table within the given database.
@@ -50,25 +54,28 @@ public interface MySQLBackend {
      * @param tableName
      * @param fieldNames
      * @param fieldValues
-     * @throws Exception
+     * @throws com.telefonica.iot.cygnus.errors.CygnusBadContextData
+     * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
+     * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
      */
-    void insertContextData(String dbName, String tableName, String fieldNames, String fieldValues) throws Exception;
+    void insertContextData(String dbName, String tableName, String fieldNames, String fieldValues)
+        throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError;
     
     /**
      * Caps records from the given table within the given database according to the given maximum number.
      * @param dbName
      * @param tableName
      * @param maxRecords
-     * @throws CygnusRuntimeError
-     * @throws CygnusPersistenceError
+     * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
+     * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
      */
     void capRecords(String dbName, String tableName, long maxRecords) throws CygnusRuntimeError, CygnusPersistenceError;
     
     /**
      * Expirates records within all the cached tables based on the expiration time.
      * @param expirationTime
-     * @throws CygnusRuntimeError
-     * @throws CygnusPersistenceError
+     * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
+     * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
      */
     void expirateRecordsCache(long expirationTime) throws CygnusRuntimeError, CygnusPersistenceError;
     
