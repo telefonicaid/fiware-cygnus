@@ -420,7 +420,7 @@ Everything equals to the raw-based storing, but:
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data\_model | no | dm-by-entity |  <i>dm-by-service-path</i> or <i>dm-by-entity</i>. |
-| keys\_conf\_file | yes | N/A | Absolute path to the CartoDB file containing the mapping between FIWARE service/Carto usernames and Carto API Keys. |
+| keys\_conf\_file | yes | N/A | Absolute path to the CartoDB file containing the mapping between FIWARE service/Carto usernames, endpoints, API Keys and account types. |
 | swap\_coordinates | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, the latitude and longitude values are exchanged. |
 | flip\_coordinates | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, the latitude and longitude values are exchanged. **Deprecated from release 1.6.0 in favour of `swap_coordinates`**. |
 | enable\_raw | no | true | <i>true</i> or <i>false</i>. If <i>true</i>, a raw based storage is done. |
@@ -467,12 +467,14 @@ $ cat /usr/cygnus/conf/cartodb_keys.conf
       {
          "username": "user1",
          "endpoint": "https://user1.cartodb.com",
-         "key": "1234567890abcdef"
+         "key": "1234567890abcdef",
+         "type": "personal"
       },
       {
          "username": "user2",
          "endpoint": "https://user2.cartodb.com",
-         "key": "abcdef1234567890"
+         "key": "abcdef1234567890",
+         "type": "enterprise"
       }
    ]
 }
@@ -503,6 +505,8 @@ It is mandatory the entities aimed to be handled by this sink have a geolocated 
 
 ####<a name="section2.3.2"></a>Multitenancy support
 Different than other NGSI sinks, where a single authorized user is able to create user spaces and write data on behalf of all the other users (who can only read the data), this sink requires the writing credentials of each user and such user spaces created in advance. The reason is Carto imposes the database and schema upon user account creation, which typically are related to the FIWARE service (or FIWARE tenant ID), and the only persistence element Cygnus must create are the tables within the already provisiones databases and schemas. As can be inferred, accessing these databases and schemas require specific user credentials.
+
+User credentials must be added to a special file that will be pointed by the Carto sink through the `keys_conf_file` configuration parameter. Of special interest is the account type, which can be `personal` or `enterprise`; such a distinction is important since the queries to the API differ from one to the other.
 
 [Top](#top)
 
