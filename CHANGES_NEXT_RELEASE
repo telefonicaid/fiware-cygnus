@@ -12,3 +12,4 @@
 - [cygnus-common][hardening] Clean and modularize ManagementInterface.java (#1368)
 - [cygnus-common][feature] Add KPIs API (#1339)
 - [cygnus-common][bug] Fix error handling upon MongoDB collection creation (#1377)
+- [cygnus-ngsi][hardening] Add a piece of documentation about capping and/or expirating records in CKAN, MySQL, MongoDB and STH Comet (#1391)
