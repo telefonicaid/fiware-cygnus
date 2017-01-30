@@ -25,6 +25,9 @@ import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import org.json.simple.JSONObject;
@@ -505,25 +508,30 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                 JSONObject result = (JSONObject) getRecords(resId, null, offset, RECORDSPERPAGE).get("result");
                 JSONArray records = (JSONArray) result.get("records");
 
-                for (Object recordObj : records) {
-                    JSONObject record = (JSONObject) recordObj;
-                    long id = (Long) record.get("_id");
-                    long recordTime = (Long) record.get("recvTimeTs");
-                    long currentTime = new Date().getTime() / 1000;
+                try {
+                    for (Object recordObj : records) {
+                        JSONObject record = (JSONObject) recordObj;
+                        long id = (Long) record.get("_id");
+                        String recvTime = (String) record.get("recvTime");
+                        long recordTime = CommonUtils.getMilliseconds(recvTime);
+                        long currentTime = new Date().getTime();
 
-                    if (recordTime < (currentTime - expirationTime)) {
-                        if (filters.isEmpty()) {
-                            filters += "{\"_id\":[" + id;
+                        if (recordTime < (currentTime - (expirationTime * 1000))) {
+                            if (filters.isEmpty()) {
+                                filters += "{\"_id\":[" + id;
+                            } else {
+                                filters += "," + id;
+                            } // if else
                         } else {
-                            filters += "," + id;
+                            // Since records are sorted by _id, once the first not expirated record is found the loop
+                            // can finish
+                            morePages = false;
+                            break;
                         } // if else
-                    } else {
-                        // Since records are sorted by _id, once the first not expirated record is found the loop
-                        // can finish
-                        morePages = false;
-                        break;
-                    } // if else
-                } // for
+                    } // for
+                } catch (ParseException e) {
+                    throw new CygnusRuntimeError("ParseException, " + e.getMessage());
+                } // try catch
 
                 if (records.size() == 0) {
                     morePages = false;
