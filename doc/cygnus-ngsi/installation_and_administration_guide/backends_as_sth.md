@@ -15,16 +15,18 @@ The above can be controlled by means of specific configuration parameters in cer
 
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
-| persistence\_policy.max_records | no | -1 | Maximum number of records allowed for a persistence element (table or resource) before it is capped. `-1` disables this policy. |
-| persistence\_policy.expiration_time | no | -1 | Maximum number of seconds a record is maintained in a persistence element (table or resource) before expiration. `-1` disables this policy. |
+| persistence\_policy.max_records | no | -1 | Maximum number of records allowed for a persistence element (table, resource, collection, etc.) before it is capped. `-1` disables this policy. |
+| persistence\_policy.expiration_time | no | -1 | Maximum number of seconds a record is maintained in a persistence element (table, resource, collection, etc.) before expiration. `-1` disables this policy. |
 | persistence\_policy.checking_time | no | 3600 | Frequency (in seconds) at which the sink checks for record expiration. |
 
 Which sinks provide this kind of functionality? For the time being:
 
 * `NGSIMySQLSink`
 * `NGSICKANSink`
+* `NGSIMongoSink` (but in a slight different way, see next section)
+* `NGSISTHSink` (but in a slight different way, see next section)
 
-(*) A record may mean many different things depending on the persistence backend: a Json entry in a HDFS file, a row in a MySQL table, a record in a CKAN resoeurce...
+(*) A record may mean many different things depending on the persistence backend: a Json entry in a HDFS file, a row in a MySQL table, a record in a CKAN resource...
 
 [Top](#top)
 
