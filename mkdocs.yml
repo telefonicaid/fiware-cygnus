@@ -86,6 +86,9 @@ pages:
           - 'NGSINameMappingsInterceptor': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md'
           - 'RoundRobinChannelSelector': 'cygnus-ngsi/flume_extensions_catalogue/round_robin_channel_selector.md'
           - 'Reporting issues and contact information': 'cygnus-ngsi/flume_extensions_catalogue/issues_and_contact.md'
+      - 'Integration examples':
+          - 'Integration with Apache Spark': 'cygnus-ngsi/integration/orion_cygnus_spark.md'
+          - 'Integration with Apache Kafka': 'cygnus-ngsi/integration/orion_cygnus_kafka.md'
   - 'cygnus-twitter agent':
       - 'Installation and Administration Guide':
           - 'Introduction': 'cygnus-twitter/installation_and_administration_guide/introduction.md'
