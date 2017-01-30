@@ -93,7 +93,7 @@ cygnusagent.sources.http-source.port = 5050
 cygnusagent.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
 cygnusagent.sources.http-source.handler.notification_target = /notify
 cygnusagent.sources.http-source.handler.default_service = def_serv
-cygnusagent.sources.http-source.handler.default_service_path = def_servpath
+cygnusagent.sources.http-source.handler.default_service_path = /def_servpath
 cygnusagent.sources.http-source.handler.events_ttl = 10
 cygnusagent.sources.http-source.interceptors = ts gi
 cygnusagent.sources.http-source.interceptors.ts.type = timestamp
@@ -289,6 +289,6 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
 [Top](#top)
 
 ##<a name="section5"></a>Reporting issues and contact information
-Any doubt you may have, please refer to the [Cygnus Core Team](../../doc/cygnus-ngsi/user_and_programmer_guide/reporting_issues_and_contact.md).
+Any doubt you may have, please refer to the [Cygnus Core Team](../doc/cygnus-ngsi/user_and_programmer_guide/issues_and_contact.md).
 
 [Top](#top)

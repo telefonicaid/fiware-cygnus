@@ -14,6 +14,7 @@
     * [Running as a service](./running_as_service.md)
 * Advanced topics:
     * [Testing](./testing.md)
+    * [Backends as short-term historics](./backends_as_sth.md)
     * [Name mappings](./name_mappings.md)
     * [Grouping Rules](./grouping_rules.md)
     * [Multitenancy](./multitenancy.md)
