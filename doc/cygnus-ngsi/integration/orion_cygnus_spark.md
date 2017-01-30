@@ -27,7 +27,7 @@ All components installation, configuration and running will be explained accordi
 [Top](#top)
 
 ##<a name="section2"></a>Setting up Orion Context Broker
-Orion Context Broker installation guide can be fund [here](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/admin/install.md#installation).
+Orion Context Broker installation guide can be found [here](https://fiware-orion.readthedocs.io/en/master/admin/install/index.html). We recommend to use release 1.6.0 at least.
 
 The default configuarion is OK for this integration example. Simply run it by typing in a shell:
 
@@ -68,6 +68,19 @@ curl -X POST "http://localhost:1026/v2/entities" -s -S -H 'Content-Type: applica
   "type": "room",
   "temperature": {
     "value": 26.5,
+    "type": "Float"
+  }
+}
+EOF
+```
+
+And updated using this other command:
+
+```
+curl -X POST "http://localhost:1026/v2/entities/room1/attrs" -s -S -H 'Content-Type: application/json' -d @- <<EOF
+{
+  "temperature": {
+    "value": 27.5,
     "type": "Float"
   }
 }
@@ -130,9 +143,11 @@ In order to test the integracion among Orion Context Broker and Cygnus, simply u
 ```
 $ tail -f /var/log/cygnus/cygnus.log
 ...
-time=2017-01-27T13:33:28.236UTC | lvl=INFO | corr=a72db6ff-ce15-4d38-a3a3-95af2ecc73b8 | trans=a72db6ff-ce15-4d38-a3a3-95af2ecc73b8 | srv=sc_valencia | subsrv=/gardens | comp=cygnus-ngsi | op=getEvents | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[304] : [NGSIRestHandler] Received data ({  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",  "originator" : "localhost",  "contextResponses" : [    {      "contextElement" : {        "attributes" : [          {            "name" : "temperature",            "type" : "centigrade",            "value" : "26.5"          }        ],        "type" : "room",        "isPattern" : "false",        "id" : "room1"      },      "statusCode" : {        "code" : "200",        "reasonPhrase" : "OK"      }    }  ]})
+time=2017-01-27T13:33:28.236UTC | lvl=INFO | corr=a72db6ff-ce15-4d38-a3a3-95af2ecc73b8 | trans=a72db6ff-ce15-4d38-a3a3-95af2ecc73b8 | srv=sc_valencia | subsrv=/gardens | comp=cygnus-ngsi | op=getEvents | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[304] : [NGSIRestHandler] Received data ({  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",  "originator" : "localhost",  "contextResponses" : [    {      "contextElement" : {        "attributes" : [          {            "name" : "temperature",            "type" : "centigrade",            "value" : 26.5          }        ],        "type" : "room",        "isPattern" : "false",        "id" : "room1"      },      "statusCode" : {        "code" : "200",        "reasonPhrase" : "OK"      }    }  ]})
 ...
 ```
+
+At this moment of the integration most probably you'll see several Java exceptions about the inhability to connect to Spark. That's normal, since Spark listener on TCP/5051 port is not running yet.
 
 [Top](#top)
 
@@ -143,7 +158,7 @@ Apache Spark will be installed from the URL resulting from entering at [Spark Do
 * Package type: pre-built for Hadoop 2.3
 * Download type: direct download
 
-The URL the "download Spark" link points to must be copied and then downloaded in our machine (into our home dir, for instance) by doing:
+The URL the "download Spark" link points to must be copied and then downloaded in our machine (into our home dir, for instance) by doing (Please, replace `d3kbcqa49mib13.cloudfront.net` with the actual base URL in your case):
 
 ```
 $ cd ~
@@ -179,8 +194,7 @@ $ cd spark-1.6.3-bin-hadoop2.3
 In order to test the whole architecture of our real time context information analysis we'll use an already developed analysis application Spark provides within its examples, called `JavaFlumeEventCount`:
 
 ```
-$ ls examples/src/main/java/org/apache/spark/examples/streaming/ | \
-grep JavaFlumeEventCount.java
+$ ls examples/src/main/java/org/apache/spark/examples/streaming/ | grep JavaFlumeEventCount.java
 JavaFlumeEventCount.java
 ```
 
@@ -197,7 +211,7 @@ Time: 1484750792000 ms
 Received 0 flume events.
 ```
 
-As can be seen, no Avro events are read. Neverhteless, if we update some context entity among the subscribed ones, we'll see the application receives it:
+As can be seen, no Avro events are read. Neverhteless, if we update some context entity among the subscribed ones, we'll see the application receives it (it should take a few seconds for the first time):
 
 ```
 -------------------------------------------
