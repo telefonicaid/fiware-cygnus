@@ -277,8 +277,8 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
   <tr><td>Ignore white space-based attribute values</td><td>1.0.0</td></tr>
   <tr><td>NGSIPostgreSQLSink</td><td>First implementation</td><td>0.12.0</d></tr>
   <tr><td rowspan="5">NGSICartoDBSink</td><td>First implementation (raw-historic analysis)</td><td>1.0.0</d></tr>
-  <tr><td>Distance-historic analysis</td><td>0.12.0</td></tr>
-  <tr><td>Multi tenancy support</td><td>0.12.0</td></tr>
+  <tr><td>Distance-historic analysis</td><td>1.1.0</td></tr>
+  <tr><td>Multi tenancy support</td><td>1.1.0</td></tr>
   <tr><td>Orion's geo:json support</td><td>1.6.0</td></tr>
   <tr><td>Raw-snapsot analysis</td><td>1.6.0</td></tr>
   <tr><td rowspan="2">NGSITestSink</td><td>First implementation</td><td>0.7.0</td></tr>
