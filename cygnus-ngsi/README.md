@@ -80,7 +80,7 @@ So, the starting point is choosing the internal architecture of the Cygnus NGSI 
 +-------------+    +----------------+    +---------------+
 ```
 
-Attending to the above architecture, the content of `/usr/cygnus/conf/cygnus_1.conf` will be:
+Attending to the above architecture, the content of `/usr/cygnus/conf/agent_1.conf` will be:
 
 ```
 cygnusagent.sources = http-source
