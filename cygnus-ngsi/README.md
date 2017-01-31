@@ -255,9 +255,10 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
   <tr><td>HDFSBackendImplBinary</td><td>0.10.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.10.0</td></tr>
   <tr><td>Per-user Hive databases</td><td>0.12.0</td></tr>
-  <tr><td rowspan="3">NGSICKANSink</td><td>First implementation</td><td>0.2.0</td></tr>
+  <tr><td rowspan="4">NGSICKANSink</td><td>First implementation</td><td>0.2.0</td></tr>
   <tr><td>Enable SSL</td><td>0.4.2</td></tr>
   <tr><td>Batching mechanism</td><td>0.11.0</td></tr>
+  <tr><td>Capping and expiration</td><td>1.7.0</td></tr>
   <tr><td>NGSIDynamoDBSink</td><td>First implementation</td><td>0.11.0</td></tr>
   <tr><td rowspan="2">NGSIKafkaSink</td><td>First implementation</td><td>0.9.0</td></tr>
   <tr><td>Batching mechanims</td><td>0.11.0</td></tr>
@@ -266,8 +267,9 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
   <tr><td>Batching support</td><td>0.12.0</td></tr>
   <tr><td>Time and size-based data management policies</td><td>0.13.0</td></tr>
   <tr><td>Ignore white space-based attribute values</td><td>1.0.0</td></tr>
-  <tr><td rowspan="2">NGSIMySQLSink</td><td>First implementation</td><td>0.2.0</td></tr>
+  <tr><td rowspan="3">NGSIMySQLSink</td><td>First implementation</td><td>0.2.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.10.0</td></tr>
+  <tr><td>Capping and expiration</td><td>1.7.0</td></tr>
   <tr><td rowspan="7">NGSISTHSink</td><td>First implementation</td><td>0.8.0</td></tr>
   <tr><td>Hash based collections</td><td>0.8.1</td></tr>
   <tr><td>TimeInstant metadata as reception time</td><td>0.12.0</td></tr>
@@ -292,6 +294,11 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
   <tr><td>Per batch TTL</td><td>0.13.0</td></tr>
   <tr><td>New encoding</td><td>1.3.0</td></tr>
   <tr><td>Name mappings</td><td>1.4.0</td></tr>
+  <tr><td rowspan="5">API</td><td>Grouping Rules</td><td>0.13.0</td></tr>
+  <tr><td>Subscriptions</td><td>1.0.0</td></tr>
+  <tr><td>Agents and instances</td><td>1.2.0</td></tr>
+  <tr><td>Logs</td><td>1.4.0</td></tr>
+  <tr><td>Metrics</td><td>1.7.0</td></tr>
 </table>
 
 [Top](#top)
