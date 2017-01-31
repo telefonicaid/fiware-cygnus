@@ -73,13 +73,8 @@ public class MySQLBackendImpl implements MySQLBackend {
         return driver;
     } // getDriver
     
-    /**
-     * Creates a database, given its name, if not exists.
-     * @param dbName
-     * @throws Exception
-     */
     @Override
-    public void createDatabase(String dbName) throws Exception {
+    public void createDatabase(String dbName) throws CygnusRuntimeError, CygnusPersistenceError {
         if (cache.isCachedDb(dbName)) {
             LOGGER.debug("'" + dbName + "' is cached, thus it is not created");
             return;
@@ -92,16 +87,16 @@ public class MySQLBackendImpl implements MySQLBackend {
         
         try {
             stmt = con.createStatement();
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
+        } catch (SQLException e) {
+            throw new CygnusRuntimeError("SQLException, " + e.getMessage());
         } // try catch
         
         try {
             String query = "create database if not exists `" + dbName + "`";
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
+        } catch (SQLException e) {
+            throw new CygnusPersistenceError("SQLException, " + e.getMessage());
         } // try catch
         
         closeMySQLObjects(con, stmt);
@@ -110,15 +105,9 @@ public class MySQLBackendImpl implements MySQLBackend {
         cache.addDb(dbName);
     } // createDatabase
     
-    /**
-     * Creates a table, given its name, if not exists in the given database.
-     * @param dbName
-     * @param tableName
-     * @param typedFieldNames
-     * @throws Exception
-     */
     @Override
-    public void createTable(String dbName, String tableName, String typedFieldNames) throws Exception {
+    public void createTable(String dbName, String tableName, String typedFieldNames)
+        throws CygnusRuntimeError, CygnusPersistenceError {
         if (cache.isCachedTable(dbName, tableName)) {
             LOGGER.debug("'" + tableName + "' is cached, thus it is not created");
             return;
@@ -131,16 +120,16 @@ public class MySQLBackendImpl implements MySQLBackend {
         
         try {
             stmt = con.createStatement();
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
+        } catch (SQLException e) {
+            throw new CygnusRuntimeError("SQLException, " + e.getMessage());
         } // try catch
         
         try {
             String query = "create table if not exists `" + tableName + "` " + typedFieldNames;
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
+        } catch (SQLException e) {
+            throw new CygnusPersistenceError("SQLException, " + e.getMessage());
         } // try catch
         
         closeMySQLObjects(con, stmt);
@@ -151,7 +140,7 @@ public class MySQLBackendImpl implements MySQLBackend {
     
     @Override
     public void insertContextData(String dbName, String tableName, String fieldNames, String fieldValues)
-        throws Exception {
+        throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError {
         Statement stmt = null;
         
         // get a connection to the given database
@@ -159,8 +148,8 @@ public class MySQLBackendImpl implements MySQLBackend {
             
         try {
             stmt = con.createStatement();
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
+        } catch (SQLException e) {
+            throw new CygnusRuntimeError("SQLException, " + e.getMessage());
         } // try catch
         
         try {
@@ -168,9 +157,9 @@ public class MySQLBackendImpl implements MySQLBackend {
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
-            throw new CygnusPersistenceError(e.getMessage());
+            throw new CygnusPersistenceError("SQLTimeoutException, " + e.getMessage());
         } catch (SQLException e) {
-            throw new CygnusBadContextData(e.getMessage());
+            throw new CygnusBadContextData("SQLException, " + e.getMessage());
         } // try catch
         
         closeMySQLObjects(con, stmt);
@@ -405,7 +394,7 @@ public class MySQLBackendImpl implements MySQLBackend {
          * @return
          * @throws CygnusPersistenceError
          */
-        public Connection getConnection(String dbName) throws CygnusPersistenceError {
+        public Connection getConnection(String dbName) throws CygnusRuntimeError, CygnusPersistenceError {
             try {
                 // FIXME: the number of cached connections should be limited to a certain number; with such a limit
                 //        number, if a new connection is needed, the oldest one is closed
@@ -422,7 +411,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
                 return con;
             } catch (ClassNotFoundException e) {
-                throw new CygnusPersistenceError("ClassNotFoundException, " + e.getMessage());
+                throw new CygnusRuntimeError("ClassNotFoundException, " + e.getMessage());
             } catch (SQLException e) {
                 throw new CygnusPersistenceError("SQLException, " + e.getMessage());
             } // try catch

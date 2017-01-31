@@ -93,6 +93,10 @@ public class NGSIEvent implements Event {
         return new Long(headers.get(NGSIConstants.FLUME_HEADER_TIMESTAMP));
     } // getRecvTimeTs
     
+    public String getServiceForData() {
+        return headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
+    } // getServiceForData
+    
     /**
      * Gets the service both for data and for naming.
      * @param enableMappings

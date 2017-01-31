@@ -386,9 +386,11 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         try {
             persistBatch(batch);
         } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
+            updateServiceMetrics(batch, true);
             LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
             return Status.READY;
         } catch (CygnusPersistenceError e) {
+            updateServiceMetrics(batch, true);
             LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
             doRollbackAgain(rollbackedAccumulation);
             return Status.BACKOFF; // Slow down the sink since there are problems with the persistence backend
@@ -401,6 +403,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
             } // try catch
         } // if
+        
+        updateServiceMetrics(batch, false);
 
         if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
             LOGGER.info("Finishing internal transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
@@ -518,12 +522,14 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             try {
                 persistBatch(batch);
             } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
+                updateServiceMetrics(batch, true);
                 LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
                 accumulator.initialize(new Date().getTime());
                 txn.commit();
                 txn.close();
                 return Status.READY;
             } catch (CygnusPersistenceError e) {
+                updateServiceMetrics(batch, true);
                 LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
                 doRollback(accumulator.clone()); // the global accumulator has to be cloned for rollbacking purposes
                 accumulator.initialize(new Date().getTime());
@@ -539,6 +545,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
                 } // try
             } // if
+            
+            updateServiceMetrics(batch, false);
         } // if
 
         if (!accumulator.getAccTransactionIds().isEmpty()) {
@@ -574,6 +582,19 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             } // if
         } // if else
     } // doRollback
+    
+    private void updateServiceMetrics(NGSIBatch batch, boolean error) {
+        batch.startIterator();
+        
+        while (batch.hasNext()) {
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
+            NGSIEvent event = events.get(0);
+            String service = event.getServiceForData();
+            String servicePath = event.getServicePathForData();
+            long time = (new Date().getTime() - event.getRecvTimeTs()) * events.size();
+            serviceMetrics.add(service, servicePath, 0, 0, 0, 0, time, events.size(), 0, 0, error ? events.size() : 0);
+        } // while
+    } // updateServiceMetrics
 
     /**
      * Utility class for batch-like getRecvTimeTs accumulation purposes.

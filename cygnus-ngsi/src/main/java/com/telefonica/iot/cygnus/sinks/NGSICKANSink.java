@@ -36,6 +36,7 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
 import java.util.Locale;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
 
 /**
@@ -241,17 +242,22 @@ public class NGSICKANSink extends NGSISink {
 
             // Get the events within the current sub-batch
             ArrayList<NGSIEvent> events = batch.getNextEvents();
+            
+            // Get the first event, it will give us useful information
+            NGSIEvent firstEvent = events.get(0);
+            String service = firstEvent.getServiceForData();
+            String servicePath = firstEvent.getServicePathForData();
 
-            // Get an aggregator for this entity and initialize it
+            // Get an aggregator for this entity and initialize it based on the first event
             CKANAggregator aggregator = getAggregator(this.rowAttrPersistence);
-            aggregator.initialize(events.get(0));
+            aggregator.initialize(firstEvent);
 
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
 
             // Persist the aggregation
-            persistAggregation(aggregator);
+            persistAggregation(aggregator, service, servicePath);
             batch.setNextPersisted(true);
         } // while
     } // persistBatch
@@ -495,7 +501,7 @@ public class NGSICKANSink extends NGSISink {
         } // if else
     } // getAggregator
 
-    private void persistAggregation(CKANAggregator aggregator)
+    private void persistAggregation(CKANAggregator aggregator, String service, String servicePath)
         throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         String aggregation = aggregator.getAggregation();
         String orgName = aggregator.getOrgName(enableLowercase);
@@ -505,11 +511,23 @@ public class NGSICKANSink extends NGSISink {
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSICKANSink (orgName=" + orgName
                 + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + aggregation + ")");
 
-        if (aggregator instanceof RowAggregator) {
-            persistenceBackend.persist(orgName, pkgName, resName, aggregation, true);
-        } else {
-            persistenceBackend.persist(orgName, pkgName, resName, aggregation, false);
-        } // if else
+        ((CKANBackendImpl) persistenceBackend).startTransaction();
+        
+        // Do try-catch only for metrics gathering purposes... after that, re-throw
+        try {
+            if (aggregator instanceof RowAggregator) {
+                persistenceBackend.persist(orgName, pkgName, resName, aggregation, true);
+            } else {
+                persistenceBackend.persist(orgName, pkgName, resName, aggregation, false);
+            } // if else
+            
+            ImmutablePair<Long, Long> bytes = ((CKANBackendImpl) persistenceBackend).finishTransaction();
+            serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
+        } catch (CygnusBadConfiguration | CygnusRuntimeError | CygnusPersistenceError e) {
+            ImmutablePair<Long, Long> bytes = ((CKANBackendImpl) persistenceBackend).finishTransaction();
+            serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
+            throw e;
+        } // catch
     } // persistAggregation
 
     /**

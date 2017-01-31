@@ -80,7 +80,7 @@ $ curl -X GET "http://localhost:8081/v1/version"
 }
 ```
 
-Many other operations, like getting/putting/updating/deleting the grouping rules can be found in Management Interface [documentation](./doc/installation_and_administration_guide/management_interface.md).
+Many other operations, like getting/putting/updating/deleting the grouping rules can be found in Management Interface [documentation](../doc/cygnus-common/installation_and_administration_guide/management_interface.md).
 
 [Top](#top)
 
@@ -113,6 +113,6 @@ Further information can be found in the documentation at [fiware-cygnus.readthed
 [Top](#top)
 
 ##<a name="section5"></a>Reporting issues and contact information
-Any doubt you may have, please refer to the [Cygnus Core Team](./reporting_issues_and_contact.md).
+Any doubt you may have, please refer to the [Cygnus Core Team](../reporting_issues_and_contact.md).
 
 [Top](#top)
