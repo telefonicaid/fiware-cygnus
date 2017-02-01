@@ -99,6 +99,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Tue Jan 31 2016 Francisco Romero <frnacisco.romerobueno@telefonica.com> 1.7.0
+
 * Fri Dec 02 2016 Francisco Romero <frnacisco.romerobueno@telefonica.com> 1.6.0
 
 * Wed Nov 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.5.0

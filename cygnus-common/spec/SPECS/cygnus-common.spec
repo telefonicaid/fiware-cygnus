@@ -171,6 +171,13 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Tue Jan 31 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.7.0
+- [cygnus] Add Travis CI (#1347)
+- [cygnus][hardening] Fix "FIWARE" name in license headers (#1369)
+- [cygnus-common][hardening] Clean and modularize ManagementInterface.java (#1368)
+- [cygnus-common][feature] Add KPIs API (#1339)
+- [cygnus-common][bug] Fix error handling upon MongoDB collection creation (#1377)
+
 * Fri Dec 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.6.0
 - [cygnus][hardening] Add IPv6 support to API and GUI (#1261)
 
