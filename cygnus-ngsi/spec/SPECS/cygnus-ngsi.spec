@@ -99,6 +99,22 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Tue Jan 31 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.7.0 
+- [cygnus-ngsi][feature] Add global data capping/expirationn options based on time and size (#1317)
+- [cygnus-ngsi][feature] Add specific data capping/expiration implementation for NGSICKANSink (#1344)
+- [cygnus-ngsi][feature] Add specific data capping/expiration implementation for NGSIMySQLSink (#1365)
+- [cygnus] Add Travis CI (#1347)
+- [cygnus-ngsi][hardening] Force lowercase organization, dataset and resource names in NGSICKANSink (#1352)
+- [cygnus-ngsi][hardening] Replace warnings upon unnecessary header received with debug traces at NGSIRestHandler (#1354)
+- [cygnus-ngsi][hardening] Improve persistence error logs at NGSISink (#1358)
+- [cygnus-ngsi][hardening] Add raw bytes to NGSIEvent (#1345)
+- [cygnus-ngsi][hardening] Add cache to NGSIMySQLSink (#130)
+- [cygnus][hardening] Fix "FIWARE" name in license headers (#1369)
+- [cygnus-ngsi][bug] Differentiate among enterprise and individual Carto accounts (#1382)
+- [cygnus-ngsi][hardening] Add integration example with Apache Spark (#1397)
+- [cygnus-ngsi][hardening] Add a piece of documentation about capping and/or expirating records in CKAN, MySQL, MongoDB and STH Comet (#1391)
+- [cygnus-ngsi][hardening] Update Cygnus NGSI README with last features and new advanced topics (#1390)
+
 * Fri Dec 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.6.0
 - [cygnus-ngsi][hardening] Update migration script for HDFS regarding new encoding (#1271)
 - [cygnus-ngsi][feature] Add support for geo:json Orion's type in NGSICartoDBSink (#1275)
