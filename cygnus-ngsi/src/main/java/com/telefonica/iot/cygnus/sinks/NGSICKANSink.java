@@ -15,11 +15,14 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
-
 package com.telefonica.iot.cygnus.sinks;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackendImpl;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackend;
+import com.telefonica.iot.cygnus.containers.NTIMetadata;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
@@ -31,6 +34,7 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.JsonUtils;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
@@ -58,7 +62,10 @@ public class NGSICKANSink extends NGSISink {
     private int backendMaxConns;
     private int backendMaxConnsPerRoute;
     private String ckanViewer;
+    private boolean ntiEnable;
+    private String ntiMetadataConfFile;
     private CKANBackend persistenceBackend;
+    private NTIMetadata ntiMetadata;
 
     /**
      * Constructor.
@@ -186,8 +193,7 @@ public class NGSICKANSink extends NGSISink {
         
         if (sslStr.equals("true") || sslStr.equals("false")) {
             ssl = Boolean.valueOf(sslStr);
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (ssl="
-                + sslStr + ")");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (ssl=" + sslStr + ")");
         } else  {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (ssl="
@@ -201,6 +207,25 @@ public class NGSICKANSink extends NGSISink {
                 + backendMaxConnsPerRoute + ")");
         ckanViewer = context.getString("ckan_viewer", "recline_grid_view");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (ckan_viewer=" + ckanViewer + ")");
+        
+        String ntiEnableStr = context.getString("nti.enable", "false");
+        
+        if (ntiEnableStr.equals("true") || ntiEnableStr.equals("false")) {
+            ntiEnable = Boolean.valueOf(ntiEnableStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (nti.enable=" + ntiEnableStr + ")");
+        } else  {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (nti.enable="
+                + ntiEnableStr + ") -- Must be 'true' or 'false'");
+        }  // if else
+        
+        ntiMetadataConfFile = context.getString("nti.metadata_conf_file");
+        
+        if (ntiMetadataConfFile == null || ntiMetadataConfFile.isEmpty()) {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (nti.nti_metadata_conf_file)"
+                + " -- Must not be null or empty");
+        } // if
 
         super.configure(context);
         
@@ -213,6 +238,7 @@ public class NGSICKANSink extends NGSISink {
 
     @Override
     public void start() {
+        // Create the persistence backend
         try {
             persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, orionUrl, ssl, backendMaxConns,
                     backendMaxConnsPerRoute, ckanViewer);
@@ -221,9 +247,62 @@ public class NGSICKANSink extends NGSISink {
             LOGGER.error("Error while creating the CKAN persistence backend. Details="
                     + e.getMessage());
         } // try catch
+        
+        // Load the NTI metadata, if enabled
+        loadNTIMetadata();
 
+        // Call superclass starting method
         super.start();
     } // start
+    
+    private void loadNTIMetadata() {
+        // Read the Json string from the configuration file
+        String jsonStr;
+
+        try {
+            jsonStr = JsonUtils.readJsonFile(ntiMetadataConfFile);
+            LOGGER.debug("[" + this.getName() + "] Reading NTI metadata, Json read: " + jsonStr);
+        } catch (Exception e) {
+            LOGGER.error("[" + this.getName() + "] Runtime error (" + e.getMessage() + ")");
+            ntiMetadata = null;
+            return;
+        } // try catch
+        
+        loadNTIMetadata(jsonStr);
+    } // loadNTIMetadata
+    
+    /**
+     * Loads the NTI metadata given a Json string. It is protected since it only can be used by this class and test
+     * classes.
+     * @param jsonStr
+     */
+    protected void loadNTIMetadata(String jsonStr) {
+        if (jsonStr == null) {
+            LOGGER.debug("[" + this.getName() + "] Reading NTI metadata, no file to read");
+            ntiMetadata = null;
+            return;
+        } // if
+
+        // Parse the Json string
+        Gson gson = new Gson();
+
+        try {
+            ntiMetadata = gson.fromJson(jsonStr, NTIMetadata.class);
+            LOGGER.debug("[" + this.getName() + "] Reading NTI metadata, Json parsed");
+        } catch (JsonIOException | JsonSyntaxException e) {
+            LOGGER.error("[" + this.getName() + "] Runtime error (" + e.getMessage() + ")");
+            ntiMetadata = null;
+            return;
+        } // try catch
+
+        // Check if any of the mappings is not valid, e.g. some field is missing
+        ntiMetadata.purge();
+        LOGGER.debug("[" + this.getName() + "] Reading NTI metadata, Json purged");
+        
+        // Pre-compile the regular expressions
+        ntiMetadata.compilePatterns();
+        LOGGER.debug("[" + this.getName() + "] Reading NTI metadata, regular expressions pre-compiled");
+    } // loadNameMappings
 
     @Override
     void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
@@ -242,22 +321,17 @@ public class NGSICKANSink extends NGSISink {
 
             // Get the events within the current sub-batch
             ArrayList<NGSIEvent> events = batch.getNextEvents();
-            
-            // Get the first event, it will give us useful information
-            NGSIEvent firstEvent = events.get(0);
-            String service = firstEvent.getServiceForData();
-            String servicePath = firstEvent.getServicePathForData();
 
             // Get an aggregator for this entity and initialize it based on the first event
             CKANAggregator aggregator = getAggregator(this.rowAttrPersistence);
-            aggregator.initialize(firstEvent);
+            aggregator.initialize(events.get(0));
 
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
 
             // Persist the aggregation
-            persistAggregation(aggregator, service, servicePath);
+            persistAggregation(aggregator);
             batch.setNextPersisted(true);
         } // while
     } // persistBatch
@@ -313,18 +387,24 @@ public class NGSICKANSink extends NGSISink {
      */
     private abstract class CKANAggregator {
 
-        // string containing the data records
+        // String containing the data records
         protected String records;
 
-        protected String service;
-        protected String servicePathForData;
-        protected String servicePathForNaming;
-        protected String entityForNaming;
+        // Names/IDs for CKAN structure
         protected String orgName;
         protected String pkgName;
         protected String resName;
         protected String resId;
-
+        
+        // Info about the events
+        protected String service;
+        protected String servicePath;
+        protected String entityId;
+        protected String entityType;
+        
+        /**
+         * Constructor.
+         */
         public CKANAggregator() {
             records = "";
         } // CKANAggregator
@@ -358,13 +438,19 @@ public class NGSICKANSink extends NGSISink {
         } // getResName
 
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
-            service = event.getServiceForNaming(enableNameMappings);
-            servicePathForData = event.getServicePathForData();
-            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            orgName = buildOrgName(service);
-            pkgName = buildPkgName(service, servicePathForNaming);
+            // Initialize names for CKAN structure
+            String serviceForNaming = event.getServiceForNaming(enableNameMappings);
+            String servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            String entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            orgName = buildOrgName(serviceForNaming);
+            pkgName = buildPkgName(serviceForNaming, servicePathForNaming);
             resName = buildResName(entityForNaming);
+            
+            // Initialize info about the events
+            service = event.getServiceForData();
+            servicePath = event.getServicePathForData();
+            entityId = event.getContextElement().getId();
+            entityType = event.getContextElement().getType();
         } // initialize
 
         public abstract void aggregate(NGSIEvent cygnusEvent);
@@ -389,8 +475,6 @@ public class NGSICKANSink extends NGSISink {
 
             // get the getRecvTimeTs body
             NotifyContextRequest.ContextElement contextElement = event.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
 
@@ -414,7 +498,7 @@ public class NGSICKANSink extends NGSISink {
                 // create a column and aggregate it
                 String record = "{\"" + NGSIConstants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\","
                     + "\"" + NGSIConstants.RECV_TIME + "\": \"" + recvTime + "\","
-                    + "\"" + NGSIConstants.FIWARE_SERVICE_PATH + "\": \"" + servicePathForData + "\","
+                    + "\"" + NGSIConstants.FIWARE_SERVICE_PATH + "\": \"" + servicePath + "\","
                     + "\"" + NGSIConstants.ENTITY_ID + "\": \"" + entityId + "\","
                     + "\"" + NGSIConstants.ENTITY_TYPE + "\": \"" + entityType + "\","
                     + "\"" + NGSIConstants.ATTR_NAME + "\": \"" + attrName + "\","
@@ -451,8 +535,6 @@ public class NGSICKANSink extends NGSISink {
 
             // get the getRecvTimeTs body
             NotifyContextRequest.ContextElement contextElement = event.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
 
@@ -466,7 +548,7 @@ public class NGSICKANSink extends NGSISink {
             } // if
 
             String record = "{\"" + NGSIConstants.RECV_TIME + "\": \"" + recvTime + "\","
-                    + "\"" + NGSIConstants.FIWARE_SERVICE_PATH + "\": \"" + servicePathForData + "\","
+                    + "\"" + NGSIConstants.FIWARE_SERVICE_PATH + "\": \"" + servicePath + "\","
                     + "\"" + NGSIConstants.ENTITY_ID + "\": \"" + entityId + "\","
                     + "\"" + NGSIConstants.ENTITY_TYPE + "\": \"" + entityType + "\"";
 
@@ -501,12 +583,28 @@ public class NGSICKANSink extends NGSISink {
         } // if else
     } // getAggregator
 
-    private void persistAggregation(CKANAggregator aggregator, String service, String servicePath)
+    private void persistAggregation(CKANAggregator aggregator)
         throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
+        // Get the aggregation
         String aggregation = aggregator.getAggregation();
+        
+        // Get some required parameters
         String orgName = aggregator.getOrgName(enableLowercase);
         String pkgName = aggregator.getPkgName(enableLowercase);
         String resName = aggregator.getResName(enableLowercase);
+        String service = aggregator.service;
+        String servicePath = aggregator.servicePath;
+        String entityId = aggregator.entityId;
+        String entityType = aggregator.entityType;
+        
+        // Get the NTI metadata, if enabled
+        String ntiMetadataForDataset = null;
+        String ntiMetadataForResource = null;
+        
+        if (this.ntiEnable) {
+            ntiMetadataForDataset = getNTIMetadataForDataset(service, servicePath);
+            ntiMetadataForResource = getNTIMetadataForResource(service, servicePath, entityId, entityType);
+        } // if
 
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSICKANSink (orgName=" + orgName
                 + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + aggregation + ")");
@@ -516,9 +614,11 @@ public class NGSICKANSink extends NGSISink {
         // Do try-catch only for metrics gathering purposes... after that, re-throw
         try {
             if (aggregator instanceof RowAggregator) {
-                persistenceBackend.persist(orgName, pkgName, resName, aggregation, true);
+                persistenceBackend.persist(orgName, pkgName, resName, aggregation, ntiMetadataForDataset,
+                        ntiMetadataForResource, true);
             } else {
-                persistenceBackend.persist(orgName, pkgName, resName, aggregation, false);
+                persistenceBackend.persist(orgName, pkgName, resName, aggregation, ntiMetadataForDataset,
+                        ntiMetadataForResource, false);
             } // if else
             
             ImmutablePair<Long, Long> bytes = ((CKANBackendImpl) persistenceBackend).finishTransaction();
@@ -527,7 +627,7 @@ public class NGSICKANSink extends NGSISink {
             ImmutablePair<Long, Long> bytes = ((CKANBackendImpl) persistenceBackend).finishTransaction();
             serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
             throw e;
-        } // catch
+        } // catch // catch // catch // catch
     } // persistAggregation
 
     /**
@@ -624,5 +724,13 @@ public class NGSICKANSink extends NGSISink {
     private boolean isSpecialMetadata(String value) {
         return value == null || value.equals("[]");
     } // isSpecialMetadata
+    
+    private String getNTIMetadataForDataset(String service, String servicePath) {
+        return null;
+    } // getNTIMetadataForDataset
+    
+    private String getNTIMetadataForResource(String service, String servicePath, String entityId, String entityType) {
+        return null;
+    } // getNTIMetadataForDataset
 
 } // NGSICKANSink
