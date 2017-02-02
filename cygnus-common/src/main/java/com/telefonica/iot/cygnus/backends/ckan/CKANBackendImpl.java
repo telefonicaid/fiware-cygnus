@@ -26,7 +26,6 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -75,7 +74,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
     } // CKANBackendImpl
 
     @Override
-    public void persist(String orgName, String pkgName, String resName, String records, boolean createEnabled)
+    public void persist(String orgName, String pkgName, String resName, String records, String ntiMetadataForDataset,
+            String ntiMetadataForResource, boolean createEnabled)
         throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         LOGGER.debug("Going to lookup for the resource id, the cache may be updated during the process (orgName="
                 + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");

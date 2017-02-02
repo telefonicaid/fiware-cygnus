@@ -35,12 +35,15 @@ public interface CKANBackend {
      * @param pkgName Package/dataset name
      * @param resName Resource name
      * @param records Recods to be added to the resource
+     * @param ntiMetadataForDataset
+     * @param ntiMetadataForResource
      * @param createEnabled
      * @throws CygnusBadConfiguration
      * @throws CygnusRuntimeError
      * @throws CygnusPersistenceError
      */
-    void persist(String orgName, String pkgName, String resName, String records, boolean createEnabled)
+    void persist(String orgName, String pkgName, String resName, String records, String ntiMetadataForDataset,
+            String ntiMetadataForResource, boolean createEnabled)
         throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError;
     
     /**

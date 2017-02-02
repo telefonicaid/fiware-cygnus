@@ -102,7 +102,7 @@ public class CKANBackendImplTest {
         try {
             backend.setCache(mockCache);
             backend.setHttpClient(mockHttpClient);
-            backend.persist(orgName, pkgName, resName, data, true);
+            backend.persist(orgName, pkgName, resName, data, null, null, true);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
