@@ -435,6 +435,8 @@ public class NGSIMySQLSink extends NGSISink {
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 
+                // Check if the attribute already exists in the form of 2 columns (one for metadata); if not existing,
+                // add an empty value for all previous rows
                 if (aggregation.containsKey(attrName)) {
                     aggregation.get(attrName).add(attrValue);
                     aggregation.get(attrName + "_md").add(attrMetadata);
@@ -448,7 +450,7 @@ public class NGSIMySQLSink extends NGSISink {
                 } // if else
             } // for
             
-            // Iterate on all the aggregations, checking for not update attributes; and adding an empty value if missing
+            // Iterate on all the aggregations, checking for not updated attributes; add an empty value if missing
             for (String key : aggregation.keySet()) {
                 ArrayList values = aggregation.get(key);
                 
