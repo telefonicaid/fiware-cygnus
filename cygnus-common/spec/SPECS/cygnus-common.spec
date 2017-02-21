@@ -169,6 +169,8 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Tue Feb 21 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.5.2
+
 * Thu Nov 24 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.5.1
 
 * Wed Nov 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.5.0
