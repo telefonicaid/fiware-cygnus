@@ -97,6 +97,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Tue Feb 21 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.5.2
+- [cygnus-ngsi][bug] Fix NGSIMySQLSink when persisting bulks of rows with different number of columns (#1409)
+
 * Thu Nov 24 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.5.1
 - [cygnus-ngsi][bug] Fix getting location header when creating Json responses in HttpBackend (#1318)
 
