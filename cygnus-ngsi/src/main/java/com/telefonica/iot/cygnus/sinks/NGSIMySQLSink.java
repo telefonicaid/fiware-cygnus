@@ -35,6 +35,7 @@ import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import org.apache.flume.Context;
@@ -456,18 +457,21 @@ public class NGSIMySQLSink extends NGSISink {
         
         @Override
         public void aggregate(NGSIEvent event) {
-            // get the getRecvTimeTs headers
+            // Number of previous values
+            int numPreviousValues = aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).size();
+            
+            // Get the event headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, false);
 
-            // get the getRecvTimeTs body
+            // get the event body
             ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
             
-            // iterate on all this context element attributes, if there are attributes
+            // Iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
             if (contextAttributes == null || contextAttributes.isEmpty()) {
@@ -488,8 +492,29 @@ public class NGSIMySQLSink extends NGSISink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                aggregation.get(attrName).add(attrValue);
-                aggregation.get(attrName + "_md").add(attrMetadata);
+                
+                // Check if the attribute already exists in the form of 2 columns (one for metadata); if not existing,
+                // add an empty value for all previous rows
+                if (aggregation.containsKey(attrName)) {
+                    aggregation.get(attrName).add(attrValue);
+                    aggregation.get(attrName + "_md").add(attrMetadata);
+                } else {
+                    ArrayList values = new ArrayList<>(Collections.nCopies(numPreviousValues, ""));
+                    values.add(attrValue);
+                    aggregation.put(attrName, values);
+                    ArrayList valuesMd = new ArrayList<>(Collections.nCopies(numPreviousValues, ""));
+                    valuesMd.add(attrMetadata);
+                    aggregation.put(attrName + "_md", valuesMd);
+                } // if else
+            } // for
+            
+            // Iterate on all the aggregations, checking for not updated attributes; add an empty value if missing
+            for (String key : aggregation.keySet()) {
+                ArrayList values = aggregation.get(key);
+                
+                if (values.size() == numPreviousValues) {
+                    values.add("");
+                } // if
             } // for
         } // aggregate
         
