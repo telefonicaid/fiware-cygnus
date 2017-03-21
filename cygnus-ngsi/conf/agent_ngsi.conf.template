@@ -258,7 +258,7 @@ cygnus-ngsi.sinks.mongo-sink.channel = mongo-channel
 # how the attributes are stored, either per row either per column (row, column)
 #cygnus-ngsi.sinks.mongo-sink.attr_persistence = row
 # true if the metadata will be stored, false by default
-#cygnus-ngsi.sinks.mongo-sink.attr_metadata_store = true
+#cygnus-ngsi.sinks.mongo-sink.attr_metadata_store = false
 # number of notifications to be included within a processing batch
 #cygnus-ngsi.sinks.mongo-sink.batch_size = 100
 # timeout for batch accumulation
