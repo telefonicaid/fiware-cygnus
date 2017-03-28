@@ -86,14 +86,15 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         }  // if else
         
         attrMetadataStore = context.getString("attr_metadata_store", "false");
-		if (attrMetadataStore.equals("true") || attrMetadataStore.equals("false")) {        	
-			LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_metadata_store="
-					+ attrMetadataStore + ")");
-		} else {
-			invalidConfiguration = true;
-			LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
-					+ attrMetadataStore + ") must be 'true' or 'false'");
-		} 
+
+        if (attrMetadataStore.equals("true") || attrMetadataStore.equals("false")) {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_metadata_store="
+                    + attrMetadataStore + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
+                    + attrMetadataStore + ") must be 'true' or 'false'");
+        } // if else 
 		
         super.configure(context);
     } // configure
@@ -249,48 +250,47 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                         + attrType + ")");
                 
                 Document doc;
-				if(attrMetadataStore.equals("true")){
-					doc = createDocWithMetadata(recvTimeTs, entityId, entityType, attrName, attrType, attrValue, attrMetadata);
-				}
-				else{
-					doc = createDoc(recvTimeTs, entityId, entityType, attrName, attrType, attrValue);
-				}
-				                
+
+                if(attrMetadataStore.equals("true")){
+                    doc = createDocWithMetadata(recvTimeTs, entityId, entityType, attrName, attrType, attrValue, attrMetadata);
+                } else {
+                    doc = createDoc(recvTimeTs, entityId, entityType, attrName, attrType, attrValue);
+                } // if else
+		                
                 aggregation.add(doc);
             } // for
         } // aggregate
         
         private Document createDocWithMetadata(Long recvTimeTs, String entityId, String entityType, String attrName,
-				String attrType, String attrValue, String attrMetadata) {
+                String attrType, String attrValue, String attrMetadata) {
+            Document doc = new Document("recvTime", new Date(recvTimeTs));
 
-			Document doc = new Document("recvTime", new Date(recvTimeTs));
+            switch (dataModel) {
+            case DMBYSERVICEPATH:
+                doc.append("entityId", entityId)
+                        .append("entityType", entityType)
+                        .append("attrName", attrName)
+                        .append("attrType", attrType)
+                        .append("attrValue", attrValue)
+                        .append("attrMetadata", (DBObject)JSON.parse(attrMetadata));
+                break;
+            case DMBYENTITY:
+                doc.append("attrName", attrName)
+                        .append("attrType", attrType)
+                        .append("attrValue", attrValue)
+                        .append("attrMetadata", (DBObject)JSON.parse(attrMetadata));
+                break;
+            case DMBYATTRIBUTE:
+                doc.append("attrType", attrType)
+                        .append("attrValue", attrValue)
+                        .append("attrMetadata", (DBObject)JSON.parse(attrMetadata));
+                break;
+            default:
+                return null; // this will never be reached
+            } // switch
 
-			switch (dataModel) {
-			case DMBYSERVICEPATH:
-				doc.append("entityId", entityId)
-				.append("entityType", entityType)
-				.append("attrName", attrName)
-				.append("attrType", attrType)
-				.append("attrValue", attrValue)
-				.append("attrMetadata", (DBObject)JSON.parse(attrMetadata));
-				break;
-			case DMBYENTITY:
-				doc.append("attrName", attrName)
-				.append("attrType", attrType)
-				.append("attrValue", attrValue)
-				.append("attrMetadata", (DBObject)JSON.parse(attrMetadata));
-				break;
-			case DMBYATTRIBUTE:
-				doc.append("attrType", attrType)
-				.append("attrValue", attrValue)
-				.append("attrMetadata", (DBObject)JSON.parse(attrMetadata));
-				break;
-			default:
-				return null; // this will never be reached
-			} // switch
-
-			return doc;			
-		}// createDocWithMetadata
+            return doc;			
+        } // createDocWithMetadata
         
         private Document createDoc(long recvTimeTs, String entityId, String entityType, String attrName,
                 String attrType, String attrValue) {
@@ -419,7 +419,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             backend.insertContextDataRaw(dbName, collectionName, aggregation);
         } catch (Exception e) {
             throw new CygnusPersistenceError("-, " + e.getMessage());
-        }
+        } // try catch
     } // persistAggregation
 
 } // NGSIMongoSink
