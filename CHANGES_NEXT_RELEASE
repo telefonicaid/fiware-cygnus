@@ -1,2 +1,4 @@
 - [cygnus-twitter][bug] Fix wrong data in spec file (#1407)
 - [cygnus-ngsi][hardening] Add complex configuration examples (#629)
+- [cygnus-ngsi][bug] Fix NGSIMySQLSink when persisting bulks of rows with different number of columns (#1409)
+- [cygnus-ngsi][feature] Add metadata storing in NGSIMongoSink (#1156)
