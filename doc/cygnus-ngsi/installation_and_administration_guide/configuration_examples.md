@@ -11,6 +11,10 @@ Content:
         * [Single agent, single source, multiplexing per FIWARE service](#section2.1.3)
         * [Orion Context Broker subscriptions](#section2.1.4)
     * [Scenarios involving multiple FIWARE service paths](#section2.2)
+        * [Multiple agents](#section2.2.1)
+        * [Single agent, multiple sources](#section2.2.2)
+        * [Single agent, single source, multiplexing per FIWARE service path](#section2.2.3)
+        * [Orion Context Broker subscriptions](#section2.2.4)
     * [Scenarios involving a pool of sinks per persistene backend](#section2.3)
 
 ## <a name="section1"></a>Basic configurations
@@ -27,7 +31,7 @@ A Cygnus agent based on a single source, a single channel and a single sink.
 +-----------------------------------+
 ```
 
-Its agent configuration file is the usal one:
+Its agent configuration file is the usual one:
 
 ```
 $ cat /usr/cygnus/conf/agent_simplest.conf
@@ -115,13 +119,13 @@ cygnus-ngsi.channels.chN.type = ...
 cygnus-ngsi.channels.chN...
 ```
 
-Use multi-backend configuration when you simply want the same NGSI context data to be replicated in each one of the backends. This is possible thanks to the default channel selector, which [replicates](https://flume.apache.org/FlumeUserGuide.html#replicating-channel-selector-default) internal NGSI events to all the channels connected to the source. Such a replication is always done independently of the number of FIWARE service paths you own within your FIWARE service, or the number of kind of entities you have.
+Use multi-backend configuration when you simply want the same NGSI context data to be replicated in each one of the backends. This is possible thanks to the default channel selector, which [replicates](https://flume.apache.org/FlumeUserGuide.html#replicating-channel-selector-default) internal NGSI events to all the channels connected to the source. Such a replication is always done independently of the number of FIWARE service paths you own within your FIWARE service, or the number of entity types you have.
 
 [Top](#top)
 
 ## <a name="section2"></a>Advanced configurations
 ### <a name="section2.1"></a>Scenarios involving multiple FIWARE services
-Cygnus NGSI, as many of the FIWARE components, natively supports multitenancy thanks to the **FIWARE service** concept. NGSI notifications consumed by Cygnus contain a Http header carrying such a value, which is used for segmentating context information in the historical backend in the form of per-service dedicated MySQL/MongoDB/STH database, or HDFS user space, or CKAN organization, etc.
+Cygnus NGSI, as many of the FIWARE components, natively supports multitenancy thanks to the **FIWARE service** concept. NGSI notifications consumed by Cygnus contain a HTTP header carrying such a value, which is used for segmentating context information in the historical backend in the form of per-service dedicated [MySQL](../flume_extensions_catalogue/ngsi_mysql_sink.md)/[MongoDB](../flume_extensions_catalogue/ngsi_mongo.md)/[STH](../flume_extensions_catalogue/ngsi_sth.md) database, or [HDFS](../flume_extensions_catalogue/ngsi_hdfs_sink.md) user space, or [CKAN](../flume_extensions_catalogue/ngsi_ckan_sink.md) organization (non exhaustive list).
 
 Such a segmentation can be perfectly done by a single sink if it is configured with some *superuser* credentials. I.e. the sink interacts with the backend API authenticating as a superuser able to create databases, HDFS user spaces, CKAN organizations, etc. Then, it is only a question of enabling certain backend users in order the clients can query for data.
 
@@ -135,25 +139,25 @@ Next sections explain how to achieve that by implementing advanced configuration
 The first (and obvious) solution is to instantiate multiple Cygnus agents (multiple JVM processes, each one listening on a dedicated TCP port), one per FIWARE service. This solution ensures each FIWARE service has specific Name Mappings, dedicated sink (or sinks), etc.
 
 ```
-+--------------------------------------------------------------+
-|  +--------------+     +-------------+     +---------------+  |
-|  | src-client-1 |-----| ch-client-1 |-----| sink-client-1 |  |
-|  +--------------+     +-------------+     +---------------+  |
-+--------------------------------------------------------------+
++-----------------------------------------------------+
+|  +-----------+     +----------+     +------------+  |
+|  | src-svc-1 |-----| ch-svc-1 |-----| sink-svc-1 |  |
+|  +-----------+     +----------+     +------------+  |
++-----------------------------------------------------+
 
-+--------------------------------------------------------------+
-|  +--------------+     +-------------+     +---------------+  |
-|  | src-client-2 |-----| ch-client-2 |-----| sink-client-2 |  |
-|  +--------------+     +-------------+     +---------------+  |
-+--------------------------------------------------------------+
++-----------------------------------------------------+
+|  +-----------+     +----------+     +------------+  |
+|  | src-svc-2 |-----| ch-svc-2 |-----| sink-svc-2 |  |
+|  +-----------+     +----------+     +------------+  |
++-----------------------------------------------------+
                           
-                              ...
+                           ...
                           
-+--------------------------------------------------------------+
-|  +--------------+     +-------------+     +---------------+  |
-|  | src-client-N |-----| ch-client-N |-----| sink-client-N |  |
-|  +--------------+     +-------------+     +---------------+  |
-+--------------------------------------------------------------+
++-----------------------------------------------------+
+|  +-----------+     +----------+     +------------+  |
+|  | src-svc-N |-----| ch-svc-N |-----| sink-svc-N |  |
+|  +-----------+     +----------+     +------------+  |
++-----------------------------------------------------+
 ```
 
 For each client/FIWARE service called `<id>` an `agent_<id>.conf` configuration file is required:
@@ -161,27 +165,27 @@ For each client/FIWARE service called `<id>` an `agent_<id>.conf` configuration 
 ```
 $ cat /usr/cygnus/conf/agent_<id>.conf
 # declarations
-cygnus-ngsi-<id>.sources = src-client-<id>
-cygnus-ngsi-<id>.sinks = sink-client-<id>
-cygnus-ngsi-<id>.channels = ch-client-<id>
+cygnus-ngsi-<id>.sources = src-svc-<id>
+cygnus-ngsi-<id>.sinks = sink-svc-<id>
+cygnus-ngsi-<id>.channels = ch-svc-<id>
 
 # sources
-cygnus-ngsi-<id>.sources.src-client-<id>.type = http
-cygnus-ngsi-<id>.sources.src-client-<id>.channels = ch-client-<id>
-cygnus-ngsi-<id>.sources.src-client-<id>.port = <client_port>
-cygnus-ngsi-<id>.sources.src-client-<id>...
+cygnus-ngsi-<id>.sources.src-svc-<id>.type = http
+cygnus-ngsi-<id>.sources.src-svc-<id>.channels = ch-svc-<id>
+cygnus-ngsi-<id>.sources.src-svc-<id>.port = <svc-port>
+cygnus-ngsi-<id>.sources.src-svc-<id>...
 
 # sinks
-cygnus-ngsi-<id>.sinks.sink-client-<id>.type = ...
-cygnus-ngsi-<id>.sinks.sink-client-<id>.channel = ch-client-<id>
-cygnus-ngsi-<id>.sinks.sink-client-<id>...
+cygnus-ngsi-<id>.sinks.sink-svc-<id>.type = ...
+cygnus-ngsi-<id>.sinks.sink-svc-<id>.channel = ch-svc-<id>
+cygnus-ngsi-<id>.sinks.sink-svc-<id>...
 
 # channels
-cygnus-ngsi-<id>.channels.ch-client-<id>.type = ...
-cygnus-ngsi-<id>.channels.ch-client-<id>...
+cygnus-ngsi-<id>.channels.ch-svc-<id>.type = ...
+cygnus-ngsi-<id>.channels.ch-svc-<id>...
 ```
 
-[Multi-instance](ref) support is available form the very begining of Cygnus, through the `cygnus_instance_<id>.conf` configuration files used when running Cygnus [as a service](ref):
+[Multi-instance](ref) support is available from the very begining of Cygnus, through the `cygnus_instance_<id>.conf` configuration files used when running Cygnus [as a service](ref):
 
 ```
 $ cat /usr/cygnus/conf/cygnus_instance_<id>.conf
@@ -205,21 +209,21 @@ Use this kind of advanced configuration if you have no restrictions in terms of 
 [Top](#top)
 
 #### <a name="section2.1.2"></a>Single agent, multiple sources
-A variation regarding the previus one is to have a single agent (single JVM process) and multiple Http sources (one per FIWARE service).
+A variation regarding the previus one is to have a single agent (single JVM process) and multiple HTTP sources (one per FIWARE service).
 
 ```
-+--------------------------------------------------------------+
-|  +--------------+     +-------------+     +---------------+  |
-|  | src-client-1 |-----| ch-client-1 |-----| sink-client-1 |  |
-|  +--------------+     +-------------+     +---------------+  |
-|  +--------------+     +-------------+     +---------------+  |
-|  | src-client-2 |-----| ch-client-2 |-----| sink-client-2 |  |
-|  +--------------+     +-------------+     +---------------+  |
-|        ...                  ...                  ...         |
-|  +--------------+     +-------------+     +---------------+  |
-|  | src-client-N |-----| ch-client-N |-----| sink-client-N |  |
-|  +--------------+     +-------------+     +---------------+  |
-+--------------------------------------------------------------+
++-----------------------------------------------------+
+|  +-----------+     +----------+     +------------+  |
+|  | src-svc-1 |-----| ch-svc-1 |-----| sink-svc-1 |  |
+|  +-----------+     +----------+     +------------+  |
+|  +-----------+     +----------+     +------------+  |
+|  | src-svc-2 |-----| ch-svc-2 |-----| sink-svc-2 |  |
+|  +-----------+     +----------+     +------------+  |
+|       ...               ...                ...      |
+|  +-----------+     +----------+     +------------+  |
+|  | src-svc-N |-----| ch-svc-N |-----| sink-svc-N |  |
+|  +-----------+     +----------+     +------------+  |
++-----------------------------------------------------+
 ```
 
 Such an architecture is achieved by using the following agent configuration:
@@ -227,54 +231,54 @@ Such an architecture is achieved by using the following agent configuration:
 ```
 $ cat /usr/cygnus/conf/agent_all.conf
 # declarations
-cygnus-ngsi.sources = src-client-1 src-client-2 ... src-client-N
-cygnus-ngsi.sinks = sink-client-1 sink-client-2 ... sink-client-N
-cygnus-ngsi.channels = ch-client-1 ch-client-2 ... ch-client-N
+cygnus-ngsi.sources = src-svc-1 src-svc-2 ... src-svc-N
+cygnus-ngsi.sinks = sink-svc-1 sink-svc-2 ... sink-svc-N
+cygnus-ngsi.channels = ch-svc-1 ch-svc-2 ... ch-svc-N
 
 # sources
-cygnus-ngsi.sources.src-client-1.type = http
-cygnus-ngsi.sources.src-client-1.channels = ch-client-1
-cygnus-ngsi.sources.src-client-1.port = <client1-port>
-cygnus-ngsi.sources.src-client-1...
+cygnus-ngsi.sources.src-svc-1.type = http
+cygnus-ngsi.sources.src-svc-1.channels = ch-svc-1
+cygnus-ngsi.sources.src-svc-1.port = <svc-1-port>
+cygnus-ngsi.sources.src-svc-1...
 
-cygnus-ngsi.sources.src-client-2.type = http
-cygnus-ngsi.sources.src-client-2.channels = ch-client-2
-cygnus-ngsi.sources.src-client-2.port = <client2-port>
-cygnus-ngsi.sources.src-client-2...
+cygnus-ngsi.sources.src-svc-2.type = http
+cygnus-ngsi.sources.src-svc-2.channels = ch-svc-2
+cygnus-ngsi.sources.src-svc-2.port = <svc-2-port>
+cygnus-ngsi.sources.src-svc-2...
 
 ...
 
-cygnus-ngsi.sources.src-client-N.type = http
-cygnus-ngsi.sources.src-client-N.channels = ch-client-N
-cygnus-ngsi.sources.src-client-N.port = <clientN-port>
-cygnus-ngsi.sources.src-client-N...
+cygnus-ngsi.sources.src-svc-N.type = http
+cygnus-ngsi.sources.src-svc-N.channels = ch-svc-N
+cygnus-ngsi.sources.src-svc-N.port = <svc-N-port>
+cygnus-ngsi.sources.src-svc-N...
 
 # sinks
-cygnus-ngsi.sinks.sink-client-1.type = ...
-cygnus-ngsi.sinks.sink-client-1.channel = ch-client-1
-cygnus-ngsi.sinks.sink-client-1...
+cygnus-ngsi.sinks.sink-svc-1.type = ...
+cygnus-ngsi.sinks.sink-svc-1.channel = ch-svc-1
+cygnus-ngsi.sinks.sink-svc-1...
 
-cygnus-ngsi.sinks.sink-client-2.type = ...
-cygnus-ngsi.sinks.sink-client-2.channel = ch-client-2
-cygnus-ngsi.sinks.sink-client-2...
+cygnus-ngsi.sinks.sink-svc-2.type = ...
+cygnus-ngsi.sinks.sink-svc-2.channel = ch-svc-2
+cygnus-ngsi.sinks.sink-svc-2...
 
 ...
 
-cygnus-ngsi.sinks.sink-client-N.type = ...
-cygnus-ngsi.sinks.sink-client-N.channel = ch-client-N
-cygnus-ngsi.sinks.sink-client-N...
+cygnus-ngsi.sinks.sink-svc-N.type = ...
+cygnus-ngsi.sinks.sink-svc-N.channel = ch-svc-N
+cygnus-ngsi.sinks.sink-svc-N...
 
 # channels
-cygnus-ngsi.channels.ch-client-1.type = ...
-cygnus-ngsi.channels.ch-client-1...
+cygnus-ngsi.channels.ch-svc-1.type = ...
+cygnus-ngsi.channels.ch-svc-1...
 
-cygnus-ngsi.channels.ch-client-2.type = ...
-cygnus-ngsi.channels.ch-client-2...
+cygnus-ngsi.channels.ch-svc-2.type = ...
+cygnus-ngsi.channels.ch-svc-2...
 
 ...
 
-cygnus-ngsi.channels.ch-client-N.type = ...
-cygnus-ngsi.channels.ch-client-N...
+cygnus-ngsi.channels.ch-svc-N.type = ...
+cygnus-ngsi.channels.ch-svc-N...
 ```
 
 The related `cygnus_instance_all.conf` should look like:
@@ -298,23 +302,23 @@ Use this kind of advanced configuraiton if you hace restrictions in terms of har
 Finally, insted of multiplexing the notifications per TCP port (i.e. one port per FIWARE service), you can enable the reception of all kind of notifications through a single TCP port and perform such a multiplexing internally to a single Cygnus agent.
 
 ```
-+---------------------------------------------------------+
-|         service1 +-------------+     +---------------+  |
-|       +----------| ch-client-1 |-----| sink-client-1 |  |
-|       |          +-------------+     +---------------+  |
-|       | service2 +-------------+     +---------------+  |
-|       |    +-----| ch-client-2 |-----| sink-client-2 |  |
-|       |    |     +-------------+     +---------------+  |
-|  +---------+                                            |
-|  | src-all |           ...                  ...         |
-|  +---------+                                            |
-|       |    |     +-------------+     +---------------+  |
-|       |    +-----| ch-client-N |-----| sink-client-N |  |
-|       | serviceN +-------------+     +---------------+  |
-|       |          +-------------+     +---------------+  |
-|       +----------|   ch-def    |-----|   sink-def    |  |
-|                  +-------------+     +---------------+  |
-+---------------------------------------------------------+
++---------------------------------------------------+
+|            scv-1 +----------+     +------------+  |
+|       +----------| ch-svc-1 |-----| sink-svc-1 |  |
+|       |          +----------+     +------------+  |
+|       |    svc-2 +----------+     +------------+  |
+|       |    +-----| ch-svc-2 |-----| sink-svc-2 |  |
+|       |    |     +----------+     +------------+  |
+|  +---------+                                      |
+|  | src-all |          ...               ...       |
+|  +---------+                                      |
+|       |    |     +----------+     +------------+  |
+|       |    +-----| ch-svc-N |-----| sink-svc-N |  |
+|       |    svc-N +----------+     +------------+  |
+|       |          +----------+     +------------+  |
+|       +----------|  ch-def  |-----|  sink-def  |  |
+|                  +----------+     +------------+  |
++---------------------------------------------------+
 ```
 
 I.e. using this agent configuration:
@@ -323,53 +327,53 @@ I.e. using this agent configuration:
 $ cat /usr/cygnus/conf/agent_all.conf
 # declarations
 cygnus-ngsi.sources = src-all
-cygnus-ngsi.sinks = sink-client-1 sink-client-2 ... sink-client-N sink-def
-cygnus-ngsi.channels = ch-client-1 ch-client-2 ... ch-client-N ch-def
+cygnus-ngsi.sinks = sink-svc-1 sink-svc-2 ... sink-svc-N sink-def
+cygnus-ngsi.channels = ch-svc-1 ch-svc-2 ... ch-svc-N ch-def
 
 # sources
 cygnus-ngsi.sources.src-all.type = http
-cygnus-ngsi.sources.src-all.channels = ch-client-1 ch-client-2 ... ch-client-N ch-def
+cygnus-ngsi.sources.src-all.channels = ch-svc-1 ch-svc-2 ... ch-svc-N ch-def
 cygnus-ngsi.sources.src-all.selector.type = multiplexing
 cygnus-ngsi.sources.src-all.selector.header = fiware-service
-cygnus-ngsi.sources.src-all.selector.mappings.<service1> = ch-client-1
-cygnus-ngsi.sources.src-all.selector.mappings.<service2> = ch-client-2
+cygnus-ngsi.sources.src-all.selector.mappings.<svc-1> = ch-svc-1
+cygnus-ngsi.sources.src-all.selector.mappings.<svc-2> = ch-svc-2
 ...
-cygnus-ngsi.sources.src-all.selector.mappings.<serviceN> = ch-client-N
+cygnus-ngsi.sources.src-all.selector.mappings.<svc-N> = ch-svc-N
 cygnus-ngsi.sources.src-all.selector.mappings.default = ch-def
 cygnus-ngsi.sources.src-all.port = 5050
 
 cygnus-ngsi.sources.src-all...
 
 # sinks
-cygnus-ngsi.sinks.sink-client-1.type = ...
-cygnus-ngsi.sinks.sink-client-1.channel = ch-client-1
-cygnus-ngsi.sinks.sink-client-1...
+cygnus-ngsi.sinks.sink-svc-1.type = ...
+cygnus-ngsi.sinks.sink-svc-1.channel = ch-svc-1
+cygnus-ngsi.sinks.sink-svc-1...
 
-cygnus-ngsi.sinks.sink-client-2.type = ...
-cygnus-ngsi.sinks.sink-client-2.channel = ch-client-2
-cygnus-ngsi.sinks.sink-client-2...
+cygnus-ngsi.sinks.sink-svc-2.type = ...
+cygnus-ngsi.sinks.sink-svc-2.channel = ch-svc-2
+cygnus-ngsi.sinks.sink-svc-2...
 
 ...
 
-cygnus-ngsi.sinks.sink-client-N.type = ...
-cygnus-ngsi.sinks.sink-client-N.channel = ch-client-N
-cygnus-ngsi.sinks.sink-client-N...
+cygnus-ngsi.sinks.sink-svc-N.type = ...
+cygnus-ngsi.sinks.sink-svc-N.channel = ch-svc-N
+cygnus-ngsi.sinks.sink-svc-N...
 
 cygnus-ngsi.sinks.sink-def.type = ...
 cygnus-ngsi.sinks.sink-def.channel = ch-def
 cygnus-ngsi.sinks.sink-def...
 
 # channels
-cygnus-ngsi.channels.ch-client-1.type = ...
-cygnus-ngsi.channels.ch-client-1...
+cygnus-ngsi.channels.ch-svc-1.type = ...
+cygnus-ngsi.channels.ch-svc-1...
 
-cygnus-ngsi.channels.ch-client-2.type = ...
-cygnus-ngsi.channels.ch-client-2...
+cygnus-ngsi.channels.ch-svc-2.type = ...
+cygnus-ngsi.channels.ch-svc-2...
 
 ...
 
-cygnus-ngsi.channels.ch-client-N.type = ...
-cygnus-ngsi.channels.ch-client-N...
+cygnus-ngsi.channels.ch-svc-N.type = ...
+cygnus-ngsi.channels.ch-svc-N...
 
 cygnus-ngsi.channels.ch-def.type = ...
 cygnus-ngsi.channels.ch-def...
@@ -399,12 +403,87 @@ Nevertheless, it may not seem so obvious how subscriptions look like when a sing
 
 [Top](#top)
 
-### <a name="section2.2"></a>Scenarios involving multiple FIWARE services
-Another header, the **FIWARE service path**, can be used to segmentate data belonging to a single tenant or client. Such a header is used by Cygnus to prefix the name of tables and collections in database-based sinks, or as a subfolder within the HDFS user space, or as a package/dataset in CKAN, etc.
+### <a name="section2.2"></a>Scenarios involving multiple FIWARE service paths
+Another header, the **FIWARE service path**, can be used to segmentate data belonging to a single tenant or client. Such a header is used by Cygnus to prefix the name of tables and collections in database-based sinks, or it is used as a subfolder within the [HDFS](../flume_extensions_catalogue/ngsi_hdfs_sink.md) user space, or as a package/dataset in [CKAN](../flume_extensions_catalogue/ngsi_ckan_sink.md) (non exhaustive list).
 
-Analogous to the FIWARE service, the FIWARE service path can be used to parallelize the processing of the context data notified by Orion Context Broker to Cygnus. Either by creating one listener per service-service path pair (then a Cygnus agent can be created per listener, or a single Cygnus agent with multiple listeners can be created), either creating a single listener for all the service-service path pairs and internarlly to Cygnus multiplex the data based on the FIWARE service-path header.
+Analogous to the FIWARE service, the FIWARE service path can be used to parallelize the processing of the context data notified by Orion Context Broker to Cygnus. Either by creating one listener per (service, service path) pair (then a Cygnus agent can be created per listener, or a single Cygnus agent with multiple listeners can be created), either creating a single listener for all the (service, service path) pairs and internally to Cygnus multiplex the data based on the FIWARE service-path header.
 
-Regarding Orion Context Broker subscriptions, if multiple listeners are used (either multiple agents either a single agent with many listeners) a subscription for each service-service path pair is required, pointing each one to a different endpoint URL. Nevertheless, if a single Cygnus agent with a single listener, internally multiplexing context data based on the FIWARE service path, is used, then a single suscription can be made for all the service paths within the client FIWARE service. This is achieved by using a special FIWARE service path header's value: `/#`.
+[Top](#top)
+
+#### <a name="section2.2.1"></a>Multiple agents
+In this case, a Cygnus agent will be deployed for each FIWARE service path within a single FIWARE service.
+
+```
++-----------------------------------------------------------------+
+|  +---------------+     +--------------+     +----------------+  |
+|  | src-svcpath-1 |-----| ch-svcpath-1 |-----| sink-svcpath-1 |  |
+|  +---------------+     +--------------+     +----------------+  |
++-----------------------------------------------------------------+
+
++-----------------------------------------------------------------+
+|  +---------------+     +--------------+     +----------------+  |
+|  | src-svcpath-2 |-----| ch-svcpath-2 |-----| sink-svcpath-2 |  |
+|  +---------------+     +--------------+     +----------------+  |
++-----------------------------------------------------------------+
+                          
+                              ...
+                          
++-----------------------------------------------------------------+
+|  +---------------+     +--------------+     +----------------+  |
+|  | src-svcpath-N |-----| ch-svcpath-N |-----| sink-svcpath-N |  |
+|  +---------------+     +--------------+     +----------------+  |
++-----------------------------------------------------------------+
+```
+
+[Top](#top)
+
+#### <a name="section2.2.2"></a>Single agent, multiple sources
+Similar to the case above, a single Cygnus agent starts a HTTP listener for each FIWARE service path within a single FIWARE service.
+
+```
++-----------------------------------------------------------------+
+|  +---------------+     +--------------+     +----------------+  |
+|  | src-svcpath-1 |-----| ch-svcpath-1 |-----| sink-svcpath-1 |  |
+|  +---------------+     +--------------+     +----------------+  |
+|  +---------------+     +--------------+     +----------------+  |
+|  | src-svcpath-2 |-----| ch-svcpath-2 |-----| sink-svcpath-2 |  |
+|  +---------------+     +--------------+     +----------------+  |
+|         ...                   ...                   ...         |
+|  +---------------+     +--------------+     +----------------+  |
+|  | src-svcpath-N |-----| ch-svcpath-N |-----| sink-svcpath-N |  |
+|  +---------------+     +--------------+     +----------------+  |
++-----------------------------------------------------------------+
+```
+
+[Top](#top)
+
+#### <a name="section2.2.3"></a>Single agent, single source, multiplexing per FIWARE service path
+The single Cygnus agent multiplexes the notified NGSI context data based on the FIWARE service path header.
+
+```
++-----------------------------------------------------------+
+|        svcpath-1 +--------------+     +----------------+  |
+|       +----------| ch-svcpath-1 |-----| sink-svcpath-1 |  |
+|       |          +--------------+     +----------------+  |
+|       |svcpath-2 +--------------+     +----------------+  |
+|       |    +-----| ch-svcpath-2 |-----| sink-svcpath-2 |  |
+|       |    |     +--------------+     +----------------+  |
+|  +---------+                                              |
+|  | src-all |            ...                   ...         |
+|  +---------+                                              |
+|       |    |     +--------------+     +----------------+  |
+|       |    +-----| ch-svcpath-N |-----| sink-svcpath-N |  |
+|       |svcpath-N +--------------+     +----------------+  |
+|       |          +--------------+     +----------------+  |
+|       +----------|    ch-def    |-----|    sink-def    |  |
+|                  +--------------+     +----------------+  |
++-----------------------------------------------------------+
+```
+
+[Top](#top)
+
+#### <a name="section2.2.4"></a>Orion Context Broker subscriptions
+Regarding Orion Context Broker subscriptions, if multiple listeners are used (either multiple agents either a single agent with many listeners) a subscription for each (service, service path) pair is required, pointing each one to a different endpoint URL. Nevertheless, if a single Cygnus agent with a single listener, internally multiplexing context data based on the FIWARE service path, is used, then a single suscription can be made for all the service paths within the client FIWARE service. This is achieved by using a special FIWARE service path header's value: `/#`.
 
 [Top](#top)
 
