@@ -15,7 +15,8 @@ Content:
         * [Single agent, multiple sources](#section2.2.2)
         * [Single agent, single source, multiplexing per FIWARE service path](#section2.2.3)
         * [Orion Context Broker subscriptions](#section2.2.4)
-    * [Scenarios involving a pool of sinks per persistene backend](#section2.3)
+    * [Scenarios involving multiple FIWARE services, each one involving multiple FIWARE service paths](#section2.3)
+    * [Scenarios involving a pool of sinks per persistene backend](#section2.4)
 
 ## <a name="section1"></a>Basic configurations
 Basic configurations are those involving a single listener/source and one or more sinks receiving a copy of the same internal NGSI event obtained once a NGSI notification is processed at the source.
@@ -25,6 +26,7 @@ A Cygnus agent based on a single source, a single channel and a single sink.
 
 ```
 +-----------------------------------+
+|                               JVM |
 |  +-----+     +----+     +------+  |
 |  | src |-----| ch |-----| sink |  |
 |  +-----+     +----+     +------+  |
@@ -63,6 +65,7 @@ Similar as the previous one, in this case there is one channel and one sink per 
 
 ```
 +-------------------------------------+
+|                                 JVM |
 |              +-----+     +-------+  |
 |        +-----| ch1 |-----| sink1 |  |
 |        |     +-----+     +-------+  |
@@ -140,12 +143,14 @@ The first (and obvious) solution is to instantiate multiple Cygnus agents (multi
 
 ```
 +-----------------------------------------------------+
+|                                                JVM1 |
 |  +-----------+     +----------+     +------------+  |
 |  | src-svc-1 |-----| ch-svc-1 |-----| sink-svc-1 |  |
 |  +-----------+     +----------+     +------------+  |
 +-----------------------------------------------------+
 
 +-----------------------------------------------------+
+|                                                JVM2 |
 |  +-----------+     +----------+     +------------+  |
 |  | src-svc-2 |-----| ch-svc-2 |-----| sink-svc-2 |  |
 |  +-----------+     +----------+     +------------+  |
@@ -154,6 +159,7 @@ The first (and obvious) solution is to instantiate multiple Cygnus agents (multi
                            ...
                           
 +-----------------------------------------------------+
+|                                                JVMN |
 |  +-----------+     +----------+     +------------+  |
 |  | src-svc-N |-----| ch-svc-N |-----| sink-svc-N |  |
 |  +-----------+     +----------+     +------------+  |
@@ -213,6 +219,7 @@ A variation regarding the previus one is to have a single agent (single JVM proc
 
 ```
 +-----------------------------------------------------+
+|                                                 JVM |
 |  +-----------+     +----------+     +------------+  |
 |  | src-svc-1 |-----| ch-svc-1 |-----| sink-svc-1 |  |
 |  +-----------+     +----------+     +------------+  |
@@ -299,10 +306,11 @@ Use this kind of advanced configuraiton if you hace restrictions in terms of har
 [Top](#top)
 
 #### <a name="section2.1.3"></a>Single agent, single source, multiplexing per FIWARE service
-Finally, insted of multiplexing the notifications per TCP port (i.e. one port per FIWARE service), you can enable the reception of all kind of notifications through a single TCP port and perform such a multiplexing internally to a single Cygnus agent.
+Finally, insted of multiplexing the notifications per TCP port (i.e. one port per FIWARE service), you can enable the reception of all kind of notifications through a single TCP port and perform such a multiplexing internally to a single Cygnus agent using Flume's [Multiplexing Channel Processor](https://flume.apache.org/FlumeUserGuide.html#multiplexing-channel-selector).
 
 ```
 +---------------------------------------------------+
+|                                               JVM |
 |            scv-1 +----------+     +------------+  |
 |       +----------| ch-svc-1 |-----| sink-svc-1 |  |
 |       |          +----------+     +------------+  |
@@ -401,6 +409,8 @@ It seems obvious a per client subscription is required when a per client listene
 
 Nevertheless, it may not seem so obvious how subscriptions look like when a single Cygnus agent with a single listener internally multiplexes the notified context data based on the FIWARE service. In that case, a suscription per client is also required (since Orion does not allow to subscribe to all FIWARE services, due to security reasons), but all subscriptions must point to the same single endpoint URL.
 
+In any case, please consider the trade off between using as minimum Orion subscriptions as possible (subscriptions number impacts in terms of Orion performance) and using as maximum JVM/Cygnus agents (each JVM has its own resources in terms of memory and CPU).
+
 [Top](#top)
 
 ### <a name="section2.2"></a>Scenarios involving multiple FIWARE service paths
@@ -415,12 +425,14 @@ In this case, a Cygnus agent will be deployed for each FIWARE service path withi
 
 ```
 +-----------------------------------------------------------------+
+|                                                            JVM1 |
 |  +---------------+     +--------------+     +----------------+  |
 |  | src-svcpath-1 |-----| ch-svcpath-1 |-----| sink-svcpath-1 |  |
 |  +---------------+     +--------------+     +----------------+  |
 +-----------------------------------------------------------------+
 
 +-----------------------------------------------------------------+
+|                                                            JVM2 |
 |  +---------------+     +--------------+     +----------------+  |
 |  | src-svcpath-2 |-----| ch-svcpath-2 |-----| sink-svcpath-2 |  |
 |  +---------------+     +--------------+     +----------------+  |
@@ -429,6 +441,7 @@ In this case, a Cygnus agent will be deployed for each FIWARE service path withi
                               ...
                           
 +-----------------------------------------------------------------+
+|                                                            JVMN |
 |  +---------------+     +--------------+     +----------------+  |
 |  | src-svcpath-N |-----| ch-svcpath-N |-----| sink-svcpath-N |  |
 |  +---------------+     +--------------+     +----------------+  |
@@ -442,6 +455,7 @@ Similar to the case above, a single Cygnus agent starts a HTTP listener for each
 
 ```
 +-----------------------------------------------------------------+
+|                                                             JVM |
 |  +---------------+     +--------------+     +----------------+  |
 |  | src-svcpath-1 |-----| ch-svcpath-1 |-----| sink-svcpath-1 |  |
 |  +---------------+     +--------------+     +----------------+  |
@@ -462,6 +476,7 @@ The single Cygnus agent multiplexes the notified NGSI context data based on the 
 
 ```
 +-----------------------------------------------------------+
+|                                                       JVM |
 |        svcpath-1 +--------------+     +----------------+  |
 |       +----------| ch-svcpath-1 |-----| sink-svcpath-1 |  |
 |       |          +--------------+     +----------------+  |
@@ -485,13 +500,41 @@ The single Cygnus agent multiplexes the notified NGSI context data based on the 
 #### <a name="section2.2.4"></a>Orion Context Broker subscriptions
 Regarding Orion Context Broker subscriptions, if multiple listeners are used (either multiple agents either a single agent with many listeners) a subscription for each (service, service path) pair is required, pointing each one to a different endpoint URL. Nevertheless, if a single Cygnus agent with a single listener, internally multiplexing context data based on the FIWARE service path, is used, then a single suscription can be made for all the service paths within the client FIWARE service. This is achieved by using a special FIWARE service path header's value: `/#`.
 
+In any case, please consider the trade off between using as minimum Orion subscriptions as possible (subscriptions number impacts in terms of Orion performance) and using as maximum JVM/Cygnus agents (each JVM has its own resources in terms of memory and CPU).
+
 [Top](#top)
 
-### <a name="section2.3"></a>Scenarios involving a pool of sinks per persistene backend
+### <a name="section2.3"></a>Scenarios involving multiple FIWARE services, each one involving multiple FIWARE service paths
+Attending to the configurations seen in previous sections, there are two possibilities:
+
+* Create a Cygnus agent for each (service, service path) pair, which ensures a HTTP listener per pair in a JVM per pair.
+* Create a Cygnus agent for each service, and then configure as many HTTP listeners as FIWARE service paths within the FIWARE service.
+
+Nevertheless, it is not possible to have a single HTTP listener for all FIWARE services and FIWARE service paths, since current status of Flume technology does not allow for multiplexing based on two headers; current Flume's [Multiplexing Channel Selector](https://flume.apache.org/FlumeUserGuide.html#multiplexing-channel-selector) only enables multiplexion based on a single header. **A custom channel selector must be implemented for this purpose**.
+
+Another possibility is to have a two-levels architecture: the first level contains a single Cygnus agent in charge of multiplexing per FIWARE service; its sinks simply forward the NGSI context information to the next level (using Flume's Avro [sinks](https://flume.apache.org/FlumeUserGuide.html#avro-sink) and [sources](https://flume.apache.org/FlumeUserGuide.html#avro-source), for instance). Then, the second level contains a Cygnus agent per FIWARE service, multiplexing the context information in a per FIWARE service path basis.
+
+```
+                    +--------------------------+   
+              +-----| JVM-all-svcpath-in-svc-1 |
+              |     +--------------------------+
++-------------+     +--------------------------+
+| JVM-all-svc |-----| JVM-all-svcpath-in-svc-2 |
++-------------+     +--------------------------+
+              |                  ...
+              |     +--------------------------+   
+              +-----| JVM-all-svcpath-in-svc-N |
+                    +--------------------------+
+```
+
+[Top](#top)
+
+### <a name="section2.4"></a>Scenarios involving a pool of sinks per persistene backend
 A pool of sinks can be configured in order to increase the performance of a Cygnus agent. Such a pool works in a Round Robin way, i.e. sequentially taking NGSI events from a common channel as long as the sinks become available.
 
 ```
 +------------------------------------+
+|                                JVM |
 |                         +-------+  |
 |                   +-----| sink1 |  |
 |                   |     +-------+  |
