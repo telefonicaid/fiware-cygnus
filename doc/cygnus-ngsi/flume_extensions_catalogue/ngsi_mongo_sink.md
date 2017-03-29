@@ -96,17 +96,20 @@ Regarding the specific data stored within the above collections, if `attr_persis
     * `attrName`: Notified attribute name.
     * `attrType`: Notified attribute type.
     * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
+    * `attrMetadata`: will be stored only if it was configured to (attr_metadata_store set to true in the configuration file ngsi_agent.conf). It is a Json object.
 * Data model by entity:
     * `recvTimeTs`: UTC timestamp expressed in miliseconds.
     * `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
     * `attrName`: Notified attribute name.
     * `attrType`: Notified attribute type.
     * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
+    * `attrMetadata`: will be stored only if it was configured to (attr_metadata_store set to true in the configuration file ngsi_agent.conf). It is a Json object.
 * Data model by attribute:
     * `recvTimeTs`: UTC timestamp expressed in miliseconds.
     * `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
     * `attrType`: Notified attribute type.
     * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
+    * `attrMetadata`: will be stored only if it was configured to (attr_metadata_store set to true in the configuration file ngsi_agent.conf). It is a Json object.
 
 [Top](#top)
 
@@ -298,6 +301,7 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data\_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported. |
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
+| attr\_metadata\_store | no | false | <i>true</i> or <i>false</i>. |
 | mongo\_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
 | mongo\_username | no | <i>empty</i> | If empty, no authentication is done. |
 | mongo\_password | no | <i>empty</i> | If empty, no authentication is done. |
