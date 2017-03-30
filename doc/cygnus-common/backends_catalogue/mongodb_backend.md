@@ -1,5 +1,5 @@
-#MongoDB backend
-##`MongoBackend` interface
+# MongoDB backend
+## `MongoBackend` interface
 This class enumerates the methods any [MongoDB](https://www.mongodb.com/) backend implementation must expose. In this case, the following ones:
 
     void createDatabase(String dbName) throws Exception;
@@ -22,7 +22,7 @@ This class enumerates the methods any [MongoDB](https://www.mongodb.com/) backen
         
 > Stores the hash associated to a collection build based on the givn parameters.
 
-##`MongoBackendImpl` class
+## `MongoBackendImpl` class
 This is a convenience backend class for MongoDB that implements the `MongoBackend` interface described above.
 
 `MongoBackendImpl` really wraps the [MongoDB driver for Java](https://docs.mongodb.com/ecosystem/drivers/java/).

@@ -1,4 +1,4 @@
-#<a name="top"></a>Name Mappings
+# <a name="top"></a>Name Mappings
 Name Mappings is an advanced global feature of Cygnus. It is global because it is available for all NGSI sinks.
 
 Name Mappings allow changing the notified <b>FIWARE service</b>, <b>FIWARE service path</b>, <b>entity IDs</b>, <b>entity types</b>, <b>attribute names</b> and <b>attribute types</b>, given a mapping. Such a mapping is just a Json within a configuration file detailing how original naming must be replaced by alternative naming.
@@ -51,7 +51,7 @@ Please observe no raw bytes about the body are sent.
 
 Whenever a sink takes one of these `NGSIEvent`'s, it is only a matter of deciding if such a sink enables the mappings (`enable_name_mappings` parameter) or not. If mappings are enabled, then the already parsed `NotifyContextRequest`, mapped version, is used. If not, then the original version is used.
 
-##Creating your own Name Mappings
+## Creating your own Name Mappings
 Please observe the mappings definition is global to all the sinks, at `NGSIRestHandler`, as a Flume interceptor. Nevertheless, the application is local to the sink, depending on the `enable_name_mappings` parameter. Thus, if none of your sinks is going to take advantage of the mappings, simply avoid configuring the `NGSINameMappingsInterceptor` in `NGSIRestHandler`. That will avoid unnecessary interception and iterations on the mappings and Cygnus will perform faster.
 
 ```
@@ -174,7 +174,7 @@ $ cat /path/to/conf/name_mappings.conf
 
 [Top](#top)
 
-##Name Mappings vs. grouping rules
+## Name Mappings vs. grouping rules
 As seen, the Name Mappings feature is quite similar to the already existent grouping rules. Both of them are Flume interceptors and both of them allow changing certain notified name elements. Thus, which are the differences? Mainly:
 
 | Name Mappings | Grouping rules |
@@ -187,7 +187,7 @@ As seen, the Name Mappings feature is quite similar to the already existent grou
 
 [Top](#top)
 
-##Further reading
+## Further reading
 Please, check the [specific documentation](../flume_extensions_catalogue/ngsi_name_mappings_interceptor.md) for this custom interceptor in the Flume extensions catalogue for cygnus-ngsi agent.
 
 [Top](#top)

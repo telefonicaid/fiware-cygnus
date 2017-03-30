@@ -1,4 +1,4 @@
-#Installing cygnus-common with RPM (CentOS/RedHat)
+# Installing cygnus-common with RPM (CentOS/RedHat)
 Simply configure the FIWARE repository if not yet configured:
 
     $ cat > /etc/yum.repos.d/fiware.repo <<EOL

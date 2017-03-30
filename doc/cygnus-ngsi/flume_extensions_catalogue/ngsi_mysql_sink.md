@@ -1,4 +1,4 @@
-#<a name="top"></a>NGSIMySQLSink
+# <a name="top"></a>NGSIMySQLSink
 Content:
 
 * [Functionality](#section1)
@@ -27,7 +27,7 @@ Content:
     * [`NGSIMySQLSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
 
-##<a name="section1"></a>Functionality
+## <a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIMySQLSink`, or simply `NGSIMySQLSink` is a sink designed to persist NGSI-like context data events within a [MySQL server](https://www.mysql.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific MySQL data structures.
@@ -36,19 +36,19 @@ Next sections will explain this in detail.
 
 [Top](#top)
 
-###<a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
+### <a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
 Notified NGSI events (containing context data) are transformed into `NGSIEvent` objects (for each context element a `NGSIEvent` is created; such an event is a mix of certain headers and a `ContextElement` object), independently of the NGSI data generator or the final backend where it is persisted.
 
 This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_rest_handler.md). Once translated, the data (now, as `NGSIEvent` objects) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
-###<a name="section1.2"></a>Mapping `NGSIEvent`s to MySQL data structures
+### <a name="section1.2"></a>Mapping `NGSIEvent`s to MySQL data structures
 MySQL organizes the data in databases that contain tables of data rows. Such organization is exploited by `NGSIMySQLSink` each time a `NGSIEvent` is going to be persisted.
 
 [Top](#top)
 
-####<a name="section1.2.1"></a>MySQL databases naming conventions
+#### <a name="section1.2.1"></a>MySQL databases naming conventions
 A database named as the notified `fiware-service` header value (or, in absence of such a header, the defaulted value for the FIWARE service) is created (if not existing yet).
 
 It must be said MySQL [only accepts](http://dev.mysql.com/doc/refman/5.7/en/identifiers.html) alphanumerics `$` and `_`. This leads to certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
@@ -57,7 +57,7 @@ MySQL [databases name length](http://dev.mysql.com/doc/refman/5.7/en/identifiers
 
 [Top](#top)
 
-####<a name="section1.2.2"></a>MySQL tables naming conventions
+#### <a name="section1.2.2"></a>MySQL tables naming conventions
 The name of these tables depends on the configured data model (see the [Configuration](#section2.1) section for more details):
 
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
@@ -85,7 +85,7 @@ Please observe the concatenation of entity ID and type is already given in the `
 
 [Top](#top)
 
-####<a name="section1.2.3"></a>Row-like storing
+#### <a name="section1.2.3"></a>Row-like storing
 Regarding the specific data stored within the above table, if `attr_persistence` parameter is set to `row` (default storing mode) then the notified data is stored attribute by attribute, composing an insert for each one of them. Each insert contains the following fields:
 
 * `recvTimeTs`: UTC timestamp expressed in miliseconds.
@@ -100,7 +100,7 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 
 [Top](#top)
 
-####<a name="section1.2.4"></a>Column-like storing
+#### <a name="section1.2.4"></a>Column-like storing
 Regarding the specific data stored within the above table, if `attr_persistence` parameter is set to `column` then a single line is composed for the whole notified entity, containing the following fields:
 
 * `recvTime`: Timestamp in human-readable format (Similar to [ISO 8601](http://en.wikipedia.org/wiki/ISO_8601), but avoiding the `Z` character denoting UTC, since all MySQL timestamps are supposed to be in UTC format).
@@ -112,8 +112,8 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 
 [Top](#top)
 
-###<a name="section1.3"></a>Example
-####<a name="section1.3.1"></a>`NGSIEvent`
+### <a name="section1.3"></a>Example
+#### <a name="section1.3.1"></a>`NGSIEvent`
 Assuming the following `NGSIEvent` is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     ngsi-event={
@@ -147,7 +147,7 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
 [Top](#top)
 
-####<a name="section1.3.2"></a>Database and table names
+#### <a name="section1.3.2"></a>Database and table names
 The MySQL database name will always be `vehicles`.
 
 The MySQL table names will be, depending on the configured data model, the following ones (old encoding):
@@ -166,7 +166,7 @@ Using the new encoding:
 
 [Top](#top)
 
-####<a name="section1.3.3"></a>Row-like storing
+#### <a name="section1.3.3"></a>Row-like storing
 Assuming `attr_persistence=row` as configuration parameter, then `NGSIMySQLSink` will persist the data within the body as:
 
     mysql> select * from 4wheels_car1_car;
@@ -180,7 +180,7 @@ Assuming `attr_persistence=row` as configuration parameter, then `NGSIMySQLSink`
 
 [Top](#top)
 
-####<a name="section1.3.4"></a>Column-like storing
+#### <a name="section1.3.4"></a>Column-like storing
 If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within the body as:
 
     mysql> select * from 4wheels_car1_car;
@@ -193,8 +193,8 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 
 [Top](#top)
 
-##<a name="section2"></a>Administration guide
-###<a name="section2.1"></a>Configuration
+## <a name="section2"></a>Administration guide
+### <a name="section2.1"></a>Configuration
 `NGSIMySQLSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -246,13 +246,13 @@ A configuration example could be:
 
 [Top](#top)
 
-###<a name="section2.2"></a>Use cases
+### <a name="section2.2"></a>Use cases
 Use `NGSIMySQLSink` if you are looking for a database storage not growing so much in the mid-long term.
 
 [Top](#top)
 
-###<a name="section2.3"></a>Important notes
-####<a name="section2.3.1"></a>About the table type and its relation with the grouping rules
+### <a name="section2.3"></a>Important notes
+#### <a name="section2.3.1"></a>About the table type and its relation with the grouping rules
 The table type configuration parameter, as seen, is a method for <i>direct</i> aggregation of data: by <i>default</i> destination (i.e. all the notifications about the same entity will be stored within the same MySQL table) or by <i>default</i> service-path (i.e. all the notifications about the same service-path will be stored within the same MySQL table).
 
 The [Grouping feature](./ngsi_grouping_interceptor.md) is another aggregation mechanism, but an <i>inderect</i> one. This means the grouping feature does not really aggregates the data into a single table, that's something the sink will done based on the configured table type (see above), but modifies the default destination or service-path, causing the data is finally aggregated (or not) depending on the table type.
@@ -261,14 +261,14 @@ For instance, if the chosen table type is by destination and the grouping featur
 
 [Top](#top)
 
-####<a name="section2.3.2"></a>About the persistence mode
+#### <a name="section2.3.2"></a>About the persistence mode
 Please observe not always the same number of attributes is notified; this depends on the subscription made to the NGSI-like sender. This is not a problem for the `row` persistence mode, since fixed 8-fields data rows are inserted for each notified attribute. Nevertheless, the `column` mode may be affected by several data rows of different lengths (in term of fields). Thus, the `column` mode is only recommended if your subscription is designed for always sending the same attributes, event if they were not updated since the last notification.
 
 In addition, when running in `column` mode, due to the number of notified attributes (and therefore the number of fields to be written within the Datastore) is unknown by Cygnus, the table can not be automatically created, and must be provisioned previously to the Cygnus execution. That's not the case of the `row` mode since the number of fields to be written is always constant, independently of the number of notified attributes.
 
 [Top](#top)
 
-####<a name="section2.3.3"></a>About batching
+#### <a name="section2.3.3"></a>About batching
 As explained in the [programmers guide](#section3), `NGSIMySQLSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 `NGSIEvent`s. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same MySQL table. If processing the events one by one, we would need 100 inserts into MySQL; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination MySQL table. In the worst case, the whole 100 entities will be about 100 different entities (100 different MySQL tables), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
@@ -281,12 +281,12 @@ By default, `NGSIMySQLSink` has a configured batch size and batch accumulation t
 
 [Top](#top)
 
-####<a name="section2.3.4"></a>Time zone information
+#### <a name="section2.3.4"></a>Time zone information
 Time zone information is not added in MySQL timestamps since MySQL stores that information as a environment variable. MySQL timestamps are stored in UTC time.
 
 [Top](#top)
 
-####<a name="section2.3.5"></a>About the encoding
+#### <a name="section2.3.5"></a>About the encoding
 Until version 1.2.0 (included), Cygnus applied a very simple encoding:
 
 * All non alphanumeric characters were replaced by underscore, `_`.
@@ -308,7 +308,7 @@ Despite the old encoding will be deprecated in the future, it is possible to swi
 
 [Top](#top)
 
-####<a name="section2.3.6"></a>About capping resources and expirating records
+#### <a name="section2.3.6"></a>About capping resources and expirating records
 Capping and expiration are disabled by default. Nevertheless, if desired, this can be enabled:
 
 * Capping by the number of records. This allows the resource growing up until certain configured maximum number of records is reached (`persistence_policy.max_records`), and then maintains such a constant number of records.
@@ -316,8 +316,8 @@ Capping and expiration are disabled by default. Nevertheless, if desired, this c
 
 [Top](#top)
 
-##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`NGSIMySQLSink` class
+## <a name="section3"></a>Programmers guide
+### <a name="section3.1"></a>`NGSIMySQLSink` class
 As any other NGSI-like sink, `NGSIMySQLSink` extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
@@ -342,7 +342,7 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-###<a name="section3.2"></a>Authentication and authorization
+### <a name="section3.2"></a>Authentication and authorization
 Current implementation of `NGSIMySQLSink` relies on the username and password credentials created at the MySQL endpoint.
 
 [Top](#top)

@@ -1,4 +1,4 @@
-#<a name="top"></a>Cygnus NGSI
+# <a name="top"></a>Cygnus NGSI
 Content:
 
 * [Welcome to Cygnus NGSI](#section1)
@@ -14,7 +14,7 @@ Content:
 * [Features summary](#section4)
 * [Reporting issues and contact information](#section5)
 
-##<a name="section1"></a>Welcome to Cygnus NGSI
+## <a name="section1"></a>Welcome to Cygnus NGSI
 Cygnus NGSI is a connector in charge of persisting [Orion](https://github.com/telefonicaid/fiware-orion) context data in certain configured third-party storages, creating a historical view of such data. In other words, Orion only stores the last value regarding an entity's attribute, and if an older value is required then you will have to persist it in other storage, value by value, using Cygnus NGSI.
 
 Cygnus NGSI uses the subscription/notification feature of Orion. A subscription is made in Orion on behalf of Cygnus NGSI, detailing which entities we want to be notified when an update occurs on any of those entities attributes.
@@ -37,14 +37,14 @@ You may consider to visit [Cygnus NGSI Quick Start Guide](../doc/cygnus-ngsi/qui
 
 [Top](#top)
 
-##<a name="section2"></a>Basic operation
-###<a name="section2.1"></a>Hardware requirements
+## <a name="section2"></a>Basic operation
+### <a name="section2.1"></a>Hardware requirements
 * RAM: 1 GB, specially if abusing of the batching mechanism.
 * HDD: A few GB may be enough unless the channel types are configured as `FileChannel` type.
 
 [Top](#top)
 
-###<a name="section2.2"></a>Installation (CentOS/RedHat)
+### <a name="section2.2"></a>Installation (CentOS/RedHat)
 Simply configure the FIWARE repository if not yet configured:
 
     $ cat > /etc/yum.repos.d/fiware.repo <<EOL
@@ -65,7 +65,7 @@ Please observe, as part of the installation process, cygnus-common is installed 
 
 [Top](#top)
 
-###<a name="section2.3"></a>Configuration
+### <a name="section2.3"></a>Configuration
 Cygnus NGSI is a tool with a high degree of configuration required for properly running it. The reason is the configuration describes the Flume-based agent chosen to be run.
 
 So, the starting point is choosing the internal architecture of the Cygnus NGSI agent. Let's assume the simplest one:
@@ -121,7 +121,7 @@ POLLING_INTERVAL=30
 
 [Top](#top)
 
-###<a name="section2.4"></a>Running
+### <a name="section2.4"></a>Running
 Cygnus NGSI can be run as a service by simply typing:
 
     $ (sudo) service cygnus start
@@ -130,7 +130,7 @@ Logs are written in `/var/log/cygnus/cygnus.log`, and the PID of the process wil
 
 [Top](#top)
 
-###<a name="section2.5"></a>Unit testing
+### <a name="section2.5"></a>Unit testing
 Running the tests require [Apache Maven](https://maven.apache.org/) installed and Cygnus NGSI sources downloaded.
 
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
@@ -139,7 +139,7 @@ Running the tests require [Apache Maven](https://maven.apache.org/) installed an
 
 [Top](#top)
 
-###<a name="section2.6"></a>e2e testing
+### <a name="section2.6"></a>e2e testing
 Cygnus NGSI works by receiving NGSI-like notifications, which are finally persisted. In order to test this, you can run any of the notification scripts located in the [resources folder](./resources/ngsi-examples) of this repo, which emulate certain notification types.
 
 ```
@@ -167,7 +167,7 @@ Or you can connect a real NGSI source such as [Orion Context Broker](https://git
 
 [Top](#top)
 
-###<a name="section2.7"></a>Management API overview
+### <a name="section2.7"></a>Management API overview
 Run the following `curl` in order to get the version (assuming Cygnus NGSI runs on `localhost`):
 
 ```
@@ -226,7 +226,7 @@ Many other operations, like getting/putting/updating/deleting the grouping rules
 
 [Top](#top)
 
-##<a name="section3"></a>Advanced topics and further reading
+## <a name="section3"></a>Advanced topics and further reading
 Detailed information regarding cygus-ngsi can be found in the [Installation and Administration Guide](../doc/cygnus-ngsi/installation_and_administration_guide/introduction.md), the [User and Programmer Guide](../doc/cygnus-ngsi/user_and_programmer_guide/introduction.md) and the [Flume extensions catalogue](../doc/cygnus-ngsi/flume_extensions_catalogue/introduction.md). The following is just a list of shortcuts regarding the most popular topics:
 
 * [Installation with docker](../doc/cygnus-ngsi/installation_and_administration_guide/install_with_docker). An alternative to RPM installation, docker is one of the main options when installing FIWARE components.
@@ -241,7 +241,7 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
 
 [Top](#top)
 
-##<a name="section4"></a>Features summary
+## <a name="section4"></a>Features summary
 <table>
   <tr><th>Component</th><th>Feature</th><th>From version</th></tr>
   <tr><td rowspan="11">NGSIHDFSSink</td><td>First implementation</td><td>0.1.0</td></tr>
@@ -303,7 +303,7 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
 
 [Top](#top)
 
-##<a name="section5"></a>Reporting issues and contact information
+## <a name="section5"></a>Reporting issues and contact information
 Any doubt you may have, please refer to the [Cygnus Core Team](../doc/cygnus-ngsi/user_and_programmer_guide/issues_and_contact.md).
 
 [Top](#top)

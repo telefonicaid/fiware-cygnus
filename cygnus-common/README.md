@@ -1,4 +1,4 @@
-#<a name="top"></a>cygnus-common
+# <a name="top"></a>cygnus-common
 Content:
 
 * [Welcome to cygnus-common](#section1)
@@ -13,21 +13,21 @@ Content:
 * [Features summary](#section4)
 * [Reporting issues and contact information](#section5)
 
-#<a name="section1"></a>Welcome to cygnus-common
+# <a name="section1"></a>Welcome to cygnus-common
 cygnus-common is the base for any Cygnus agent (e.g. cygnus-ngsi). Cygnus agents are based on [Apache Flume](http://flume.apache.org/) agents, which are basically composed of a source in charge of receiving the data, a channel where the source puts the data once it has been transformed into a Flume event, and a sink, which takes Flume events from the channel in order to persist the data within its body into a third-party storage.
 
 cygnus-common provides a set of extensions for Apache Flume, for instance, defining how a Http source handler must look like or adding channels suitable for reading Cygnus-like counters. But not only Flume extensions, but interesting functionality for any agent in terms of a common Management Interface, common backend classes for HDFS, MySQL, MongoDB, PostgreSQL and many others, unified logging classes and error handling, etc.
 
 [Top](#top)
 
-##<a name="section2"></a>Basic operation
-###<a name="section2.1"></a>Hardware requirements
+## <a name="section2"></a>Basic operation
+### <a name="section2.1"></a>Hardware requirements
 * RAM: 1 GB, specially if abusing of the batching mechanism.
 * HDD: A few GB may be enough unless the channel types are configured as `FileChannel` type.
 
 [Top](#top)
 
-###<a name="section2.2"></a>Installation (CentOS/RedHat)
+### <a name="section2.2"></a>Installation (CentOS/RedHat)
 Simply configure the FIWARE repository if not yet configured:
 
     $ cat > /etc/yum.repos.d/fiware.repo <<EOL
@@ -46,12 +46,12 @@ The above will install cygnus-common in `/usr/cygnus/`.
 
 [Top](#top)
 
-###<a name="section2.3"></a>Configuration
+### <a name="section2.3"></a>Configuration
 Configuring cygnus-common is just configuring Apache Flume since no agent-related functionality is added (that's something agents as cygnus-ngsi do). Please, check [this](https://flume.apache.org/FlumeUserGuide.html#setup) official guidelines.
 
 [Top](#top)
 
-###<a name="section2.4"></a>Running
+### <a name="section2.4"></a>Running
 cygnus-common can be run as a service by simply typing:
 
     $ service cygnus-common start
@@ -60,7 +60,7 @@ Logs are written in `/var/log/cygnus/cygnus.log`, and the PID of the process wil
 
 [Top](#top)
 
-###<a name="section2.5"></a>Unit testing
+### <a name="section2.5"></a>Unit testing
 Running the tests require [Apache Maven](https://maven.apache.org/) installed and cygnus-common sources downloaded.
 
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
@@ -69,7 +69,7 @@ Running the tests require [Apache Maven](https://maven.apache.org/) installed an
 
 [Top](#top)
 
-###<a name="section2.6"></a>Management API overview
+### <a name="section2.6"></a>Management API overview
 Run the following `curl` in order to get the version (assuming cygnus-common runs on `localhost`):
 
 ```
@@ -84,13 +84,13 @@ Many other operations, like getting/putting/updating/deleting the grouping rules
 
 [Top](#top)
 
-##<a name="section3"></a>Further reading
+## <a name="section3"></a>Further reading
 
 Further information can be found in the documentation at [fiware-cygnus.readthedocs.io](https://fiware-cygnus.readthedocs.io)
 
 [Top](#top)
 
-##<a name="section4"></a>Features summary
+## <a name="section4"></a>Features summary
 <table>
   <tr><td rowspan="6">Management Interface</td><td>GET /version</td><td>0.5.0</td></tr>
   <tr><td>GET /stats</td><td>0.13.0</td></tr>
@@ -112,7 +112,7 @@ Further information can be found in the documentation at [fiware-cygnus.readthed
 
 [Top](#top)
 
-##<a name="section5"></a>Reporting issues and contact information
+## <a name="section5"></a>Reporting issues and contact information
 Any doubt you may have, please refer to the [Cygnus Core Team](../reporting_issues_and_contact.md).
 
 [Top](#top)

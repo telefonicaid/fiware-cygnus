@@ -1,4 +1,4 @@
-#<a name="top"></a>NGSISTHSink
+# <a name="top"></a>NGSISTHSink
 Content:
 
 * [Functionality](#section1)
@@ -24,7 +24,7 @@ Content:
     * [`MongoBackend` class](#section3.2)
     * [Authentication and authorization](#section3.3)
 
-##<a name="section1"></a>Functionality
+## <a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSISTHSink`, or simply `NGSISTHSink` is a sink designed to persist NGSI-like context data events within a MongoDB server in an aggregated way, specifically these measures are computed:
 
 * For numeric attribute values:
@@ -44,19 +44,19 @@ Next sections will explain this in detail.
 
 [Top](#top)
 
-###<a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
+### <a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
 Notified NGSI events (containing context data) are transformed into `NGSIEvent` objects (for each context element a `NGSIEvent` is created; such an event is a mix of certain headers and a `ContextElement` object), independently of the NGSI data generator or the final backend where it is persisted.
 
 This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_rest_handler.md). Once translated, the data (now, as `NGSIEvent` objects) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
-###<a name="section1.2"></a>Mapping `NGSIEvent`s to MongoDB data structures
+### <a name="section1.2"></a>Mapping `NGSIEvent`s to MongoDB data structures
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `NGSISTHSink` each time a `NGSIEvent` is going to be persisted.
 
 [Top](#top)
 
-####<a name="section1.2.1"></a>MongoDB databases and collections naming conventions
+#### <a name="section1.2.1"></a>MongoDB databases and collections naming conventions
 A database called as the `fiware-service` header value within the event is created (if not existing yet). A configured prefix is added (by default, `sth_`).
 
 It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `/`, `\`, `.`, `"` and `$` in the database names. This leads to certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
@@ -65,7 +65,7 @@ MongoDB [namespaces (database + collection) name length](https://docs.mongodb.co
 
 [Top](#top)
 
-####<a name="section1.2.2"></a>MongoDB collections naming conventions
+#### <a name="section1.2.2"></a>MongoDB collections naming conventions
 The name of these collections depends on the configured data model and analysis mode (see the [Configuration](#section2.1) section for more details):
 
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md)) is used as the name of the collection. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The configured prefix is prepended to the collection name, while `.aggr` sufix is appended to it.
@@ -94,7 +94,7 @@ Please observe the concatenation of entity ID and type is already given in the `
 
 [Top](#top)
 
-####<a name="section1.2.3"></a>Storing
+#### <a name="section1.2.3"></a>Storing
 As said, `NGSISTHSink` has been designed for pre-aggregating certain statistics about entities and their attributes:
 
 * For numeric attribute values:
@@ -114,8 +114,8 @@ Finally, each document will save the number of <i>samples</i> that were used for
 
 [Top](#top)
 
-###<a name="section1.3"></a>Example
-####<a name="section1.3.1"></a>`NGSIEvent`
+### <a name="section1.3"></a>Example
+#### <a name="section1.3.1"></a>`NGSIEvent`
 Assuming the following `NGSIEvent` is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     ngsi-event={
@@ -150,7 +150,7 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
 [Top](#top)
 
-####<a name="section1.3.2"></a>Database and collection names
+#### <a name="section1.3.2"></a>Database and collection names
 A MongoDB database named as the concatenation of the prefix and the notified FIWARE service path, i.e. `sth_vehicles`, will be created.
 
 Regarding the collection names, the MongoDB collection names will be, depending on the configured data model, the following ones (old encoding):
@@ -169,7 +169,7 @@ Using the new encoding:
 
 [Top](#top)
 
-####<a name="section1.3.3"></a>Storing
+#### <a name="section1.3.3"></a>Storing
 Assuming `data_model=dm-by-entity` and all the possible resolutions as configuration parameters (see section [Configuration](#section2.1) for more details), then `NGSISTHSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
@@ -289,8 +289,8 @@ Assuming `data_model=dm-by-entity` and all the possible resolutions as configura
 
 [Top](#top)
 
-##<a name="section2"></a>Administration guide
-###<a name="section2.1"></a>Configuration
+## <a name="section2"></a>Administration guide
+### <a name="section2.1"></a>Configuration
 `NGSISTHSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -342,13 +342,13 @@ A configuration example could be:
 
 [Top](#top)
 
-###<a name="section2.2"></a>Use cases
+### <a name="section2.2"></a>Use cases
 Use `NGSISTHSink` if you are looking for a Json-based document storage about aggregated data not growing so much in the mid-long term.
 
 [Top](#top)
 
-###<a name="section2.3"></a>Important notes
-####<a name="section2.3.1"></a>About batching
+### <a name="section2.3"></a>Important notes
+#### <a name="section2.3.1"></a>About batching
 Despite `NGSISTHSink` allows for batching configuration, it is not true it works with real batches as the rest of sinks. The batching mechanism was designed to accumulate NGSI-like notified data following the configured data model (i.e. by service, service path, entity or attribute) and then perform a single bulk-like insert operation comprising all the accumulated data.
 
 Nevertheless, STH Comet storage aggregates data through updates, i.e. there are no inserts but updates of certain pre-populated collections. Then, these updates implement at MongoDB level the expected aggregations of STH Comet (sum, sum2, max and min).
@@ -359,12 +359,12 @@ Thus, `NGSISTHSink` does not implement a real batching mechanism as usual. Pleas
 
 [Top](#top)
 
-####<a name="section2.3.2"></a>About `recvTime` and `TimeInstant` metadata
+#### <a name="section2.3.2"></a>About `recvTime` and `TimeInstant` metadata
 By default, `NGSISTHSink` stores the notification reception timestamp. Nevertheless, if a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
 
 [Top](#top)
 
-####<a name="section2.3.3"></a>About the encoding
+#### <a name="section2.3.3"></a>About the encoding
 `NGSIMongoSink` follows the [MongoDB naming restrictions](https://docs.mongodb.org/manual/reference/limits/#naming-restrictions). In a nutshell:
 
 Until version 1.2.0 (included), Cygnus applied a very simple encoding:
@@ -383,7 +383,7 @@ Despite the old encoding will be deprecated in the future, it is possible to swi
 
 [Top](#top)
 
-####<a name="section2.3.4"></a>About supported versions of MongoDB
+#### <a name="section2.3.4"></a>About supported versions of MongoDB
 This sink has been tested with the following versions of Mongo:
 
 * 3.2.6
@@ -391,8 +391,8 @@ This sink has been tested with the following versions of Mongo:
 
 [Top](#top)
 
-##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`NGSISTHSink` class
+## <a name="section3"></a>Programmers guide
+### <a name="section3.1"></a>`NGSISTHSink` class
 `NGSISTHSink` extends `NGSIMongoBaseSink`, which as any other NGSI-like sink, extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
@@ -409,7 +409,7 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-###<a name="section3.2"></a>`MongoBackend` class
+### <a name="section3.2"></a>`MongoBackend` class
 This is a convenience backend class for MongoDB that provides methods to persist the context data both in raw of aggregated format. Relevant methods regarding raw format are:
 
     public void createDatabase(String dbName) throws Exception;
@@ -428,7 +428,7 @@ Nothing special is done with regards to the encoding. Since Cygnus generally wor
 
 [Top](#top)
 
-###<a name="section3.3"></a>Authentication and authorization
+### <a name="section3.3"></a>Authentication and authorization
 Current implementation of `NGSIMongoSink` relies on the username and password credentials created at the MongoDB endpoint.
 
 [Top](#top)

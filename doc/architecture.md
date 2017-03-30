@@ -1,7 +1,7 @@
-#<a name="top"></a>Cygnus architecture
+# <a name="top"></a>Cygnus architecture
 Cygnus runs Flume agents. Thus, Cygnus agents architecture is Flume agents one. Let's see how this architecture ranges from the most basic configuration to the most complex one.
 
-##Flume architecture
+## Flume architecture
 As stated in [flume.apache.org](http://flume.apache.org/FlumeDeveloperGuide.html):
 
 >An Event is a unit of data that flows through a Flume agent. The Event flows from Source to Channel to Sink, and is represented by an implementation of the Event interface. An Event carries a payload (byte array) that is accompanied by an optional set of headers (string attributes). A Flume agent is a process (JVM) that hosts the components that allow Events to flow from an external source to a external destination.
@@ -12,7 +12,7 @@ As stated in [flume.apache.org](http://flume.apache.org/FlumeDeveloperGuide.html
 
 [Top](#top)
 
-##Basic Cygnus agent architecture
+## Basic Cygnus agent architecture
 The simplest way of using Cygnus is to adopt basic constructs/flows of <i>source - channel - sink</i> as described in the Apache Flume documentation. There can be as many basic constructs/flows as persistence elements, i.e. one for HDFS, another one for MySQL, etc. 
 
 For each one of this flows, a [`HttpSource`](http://flume.apache.org/FlumeUserGuide.html#http-source) has to be used. The way this native sources process the Orion notifications is by means of a specific REST handler: `NGSIRESTHandler`. Nevetheless, this basic approach requires each source receives its own event notifications. This is not a problem if the architect clearly defines which flows must end in a HDFS storage, or in a Carto storage, if talking about a NGSI agent. But, what happens if the same event must be stored at HDFS and Carto at the same time? In this case, the constructs are modified in order all of them have the same Http source; then, the notified event is replicated for each channel connected to the source.
@@ -38,7 +38,7 @@ Finally, the sinks are custom ones, one per each persistence element covered by 
 
 [Top](#top)
 
-##Advanced Cygnus architectures
+## Advanced Cygnus architectures
 All the advanced archictures arise when trying to improve the performance of Cygnus. As seen above, basic Cygnus configuration is about a source writting Flume events into a single channel where a single sink consumes those events. This can be clearly moved to a multiple sink configuration running in parallel; there are several possibilities:
 
 ### Multiple sinks, single channel
@@ -63,7 +63,7 @@ Due to the available <i>Channel Selectors</i> do not fit our needs, a custom sel
 
 [Top](#top)
 
-##High availability Cygnus architecture
+## High availability Cygnus architecture
 High Availability (or HA) is achieved by replicating a whole Cygnus agent, independently of the internal architecture (basic or advance), in an active-passive standard schema. I.e. when the active Cygnus agent fails, a load balancer redirects all the incoming Orion notifications to the passive one. Both Cygnus agents are able to persist the notified context data using the same set of sinks with identical configuration.
 
 ![](./images/ha_architecture.jpg) 

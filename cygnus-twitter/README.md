@@ -10,7 +10,7 @@
 * [Licensing](#section6)
 * [Reporting issues and contact information](#section7)
 
-##<a name="section1"></a>Welcome to Cygnus-twitter
+## <a name="section1"></a>Welcome to Cygnus-twitter
 This project is part of [FIWARE](http://fiware.org), being part of the [Cosmos](http://catalogue.fiware.org/enablers/bigdata-analysis-cosmos) Ecosystem.
 
 Cygnus-twitter is a connector in charge of persisting tweets (https://dev.twitter.com/overview/api/tweets) in certain configured third-party storages, creating a historical view of such data.
@@ -23,14 +23,14 @@ Current stable release is able to persist Twitter data in:
 
 [Top](#top)
 
-##<a name="section2"></a>Basic operation
-###<a name="section2.1"></a>Hardware requirements
+## <a name="section2"></a>Basic operation
+### <a name="section2.1"></a>Hardware requirements
 * RAM: 1 GB, specially if abusing of the batching mechanism.
 * HDD: A few GB may be enough unless the channel types are configured as `FileChannel` type.
 
 [Top](#top)
 
-###<a name="section2.3"></a>Configuration
+### <a name="section2.3"></a>Configuration
 Cygnus-twitter is a tool with a high degree of configuration required for properly running it.
 
 So, the starting point is choosing the internal architecture of the Cygnus agent. Let's assume the simplest one:
@@ -183,7 +183,7 @@ Check the [User and Programmer Guide](../../doc/cygnus-twitter/user_and_programm
 
 [Top](#top)
 
-###<a name="section2.5"></a>Unit testing
+### <a name="section2.5"></a>Unit testing
 Running the tests require [Apache Maven](https://maven.apache.org/) installed and Cygnus sources downloaded.
 
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
@@ -192,7 +192,7 @@ Running the tests require [Apache Maven](https://maven.apache.org/) installed an
 
 [Top](#top)
 
-###<a name="section2.7"></a>Management API overview
+### <a name="section2.7"></a>Management API overview
 Run the following `curl` in order to get the version (assuming Cygnus runs on `localhost`):
 
 ```
@@ -251,7 +251,7 @@ Many other operations, like getting/putting/updating/deleting the grouping rules
 
 [Top](#top)
 
-##<a name="section5"></a>Features summary
+## <a name="section5"></a>Features summary
 <table>
   <tr><th>Component</th><th>Feature</th><th>From version</th></tr>
   <tr><td rowspan="7">TwitterHDFSSink</td><td>First implementation</td><td>1.1.0</td></tr>
@@ -267,12 +267,12 @@ Many other operations, like getting/putting/updating/deleting the grouping rules
 
 [Top](#top)
 
-##<a name="section6"></a>Licensing
+## <a name="section6"></a>Licensing
 Cygnus is licensed under Affero General Public License (GPL) version 3. You can find a [copy of this license in the repository](../../LICENSE).
 
 [Top](#top)
 
-##<a name="section7"></a>Reporting issues and contact information
+## <a name="section7"></a>Reporting issues and contact information
 There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
 
 * Use [stackoverflow.com](http://stackoverflow.com) for specific questions about this software. Typically, these will be related to installation problems, errors and bugs. Development questions when forking the code are welcome as well. Use the `fiware-cygnus` tag.

@@ -8,7 +8,7 @@ Content:
 * [Programmers guide](#section3)
     * [`TwitterSource` class](#section3.1)
 
-##<a name="section1"></a>Functionality
+## <a name="section1"></a>Functionality
 `com.telefonica.iot.cygnus.sources.TwitterSource`, or simply `TwitterSource` is a source designed to collect data from [Twitter] (https://twitter.com).
 
 Tweets are always transformed into internal Flume events at `TwitterSource`. In the end, the information within these Flume events must be mapped into specific data structures at the corresponding sinks.
@@ -17,15 +17,15 @@ Next sections will explain this in detail.
 
 [Top](#top)
 
-###<a name="section1.1"></a>Mapping Twitter events to flume events
+### <a name="section1.1"></a>Mapping Twitter events to flume events
 Received Twitter events are transformed into Flume events (specifically `TwitterEvent`), independently of the final backend where it is persisted.
 
 The body of a flume TwitterEvent is the representation of a tweet in JSON format. Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
-##<a name="section2"></a>Administration guide
-###<a name="section2.1"></a>Configuration
+## <a name="section2"></a>Administration guide
+### <a name="section2.1"></a>Configuration
 `TwitterSource` is configured through the following parameters that are defined in the configuration file `agent_<id>.conf`.
 
 The name of the source:
@@ -84,8 +84,8 @@ cygnus-twitter.sources.twitter-source.accessToken = xxxxxxxx
 cygnus-twitter.sources.twitter-source.accessTokenSecret = xxxxxxxx
 ```
 
-##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`TwitterSource` class
+## <a name="section3"></a>Programmers guide
+### <a name="section3.1"></a>`TwitterSource` class
 `TwitterSource` has two main methods that are described in the following paragraphs.
 
 `public void configure(Context context)`

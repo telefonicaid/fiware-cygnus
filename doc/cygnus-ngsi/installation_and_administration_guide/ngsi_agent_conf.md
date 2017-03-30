@@ -1,4 +1,4 @@
-#<a name="top"></a>cygnus-ngsi agent configuration
+# <a name="top"></a>cygnus-ngsi agent configuration
 cygnus-ngsi, as any other Cygnus agent, follows the multi-instance configuration of cygnus-common.
 
 The file `agent_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/agent_ngsi.conf.template`.

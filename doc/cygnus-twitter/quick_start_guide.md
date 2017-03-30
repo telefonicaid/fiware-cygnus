@@ -17,7 +17,7 @@ Or as a thin Java jar file:
     $ cp target/cygnus-<x.y.z>.jar APACHE_FLUME_HOME/plugins.d/cygnus/lib
 ```
 
-##Configuring a test agent
+## Configuring a test agent
 
 This kind of agent is the simplest one you can configure with Cygnus-twitter. It is based on a standard `TwitterSource`, a `MemoryChannel` and a `HDFSSink`. Don't worry about the configuration details, specially those about the source; simply think on a Twitter listener waiting for tweet statuses and sending them in the form of Flume events to a testing purpose sink that will persist tweets in a hdfs third-party storage.
 
@@ -129,7 +129,7 @@ cygnus-twitter.channels.hdfs-channel.capacity = 1000
 cygnus-twitter.channels.hdfs-channel.transactionCapacity = 100
 ```
 
-##Reporting issues and contact information
+## Reporting issues and contact information
 There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
 
 * Use [stackoverflow.com](http://stackoverflow.com) for specific questions about this software. Typically, these will be related to installation problems, errors and bugs. Development questions when forking the code are welcome as well. Use the `fiware-cygnus` tag.
