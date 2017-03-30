@@ -1,4 +1,4 @@
-#<a name="top"></a>Deprecated and removed functionality
+# <a name="top"></a>Deprecated and removed functionality
 Content:
 
 * [Functionality deprecation and remove policy](#section1)
@@ -13,7 +13,7 @@ Content:
     * [`matching_table` parameter](#section3.5)
     * [Hash-based collection names in MongoDB/STH](#section3.6)
 
-##<a name="section1"></a>Functionality deprecation and remove policy
+## <a name="section1"></a>Functionality deprecation and remove policy
 At Cygnus NGSI agent (cygnus-ngsi), functionality lifecycle is:
 
 1. New feature is designed.
@@ -30,23 +30,23 @@ Deprecated features are removed not before 3 developement sprints (usually, a de
 
 [Top](#top)
 
-##<a name="section2"></a>Deprecated functionalities
-###<a nane="section2.1"></a>Grouping Rules
+## <a name="section2"></a>Deprecated functionalities
+### <a nane="section2.1"></a>Grouping Rules
 Added at version [0.5](https://github.com/telefonicaid/fiware-cygnus/releases/tag/release-0.5) (issue [107](https://github.com/telefonicaid/fiware-cygnus/issues/107)).
 
 Deprecated after releasing version [1.6.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/1.6.0) (issue [1182](https://github.com/telefonicaid/fiware-cygnus/issues/1182)).
 
 [Top](#top)
 
-###<a name="section2.2"></a>`flip_coordinates` parameter
+### <a name="section2.2"></a>`flip_coordinates` parameter
 Added at version [1.0.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/1.0.0) (issue [927](https://github.com/telefonicaid/fiware-cygnus/issues/927)).
 
 Deprecated after releasing version [1.6.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/1.6.0) (issue [1313](https://github.com/telefonicaid/fiware-cygnus/issues/1313)).
 
 [Top](#top)
 
-##<a name="section3"></a>Removed functionalities
-###<a name="section3.1"></a>`events_ttl` parameter
+## <a name="section3"></a>Removed functionalities
+### <a name="section3.1"></a>`events_ttl` parameter
 Added at version [0.1](https://github.com/telefonicaid/fiware-cygnus/releases/tag/release-0.1).
 
 Never deprecated.
@@ -55,7 +55,7 @@ Removed in favour of `batch_ttl` parameter after releasing version [0.13.0](http
 
 [Top](#top)
 
-###<a name="section3.2"></a>XML notifications support
+### <a name="section3.2"></a>XML notifications support
 Added at version [0.1](https://github.com/telefonicaid/fiware-cygnus/releases/tag/release-0.1).
 
 Deprecated in favour of Json notifications from the very begining of the development.
@@ -64,7 +64,7 @@ Removed after releasing version [0.13.0](https://github.com/telefonicaid/fiware-
 
 [Top](#top)
 
-###<a name="section3.3"></a>`cosmos_`-like HDFS parameters
+### <a name="section3.3"></a>`cosmos_`-like HDFS parameters
 Added at version [0.1](https://github.com/telefonicaid/fiware-cygnus/releases/tag/release-0.1).
 
 Deprecated in favour of `hdfs_`-like parameters after releasing version [0.8.1](https://github.com/telefonicaid/fiware-cygnus/releases/tag/release-0.8.1) (issue [374](https://github.com/telefonicaid/fiware-cygnus/issues/374)).
@@ -73,7 +73,7 @@ Removed after releasing version [1.0.0](https://github.com/telefonicaid/fiware-c
 
 [Top](#top)
 
-###<a name="section3.4"></a>Data model by attribute in `NGSICartoDBSink`
+### <a name="section3.4"></a>Data model by attribute in `NGSICartoDBSink`
 Added at version [1.0.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/1.0.0) (issue [927](https://github.com/telefonicaid/fiware-cygnus/issues/927)).
 
 Never deprecated.
@@ -82,7 +82,7 @@ Removed after releasing version [1.1.0](https://github.com/telefonicaid/fiware-c
 
 [Top](#top)
 
-###<a name="section3.5"></a>`matching_table` parameter
+### <a name="section3.5"></a>`matching_table` parameter
 Added at version [0.5](https://github.com/telefonicaid/fiware-cygnus/releases/tag/release-0.5) (issue [https://github.com/telefonicaid/fiware-cygnus/issues/107](107)).
 
 Deprecated in favour of `grouping_rules_conf_file` after releasing version [0.8.1](https://github.com/telefonicaid/fiware-cygnus/releases/tag/release-0.8.1) (issue [https://github.com/telefonicaid/fiware-cygnus/issues/387](387)).
@@ -91,7 +91,7 @@ Removed after releaseing version [1.1.0](https://github.com/telefonicaid/fiware-
 
 [Top](#top)
 
-###<a name="section3.6"></a>Hash-based collection names for MongoDB/STH
+### <a name="section3.6"></a>Hash-based collection names for MongoDB/STH
 Added at version [0.8.1](https://github.com/telefonicaid/fiware-cygnus/releases/tag/0.8.1) (issue [420](https://github.com/telefonicaid/fiware-cygnus/issues/420)).
 
 Never deprecated.

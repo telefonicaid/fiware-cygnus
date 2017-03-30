@@ -1,4 +1,4 @@
-#<a name="top"></a>Adding new NGSI sinks development guide
+# <a name="top"></a>Adding new NGSI sinks development guide
 Content:
 
 * [Introduction](#section1)
@@ -14,14 +14,14 @@ Content:
 * [Backend convenience classes](#section4)
 * [Naming and placing the new sink](#section5)
 
-##<a name="section1"></a>Introduction
+## <a name="section1"></a>Introduction
 `cygnus-ngsi` allows for NGSI context data persistence in certain storages by means of Flume sinks. As long as the current collection of sinks could be limited for your purposes, you can add your own sinks regarding a persistence technology of your choice and become an official `cygnus-ngsi` contributor!
 
 This document tries to guide you on the development of such alternative sinks, by giving you guidelines about how to write the sink code, but also how the different classes must be called, the backends that can be used, etc.
 
 [Top](#top)
 
-##<a name="section2"></a>Base `NGSISink` class
+## <a name="section2"></a>Base `NGSISink` class
 `NGSISink` is the base class all the sinks within `cygnus-ngsi` extend. It is an abstract class which extends from `CygnusSink` class at `cygnus-common` (which, by its side, extends Flume's native `AbstractSink`).
 
 `NGSISink` provides most of the logic required by any NGSI-like sink:
@@ -37,7 +37,7 @@ You find this class at the following path:
 
 [Top](#top)
 
-###<a name="section2.1"></a>Inherited configuration
+### <a name="section2.1"></a>Inherited configuration
 All the sinks extending `NGSISink` inherit the following configuration parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -53,12 +53,12 @@ These parameters are read (and defaulted, when required) in the `configure(Conte
 
 [Top](#top)
 
-###<a name="section2.2"></a>Inherited starting and stoping
+### <a name="section2.2"></a>Inherited starting and stoping
 TBD
 
 [Top](#top)
 
-###<a name="section2.3"></a>Inherited events consumption    
+### <a name="section2.3"></a>Inherited events consumption    
 The most important part of `NGSISink` is where the events are consumed in a batch-like approach. This is done in the `process()` method inherited from `AbstractSink`, which is overwritten.
 
 Such events processing is done by opening a Flume transaction and reading events as specified in the `batch_size` parameter (if no enough events are available, the accumulation ends when the `batch_timeout` is reached). For each event read, the transaction is committed. Once the accumulations ends the transaction is closed.
@@ -75,7 +75,7 @@ Specific persistence logic is implemented by overwriting the only abstract metho
 
 [Top](#top)
 
-###<a name="section2.4"></a>Inherited counters
+### <a name="section2.4"></a>Inherited counters
 Because `NGSISink` extends `CygnusSink` the following counters are already available for retrieving statistics of any sink extending `NGSISink`:
 
 * Number of processed events, i.e. the number of events taken from the channel and accumulated in a batch for persistence.
@@ -83,18 +83,18 @@ Because `NGSISink` extends `CygnusSink` the following counters are already avail
 
 [Top](#top)
 
-##<a name="section3"></a>New sink class
-###<a name="section3.1"></a>Specific configuration
+## <a name="section3"></a>New sink class
+### <a name="section3.1"></a>Specific configuration
 The `configure(Context)` method of `NGSISink` can be extended with specific configuration parameters reading (and defaulting, when required).
 
 [Top](#top)
 
-###<a name="section3.2"></a>Kind of information to be persisted
+### <a name="section3.2"></a>Kind of information to be persisted
 We include a list of fields that are usually persisted in Cygnus sinks:* The reception time of the notification in miliseconds.* The reception time of the notification in human-readable format.* The notified/grouped FIWARE service path.* The entity ID.* The entity type.* The attributes and the attribute’s metadata.Regarding the attributes and their metadata, you may choose between two options (or both of them, by means of a switching configuration parameter):* <i>row</i> format, i.e. a write/insertion/upsert per attribute and metadata.* <i>column</i> format, i.e. a single write/insertion/upsert containing all the attributes and their metadata.
 
 [Top](#top)
 
-###<a name="section3.2"></a>Fitting to the specific data structures
+### <a name="section3.2"></a>Fitting to the specific data structures
 It is worth to briefly comment how the specific data structures should be created.
 Typically, the notified service (which defines a client/tenant) should map to the storage element in charge of defining namespaces per user. For instance, in MySQL, PostgreSQL, MongoDB and STH, the service maps to a specific database where permissions can be defined at user level. While in CKAN, the service maps to an organization. In other cases, the mapping is not so evident, as in HDFS, where the service maps into a folder under `hdfs://user/`. Or it is totally impossible to fit, as is the case of DynamoDB or Kafka, where the service can only be added as part of the persistence element name (table and topic, respectively).
 Regarding the notified service path, it is usually included as a prefix of the destination name (file, table, resource, collection, topic) where the data is really written. This is the case of all the sinks except HDFS and CKAN. HDFS maps the service path as a subfolder under `hdfs://user/service`, and CKAN maps the service path as a package.
@@ -103,12 +103,12 @@ It is worth to briefly comment how the specific data structures should be create
 
 [Top](#top)
 
-##<a name="section4"></a>Backend convenience classes
+## <a name="section4"></a>Backend convenience classes
 Sometimes all the necessary logic to persist the notified context data cannot be coded in the `persist` abstract method. In this case, you may want to create a backend class or set of classes wrapping the detailed interactions with the final backend. Nevertheless, these classes should not be located at `cygnus-ngsi` but at `cygnus-common`.
 
 [Top](#top)
 
-##<a name="section5"></a>Naming and placing the new classes
+## <a name="section5"></a>Naming and placing the new classes
 New sink classes must be called `NGSI<technology>Sink`, being <i>technology</i> the name of the persistence backend. Examples are the already existent sinks `NGSIHDFSSink`, `NGSICKANSink` or `NGSIMySQLSink`.
 
 Regarding the new sink class location, it must be:

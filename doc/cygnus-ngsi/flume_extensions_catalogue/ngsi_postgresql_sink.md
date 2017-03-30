@@ -1,4 +1,4 @@
-#<a name="top"></a>NGSIPostgreSQLSink
+# <a name="top"></a>NGSIPostgreSQLSink
 Content:
 
 * [Functionality](#section1)
@@ -27,7 +27,7 @@ Content:
     * [`NGSIPostgreSQLSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
 
-##<a name="section1"></a>Functionality
+## <a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIPostgreSQLSink`, or simply `NGSIPostgreSQLSink` is a sink designed to persist NGSI-like context data events within a [PostgreSQL server](https://www.postgresql.org/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific PostgreSQL data structures.
@@ -36,19 +36,19 @@ Next sections will explain this in detail.
 
 [Top](#top)
 
-###<a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
+### <a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
 Notified NGSI events (containing context data) are transformed into `NGSIEvent` objects (for each context element a `NGSIEvent` is created; such an event is a mix of certain headers and a `ContextElement` object), independently of the NGSI data generator or the final backend where it is persisted.
 
 This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_rest_handler.md). Once translated, the data (now, as `NGSIEvent` objects) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
-###<a name="section1.2"></a>Mapping `NGSIEvent`s to PostgreSQL data structures
+### <a name="section1.2"></a>Mapping `NGSIEvent`s to PostgreSQL data structures
 PostgreSQL organizes the data in schemas inside a database that contain tables of data rows. Such organization is exploited by `NGSIPostgreSQLSink` each time a `NGSIEvent` is going to be persisted.
 
 [Top](#top)
 
-####<a name="section1.2.1"></a>PostgreSQL databases naming conventions
+#### <a name="section1.2.1"></a>PostgreSQL databases naming conventions
 Previous to any operation with PostgreSQL you need to create the database to be used.
 
 It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
@@ -57,7 +57,7 @@ PostgreSQL [databases name length](http://www.postgresql.org/docs/current/static
 
 [Top](#top)
 
-####<a name="section1.2.2"></a>PostgreSQL schemas naming conventions
+#### <a name="section1.2.2"></a>PostgreSQL schemas naming conventions
 A schema named as the notified `fiware-service` header value (or, in absence of such a header, the defaulted value for the FIWARE service) is created (if not existing yet).
 
 It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
@@ -66,7 +66,7 @@ PostgreSQL [schemas name length](http://www.postgresql.org/docs/current/static/s
 
 [Top](#top)
 
-####<a name="section1.2.3"></a>PostgreSQL tables naming conventions
+#### <a name="section1.2.3"></a>PostgreSQL tables naming conventions
 The name of these tables depends on the configured data model (see the [Configuration](#section2.1) section for more details):
 
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
@@ -94,7 +94,7 @@ Please observe the concatenation of entity ID and type is already given in the `
 
 [Top](#top)
 
-####<a name="section1.2.4"></a>Row-like storing
+#### <a name="section1.2.4"></a>Row-like storing
 Regarding the specific data stored within the above table, if `attr_persistence` parameter is set to `row` (default storing mode) then the notified data is stored attribute by attribute, composing an insert for each one of them. Each insert contains the following fields:
 
 * `recvTimeTs`: UTC timestamp expressed in miliseconds.
@@ -109,7 +109,7 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 
 [Top](#top)
 
-####<a name="section1.2.5"></a>Column-like storing
+#### <a name="section1.2.5"></a>Column-like storing
 Regarding the specific data stored within the above table, if `attr_persistence` parameter is set to `column` then a single line is composed for the whole notified entity, containing the following fields:
 
 * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
@@ -121,8 +121,8 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 
 [Top](#top)
 
-###<a name="section1.3"></a>Example
-####<a name="section1.3.1"></a>`NGSIEvent`
+### <a name="section1.3"></a>Example
+#### <a name="section1.3.1"></a>`NGSIEvent`
 Assuming the following `NGSIEvent` is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     ngsi-event={
@@ -157,7 +157,7 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
 [Top](#top)
 
-####<a name="section1.3.2"></a>Database, schema and table names
+#### <a name="section1.3.2"></a>Database, schema and table names
 The PostgreSQL database name will be of the user's choice.
 
 The PostgreSQL schema will always be `vehicles`.
@@ -178,7 +178,7 @@ Using the new encoding:
 
 [Top](#top)
 
-####<a name="section1.3.3"></a>Row-like storing
+#### <a name="section1.3.3"></a>Row-like storing
 Assuming `attr_persistence=row` as configuration parameters, then `NGSIPostgreSQLSink` will persist the data within the body as:
 
     $ psql -U myuser
@@ -212,13 +212,13 @@ Assuming `attr_persistence=row` as configuration parameters, then `NGSIPostgreSQ
 
 [Top](#top)
 
-####<a name="section1.3.4"></a>Column-like storing
+#### <a name="section1.3.4"></a>Column-like storing
 Coming soon.
 
 [Top](#top)
 
-##<a name="section2"></a>Administration guide
-###<a name="section2.1"></a>Configuration
+## <a name="section2"></a>Administration guide
+### <a name="section2.1"></a>Configuration
 `NGSIPostgreSQLSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -268,13 +268,13 @@ A configuration example could be:
 
 [Top](#top)
 
-###<a name="section2.2"></a>Use cases
+### <a name="section2.2"></a>Use cases
 Use `NGSIPostgreSQLSink` if you are looking for a big database with several tenants. PostgreSQL is bad at having several databases, but very good at having different schemas.
 
 [Top](#top)
 
-###<a name="section2.3"></a>Important notes
-####<a name="section2.3.1"></a>About the table type and its relation with the grouping rules
+### <a name="section2.3"></a>Important notes
+#### <a name="section2.3.1"></a>About the table type and its relation with the grouping rules
 The table type configuration parameter, as seen, is a method for <i>direct</i> aggregation of data: by <i>default</i> destination (i.e. all the notifications about the same entity will be stored within the same PostgreSQL table) or by <i>default</i> service-path (i.e. all the notifications about the same service-path will be stored within the same PostgreSQL table).
 
 The [Grouping feature](./ngsi_grouping_interceptor.md) is another aggregation mechanism, but an <i>inderect</i> one. This means the grouping feature does not really aggregates the data into a single table, that's something the sink will done based on the configured table type (see above), but modifies the default destination or service-path, causing the data is finally aggregated (or not) depending on the table type.
@@ -283,14 +283,14 @@ For instance, if the chosen table type is by destination and the grouping featur
 
 [Top](#top)
 
-####<a name="section2.3.2"></a>About the persistence mode
+#### <a name="section2.3.2"></a>About the persistence mode
 Please observe not always the same number of attributes is notified; this depends on the subscription made to the NGSI-like sender. This is not a problem for the `row` persistence mode, since fixed 8-fields data rows are inserted for each notified attribute. Nevertheless, the `column` mode may be affected by several data rows of different lengths (in term of fields). Thus, the `column` mode is only recommended if your subscription is designed for always sending the same attributes, event if they were not updated since the last notification.
 
 In addition, when running in `column` mode, due to the number of notified attributes (and therefore the number of fields to be written within the Datastore) is unknown by Cygnus, the table can not be automatically created, and must be provisioned previously to the Cygnus execution. That's not the case of the `row` mode since the number of fields to be written is always constant, independently of the number of notified attributes.
 
 [Top](#top)
 
-####<a name="section2.3.3"></a>About batching
+#### <a name="section2.3.3"></a>About batching
 As explained in the [programmers guide](#section3), `NGSIPostgreSQLSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 `NGSIEvent`s. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same PostgreSQL table. If processing the events one by one, we would need 100 inserts into PostgreSQL; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination PostgreSQL table. In the worst case, the whole 100 entities will be about 100 different entities (100 different PostgreSQL tables), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
@@ -303,12 +303,12 @@ By default, `NGSIPostgreSQLSink` has a configured batch size and batch accumulat
 
 [Top](#top)
 
-####<a name="section2.3.4"></a>Time zone information
+#### <a name="section2.3.4"></a>Time zone information
 Time zone information is not added in PostgreSQL timestamps since PostgreSQL stores that information as a environment variable. PostgreSQL timestamps are stored in UTC time.
 
 [Top](#top)
 
-####<a name="section2.3.4"></a>About the encoding
+#### <a name="section2.3.4"></a>About the encoding
 Until version 1.2.0 (included), Cygnus applied a very simple encoding:
 
 * All non alphanumeric characters were replaced by underscore, `_`.
@@ -330,8 +330,8 @@ Despite the old encoding will be deprecated in the future, it is possible to swi
 
 [Top](#top)
 
-##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`NGSIPostgreSQLSink` class
+## <a name="section3"></a>Programmers guide
+### <a name="section3.1"></a>`NGSIPostgreSQLSink` class
 As any other NGSI-like sink, `NGSIPostgreSQLSink` extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
@@ -348,7 +348,7 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-###<a name="section3.2"></a>Authentication and authorization
+### <a name="section3.2"></a>Authentication and authorization
 Current implementation of `NGSIPostgreSQLSink` relies on the database, username and password credentials created at the PostgreSQL endpoint.
 
 [Top](#top)

@@ -1,4 +1,4 @@
-#<a name="top"></a>NGSIKafkaSink
+# <a name="top"></a>NGSIKafkaSink
 Content:
 
 * [Functionality](#section1)
@@ -19,7 +19,7 @@ Content:
 * [Programmers guide](#section3)
     * [`NGSIKafkaSink` class](#section3.1)
 
-##<a name="section1"></a>Functionality
+## <a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIKafkaSink`, or simply `NGSIKafkaSink` is a sink designed to persist NGSI-like context data events within a [Apache Kafka](http://kafka.apache.org/) deployment. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific Kafka data structures at the Cygnus sinks.
@@ -28,19 +28,19 @@ Next sections will explain this in detail.
 
 [Top](#top)
 
-###<a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
+### <a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
 Notified NGSI events (containing context data) are transformed into `NGSIEvent` objects (for each context element a `NGSIEvent` is created; such an event is a mix of certain headers and a `ContextElement` object), independently of the NGSI data generator or the final backend where it is persisted.
 
 This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_rest_handler.md). Once translated, the data (now, as `NGSIEvent` objects) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
-###<a name="section1.2"></a>Mapping `NGSIEvent`s to Kafka data structures
+### <a name="section1.2"></a>Mapping `NGSIEvent`s to Kafka data structures
 [Apache Kafka organizes](http://kafka.apache.org/documentation.html#introduction) the data in topics (a category or feed name to which messages are published). Such organization is exploited by `NGSIKafkaSink` each time a `NGSIEvent` is going to be persisted.
 
 [Top](#top)
 
-####<a name="section1.2.1"></a>Topics naming conventions
+#### <a name="section1.2.1"></a>Topics naming conventions
 A Kafka topic is created (number of partitions 1) if not yet existing depending on the configured data model:
 
 * Data model by service (`data_model=dm-by-service`). As the data model name denotes, the notified FIWARE service (or the configured one as default in [`NGSIRestHandler`](ngsi_rest_handler.md)) is used as the name of the topic. This allows the data about all the NGSI entities belonging to the same service is stored in this unique topic.
@@ -61,13 +61,13 @@ Please observe the concatenation of entity ID and type is already given in the `
 
 [Top](#top)
 
-####<a name="section1.2.2"></a>Storing
+#### <a name="section1.2.2"></a>Storing
 `NGSIEvent`s structure is <i>stringified</i> as a Json object containing an array of headers and another object containing the Json data as it is notified by the NGSI-like source.
 
 [Top](#top)
 
-###<a name="section1.3"></a>Example
-####<a name="section1.3.1"></a>`NGSIEvent`
+### <a name="section1.3"></a>Example
+#### <a name="section1.3.1"></a>`NGSIEvent`
 Assuming the following `NGSIEvent` is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     ngsi-event={
@@ -101,7 +101,7 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
 [Top](#top)
 
-####<a name="section1.3.2"></a>Topic names
+#### <a name="section1.3.2"></a>Topic names
 The topic names will be, depending on the configured data model, the following ones:
 
 | FIWARE service path | `dm-by-service` | `dm-by-service-path` | `dm-by-entity` | `dm-by-attribute` |
@@ -111,7 +111,7 @@ The topic names will be, depending on the configured data model, the following o
 
 [Top](#top)
 
-####<a name="section1.3.3"></a>Storing
+#### <a name="section1.3.3"></a>Storing
 Let's assume a topic name `vehiclesxffffx002f4wheelsxffffcar1xffffcarxffffspeed` (data model by attribute, non-root service path). The data stored within this topic would be:
 
     $ bin/kafka-console-consumer.sh --zookeeper localhost:2181 --topic vehiclesxffffx002f4wheelsxffffcar1xffffcarxffffspeed --from-beginning
@@ -121,8 +121,8 @@ Let's assume a topic name `vehiclesxffffx002f4wheelsxffffcar1xffffcarxffffspeed`
 
 [Top](#top)
 
-##<a name="section2"></a>Administration guide
-###<a name="section2.1"></a>Configuration
+## <a name="section2"></a>Administration guide
+### <a name="section2.1"></a>Configuration
 `NGSIKafkaSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -164,13 +164,13 @@ A configuration example could be:
 
 [Top](#top)
 
-###<a name="section2.2"></a>Use cases
+### <a name="section2.2"></a>Use cases
 Use `NGSIKafkaSink` if you want to integrate OrionContextBroker with a Kafka-based consumer, as a Storm real-time application.
 
 [Top](#top)
 
-###<a name="section2.3"></a>Important notes
-####<a name="section2.3.1"></a>About batching
+### <a name="section2.3"></a>Important notes
+#### <a name="section2.3.1"></a>About batching
 As explained in the [programmers guide](#section3), `NGSIKafkaSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 `NGSIEvent`s. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same Kafka topic. If processing the events one by one, we would need 100 writes to Kafka; nevertheless, in this example only one write is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination Kafka topic. In the worst case, the whole 100 entities will be about 100 different entities (100 different Kafka topics), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 writes of the event by event approach with only 10-15 writes.
@@ -183,7 +183,7 @@ By default, `NGSIKafkaSink` has a configured batch size and batch accumulation t
 
 [Top](#top)
 
-####<a name="section2.3.2"></a>About the encoding
+#### <a name="section2.3.2"></a>About the encoding
 Cygnus applies this specific encoding tailored to Kafka data structures:
 
 * Alphanumeric characters are not encoded.
@@ -198,8 +198,8 @@ Cygnus applies this specific encoding tailored to Kafka data structures:
 
 [Top](#top)
 
-##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`NGSIKafkaSink` class
+## <a name="section3"></a>Programmers guide
+### <a name="section3.1"></a>`NGSIKafkaSink` class
 As any other NGSI-like sink, `NGSIKafkaSink` extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;

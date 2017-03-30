@@ -1,11 +1,11 @@
-#<a name="top"></a>Backends as short-term historics
+# <a name="top"></a>Backends as short-term historics
 Backends are used by Cygnus NGSI as "infinite" historical context data repositories. More and more data is appended to files, tables and collections as data flow from a NGSI source. Such a data flow may never end, thus, insertions may never end too, exhausting the available storing resources.
 
 Therefore, it is important to provide mechanisms in charge of controlling how much data is stored in the persistence backends, removing old data in favour of new one, resulting in some kind of short-term historic implementation.
 
 From version 1.7.0 this is something that can be done by means of the **capping** and/or **expirating** features.
 
-##How it works
+## How it works
 There are two approaches when deciding which data must be removed from existent historics:
 
 * By **capping** data "records"(*) once certain size limit has been reached. In other words, to ensure that only the last N records are stored, honouring the capping limit in place.
@@ -30,7 +30,7 @@ Which sinks provide this kind of functionality? For the time being:
 
 [Top](#top)
 
-##The special case of `NGSIMongoSink` and `NGSISTHSink`
+## The special case of `NGSIMongoSink` and `NGSISTHSink`
 `NGSIMongoSink` and `NGSISTHSink` implement this kind of functionality from version 0.13.0, since the data stored in MongoDB and STH Comet was wanted to be a short-term historic from the very begining. Nevertheless, the parameters controlling the functionality are very different from the above ones:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -43,7 +43,7 @@ There are also differences in the implementations: while MongoDB natively provid
 
 [Top](#top)
 
-##Future work
+## Future work
 Most probably in the future all the sinks sharing this feature will see their parameters homogenized, since conceptually the capping/expirating feature implmented by CKAN and MySQL sinks is the same than the time and size-based data management policies in MongoDB and STH sinks.
 
 [Top](#top)

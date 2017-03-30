@@ -1,4 +1,4 @@
-#Running a cygnus-twitter agent
+# Running a cygnus-twitter agent
 
 Once the `agent_<id>.conf` file is properly configured, just use the following command to start:
 

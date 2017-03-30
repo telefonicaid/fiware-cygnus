@@ -1,11 +1,11 @@
-#<a name="top"></a>Logs and alarms
+# <a name="top"></a>Logs and alarms
 Content:
 
 * [Introduction](#section1)
 * [Log message types](#section2)
 * [Alarm conditions](#seciton3)
 
-##<a name="section1"></a>Introduction
+## <a name="section1"></a>Introduction
 This document describes the alarms a platform integrating Cygnus-twitter should raise when an incident happens. Thus, it is addressed to professional operators and such platform administrators.
 
 Cygnus messages are explained before the alarm conditions deriving from those messages are described.
@@ -21,7 +21,7 @@ For each alarm, the following information is given:
 
 [Top](#top)
 
-##<a name="section2"></a>Log message types
+## <a name="section2"></a>Log message types
 Cygnus logs are categorized under seven message types, each one identified by a tag in the custom message part of the trace. These are the tags:
 
 * <i>Fatal error</i> (`FATAL` level). These kind of errors may cause Cygnus to stop, and thus must be repported to the development team through [stackoverflow.com](http://stackoverflow.com/) (please, tag it with <i>fiware</i>).
@@ -47,7 +47,7 @@ Debug messages are labeled as <i>Debug</i>, with a logging level of `DEBUG`. Inf
 
 [Top](#top)
 
-##<a name="section3"></a>Alarm conditions
+## <a name="section3"></a>Alarm conditions
 Alarm ID | Severity | Detection strategy | Stop condition | Description | Action
 ---|---|---|---|---|---
 1 | CRITICAL | A `FATAL` trace is found. | For each configured Cygnus-twitter component (i.e. `TwitterSource` and `TwiterHDFSSink`), the following trace is found: <i>Startup completed</i>. | A problem has happend at Cygnus startup. The `msg` field details the particular problem. | Fix the issue that is precluding Cygnus startup, e.g. if the problem was due to and invalid twitter API key or invalid coordinates for the geoquery, then change such values.  

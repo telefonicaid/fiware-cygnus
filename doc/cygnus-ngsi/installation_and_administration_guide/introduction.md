@@ -1,4 +1,4 @@
-#<a name="top"></a>Introduction
+# <a name="top"></a>Introduction
 This document details how to install and administrate a **cygnus-ngsi** agent.
 
 cygnus-ngsi is a connector in charge of persisting [Orion](https://github.com/telefonicaid/fiware-orion) context data in certain configured third-party storages, creating a historical view of such data. In other words, Orion only stores the last value regarding an entity's attribute, and if an older value is required then you will have to persist it in other storage, value by value, using cygnus-ngsi.
@@ -19,14 +19,14 @@ Current stable release is able to persist Orion context data in:
 
 [Top](#top)
 
-##Intended audience
+## Intended audience
 This document is mainly addressed to those FIWARE users already using an [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance and willing to create historical views from the context data managed by Orion. In that case, you will need this document in order to learn how to install and administrate cygnus-ngsi.
 
 If your aim is to create a new sink for cygnus-ngsi, or expand it in some way, please refer to the [User and Programmer Guide](../user_and_programmer_guide/introduction.md).
 
 [Top](#top)
 
-##Structure of the document
+## Structure of the document
 Apart from this introduction, this Installation and Administration Guide mainly contains sections about installing, configuring, running and testing cygnus-ngsi. The FIWARE user will also find useful information regarding multitenancy or performance tips. In addition, sanity check procedures (useful to know wether the installation was successful or not) and diagnosis procedures (a set of tips aiming to help when an issue arises) are provided as well.
 
 It is very important to note that, for those topics not covered by this documentation, the related section in cygnus-common applies. Specifically:

@@ -1,4 +1,4 @@
-#<a name="top"></a>Management interface
+# <a name="top"></a>Management interface
 Content:
 
 * [Apiary version of this document](#section1)
@@ -17,12 +17,12 @@ Content:
 * [PUT `/admin/configuration/instance`](#section10)
 * [DELETE `/admin/configuration/instance`](#section11)
 
-##<a name="section1"></a>Apiary version of this document
+## <a name="section1"></a>Apiary version of this document
 This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/latest) as well.
 
 [Top](#top)
 
-##<a name="section2"></a>`GET /admin/log`
+## <a name="section2"></a>`GET /admin/log`
 Gets the logging level of Cygnus.
 
 ```
@@ -45,7 +45,7 @@ Responses:
 
 [Top](#top)
 
-##<a name="section3"></a>`PUT /admin/log`
+## <a name="section3"></a>`PUT /admin/log`
 Updates the logging level of Cygnus, given the logging level as a query parameter.
 
 Valid logging levels are `DEBUG`, `INFO`, `WARNING` (`WARN` also works), `ERROR` and `FATAL`.
@@ -72,8 +72,8 @@ Responses:
 
 [Top](#top)
 
-##<a name="section4"></a>`GET /admin/configuration/agent`
-###<a name="section4.1"></a>`GET` all parameters
+## <a name="section4"></a>`GET /admin/configuration/agent`
+### <a name="section4.1"></a>`GET` all parameters
 
 Gets all the parameters from an agent given the path to the configuration file as the URI within the URL. The name of the agent must start with `agent_`.
 
@@ -109,7 +109,7 @@ Invalid agent configuration file name:
 
 [Top](#top)
 
-###<a name="section4.2"></a>`GET` a single parameter
+### <a name="section4.2"></a>`GET` a single parameter
 
 Gets a single parameter from an agent given the path to the configuration file as the URI within the URL and the name of the parameter as a query parameter. The name of the agent must start with `agent_`.
 
@@ -151,7 +151,7 @@ Invalid agent configuration file name:
 
 [Top](#top)
 
-##<a name="section5"></a>`POST /admin/configuration/agent`
+## <a name="section5"></a>`POST /admin/configuration/agent`
 
 Posts a single parameter if it doesn't exist in the agent given the path to the configuration file as the URI within the URL and the name and the value of the parameter as a query parameters. The name of the agent must start with `agent_`.
 
@@ -193,7 +193,7 @@ Invalid agent configuration file name:
 
 [Top](#top)
 
-##<a name="section6"></a>`PUT /admin/configuration/agent`
+## <a name="section6"></a>`PUT /admin/configuration/agent`
 
 Puts a single parameter if it doesn't exist or update it if already exists in the agent given the path to the configuration file as the URI within the URL and the name and the value of the parameter as a query parameters. The name of the agent must start with `agent_`.
 
@@ -275,7 +275,7 @@ cygnus-common.sinks.mysql-sink.attr_persistence = row
 
 [Top](#top)
 
-##<a name="section7"></a>`DELETE /admin/configuration/agent`
+## <a name="section7"></a>`DELETE /admin/configuration/agent`
 
 Deletes a single parameter if it exists in the agent given the path to the configuration file as the URI within the URL and the name of the parameter as a query parameter. The name of the agent must start with `agent_`.
 
@@ -317,8 +317,8 @@ Invalid agent configuration file name:
 
 [Top](#top)
 
-##<a name="section8"></a>`GET /admin/configuration/instance`
-###<a name="section8.1"></a>`GET` all parameters
+## <a name="section8"></a>`GET /admin/configuration/instance`
+### <a name="section8.1"></a>`GET` all parameters
 
 Gets all the parameters from an instance given the path to the configuration file as the URI within the URL. The path to the instance must be with `/usr/cygnus/conf`.
 
@@ -353,7 +353,7 @@ Instance configuration file not found:
 
 [Top](#top)
 
-###<a name="section8.2"></a>`GET` a single parameter
+### <a name="section8.2"></a>`GET` a single parameter
 
 Gets a single parameter from an instance given the path to the configuration file as the URI within the URL and the name of the parameter as a query parameter. The path to the instance must be with `/usr/cygnus/conf`.
 
@@ -395,7 +395,7 @@ Instance configuration file not found:
 
 [Top](#top)
 
-##<a name="section9"></a>`POST /admin/configuration/instance`
+## <a name="section9"></a>`POST /admin/configuration/instance`
 
 Posts a single parameter if it doesn't exist in the instance given the path to the configuration file as the URI within the URL and the name and the value of the parameter as a query parameters. The path to the instance must be with `/usr/cygnus/conf`.
 
@@ -437,7 +437,7 @@ Instance configuration file not found:
 
 [Top](#top)
 
-##<a name="section10"></a>`PUT /admin/configuration/instance`
+## <a name="section10"></a>`PUT /admin/configuration/instance`
 
 Puts a single parameter if it doesn't exist or update it if already exists in the instance given the path to the configuration file as the URI within the URL and the name and the value of the parameter as a query parameters. The path to the instance must be with `/usr/cygnus/conf`.
 
@@ -525,7 +525,7 @@ POLLING_INTERVAL=30
 
 [Top](#top)
 
-##<a name="section11"></a>`DELETE /admin/configuration/instance`
+## <a name="section11"></a>`DELETE /admin/configuration/instance`
 
 Deletes a single parameter in the instance given the path to the configuration file as the URI within the URL and the name of the parameter as a query parameters. The path to the instance must be with `/usr/cygnus/conf`.
 

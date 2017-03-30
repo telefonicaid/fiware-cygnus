@@ -1,4 +1,4 @@
-#<a name="top"></a>NGSIRestHandler
+# <a name="top"></a>NGSIRestHandler
 Content:
 
 * [Functionality](#section1)
@@ -10,8 +10,8 @@ Content:
 * [Programmers guide](#section3)
     * [`NGSIRestHandler` class](#section3.1)
 
-##<a name="section1"></a>Functionality
-###<a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
+## <a name="section1"></a>Functionality
+### <a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
 This section explains how a notified NGSI event (a http message containing headers and payload) is used to create a `NGSIEvent` object, suitable for being consumed by any of the Cygnus sinks, thanks to `NGSIRestHandler`.
 
 It is necessary to remark again this handler is designed for being used by `HttpSource`, the native component of Apache Flume. An http message containing a NGSI-like notification will be received by `HttpSource` and passed to `NGSIRestHandler` in order to create one or more `NGSIEvent` objects (one per notified context element) to be put in a sink's channel (mainly, these channels are objects in memory, but could be files).
@@ -37,7 +37,7 @@ Finally, it must be said the `NGSIEVent` contains another field, of type `Contex
 
 [Top](#top)
 
-###<a name="section1.2"></a>Example
+### <a name="section1.2"></a>Example
 Let's assume the following not-intercepted event regarding a received notification (the code below is an <i>object representation</i>, not any real data format):
 
 ```
@@ -111,8 +111,8 @@ ngsi-event-2={
 
 [Top](#top)
 
-##<a name="section2"></a>Administration guide
-###<a name="section2.1"></a>Configuration
+## <a name="section2"></a>Administration guide
+### <a name="section2.1"></a>Configuration
 `NGSIRestHandler` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -132,15 +132,15 @@ A configuration example could be:
 
 [Top](#top)
 
-###<a name="section2.2"></a>Accepted character set
+### <a name="section2.2"></a>Accepted character set
 This handler for NGSI only works with UTF-8 encoding. Thus, notifications must send a `Content-Type` header with `application/json; charset=utf-8` as value. Any other content type wont be considered and the notification will be discarded.
 
 It is expected UTF-8 character set is maintained by all the Flume elements in the configuration, in order the final sinks (or their backend abstractions, if they exist) compose their writes/inserts/upserts by properly specifying this kind of encoding.
 
 [Top](#top)
 
-##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`NGSIRestHandler` class
+## <a name="section3"></a>Programmers guide
+### <a name="section3.1"></a>`NGSIRestHandler` class
 TBD
 
 [Top](#top)

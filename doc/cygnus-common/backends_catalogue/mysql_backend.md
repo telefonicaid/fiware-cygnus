@@ -1,5 +1,5 @@
-#MySQL backend
-##`MySQLBackend` interface
+# MySQL backend
+## `MySQLBackend` interface
 This class enumerates the methods any [MySQL](https://www.mysql.com/) backend implementation must expose. In this case, the following ones:
 
     void createDatabase(String dbName) throws Exception;
@@ -14,7 +14,7 @@ This class enumerates the methods any [MySQL](https://www.mysql.com/) backend im
 
 > Persists the accumulated context data (in the form of the given field values) regarding an entity within the given table. This table belongs to the given database. The field names are given as well to ensure the right insert of the field values.
 
-##`MySQLBackendImpl` class
+## `MySQLBackendImpl` class
 This is a convenience backend class for MySQL that implements the `MySQLBackend` interface described above.
 
 `MySQLBackendImpl` really wraps the [MySQL JDBC driver](https://dev.mysql.com/downloads/connector/j/).

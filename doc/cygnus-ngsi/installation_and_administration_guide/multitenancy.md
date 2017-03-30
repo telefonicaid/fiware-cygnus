@@ -1,4 +1,4 @@
-#Multitenancy in Cygnus
+# Multitenancy in Cygnus
 Content:
 
 * [General multitenancy assumption](#section1)
@@ -7,7 +7,7 @@ Content:
     * [`NGSIKafkaSink`](#section2.2)
     * [`NGSITestSink`](#section2.3)
 
-##<a name="section1"></a>General multitenancy assumption
+## <a name="section1"></a>General multitenancy assumption
 This section explains the general rule to be followed when implementing multitenancy in Cygnus, specifically when using the following sinks:
 
 * `NGSIHDFSSink`
@@ -29,20 +29,20 @@ The above mentioned solution can only work if the final storage holding the hist
 
 [Top](#top)
 
-##<a name="section2"></a>Exceptions
-###<a name="section2.1"></a>`NGSIDynamoDBSink`
+## <a name="section2"></a>Exceptions
+### <a name="section2.1"></a>`NGSIDynamoDBSink`
 DynamoDB handles a single database per client, having each client different access credentials. This means a single superuser cannot be configured in charge of writing data on behalf of several tenants. Even in the case a single DynamoDB user space is used for all the tenants and a table is created in a per client basis, it is not a valid a solution since having access to the user space means access to all the tables.
 
 [This](https://github.com/telefonicaid/fiware-cygnus/issues/608) opened issue tries to enclose a valid solution than will be implemented sometime in the future.
 
 [Top](#top)
 
-###<a name="section2.2"></a>`NGSIKafkaSink`
+### <a name="section2.2"></a>`NGSIKafkaSink`
 For the time being, Kafka does not support any kind of authorization mechanism. This implies, despite several topics can be created, one per tenant, there is no control on who can read the different topics.
 
 [Top](#top)
 
-###<a name="section2.3"></a>`NGSITestSink`
+### <a name="section2.3"></a>`NGSITestSink`
 This is a testing purpose sink and thus there is no need for multitenancy support.
 
 [Top](#top)

@@ -1,4 +1,4 @@
-#Connecting Orion Context Broker and Cygnus
+# Connecting Orion Context Broker and Cygnus
 Cygnus takes advantage of the subscription-notification mechanism of [Orion Context Broker](https://github.com/telefonicaid/fiware-orion). Specifically, Cygnus needs to be notified each time certain entity's attributes change, and in order to do that, Cygnus must subscribe to those entity's attribute changes.
 
 You can make a subscription to Orion on behalf of Cygnus by using a `curl` command or any other REST client. In the following example, we assume both Orion and Cygnus run in localhost, and Cygnus is listening in the TCP/5050 port:

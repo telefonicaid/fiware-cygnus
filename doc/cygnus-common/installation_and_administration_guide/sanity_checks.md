@@ -1,4 +1,4 @@
-#<a name="top"></a>Sanity checks
+# <a name="top"></a>Sanity checks
 Content:
 
 * [How to proceed](#section1)
@@ -6,14 +6,14 @@ Content:
 * [Check: API port](#section3)
 * [Check: GUI port](#section4)
 
-##<a name="section1"></a>How to proceed
+## <a name="section1"></a>How to proceed
 Verify all the sanity checks included in this document, one by one.
 
 If you have any problem with one specific check, please go to the proper section of the [diagnosis procedures](./diagnosis_procedures.md) document.
 
 [Top](#top)
 
-##<a name="section2"></a>Check: Logs
+## <a name="section2"></a>Check: Logs
 Any Cygnus agent logs in `/var/log/cygnus/cygnus.log`, unless the `console` appender is used.
 
 In any case, traced logs must look like the following ones:
@@ -93,7 +93,7 @@ And the Management Interface is setup:
 
 [Top](#top)
 
-##<a name="section3"></a>Check: API port
+## <a name="section3"></a>Check: API port
 The API must be up and running in the port you configured (either using the `-p` option in the command line, either using the `ADMIN_PORT` parameter in the `cygnus_instance_<id>.conf` file). `8081` is the default.
 
 You can check it by asking for the Cygnus version:
@@ -105,7 +105,7 @@ $ curl "http://localhost:8081/v1/version"
 
 [Top](#top)
 
-##<a name="section4"></a>Check: GUI port
+## <a name="section4"></a>Check: GUI port
 Coming soon.
 
 [Top](#top)
