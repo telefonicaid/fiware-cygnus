@@ -21,7 +21,7 @@ Content:
 ## <a name="section1"></a>Basic configurations
 Basic configurations are those involving a single listener/source and one or more sinks receiving a copy of the same internal NGSI event obtained once a NGSI notification is processed at the source.
 
-### <a name="section1.1"></a>Simplest scenario
+### <a name="section1.1"></a>Simplest scenario
 A Cygnus agent based on a single source, a single channel and a single sink.
 
 ```
@@ -60,7 +60,7 @@ cygnus-ngsi.channels.ch...
 
 [Top](#top)
 
-### <a name="section1.2"></a>Scenarios involving multiple persistence backends
+### <a name="section1.2"></a>Scenarios involving multiple persistence backends
 Similar as the previous one, in this case there is one channel and one sink per destination backend.
 
 ```
