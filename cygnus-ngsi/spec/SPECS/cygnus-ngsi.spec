@@ -99,6 +99,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Mon Apr 03 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.7.1
+- [cygnus-ngsi][bug] Fix NGSIMySQLSink when persisting bulks of rows with different number of columns (#1409)
+
 * Tue Jan 31 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.7.0 
 - [cygnus-ngsi][feature] Add global data capping/expirationn options based on time and size (#1317)
 - [cygnus-ngsi][feature] Add specific data capping/expiration implementation for NGSICKANSink (#1344)
