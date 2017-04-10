@@ -69,7 +69,7 @@ public interface MongoBackend {
     void insertContextDataRaw(String dbName, String collectionName, ArrayList<Document> aggregation) throws Exception;
     
     /**
-     * Inserts pre-aggregated numeric context data in the related aggregated collction for the resolutions given.
+     * Inserts pre-aggregated numeric context data in the related aggregated collection for the resolutions given.
      * @param dbName
      * @param collectionName
      * @param recvTimeTs
@@ -91,7 +91,7 @@ public interface MongoBackend {
         throws Exception;
     
     /**
-     * Inserts pre-aggregated string-based context data in the related aggregated collction for the resolutions given.
+     * Inserts pre-aggregated string-based context data in the related aggregated collection for the resolutions given.
      * @param dbName
      * @param collectionName
      * @param recvTimeTs
