@@ -377,6 +377,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         Accumulator rollbackedAccumulation = getRollbackedAccumulationForRetry();
 
         if (rollbackedAccumulation == null) {
+            setMDCToNA();
             return Status.READY; // No rollbacked batch was ready for retry, so we are ready to process new batches
         } // if
             
@@ -388,11 +389,13 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
             updateServiceMetrics(batch, true);
             LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
+            setMDCToNA();
             return Status.READY;
         } catch (CygnusPersistenceError e) {
             updateServiceMetrics(batch, true);
             LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
             doRollbackAgain(rollbackedAccumulation);
+            setMDCToNA();
             return Status.BACKOFF; // Slow down the sink since there are problems with the persistence backend
         } // try catch
 
@@ -412,6 +415,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
         rollbackedAccumulations.remove(0);
         numPersistedEvents += rollbackedAccumulation.getBatch().getNumEvents();
+        setMDCToNA();
         return Status.READY;
     } // processRollbackedBatches
     
@@ -488,11 +492,13 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             // Get an getRecvTimeTs
             NGSIEvent event = (NGSIEvent) ch.take();
 
-            // Check if the getRecvTimeTs is null
+            // Check if the event is null
             if (event == null) {
                 accumulator.setAccIndex(currentIndex);
                 txn.commit();
                 txn.close();
+                // to-do: this must be uncomment once multiple transaction and correlation IDs are traced in logs
+                //setMDCToNA();
                 return Status.BACKOFF; // Slow down the sink since no events are available
             } // if
 
@@ -527,6 +533,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 accumulator.initialize(new Date().getTime());
                 txn.commit();
                 txn.close();
+                setMDCToNA();
                 return Status.READY;
             } catch (CygnusPersistenceError e) {
                 updateServiceMetrics(batch, true);
@@ -535,6 +542,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 accumulator.initialize(new Date().getTime());
                 txn.commit();
                 txn.close();
+                setMDCToNA();
                 return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
             } // try catch
 
@@ -557,8 +565,20 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         accumulator.initialize(new Date().getTime());
         txn.commit();
         txn.close();
+        setMDCToNA();
         return Status.READY;
     } // processNewBatches
+    
+    /**
+     * Sets some MDC logging fields to 'N/A' for this thread. Value for the component field is inherited from main
+     * thread (CygnusApplication.java).
+     */
+    private void setMDCToNA() {
+        MDC.put(CommonConstants.LOG4J_CORR, "N/A");
+        MDC.put(CommonConstants.LOG4J_TRANS,"N/A");
+        MDC.put(CommonConstants.LOG4J_SVC, "N/A");
+        MDC.put(CommonConstants.LOG4J_SUBSVC, "N/A");
+    } // setMDCToNA
 
     /**
      * Rollbacks the accumulator for the first time.
