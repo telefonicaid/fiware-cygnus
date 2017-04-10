@@ -19,6 +19,7 @@
 package com.telefonica.iot.cygnus.handlers;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
@@ -158,6 +159,13 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             
     @Override
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
+        // Set some MDC logging fields to 'N/A' for this thread
+        // Value for the component field is inherited from main thread (CygnusApplication.java)
+        org.apache.log4j.MDC.put(CommonConstants.LOG4J_CORR, "N/A");
+        org.apache.log4j.MDC.put(CommonConstants.LOG4J_TRANS,"N/A");
+        org.apache.log4j.MDC.put(CommonConstants.LOG4J_SVC, "N/A");
+        org.apache.log4j.MDC.put(CommonConstants.LOG4J_SUBSVC, "N/A");
+        
         // Result
         ArrayList<Event> ngsiEvents = new ArrayList<>();
         
@@ -310,7 +318,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         try {
             ncr = gson.fromJson(data, NotifyContextRequest.class);
             LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest: " + ncr.toString());
-        } catch (Exception e) {
+        } catch (JsonSyntaxException e) {
             serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
             LOGGER.error("[NGSIRestHandler] Runtime error (" + e.getMessage() + ")");
             return null;
