@@ -30,6 +30,9 @@ public final class CommonConstants {
     private CommonConstants() {
     } // CommonConstants
     
+    // Not applicable
+    public static final String NA = "N/A";
+    
     // Http header names
     public static final String HTTP_HEADER_CONTENT_TYPE = "content-type";
     
