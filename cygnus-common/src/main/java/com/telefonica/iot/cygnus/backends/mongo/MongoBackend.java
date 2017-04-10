@@ -18,6 +18,7 @@
 package com.telefonica.iot.cygnus.backends.mongo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import org.bson.Document;
 
 /**
@@ -36,8 +37,8 @@ public interface MongoBackend {
     void createDatabase(String dbName) throws Exception;
 
     /**
-     * Creates a collection for STH Comet, given its name, if not exists in the given database. Time-based limits are set,
-     * if possible.
+     * Creates a collection for STH Comet, given its name, if not exists in the given database. Time-based limits are
+     * set, if possible.
      * @param dbName
      * @param collectionName
      * @param dataExpiration
@@ -66,9 +67,9 @@ public interface MongoBackend {
      * @throws Exception
      */
     void insertContextDataRaw(String dbName, String collectionName, ArrayList<Document> aggregation) throws Exception;
-
+    
     /**
-     * Inserts a new document in the given aggregated collection within the given database (row-like mode).
+     * Inserts pre-aggregated numeric context data in the related aggregated collction for the resolutions given.
      * @param dbName
      * @param collectionName
      * @param recvTimeTs
@@ -76,32 +77,35 @@ public interface MongoBackend {
      * @param entityType
      * @param attrName
      * @param attrType
-     * @param attrValue
-     * @param attrMd
+     * @param max
+     * @param min
+     * @param sum
      * @param resolutions
+     * @param numSamples
+     * @param sum2
      * @throws Exception
      */
-    void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs,
-            String entityId, String entityType, String attrName, String attrType, String attrValue, String attrMd,
-            boolean[] resolutions)
+    void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs, String entityId,
+            String entityType, String attrName, String attrType, double max, double min, double sum, double sum2,
+            int numSamples, boolean[] resolutions)
         throws Exception;
-
+    
     /**
-     * Stores in per-service/database "collection_names" collection the matching between a hash and the fields used to
-     * build it.
-     * FIXME: destination is under study
+     * Inserts pre-aggregated string-based context data in the related aggregated collction for the resolutions given.
      * @param dbName
-     * @param hash
-     * @param isAggregated
-     * @param fiwareService
-     * @param fiwareServicePath
+     * @param collectionName
+     * @param recvTimeTs
      * @param entityId
      * @param entityType
      * @param attrName
-     * @param destination
-     * @throws java.lang.Exception
+     * @param attrType
+     * @param counts
+     * @param resolutions
+     * @throws Exception
      */
-    void storeCollectionHash(String dbName, String hash, boolean isAggregated, String fiwareService,
-            String fiwareServicePath, String entityId, String entityType, String attrName, String destination)
+    void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs, String entityId,
+            String entityType, String attrName, String attrType, HashMap<String, Integer> counts,
+            boolean[] resolutions)
         throws Exception;
+
 } // MongoBackend
