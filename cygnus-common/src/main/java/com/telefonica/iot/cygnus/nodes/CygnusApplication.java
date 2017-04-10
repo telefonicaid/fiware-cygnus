@@ -103,13 +103,10 @@ public class CygnusApplication extends Application {
         try {
             // get a reference to the supervisor, if not possible then Cygnus application cannot start
             getSupervisorRef();
-        } catch (NoSuchFieldException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             LOGGER.debug(e.getMessage());
             supervisorRef = null;
-        } catch (IllegalAccessException e) {
-            LOGGER.debug(e.getMessage());
-            supervisorRef = null;
-        } // try catch // try catch
+        } // try catch
     } // CygnusApplication
     
     /**
@@ -162,6 +159,14 @@ public class CygnusApplication extends Application {
      */
     public static void main(String[] args) {
         try {
+            // Set some MDC logging fields to 'N/A' for this thread
+            // Later in this method the component field will be given a value
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_TRANS,CommonConstants.NA);
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_COMP, CommonConstants.NA);
+        
             // Print Cygnus starting trace including version
             LOGGER.info("Starting Cygnus, version " + CommonUtils.getCygnusVersion() + "."
                     + CommonUtils.getLastCommit());
@@ -277,7 +282,7 @@ public class CygnusApplication extends Application {
                 application.handleConfigurationEvent(configurationProvider.getConfiguration());
             } // if else
                  
-            // use the agent name as component name in the logs through log4j Mapped Diagnostic Context (MDC)
+            // Set MDC logging field value for component
             MDC.put(CommonConstants.LOG4J_COMP, commandLine.getOptionValue('n'));
                         
             // start the Cygnus application
@@ -311,11 +316,9 @@ public class CygnusApplication extends Application {
             // start YAFS
             YAFS yafs = new YAFS();
             yafs.start();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | ParseException e) {
             LOGGER.error("A fatal error occurred while running. Exception follows. Details=" + e.getMessage());
-        } catch (ParseException e) {
-            LOGGER.error("A fatal error occurred while running. Exception follows. Details=" + e.getMessage());
-        } // try catch // try catch
+        } // try catch
     } // main
     
     /**
