@@ -574,10 +574,10 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
      * thread (CygnusApplication.java).
      */
     private void setMDCToNA() {
-        MDC.put(CommonConstants.LOG4J_CORR, "N/A");
-        MDC.put(CommonConstants.LOG4J_TRANS,"N/A");
-        MDC.put(CommonConstants.LOG4J_SVC, "N/A");
-        MDC.put(CommonConstants.LOG4J_SUBSVC, "N/A");
+        MDC.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
+        MDC.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
+        MDC.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
+        MDC.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
     } // setMDCToNA
 
     /**

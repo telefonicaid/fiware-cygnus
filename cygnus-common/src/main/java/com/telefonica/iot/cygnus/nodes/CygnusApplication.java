@@ -161,11 +161,11 @@ public class CygnusApplication extends Application {
         try {
             // Set some MDC logging fields to 'N/A' for this thread
             // Later in this method the component field will be given a value
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_CORR, "N/A");
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_TRANS,"N/A");
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_SVC, "N/A");
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_SUBSVC, "N/A");
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_COMP, "N/A");
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_TRANS,CommonConstants.NA);
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_COMP, CommonConstants.NA);
         
             // Print Cygnus starting trace including version
             LOGGER.info("Starting Cygnus, version " + CommonUtils.getCygnusVersion() + "."
