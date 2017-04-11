@@ -51,8 +51,8 @@ public class NGSICartoDBSink extends NGSISink {
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSICartoDBSink.class);
     private String keysConfFile;
     private boolean swapCoordinates;
-    private boolean enableRaw;
-    private boolean enableDistance;
+    private boolean enableRawHistoric;
+    private boolean enableDistanceHistoric;
     private boolean enableRawSnapshot;
     private int backendMaxConns;
     private int backendMaxConnsPerRoute;
@@ -101,21 +101,21 @@ public class NGSICartoDBSink extends NGSISink {
      * Gets if the distance-based analysis is enabled.
      * @return True if the distance-based analysis is enabled, false otherwise
      */
-    protected boolean getEnableDistance() {
-        return enableDistance;
-    } // getEnableDistance
+    protected boolean getEnableDistanceHistoric() {
+        return enableDistanceHistoric;
+    } // getEnableDistanceHistoric
     
     /**
      * Gets if the raw-based analysis is enabled.
      * @return True if the raw-based analysis is enabled, false otherwise
      */
-    protected boolean getEnableRaw() {
-        return enableRaw;
-    } // getEnableRaw
+    protected boolean getEnableRawHistoric() {
+        return enableRawHistoric;
+    } // getEnableRawHistoric
     
-    protected boolean getEnableSnapshotRaw() {
+    protected boolean getEnableRawSnapshot() {
         return enableRawSnapshot;
-    } // getEnableSnapshotRaw
+    } // getEnableRawSnapshot
     
     @Override
     public void configure(Context context) {
@@ -187,29 +187,61 @@ public class NGSICartoDBSink extends NGSISink {
             return;
         } // if else
         
-        String enableRawStr = context.getString("enable_raw", "true");
+        String enableRawStr = context.getString("enable_raw");
+        String enableRawHistoricStr = context.getString("enable_raw_historic");
 
-        if (enableRawStr.equals("true") || enableRawStr.equals("false")) {
-            enableRaw = enableRawStr.equals("true");
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_raw="
-                    + enableRawStr + ")");
+        if (enableRawHistoricStr == null || enableRawHistoricStr.isEmpty()) {
+            if (enableRawStr == null || enableRawStr.isEmpty()) {
+                enableRawHistoric = true; // default value
+            } else if (enableRawStr.equals("true") || enableRawStr.equals("false")) {
+                enableRawHistoric = enableRawStr.equals("true");
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_raw="
+                        + enableRawStr + ") -- Deprecated, use enable_raw_historic instead");
+            } else {
+                invalidConfiguration = true;
+                LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_raw="
+                        + enableRawStr + ") -- Must be 'true' or 'false' -- Deprecated, use enable_raw_historic instead");
+                return;
+            } // if else
         } else {
-            invalidConfiguration = true;
-            LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_raw="
-                    + enableRawStr + ") -- Must be 'true' or 'false'");
-            return;
+            if (enableRawHistoricStr.equals("true") || enableRawHistoricStr.equals("false")) {
+                enableRawHistoric = enableRawHistoricStr.equals("true");
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_raw_historic="
+                        + enableRawHistoricStr + ")");
+            } else {
+                invalidConfiguration = true;
+                LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_raw_historic="
+                        + enableRawHistoricStr + ") -- Must be 'true' or 'false'");
+                return;
+            } // if else
         } // if else
 
-        String enableDistanceStr = context.getString("enable_distance", "false");
-
-        if (enableDistanceStr.equals("true") || enableDistanceStr.equals("false")) {
-            enableDistance = enableDistanceStr.equals("true");
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_distance="
-                    + enableDistanceStr + ")");
+        String enableDistanceStr = context.getString("enable_distance");
+        String enableDistanceHistoricStr = context.getString("enable_distance_historic");
+        
+        if (enableDistanceHistoricStr == null || enableDistanceHistoricStr.isEmpty()) {
+            if (enableDistanceStr == null || enableDistanceStr.isEmpty()) {
+                enableDistanceHistoric = false; // default value
+            } else if (enableDistanceStr.equals("true") || enableDistanceStr.equals("false")) {
+                enableDistanceHistoric = enableDistanceStr.equals("true");
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_distance="
+                        + enableDistanceStr + ") -- Deprecated, use enable_distance_historic instead");
+            } else {
+                invalidConfiguration = true;
+                LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_distance="
+                        + enableDistanceStr + ") -- Must be 'true' or 'false' -- Deprecated, use "
+                        + "enable_distance_historic instead");
+            } // if else
         } else {
-            invalidConfiguration = true;
-            LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_distance="
-                    + enableDistanceStr + ") -- Must be 'true' or 'false'");
+            if (enableDistanceHistoricStr.equals("true") || enableDistanceHistoricStr.equals("false")) {
+                enableDistanceHistoric = enableDistanceHistoricStr.equals("true");
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_distance_historic="
+                        + enableDistanceHistoricStr + ")");
+            } else {
+                invalidConfiguration = true;
+                LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_distance_historic="
+                        + enableDistanceHistoricStr + ") -- Must be 'true' or 'false'");
+            } // if else
         } // if else
         
         String enableRawSnapshotStr = context.getString("enable_raw_snapshot", "false");
@@ -360,18 +392,18 @@ public class NGSICartoDBSink extends NGSISink {
             // Raw aggregator
             CartoDBAggregator aggregator = null;
 
-            if (enableRaw) {
+            if (enableRawHistoric) {
                 // Get an aggregator for this destination and initialize it
                 aggregator = new CartoDBAggregator();
                 aggregator.initialize(firstEvent);
             } // if
 
             for (NGSIEvent event : events) {
-                if (enableRaw && aggregator != null) {
+                if (enableRawHistoric && aggregator != null) {
                     aggregator.aggregate(event);
                 } // if
                 
-                if (enableDistance) {
+                if (enableDistanceHistoric) {
                     persistDistanceEvent(event);
                 } // if
                 
@@ -380,7 +412,7 @@ public class NGSICartoDBSink extends NGSISink {
                 } // if
             } // for
 
-            if (enableRaw) {
+            if (enableRawHistoric) {
                 // Persist the aggregation
                 persistRawAggregation(aggregator, service, servicePath);
             } // if
