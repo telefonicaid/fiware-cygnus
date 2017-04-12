@@ -84,7 +84,7 @@ The following table summarizes the table name composition:
 | `/` | `x002f` | `x002fxffff<entityId>xffff<entityType>[xffffdistance]` |
 | `/<svcPath>` | `x002fxffff<svcPath>[xffffdistance|xffffrawsnapshot]` | `x002fxffff<svcPath>xffff<entityId>xffff<entityType>[xffffdistance]` |
 
-Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`. 
+Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
 
 [Top](#top)
 
@@ -201,8 +201,8 @@ The PostgreSQL table names will be, depending on the configured data model and a
 
 [Top](#top)
 
-#### <a name="section1.3.3"></a>Raw-based storing
-Let's assume a table name `x002f4wheelsxffffcar1xffffcar` (data model by entity, non-root service path, only raw analysis mode). The data stored within this table would be:
+#### <a name="section1.3.3"></a>Raw historic-based storing
+Let's assume a table name `x002f4wheelsxffffcar1xffffcar` (data model by entity, non-root service path, only raw historic analysis mode). The data stored within this table would be:
 
 ```
 curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsxffffcar1xffffcar&api_key=abcdef0123456789"
@@ -264,8 +264,8 @@ curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsxfff
 
 [Top](#top)
 
-#### <a name="section1.3.4"></a>Distance-based storing
-Let's assume a table name `x002f4wheelsxffffcar1xffffcarxffffdistance` (data model by entity, non-root service path, only distance analysis mode) with a previous insertion (on the contrary, this would be the first insertion and almost all the aggregated values will be set to 0). The data stored within this table would be:
+#### <a name="section1.3.4"></a>Distance historic-based storing
+Let's assume a table name `x002f4wheelsxffffcar1xffffcarxffffdistance` (data model by entity, non-root service path, only distance historic analysis mode) with a previous insertion (on the contrary, this would be the first insertion and almost all the aggregated values will be set to 0). The data stored within this table would be:
 
 ```
 curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsxffffcar1xffffcarxffffdistance&api_key=abcdef0123456789"
@@ -401,7 +401,7 @@ curl "https://myusername.cartodb.com/api/v2/sql?q=select * from x002f4wheelsxfff
 [Top](#top)
 
 #### <a name="section1.3.5"></a>Raw snapshot-based storing
-Everything equals to the raw-based storing, but:
+Everything equals to the raw historic-based storing, but:
 
 * The table name is `x002f4wheelsxffffcar1xffffcarxffffrawsnapshot`.
 * The data is inserted if the given FIWARE service path, entity ID and entity type are not present in the table; used for update otherwise.
@@ -423,8 +423,10 @@ Everything equals to the raw-based storing, but:
 | keys\_conf\_file | yes | N/A | Absolute path to the CartoDB file containing the mapping between FIWARE service/Carto usernames, endpoints, API Keys and account types. |
 | swap\_coordinates | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, the latitude and longitude values are exchanged. |
 | flip\_coordinates | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, the latitude and longitude values are exchanged. **Deprecated from release 1.6.0 in favour of `swap_coordinates`**. |
-| enable\_raw | no | true | <i>true</i> or <i>false</i>. If <i>true</i>, a raw based storage is done. |
-| enable\_distance | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, a distance based storage is done. |
+| enable\_raw\_historic | no | true | <i>true</i> or <i>false</i>. If <i>true</i>, a raw hiatoric-based storage is done. |
+| enable\_raw | no | true | <i>true</i> or <i>false</i>. If <i>true</i>, a raw-based storage is done. **Deprecated from release 1.8.0 in favour of `enable_raw_historic`**. |
+| enable\_distance\_historic | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, a distance historic-based storage is done. |
+| enable\_distance | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, a distance-based storage is done. **Deprecated from release 1.8.0 in favour of `enable_distance_historic`**. |
 | enable\_raw\_snapshot | no | false | <i>true</i> or <i>false</i>. If <i>true</i>, a raw snapshot based storage is done. |
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
@@ -446,8 +448,8 @@ cygnus-ngsi.sinks.cartodb-sink.enable_name_mappings = false
 cygnus-ngsi.sinks.cartodb-sink.enable_lowercase = false
 cygnus-ngsi.sinks.cartodb-sink.keys_conf_file = /usr/cygnus/conf/cartodb_keys.conf
 cygnus-ngsi.sinks.cartodb-sink.swap_coordinates = true
-cygnus-ngsi.sinks.cartodb-sink.enable_raw = true
-cygnus-ngsi.sinks.cartodb-sink.enable_distance = false
+cygnus-ngsi.sinks.cartodb-sink.enable_raw_historic = true
+cygnus-ngsi.sinks.cartodb-sink.enable_distance_historic = false
 cygnus-ngsi.sinks.cartodb-sink.enable_raw_snapshot = false
 cygnus-ngsi.sinks.cartodb-sink.data_model = dm-by-entity
 cygnus-ngsi.sinks.cartodb-sink.batch_size = 10
