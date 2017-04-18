@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NameMappings;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest.StatusCode;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import java.util.HashMap;
 
@@ -58,6 +59,17 @@ public final class TestUtils {
         Gson gson = new Gson();
         return gson.fromJson(jsonStr, ContextElement.class);
     } // createJsonNotifyContextRequest
+    
+    /**
+     * Creates a Json-based StatusCode given the string representation of such Json.
+     * @param jsonStr
+     * @return The Json-based StatusCode
+     * @throws java.lang.Exception
+     */
+    public static StatusCode createJsonStatusCode(String jsonStr) throws Exception {
+        Gson gson = new Gson();
+        return gson.fromJson(jsonStr, StatusCode.class);
+    } // createJsonStatusCode
     
     /**
      * Creates a Json-based NameMappings given the string representation of such Json.
