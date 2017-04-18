@@ -405,8 +405,8 @@ public class NotifyContextRequest {
         
         @Override
         public String toString() {
-            String s = "{\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":\"" + value
-                    + "\",\"metadatas\":[";
+            String s = "{\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":" + value
+                    + ",\"metadatas\":[";
             
             if (metadatas != null) {
                 boolean first = true;
@@ -489,7 +489,7 @@ public class NotifyContextRequest {
         
         @Override
         public String toString() {
-            return "{\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":\"" + value + "\"}";
+            return "{\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":" + value + "}";
         } // toStrng
         
     } // ContextMetadata
