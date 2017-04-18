@@ -5,3 +5,4 @@
 - [cygnus-ngsi][hardening] Set transaction and correlation IDs to 'N/A' when there is no activity (#1175)
 - [cygnus-ngsi][hardening] Pre-aggregate batches in NGSISTHSink (#1359)
 - [cygnus-ngsi][hardening] Change the name of historic-related enabling parameters (#1314)
+- [cygnus-ngsi][bug] Fix NotifyContextRequest.ContextAttribute.toString(), removing double quote for attribute values (#1430)
