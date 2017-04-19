@@ -628,7 +628,7 @@ public class NGSIEventTest {
         ContextElement originalCE = null; // irrelevant for this test
         ContextElement mappedCE = null; // irrelevant for this test
         NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
-        event.setBody((originalCEStr + "|" + mappedCEStr).getBytes());
+        event.setBody((originalCEStr + CommonConstants.CONCATENATOR + mappedCEStr).getBytes());
         
         try {
             Assert.assertArrayEquals((originalCEStr + "|" + mappedCEStr).getBytes(), event.getBody());

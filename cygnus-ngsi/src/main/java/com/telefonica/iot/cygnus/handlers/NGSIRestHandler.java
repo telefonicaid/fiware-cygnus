@@ -364,7 +364,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                     // Headers
                     headers, 
                     // Bytes version of the notified ContextElement
-                    (cer.getContextElement().toString() + "|").getBytes(), 
+                    (cer.getContextElement().toString() + CommonConstants.CONCATENATOR).getBytes(), 
                     // Object version of the notified ContextElement
                     cer.getContextElement(),
                     // Will be set with the mapped object version of the notified ContextElement, by

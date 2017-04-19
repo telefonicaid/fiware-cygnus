@@ -512,7 +512,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 ngsiEvent = (NGSIEvent)event;
             } else {
                 // Event comes from file... original and mapped context elements must be re-created
-                String[] contextElementsStr = (new String(event.getBody())).split("\\|");
+                String[] contextElementsStr = (new String(event.getBody())).split(CommonConstants.CONCATENATOR);
                 Gson gson = new Gson();
                 ContextElement originalCE = null;
                 ContextElement mappedCE = null;

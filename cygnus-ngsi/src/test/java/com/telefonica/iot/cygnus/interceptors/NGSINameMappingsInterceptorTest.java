@@ -315,7 +315,7 @@ public class NGSINameMappingsInterceptorTest {
         NGSIEvent interceptedEvent = (NGSIEvent) nameMappingsInterceptor.intercept(originalEvent);
 
         try {
-            String[] contextElementsStr = new String(interceptedEvent.getBody()).split("\\|");
+            String[] contextElementsStr = new String(interceptedEvent.getBody()).split(CommonConstants.CONCATENATOR);
             assertTrue(contextElementsStr[0] != null && !contextElementsStr[0].isEmpty());
             assertTrue(contextElementsStr[1] != null && !contextElementsStr[1].isEmpty());
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
