@@ -631,7 +631,8 @@ public class NGSIEventTest {
         event.setBody((originalCEStr + CommonConstants.CONCATENATOR + mappedCEStr).getBytes());
         
         try {
-            Assert.assertArrayEquals((originalCEStr + "|" + mappedCEStr).getBytes(), event.getBody());
+            Assert.assertArrayEquals((originalCEStr + CommonConstants.CONCATENATOR + mappedCEStr).getBytes(),
+                    event.getBody());
             System.out.println(getTestTraceHead("[NGSIEvent.setBody]")
                     + "-  OK  - Bytes regarding the original context element have been returned");
         } catch (AssertionError e) {
