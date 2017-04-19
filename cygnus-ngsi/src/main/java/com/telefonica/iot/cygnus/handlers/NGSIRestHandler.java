@@ -359,8 +359,18 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
                     + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + ": " + transId + ")");
             
-            // Create the NGSIEvent and add it to the list
-            NGSIEvent ngsiEvent = new NGSIEvent(headers, cer.toString().getBytes(), cer.getContextElement(), null);
+            // Create the NGSI event and add it to the list
+            NGSIEvent ngsiEvent = new NGSIEvent(
+                    // Headers
+                    headers, 
+                    // Bytes version of the notified ContextElement
+                    (cer.getContextElement().toString() + "|").getBytes(), 
+                    // Object version of the notified ContextElement
+                    cer.getContextElement(),
+                    // Will be set with the mapped object version of the notified ContextElement, by
+                    // NGSINameMappingsInterceptor (if configured). Currently, null
+                    null 
+            );
             ngsiEvents.add(ngsiEvent);
             
             if (ids.isEmpty()) {
