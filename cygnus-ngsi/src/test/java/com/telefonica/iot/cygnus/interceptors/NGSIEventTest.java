@@ -599,21 +599,10 @@ public class NGSIEventTest {
     public void testGetBody() {
         System.out.println(getTestTraceHead("[NGSIEvent.getBody]")
                 + "-------- Bytes regarding the original context element are returned");
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        HashMap<String, String> headers = null; // irrelevant for this test
         byte[] body = originalCEStr.getBytes();
-        ContextElement originalCE;
-        ContextElement mappedCE;
-        
-        try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        } catch (Exception e) {
-            System.out.println(getTestTraceHead("[NGSIEvent.getBody]")
-                    + "- FAIL - There was some problem when setting up the test");
-            throw new AssertionError(e.getMessage());
-        } // try catch
-        
+        ContextElement originalCE = null; // irrelevant for this test
+        ContextElement mappedCE = null; // irrelevant for this test
         NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
@@ -626,5 +615,30 @@ public class NGSIEventTest {
             throw e;
         } // try catch
     } // testGetBody
+    
+    /**
+     * [NGSIEvent.setBody] -------- Bytes are correctly set.
+     */
+    @Test
+    public void testSetBody() {
+        System.out.println(getTestTraceHead("[NGSIEvent.setBody]")
+                + "-------- Bytes are correctly set");
+        HashMap<String, String> headers = null; // irrelevant for this test
+        byte[] body = originalCEStr.getBytes();
+        ContextElement originalCE = null; // irrelevant for this test
+        ContextElement mappedCE = null; // irrelevant for this test
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
+        event.setBody((originalCEStr + "|" + mappedCEStr).getBytes());
+        
+        try {
+            Assert.assertArrayEquals((originalCEStr + "|" + mappedCEStr).getBytes(), event.getBody());
+            System.out.println(getTestTraceHead("[NGSIEvent.setBody]")
+                    + "-  OK  - Bytes regarding the original context element have been returned");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIEvent.setBody]")
+                    + "- FAIL - Bytes regarding the original context element have not been returned");
+            throw e;
+        } // try catch
+    } // testSetBody
     
 } // NGSIEventTest
