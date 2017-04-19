@@ -6,3 +6,4 @@
 - [cygnus-ngsi][hardening] Pre-aggregate batches in NGSISTHSink (#1359)
 - [cygnus-ngsi][hardening] Change the name of historic-related enabling parameters (#1314)
 - [cygnus-ngsi][bug] Fix NotifyContextRequest.ContextAttribute.toString(), removing double quote for attribute values (#1430)
+- [cygnus-ngsi][bug] Add support for file channels (#1419)
