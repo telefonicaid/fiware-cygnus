@@ -101,8 +101,7 @@ public final class TestUtils {
         headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, correlatorID);
         ContextElement originalCE = createJsonContextElement(originalCEStr);
         ContextElement mappedCE = createJsonContextElement(mappedCEStr);
-        return new NGSIEvent(headers, (originalCE == null ? null : originalCE.toString().getBytes()),
-                originalCE, mappedCE);
+        return new NGSIEvent(headers, (originalCEStr + CommonConstants.CONCATENATOR).getBytes(), originalCE, mappedCE);
     } // createNGSIEvent
     
     /**

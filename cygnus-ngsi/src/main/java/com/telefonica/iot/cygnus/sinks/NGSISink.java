@@ -18,6 +18,7 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
+import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -41,6 +42,7 @@ import java.util.Arrays;
 import java.util.Date;
 import org.apache.flume.Channel;
 import org.apache.flume.Context;
+import org.apache.flume.Event;
 import org.apache.flume.EventDeliveryException;
 import org.apache.flume.Sink.Status;
 import org.apache.flume.Transaction;
@@ -489,9 +491,9 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 break;
             } // if
 
-            // Get an getRecvTimeTs
-            NGSIEvent event = (NGSIEvent) ch.take();
-
+            // Get an event
+            Event event = ch.take();
+            
             // Check if the event is null
             if (event == null) {
                 accumulator.setAccIndex(currentIndex);
@@ -501,19 +503,46 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 //setMDCToNA();
                 return Status.BACKOFF; // Slow down the sink since no events are available
             } // if
+            
+            // Cast the event to a NGSI event
+            NGSIEvent ngsiEvent;
+            
+            if (event instanceof NGSIEvent) {
+                // Event comes from memory... everything is already in memory
+                ngsiEvent = (NGSIEvent)event;
+            } else {
+                // Event comes from file... original and mapped context elements must be re-created
+                String[] contextElementsStr = (new String(event.getBody())).split(CommonConstants.CONCATENATOR);
+                Gson gson = new Gson();
+                ContextElement originalCE = null;
+                ContextElement mappedCE = null;
+                
+                if (contextElementsStr.length == 1) {
+                    originalCE = gson.fromJson(contextElementsStr[0], ContextElement.class);
+                } else if (contextElementsStr.length == 2) {
+                    originalCE = gson.fromJson(contextElementsStr[0], ContextElement.class);
+                    mappedCE = gson.fromJson(contextElementsStr[1], ContextElement.class);
+                } // if else
+                
+                // Re-create the NGSI event
+                ngsiEvent = new NGSIEvent(event.getHeaders(), event.getBody(), originalCE, mappedCE);
+                LOGGER.debug("Re-creating NGSI event from raw bytes in file channel, original context element: "
+                        + (originalCE == null ? null : originalCE.toString()) + ", mapped context element: "
+                        + (mappedCE == null ? null : mappedCE.toString()));
+            } // if else
 
             // Set the correlation ID, transaction ID, service and service path in MDC
             MDC.put(CommonConstants.LOG4J_CORR,
-                    event.getHeaders().get(CommonConstants.HEADER_CORRELATOR_ID));
+                    ngsiEvent.getHeaders().get(CommonConstants.HEADER_CORRELATOR_ID));
             MDC.put(CommonConstants.LOG4J_TRANS,
-                    event.getHeaders().get(NGSIConstants.FLUME_HEADER_TRANSACTION_ID));
+                    ngsiEvent.getHeaders().get(NGSIConstants.FLUME_HEADER_TRANSACTION_ID));
             MDC.put(CommonConstants.LOG4J_SVC,
-                    event.getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE));
+                    ngsiEvent.getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE));
             MDC.put(CommonConstants.LOG4J_SUBSVC,
-                    event.getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH));
+                    ngsiEvent.getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH));
 
             // Accumulate the event
-            accumulator.accumulate(event);
+            accumulator.accumulate(ngsiEvent);
             numProcessedEvents++;
         } // for
 
