@@ -34,7 +34,7 @@ A Cygnus administrator must carefully study the expected throughput for the whol
 ## <a name="section3"></a>File channels
 File channels are another heritage from Apache Flume. This kind of channels are based on files, and unlike memory channels, information within this kind of channel lives between crashes.
 
-Using file channels is interesting if your notification rate is slower than Cygnus recovery time. Then, nothing will be lost. If not, using file channels or any other *volatile* channel will not imply any significant difference, since the amount of new incoming events lost while Cygnus is down could be much higher than the number of past events saved in files.
+Using file channels is interesting if your notification rate is slower than Cygnus recovery time. Then, nothing will be lost. If not, using file channels instead of a *volatile* channel will not imply any significant difference, since the amount of new incoming events lost while Cygnus is down could be much higher than the number of past events saved in files.
 
 File channels are particularly relevant if your aim is to implement some kind of High Availability architecture (see next section).
 
