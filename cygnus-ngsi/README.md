@@ -235,6 +235,7 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
 * [Management Interface](../doc/cygnus-ngsi/installation_and_administration_guide/management_interface.md). REST-based management interface for administration purposes.
 * [Name Mappings](../doc/cygnus-ngsi/installation_and_administration_guide/name_mappings.md). Designed as a Flume interceptor, this feature alows <i>overwriting</i> any notified service, service path, entity ID, entity type, attribute name or attribute type, when used for naming.
 * [Multi-instance](../doc/cygnus-ngsi/installation_and_administration_guide/configuration_examples.md). Several instances of cygus-ngsi can be run as a service.
+* [Reliability](../doc/cygnus-ngsi/installation_and_administration_guide/reliability.md). Learn about the mechanisms making Cygnus a very reliable tool.
 * [Performance tips](../doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md). If you are experiencing performance issues or want to improve your statistics, take a look on how to obtain the best from cygus-ngsi.
 * [New sink development](../doc/cygnus-ngsi/user_and_programmer_guide/adding_new_sink.md). Addressed to those developers aiming to contribute to cygus-ngsi with new sinks.
 * [Integration examples](../doc/cygnus-ngsi/integration/). Step-by-step how-to's regarding the integraton of Cygnus NGSI with Spark and Kafka.
