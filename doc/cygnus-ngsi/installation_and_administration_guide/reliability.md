@@ -45,6 +45,37 @@ As the reader may imagine, file-based channels are slower than memory-based ones
 ## <a name="section4"></a>High Availability
 Cygnus does not implement any High Availability (HA) mechanism *per se*. Anyway, implementing HA for Cygnus is as easy as running two instances of Cygnus and putting a load balancer in between them and the NGSI source (or sources). Of course, the load balancer itself is a single point of failure; there are solutions for this, but they are out of scope of this document.
 
-An important aspect regarding HA is what happens with events within active Cygnus agent's channels at the moment of moving to the passive Cygnus agent (which automatically becomes the active one). If such events are within a memory-based channel, they are lost and nothing can be done. Nevertheless, if the channels are based on files, events can be recovered. In fact, they are not really recovered but directly used since both Cygnus agents, active and passive, can be configured for using the same data and checkpoint directories. Even in the case the active and passive Cygnuses run in different machines, a third machine can be hosting the data files; in this case, the data files can be accessed if a distributed or shared file system is configured for the three machines.
+```
+                         +----------+
+                         |  Cygnus  |  
+                   +-----| (active) |-----+
+                   |     +----------+     |
++-------+     +----+                      +---------+
+| Orion |-----| LB |                      | backend |       
++-------+     +----+                      +---------+
+                   |     +----------+     |
+                   +-----|  Cygnus  |-----+
+                         | (passive)|
+                         +----------+
+```
+
+An important aspect regarding HA is what happens with events within active Cygnus agent's channels at the moment of moving to the passive Cygnus agent (which automatically becomes the active one). If such events are within a memory-based channel, they are lost and nothing can be done. Nevertheless, if the channels are based on files, events can be recovered. In fact, they are not really recovered but directly used since both Cygnus agents, active and passive running in the same machine, can be configured for using the same data and checkpoint directories. Even in the case the active and passive Cygnuses run in different machines, which is the common HA configuration, a third machine can be hosting the data files; in this case, the data files can be accessed if a distributed or shared file system is configured for the three machines.
+
+```
+                         +----------+
+                         |  Cygnus  |
+                   +-----| (active) |-----+
+                   |     +-----+----+     |
+                   |           |          |
++-------+     +----+   +-------+------+   +---------+
+| Orion |-----| LB |   | channel data |   | backend |       
++-------+     +----+   | & checkpoint |   +---------+
+                   |   +-------+------+   |
+                   |           |          |
+                   |     +-----+----+     |
+                   +-----|  Cygnus  |-----+
+                         | (passive)|
+                         +----------+
+```
 
 [Top](#top)
