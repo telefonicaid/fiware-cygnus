@@ -8,3 +8,4 @@
 - [cygnus-ngsi][bug] Fix NotifyContextRequest.ContextAttribute.toString(), removing double quote for attribute values (#1430)
 - [cygnus-ngsi][bug] Add support for file channels (#1419)
 - [cygnus-ngsi][hardening] Add a document about reliability (#1433)
+- [cygnus-common, cygnus-ngsi][hardening] Fix FIWARE repository URL (#1435)
