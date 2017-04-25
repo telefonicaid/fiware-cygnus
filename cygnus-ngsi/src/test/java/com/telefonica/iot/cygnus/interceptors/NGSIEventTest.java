@@ -21,7 +21,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.TestUtils;
+import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import java.util.HashMap;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -321,8 +321,8 @@ public class NGSIEventTest {
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
@@ -357,8 +357,8 @@ public class NGSIEventTest {
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
@@ -394,8 +394,8 @@ public class NGSIEventTest {
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
@@ -430,8 +430,8 @@ public class NGSIEventTest {
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
@@ -467,8 +467,8 @@ public class NGSIEventTest {
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
@@ -503,8 +503,8 @@ public class NGSIEventTest {
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEEmptyTypeStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEEmptyTypeStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
@@ -537,8 +537,8 @@ public class NGSIEventTest {
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getAttributeForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
@@ -571,8 +571,8 @@ public class NGSIEventTest {
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getAttributeForNaming]")
                     + "- FAIL - There was some problem when setting up the test");

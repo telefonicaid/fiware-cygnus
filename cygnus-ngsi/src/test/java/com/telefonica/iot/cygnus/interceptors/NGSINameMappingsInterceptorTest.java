@@ -22,13 +22,12 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.TestUtils;
+import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -166,7 +165,7 @@ public class NGSINameMappingsInterceptorTest {
         NGSIEvent originalEvent;
         
         try {
-            originalEvent = TestUtils.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
+            originalEvent = NGSIUtilsForTests.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
                     "12345");
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
@@ -263,7 +262,7 @@ public class NGSINameMappingsInterceptorTest {
         NGSIEvent originalEvent;
         
         try {
-            originalEvent = TestUtils.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
+            originalEvent = NGSIUtilsForTests.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
                     "12345");
         } catch (Exception e) {
             throw new AssertionError(e.getMessage());
@@ -306,7 +305,7 @@ public class NGSINameMappingsInterceptorTest {
         NGSIEvent originalEvent;
         
         try {
-            originalEvent = TestUtils.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
+            originalEvent = NGSIUtilsForTests.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
                     "12345");
         } catch (Exception e) {
             throw new AssertionError(e.getMessage());
@@ -340,8 +339,8 @@ public class NGSINameMappingsInterceptorTest {
         ContextElement expectedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            expectedCE = TestUtils.createJsonContextElement(expectedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            expectedCE = NGSIUtilsForTests.createJsonContextElement(expectedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMap]")
                     + "- FAIL - There was some problem when parsing the ContextElements");

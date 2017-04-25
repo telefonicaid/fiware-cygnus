@@ -22,7 +22,7 @@ import static org.junit.Assert.*; // this is required by "fail" like assertions
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.StatusCode;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-import com.telefonica.iot.cygnus.utils.TestUtils;
+import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import org.junit.Test;
 
 /**
@@ -122,7 +122,7 @@ public class NotifyContextRequestTest {
         NotifyContextRequest ncr;
         
         try {
-            ncr = TestUtils.createJsonNotifyContextRequest(notification);
+            ncr = NGSIUtilsForTests.createJsonNotifyContextRequest(notification);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NotifyContextRequest.getSubscriptionId]")
                     + "- FAIL - There was a problem when creating the NotifyContextRequest");
@@ -150,7 +150,7 @@ public class NotifyContextRequestTest {
         NotifyContextRequest ncr;
         
         try {
-            ncr = TestUtils.createJsonNotifyContextRequest(notification);
+            ncr = NGSIUtilsForTests.createJsonNotifyContextRequest(notification);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NotifyContextRequest.getOriginator]")
                     + "- FAIL - There was a problem when creating the NotifyContextRequest");
@@ -178,7 +178,7 @@ public class NotifyContextRequestTest {
         NotifyContextRequest ncr;
         
         try {
-            ncr = TestUtils.createJsonNotifyContextRequest(notification);
+            ncr = NGSIUtilsForTests.createJsonNotifyContextRequest(notification);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NotifyContextRequest.toString]")
                     + "- FAIL - There was a problem when creating the NotifyContextRequest");
@@ -186,7 +186,7 @@ public class NotifyContextRequestTest {
         } // try catch
         
         try {
-            TestUtils.createJsonNotifyContextRequest(ncr.toString());
+            NGSIUtilsForTests.createJsonNotifyContextRequest(ncr.toString());
             System.out.println(getTestTraceHead("[NotifyContextRequest.toString]")
                     + "-  OK  - The string representation of this object is OK");
         } catch (Exception e) {
@@ -206,7 +206,7 @@ public class NotifyContextRequestTest {
         ContextElement ce;
         
         try {
-            ce = TestUtils.createJsonContextElement(contextElement);
+            ce = NGSIUtilsForTests.createJsonContextElement(contextElement);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getId]")
                     + "- FAIL - There was a problem when creating the ContextElement");
@@ -234,7 +234,7 @@ public class NotifyContextRequestTest {
         ContextElement ce;
         
         try {
-            ce = TestUtils.createJsonContextElement(contextElement);
+            ce = NGSIUtilsForTests.createJsonContextElement(contextElement);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getType]")
                     + "- FAIL - There was a problem when creating the ContextElement");
@@ -262,7 +262,7 @@ public class NotifyContextRequestTest {
         ContextElement ce;
         
         try {
-            ce = TestUtils.createJsonContextElement(contextElement);
+            ce = NGSIUtilsForTests.createJsonContextElement(contextElement);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getIsPattern]")
                     + "- FAIL - There was a problem when creating the ContextElement");
@@ -290,7 +290,7 @@ public class NotifyContextRequestTest {
         ContextElement ce;
         
         try {
-            ce = TestUtils.createJsonContextElement(contextElement);
+            ce = NGSIUtilsForTests.createJsonContextElement(contextElement);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.toString]")
                     + "- FAIL - There was a problem when creating the ContextElement");
@@ -298,7 +298,7 @@ public class NotifyContextRequestTest {
         } // try catch
         
         try {
-            TestUtils.createJsonContextElement(ce.toString());
+            NGSIUtilsForTests.createJsonContextElement(ce.toString());
             System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.toString]")
                     + "-  OK  - The string representation of this object is OK");
         } catch (Exception e) {
@@ -318,7 +318,7 @@ public class NotifyContextRequestTest {
         StatusCode sc;
         
         try {
-            sc = TestUtils.createJsonStatusCode(statusCode);
+            sc = NGSIUtilsForTests.createJsonStatusCode(statusCode);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.getCode]")
                     + "- FAIL - There was a problem when creating the StatusCode");
@@ -346,7 +346,7 @@ public class NotifyContextRequestTest {
         StatusCode sc;
         
         try {
-            sc = TestUtils.createJsonStatusCode(statusCode);
+            sc = NGSIUtilsForTests.createJsonStatusCode(statusCode);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.getReasonPhrase]")
                     + "- FAIL - There was a problem when creating the StatusCode");
@@ -374,7 +374,7 @@ public class NotifyContextRequestTest {
         StatusCode sc;
         
         try {
-            sc = TestUtils.createJsonStatusCode(statusCode);
+            sc = NGSIUtilsForTests.createJsonStatusCode(statusCode);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.toString]")
                     + "- FAIL - There was a problem when creating the StatusCode");
@@ -382,7 +382,7 @@ public class NotifyContextRequestTest {
         } // try catch
         
         try {
-            TestUtils.createJsonContextElement(sc.toString());
+            NGSIUtilsForTests.createJsonContextElement(sc.toString());
             System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.toString]")
                     + "-  OK  - The string representation of this object is OK");
         } catch (Exception e) {
