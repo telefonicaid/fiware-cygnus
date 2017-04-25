@@ -18,7 +18,7 @@
 package com.telefonica.iot.cygnus.interceptors;
 
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-import com.telefonica.iot.cygnus.utils.TestUtils;
+import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import java.util.Map;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
@@ -167,7 +167,7 @@ public class NGSIGroupingInterceptorTest {
         NGSIEvent originalEvent;
         
         try {
-            originalEvent = TestUtils.createNGSIEvent(originalCEStr, null, service, servicePath, correlatorID);
+            originalEvent = NGSIUtilsForTests.createNGSIEvent(originalCEStr, null, service, servicePath, correlatorID);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[GroupingInterceptor.intercept]")
                     + "- FAIL - There was a problem when creating the NGSIEvent");
