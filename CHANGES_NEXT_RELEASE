@@ -10,3 +10,4 @@
 - [cygnus-ngsi][hardening] Add a document about reliability (#1433)
 - [cygnus-common, cygnus-ngsi][hardening] Fix FIWARE repository URL (#1435)
 - [cygnus-common, cygnus-ngsi][hardening] Unify test classes (#1332, #1333)
+- [cygnus-ngsi][hardening] Add a note about optional channels when using Flume's ReplicatingChannelSelector (#510)
