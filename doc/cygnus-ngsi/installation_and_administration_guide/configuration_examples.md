@@ -124,6 +124,14 @@ cygnus-ngsi.channels.chN...
 
 Use multi-backend configuration when you simply want the same NGSI context data to be replicated in each one of the backends. This is possible thanks to the default channel selector, which [replicates](https://flume.apache.org/FlumeUserGuide.html#replicating-channel-selector-default) internal NGSI events to all the channels connected to the source. Such a replication is always done independently of the number of FIWARE service paths you own within your FIWARE service, or the number of entity types you have.
 
+**NOTE**: it must be taken into account Flume's replicating channel selector is designed to fail if a copy of the event cannot be put into one of the configured channels. If you want to avoid this behavior, just configure all the channels as optional ones (after explicitly saying the selector is the replicating one):
+
+```
+cygnus-ngsi.sources.src.channels = ch1 ch2 ... chN
+cygnus-ngsi.sources.src.selector.type = replicating
+cygnus-ngsi.sources.src.selector.optional = ch1 ch2 ... chN
+```
+
 [Top](#top)
 
 ## <a name="section2"></a>Advanced configurations
@@ -155,9 +163,9 @@ The first (and obvious) solution is to instantiate multiple Cygnus agents (multi
 |  | src-svc-2 |-----| ch-svc-2 |-----| sink-svc-2 |  |
 |  +-----------+     +----------+     +------------+  |
 +-----------------------------------------------------+
-                          
+
                            ...
-                          
+
 +-----------------------------------------------------+
 |                                                JVMN |
 |  +-----------+     +----------+     +------------+  |
@@ -437,9 +445,9 @@ In this case, a Cygnus agent will be deployed for each FIWARE service path withi
 |  | src-svcpath-2 |-----| ch-svcpath-2 |-----| sink-svcpath-2 |  |
 |  +---------------+     +--------------+     +----------------+  |
 +-----------------------------------------------------------------+
-                          
+
                               ...
-                          
+
 +-----------------------------------------------------------------+
 |                                                            JVMN |
 |  +---------------+     +--------------+     +----------------+  |
