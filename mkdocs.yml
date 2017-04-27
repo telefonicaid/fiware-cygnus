@@ -23,6 +23,7 @@ pages:
           - 'Flume environment configuration': 'cygnus-common/installation_and_administration_guide/flume_env_conf.md'
           - 'log4j configuration': 'cygnus-common/installation_and_administration_guide/log4j_conf.md'
           - 'Running as a process': 'cygnus-common/installation_and_administration_guide/running_as_process.md'
+          - 'YAFS': 'cygnus-common/installation_and_administration_guide/yafs.md'
           - 'Testing': 'cygnus-common/installation_and_administration_guide/testing.md'
           - 'Logs and alarms': 'cygnus-common/installation_and_administration_guide/logs_and_alarms.md'
           - 'Original API': 'cygnus-common/installation_and_administration_guide/management_interface.md'
