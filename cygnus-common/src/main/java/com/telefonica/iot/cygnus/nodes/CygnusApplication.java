@@ -203,6 +203,9 @@ public class CygnusApplication extends Application {
             
             option = new Option("6", "ipv6", false, "use ipv6 instead ipv4");
             options.addOption(option);
+            
+            option = new Option(null, "no-yafs", false, "do not use YAFS");
+            options.addOption(option);
 
             // Read the options
             CommandLineParser parser = new GnuParser();
@@ -243,6 +246,12 @@ public class CygnusApplication extends Application {
             
             if (commandLine.hasOption('6')) {
                 ipv6 = true;
+            } // if
+            
+            boolean noYAFS = false;
+            
+            if (commandLine.hasOption("no-yafs")) {
+                noYAFS = true;
             } // if
             
             // the following is to ensure that by default the agent will fail on startup if the file does not exist
@@ -310,12 +319,14 @@ public class CygnusApplication extends Application {
                     configurationFile, sourcesRef, channelsRef, sinksRef, apiPort, guiPort), ipv6);
             mgmtIfServer.start();
 
-            // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)
-            Runtime.getRuntime().addShutdownHook(new AgentShutdownHook("agent-shutdown-hook", supervisorRef));
-            
-            // start YAFS
-            YAFS yafs = new YAFS();
-            yafs.start();
+            if (!noYAFS) {
+                // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)
+                Runtime.getRuntime().addShutdownHook(new AgentShutdownHook("agent-shutdown-hook", supervisorRef));
+
+                // start YAFS
+                YAFS yafs = new YAFS();
+                yafs.start();
+            } // if
         } catch (IllegalArgumentException | ParseException e) {
             LOGGER.error("A fatal error occurred while running. Exception follows. Details=" + e.getMessage());
         } // try catch
