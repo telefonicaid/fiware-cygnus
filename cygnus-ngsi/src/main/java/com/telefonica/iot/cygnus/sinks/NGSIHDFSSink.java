@@ -30,6 +30,7 @@ import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
 import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
@@ -1056,7 +1057,7 @@ public class NGSIHDFSSink extends NGSISink {
                 } // if
                 
                 break;
-            } catch (Exception e) {
+            } catch (CygnusPersistenceError | CygnusRuntimeError e) {
                 if (persistenceBackend instanceof HDFSBackendImplREST) {
                     ImmutablePair<Long, Long> bytes = ((HDFSBackendImplREST) persistenceBackend).finishTransaction();
                     transactionRequestBytes += bytes.left;
@@ -1104,7 +1105,7 @@ public class NGSIHDFSSink extends NGSISink {
                     } // if
                     
                     break;
-                } catch (Exception e) {
+                } catch (CygnusPersistenceError | CygnusRuntimeError e) {
                     LOGGER.info("[" + this.getName() + "] There was some problem with the current endpoint, "
                             + "trying other one. Details: " + e.getMessage());
                 } // try catch
