@@ -30,6 +30,7 @@ import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
 import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
@@ -1056,7 +1057,7 @@ public class NGSIHDFSSink extends NGSISink {
                 } // if
                 
                 break;
-            } catch (Exception e) {
+            } catch (CygnusPersistenceError | CygnusRuntimeError e) {
                 if (persistenceBackend instanceof HDFSBackendImplREST) {
                     ImmutablePair<Long, Long> bytes = ((HDFSBackendImplREST) persistenceBackend).finishTransaction();
                     transactionRequestBytes += bytes.left;
@@ -1073,7 +1074,7 @@ public class NGSIHDFSSink extends NGSISink {
                 transactionRequestBytes, transactionResponseBytes, 0);
         
         if (!persisted) {
-            throw new CygnusPersistenceError("[" + this.getName() + "] No endpoint was available");
+            throw new CygnusPersistenceError("-, No endpoint was available");
         } // if
     } // persistAggregation
 
@@ -1104,7 +1105,7 @@ public class NGSIHDFSSink extends NGSISink {
                     } // if
                     
                     break;
-                } catch (Exception e) {
+                } catch (CygnusPersistenceError | CygnusRuntimeError e) {
                     LOGGER.info("[" + this.getName() + "] There was some problem with the current endpoint, "
                             + "trying other one. Details: " + e.getMessage());
                 } // try catch
@@ -1189,7 +1190,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // if else
         
         if (folderPath.length() > NGSIConstants.HDFS_MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building folder path name '" + folderPath + "' and its length is "
+            throw new CygnusBadConfiguration("-, Building folder path name '" + folderPath + "' and its length is "
                     + "greater than " + NGSIConstants.HDFS_MAX_NAME_LEN);
         } // if
         
@@ -1219,7 +1220,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // if else
         
         if (filePath.length() > NGSIConstants.HDFS_MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building file path name '" + filePath + "' and its length is "
+            throw new CygnusBadConfiguration("-, Building file path name '" + filePath + "' and its length is "
                     + "greater than " + NGSIConstants.HDFS_MAX_NAME_LEN);
         } // if
         

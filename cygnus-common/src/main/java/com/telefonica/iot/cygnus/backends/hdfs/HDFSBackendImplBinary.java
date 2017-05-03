@@ -19,6 +19,7 @@
 package com.telefonica.iot.cygnus.backends.hdfs;
 
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -82,31 +83,60 @@ public class HDFSBackendImplBinary implements HDFSBackend {
     } // setFSGetter
 
     @Override
-    public void createDir(String dirPath) throws Exception {
+    public void createDir(String dirPath) throws CygnusPersistenceError, CygnusRuntimeError {
         CreateDirPEA pea = new CreateDirPEA(dirPath);
         UserGroupInformation ugi = UserGroupInformation.createRemoteUser(hdfsUser);
-        ugi.doAs(pea);
+        
+        try {
+            ugi.doAs(pea);
+        } catch (IOException e) {
+            throw new CygnusPersistenceError("IOException, " + e.getMessage());
+        } catch (InterruptedException e) {
+            throw new CygnusPersistenceError("InterruptedException, " + e.getMessage());
+        } // try catch
     } // createDir
 
     @Override
-    public void createFile(String filePath, String data) throws Exception {
+    public void createFile(String filePath, String data) throws CygnusPersistenceError, CygnusRuntimeError {
         CreateFilePEA pea = new CreateFilePEA(filePath, data);
         UserGroupInformation ugi = UserGroupInformation.createRemoteUser(hdfsUser);
-        ugi.doAs(pea);
+        
+        try {
+            ugi.doAs(pea);
+        } catch (IOException e) {
+            throw new CygnusPersistenceError("IOException, " + e.getMessage());
+        } catch (InterruptedException e) {
+            throw new CygnusPersistenceError("InterruptedException, " + e.getMessage());
+        } // try catch
     } // createFile
 
     @Override
-    public void append(String filePath, String data) throws Exception {
+    public void append(String filePath, String data) throws CygnusPersistenceError, CygnusRuntimeError {
         AppendPEA pea = new AppendPEA(filePath, data);
         UserGroupInformation ugi = UserGroupInformation.createRemoteUser(hdfsUser);
-        ugi.doAs(pea);
+        
+        try {
+            ugi.doAs(pea);
+        } catch (IOException e) {
+            throw new CygnusPersistenceError("IOException, " + e.getMessage());
+        } catch (InterruptedException e) {
+            throw new CygnusPersistenceError("InterruptedException, " + e.getMessage());
+        } // try catch
     } // append
 
     @Override
-    public boolean exists(String filePath) throws Exception {
+    public boolean exists(String filePath) throws CygnusPersistenceError, CygnusRuntimeError {
         ExistsPEA pea = new ExistsPEA(filePath);
         UserGroupInformation ugi = UserGroupInformation.createRemoteUser(hdfsUser);
-        ugi.doAs(pea);
+        
+        try {
+            ugi.doAs(pea);
+        } catch (IOException e) {
+            throw new CygnusPersistenceError("IOException, " + e.getMessage());
+        } catch (InterruptedException e) {
+            throw new CygnusPersistenceError("InterruptedException, " + e.getMessage());
+        } // try catch
+        
         return pea.exists();
     } // exists
     

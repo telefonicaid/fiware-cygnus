@@ -18,6 +18,9 @@
 
 package com.telefonica.iot.cygnus.backends.hdfs;
 
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
+
 /**
  * Interface for those backends implementing the persistence in HDFS.
  * 
@@ -35,9 +38,10 @@ public interface HDFSBackend {
      * hdfs:///user/\<hdfsUser\>/\<dirPath\>
      * 
      * @param dirPath Directory to be created
-     * @throws Exception
+     * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
+     * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
      */
-    void createDir(String dirPath) throws Exception;
+    void createDir(String dirPath) throws CygnusPersistenceError, CygnusRuntimeError;
     
     /**
      * Creates a file in HDFS with initial content given its relative path. The absolute path will be build as:
@@ -45,27 +49,30 @@ public interface HDFSBackend {
      * 
      * @param filePath File to be created
      * @param data Data to be written in the created file
-     * @throws Exception
+     * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
+     * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
      */
-    void createFile(String filePath, String data) throws Exception;
+    void createFile(String filePath, String data) throws CygnusPersistenceError, CygnusRuntimeError;
     
     /**
      * Appends data to an existent file in HDFS.
      * 
      * @param filePath File to be created
      * @param data Data to be appended in the file
-     * @throws Exception
+     * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
+     * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
      */
-    void append(String filePath, String data) throws Exception;
+    void append(String filePath, String data) throws CygnusPersistenceError, CygnusRuntimeError;
     
     /**
      * Checks if the file exists in HDFS.
      * 
      * @param filePath File that must be checked
      * @return
-     * @throws Exception
+     * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
+     * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
      */
-    boolean exists(String filePath) throws Exception;
+    boolean exists(String filePath) throws CygnusPersistenceError, CygnusRuntimeError;
     
     /**
      * Serializes the backend for pretty printing.
