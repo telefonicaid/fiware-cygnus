@@ -1074,7 +1074,7 @@ public class NGSIHDFSSink extends NGSISink {
                 transactionRequestBytes, transactionResponseBytes, 0);
         
         if (!persisted) {
-            throw new CygnusPersistenceError("[" + this.getName() + "] No endpoint was available");
+            throw new CygnusPersistenceError("-, No endpoint was available");
         } // if
     } // persistAggregation
 
@@ -1190,7 +1190,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // if else
         
         if (folderPath.length() > NGSIConstants.HDFS_MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building folder path name '" + folderPath + "' and its length is "
+            throw new CygnusBadConfiguration("-, Building folder path name '" + folderPath + "' and its length is "
                     + "greater than " + NGSIConstants.HDFS_MAX_NAME_LEN);
         } // if
         
@@ -1220,7 +1220,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // if else
         
         if (filePath.length() > NGSIConstants.HDFS_MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building file path name '" + filePath + "' and its length is "
+            throw new CygnusBadConfiguration("-, Building file path name '" + filePath + "' and its length is "
                     + "greater than " + NGSIConstants.HDFS_MAX_NAME_LEN);
         } // if
         
