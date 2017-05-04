@@ -22,14 +22,24 @@ package com.telefonica.iot.cygnus.errors;
  *
  * @author frb
  */
-public class CygnusBadConfiguration extends Exception {
+public class CygnusBadConfiguration extends CygnusError {
     
     /**
      * Constructor.
-     * @param message
+     * @param cygnusMessage
      */
-    public CygnusBadConfiguration(String message) {
-        super("Bad configuration. Message: " + message);
+    public CygnusBadConfiguration(String cygnusMessage) {
+        super("CygnusBadConfiguration", "-", cygnusMessage, "-");
+    } // CygnusBadConfiguration
+    
+    /**
+     * Constructor.
+     * @param cygnusMessage
+     * @param javaException
+     * @param javaMessage
+     */
+    public CygnusBadConfiguration(String cygnusMessage, String javaException, String javaMessage) {
+        super("CygnusBadConfiguration", javaException, cygnusMessage, javaMessage);
     } // CygnusBadConfiguration
     
 } // CygnusBadConfiguration

@@ -21,14 +21,24 @@ package com.telefonica.iot.cygnus.errors;
  *
  * @author frb
  */
-public class CygnusExpiratingError extends Exception {
+public class CygnusExpiratingError extends CygnusError {
     
     /**
      * Constructor.
-     * @param message
+     * @param cygnusMessage
      */
-    public CygnusExpiratingError(String message) {
-        super("Error while expirating records. Message: " + message);
+    public CygnusExpiratingError(String cygnusMessage) {
+        super("CygnusExpiratingError", "-", cygnusMessage, "-");
+    } // CygnusExpiratingError
+    
+    /**
+     * Constructor.
+     * @param cygnusMessage
+     * @param javaException
+     * @param javaMessage
+     */
+    public CygnusExpiratingError(String cygnusMessage, String javaException, String javaMessage) {
+        super("CygnusExpiratingError", javaException, cygnusMessage, javaMessage);
     } // CygnusExpiratingError
     
 } // CygnusExpiratingError
