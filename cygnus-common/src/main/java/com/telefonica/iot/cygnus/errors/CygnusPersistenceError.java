@@ -29,7 +29,7 @@ public class CygnusPersistenceError extends CygnusError {
      * @param cygnusMessage
      */
     public CygnusPersistenceError(String cygnusMessage) {
-        super("CygnusPersistenceError", "-", cygnusMessage, "-");
+        super("CygnusPersistenceError", null, cygnusMessage, null);
     } // CygnusPersistenceError
     
     /**

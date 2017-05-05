@@ -31,7 +31,8 @@ public class CygnusError extends Exception {
      * @param javaMessage
      */
     public CygnusError(String cygnusException, String javaException, String cygnusMessage, String javaMessage) {
-        super(cygnusException + "(" + javaException + "), " + cygnusMessage + "(" + javaMessage + ")");
+        super(cygnusException + (javaException == null ? ". " : " (" + javaException + "). ")
+                + cygnusMessage + (javaMessage == null ? ". " : " (" + javaMessage + "). "));
     } // CygnusError
     
 } // CygnusError

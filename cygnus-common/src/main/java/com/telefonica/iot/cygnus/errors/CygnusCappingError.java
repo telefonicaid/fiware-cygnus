@@ -28,7 +28,7 @@ public class CygnusCappingError extends CygnusError {
      * @param cygnusMessage
      */
     public CygnusCappingError(String cygnusMessage) {
-        super("CygnusCappingError", "-", cygnusMessage, "-");
+        super("CygnusCappingError", null, cygnusMessage, null);
     } // CygnusCappingError
     
     /**

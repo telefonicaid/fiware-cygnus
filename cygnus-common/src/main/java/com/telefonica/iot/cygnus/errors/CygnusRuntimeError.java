@@ -29,7 +29,7 @@ public class CygnusRuntimeError extends CygnusError {
      * @param cygnusMessage
      */
     public CygnusRuntimeError(String cygnusMessage) {
-        super("CygnusRuntimeError", "-", cygnusMessage, "-");
+        super("CygnusRuntimeError", null, cygnusMessage, null);
     } // CygnusRuntimeError
     
     /**

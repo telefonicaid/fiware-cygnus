@@ -29,7 +29,7 @@ public class CygnusBadContextData extends CygnusError {
      * @param cygnusMessage
      */
     public CygnusBadContextData(String cygnusMessage) {
-        super("BadContextData", "-", cygnusMessage, "-");
+        super("BadContextData", null, cygnusMessage, null);
     } // CygnusBadContextData
     
     /**
