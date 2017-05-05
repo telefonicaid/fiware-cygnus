@@ -390,12 +390,12 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             persistBatch(batch);
         } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
             updateServiceMetrics(batch, true);
-            LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
+            LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
             setMDCToNA();
             return Status.READY;
         } catch (CygnusPersistenceError e) {
             updateServiceMetrics(batch, true);
-            LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
+            LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
             doRollbackAgain(rollbackedAccumulation);
             setMDCToNA();
             return Status.BACKOFF; // Slow down the sink since there are problems with the persistence backend
@@ -405,7 +405,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             try {
                 capRecords(batch, persistencePolicyMaxRecords);
             } catch (CygnusCappingError e) {
-                LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
+                LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
             } // try catch
         } // if
         
@@ -558,7 +558,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 persistBatch(batch);
             } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
                 updateServiceMetrics(batch, true);
-                LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
+                LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
                 accumulator.initialize(new Date().getTime());
                 txn.commit();
                 txn.close();
@@ -566,7 +566,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 return Status.READY;
             } catch (CygnusPersistenceError e) {
                 updateServiceMetrics(batch, true);
-                LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
+                LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
                 doRollback(accumulator.clone()); // the global accumulator has to be cloned for rollbacking purposes
                 accumulator.initialize(new Date().getTime());
                 txn.commit();
@@ -579,7 +579,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 try {
                     capRecords(batch, persistencePolicyMaxRecords);
                 } catch (CygnusCappingError e) {
-                    LOGGER.error(e.getMessage() + ", Stack trace: " + Arrays.toString(e.getStackTrace()));
+                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
                 } // try
             } // if
             
