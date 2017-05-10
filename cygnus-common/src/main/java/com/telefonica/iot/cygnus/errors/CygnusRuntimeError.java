@@ -22,14 +22,24 @@ package com.telefonica.iot.cygnus.errors;
  *
  * @author frb
  */
-public class CygnusRuntimeError extends Exception {
+public class CygnusRuntimeError extends CygnusError {
     
     /**
      * Constructor.
-     * @param message
+     * @param cygnusMessage
      */
-    public CygnusRuntimeError(String message) {
-        super("Runtime error. Message: " + message);
+    public CygnusRuntimeError(String cygnusMessage) {
+        super("CygnusRuntimeError", null, cygnusMessage, null);
+    } // CygnusRuntimeError
+    
+    /**
+     * Constructor.
+     * @param cygnusMessage
+     * @param javaException
+     * @param javaMessage
+     */
+    public CygnusRuntimeError(String cygnusMessage, String javaException, String javaMessage) {
+        super("CygnusRuntimeError", javaException, cygnusMessage, javaMessage);
     } // CygnusRuntimeError
     
 } // CygnusRuntimeError

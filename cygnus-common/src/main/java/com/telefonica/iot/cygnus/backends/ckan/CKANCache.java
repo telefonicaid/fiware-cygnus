@@ -179,35 +179,36 @@ public class CKANCache extends HttpBackend {
         headers.add(new BasicHeader("Authorization", apiKey));
         JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
 
-        if (res.getStatusCode() == 200) {
-            // the organization exists in CKAN
-            JSONObject result = (JSONObject) res.getJsonObject().get("result");
-                        
-            // check if the organization is in "deleted" state
-            String orgState = result.get("state").toString();
-            
-            if (orgState.equals("deleted")) {
-                throw new CygnusBadConfiguration("The organization exists but it is in a deleted state (orgName="
-                        + orgName + ")");
-            } // if
-
-            // put the organization in the tree and in the organization map
-            String orgId = result.get("id").toString();
-            tree.put(orgName, new HashMap<String, ArrayList<String>>());
-            orgMap.put(orgName, orgId);
-            LOGGER.debug("Organization found in CKAN, now cached (orgName/orgId=" + orgName + "/" + orgId + ")");
-
-            // get the packages and populate the packages map
-            JSONArray packages = (JSONArray) result.get("packages");
-            LOGGER.debug("Going to populate the packages cache (orgName=" + orgName + ")");
-            populatePackagesMap(packages, orgName);
-            return true;
-        } else if (res.getStatusCode() == 404) {
-            return false;
-        } else {
-            throw new CygnusPersistenceError("Could not check if the organization exists ("
-                    + "orgName=" + orgName + ", statusCode=" + res.getStatusCode() + ")");
-        } // if else
+        switch (res.getStatusCode()) {
+            case 200:
+                // the organization exists in CKAN
+                JSONObject result = (JSONObject) res.getJsonObject().get("result");
+                
+                // check if the organization is in "deleted" state
+                String orgState = result.get("state").toString();
+                
+                if (orgState.equals("deleted")) {
+                    throw new CygnusBadConfiguration("The organization '" + orgName + "' exists but it is in a "
+                            + "deleted state");
+                } // if
+                
+                // put the organization in the tree and in the organization map
+                String orgId = result.get("id").toString();
+                tree.put(orgName, new HashMap<String, ArrayList<String>>());
+                orgMap.put(orgName, orgId);
+                LOGGER.debug("Organization found in CKAN, now cached (orgName/orgId=" + orgName + "/" + orgId + ")");
+                
+                // get the packages and populate the packages map
+                JSONArray packages = (JSONArray) result.get("packages");
+                LOGGER.debug("Going to populate the packages cache (orgName=" + orgName + ")");
+                populatePackagesMap(packages, orgName);
+                return true;
+            case 404:
+                return false;
+            default:
+                throw new CygnusPersistenceError("Could not check if the organization exists ("
+                        + "orgName=" + orgName + ", statusCode=" + res.getStatusCode() + ")");
+        } // switch
     } // isCachedOrg
     
     /**
@@ -237,37 +238,38 @@ public class CKANCache extends HttpBackend {
         headers.add(new BasicHeader("Authorization", apiKey));
         JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
 
-        if (res.getStatusCode() == 200) {
-            // the package exists in CKAN
-            JSONObject result = (JSONObject) res.getJsonObject().get("result");
-                        
-            // check if the package is in "deleted" state
-            String pkgState = result.get("state").toString();
-            
-            if (pkgState.equals("deleted")) {
-                throw new CygnusBadConfiguration("The package exists but it is in a deleted state (orgName=" + orgName
-                        + ", pkgName=" + pkgName + ")");
-            } // if
-
-            // put the package in the tree and in the package map
-            String pkgId = result.get("id").toString();
-            tree.get(orgName).put(pkgName, new ArrayList<String>());
-            orgMap.put(pkgName, pkgId);
-            LOGGER.debug("Package found in CKAN, now cached (orgName=" + orgName + ", pkgName/pkgId=" + pkgName
-                    + "/" + pkgId + ")");
-
-            // get the resource and populate the resource map
-            JSONArray resources = (JSONArray) result.get("resources");
-            LOGGER.debug("Going to populate the resources cache (orgName=" + orgName + ", pkgName=" + pkgName
-                    + ")");
-            populateResourcesMap(resources, orgName, pkgName, false);
-            return true;
-        } else if (res.getStatusCode() == 404) {
-            return false;
-        } else {
-            throw new CygnusPersistenceError("Could not check if the package exists ("
-                    + "orgName=" + orgName + ", pkgName=" + pkgName + ", statusCode=" + res.getStatusCode() + ")");
-        } // if else
+        switch (res.getStatusCode()) {
+            case 200:
+                // the package exists in CKAN
+                JSONObject result = (JSONObject) res.getJsonObject().get("result");
+                
+                // check if the package is in "deleted" state
+                String pkgState = result.get("state").toString();
+                
+                if (pkgState.equals("deleted")) {
+                    throw new CygnusBadConfiguration("The package '" + pkgName + "' exists but it is in a "
+                            + "deleted state");
+                } // if
+                
+                // put the package in the tree and in the package map
+                String pkgId = result.get("id").toString();
+                tree.get(orgName).put(pkgName, new ArrayList<String>());
+                orgMap.put(pkgName, pkgId);
+                LOGGER.debug("Package found in CKAN, now cached (orgName=" + orgName + ", pkgName/pkgId=" + pkgName
+                        + "/" + pkgId + ")");
+                
+                // get the resource and populate the resource map
+                JSONArray resources = (JSONArray) result.get("resources");
+                LOGGER.debug("Going to populate the resources cache (orgName=" + orgName + ", pkgName=" + pkgName
+                        + ")");
+                populateResourcesMap(resources, orgName, pkgName, false);
+                return true;
+            case 404:
+                return false;
+            default:
+                throw new CygnusPersistenceError("Could not check if the package exists ("
+                        + "orgName=" + orgName + ", pkgName=" + pkgName + ", statusCode=" + res.getStatusCode() + ")");
+        } // switch
     } // isCachedPkg
     
     /**
@@ -303,44 +305,45 @@ public class CKANCache extends HttpBackend {
         headers.add(new BasicHeader("Authorization", apiKey));
         JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
 
-        if (res.getStatusCode() == 200) {
-            // the package exists in CKAN
-            LOGGER.debug("Package found in CKAN, going to update the cached resources (orgName=" + orgName
-                    + ", pkgName=" + pkgName + ")");
-
-            // there is no need to check if the package is in "deleted" state...
-
-            // there is no need to put the package in the tree nor put it in the package map...
-
-            // get the resource and populate the resource map
-            JSONObject result = (JSONObject) res.getJsonObject().get("result");
-            JSONArray resources = (JSONArray) result.get("resources");
-            
-            if (resources.size() == 0) {
-                return false;
-            } else {
-                LOGGER.debug("Going to populate the resources cache (orgName=" + orgName + ", pkgName=" + pkgName
-                        + ")");
-                populateResourcesMap(resources, orgName, pkgName, true);
+        switch (res.getStatusCode()) {
+            case 200:
+                // the package exists in CKAN
+                LOGGER.debug("Package found in CKAN, going to update the cached resources (orgName=" + orgName
+                        + ", pkgName=" + pkgName + ")");
                 
-                // check if the resource is within the resources cache, once populated
-                if (tree.get(orgName).get(pkgName).contains(resName)) {
-                    LOGGER.debug("Resource found in the cache, once queried CKAN " + "(orgName=" + orgName
-                            + ", pkgName=" + pkgName + ", resName=" + resName + ")");
-                    return true;
-                } else {
-                    LOGGER.debug("Resource not found in the cache, once queried CKAN " + "(orgName=" + orgName
-                            + ", pkgName=" + pkgName + ", resName=" + resName + ")");
+                // there is no need to check if the package is in "deleted" state...
+                
+                // there is no need to put the package in the tree nor put it in the package map...
+                
+                // get the resource and populate the resource map
+                JSONObject result = (JSONObject) res.getJsonObject().get("result");
+                JSONArray resources = (JSONArray) result.get("resources");
+                
+                if (resources.isEmpty()) {
                     return false;
+                } else {
+                    LOGGER.debug("Going to populate the resources cache (orgName=" + orgName + ", pkgName=" + pkgName
+                            + ")");
+                    populateResourcesMap(resources, orgName, pkgName, true);
+                    
+                    // check if the resource is within the resources cache, once populated
+                    if (tree.get(orgName).get(pkgName).contains(resName)) {
+                        LOGGER.debug("Resource found in the cache, once queried CKAN " + "(orgName=" + orgName
+                                + ", pkgName=" + pkgName + ", resName=" + resName + ")");
+                        return true;
+                    } else {
+                        LOGGER.debug("Resource not found in the cache, once queried CKAN " + "(orgName=" + orgName
+                                + ", pkgName=" + pkgName + ", resName=" + resName + ")");
+                        return false;
+                    } // if else
                 } // if else
-            } // if else
-        } else if (res.getStatusCode() == 404) {
-            return false;
-        } else {
-            throw new CygnusPersistenceError("Could not check if the resource exists ("
-                    + "orgName=" + orgName + ", pkgName=" + pkgName + ", resName=" + resName
-                    + ", statusCode=" + res.getStatusCode() + ")");
-        } // if else
+            case 404:
+                return false;
+            default:
+                throw new CygnusPersistenceError("Could not check if the resource exists ("
+                        + "orgName=" + orgName + ", pkgName=" + pkgName + ", resName=" + resName
+                        + ", statusCode=" + res.getStatusCode() + ")");
+        } // switch
     } // isCachedRes
 
     /**
@@ -354,7 +357,7 @@ public class CKANCache extends HttpBackend {
     private void populatePackagesMap(JSONArray packages, String orgName)
         throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         // this check is for debuging purposes
-        if (packages == null || packages.size() == 0) {
+        if (packages == null || packages.isEmpty()) {
             LOGGER.debug("The pacakges list is empty, nothing to cache");
             return;
         } // if
@@ -373,8 +376,7 @@ public class CKANCache extends HttpBackend {
             String pkgState = pkg.get("state").toString();
 
             if (pkgState.equals("deleted")) {
-                throw new CygnusBadConfiguration("The package exists but it is in a deleted state (orgName="
-                        + orgName + ", pkgName=" + pkgName + ")");
+                throw new CygnusBadConfiguration("The package '" + pkgName + "' exists but it is in a deleted state");
             } // if
             
             // put the package in the tree and in the packages map
@@ -403,7 +405,7 @@ public class CKANCache extends HttpBackend {
      */
     private void populateResourcesMap(JSONArray resources, String orgName, String pkgName, boolean checkExistence) {
         // this check is for debuging purposes
-        if (resources == null || resources.size() == 0) {
+        if (resources == null || resources.isEmpty()) {
             LOGGER.debug("The resources list is empty, nothing to cache");
             return;
         } // if

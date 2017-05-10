@@ -1,5 +1,5 @@
 /**
- * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2017 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FIWARE project).
  *
@@ -15,31 +15,24 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
-
 package com.telefonica.iot.cygnus.errors;
 
 /**
  *
  * @author frb
  */
-public class CygnusBadContextData extends CygnusError {
+public class CygnusError extends Exception {
     
     /**
      * Constructor.
-     * @param cygnusMessage
-     */
-    public CygnusBadContextData(String cygnusMessage) {
-        super("BadContextData", null, cygnusMessage, null);
-    } // CygnusBadContextData
-    
-    /**
-     * Constructor.
-     * @param cygnusMessage
+     * @param cygnusException
      * @param javaException
+     * @param cygnusMessage
      * @param javaMessage
      */
-    public CygnusBadContextData(String cygnusMessage, String javaException, String javaMessage) {
-        super("BadContextData", javaException, cygnusMessage, javaMessage);
-    } // CygnusBadContextData
+    public CygnusError(String cygnusException, String javaException, String cygnusMessage, String javaMessage) {
+        super(cygnusException + (javaException == null ? ". " : " (" + javaException + "). ")
+                + cygnusMessage + (javaMessage == null ? ". " : " (" + javaMessage + "). "));
+    } // CygnusError
     
-} // CygnusBadContextData
+} // CygnusError

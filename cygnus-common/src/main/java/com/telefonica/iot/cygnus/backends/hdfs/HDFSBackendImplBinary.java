@@ -90,9 +90,9 @@ public class HDFSBackendImplBinary implements HDFSBackend {
         try {
             ugi.doAs(pea);
         } catch (IOException e) {
-            throw new CygnusPersistenceError("IOException, " + e.getMessage());
+            throw new CygnusPersistenceError("Directory creation error", "IOException", e.getMessage());
         } catch (InterruptedException e) {
-            throw new CygnusPersistenceError("InterruptedException, " + e.getMessage());
+            throw new CygnusPersistenceError("Directory creation error", "InterruptedException", e.getMessage());
         } // try catch
     } // createDir
 
@@ -104,9 +104,9 @@ public class HDFSBackendImplBinary implements HDFSBackend {
         try {
             ugi.doAs(pea);
         } catch (IOException e) {
-            throw new CygnusPersistenceError("IOException, " + e.getMessage());
+            throw new CygnusPersistenceError("File creation error", "IOException", e.getMessage());
         } catch (InterruptedException e) {
-            throw new CygnusPersistenceError("InterruptedException, " + e.getMessage());
+            throw new CygnusPersistenceError("File creation error", "InterruptedException", e.getMessage());
         } // try catch
     } // createFile
 
@@ -118,9 +118,9 @@ public class HDFSBackendImplBinary implements HDFSBackend {
         try {
             ugi.doAs(pea);
         } catch (IOException e) {
-            throw new CygnusPersistenceError("IOException, " + e.getMessage());
+            throw new CygnusPersistenceError("File appending error", "IOException", e.getMessage());
         } catch (InterruptedException e) {
-            throw new CygnusPersistenceError("InterruptedException, " + e.getMessage());
+            throw new CygnusPersistenceError("File appending error", "InterruptedException", e.getMessage());
         } // try catch
     } // append
 
@@ -132,9 +132,9 @@ public class HDFSBackendImplBinary implements HDFSBackend {
         try {
             ugi.doAs(pea);
         } catch (IOException e) {
-            throw new CygnusPersistenceError("IOException, " + e.getMessage());
+            throw new CygnusPersistenceError("File existence checking error", "IOException",  e.getMessage());
         } catch (InterruptedException e) {
-            throw new CygnusPersistenceError("InterruptedException, " + e.getMessage());
+            throw new CygnusPersistenceError("File existence checking error", "InterruptedException", e.getMessage());
         } // try catch
         
         return pea.exists();

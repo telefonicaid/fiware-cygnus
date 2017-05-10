@@ -841,7 +841,7 @@ public class NGSIHDFSSink extends NGSISink {
             try {
                 attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
             } catch (ParseException e) {
-                throw new CygnusBadContextData("ParseException, " + e.getMessage());
+                throw new CygnusBadContextData("Metadata parsing error", "ParseException", e.getMessage());
             } // try catch
 
             // iterate on the metadata
@@ -974,7 +974,7 @@ public class NGSIHDFSSink extends NGSISink {
             try {
                 attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
             } catch (ParseException e) {
-                throw new CygnusBadContextData("ParseException, " + e.getMessage());
+                throw new CygnusBadContextData("Metadata parsing error", "ParseException", e.getMessage());
             } // try catch
 
             // iterate on the metadata
@@ -1074,7 +1074,7 @@ public class NGSIHDFSSink extends NGSISink {
                 transactionRequestBytes, transactionResponseBytes, 0);
         
         if (!persisted) {
-            throw new CygnusPersistenceError("-, No endpoint was available");
+            throw new CygnusPersistenceError("No endpoint was available");
         } // if
     } // persistAggregation
 

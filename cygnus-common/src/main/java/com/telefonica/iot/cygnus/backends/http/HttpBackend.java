@@ -184,7 +184,7 @@ public abstract class HttpBackend {
                 request = new HttpDelete(url);
                 break;
             default:
-                throw new CygnusRuntimeError("-, Http " + method + " method not supported"); // if else
+                throw new CygnusRuntimeError("Http '" + method + "' method not supported");
         } // switch
 
         if (headers != null) {
@@ -199,7 +199,7 @@ public abstract class HttpBackend {
             httpRes = httpClient.execute(request);
         } catch (IOException e) {
             request.releaseConnection();
-            throw new CygnusPersistenceError("IOException, " + e.getMessage());
+            throw new CygnusPersistenceError("Request error", "IOException", e.getMessage());
         } // try catch
 
         JsonResponse response = createJsonResponse(httpRes);
@@ -218,7 +218,7 @@ public abstract class HttpBackend {
             PrivilegedRequest req = new PrivilegedRequest(method, url, headers, entity);
             return createJsonResponse((HttpResponse) Subject.doAs(loginContext.getSubject(), req));
         } catch (LoginException e) {
-            throw new CygnusRuntimeError("LoginException, " + e.getMessage());
+            throw new CygnusRuntimeError("Privileged request error", "LoginException", e.getMessage());
         } // try catch
     } // doPrivilegedRequest
     
@@ -308,9 +308,9 @@ public abstract class HttpBackend {
             try {
                 reader = new BufferedReader(new InputStreamReader(httpRes.getEntity().getContent()));
             } catch (IOException e) {
-                throw new CygnusRuntimeError("IOException, " + e.getMessage());
+                throw new CygnusRuntimeError("Response handling error", "IOException", e.getMessage());
             } catch (IllegalStateException e) {
-                throw new CygnusRuntimeError("IllegalStateException, " + e.getMessage());
+                throw new CygnusRuntimeError("Response handling error", "IllegalStateException", e.getMessage());
             } // try catch
             
             String res = "";
@@ -321,7 +321,7 @@ public abstract class HttpBackend {
                     res += line;
                 } // while
             } catch (IOException e) {
-                throw new CygnusRuntimeError("IOException, " + e.getMessage());
+                throw new CygnusRuntimeError("Response handling error", "IOException", e.getMessage());
             } // try catch
             
             transactionResponseBytes += res.length();
@@ -329,7 +329,7 @@ public abstract class HttpBackend {
             try {
                 reader.close();
             } catch (IOException e) {
-                throw new CygnusRuntimeError("IOException, " + e.getMessage());
+                throw new CygnusRuntimeError("Response handling error", "IOException", e.getMessage());
             } // try catch
 
             LOGGER.debug("Http response payload: " + res);
@@ -343,7 +343,7 @@ public abstract class HttpBackend {
                     try {
                         object = jsonParser.parse(res);
                     } catch (ParseException e) {
-                        throw new CygnusRuntimeError("ParseException, " + e.getMessage());
+                        throw new CygnusRuntimeError("Response handling error", "ParseException", e.getMessage());
                     } // try catch
 
                     jsonPayload = new JSONObject();
@@ -352,7 +352,7 @@ public abstract class HttpBackend {
                     try {
                         jsonPayload = (JSONObject) jsonParser.parse(res);
                     } catch (ParseException e) {
-                        throw new CygnusRuntimeError("ParseException, " + e.getMessage());
+                        throw new CygnusRuntimeError("Response handling error", "ParseException", e.getMessage());
                     } // try catch
                 } // if else
             } // if
