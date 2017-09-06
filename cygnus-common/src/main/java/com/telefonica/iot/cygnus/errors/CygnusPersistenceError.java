@@ -22,14 +22,24 @@ package com.telefonica.iot.cygnus.errors;
  *
  * @author frb
  */
-public class CygnusPersistenceError extends Exception {
+public class CygnusPersistenceError extends CygnusError {
     
     /**
      * Constructor.
-     * @param message
+     * @param cygnusMessage
      */
-    public CygnusPersistenceError(String message) {
-        super("Persistence error. Message: " + message);
+    public CygnusPersistenceError(String cygnusMessage) {
+        super("CygnusPersistenceError", null, cygnusMessage, null);
+    } // CygnusPersistenceError
+    
+    /**
+     * Constructor.
+     * @param cygnusMessage
+     * @param javaException
+     * @param javaMessage
+     */
+    public CygnusPersistenceError(String cygnusMessage, String javaException, String javaMessage) {
+        super("CygnusPersistenceError", javaException, cygnusMessage, javaMessage);
     } // CygnusPersistenceError
     
 } // CygnusPersistenceError

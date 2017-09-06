@@ -530,10 +530,10 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
                         } // if else
                     } // for
                 } catch (ParseException e) {
-                    throw new CygnusRuntimeError("ParseException, " + e.getMessage());
+                    throw new CygnusRuntimeError("Data expiration error", "ParseException", e.getMessage());
                 } // try catch
 
-                if (records.size() == 0) {
+                if (records.isEmpty()) {
                     morePages = false;
                 } else {
                     offset += RECORDSPERPAGE;

@@ -1,4 +1,4 @@
-#<a name="top"></a>NGSITestSink
+# <a name="top"></a>NGSITestSink
 Content:
 
 * [Functionality](#section1)
@@ -11,7 +11,7 @@ Content:
     * [Important notes](#section2.3)
         * [About batching](#section2.3.1)
 
-##<a name="section1"></a>Functionality
+## <a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSITestSink`, or simply `NGSITestSink` is a sink designed to test Cygnus when receiving NGSI-like context data events. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` Object at Cygnus sources. In the end, the information within these events is not meant to be persisted at any real storage, but simply logged (depending on your `log4j` configuration, the logs will be printed in console, a file...).
@@ -20,20 +20,20 @@ Next sections will explain this in detail.
 
 [Top](#top)
 
-###<a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
+### <a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
 Notified NGSI events (containing context data) are transformed into `NGSIEvent` objects (for each context element a `NGSIEvent` is created; such an event is a mix of certain headers and a `ContextElement` object), independently of the NGSI data generator or the final backend where it is persisted.
 
 This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_rest_handler.md). Once translated, the data (now, as `NGSIEvent` objects) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
-###<a name="section1.2"></a>Mapping `NGSIEvent`s lo logs
+### <a name="section1.2"></a>Mapping `NGSIEvent`s lo logs
 The mapping is direct, converting the context data into strings to be written in console, or file...
 
 [Top](#top)
 
-###<a name="section1.3"></a>Example
-####<a name="section1.3.1"></a>`NGSIEvent`
+### <a name="section1.3"></a>Example
+#### <a name="section1.3.1"></a>`NGSIEvent`
 Assuming the following `NGSIEvent` is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     ngsi-event={
@@ -77,8 +77,8 @@ time=2015-12-10T14:31:49.486CET | lvl=INFO | trans=1429535775-308-0000000000 | s
 
 [Top](#top)
 
-##<a name="section2"></a>Adinistration guide
-###<a name="section2.1"></a>Configuration
+## <a name="section2"></a>Adinistration guide
+### <a name="section2.1"></a>Configuration
 `NGSITestSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -108,13 +108,13 @@ A configuration example could be:
 
 [Top](#top)
 
-###<a name="section2.2"></a>Use cases
+### <a name="section2.2"></a>Use cases
 Use this sink in order to test if a Cygnus deployment is properly receiving notifications from an Orion Context Broker premise.
 
 [Top](#top)
 
-###<a name="section2.3"></a>Important notes
-####<a name="section2.3.1"></a>About batching
+### <a name="section2.3"></a>Important notes
+#### <a name="section2.3.1"></a>About batching
 `NGSITestSink` extends `NGSISink`, which provides a batch-based built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Particularly, this is not important for this test sink, but the other sinks will largely benefit from this feature. Please, check the specific sink documentation for more details.

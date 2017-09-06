@@ -1,4 +1,4 @@
-#User and Programmer Guide
+# User and Programmer Guide
 
 * [Introduction](./introduction.md)
 * User guide:

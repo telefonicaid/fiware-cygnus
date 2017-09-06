@@ -19,8 +19,7 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-import com.telefonica.iot.cygnus.utils.TestUtils;
-import java.util.logging.Logger;
+import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertEquals;
@@ -57,7 +56,7 @@ public class NGSIBatchTest {
         NGSIEvent event;
         
         try {
-            event = TestUtils.createNGSIEvent(originalCEStr, mappedCEStr, service, servicePath, correlatorId);
+            event = NGSIUtilsForTests.createNGSIEvent(originalCEStr, mappedCEStr, service, servicePath, correlatorId);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIBatch.addEvent]")
                     + "- FAIL - There was some problem when creating the NGSI event");
@@ -105,7 +104,7 @@ public class NGSIBatchTest {
         NGSIEvent event1;
         
         try {
-            event1 = TestUtils.createNGSIEvent(originalCEStr, mappedCEStr, service, servicePath, correlatorId);
+            event1 = NGSIUtilsForTests.createNGSIEvent(originalCEStr, mappedCEStr, service, servicePath, correlatorId);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIBatch.addEvent]")
                     + "- FAIL - There was some problem when creating the first NGSI event");
@@ -116,7 +115,7 @@ public class NGSIBatchTest {
         NGSIEvent event2;
         
         try {
-            event2 = TestUtils.createNGSIEvent(originalCEStr, mappedCEStr, service, servicePath, correlatorId);
+            event2 = NGSIUtilsForTests.createNGSIEvent(originalCEStr, mappedCEStr, service, servicePath, correlatorId);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIBatch.addEvent]")
                     + "- FAIL - There was some problem when creating the second NGSI event");

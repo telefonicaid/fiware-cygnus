@@ -231,9 +231,13 @@ public class NGSIMySQLSink extends NGSISink {
                 LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",dbName="
                         + dbName + ", tableName=" + tableName + ")");
                 persistenceBackend.capRecords(dbName, tableName, maxRecords);
-            } catch (CygnusBadConfiguration | CygnusRuntimeError | CygnusPersistenceError e) {
-                throw new CygnusCappingError(e.getMessage());
-            } // catch
+            } catch (CygnusBadConfiguration e) {
+                throw new CygnusCappingError("Data capping error", "CygnusBadConfiguration", e.getMessage());
+            } catch (CygnusRuntimeError e) {
+                throw new CygnusCappingError("Data capping error", "CygnusRuntimeError", e.getMessage());
+            } catch (CygnusPersistenceError e) {
+                throw new CygnusCappingError("Data capping error", "CygnusPersistenceError", e.getMessage());
+            } // try catch
         } // while
     } // capRecords
 
@@ -243,8 +247,10 @@ public class NGSIMySQLSink extends NGSISink {
         
         try {
             persistenceBackend.expirateRecordsCache(expirationTime);
-        } catch (CygnusRuntimeError | CygnusPersistenceError e) {
-            throw new CygnusExpiratingError(e.getMessage());
+        } catch (CygnusRuntimeError e) {
+            throw new CygnusExpiratingError("Data expiration error", "CygnusRuntimeError", e.getMessage());
+        } catch (CygnusPersistenceError e) {
+            throw new CygnusExpiratingError("Data expiration error", "CygnusPersistenceError", e.getMessage());
         } // try catch
     } // expirateRecords
     

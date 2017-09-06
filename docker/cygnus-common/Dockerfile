@@ -34,7 +34,7 @@ ENV CYGNUS_API_PORT "8081"
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "release/1.7.0"
+ENV GIT_REV_CYGNUS "master"
 
 ENV MVN_VER "3.3.9"
 ENV MVN_TGZ "apache-maven-${MVN_VER}-bin.tar.gz"

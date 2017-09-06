@@ -1,4 +1,4 @@
-#<a name="top"></a>Connecting Orion Context Broker with Spark Streaming, using Cygnus
+# <a name="top"></a>Connecting Orion Context Broker with Spark Streaming, using Cygnus
 Content:
 
 * [Introduction](#section1)
@@ -8,7 +8,7 @@ Content:
 * [Testing everything together](#section5)
 * [Further information](#section6)
 
-##<a name="section1"></a>Introduction
+## <a name="section1"></a>Introduction
 The idea behind this document is to explain, step-by-step, how to send on change context information in a real time basis from Orion Context Broker to Spark Streaming, for its analysis.
 
 Such a connection will be made thanks to Cygnus, specifically by using the following components:
@@ -26,7 +26,7 @@ All components installation, configuration and running will be explained accordi
 
 [Top](#top)
 
-##<a name="section2"></a>Setting up Orion Context Broker
+## <a name="section2"></a>Setting up Orion Context Broker
 Orion Context Broker installation guide can be found [here](https://fiware-orion.readthedocs.io/en/master/admin/install/index.html). We recommend to use release 1.6.0 at least.
 
 The default configuarion is OK for this integration example. Simply run it by typing in a shell:
@@ -91,7 +91,7 @@ Please refere to Orion Context Broker [official documentation](http://fiware-ori
 
 [Top](#top)
 
-##<a name="section3"></a>Setting up Cygnus
+## <a name="section3"></a>Setting up Cygnus
 Regarding installation, do it from [FIWARE yum repository](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/install_with_rpm.md). Once installed in its latest version, a Cygnus agent must be configured as follows:
 
 ```
@@ -151,7 +151,7 @@ At this moment of the integration most probably you'll see several Java exceptio
 
 [Top](#top)
 
-##<a name="section4"></a>Setting up spark Streaming
+## <a name="section4"></a>Setting up spark Streaming
 Apache Spark will be installed from the URL resulting from entering at [Spark Download page](http://spark.apache.org/downloads.html) and selecting:
 
 * Spark release: 1.6.3
@@ -190,7 +190,7 @@ $ cd spark-1.6.3-bin-hadoop2.3
 
 [Top](#top)
 
-##<a name="section5"></a>Testing everything together
+## <a name="section5"></a>Testing everything together
 In order to test the whole architecture of our real time context information analysis we'll use an already developed analysis application Spark provides within its examples, called `JavaFlumeEventCount`:
 
 ```
@@ -222,7 +222,7 @@ Received 1 flume events.
 
 [Top](#top)
 
-##<a name="section6"></a>Further information
+## <a name="section6"></a>Further information
 From here on, the user should create his/her own analytics for Spark Streaming, based on the binary Avro events containing NGSI context information.
 
 It is highly recommended using the NGSI-specific functions for Spark bundled as a library in the [FIWARE Cosmos](https://github.com/telefonicaid/fiware-cosmos/tree/master/cosmos-spark-library) repository. Such a library contains primitives for deserializing binary Avro events, using tuples adapted to the context entity model, and so on. And will help for sure any FIWARE developer, simplifying the design of NGSI-like analytics on top of Spark.

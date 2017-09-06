@@ -1,4 +1,4 @@
-#<a name="top"></a>NGSIHDFSSink
+# <a name="top"></a>NGSIHDFSSink
 Content:
 
 * [Functionality](#section1)
@@ -31,7 +31,7 @@ Content:
     * [OAuth2 authentication](#section3.2)
     * [Kerberos authentication](#section3.3)
 
-##<a name="section1"></a>Functionality
+## <a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIHDFSSink`, or simply `NGSIHDFSSink` is a sink designed to persist NGSI-like context data events within a [HDFS](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html) deployment. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific HDFS data structures at the Cygnus sinks.
@@ -40,19 +40,19 @@ Next sections will explain this in detail.
 
 [Top](#top)
 
-###<a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
+### <a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
 Notified NGSI events (containing context data) are transformed into `NGSIEvent` objects (for each context element a `NGSIEvent` is created; such an event is a mix of certain headers and a `ContextElement` object), independently of the NGSI data generator or the final backend where it is persisted.
 
 This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_rest_handler.md). Once translated, the data (now, as `NGSIEvent` objects) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
-###<a name="section1.2"></a>Mapping `NGSIEvent`s to HDFS data structures
+### <a name="section1.2"></a>Mapping `NGSIEvent`s to HDFS data structures
 [HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containing big data files. Such organization is exploited by `NGSIHDFSSink` each time a `NGSIEvent` is going to be persisted.
 
 [Top](#top)
 
-####<a name="section1.2.1"></a>HDFS paths naming conventions
+#### <a name="section1.2.1"></a>HDFS paths naming conventions
 Since the unique data model accepted for `NGSIHDFSSink` is per entity (see the [Configuration](#section2.1) section for more details), a HDFS folder:
 
     /user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>
@@ -65,7 +65,7 @@ Please observe HDFS folders and files follow the [Unix rules](https://en.wikiped
 
 [Top](#top)
 
-####<a name="section1.2.2"></a>Json row-like storing
+#### <a name="section1.2.2"></a>Json row-like storing
 Regarding the specific data stored within the HDFS file, if `file_format` parameter is set to `json-row` (default storing mode) then the notified data is stored attribute by attribute, composing a Json document for each one of them. Each append contains the following fields:
 
 * `recvTimeTs`: UTC timestamp expressed in miliseconds.
@@ -80,7 +80,7 @@ Regarding the specific data stored within the HDFS file, if `file_format` parame
 
 [Top](#top)
 
-####<a name="section1.2.3"></a>Json column-like storing
+#### <a name="section1.2.3"></a>Json column-like storing
 Regarding the specific data stored within the HDFS file, if `file_format` parameter is set to `json-column` then a single Json document is composed for the whole notified entity, containing the following fields:
 
 * `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
@@ -92,7 +92,7 @@ Regarding the specific data stored within the HDFS file, if `file_format` parame
 
 [Top](#top)
 
-####<a name="section1.2.4"></a>CSV row-like storing
+#### <a name="section1.2.4"></a>CSV row-like storing
 Regarding the specific data stored within the HDFS file, if `file_format` parameter is set to `csv-row` then the notified data is stored attribute by attribute, composing a CSV record for each one of them. Each record contains the following fields:
 
 * `recvTimeTs`: UTC timestamp expressed in miliseconds.
@@ -107,7 +107,7 @@ Regarding the specific data stored within the HDFS file, if `file_format` parame
 
 [Top](#top)
 
-####<a name="section1.2.5"></a>CSV column-like storing
+#### <a name="section1.2.5"></a>CSV column-like storing
 Regarding the specific data stored within the HDFS file, if `file_format` parameter is set to `csv-column` then a single CSV record is composed for the whole notified entity, containing the following fields:
 
 * `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
@@ -119,15 +119,15 @@ Regarding the specific data stored within the HDFS file, if `file_format` parame
 
 [Top](#top)
 
-####<a name="section1.2.6"></a>Hive
+#### <a name="section1.2.6"></a>Hive
 A special feature regarding HDFS persisted data is the possibility to exploit it through Hive, a SQL-like querying system. `NGSIHDFSSink` automatically [creates a Hive external table](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+DDL#LanguageManualDDL-Create/Drop/TruncateTable) (similar to a SQL table) for each persisted entity in the default database, being the name for such tables as `<username>_<fiware-service>_<fiware-servicePath>_<destination>_[row|column]`.
 
 The fields regarding each data row match the fields of the JSON documents/CSV records appended to the HDFS files. In the case of JSON, they are deserialized by using a [JSON serde](https://github.com/rcongiu/Hive-JSON-Serde). In the case of CSV they are deserialized by the delimiter fields specified in the table creation.
 
 [Top](#top)
 
-###<a name="section1.3"></a>Example
-####<a name="section1.3.1"></a>`NGSIEvent`
+### <a name="section1.3"></a>Example
+#### <a name="section1.3.1"></a>`NGSIEvent`
 Assuming the following `NGSIEvent` is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     ngsi-event={
@@ -161,7 +161,7 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
 [Top](#top)
 
-####<a name="section1.3.2"></a>Path names
+#### <a name="section1.3.2"></a>Path names
 Assuming `hdfs_username=myuser` and `service_as_namespace=false` as configuration parameters, then `NGSIHDFSSink` will persist the data within the body in this file (old encoding):
 
     $ hadoop fs -cat /user/myuser/vehicles/4wheels/car1_car/car1_car.txt
@@ -172,7 +172,7 @@ Using the new encoding:
 
 [Top](#top)
 
-####<a name="section1.3.3"></a>Json row-like storing
+#### <a name="section1.3.3"></a>Json row-like storing
 A pair of Json documents are appended to the above file, one per attribute:
 
 ```
@@ -182,7 +182,7 @@ A pair of Json documents are appended to the above file, one per attribute:
 
 [Top](#top)
 
-####<a name="section1.3.4"></a>Json column-like storing
+#### <a name="section1.3.4"></a>Json column-like storing
 A single Json document is appended to the above file, containing all the attributes:
 
 ```
@@ -191,7 +191,7 @@ A single Json document is appended to the above file, containing all the attribu
 
 [Top](#top)
 
-####<a name="section1.3.5"></a>CSV row-like storing
+#### <a name="section1.3.5"></a>CSV row-like storing
 A pair of CSV records are appended to the above file, one per attribute:
 
 ```
@@ -215,7 +215,7 @@ then the `hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_spe
 
 [Top](#top)
 
-####<a name="section1.3.6"></a>CSV column-like storing
+#### <a name="section1.3.6"></a>CSV column-like storing
 A single CSV record is appended to the above file, containing all the attributes:
 
 ```
@@ -238,7 +238,7 @@ then the `hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_spe
 
 [Top](#top)
 
-####<a name="section1.3.7"></a>Hive storing
+#### <a name="section1.3.7"></a>Hive storing
 With respect to Hive, the content of the tables in the `json-row`, `json-column`, `csv-row` and `csv-column` modes, respectively, is:
 
     $ hive
@@ -259,8 +259,8 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 
 [Top](#top)
 
-##<a name="section2"></a>Administration guide
-###<a name="section2.1"></a>Configuration
+## <a name="section2"></a>Administration guide
+### <a name="section2.1"></a>Configuration
 `NGSIHDFSSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -329,21 +329,20 @@ A configuration example could be:
 
 [Top](#top)
 
-###<a name="section2.2"></a>Use cases
+### <a name="section2.2"></a>Use cases
 Use `NGSIHDFSSink` if you are looking for a JSON or CSV-based document storage growing in the mid-long-term in estimated sizes of terabytes for future trending discovery, along the time persistent patterns of behaviour and so on.
 
 For a short-term historic, those required by dashboards and charting user interfaces, other backends are more suited such as MongoDB, STH Comet or MySQL (Cygnus provides sinks for them, as well).
 
 [Top](#top)
 
-###<a name="section2.3"></a>Important notes
-
-####<a name="section2.3.1"></a>About the persistence mode
+### <a name="section2.3"></a>Important notes
+#### <a name="section2.3.1"></a>About the persistence mode
 Please observe not always the same number of attributes is notified; this depends on the subscription made to the NGSI-like sender. This is not a problem for the `*-row` persistence mode, since fixed 8-fields JSON/CSV documents are appended for each notified attribute. Nevertheless, the `*-column` mode may be affected by several JSON documents/CSV records of different lengths (in term of fields). Thus, the `*-column` mode is only recommended if your subscription is designed for always sending the same attributes, event if they were not updated since the last notification.
 
 [Top](#top)
 
-####<a name="section2.3.2"></a>About the binary backend
+#### <a name="section2.3.2"></a>About the binary backend
 Current implementation of the HDFS binary backend does not support any authentication mechanism.
 
 A desirable authentication method would be OAuth2, since it is the standard in FIWARE, but this is not currently supported by the remote RPC server the binary backend accesses.
@@ -356,7 +355,7 @@ There exists an [issue](https://github.com/telefonicaid/fiware-cosmos/issues/111
 
 [Top](#top)
 
-####<a name="section2.3.3"></a>About batching
+#### <a name="section2.3.3"></a>About batching
 As explained in the [programmers guide](#section3), `NGSIHDFSSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 `NGSIEvent`s. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same HDFS file. If processing the events one by one, we would need 100 writes to HDFS; nevertheless, in this example only one write is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination HDFS file. In the worst case, the whole 100 entities will be about 100 different entities (100 different HDFS destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 writes of the event by event approach with only 10-15 writes.
@@ -369,7 +368,7 @@ By default, `NGSIHDFSSink` has a configured batch size and batch accumulation ti
 
 [Top](#top)
 
-####<a name="section2.3.4"></a>About the encoding
+#### <a name="section2.3.4"></a>About the encoding
 Until version 1.2.0 (included), Cygnus applied a very simple encoding:
 
 * All non alphanumeric characters were replaced by underscore, `_`.
@@ -390,8 +389,8 @@ Despite the old encoding will be deprecated in the future, it is possible to swi
 
 [Top](#top)
 
-##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`NGSIHDFSSink` class
+## <a name="section3"></a>Programmers guide
+### <a name="section3.1"></a>`NGSIHDFSSink` class
 As any other NGSI-like sink, `NGSIHDFSSink` extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
@@ -408,7 +407,7 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-###<a name="section3.2"></a>OAuth2 authentication
+### <a name="section3.2"></a>OAuth2 authentication
 [OAuth2](http://oauth.net/2/) is the evolution of the OAuth protocol, an open standard for authorization. Using OAuth, client applications can access in a secure way certain server resources on behalf of the resource owner, and the best, without sharing their credentials with the service. This works because of a trusted authorization service in charge of emitting some pieces of security information: the access tokens. Once requested, the access token is attached to the service request in order the server may ask the authorization service for the validity of the user requesting the access (authentication) and the availability of the resource itself for this user (authorization).
 
 A detailed architecture of OAuth2 can be found [here](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/PEP_Proxy_-_Wilma_-_Installation_and_Administration_Guide), but in a nutshell, FIWARE implements the above concept through the Identity Manager GE ([Keyrock](http://catalogue.fiware.org/enablers/identity-management-keyrock) implementation) and the Access Control ([AuthZForce](http://catalogue.fiware.org/enablers/authorization-pdp-authzforce) implementation); the join of this two enablers conform the OAuth2-based authorization service in FIWARE:
@@ -427,7 +426,7 @@ As you can see, your FIWARE Lab credentials are required in the payload, in the 
 
 [Top](#top)
 
-###<a name="section3.3"></a>Kerberos authentication
+### <a name="section3.3"></a>Kerberos authentication
 Hadoop Distributed File System (HDFS) can be remotely managed through a REST API called [WebHDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html). This API may be used without any kind of security (in this case, it is enough knowing a valid HDFS user name in order to access this user HDFS space), or a Kerberos infrastructure may be used for authenticating the users.
 
 [Kerberos](http://web.mit.edu/kerberos/) is an authentication protocol created by MIT, current version is 5. It is based in symmetric key cryptography and a trusted third party, the Kerberos servers themselves. The protocol is as easy as authenticating to the Authentication Server (AS), which forwards the user to the Key Distribution Center (KDC) with a ticket-granting ticket (TGT) that can be used to retrieve the definitive client-to-server ticket. This ticket can then be used for authentication purposes against a service server (in both directions).
@@ -444,7 +443,7 @@ Nevertheless, Cygnus needs this process to be automated. Let's see how through t
 
 [Top](#top)
 
-####`conf/cygnus.conf`
+#### `conf/cygnus.conf`
 This file can be built from the distributed `conf/cygnus.conf.template`. Edit appropriately this part of the `NGSIHDFSSink` configuration:
 
     # Kerberos-based authentication enabling
@@ -462,7 +461,7 @@ I.e. start enabling (or not) the Kerberos authentication. Then, configure a user
 
 [Top](#top)
 
-####`conf/krb5_login.conf`
+#### `conf/krb5_login.conf`
 
 Contains the following line, which must not be changed (thus, the distributed file is not a template but the definitive one).
 
@@ -472,7 +471,7 @@ Contains the following line, which must not be changed (thus, the distributed fi
 
 [Top](#top)
 
-####`conf/krb5.conf`
+#### `conf/krb5.conf`
 
 This file can be built from the distributed `conf/krb5.conf.template`. Edit it appropriately, basically by replacing `EXAMPLE.COM` by your Kerberos realm (this is the same than your domain, but uppercase, i.e. the realm for `example.com` is `EXAMPLE.COM`) and by configuring your Kerberos Key Distribution Center (KDC) and your Kerberos admin/authentication server (ask your network administrator in order to know them).
 

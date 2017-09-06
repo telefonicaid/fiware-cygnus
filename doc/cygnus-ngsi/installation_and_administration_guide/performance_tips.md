@@ -1,4 +1,4 @@
-#<a name="top"></a>Tuning tips for increasing the performance
+# <a name="top"></a>Tuning tips for increasing the performance
 Content:
 
 * [Batching](#section1)
@@ -15,8 +15,8 @@ Content:
 * [Grouping Rules](#section5)
 * [Writing logs](#section6)
 
-##<a name="section1"></a>Batching
-###<a name="section1.1"></a>Sizing
+## <a name="section1"></a>Batching
+### <a name="section1.1"></a>Sizing
 Batching is the mechanism Cygnus implements for processing sets of `NGSIEvent`s (a `NGSIEvent` typically comes from a Orion's notification) all together instead of one by one. These sets, or properly said <i>batches</i>, are built by `NGSISink`, the base class all the sinks extend. Thus, having the batches already created in the inherited code the sinks only have to deal with the persistence of the data within them. Typically, the information within a whole batch is aggregated into a large data chunk that is stored at the same time by using a single write/insert/upsert operation. Why?
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink because the number of writes is dramatically reduced. Let's see an example. Let's assume 100 notifications, no batching mechanism at all and a HDFS storage. It seems obvious 100 writes are needed, one per `NGSIEvent`/notification. And writing to disk is largely slow. Now let's assume a batch of size 100. In the best case, all these `NGSIEvent`s/notifications regard to the same entity, which means all the data within them will be persisted in the same HDFS file and therefore only one write is required.
@@ -37,7 +37,7 @@ Nevertheless, as explained above, it is highly recommended to increase at least 
 
 [Top](#top)
 
-###<a name="section1.2"></a>Retries
+### <a name="section1.2"></a>Retries
 Batches may not be persisted. This is something may occur from time to time because the sink is temporarily not available, or the communications are failing. In that case, Cygnus has implemented a retry mechanism.
 
 Regarding the retries of not persisted batches, a couple of parameters is used. On the one hand, a Time-To-Live (TTL) is used, specifing the number of retries Cygnus will do before definitely dropping the event (0 means no retries, -1 means infinite retries). On the other hand, a list of retry intervals can be configured. Such a list defines the first retry interval, then the second retry interval, and so on; if the TTL is greater than the length of the list, then the last retry interval is repeated as many times as necessary.
@@ -53,7 +53,7 @@ On the other hand, very short retry intervals will make Cygnus working unncessar
 
 [Top](#top)
 
-##<a name="section2"></a>Sink parallelization
+## <a name="section2"></a>Sink parallelization
 Most of the processing effort done by Cygnus is located at the sinks, and these elements can be a bottleneck if not configured appropriately.
 
 Basic Cygnus configuration is about a source writing Flume events into a single channel where a single sink consumes those events:
@@ -77,7 +77,7 @@ This can be clearly moved to a multiple sink configuration running in parallel. 
 
 [Top](#top)
 
-###<a name="section2.1"></a>Multiple sinks, single channel
+### <a name="section2.1"></a>Multiple sinks, single channel
 You can simply add more sinks consuming events from the same single channel. This configuration theoretically increases the processing capabilities in the sink side, but usually shows an important drawback, specially if the events are consumed by the sinks very fast: the sinks have to compete for the single channel. Thus, some times you can find that adding more sinks in this way simply turns the system slower than a single sink configuration. This configuration is only recommended when the sinks require a lot of time to process a single event, ensuring few collisions when accessing the channel.
 
     cygnus-ngsi.sources = mysource
@@ -107,7 +107,7 @@ You can simply add more sinks consuming events from the same single channel. Thi
 
 [Top](#top)
 
-###<a name="section2.2"></a>Multiple sinks, multiple channels
+### <a name="section2.2"></a>Multiple sinks, multiple channels
 The above mentioned drawback can be solved by configuring a channel per each sink, avoiding the competition for the single channel.
 
 However, when multiple channels are used for a same storage, then some kind of <i>dispatcher</i> deciding which channels will receive a copy of the events is required. This is the goal of the Flume <i>Channel Selectors</i>, a piece of software selecting the appropriate set of channels the Flume events will be put in. The default one is [`Replicating Channel Selector`](http://flume.apache.org/FlumeUserGuide.html#replicating-channel-selector-default), i.e. each time a Flume event is generated at the sources, it is replicated in all the channels connected to those sources. There is another selector, the [`Multiplexing Channel Selector`](http://flume.apache.org/FlumeUserGuide.html#multiplexing-channel-selector), which puts the events in a channel given certain matching-like criteria. Nevertheless:
@@ -161,20 +161,20 @@ Basically, the custom <i>Channel Selector</i> type must be configured, together 
 
 [Top](#top)
 
-###<a name="section2.3"></a>Why the `LoadBalancingSinkProcessor` is not suitable
+### <a name="section2.3"></a>Why the `LoadBalancingSinkProcessor` is not suitable
 [This](http://flume.apache.org/FlumeUserGuide.html#load-balancing-sink-processor) Flume <i>Sink Processor</i> is not suitable for our parallelization purposes due to the load balancing is done in a sequential way. I.e. either in a round robin-like configuration of the load balancer either in a random way, the sinks are used one by one and not at the same time.
 
 [Top](#top)
 
-##<a name="section3"></a>Channel considerations
-###<a name="section3.1"></a>Channel type
+## <a name="section3"></a>Channel considerations
+### <a name="section3.1"></a>Channel type
 The most important thing when designing a channel for Cygnus (in general, a Flume-based application) is the tradeoff between speed and reliability. This applies especially to the channels.
 
 On the one hand, the `MemoryChannel` is a very fast channel since it is implemented directly in memory, but it is not reliable at all if, for instance, Cygnus crashes for any reason and it is recovered by a third party system (let's say <i>Monit</i>): in that case the Flume events put into the memory-based channel before the crash are lost. On the other hand, the `FileChannel` and `JDBCChannel` are very reliable since there is a permanent support for the data in terms of OS files or RDBM tables, respectively. Nevertheless, they are slower than a `MemoryChannel` since the I/O is done against the HDD and not against the memory.
 
 [Top](#top)
 
-###<a name="section3.2"></a>Channel capacity
+### <a name="section3.2"></a>Channel capacity
 There are no empirical tests showing a decrease of the performance if the channel capacity is configured with a large number, let's say 1 million of Flume events. The `MemoryChannel` is supposed to be designed as a chained FIFO queue, and the persistent channels only manage a list of pointers to the real data, which should not be hard to iterate.
 
 Such large capacities are only required when the Flume sources are faster than the Flume sinks (and even in that case, sooner or later, the channels will get full) or a lot of processing retries are expected within the sinks (see next section).
@@ -187,7 +187,7 @@ In order to calculate the appropriate capacity, just have in consideration the f
 
 [Top](#top)
 
-##<a name="section4"></a>Name Mappings
+## <a name="section4"></a>Name Mappings
 Name Mappings feature is a powerful tool for changing the original notified FIWARE service, FIWARE service path, entity ID and type, and attributes name and type. As a side effect of this changing, Name Mappings can be used for <i>routing</i> your data, for instance by setting a common alternative FIWARE service path for two or more original service paths, all the data regarding these service paths will be stored under the same CKAN package.
 
 As you may suppose, the usage of Name Mappings slows down Cygnus because the alternative settings are obtained after checking a list of mappings written in Json format. Despite such a Json is loaded into memory and regular expressions are compiled into patterns, it must be iterated each time a `NGSIEvent`/notification is sent to Cygnus and the conditions for matching checked.
@@ -199,7 +199,7 @@ Nevertheless, you may write your Name Mappings in a smart way:
 
 [Top](#top)
 
-##<a name="section5"></a>Grouping Rules
+## <a name="section5"></a>Grouping Rules
 **IMPORTANT NOTE: from release 1.6.0, this feature is deprecated in favour of Name Mappings. More details can be found [here](./deprecated_and_removed.md#section2.1).**
 
 Grouping Rules feature is a powerful tool for <i>routing</i> your data, i.e. setting an alternative FIWARE service path and entity, whcih in the end decides the HDFS file, MySQL/PostgreSQL/DynamoDB/Carto table, CKAN resource, Kafka queue or MongoDB collection for your context data; on the contrary, the default destination is used.
@@ -213,7 +213,7 @@ Nevertheless, you may write your Grouping Rules in a smart way:
 
 [Top](#top)
 
-##<a name="section6"></a>Writing logs
+## <a name="section6"></a>Writing logs
 Writing logs, as any I/O operation where disk writes are involved, is largely slow. Please avoid writing a huge number if logs unless necessary, i.e. because your are debugging Cygnus, and try running cygnus at least with `INFO` level (despite a lot of logs are still written at that level). The best is running with `ERROR` level. Logs are totally disabled by using the `OFF` level.
 
 Logging level Cygnus run with is configured in `/usr/cygnus/conf/log4j.properties`. `INFO` is configured by default:

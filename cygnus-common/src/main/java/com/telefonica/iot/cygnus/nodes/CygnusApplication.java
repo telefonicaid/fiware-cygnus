@@ -103,13 +103,10 @@ public class CygnusApplication extends Application {
         try {
             // get a reference to the supervisor, if not possible then Cygnus application cannot start
             getSupervisorRef();
-        } catch (NoSuchFieldException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             LOGGER.debug(e.getMessage());
             supervisorRef = null;
-        } catch (IllegalAccessException e) {
-            LOGGER.debug(e.getMessage());
-            supervisorRef = null;
-        } // try catch // try catch
+        } // try catch
     } // CygnusApplication
     
     /**
@@ -162,6 +159,14 @@ public class CygnusApplication extends Application {
      */
     public static void main(String[] args) {
         try {
+            // Set some MDC logging fields to 'N/A' for this thread
+            // Later in this method the component field will be given a value
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_TRANS,CommonConstants.NA);
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_COMP, CommonConstants.NA);
+        
             // Print Cygnus starting trace including version
             LOGGER.info("Starting Cygnus, version " + CommonUtils.getCygnusVersion() + "."
                     + CommonUtils.getLastCommit());
@@ -197,6 +202,9 @@ public class CygnusApplication extends Application {
             options.addOption(option);
             
             option = new Option("6", "ipv6", false, "use ipv6 instead ipv4");
+            options.addOption(option);
+            
+            option = new Option(null, "no-yafs", false, "do not use YAFS");
             options.addOption(option);
 
             // Read the options
@@ -240,6 +248,12 @@ public class CygnusApplication extends Application {
                 ipv6 = true;
             } // if
             
+            boolean noYAFS = false;
+            
+            if (commandLine.hasOption("no-yafs")) {
+                noYAFS = true;
+            } // if
+            
             // the following is to ensure that by default the agent will fail on startup if the file does not exist
             if (!configurationFile.exists()) {
                 // if command line invocation, then need to fail fast
@@ -277,7 +291,7 @@ public class CygnusApplication extends Application {
                 application.handleConfigurationEvent(configurationProvider.getConfiguration());
             } // if else
                  
-            // use the agent name as component name in the logs through log4j Mapped Diagnostic Context (MDC)
+            // Set MDC logging field value for component
             MDC.put(CommonConstants.LOG4J_COMP, commandLine.getOptionValue('n'));
                         
             // start the Cygnus application
@@ -305,17 +319,17 @@ public class CygnusApplication extends Application {
                     configurationFile, sourcesRef, channelsRef, sinksRef, apiPort, guiPort), ipv6);
             mgmtIfServer.start();
 
-            // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)
-            Runtime.getRuntime().addShutdownHook(new AgentShutdownHook("agent-shutdown-hook", supervisorRef));
-            
-            // start YAFS
-            YAFS yafs = new YAFS();
-            yafs.start();
-        } catch (IllegalArgumentException e) {
+            if (!noYAFS) {
+                // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)
+                Runtime.getRuntime().addShutdownHook(new AgentShutdownHook("agent-shutdown-hook", supervisorRef));
+
+                // start YAFS
+                YAFS yafs = new YAFS();
+                yafs.start();
+            } // if
+        } catch (IllegalArgumentException | ParseException e) {
             LOGGER.error("A fatal error occurred while running. Exception follows. Details=" + e.getMessage());
-        } catch (ParseException e) {
-            LOGGER.error("A fatal error occurred while running. Exception follows. Details=" + e.getMessage());
-        } // try catch // try catch
+        } // try catch
     } // main
     
     /**

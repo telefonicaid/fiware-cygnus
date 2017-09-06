@@ -12,13 +12,13 @@ Content:
         * [Environment variables](#section3.2.2)
         * [Using volumes](#section3.2.3)
 
-##<a name="section1"></a>Before starting
+## <a name="section1"></a>Before starting
 Obviously, you will need docker installed and running in you machine. Please, check [this](https://docs.docker.com/linux/started/) official start guide.
 
 [Top](#top)
 
-##<a name="section2"></a>Getting an image
-###<a name="section2.1"></a>Building from sources
+## <a name="section2"></a>Getting an image
+### <a name="section2.1"></a>Building from sources
 Start by cloning the `fiware-cygnus` repository:
 
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
@@ -42,7 +42,7 @@ centos              6                   61bf77ab8841        4 weeks ago         
 
 [Top](#top)
 
-###<a name="section2.2"></a>Using docker hub image
+### <a name="section2.2"></a>Using docker hub image
 Instead of building an image from the scratch, you may download it from [hub.docker.com](https://hub.docker.com/r/fiware/cygnus-twitter/):
 
     $ docker pull fiware/cygnus-twitter
@@ -58,8 +58,8 @@ centos              6                   61bf77ab8841        4 weeks ago         
 
 [Top](#top)
 
-##<a name="section3"></a>Using the image
-###<a name="section3.1"></a>As it is
+## <a name="section3"></a>Using the image
+### <a name="section3.1"></a>As it is
 The cygnus-twitter image (either built from the scratch, either downloaded from hub.docker.com) allows running a Cygnus agent in charge of receiving tweets from Twitter and persiting them into a HDFS storage.
 
 Start a container for this image by typing in a terminal:
@@ -115,7 +115,7 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 
 [Top](#top)
 
-###<a name="section3.2"></a>Using a specific configuration
+### <a name="section3.2"></a>Using a specific configuration
 As seen above, the default configuation distributed with the image is tied to certain values that may not be suitable for you tests. Specifically:
 
 * It only works for storing streaming tweets in a temporal file (/tmp).
@@ -126,21 +126,21 @@ You may need to alter the above values with values of your own.
 
 [Top](#top)
 
-####<a name="section3.2.1"></a>Editing the docker files
+#### <a name="section3.2.1"></a>Editing the docker files
 The easiest way is by editing both the `Dockerfile` and/or `agent.conf` file under `docker/cygnus-twitter` and building the cygnus-twitter image from the scratch.
 
 This gives you total control on the docker image.
 
 [Top](#top)
 
-####<a name="section3.2.2"></a>Environment variables
+#### <a name="section3.2.2"></a>Environment variables
 Those parameters associated to an environment variable can be easily overwritten in the command line using the `-e` option. For instance, if you want to change the log4j logging level, simply run:
 
     $ docker run -e LOG_LEVEL='DEBUG' cygnus-twitter
 
 [Top](#top)
 
-####<a name="section3.2.3"></a>Using volumes
+#### <a name="section3.2.3"></a>Using volumes
 Another possibility is to start a container with a volume (`-v` option) and map the entire configuraton file within the container with a local version of the file:
 
     $ docker run -v /absolute/path/to/local/agent.conf:/opt/apache-flume/conf/agent.conf cygnus-twitter

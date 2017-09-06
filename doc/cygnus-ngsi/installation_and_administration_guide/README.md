@@ -1,4 +1,4 @@
-#Installation and Administration Guide
+# Installation and Administration Guide
 
 * [Introduction](./introduction.md)
 * Installation:
@@ -17,6 +17,7 @@
     * [Backends as short-term historics](./backends_as_sth.md)
     * [Name mappings](./name_mappings.md)
     * [Grouping Rules](./grouping_rules.md)
+    * [Reliability](./reliability.md)
     * [Multitenancy](./multitenancy.md)
     * [Performance tips](./performance_tips.md)
     * [NGSIv2 support](./ngsiv2_support.md)

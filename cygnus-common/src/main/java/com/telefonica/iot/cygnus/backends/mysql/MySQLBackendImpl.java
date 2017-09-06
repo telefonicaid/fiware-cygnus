@@ -88,7 +88,7 @@ public class MySQLBackendImpl implements MySQLBackend {
         try {
             stmt = con.createStatement();
         } catch (SQLException e) {
-            throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+            throw new CygnusRuntimeError("Database creation error", "SQLException", e.getMessage());
         } // try catch
         
         try {
@@ -96,7 +96,7 @@ public class MySQLBackendImpl implements MySQLBackend {
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLException e) {
-            throw new CygnusPersistenceError("SQLException, " + e.getMessage());
+            throw new CygnusPersistenceError("Database creation error", "SQLException", e.getMessage());
         } // try catch
         
         closeMySQLObjects(con, stmt);
@@ -121,7 +121,7 @@ public class MySQLBackendImpl implements MySQLBackend {
         try {
             stmt = con.createStatement();
         } catch (SQLException e) {
-            throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+            throw new CygnusRuntimeError("Table creation error", "SQLException", e.getMessage());
         } // try catch
         
         try {
@@ -129,7 +129,7 @@ public class MySQLBackendImpl implements MySQLBackend {
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLException e) {
-            throw new CygnusPersistenceError("SQLException, " + e.getMessage());
+            throw new CygnusPersistenceError("Table creation error", "SQLException", e.getMessage());
         } // try catch
         
         closeMySQLObjects(con, stmt);
@@ -149,7 +149,7 @@ public class MySQLBackendImpl implements MySQLBackend {
         try {
             stmt = con.createStatement();
         } catch (SQLException e) {
-            throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+            throw new CygnusRuntimeError("Data insertion error", "SQLException", e.getMessage());
         } // try catch
         
         try {
@@ -157,9 +157,9 @@ public class MySQLBackendImpl implements MySQLBackend {
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
-            throw new CygnusPersistenceError("SQLTimeoutException, " + e.getMessage());
+            throw new CygnusPersistenceError("Data insertion error", "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
-            throw new CygnusBadContextData("SQLException, " + e.getMessage());
+            throw new CygnusBadContextData("Data insertion error", "SQLException", e.getMessage());
         } // try catch
         
         closeMySQLObjects(con, stmt);
@@ -179,7 +179,7 @@ public class MySQLBackendImpl implements MySQLBackend {
         try {
             stmt = con.createStatement();
         } catch (SQLException e) {
-            throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+            throw new CygnusRuntimeError("Querying error", "SQLException", e.getMessage());
         } // try catch
         
         try {
@@ -194,7 +194,7 @@ public class MySQLBackendImpl implements MySQLBackend {
             return crs;
         } catch (SQLException e) {
             closeMySQLObjects(con, stmt);
-            throw new CygnusPersistenceError("SQLException, " + e.getMessage());
+            throw new CygnusPersistenceError("Querying error", "SQLException", e.getMessage());
         } // try catch
     } // select
     
@@ -208,7 +208,7 @@ public class MySQLBackendImpl implements MySQLBackend {
         try {
             stmt = con.createStatement();
         } catch (SQLException e) {
-            throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+            throw new CygnusRuntimeError("Deleting error", "SQLException", e.getMessage());
         } // try catch
         
         try {
@@ -216,7 +216,7 @@ public class MySQLBackendImpl implements MySQLBackend {
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLException e) {
-            throw new CygnusPersistenceError("SQLException, " + e.getMessage());
+            throw new CygnusPersistenceError("Deleting error", "SQLException", e.getMessage());
         } // try catch
         
         closeMySQLObjects(con, stmt);
@@ -237,7 +237,7 @@ public class MySQLBackendImpl implements MySQLBackend {
                 records.beforeFirst();
             } // if
         } catch (SQLException e) {
-            throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+            throw new CygnusRuntimeError("Data capping error", "SQLException", e.getMessage());
         } // try catch
         
         // Get the reception times (they work as IDs) for future deletion
@@ -260,7 +260,7 @@ public class MySQLBackendImpl implements MySQLBackend {
             
             records.close();
         } catch (SQLException e) {
-            throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+            throw new CygnusRuntimeError("Data capping error", "SQLException", e.getMessage());
         } // try catch
         
         if (filters.isEmpty()) {
@@ -296,7 +296,7 @@ public class MySQLBackendImpl implements MySQLBackend {
                         records.beforeFirst();
                     } // if
                 } catch (SQLException e) {
-                    throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+                    throw new CygnusRuntimeError("Data expiration error", "SQLException", e.getMessage());
                 } // try catch
 
                 // Get the reception times (they work as IDs) for future deletion
@@ -321,9 +321,9 @@ public class MySQLBackendImpl implements MySQLBackend {
                         } // if else
                     } // for
                 } catch (SQLException e) {
-                    throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+                    throw new CygnusRuntimeError("Data expiration error", "SQLException", e.getMessage());
                 } catch (ParseException e) {
-                    throw new CygnusRuntimeError("ParseException, " + e.getMessage());
+                    throw new CygnusRuntimeError("Data expiration error", "ParseException", e.getMessage());
                 } // try catch
 
                 if (filters.isEmpty()) {
@@ -348,7 +348,7 @@ public class MySQLBackendImpl implements MySQLBackend {
             try {
                 con.close();
             } catch (SQLException e) {
-                throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+                throw new CygnusRuntimeError("Objects closing error", "SQLException", e.getMessage());
             } // try catch
         } // if
 
@@ -356,7 +356,7 @@ public class MySQLBackendImpl implements MySQLBackend {
             try {
                 stmt.close();
             } catch (SQLException e) {
-                throw new CygnusRuntimeError("SQLException, " + e.getMessage());
+                throw new CygnusRuntimeError("Objects closing error", "SQLException", e.getMessage());
             } // try catch
         } // if
     } // closeMySQLObjects
@@ -411,9 +411,9 @@ public class MySQLBackendImpl implements MySQLBackend {
 
                 return con;
             } catch (ClassNotFoundException e) {
-                throw new CygnusRuntimeError("ClassNotFoundException, " + e.getMessage());
+                throw new CygnusRuntimeError("Connection error", "ClassNotFoundException", e.getMessage());
             } catch (SQLException e) {
-                throw new CygnusPersistenceError("SQLException, " + e.getMessage());
+                throw new CygnusPersistenceError("Connection error", "SQLException", e.getMessage());
             } // try catch
         } // getConnection
         

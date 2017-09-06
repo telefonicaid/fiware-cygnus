@@ -22,7 +22,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.TestUtils;
+import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.flume.Context;
@@ -165,7 +165,7 @@ public class NGSINameMappingsInterceptorTest {
         NGSIEvent originalEvent;
         
         try {
-            originalEvent = TestUtils.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
+            originalEvent = NGSIUtilsForTests.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
                     "12345");
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
@@ -249,20 +249,20 @@ public class NGSINameMappingsInterceptorTest {
     } // testGetEventsHeadersInNGSIFlumeEvent
     
     /**
-     * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI getRecvTimeTs is put in the channel, it contains
-     * the original ContextElement and the mapped one.
+     * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI event is put in the channel, it contains
+     * the original ContextElement and the mapped one as objects.
      */
     @Test
-    public void testGetNCRsInNGSIEvent() {
+    public void testGetContextElementsInNGSIEvent() {
         System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                + "-------- When a Flume event is put in the channel, it contains the original ContextElement "
-                + "and the mapped one");
+                + "-------- When a NGSI event is put in the channel, it contains the original ContextElement "
+                + "and the mapped one as objects");
         NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
         nameMappingsInterceptor.loadNameMappings(nameMappingsStr);
         NGSIEvent originalEvent;
         
         try {
-            originalEvent = TestUtils.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
+            originalEvent = NGSIUtilsForTests.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
                     "12345");
         } catch (Exception e) {
             throw new AssertionError(e.getMessage());
@@ -273,39 +273,74 @@ public class NGSINameMappingsInterceptorTest {
         try {
             assertTrue(interceptedEvent.getMappedCE() != null);
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "-  OK  - The generated NGSI event contains the original ContextElement");
+                    + "-  OK  - The generated NGSI event contains the original ContextElement as object");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "- FAIL - The generated NGSI event does not contain the original ContextElement");
+                    + "- FAIL - The generated NGSI event does not contain the original ContextElement as object");
             throw e;
         } // try catch
         
         try {
             assertTrue(interceptedEvent.getOriginalCE() != null);
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "-  OK  - The generated NGSI event contains the mapped ContextElement");
+                    + "-  OK  - The generated NGSI event contains the mapped ContextElement as object");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "- FAIL - The generated NGSI event does not contain the mapped ContextElement");
+                    + "- FAIL - The generated NGSI event does not contain the mapped ContextElement as object");
             throw e;
         } // try catch
-    } // testGetNCRsInNGSIEvent
+    } // testGetContextElementsInNGSIEvent
     
     /**
-     * [NGSIGroupingInterceptor.doMap] -------- A mapped NotifyContextRequest can be obtained from the Name Mappings.
+     * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI event is put in the channel, it contains
+     * the original ContextElement and the mapped one as bytes in the body.
+     */
+    @Test
+    public void testGetBodyInNGSIEvent() {
+        System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
+                + "-------- When a NGSI event is put in the channel, it contains the original ContextElement and "
+                + "the mapped one as bytes in the body");
+        NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
+        nameMappingsInterceptor.loadNameMappings(nameMappingsStr);
+        NGSIEvent originalEvent;
+        
+        try {
+            originalEvent = NGSIUtilsForTests.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
+                    "12345");
+        } catch (Exception e) {
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        NGSIEvent interceptedEvent = (NGSIEvent) nameMappingsInterceptor.intercept(originalEvent);
+
+        try {
+            String[] contextElementsStr = new String(interceptedEvent.getBody()).split(CommonConstants.CONCATENATOR);
+            assertTrue(contextElementsStr[0] != null && !contextElementsStr[0].isEmpty());
+            assertTrue(contextElementsStr[1] != null && !contextElementsStr[1].isEmpty());
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
+                    + "-  OK  - The generated NGSI event contains the original ContextElement as bytes");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
+                    + "- FAIL - The generated NGSI event does not contain the original ContextElement as bytes");
+            throw e;
+        } // try catch
+    } // testGetBodyInNGSIEvent
+    
+    /**
+     * [NGSIGroupingInterceptor.doMap] -------- A mapped ContextElement can be obtained from the Name Mappings.
      */
     @Test
     public void testDoMap() {
         System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMap]")
-                + "-------- A mapped NotifyContextRequest can be obtained from the Name Mappings");
+                + "-------- A mapped ContextElement can be obtained from the Name Mappings");
         NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
         nameMappingsInterceptor.loadNameMappings(nameMappingsStr);
         ContextElement originalCE;
         ContextElement expectedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            expectedCE = TestUtils.createJsonContextElement(expectedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            expectedCE = NGSIUtilsForTests.createJsonContextElement(expectedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMap]")
                     + "- FAIL - There was some problem when parsing the ContextElements");

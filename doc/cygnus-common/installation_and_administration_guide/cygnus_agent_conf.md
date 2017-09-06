@@ -1,11 +1,11 @@
-#<a name="top"></a>Cygnus agent configuration
+# <a name="top"></a>Cygnus agent configuration
 Content:
 
 * [Introduction](#section1)
 * [`cygnus_instance_<id>.conf`](#section2)
 * [`agent_<id>.conf`](#section3)
 
-##<a name="section1"></a>Introduction
+## <a name="section1"></a>Introduction
 Any Cygnus agent is configured through two different files:
 
 * A `cygnus_instance_<id>.conf` file addressing all those non Flume parameters, such as the Flume agent name, the specific log file for this instance, the administration port, etc. This configuration file is not necessary if Cygnus is run as a standalone application (see later), but it is mandatory if run as a service (see later).
@@ -24,7 +24,7 @@ In addition, (a unique) `log4j.properties` controls how Cygnus logs its traces.
 
 [Top](#top)
 
-##<a name="section2"></a>`cygnus_instance_<id>.conf`
+## <a name="section2"></a>`cygnus_instance_<id>.conf`
 The file `cygnus_instance_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/cygnus_instance.conf.template`.
 
 ```
@@ -48,7 +48,7 @@ As you can see, this file allows configuring the log file. For a detailed loggin
 
 [Top](#top)
 
-##<a name="section3"></a>`agent_<id>.conf`
+## <a name="section3"></a>`agent_<id>.conf`
 The file `agent_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/agent.conf.template`.
 
 While no specific Cygnus agent is used, this template is just the Apache Flume template.

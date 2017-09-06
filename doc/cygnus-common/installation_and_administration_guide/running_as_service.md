@@ -1,4 +1,4 @@
-#Running cygnus-common as a service
+# Running cygnus-common as a service
 **Note**: Cygnus can only be run as a service if you installed it through the RPM.
 
 Running cygnus-common is the same than running a plain Flume. Once the `cygnus_instance_<id>.conf` and `agent_<id>.conf` files are properly configured, just use the `service` command to start, restart, stop or get the status (as a sudoer):

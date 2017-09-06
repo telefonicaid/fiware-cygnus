@@ -101,6 +101,15 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         // Add the mapped ContextElement to the NGSIEvent
         ngsiEvent.setMappedCE(map.getRight());
         
+        // Add the bytes version of the mapped ContextElement to event's body
+        byte[] originalCEBytes = ngsiEvent.getBody();
+        byte[] mappedCEBytes = map.getRight().toString().getBytes();
+        byte[] newBody = new byte[originalCEBytes.length + mappedCEBytes.length];
+        System.arraycopy(originalCEBytes, 0, newBody, 0, originalCEBytes.length);
+        System.arraycopy(mappedCEBytes, 0, newBody, originalCEBytes.length, mappedCEBytes.length);
+        ngsiEvent.setBody(newBody);
+        LOGGER.debug("[nmi] New body: " + new String(newBody));
+        
         // Add the mapped service and service path to the headers
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, map.getLeft());
         LOGGER.debug("[nmi] Header added to NGSI event ("

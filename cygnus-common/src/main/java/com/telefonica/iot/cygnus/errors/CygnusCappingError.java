@@ -21,14 +21,24 @@ package com.telefonica.iot.cygnus.errors;
  *
  * @author frb
  */
-public class CygnusCappingError extends Exception {
+public class CygnusCappingError extends CygnusError {
     
     /**
      * Constructor.
-     * @param message
+     * @param cygnusMessage
      */
-    public CygnusCappingError(String message) {
-        super("Error while capping persistence elements. Message: " + message);
+    public CygnusCappingError(String cygnusMessage) {
+        super("CygnusCappingError", null, cygnusMessage, null);
+    } // CygnusCappingError
+    
+    /**
+     * Constructor.
+     * @param cygnusMessage
+     * @param javaException
+     * @param javaMessage
+     */
+    public CygnusCappingError(String cygnusMessage, String javaException, String javaMessage) {
+        super("CygnusCappingError", javaException, cygnusMessage, javaMessage);
     } // CygnusCappingError
     
 } // CygnusCappingError
