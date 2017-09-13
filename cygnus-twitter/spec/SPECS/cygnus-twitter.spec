@@ -99,9 +99,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
-* Mon Apr 03 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.7.1
-- [cygnus-twitter][bug] Fix wrong data in spec file (#1407)
-
 * Tue Jan 31 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.7.0
 
 * Fri Dec 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.6.0
