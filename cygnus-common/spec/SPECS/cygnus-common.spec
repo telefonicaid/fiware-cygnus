@@ -171,6 +171,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed Sep 13 2017 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.8.0
+- [cygnus-common, cygnus-ngsi][hardening] Fix FIWARE repository URL (#1435)
+- [cygnus-common, cygnus-ngsi][hardening] Unify test classes (#1332, #1333)
+- [cygnus-common][bug] Allow disabling YAFS in order to avoid crashes upon configuration reloads (#1074)
+
 * Tue Jan 31 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.7.0
 - [cygnus] Add Travis CI (#1347)
 - [cygnus][hardening] Fix "FIWARE" name in license headers (#1369)

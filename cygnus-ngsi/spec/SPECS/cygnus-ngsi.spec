@@ -99,6 +99,22 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed Sep 13 2017 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.8.0
+- [cygnus-ngsi][hardening] Add complex configuration examples (#629)
+- [cygnus-ngsi][bug] Fix NGSIMySQLSink when persisting bulks of rows with different number of columns (#1409)
+- [cygnus-ngsi][feature] Add metadata storing in NGSIMongoSink (#1156)
+- [cygnus-ngsi][hardening] Set transaction and correlation IDs to 'N/A' when there is no activity (#1175)
+- [cygnus-ngsi][hardening] Pre-aggregate batches in NGSISTHSink (#1359)
+- [cygnus-ngsi][hardening] Change the name of historic-related enabling parameters (#1314)
+- [cygnus-ngsi][bug] Fix NotifyContextRequest.ContextAttribute.toString(), removing double quote for attribute values (#1430)
+- [cygnus-ngsi][bug] Add support for file channels (#1419)
+- [cygnus-ngsi][hardening] Add a document about reliability (#1433)
+- [cygnus-ngsi][hardening] Add a note about optional channels when using Flume's ReplicatingChannelSelector (#510)
+- [cygnus-ngsi][hardening] Improve HDFS sink logs (#1358)
+- [cygnus-ngsi][hardening] Add CygnusError base class (#1441)
+- [cygnus-common, cygnus-ngsi][hardening] Fix FIWARE repository URL (#1435)
+- [cygnus-common, cygnus-ngsi][hardening] Unify test classes (#1332, #1333)
+
 * Tue Jan 31 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.7.0 
 - [cygnus-ngsi][feature] Add global data capping/expirationn options based on time and size (#1317)
 - [cygnus-ngsi][feature] Add specific data capping/expiration implementation for NGSICKANSink (#1344)
