@@ -171,8 +171,6 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
-* Mon Apr 03 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.7.1
-
 * Tue Jan 31 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.7.0
 - [cygnus] Add Travis CI (#1347)
 - [cygnus][hardening] Fix "FIWARE" name in license headers (#1369)
