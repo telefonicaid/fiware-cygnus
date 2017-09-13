@@ -384,7 +384,11 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             LOGGER.debug("[nmi] Entity found: " + originalEntityId + ", " + originalEntityType);
 
             if (entityMapping.getNewEntityId() != null) {
-                newEntityId = entityMapping.getNewEntityId();
+            	LOGGER.debug("[nmi] IdPattern : " +entityMapping.getOriginalEntityIdPattern().toString());
+            	
+            	newEntityId = originalEntityId.replaceAll(entityMapping.getOriginalEntityIdPattern().toString()
+            											, entityMapping.getNewEntityId());
+            	LOGGER.debug("[nmi] newEntityId : " +newEntityId);
             } // if
 
             if (entityMapping.getNewEntityType() != null) {
