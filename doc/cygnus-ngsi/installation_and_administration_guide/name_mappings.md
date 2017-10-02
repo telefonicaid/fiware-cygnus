@@ -171,6 +171,26 @@ $ cat /path/to/conf/name_mappings.conf
    ]
 }
 ```
+In addition, It's allowed to use regular expressions for EntityIds replacement. For instance, if we want to rename EntityIds maintaining each entity number:
+
+```
+{
+	"serviceMappings": [{
+		"originalService": "service",
+		"newService": "new_service",
+		"servicePathMappings": [{
+			"originalServicePath": "/subservice",
+			"newServicePath": "/new_subservice",
+			"entityMappings": [{
+				"originalEntityType": "myentitytype",
+				"originalEntityId": "(myentityid)([0-9]*)",
+				"newEntityId": "new_myentityid$2",
+				"attributeMappings": []
+			}]
+		}]
+	}]
+}
+```
 
 [Top](#top)
 
