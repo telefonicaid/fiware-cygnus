@@ -171,7 +171,7 @@ $ cat /path/to/conf/name_mappings.conf
    ]
 }
 ```
-In addition, It's allowed to use regular expressions for EntityIds replacement. For instance, if we want to rename EntityIds maintaining each entity number:
+In addition, it's allowed to use regular expressions for EntityIds replacement. For instance, if we want to rename EntityIds maintaining each entity number:
 
 ```
 {
