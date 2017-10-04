@@ -171,6 +171,26 @@ $ cat /path/to/conf/name_mappings.conf
    ]
 }
 ```
+In addition, above mentioned Java-based regular expressions can be also used in new entity IDs. For instance, if we want to rename certain entity IDs described as a string concatenated with a number, and we want to replace the string but maintaining the number:
+
+```
+{
+	"serviceMappings": [{
+		"originalService": "service",
+		"newService": "new_service",
+		"servicePathMappings": [{
+			"originalServicePath": "/subservice",
+			"newServicePath": "/new_subservice",
+			"entityMappings": [{
+				"originalEntityType": "myentitytype",
+				"originalEntityId": "(myentityid)([0-9]*)",
+				"newEntityId": "new_myentityid$2",
+				"attributeMappings": []
+			}]
+		}]
+	}]
+}
+```
 
 [Top](#top)
 

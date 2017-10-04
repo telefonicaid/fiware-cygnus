@@ -96,6 +96,37 @@ public class NGSINameMappingsInterceptorTest {
             +   "\"isPattern\" : \"false\","
             +   "\"id\" : \"new_Room1\""
             + "}";
+    private final String nameMappingsRegexStr = ""
+            + "{"
+            + "   \"serviceMappings\": ["
+            + "      {"
+            + "         \"originalService\": \".*\","
+            + "         \"newService\": \"new_default\","
+            + "         \"servicePathMappings\": ["
+            + "            {"
+            + "               \"originalServicePath\": \"/.*\","
+            + "               \"newServicePath\": \"/new_any\","
+            + "               \"entityMappings\": ["
+            + "                  {"
+            + "                     \"originalEntityId\": \"(Room)([0-9]*)\","
+            + "                     \"originalEntityType\": \"Room\","
+            + "                     \"newEntityId\": \"new_Room$2\","
+            + "                     \"newEntityType\": \"new_Room\","
+            + "                     \"attributeMappings\": ["
+            + "                        {"
+            + "                           \"originalAttributeName\": \"temp(.*)\","
+            + "                           \"originalAttributeType\": \"cent(.*)\","
+            + "                           \"newAttributeName\": \"new_temperature\","
+            + "                           \"newAttributeType\": \"new_centigrade\""
+            + "                        }"
+            + "                     ]"
+            + "                  }"
+            + "               ]"
+            + "            }"
+            + "         ]"
+            + "      }"
+            + "   ]"
+            + "}";
     
     /**
      * Constructor.
@@ -377,6 +408,58 @@ public class NGSINameMappingsInterceptorTest {
             throw e;
         } // try catch
     } // testDoMap
+    
+    /**
+     * [NGSIGroupingInterceptor.doMapRegex] -------- A mapped ContextElement can be obtained from the Name Mappings.
+     */
+    @Test
+    public void testDoMapRegex() {
+        System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapRegex]")
+                + "-------- A mapped ContextElement can be obtained from the Name Mappings");
+        NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
+        nameMappingsInterceptor.loadNameMappings(nameMappingsRegexStr);
+        ContextElement originalCE;
+        ContextElement expectedCE;
+        
+        try {
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            expectedCE = NGSIUtilsForTests.createJsonContextElement(expectedCEStr);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapRegex]")
+                    + "- FAIL - There was some problem when parsing the ContextElements");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(
+                originalService, originalServicePath, originalCE);
+        ContextElement mappedCE = map.getRight();
+        boolean equals = true;
+        
+        if (!mappedCE.getId().equals(expectedCE.getId()) || !mappedCE.getType().equals(expectedCE.getType())) {
+            equals = false;
+        } else {
+            for (int j = 0; j < mappedCE.getAttributes().size(); j++) {
+                ContextAttribute mappedCA = mappedCE.getAttributes().get(j);
+                ContextAttribute expectedCA = expectedCE.getAttributes().get(j);
+
+                if (!mappedCA.getName().equals(expectedCA.getName())
+                        || !mappedCA.getType().equals(expectedCA.getType())) {
+                    equals = false;
+                    break;
+                } // if
+            } // for
+        } // if else
+        
+        try {
+            assertTrue(equals);
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapRegex]")
+                    + "-  OK  - The mapped NotifyContextRequest is equals to the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapRegex]")
+                    + "- FAIL - The mapped NotifyContextRequest is not equals to the expected one");
+            throw e;
+        } // try catch
+    } // testDoMapRegex
     
     private Context createBuilderContext(String nameMappingsConfFile) {
         Context context = new Context();
