@@ -152,6 +152,12 @@ Where <i>short description</i> MAY enclose other “[...]” sublevels. For inst
 ### <a name="section3.7"></a>Coding style
 The `fiware-cygnus/telefonica_checkstyle.xml` file MUST be configured in any Integrated Development Environment (IDE) used by the different development teams as a coding style checker. This XML file contains all the coding style rules accepted by Telefónica.
 
+NOTE: it some cases we have found problems with `telefonica_checkstyle.xml` in recent versions of checkstyle with the [Eclipse plugin](http://eclipse-cs.sourceforge.net), which are solved commenting out the following line:
+
+```
+<module name="RedundantThrows"/>
+```
+
 [Top](#top)
 
 ### <a name="section3.8"></a>Commits and squashing
