@@ -16,7 +16,7 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
-FROM centos:6
+FROM centos:centos7.4.1708
 
 MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
 
@@ -55,20 +55,20 @@ ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 ENV GIT_REV_CYGNUS "master"
 # ENV GIT_REV_CYGNUS "mybranch"
 
-ENV MVN_VER "3.3.9"
+ENV MVN_VER "3.5.2"
 ENV MVN_HOME "/opt/apache-maven"
 
 ENV FLUME_VER "1.4.0"
 ENV FLUME_HOME "/opt/apache-flume"
 
-ENV JAVA_VERSION "1.7.0"
+ENV JAVA_VERSION "1.8.0"
 
 # Install
 RUN \
     # Add Cygnus user
     adduser ${CYGNUS_USER} && \
     yum -y install nc java-${JAVA_VERSION}-openjdk-devel git && \
-    export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION} && \
+    export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk && \
     export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1" && \
     export MAVEN_ARGS="-B -T4" && \
     # For debug Maven
@@ -116,13 +116,13 @@ RUN \
     echo "INFO: Create Cygnus log folder" && \
     mkdir -p /var/log/cygnus && \
     echo "INFO: Cleanup to thin the final image... doing optimizations..." && \
-    echo "INFO: Java runtime not needs JAVA_HOME... Unsetting..." && \
-    unset JAVA_HOME && \
     cd ${CYGNUS_HOME}/cygnus-common && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
     cd ${CYGNUS_HOME}/cygnus-ngsi && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
     rm -rf /root/.m2 && rm -rf ${MVN_HOME} && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz && \
+    echo "INFO: Java runtime not needs JAVA_HOME... Unsetting..." && \
+    unset JAVA_HOME && \
     yum erase -y git java-${JAVA_VERSION}-openjdk-devel && \
     rpm -qa redhat-logos gtk2 pulseaudio-libs libvorbis jpackage* groff alsa* atk cairo libX* | xargs -r rpm -e --nodeps && yum -y erase libss && \
     yum clean all && rpm -vv --rebuilddb && rm -rf /var/lib/yum/yumdb && rm -rf /var/lib/yum/history && \
