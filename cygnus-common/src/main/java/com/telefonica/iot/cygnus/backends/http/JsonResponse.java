@@ -32,23 +32,41 @@ public class JsonResponse {
     private final int statusCode;
     private final String reasonPhrase;
     private final Header locationHeader;
+    private final Header[] headers;
 
     /**
      * Constructor.
+     * 
      * @param jsonObject
      * @param statusCode
      * @param reasonPhrase
      * @param locationHeader
      */
     public JsonResponse(JSONObject jsonObject, int statusCode, String reasonPhrase, Header locationHeader) {
+        this(jsonObject, statusCode, reasonPhrase, locationHeader, null);
+    } // JsonResponse
+
+    /**
+     * Constructor.
+     * 
+     * @param jsonObject
+     * @param statusCode
+     * @param reasonPhrase
+     * @param locationHeader
+     * @param headers
+     */
+    public JsonResponse(JSONObject jsonObject, int statusCode, String reasonPhrase, Header locationHeader,
+            Header[] headers) {
         this.jsonObject = jsonObject;
         this.statusCode = statusCode;
         this.reasonPhrase = reasonPhrase;
         this.locationHeader = locationHeader;
+        this.headers = headers;
     } // JsonResponse
 
     /**
      * Gets the Json object.
+     * 
      * @return jsonObject
      */
     public JSONObject getJsonObject() {
@@ -57,26 +75,38 @@ public class JsonResponse {
 
     /**
      * Gets the status code.
+     * 
      * @return statusCode
      */
     public int getStatusCode() {
         return statusCode;
     } // getStatusCode
-    
+
     /**
      * Gets the reason phrase.
+     * 
      * @return reasonPhrase
      */
     public String getReasonPhrase() {
         return reasonPhrase;
     } // getReasonPhrase
-    
+
     /**
      * Gets the location header.
+     * 
      * @return locationHeader
      */
     public Header getLocationHeader() {
         return locationHeader;
     } // getLocationHeader
+
+    /**
+     * Gets the headers.
+     * 
+     * @return headers
+     */
+    public Header[] getHeaders() {
+        return headers;
+    } // getHeaders
 
 } // JsonResponse
