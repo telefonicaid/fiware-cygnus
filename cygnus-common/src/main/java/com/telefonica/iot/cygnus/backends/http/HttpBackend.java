@@ -53,7 +53,7 @@ import org.json.simple.parser.ParseException;
  * @author frb
  */
 public abstract class HttpBackend {
-    
+
     private final String host;
     private final String port;
     private final boolean ssl;
@@ -65,9 +65,11 @@ public abstract class HttpBackend {
     private long transactionRequestBytes;
     private long transactionResponseBytes;
     private static final CygnusLogger LOGGER = new CygnusLogger(HttpBackend.class);
-    
+    private static boolean allHeaders = false;
+
     /**
      * Constructor.
+     * 
      * @param host
      * @param port
      * @param ssl
@@ -87,23 +89,35 @@ public abstract class HttpBackend {
         this.krb5 = krb5;
         this.krb5User = krb5User;
         this.krb5Password = krb5Password;
-        
+
         // create a Http clients factory and an initial connection
         httpClientFactory = new HttpClientFactory(ssl, krb5LoginConfFile, krb5ConfFile, maxConns, maxConnsPerRoute);
         httpClient = httpClientFactory.getHttpClient(ssl, krb5);
     } // HttpBackend
-    
+
     /**
      * Sets the http client.
+     * 
      * @param httpClient
      */
     public void setHttpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
     } // setHttpClient
-    
+
     /**
-     * Does a Http request given a method, a relative URL (the final URL will be composed by using this relative URL
-     * and the active Http endpoint), a list of headers and the payload.
+     * Sets the all headers.
+     * 
+     * @param allHeaders
+     */
+    public static void setAllHeaders(boolean allHeaders) {
+        HttpBackend.allHeaders = allHeaders;
+    } // setAllHeaders
+
+    /**
+     * Does a Http request given a method, a relative URL (the final URL will be
+     * composed by using this relative URL and the active Http endpoint), a list
+     * of headers and the payload.
+     * 
      * @param method
      * @param url
      * @param relative
@@ -118,9 +132,9 @@ public abstract class HttpBackend {
         if (entity != null) {
             transactionRequestBytes += entity.getContentLength();
         } // if
-        
+
         JsonResponse response;
-        
+
         if (relative) {
             // create the HttpFS URL
             String effectiveURL = (ssl ? "https://" : "http://") + host + ":" + port + url;
@@ -140,10 +154,11 @@ public abstract class HttpBackend {
             } // if else
         } // if else
     } // doRequest
-    
+
     /**
-     * Does a Http request given a method, a relative URL, a list of headers and the payload
-     * Protected method due to it's used by the tests.
+     * Does a Http request given a method, a relative URL, a list of headers and
+     * the payload Protected method due to it's used by the tests.
+     * 
      * @param method
      * @param url
      * @param headers
@@ -152,29 +167,30 @@ public abstract class HttpBackend {
      * @throws CygnusRuntimeError
      * @throws CygnusPersistenceError
      */
-        
+
     protected JsonResponse doRequest(String method, String url, ArrayList<Header> headers, StringEntity entity)
-        throws CygnusRuntimeError, CygnusPersistenceError {
+            throws CygnusRuntimeError, CygnusPersistenceError {
         HttpResponse httpRes = null;
         HttpRequestBase request;
 
         switch (method) {
+
             case "PUT":
                 HttpPut reqPut = new HttpPut(url);
-                
+
                 if (entity != null) {
                     reqPut.setEntity(entity);
                 } // if
-                
+    
                 request = reqPut;
                 break;
             case "POST":
                 HttpPost reqPost = new HttpPost(url);
-                
+    
                 if (entity != null) {
                     reqPost.setEntity(entity);
                 } // if
-                
+    
                 request = reqPost;
                 break;
             case "GET":
@@ -206,11 +222,11 @@ public abstract class HttpBackend {
         request.releaseConnection();
         return response;
     } // doRequest
-    
+
     // from here on, consider this link:
     // http://stackoverflow.com/questions/21629132/httpclient-set-credentials-for-kerberos-authentication
-    private JsonResponse doPrivilegedRequest(String method, String url, ArrayList<Header> headers,
-            StringEntity entity) throws CygnusRuntimeError {
+    private JsonResponse doPrivilegedRequest(String method, String url, ArrayList<Header> headers, StringEntity entity)
+            throws CygnusRuntimeError {
         try {
             LoginContext loginContext = new LoginContext("cygnus_krb5_login",
                     new KerberosCallbackHandler(krb5User, krb5Password));
@@ -221,26 +237,27 @@ public abstract class HttpBackend {
             throw new CygnusRuntimeError("Privileged request error", "LoginException", e.getMessage());
         } // try catch
     } // doPrivilegedRequest
-    
+
     /**
      * PrivilegedRequest class.
      */
-    private class PrivilegedRequest implements PrivilegedAction {
-        
+    private class PrivilegedRequest implements PrivilegedAction<Object> {
+
         private final Logger logger;
         private final String method;
         private final String url;
         private final ArrayList<Header> headers;
         private final StringEntity entity;
-               
+
         /**
          * Constructor.
+         * 
          * @param mrthod
          * @param url
          * @param headers
          * @param entity
          */
-        public PrivilegedRequest(String method, String url, ArrayList<Header> headers, StringEntity entity) {
+        PrivilegedRequest(String method, String url, ArrayList<Header> headers, StringEntity entity) {
             this.logger = Logger.getLogger(PrivilegedRequest.class);
             this.method = method;
             this.url = url;
@@ -264,15 +281,18 @@ public abstract class HttpBackend {
                 return null;
             } // try catch
         } // run
-        
+
     } // PrivilegedRequest
-    
+
     /**
-     * Creates a JsonResponse object based on the given HttpResponse. It is protected for testing purposes.
+     * Creates a JsonResponse object based on the given HttpResponse. It is
+     * protected for testing purposes.
+     * 
      * @param httpRes
      * @return A JsonResponse object
      * @throws CygnusRuntimeError
      */
+    @SuppressWarnings("unchecked")
     protected JsonResponse createJsonResponse(HttpResponse httpRes) throws CygnusRuntimeError {
         if (httpRes == null) {
             return null;
@@ -281,6 +301,11 @@ public abstract class HttpBackend {
         // get the location header
         Header locationHeader = null;
         Header[] headers = httpRes.getHeaders("Location");
+        // return all headers
+        Header[] headersAll = null;
+        if (allHeaders) {
+            headersAll = httpRes.getAllHeaders();
+        }
 
         if (headers.length > 0) {
             locationHeader = headers[0];
@@ -288,12 +313,12 @@ public abstract class HttpBackend {
 
         if (httpRes.getHeaders("Content-Type").length == 0) {
             return new JsonResponse(null, httpRes.getStatusLine().getStatusCode(),
-                httpRes.getStatusLine().getReasonPhrase(), locationHeader);
+                    httpRes.getStatusLine().getReasonPhrase(), locationHeader, headersAll);
         } // if
 
         if (!httpRes.getHeaders("Content-Type")[0].getValue().contains("application/json")) {
             return new JsonResponse(null, httpRes.getStatusLine().getStatusCode(),
-                httpRes.getStatusLine().getReasonPhrase(), locationHeader);
+                    httpRes.getStatusLine().getReasonPhrase(), locationHeader, headersAll);
         } // if
 
         LOGGER.debug("Http response status line: " + httpRes.getStatusLine().toString());
@@ -304,7 +329,7 @@ public abstract class HttpBackend {
 
         if (entity != null) {
             BufferedReader reader;
-            
+
             try {
                 reader = new BufferedReader(new InputStreamReader(httpRes.getEntity().getContent()));
             } catch (IOException e) {
@@ -312,7 +337,7 @@ public abstract class HttpBackend {
             } catch (IllegalStateException e) {
                 throw new CygnusRuntimeError("Response handling error", "IllegalStateException", e.getMessage());
             } // try catch
-            
+
             String res = "";
             String line;
 
@@ -323,7 +348,7 @@ public abstract class HttpBackend {
             } catch (IOException e) {
                 throw new CygnusRuntimeError("Response handling error", "IOException", e.getMessage());
             } // try catch
-            
+
             transactionResponseBytes += res.length();
 
             try {
@@ -360,11 +385,12 @@ public abstract class HttpBackend {
 
         // return the result
         return new JsonResponse(jsonPayload, httpRes.getStatusLine().getStatusCode(),
-                httpRes.getStatusLine().getReasonPhrase(), locationHeader);
+                httpRes.getStatusLine().getReasonPhrase(), locationHeader, headersAll);
     } // createJsonResponse
-    
+
     /**
-     * Starts a transaction. Basically, this means the byte counters are reseted.
+     * Starts a transaction. Basically, this means the byte counters are
+     * reseted.
      */
     public void startTransaction() {
         transactionRequestBytes = 0;
@@ -372,11 +398,13 @@ public abstract class HttpBackend {
     } // startTransaction
 
     /**
-     * Finishes a transaction. Basically, this means the the bytes counters are retrieved.
+     * Finishes a transaction. Basically, this means the the bytes counters are
+     * retrieved.
+     * 
      * @return
      */
     public ImmutablePair<Long, Long> finishTransaction() {
-        return new ImmutablePair(transactionRequestBytes, transactionResponseBytes);
+        return new ImmutablePair<Long, Long>(transactionRequestBytes, transactionResponseBytes);
     } // finishTransaction
 
 } // HttpBackend
