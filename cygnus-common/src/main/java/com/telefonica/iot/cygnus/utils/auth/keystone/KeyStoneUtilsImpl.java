@@ -15,7 +15,7 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
-package com.telefonica.iot.cygnus.backends.keystone;
+package com.telefonica.iot.cygnus.utils.auth.keystone;
 
 import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
@@ -41,7 +41,7 @@ import org.apache.http.message.BasicHeader;
  * 
  * @author dmartinez  - PMO Santander Smart City
  */
-public class KeyStoneBackendImpl extends HttpBackend implements KeyStoneBackend {
+public class KeyStoneUtilsImpl extends HttpBackend implements KeyStoneUtils {
 
     private static final String STR_SCOPE_TAG = "<<scope>>";
 
@@ -49,7 +49,7 @@ public class KeyStoneBackendImpl extends HttpBackend implements KeyStoneBackend 
 
     private static final String KEYSTONE_RELATIVE_URL = "/v3/auth/tokens";
 
-    private static final CygnusLogger LOGGER = new CygnusLogger(KeyStoneBackendImpl.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(KeyStoneUtilsImpl.class);
 
     // Request Header constats.
     private static final String HEADER_X_AUTH_TOKEN = "X-Auth-token";
@@ -103,7 +103,7 @@ public class KeyStoneBackendImpl extends HttpBackend implements KeyStoneBackend 
      * @param maxConnsPerRoute
      *            max connections per route
      */
-    public KeyStoneBackendImpl(String keyStoneHost, String keyStonePort, boolean ssl, int maxConns,
+    public KeyStoneUtilsImpl(String keyStoneHost, String keyStonePort, boolean ssl, int maxConns,
             int maxConnsPerRoute) {
         super(keyStoneHost, keyStonePort, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
         setAllHeaders(true);

@@ -15,7 +15,7 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
-package com.telefonica.iot.cygnus.backends.keystone;
+package com.telefonica.iot.cygnus.utils.auth.keystone;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -27,21 +27,22 @@ import org.junit.Test;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.Property;
+import com.telefonica.iot.cygnus.utils.PropertyUtils;
+import com.telefonica.iot.cygnus.utils.auth.keystone.KeyStoneUtilsImpl;
 
 /**
  * 
  * @author joelcamus - PMO Santander Smart City
  *
  */
-public class KeyStoneBackendImplTest {
+public class KeyStoneUtilsTest {
 
-    private static final CygnusLogger LOGGER = new CygnusLogger(KeyStoneBackendImplTest.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(KeyStoneUtilsTest.class);
 
     // instance to be tested
-    private KeyStoneBackendImpl backend;
+    private KeyStoneUtilsImpl keyStoneUtils;
 
-    private final Property property = new Property("./src/test/resources/login.properties");;
+    private final PropertyUtils property = new PropertyUtils("./src/test/resources/login.properties");;
 
     // constants
     private final String host = property.getProperty("orionHostKey");
@@ -70,7 +71,7 @@ public class KeyStoneBackendImplTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new KeyStoneBackendImpl(host, port, ssl, maxConns, maxConnsPerRoute);
+        keyStoneUtils = new KeyStoneUtilsImpl(host, port, ssl, maxConns, maxConnsPerRoute);
     } // setUp
 
     /**
@@ -82,18 +83,18 @@ public class KeyStoneBackendImplTest {
         String token = "";
 
         System.out.println("------ Setting token TTL to 1 minute ");
-        backend.setTokenTimeToLive(1);
+        keyStoneUtils.setTokenTimeToLive(1);
 
         try {
             System.out.println("------ Getign token for " + fiwareService + fiwareServicePath);
-            token = backend.getSessionToken(user, password, fiwareService, fiwareServicePath);
+            token = keyStoneUtils.getSessionToken(user, password, fiwareService, fiwareServicePath);
             System.out.println("Returned token:  " + token);
 
             System.out.println("------ Waiting token to expire...");
             Thread.sleep(61000);
 
             System.out.println("------ Getign token for " + fiwareService + fiwareServicePath);
-            token = backend.getSessionToken(user, password, fiwareService, fiwareServicePath);
+            token = keyStoneUtils.getSessionToken(user, password, fiwareService, fiwareServicePath);
             System.out.println("Returned token:  " + token);
 
             assertTrue(!token.equals(""));
@@ -119,19 +120,19 @@ public class KeyStoneBackendImplTest {
         String token = "";
 
         System.out.println("------ Setting token TTL to 1 minute ");
-        backend.setTokenTimeToLive(1);
+        keyStoneUtils.setTokenTimeToLive(1);
 
         try {
 
             System.out.println("------ Getign token for " + fiwareService2 + fiwareServicePath2);
-            token = backend.getSessionToken(user2, password2, fiwareService2, fiwareServicePath2);
+            token = keyStoneUtils.getSessionToken(user2, password2, fiwareService2, fiwareServicePath2);
             System.out.println("Returned token:  " + token);
 
             System.out.println("------ Waiting token to expire...");
             Thread.sleep(61000);
 
             System.out.println("------ Getign token for " + fiwareService2 + fiwareServicePath2);
-            token = backend.getSessionToken(user2, password2+"fail", fiwareService2, fiwareServicePath2);
+            token = keyStoneUtils.getSessionToken(user2, password2+"fail", fiwareService2, fiwareServicePath2);
             System.out.println("Returned token:  " + token);
 
             fail(token);
@@ -159,15 +160,15 @@ public class KeyStoneBackendImplTest {
 
         try {
             LOGGER.debug("------ Getign token for " + fiwareService + fiwareServicePath);
-            token = backend.getSessionToken(user, password, fiwareService, fiwareServicePath);
+            token = keyStoneUtils.getSessionToken(user, password, fiwareService, fiwareServicePath);
             LOGGER.debug("Returned token:  " + token);
 
             LOGGER.debug("------ Getign token for " + fiwareService2 + fiwareServicePath2);
-            token = backend.getSessionToken(user2, password2, fiwareService2, fiwareServicePath2);
+            token = keyStoneUtils.getSessionToken(user2, password2, fiwareService2, fiwareServicePath2);
             LOGGER.debug("Returned token:  " + token);
 
             LOGGER.debug("------ Retry get token from cache:  " + fiwareService2 + fiwareServicePath2);
-            token = backend.getSessionToken(user2, password2, fiwareService2, fiwareServicePath2);
+            token = keyStoneUtils.getSessionToken(user2, password2, fiwareService2, fiwareServicePath2);
             LOGGER.debug("Returned token:  " + token);
 
             /* Uncomment for testing exceeded token live time */
@@ -175,19 +176,19 @@ public class KeyStoneBackendImplTest {
             // TimeUnit.MINUTES.sleep(1);
 
             LOGGER.debug("------ Retry token forced update: " + fiwareService2 + fiwareServicePath2);
-            token = backend.updateSessionToken(user2, password2, fiwareService2, fiwareServicePath2);
+            token = keyStoneUtils.updateSessionToken(user2, password2, fiwareService2, fiwareServicePath2);
             LOGGER.debug("Returned token:  " + token);
 
             LOGGER.debug("------ Getign token for " + fiwareService + fiwareServicePath);
-            token = backend.getSessionToken(user, password, fiwareService, fiwareServicePath);
+            token = keyStoneUtils.getSessionToken(user, password, fiwareService, fiwareServicePath);
             LOGGER.debug("Returned token:  " + token);
 
             LOGGER.debug("------ Getign token for " + fiwareService2 + fiwareServicePath2);
-            token = backend.getSessionToken(user2, password2, fiwareService2, fiwareServicePath2);
+            token = keyStoneUtils.getSessionToken(user2, password2, fiwareService2, fiwareServicePath2);
             LOGGER.debug("Returned token:  " + token);
 
             LOGGER.debug("------ Getign token for " + fiwareService + noServicePath);
-            token = backend.getSessionToken(user, password, fiwareService, noServicePath);
+            token = keyStoneUtils.getSessionToken(user, password, fiwareService, noServicePath);
             LOGGER.debug("Returned token:  " + token);
 
         } catch (Exception e) {

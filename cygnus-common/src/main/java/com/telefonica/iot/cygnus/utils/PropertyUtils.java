@@ -32,9 +32,9 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
  * @author joelcamus - PMO Santander Smart City
  *
  */
-public class Property {
+public class PropertyUtils {
 
-	private static final CygnusLogger LOGGER = new CygnusLogger(Property.class);
+	private static final CygnusLogger LOGGER = new CygnusLogger(PropertyUtils.class);
 	private String file;
 	private InputStream input = null;
 	private Properties prop = null;
@@ -49,12 +49,12 @@ public class Property {
 	/**
 	 * @param file
 	 */
-	public Property(String file) {
+	public PropertyUtils(String file) {
 		super();
 		this.file = file;
 		try {
 			prop = new Properties();
-			input = Property.class.getClassLoader().getResourceAsStream("login.properties");
+			input = PropertyUtils.class.getClassLoader().getResourceAsStream("login.properties");
 
 			// load a properties file
 			prop.load(input);

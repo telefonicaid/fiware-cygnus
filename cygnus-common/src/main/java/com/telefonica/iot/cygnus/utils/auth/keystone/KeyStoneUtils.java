@@ -15,7 +15,7 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
-package com.telefonica.iot.cygnus.backends.keystone;
+package com.telefonica.iot.cygnus.utils.auth.keystone;
 
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
@@ -25,7 +25,7 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
  * 
  * @author dmartinez - PMO Santander Smart City
  */
-public interface KeyStoneBackend {
+public interface KeyStoneUtils {
 
     /**
      * Gets KeyStone session token given user and password using tokens cache.
