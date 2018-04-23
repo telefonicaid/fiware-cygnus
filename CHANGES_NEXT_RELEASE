@@ -2,3 +2,5 @@
 [cygnus-common][Docker] Upgrade to CentOS 7, Maven 3.5.2 and Java 1.8.0 in Dockerfile
 [cygnus-twitter][Docker] Upgrade to CentOS 7, Maven 3.5.2 and Java 1.8.0 in Dockerfile
 [cygnus-ngsi][NGSINameMappingsInterceptor] Allow regular expression replacement for EntityIds (#1456)
+cygnus-ngsi][HttpBackend] Add support to recover data from response header (#1455)
+[cygnus-ngsi][KeystoneUtils] Create new Auth functionality (#1471)
