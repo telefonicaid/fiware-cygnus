@@ -225,7 +225,7 @@ public class NGSIKafkaSink extends NGSISink {
             return name.toLowerCase();
         } else {
             return name;
-        }
+        } // if
     } // buildTopic
 
     /**
