@@ -48,6 +48,11 @@ ENV CYGNUS_HDFS_USER "hdfs"
 ENV CYGNUS_HDFS_TOKEN ""
 ENV CYGNUS_CARTO_USER "carto"
 ENV CYGNUS_CARTO_KEY "carto"
+ENV CYGNUS_POSTGRESQL_HOST "iot-postgresql"
+ENV CYGNUS_POSTGRESQL_PORT "5432"
+ENV CYGNUS_POSTGRESQL_USER "postgresql"
+ENV CYGNUS_POSTGRESQL_PASS "postgresql"
+
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
