@@ -178,7 +178,8 @@ public class NGSIKafkaSink extends NGSISink {
      * @return
      * @throws CygnusBadConfiguration
      */
-    protected String buildTopicName(String service, String servicePath, String entity, String attribute)
+    protected String buildTopicName(String service, String servicePath, String entity, String attribute,
+                                    boolean enableLowercase)
     throws CygnusBadConfiguration {
         String name;
 
@@ -220,7 +221,11 @@ public class NGSIKafkaSink extends NGSISink {
                     + "' and its length is greater than " + CommonConstants.MAX_NAME_LEN);
         } // if
 */
-        return name;
+        if (enableLowercase) {
+            return tableName.toLowerCase();
+        } else {
+            return name;
+        }
     } // buildTopic
 
     /**
@@ -287,8 +292,10 @@ public class NGSIKafkaSink extends NGSISink {
     private void persistAggregation(KafkaAggregator aggregator) throws CygnusBadConfiguration, CygnusPersistenceError {
         String aggregation = aggregator.getAggregation();
         String topicName = buildTopicName(aggregator.getService(),
-                aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(),
-                aggregator.getAttributeForNaming()).toLowerCase();
+                                          aggregator.getServicePathForNaming(),
+                                          aggregator.getEntityForNaming(),
+                                          aggregator.getAttributeForNaming(),
+                                          enableLowercase);
 
         // build the message/record to be sent to Kafka
         ProducerRecord<String, String> record;
