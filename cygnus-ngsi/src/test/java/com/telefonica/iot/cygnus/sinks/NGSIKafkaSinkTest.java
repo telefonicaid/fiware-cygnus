@@ -35,7 +35,7 @@ public class NGSIKafkaSinkTest {
     private final String servicePathSlash = "/";
     private final String entity = "entityId=entityType";
     private final String attribute = "attributeName";
-    private final String enableLowercase = null; // default value
+    private final boolean enableLowercase = true;
     private String expectedTopic;
 
     
