@@ -222,7 +222,7 @@ public class NGSIKafkaSink extends NGSISink {
         } // if
 */
         if (enableLowercase) {
-            return tableName.toLowerCase();
+            return name.toLowerCase();
         } else {
             return name;
         }
