@@ -66,6 +66,30 @@ public final class NGSIUtilsForTests {
         return context;
     } // createContextForMongoSTH
     
+    
+    /**
+     * Creates a Flume context for Orion sinks.
+     * @param collectionPrefix
+     * @param dbPrefix
+     * @param dataModel
+     * @param enableEncoding
+     * @return A context for Orion sinks.
+     */
+    public static Context createContextForOrion(String orionHost, String orionPort,
+            String orionHostKey, String orionPortKey,
+            String orionUsername, String orionPassword, String orionFiware, String orionFiwarePath) {
+        Context context = new Context();
+        context.put("orion_host", orionHost);
+        context.put("orion_port", orionPort);
+        context.put("keystone_host", orionHostKey);
+        context.put("keystone_port", orionPortKey);
+        context.put("orion_username", orionUsername);
+        context.put("orion_password", orionPassword);
+        context.put("orion_fiware", orionFiware);
+        context.put("orion_fiware_path", orionFiwarePath);
+        return context;
+    } // createContextForOrion
+    
     /**
      * Creates a Json-based NotifyContextRequest given the string representation of such Json.
      * @param jsonStr
@@ -136,6 +160,7 @@ public final class NGSIUtilsForTests {
                 mappedCE);
     } // createInterceptedNGSIEvent
 
+    
     /**
      * Creates a Json-based ContextElement given the string representation of such Json.
      * @param jsonStr

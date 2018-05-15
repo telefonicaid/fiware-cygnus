@@ -18,24 +18,33 @@
 
 package com.telefonica.iot.cygnus.backends.orion;
 
-import com.telefonica.iot.cygnus.backends.http.HttpBackend;
-import com.telefonica.iot.cygnus.backends.http.JsonResponse;
-import com.telefonica.iot.cygnus.log.CygnusLogger;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+
 import org.apache.http.Header;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.telefonica.iot.cygnus.backends.http.HttpBackend;
+import com.telefonica.iot.cygnus.backends.http.JsonResponse;
+import com.telefonica.iot.cygnus.errors.CygnusBadAuthorization;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
+import com.telefonica.iot.cygnus.log.CygnusLogger;
 
 /**
  *
  * @author pcoello25
  */
 public class OrionBackendImpl extends HttpBackend implements OrionBackend {
-    
+
     private static final CygnusLogger LOGGER = new CygnusLogger(OrionBackendImpl.class);
-    
+
     /**
      * Constructor.
+     * 
      * @param orionHost
      * @param orionPort
      * @param ssl
@@ -44,177 +53,227 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
      */
     public OrionBackendImpl(String orionHost, String orionPort, boolean ssl, int maxConns, int maxConnsPerRoute) {
         super(orionHost, orionPort, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
+
     } // StatsBackendImpl
 
     @Override
-    public JsonResponse subscribeContextV1(String subscription, String token, String fiwareService, 
+    public JsonResponse subscribeContextV1(String subscription, String token, String fiwareService,
             String fiwareServicePath) throws Exception {
-        
+
         // create the relative URL
         String relativeURL = "/v1/subscribeContext";
-        
+
         // create the http header
         ArrayList<Header> headers = getHeaders(token, fiwareService, fiwareServicePath);
-        
+
         // create an entity for request
         StringEntity entity = new StringEntity(subscription);
-        
+
         // do the request
         JsonResponse response = doRequest("POST", relativeURL, true, headers, entity);
-        
+
         // check status code from response
         return response;
     } // subscribeContext
-    
+
     @Override
-    public JsonResponse subscribeContextV2(String subscription, String token, String fiwareService, 
+    public JsonResponse subscribeContextV2(String subscription, String token, String fiwareService,
             String fiwareServicePath) throws Exception {
-        
+
         // create the relative URL
         String relativeURL = "/v2/subscriptions";
-        
+
         // create the http header
         ArrayList<Header> headers = getHeaders(token, fiwareService, fiwareServicePath);
-        
+
         // create an entity for request
         StringEntity entity = new StringEntity(subscription);
-        
+
         // do the request
         JsonResponse response = doRequest("POST", relativeURL, true, headers, entity);
-        
+
         // check status code from response
         return response;
     } // subscribeContext
-    
+
     @Override
-    public JsonResponse deleteSubscriptionV1(String subscriptionId, String token, String fiwareService, 
-            String fiwareServicePath) throws Exception { 
-        
+    public JsonResponse deleteSubscriptionV1(String subscriptionId, String token, String fiwareService,
+            String fiwareServicePath) throws Exception {
+
         // create the http header
         ArrayList<Header> headers = getHeaders(token, fiwareService, fiwareServicePath);
-                
+
         String relativeURL = "/v1/unsubscribeContext";
-        String subscriptionStr = "{\n" 
-                + "\"subscriptionId\": \"" + subscriptionId + "\"\n"
-                + "}";
+        String subscriptionStr = "{\n" + "\"subscriptionId\": \"" + subscriptionId + "\"\n" + "}";
         StringEntity subscriptionEnt = new StringEntity(subscriptionStr);
-        
+
         // do the request
         JsonResponse response = doRequest("POST", relativeURL, true, headers, subscriptionEnt);
-        
-        return response;   
+
+        return response;
     } // deleteSubscriptionV1
-    
+
     @Override
-    public JsonResponse getSubscriptionsByIdV2(String token, String subscriptionId, String fiwareService, 
+    public JsonResponse getSubscriptionsByIdV2(String token, String subscriptionId, String fiwareService,
             String fiwareServicePath) throws Exception {
-        
+
         // create the http header
         ArrayList<Header> headers = getHeaders(token, fiwareService, fiwareServicePath);
-        
+
         String relativeURL = "/v2/subscriptions/" + subscriptionId;
         JsonResponse response = doRequest("GET", relativeURL, true, headers, null);
-        
+
         return response;
     } // getSubscriptionsV2byId
-    
+
     @Override
-    public JsonResponse getSubscriptionsV2(String token, String subscriptionId, String fiwareService, 
+    public JsonResponse getSubscriptionsV2(String token, String subscriptionId, String fiwareService,
             String fiwareServicePath) throws Exception {
-        
-    // create the http header
+
+        // create the http header
         ArrayList<Header> headers = getHeaders(token, fiwareService, fiwareServicePath);
-        
+
         String relativeURL = "/v2/subscriptions";
         JsonResponse response = doRequest("GET", relativeURL, true, headers, null);
-        
+
         return response;
     } // getSubscriptionsV2
-    
+
     @Override
-    public JsonResponse deleteSubscriptionV2(String subscriptionId, String token, String fiwareService, 
+    public JsonResponse deleteSubscriptionV2(String subscriptionId, String token, String fiwareService,
             String fiwareServicePath) throws Exception {
         // create the http header
         ArrayList<Header> headers = getHeaders(token, fiwareService, fiwareServicePath);
-        
+
         String relativeURL = "/v2/subscriptions/" + subscriptionId;
         JsonResponse response = doRequest("DELETE", relativeURL, true, headers, null);
-        
+
         return response;
-        
+
     } // deleteSubscriptionV2
-    
-    private ArrayList<Header> getHeaders (String token, String fiwareService, String fiwareServicePath) {
+
+    private ArrayList<Header> getHeaders(String token, String fiwareService, String fiwareServicePath) {
         ArrayList<Header> headers = new ArrayList<Header>();
         headers.add(new BasicHeader("Content-type", "application/json"));
         headers.add(new BasicHeader("Accept", "application/json"));
         headers.add(new BasicHeader("Fiware-Service", fiwareService));
         headers.add(new BasicHeader("Fiware-ServicePath", fiwareServicePath));
-        
+
         if (token != null) {
             headers.add(new BasicHeader("X-Auth-token", token));
         } // if
-        
+
         return headers;
     }
-    
+
     // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/304
     /**
+     * // @Override public void updateContext(String entityId, String
+     * entityType, ArrayList<OrionStats> allAttrStats) throws Exception { //
+     * create the relative URL String relativeURL = "/v1/updateContext";
+     * 
+     * // create the http headers ArrayList<Header> headers = new ArrayList
+     * <Header>(); headers.add(new BasicHeader("Content-Type",
+     * "application/json")); headers.add(new BasicHeader("Accept",
+     * "application/json"));
+     * 
+     * // create the Json-based payload String jsonStr = "" + "{" +
+     * "   \"contextElements\": [" + "      {" + "         \"type\": \"" +
+     * entityType + "\"," + "         \"isPattern\": \"false\"," +
+     * "         \"id\": \"" + entityId + "\"," + "         \"attributes\": [";
+     * 
+     * if (allAttrStats != null) { for (int i = 0; i < allAttrStats.size(); i++)
+     * { OrionStats attrStats = allAttrStats.get(i); jsonStr += "" +
+     * "             {" + "                \"name\": \"" +
+     * attrStats.getAttrName() + "\"," + "                \"type\": \"" +
+     * attrStats.getAttrType() + "\"," + "                \"metadatas\":";
+     * jsonStr += attrStats.toNGSIString(); jsonStr += "" + "             }";
+     * 
+     * if (i != (allAttrStats.size() - 1)) { jsonStr += ","; } // if } // for }
+     * // if
+     * 
+     * jsonStr += "" + "         ]" + "      }" + "   ]," +
+     * "   \"updateAction\": \"UPDATE\"" + "}"; StringEntity entity = new
+     * StringEntity(jsonStr);
+     * 
+     * // do the request JsonResponse response = doRequest("POST", relativeURL,
+     * true, headers, entity);
+     * 
+     * // check the status if (response.getStatusCode() != 200) { throw new
+     * CygnusPersistenceError(
+     * "The context could not be updated. HttpFS response: " +
+     * response.getStatusCode() + " " + response.getReasonPhrase()); } // if }
+     * // updateContext
+     **/
+
+    /**
+     * Create or update entity in the system (v2).
+     * 
+     * @param bodyJSON
+     * @param orionToken
+     * @param fiwareService
+     * @param fiwareServicePath
+     * @throws CygnusPersistenceError
+     * @throws CygnusRuntimeError
+     * @throws UnsupportedEncodingException
+     * @throws CygnusBadAuthorization
+     * @throws JSONException
+     */
     @Override
-    public void updateContext(String entityId, String entityType, ArrayList<OrionStats> allAttrStats)
-        throws Exception {
+    public void updateRemoteContext(String bodyJSON, String orionToken, String fiwareService, String fiwareServicePath)
+            throws CygnusRuntimeError, CygnusPersistenceError, UnsupportedEncodingException, CygnusBadAuthorization,
+            JSONException {
+        LOGGER.debug("init updateRemoteContext(bodyJSON --> " + bodyJSON + ", fiwareService --> " + fiwareService
+                + ", fiwareServicePath --> " + fiwareServicePath + ")");
         // create the relative URL
-        String relativeURL = "/v1/updateContext";
-        
+        String relativeURL = "/v2/entities";
+
         // create the http headers
-        ArrayList<Header> headers = new ArrayList<Header>();
-        headers.add(new BasicHeader("Content-Type", "application/json"));
-        headers.add(new BasicHeader("Accept", "application/json"));
+        ArrayList<Header> headers = getHeaders(orionToken, fiwareService, fiwareServicePath);
 
-        // create the Json-based payload
-        String jsonStr = ""
-                + "{"
-                + "   \"contextElements\": ["
-                + "      {"
-                + "         \"type\": \"" + entityType + "\","
-                + "         \"isPattern\": \"false\","
-                + "         \"id\": \"" + entityId + "\","
-                + "         \"attributes\": [";
-        
-        if (allAttrStats != null) {
-            for (int i = 0; i < allAttrStats.size(); i++) {
-                OrionStats attrStats = allAttrStats.get(i);
-                jsonStr += ""
-                        + "             {"
-                        + "                \"name\": \"" + attrStats.getAttrName() + "\","
-                        + "                \"type\": \"" + attrStats.getAttrType() + "\","
-                        + "                \"metadatas\":";
-                jsonStr += attrStats.toNGSIString();
-                jsonStr += ""
-                        + "             }";
+        JSONObject body;
+        try {
+            body = new JSONObject(bodyJSON);
+        } catch (Exception e) {
+            LOGGER.error("UpdateRemoteContext, Error creating JSON Object :\n " + bodyJSON);
+            throw e;
+        }
+        // Create the relative URL Update
+        String relativeURLActualizacion = relativeURL + "/" + body.get("id") + "/attrs";
 
-                if (i != (allAttrStats.size() - 1)) {
-                    jsonStr += ",";
-                } // if
-            } // for
-        } // if
-        
-        jsonStr += ""
-                + "         ]"
-                + "      }"
-                + "   ],"
-                + "   \"updateAction\": \"UPDATE\""
-                + "}";
-        StringEntity entity = new StringEntity(jsonStr);
-        
-        // do the request
-        JsonResponse response = doRequest("POST", relativeURL, true, headers, entity);
+        // Remove de attributes id and type of entity
+        body.remove("id");
+        body.remove("type");
+        body.remove("isPattern");
+
+        // transform string to StringEntity
+        StringEntity entity = new StringEntity(body.toString());
+
+        // Update entity
+        JsonResponse response = doRequest("POST", relativeURLActualizacion, true, headers, entity);
+        LOGGER.debug("Response of update entity. Status Code --> " + response.getStatusCode() + " , Reason Phrase --> "
+                + response.getReasonPhrase());
+        // check the status of response, if status code is 404, the entity is
+        // not in system.
+        if (response.getStatusCode() == 404) {
+            JSONObject bodyJsonCreate = new JSONObject(bodyJSON);
+            bodyJsonCreate.remove("isPattern");
+            entity = new StringEntity(bodyJsonCreate.toString());
+            // create entity
+            response = doRequest("POST", relativeURL, true, headers, entity);
+            LOGGER.debug("Response of create entity. Status Code --> " + response.getStatusCode()
+                    + " , Reason Phrase --> " + response.getReasonPhrase());
+        } else if (response.getStatusCode() == 401) {
+            throw new CygnusBadAuthorization("Error of authorization.");
+
+        }
 
         // check the status
-        if (response.getStatusCode() != 200) {
+        if (response.getStatusCode() != 200 && response.getStatusCode() != 201 && response.getStatusCode() != 204) {
             throw new CygnusPersistenceError("The context could not be updated. HttpFS response: "
                     + response.getStatusCode() + " " + response.getReasonPhrase());
         } // if
-    } // updateContext
-    **/
+    } // updateRemoteContext
+      // **/
+
 } // StatsBackendImpl

@@ -17,16 +17,24 @@
  */
 package com.telefonica.iot.cygnus.backends.orion;
 
+import java.io.UnsupportedEncodingException;
+
+import org.json.JSONException;
+
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
+import com.telefonica.iot.cygnus.errors.CygnusBadAuthorization;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 
 /**
  *
  * @author pcoello25
  */
 public interface OrionBackend {
-    
+
     /**
-     * Updates a context element given a list of statistical metadata for each entity's attribute.
+     * Updates a context element given a list of statistical metadata for each
+     * entity's attribute.
      * 
      * @param entityId
      * @param entityType
@@ -34,10 +42,12 @@ public interface OrionBackend {
      * @throws Exception
      */
     // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/304
-    // void updateContext(String entityId, String entityType, ArrayList<OrionStats> allAttrStats) throws Exception;
-    
+    // void updateContext(String entityId, String entityType,
+    // ArrayList<OrionStats> allAttrStats) throws Exception;
+
     /**
-     * Subscribe to Orion with a given port, host and string with subscription information (v1).
+     * Subscribe to Orion with a given port, host and string with subscription
+     * information (v1).
      * 
      * @param subscription
      * @param token
@@ -46,11 +56,12 @@ public interface OrionBackend {
      * @throws Exception
      * @return response
      */
-    JsonResponse subscribeContextV1(String subscription, String token, String fiwareService, 
-            String fiwareServicePath) throws Exception;
-    
+    JsonResponse subscribeContextV1(String subscription, String token, String fiwareService, String fiwareServicePath)
+            throws Exception;
+
     /**
-     * Subscribe to Orion with a given port, host and string with subscription information (v2).
+     * Subscribe to Orion with a given port, host and string with subscription
+     * information (v2).
      * 
      * @param subscription
      * @param token
@@ -59,9 +70,9 @@ public interface OrionBackend {
      * @throws Exception
      * @return response
      */
-    JsonResponse subscribeContextV2(String subscription, String token, String fiwareService, 
-            String fiwareServicePath) throws Exception;
-    
+    JsonResponse subscribeContextV2(String subscription, String token, String fiwareService, String fiwareServicePath)
+            throws Exception;
+
     /**
      * Unsubscribe from Orion with a given subscription id (v1).
      * 
@@ -72,9 +83,9 @@ public interface OrionBackend {
      * @throws Exception
      * @return response
      */
-    JsonResponse deleteSubscriptionV1(String subscriptionId, String token, String fiwareService, 
+    JsonResponse deleteSubscriptionV1(String subscriptionId, String token, String fiwareService,
             String fiwareServicePath) throws Exception;
-    
+
     /**
      * Unsubscribe from Orion with a given subscription id (v2).
      * 
@@ -85,9 +96,9 @@ public interface OrionBackend {
      * @throws Exception
      * @return response
      */
-    JsonResponse deleteSubscriptionV2(String subscriptionId, String token, String fiwareService, 
+    JsonResponse deleteSubscriptionV2(String subscriptionId, String token, String fiwareService,
             String fiwareServicePath) throws Exception;
-    
+
     /**
      * Gets a current subscription with a given subscription id (v2).
      * 
@@ -98,9 +109,9 @@ public interface OrionBackend {
      * @throws Exception
      * @return response
      */
-    JsonResponse getSubscriptionsByIdV2(String token, String subscriptionId, String fiwareService, 
+    JsonResponse getSubscriptionsByIdV2(String token, String subscriptionId, String fiwareService,
             String fiwareServicePath) throws Exception;
-    
+
     /**
      * Gets all current subscriptions in the system (v2).
      * 
@@ -111,7 +122,23 @@ public interface OrionBackend {
      * @throws Exception
      * @return response
      */
-    JsonResponse getSubscriptionsV2(String token, String subscriptionId, String fiwareService, 
-            String fiwareServicePath) throws Exception;
-    
+    JsonResponse getSubscriptionsV2(String token, String subscriptionId, String fiwareService, String fiwareServicePath)
+            throws Exception;
+
+    /**
+     * Create or update entity in the system (v2).
+     * 
+     * @param bodyJSON
+     * @param orionToken
+     * @param fiwareService
+     * @param fiwareServicePath
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
+     * @throws UnsupportedEncodingException
+     * @throws CygnusBadAuthorization
+     * @throws JSONException
+     */
+    void updateRemoteContext(String bodyJSON, String orionToken, String fiwareService, String fiwareServicePath)
+            throws CygnusRuntimeError, CygnusPersistenceError, UnsupportedEncodingException, CygnusBadAuthorization,
+            JSONException;
 } // StatsBackend

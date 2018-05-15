@@ -39,7 +39,7 @@ import org.apache.http.message.BasicHeader;
 /**
  * Keystone implementation Backend.
  * 
- * @author dmartinez  - PMO Santander Smart City
+ * @author PMO Santander Smart City – Ayuntamiento de Santander
  */
 public class KeyStoneUtilsImpl extends HttpBackend implements KeyStoneUtils {
 
@@ -257,13 +257,13 @@ public class KeyStoneUtilsImpl extends HttpBackend implements KeyStoneUtils {
     /**
      * Token Cache class.
      * 
-     * @author dmartinez
+     * @author PMO Santander Smart City – Ayuntamiento de Santander
      */
     private class TokenCache {
         /**
          * Token class.
          * 
-         * @author dmartinez
+         * @author PMO Santander Smart City – Ayuntamiento de Santander
          *
          */
         private class Token {
