@@ -1,4 +1,4 @@
-# <a name="top"></a>NGSIPostgreSQLSink
+# <a name="top"></a>NGSIOrionSink
 Content:
 
 * [Functionality](#section1)
@@ -12,7 +12,7 @@ Content:
     * [Authentication and authorization](#section3.2)
 
 ## <a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.NGSIOrionSink`, or simply `NGSIOrionSink` is a sink designed to persist NGSI-like context data events within a [Context Broker](https://fiware-orion.readthedocs.io/en/master/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.NGSIOrionSink`, or simply `NGSIOrionSink` is a sink designed to persist NGSI-like context data events within a [Orion Context Broker](https://fiware-orion.readthedocs.io/en/master/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific Context Broker data structures.
 
@@ -67,7 +67,7 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
 ## <a name="section2"></a>Administration guide
 ### <a name="section2.1"></a>Configuration
-`NGSIPostgreSQLSink` is configured through the following parameters:
+`NGSIOrionSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
@@ -99,13 +99,13 @@ A configuration example could be:
     cygnus-ngsi.sinks = orion-sink
     cygnus-ngsi.channels = orion-channel
     ...
-    cygnus-ngsi.sinks.orion-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink
+    cygnus-ngsi.sinks.orion-sink.type = com.telefonica.iot.cygnus.sinks.NGSIOrionSink
     cygnus-ngsi.sinks.orion-sink.channel = orion-channel
     cygnus-ngsi.sinks.orion-sink.enable_encoding = false
     cygnus-ngsi.sinks.orion-sink.enable_grouping = false
     cygnus-ngsi.sinks.orion-sink.enable_lowercase = false
     cygnus-ngsi.sinks.orion-sink.enable_name_mappings = false
-    cygnus-ngsi.sinks.orion-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink
+    cygnus-ngsi.sinks.orion-sink.type = com.telefonica.iot.cygnus.sinks.NGSINGSIOrionSink
     cygnus-ngsi.sinks.orion-sink.channel = orion-channel
     cygnus-ngsi.sinks.orion-sink.enable_encoding = false
     cygnus-ngsi.sinks.orion-sink.enable_grouping = false
@@ -133,12 +133,12 @@ A configuration example could be:
 [Top](#top)
 
 ## <a name="section3"></a>Programmers guide
-### <a name="section3.1"></a>`NGSIPostgreSQLSink` class
+### <a name="section3.1"></a>`NGSIOrionSink` class
 As any other NGSI-like sink, `NGSIOrionSink` extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(NGSIBatch batch) throws Exception;
 
-A `NGSIBatch` contains a set of `NGSIEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the PostgreSQL table where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `OrionBackend` implementation.
+A `NGSIBatch` contains a set of `NGSIEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies other Context Borker where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `OrionBackend` implementation.
 
     public void start();
 
