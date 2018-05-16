@@ -70,8 +70,8 @@ fi
 
 # Check if CARTODB ENV vars
 if [ "$CYGNUS_CARTO_USER" != "" ]; then
-    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks = /c'${CYGNUS_AGENT_NAME}'.sinks = cartodb-sink ' ${FLUME_HOME}/conf/agent.conf
-    sed -i '/'${CYGNUS_AGENT_NAME}'.channels = /c'${CYGNUS_AGENT_NAME}'.channels = cartodb-channel ' ${FLUME_HOME}/conf/agent.conf
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks =/c'${CYGNUS_AGENT_NAME}'.sinks = cartodb-sink ' ${FLUME_HOME}/conf/agent.conf
+    sed -i '/'${CYGNUS_AGENT_NAME}'.channels =/c'${CYGNUS_AGENT_NAME}'.channels = cartodb-channel ' ${FLUME_HOME}/conf/agent.conf
     # Change parameters in the cartodb key configuration file
     sed -i 's/\"user\"/\"'${CYGNUS_CARTO_USER}'\"/g' ${FLUME_HOME}/conf/cartodb_keys.conf
     sed -i 's/\/\/user/\/\/'${CYGNUS_CARTO_USER}'/g' ${FLUME_HOME}/conf/cartodb_keys.conf
