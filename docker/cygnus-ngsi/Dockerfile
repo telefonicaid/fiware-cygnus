@@ -54,7 +54,7 @@ ENV CYGNUS_CARTO_KEY ""
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
 ENV GIT_REV_CYGNUS "master"
-ENV GIT_REV_CYGNUS "mybranch"
+#ENV GIT_REV_CYGNUS "mybranch"
 
 ENV MVN_VER "3.5.3"
 ENV MVN_HOME "/opt/apache-maven"
