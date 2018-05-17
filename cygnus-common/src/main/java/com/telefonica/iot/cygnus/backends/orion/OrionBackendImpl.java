@@ -166,48 +166,8 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
         return headers;
     }
 
-    // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/304
     /**
-     * // @Override public void updateContext(String entityId, String
-     * entityType, ArrayList<OrionStats> allAttrStats) throws Exception { //
-     * create the relative URL String relativeURL = "/v1/updateContext";
-     * 
-     * // create the http headers ArrayList<Header> headers = new ArrayList
-     * <Header>(); headers.add(new BasicHeader("Content-Type",
-     * "application/json")); headers.add(new BasicHeader("Accept",
-     * "application/json"));
-     * 
-     * // create the Json-based payload String jsonStr = "" + "{" +
-     * "   \"contextElements\": [" + "      {" + "         \"type\": \"" +
-     * entityType + "\"," + "         \"isPattern\": \"false\"," +
-     * "         \"id\": \"" + entityId + "\"," + "         \"attributes\": [";
-     * 
-     * if (allAttrStats != null) { for (int i = 0; i < allAttrStats.size(); i++)
-     * { OrionStats attrStats = allAttrStats.get(i); jsonStr += "" +
-     * "             {" + "                \"name\": \"" +
-     * attrStats.getAttrName() + "\"," + "                \"type\": \"" +
-     * attrStats.getAttrType() + "\"," + "                \"metadatas\":";
-     * jsonStr += attrStats.toNGSIString(); jsonStr += "" + "             }";
-     * 
-     * if (i != (allAttrStats.size() - 1)) { jsonStr += ","; } // if } // for }
-     * // if
-     * 
-     * jsonStr += "" + "         ]" + "      }" + "   ]," +
-     * "   \"updateAction\": \"UPDATE\"" + "}"; StringEntity entity = new
-     * StringEntity(jsonStr);
-     * 
-     * // do the request JsonResponse response = doRequest("POST", relativeURL,
-     * true, headers, entity);
-     * 
-     * // check the status if (response.getStatusCode() != 200) { throw new
-     * CygnusPersistenceError(
-     * "The context could not be updated. HttpFS response: " +
-     * response.getStatusCode() + " " + response.getReasonPhrase()); } // if }
-     * // updateContext
-     **/
-
-    /**
-     * Create or update entity in the system (v2).
+     * Create or update entity in the system (NGSIv2).
      * 
      * @param bodyJSON
      * @param orionToken
@@ -239,7 +199,7 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
             throw e;
         }
         // Create the relative URL Update
-        String relativeURLActualizacion = relativeURL + "/" + body.get("id") + "/attrs";
+        String relativeUrlUpdate = relativeURL + "/" + body.get("id") + "/attrs";
 
         // Remove de attributes id and type of entity
         body.remove("id");
@@ -250,7 +210,7 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
         StringEntity entity = new StringEntity(body.toString());
 
         // Update entity
-        JsonResponse response = doRequest("POST", relativeURLActualizacion, true, headers, entity);
+        JsonResponse response = doRequest("POST", relativeUrlUpdate, true, headers, entity);
         LOGGER.debug("Response of update entity. Status Code --> " + response.getStatusCode() + " , Reason Phrase --> "
                 + response.getReasonPhrase());
         // check the status of response, if status code is 404, the entity is
@@ -265,7 +225,6 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
                     + " , Reason Phrase --> " + response.getReasonPhrase());
         } else if (response.getStatusCode() == 401) {
             throw new CygnusBadAuthorization("Error of authorization.");
-
         }
 
         // check the status

@@ -25,22 +25,25 @@ import org.apache.log4j.LogManager;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import com.telefonica.iot.cygnus.backends.orion.OrionBackendImpl;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import com.telefonica.iot.cygnus.utils.PropertyUtils;
-import com.telefonica.iot.cygnus.utils.auth.keystone.KeyStoneUtilsImpl;
 
 /**
  *
  * @author PMO Santander Smart City – Ayuntamiento de Santander
  */
+@RunWith(MockitoJUnitRunner.class)
 public class NGSIOrionBaseSinkTest {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIOrionBaseSinkTest.class);
     private PropertyUtils propertyUtils = null;
-
+    private NGSIOrionSink sink;
+    
+    
     /**
      * Constructor.
      */
@@ -49,11 +52,11 @@ public class NGSIOrionBaseSinkTest {
     } // NGSIOrionBaseSinkTest
 
     /**
+     * @throws Exception
      * 
      */
     @Before
-    public void setup() {
-        propertyUtils = new PropertyUtils("./src/test/resources/login.properties");
+    public void setup() throws Exception {
     } // setup
 
     /**
@@ -67,23 +70,6 @@ public class NGSIOrionBaseSinkTest {
         LOGGER.debug(getTestTraceHead("[NGSIOrionBaseSink.buildCollectionName]")
                 + "-------- When / service-path is notified/defaulted and data_model=dm-by-entity, the OrionDB"
                 + "collections name is the concatenation of the <prefix>, <service-path>, <entityId> and <entityType>");
-
-        String orionHost = propertyUtils.getProperty("orionHost");
-        String orionPort = propertyUtils.getProperty("orionPort");
-        String orionHostKey = propertyUtils.getProperty("orionHostKey");
-        String orionPortKey = propertyUtils.getProperty("orionPortKey");
-        String orionUsername = propertyUtils.getProperty("orionUsername");
-        String orionPassword = propertyUtils.getProperty("orionPassword");
-        String orionFiware = propertyUtils.getProperty("orionFiware");
-        String orionFiwarePath = propertyUtils.getProperty("orionFiwarePath");
-        NGSIOrionSink sink = new NGSIOrionSink();
-        sink.configure(NGSIUtilsForTests.createContextForOrion(orionHost, orionPort, orionHostKey, orionPortKey,
-                orionUsername, orionPassword, orionFiware, orionFiwarePath));
-        boolean ssl = true;
-        int maxConns = 50;
-        int maxConnsPerRoute = 50;
-        sink.setKeyStoneUtils(new KeyStoneUtilsImpl(orionHostKey, orionPortKey, ssl, maxConns, maxConnsPerRoute));
-        sink.setOrionBackend(new OrionBackendImpl(orionHost, orionPort, ssl, maxConns, maxConnsPerRoute));
 
         String datos = " {Processing headers={\"notified-entity\"=\"Room1_Room\", "
                 + "\"transaction-id\"=\"e82ef180-4c99-4d67-a719-e02242c5e108\", \"grouped-servicepath\"=\""
@@ -99,12 +85,26 @@ public class NGSIOrionBaseSinkTest {
         try {
             String bodyJSON = datos;
 
-            bodyJSON = new JSONObject(bodyJSON.replaceAll("=", ":")).getString("updateObject");
+            propertyUtils = new PropertyUtils("./src/test/resources/login.properties");
+            String orionHost = propertyUtils.getProperty("orionHost");
+            String orionPort = propertyUtils.getProperty("orionPort");
+            String orionHostKey = propertyUtils.getProperty("orionHostKey");
+            String orionPortKey = propertyUtils.getProperty("orionPortKey");
+            String orionUsername = propertyUtils.getProperty("orionUsername");
+            String orionPassword = propertyUtils.getProperty("orionPassword");
+            String orionFiware = propertyUtils.getProperty("orionFiware");
+            String orionFiwarePath = propertyUtils.getProperty("orionFiwarePath");
 
-            sink.updateRemoteContext(bodyJSON, orionFiware, orionFiwarePath);
+            sink = new NGSIOrionSink();
+            
+            sink.configure(NGSIUtilsForTests.createContextForOrion(orionHost, orionPort, orionHostKey, orionPortKey,
+                    orionUsername, orionPassword, orionFiware, orionFiwarePath));
+
+            bodyJSON = new JSONObject(bodyJSON.replaceAll("=", ":")).getString("updateObject");
+            
 
             try {
-                assertTrue(true);
+                assertTrue(sink.getInvalidConfiguration());
                 LOGGER.debug(getTestTraceHead("[NGSIOrionBaseSink.updateRemoteContext]") + "-  OKs");
             } catch (AssertionError e) {
                 LOGGER.error(getTestTraceHead("[NGSIOrionBaseSink.updateRemoteContext]") + "- FAIL");

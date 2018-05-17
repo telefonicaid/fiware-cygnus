@@ -33,21 +33,8 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 public interface OrionBackend {
 
     /**
-     * Updates a context element given a list of statistical metadata for each
-     * entity's attribute.
-     * 
-     * @param entityId
-     * @param entityType
-     * @param allAttrStats
-     * @throws Exception
-     */
-    // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/304
-    // void updateContext(String entityId, String entityType,
-    // ArrayList<OrionStats> allAttrStats) throws Exception;
-
-    /**
      * Subscribe to Orion with a given port, host and string with subscription
-     * information (v1).
+     * information (NGSIv1).
      * 
      * @param subscription
      * @param token
@@ -61,7 +48,7 @@ public interface OrionBackend {
 
     /**
      * Subscribe to Orion with a given port, host and string with subscription
-     * information (v2).
+     * information (NGSIv2).
      * 
      * @param subscription
      * @param token
@@ -74,7 +61,7 @@ public interface OrionBackend {
             throws Exception;
 
     /**
-     * Unsubscribe from Orion with a given subscription id (v1).
+     * Unsubscribe from Orion with a given subscription id (NGSIv1).
      * 
      * @param subscriptionId
      * @param token
@@ -87,7 +74,7 @@ public interface OrionBackend {
             String fiwareServicePath) throws Exception;
 
     /**
-     * Unsubscribe from Orion with a given subscription id (v2).
+     * Unsubscribe from Orion with a given subscription id (NGSIv2).
      * 
      * @param subscriptionId
      * @param token
@@ -100,7 +87,7 @@ public interface OrionBackend {
             String fiwareServicePath) throws Exception;
 
     /**
-     * Gets a current subscription with a given subscription id (v2).
+     * Gets a current subscription with a given subscription id (NGSIv2).
      * 
      * @param token
      * @param subscriptionId
@@ -113,7 +100,7 @@ public interface OrionBackend {
             String fiwareServicePath) throws Exception;
 
     /**
-     * Gets all current subscriptions in the system (v2).
+     * Gets all current subscriptions in the system (NGSIv2).
      * 
      * @param token
      * @param subscriptionId
@@ -126,7 +113,7 @@ public interface OrionBackend {
             throws Exception;
 
     /**
-     * Create or update entity in the system (v2).
+     * Create or update entity in the system (NGSIv2).
      * 
      * @param bodyJSON
      * @param orionToken

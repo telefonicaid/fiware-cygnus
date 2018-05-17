@@ -345,7 +345,7 @@ public class NGSIOrionSink extends NGSISink {
             orionBackend = new OrionBackendImpl(getOrionHost(), getOrionPort(), isOrionSsl(), MAX_CONNS,
                     MAX_CONNS_PER_ROUTE);
             LOGGER.debug("[" + this.getName() + "] Orion persistence backend created");
-            LOGGER.info("Fin start() keyStoneBackend --> " + keyStoneUtils + ", orionToken --> " + orionToken
+            LOGGER.info("Fin start() keyStoneUtils --> " + keyStoneUtils + ", orionToken --> " + orionToken
                     + ", orionBackend --> " + orionBackend);
         } catch (Exception e) {
             LOGGER.error("Error while creating the Orion persistence backend. Details=" + e.getLocalizedMessage());
