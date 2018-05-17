@@ -69,11 +69,16 @@ public final class NGSIUtilsForTests {
     
     /**
      * Creates a Flume context for Orion sinks.
-     * @param collectionPrefix
-     * @param dbPrefix
-     * @param dataModel
-     * @param enableEncoding
-     * @return A context for Orion sinks.
+     * 
+     * @param orionHost
+     * @param orionPort
+     * @param orionHostKey
+     * @param orionPortKey
+     * @param orionUsername
+     * @param orionPassword
+     * @param orionFiware
+     * @param orionFiwarePath
+     * @return
      */
     public static Context createContextForOrion(String orionHost, String orionPort,
             String orionHostKey, String orionPortKey,

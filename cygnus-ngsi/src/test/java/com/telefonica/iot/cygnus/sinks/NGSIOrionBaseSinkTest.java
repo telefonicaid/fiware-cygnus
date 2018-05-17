@@ -19,6 +19,7 @@ package com.telefonica.iot.cygnus.sinks;
 
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -26,11 +27,14 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.telefonica.iot.cygnus.backends.orion.OrionBackend;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
-import com.telefonica.iot.cygnus.utils.PropertyUtils;
+import com.telefonica.iot.cygnus.utils.auth.keystone.KeyStoneUtils;
 
 /**
  *
@@ -40,8 +44,12 @@ import com.telefonica.iot.cygnus.utils.PropertyUtils;
 public class NGSIOrionBaseSinkTest {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIOrionBaseSinkTest.class);
-    private PropertyUtils propertyUtils = null;
     private NGSIOrionSink sink;
+
+    @Mock
+    private KeyStoneUtils mockKeyStoneUtils;
+    @Mock
+    private OrionBackend mockOrionBackend;
     
     
     /**
@@ -57,6 +65,9 @@ public class NGSIOrionBaseSinkTest {
      */
     @Before
     public void setup() throws Exception {
+
+        Mockito.doNothing().when(mockOrionBackend).updateRemoteContext(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+        Mockito.when(mockKeyStoneUtils.getSessionToken(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn("Token");
     } // setup
 
     /**
@@ -70,41 +81,34 @@ public class NGSIOrionBaseSinkTest {
         LOGGER.debug(getTestTraceHead("[NGSIOrionBaseSink.buildCollectionName]")
                 + "-------- When / service-path is notified/defaulted and data_model=dm-by-entity, the OrionDB"
                 + "collections name is the concatenation of the <prefix>, <service-path>, <entityId> and <entityType>");
-
-        String datos = " {Processing headers={\"notified-entity\"=\"Room1_Room\", "
-                + "\"transaction-id\"=\"e82ef180-4c99-4d67-a719-e02242c5e108\", \"grouped-servicepath\"=\""
-                + propertyUtils.getProperty("orionFiwarePath")
-                + "\", \"fiware-correlator\"=\"e82ef180-4c99-4d67-a719-e02242c5e108\", \"fiware-servicepath\"=\""
-                + propertyUtils.getProperty("orionFiwarePath") + "\", \"fiware-service\"=\""
-                + propertyUtils.getProperty("orionFiware")
-                + "\", \"grouped-entity\"=\"Room1_Room\", "
-                + "\"timestamp\"=\"1499097276139\"}, Processing context element={id=Room1, type=Room}, "
-                + "Processing attribute={name=temperature, type=centigrade, value=\"26.5\", metadata=[]}, "
-                + "updateObject={id=Room1, type=Room, \"temperature\" ={ type=\"centigrade\", value=\"26.5\"}}}";
-
+        
         try {
-            String bodyJSON = datos;
 
-            propertyUtils = new PropertyUtils("./src/test/resources/login.properties");
-            String orionHost = propertyUtils.getProperty("orionHost");
-            String orionPort = propertyUtils.getProperty("orionPort");
-            String orionHostKey = propertyUtils.getProperty("orionHostKey");
-            String orionPortKey = propertyUtils.getProperty("orionPortKey");
-            String orionUsername = propertyUtils.getProperty("orionUsername");
-            String orionPassword = propertyUtils.getProperty("orionPassword");
-            String orionFiware = propertyUtils.getProperty("orionFiware");
-            String orionFiwarePath = propertyUtils.getProperty("orionFiwarePath");
+            
+            String bodyJSON = "{\"id\": \"Car1\", \"type\": \"Car\", \"speed\": { \"type\":\"Float\", \"value\": 98 } }";
+            
+            String orionHost = "XXXXXX Host";
+            String orionPort = "80";
+            String orionHostKey = "XXXXXX Host KEY";
+            String orionPortKey = "8080";
+            String orionUsername = "XXXXXX Username";
+            String orionPassword = "XXXXXX Password";
+            String orionFiware = "XXXXXX Fiware";
+            String orionFiwarePath = "XXXXXX FiwarePath";
+            String enableEncoding = "falso";
 
             sink = new NGSIOrionSink();
             
             sink.configure(NGSIUtilsForTests.createContextForOrion(orionHost, orionPort, orionHostKey, orionPortKey,
                     orionUsername, orionPassword, orionFiware, orionFiwarePath));
-
-            bodyJSON = new JSONObject(bodyJSON.replaceAll("=", ":")).getString("updateObject");
+            sink.setKeyStoneUtils(mockKeyStoneUtils);
+            sink.setOrionBackend(mockOrionBackend);
+            bodyJSON = new JSONObject(bodyJSON.replaceAll("=", ":")).toString();
             
 
             try {
-                assertTrue(sink.getInvalidConfiguration());
+                sink.updateRemoteContext(bodyJSON, orionFiware, orionFiwarePath);
+                assertTrue(true);
                 LOGGER.debug(getTestTraceHead("[NGSIOrionBaseSink.updateRemoteContext]") + "-  OKs");
             } catch (AssertionError e) {
                 LOGGER.error(getTestTraceHead("[NGSIOrionBaseSink.updateRemoteContext]") + "- FAIL");
