@@ -78,7 +78,7 @@ if [ "$CYGNUS_CARTO_USER" != "" ]; then
     sed -i '/"key":/c "key":"'${CYGNUS_CARTO_KEY}'"' ${FLUME_HOME}/conf/cartodb_keys.conf
 fi
 
-if [ "$CYGNUS_MYSQL_HOST" != "" ]; then
+if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = postgresql-sink /g' ${FLUME_HOME}/conf/agent.conf
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = postgresql-channel /g' ${FLUME_HOME}/conf/agent.conf
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_host/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_host = '${CYGNUS_POSTGRESQL_HOST} ${FLUME_HOME}/conf/agent.conf
