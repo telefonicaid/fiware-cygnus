@@ -1,4 +1,5 @@
 [cygnus-ngsi][KafkaSink] Use lower_case option to build topics (#1468)
+[cygnus-ngsi][Docker] Upgrade to just enable sinks and channels depending on ENV vars [#1482]
 [cygnus-ngsi][Docker] Upgrade to CentOS 7, Maven 3.5.2 and Java 1.8.0 in Dockerfile
 [cygnus-common][Docker] Upgrade to CentOS 7, Maven 3.5.2 and Java 1.8.0 in Dockerfile
 [cygnus-twitter][Docker] Upgrade to CentOS 7, Maven 3.5.2 and Java 1.8.0 in Dockerfile
