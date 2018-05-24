@@ -78,6 +78,11 @@ if [ "$CYGNUS_CARTO_USER" != "" ]; then
     sed -i '/"key":/c "key":"'${CYGNUS_CARTO_KEY}'"' ${FLUME_HOME}/conf/cartodb_keys.conf
 fi
 
+# Export JAVA_OPTS
+JAVA_OPTS=${CYGNUS_JAVA_OPTS}
+export JAVA_OPTS
+
+
 # Run the Cygnus command
 ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${CYGNUS_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p ${CYGNUS_API_PORT} -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
 
