@@ -26,7 +26,7 @@ AGENT_CONF_FILE=agent.conf
 
 # Check if MYSQL ENV vars
 if [ "$CYGNUS_MYSQL_HOST" != "" ]; then
-    if [ $CYGNUS_MULTIAGENT ]; then
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-mysql.conf
     fi
     cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -41,7 +41,7 @@ fi
 
 # Check if MONGO ENV vars
 if [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
-    if [ $CYGNUS_MULTIAGENT ]; then
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-mongo.conf
     fi
     cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -58,7 +58,7 @@ fi
 
 # Check if CKAN ENV vars
 if [ "$CYGNUS_CKAN_HOST" != "" ]; then
-    if [ $CYGNUS_MULTIAGENT ]; then
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-ckan.conf
     fi
     cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -73,7 +73,7 @@ fi
 
 # Check if HDFS ENV vars
 if [ "$CYGNUS_HDFS_HOST" != "" ]; then
-    if [ $CYGNUS_MULTIAGENT ]; then
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-hdfs.conf
     fi
     cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -88,7 +88,7 @@ fi
 
 # Check if CARTODB ENV vars
 if [ "$CYGNUS_CARTO_USER" != "" ]; then
-    if [ $CYGNUS_MULTIAGENT ]; then
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-carto.conf
     fi
     cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -102,7 +102,7 @@ if [ "$CYGNUS_CARTO_USER" != "" ]; then
 fi
 
 if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
-    if [ $CYGNUS_MULTIAGENT ]; then
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-postgresql.conf
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = postgresql-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
