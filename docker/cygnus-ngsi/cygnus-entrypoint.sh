@@ -37,6 +37,34 @@ if [ "$CYGNUS_MYSQL_HOST" != "" ]; then
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_port/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_port = '${CYGNUS_MYSQL_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_username/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_username = '${CYGNUS_MYSQL_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_password/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_password = '${CYGNUS_MYSQL_PASS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    # The following are optional and disabled by default
+    if [ "$CYGNUS_MYSQL_ENABLE_ENCODING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.enable_encoding = '${CYGNUS_MYSQL_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MYSQL_ENABLE_GROUPING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.enable_grouping = '${CYGNUS_MYSQL_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.enable_name_mappings = '${CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MYSQL_ENABLE_LOWERCASE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.enable_lowercase/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.enable_lowercase = '${CYGNUS_MYSQL_ENABLE_LOWERCASE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MYSQL_DATA_MODEL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.data_model/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.data_model = '${CYGNUS_MYSQL_DATA_MODEL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MYSQL_ATTR_PERSISTENCE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.attr_persistence/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.attr_persistence = '${CYGNUS_MYSQL_ATTR_PERSISTENCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MYSQL_BATCH_SIZE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.batch_size/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.batch_size = '${CYGNUS_MYSQL_BATCH_SIZE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MYSQL_BATCH_TIMEOUT" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.batch_timeout/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.batch_timeout = '${CYGNUS_MYSQL_BATCH_TIMEOUT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MYSQL_BATCH_TTL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.batch_ttl = '${CYGNUS_MYSQL_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
 fi
 
 # Check if MONGO ENV vars
@@ -54,6 +82,89 @@ if [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_hosts/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_hosts = '${CYGNUS_MONGO_HOSTS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_username/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_username = '${CYGNUS_MONGO_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_password/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_password = '${CYGNUS_MONGO_PASS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    # The following are optional and disabled by default
+    if [ "$CYGNUS_MONGO_ENABLE_ENCODING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_encoding = '${CYGNUS_MONGO_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MONGO_ENABLE_GROUPING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_grouping = '${CYGNUS_MONGO_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MONGO_ENABLE_NAME_MAPPINGS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_name_mappings = '${CYGNUS_MONGO_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MONGO_ENABLE_LOWERCASE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_lowercase/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_lowercase = '${CYGNUS_MONGO_ENABLE_LOWERCASE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MONGO_DATA_MODEL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.data_model/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.data_model = '${CYGNUS_MONGO_DATA_MODEL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MONGO_ATTR_PERSISTENCE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.attr_persistence/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.attr_persistence = '${CYGNUS_MONGO_ATTR_PERSISTENCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MONGO_DB_PREFIX" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.db_prefix/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.db_prefix = '${CYGNUS_MONGO_DB_PREFIX} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MONGO_COLLECTION_PREFIX" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.collection_prefix/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.collection_prefix = '${CYGNUS_MONGO_COLLECTION_PREFIX} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MONGO_BATCH_SIZE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.batch_size/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.batch_size = '${CYGNUS_MONGO_BATCH_SIZE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MONGO_BATCH_TIMEOUT" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.batch_timeout/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.batch_timeout = '${CYGNUS_MONGO_BATCH_TIMEOUT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MONGO_BATCH_TTL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.batch_ttl = '${CYGNUS_MONGO_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MONGO_DATA_EXPIRATION" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.data_expiration/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.data_expiration = '${CYGNUS_MONGO_DATA_EXPIRATION} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MONGO_COLLECTIONS_SIZE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.collections_size/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.collections_size = '${CYGNUS_MONGO_COLLECTIONS_SIZE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_MONGO_MAX_DOCUMENTS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.max_documents/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.max_documents = '${CYGNUS_MONGO_MAX_DOCUMENTS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_IGNORE_WHITE_SPACES" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.ignore_white_spaces/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.ignore_white_spaces = '${CYGNUS_MONGO_IGNORE_WHITE_SPACES} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_STH_ENABLE_ENCODING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.enable_encoding = '${CYGNUS_STH_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_STH_ENABLE_GROUPING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.enable_grouping = '${CYGNUS_STH_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_STH_ENABLE_NAME_MAPPINGS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.enable_name_mappings = '${CYGNUS_STH_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_STH_ENABLE_LOWERCASE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.enable_lowercase/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.enable_lowercase = '${CYGNUS_STH_ENABLE_LOWERCASE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_STH_DATA_MODEL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.data_model/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.data_model = '${CYGNUS_STH_DATA_MODEL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+
+    if [ "$CYGNUS_STH_DB_PREFIX" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.db_prefix/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.db_prefix = '${CYGNUS_STH_DB_PREFIX} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_STH_COLLECTION_PREFIX" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.collection_prefix/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.collection_prefix = '${CYGNUS_STH_COLLECTION_PREFIX} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_STH_RESOLUTIONS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.resolutions/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.resolutions = '${CYGNUS_STH_RESOLUTIONS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_STH_BATCH_SIZE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.batch_size/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.batch_size = '${CYGNUS_STH_BATCH_SIZE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_STH_BATCH_TIMEOUT" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.batch_timeout/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.batch_timeout = '${CYGNUS_STH_BATCH_TIMEOUT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_STH_BATCH_TTL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.batch_ttl = '${CYGNUS_STH_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_STH_DATA_EXPIRATION" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.data_expiration/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.data_expiration = '${CYGNUS_STH_DATA_EXPIRATION} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
 fi
 
 # Check if CKAN ENV vars
@@ -69,6 +180,40 @@ if [ "$CYGNUS_CKAN_HOST" != "" ]; then
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.ckan_port/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.ckan_port = '${CYGNUS_CKAN_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.ssl/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.ssl = '${CYGNUS_CKAN_SSL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.api_key/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.api_key = '${CYGNUS_CKAN_API_KEY} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    # The following are optional and disabled by default
+    if [ "$CYGNUS_CKAN_ENABLE_ENCODING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.enable_encoding = '${CYGNUS_CKAN_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_CKAN_ENABLE_GROUPING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.enable_grouping = '${CYGNUS_CKAN_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_CKAN_ENABLE_NAME_MAPPINGS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.enable_name_mappings = '${CYGNUS_CKAN_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_CKAN_DATA_MODEL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.data_model/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.data_model = '${CYGNUS_CKAN_DATA_MODEL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_CKAN_ATTR_PERSISTENCE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.attr_persistence/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.attr_persistence = '${CYGNUS_CKAN_ATTR_PERSISTENCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_CKAN_ORION_URL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.orion_url/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.orion_url = '${CYGNUS_CKAN_ORION_URL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_CKAN_BATCH_SIZE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.batch_size/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.batch_size = '${CYGNUS_CKAN_BATCH_SIZE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_CKAN_BATCH_TIMEOUT" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.batch_timeout/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.batch_timeout = '${CYGNUS_CKAN_BATCH_TIMEOUT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_CKAN_BATCH_TTL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.batch_ttl = '${CYGNUS_CKAN_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_CKAN_BACKEND_MAX_CONNS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.backend.max_conns/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.backend.max_conns = '${CYGNUS_CKAN_MAX_CONNS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_CKAN_BACKEND_MAX_CONNS_PER_ROUTE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.backend.max_connections_per_route/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.backend.max_conns_per_route = '${CYGNUS_CKAN_MAX_CONNS_PER_ROUTE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
 fi
 
 # Check if HDFS ENV vars
@@ -84,6 +229,59 @@ if [ "$CYGNUS_HDFS_HOST" != "" ]; then
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.hdfs_port/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.hdfs_port = '${CYGNUS_HDFS_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.hdfs_username/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.hdfs_username = '${CYGNUS_HDFS_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.oauth2_token/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.oauth2_token = '${CYGNUS_HDFS_TOKEN} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    # The following are optional and disabled by default
+    if [ "$CYGNUS_HDFS_ENABLE_ENCODING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.enable_encoding = '${CYGNUS_HDFS_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_ENABLE_GROUPING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.enable_grouping = '${CYGNUS_HDFS_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_ENABLE_NAME_MAPPINGS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.enable_name_mappings = '${CYGNUS_HDFS_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_ENABLE_LOWERCASE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.enable_lowercase/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.enable_lowercase = '${CYGNUS_HDFS_ENABLE_LOWERCASE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_DATA_MODEL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.data_model/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.data_model = '${CYGNUS_HDFS_DATA_MODEL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_FILE_FORMAT" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.file_format/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.file_format = '${CYGNUS_HDFS_FILE_FORMAT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+
+    if [ "$CYGNUS_HDFS_BACKEND_IMPL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.backend.impl/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.backend.impl = '${CYGNUS_HDFS_BACKEND_IMPL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_BACKEND_MAX_CONNS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.backend.max_conns/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.backend.max_conns = '${CYGNUS_HDFS_BACKEND_MAX_CONNS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_BACKEND_MAX_CONNS_PER_ROUTE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.backend.max_conns_per_route/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.backend.max_conns_per_route = '${CYGNUS_HDFS_BACKEND_MAX_CONNS_PER_ROUTE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_PASSWORD" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.password/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.password = '${CYGNUS_HDFS_PASSWORD} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_SERVICE_AS_NAMESPACE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.service_as_namespace/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.service_as_namespace = '${CYGNUS_HDFS_BATCH_SIZE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_BATCH_SIZE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.batch_size/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.batch_size = '${CYGNUS_HDFS_BATCH_SIZE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_BATCH_TIMEOUT" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.batch_timeout/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.batch_timeout = '${CYGNUS_HDFS_BATCH_TIMEOUT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_BATCH_TTL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.batch_ttl = '${CYGNUS_HDFS_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_BATCH_RETRY_INTERVALS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.batch_retry_intervals/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.batch_retry_intervals = '${CYGNUS_HDFS_BATCH_RETRY_INTERVALS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_HIVE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.hive/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.hive = '${CYGNUS_HDFS_HIVE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_HDFS_KRB5_AUTH" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.krb5_auth/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.krb5_auth = '${CYGNUS_HDFS_KRB5_AUTH} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
 fi
 
 # Check if CARTODB ENV vars
@@ -112,6 +310,31 @@ if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_port/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_port = '${CYGNUS_POSTGRESQL_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_username/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_username = '${CYGNUS_POSTGRESQL_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_password/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_password = '${CYGNUS_POSTGRESQL_PASS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    # The following are optional and disabled by default
+    if [ "$CYGNUS_POSTGRESQL_ENABLE_ENCODING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_encoding = '${CYGNUS_POSTGRESQL_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGRESQL_ENABLE_GROUPING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_grouping = '${CYGNUS_POSTGRESQL_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_name_mappings = '${CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGRESQL_ENABLE_LOWERCASE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_lowercase/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_lowercase = '${CYGNUS_POSTGRESQL_ENABLE_LOWERCASE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGRESQL_ATTR_PERSISTENCE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.attr_persistence/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.attr_persistence = '${CYGNUS_POSTGRESQL_ATTR_PERSISTENCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGRESQL_BATCH_SIZE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.batch_size/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.batch_size = '${CYGNUS_POSTGRESQL_BATCH_SIZE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGRESQL_BATCH_TIMEOUT" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.batch_timeout/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.batch_timeout = '${CYGNUS_POSTGRESQL_BATCH_TIMEOUT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGRESQL_BATCH_TTL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.batch_ttl = '${CYGNUS_POSTGRESQL_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
 fi
 
 
