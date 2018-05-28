@@ -212,7 +212,7 @@ if [ "$CYGNUS_CKAN_HOST" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.backend.max_conns/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.backend.max_conns = '${CYGNUS_CKAN_MAX_CONNS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     if [ "$CYGNUS_CKAN_BACKEND_MAX_CONNS_PER_ROUTE" != "" ]; then
-        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.backend.max_connections_per_route/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.backend.max_conns_per_route = '${CYGNUS_CKAN_MAX_CONNS_PER_ROUTE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.backend.max_conns_per_route/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.backend.max_conns_per_route = '${CYGNUS_CKAN_MAX_CONNS_PER_ROUTE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
 fi
 
