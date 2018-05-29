@@ -174,7 +174,6 @@ As seen above, the default configuration distributed with the image is tied to c
     * The port for MYSQL is `3306` but can be changed through the CYGNUS_MYSQL_PORT environment variable.
     * The user for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_USER environment variable.
     * The pass for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_PASS environment variable.
-
     * CYGNUS_MYSQL_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_MYSQL_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
@@ -182,7 +181,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_MYSQL_DATA_MODEL: select the data_model: dm-by-service-path or dm-by-entity.
     * CYGNUS_MYSQL_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
     * CYGNUS_MYSQL_BATCH_SIZE: number of notifications to be included within a processing batch.
-    * CYGNUS_MYSQL_BATCH_TIMEOUT: timeout for batch accumulation.
+    * CYGNUS_MYSQL_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_MYSQL_BATCH_TTL: number of retries upon persistence error.
 
 * Mongo and STH:
@@ -200,7 +199,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_MONGO_DB_PREFIX: prefix for the MongoDB databases
     * CYGNUS_MONGO_COLLECTION_PREFIX: prefix for the MongoDB collections
     * CYGNUS_MONGO_BATCH_SIZE: number of notifications to be included within a processing batch.
-    * CYGNUS_MONGO_BATCH_TIMEOUT:  timeout for batch accumulation.
+    * CYGNUS_MONGO_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_MONGO_BATCH_TTL: number of retries upon persistence error.
     * CYGNUS_MONGO_DATA_EXPIRATION: value specified in seconds. Set to 0 if not wanting this policy
     * CYGNUS_MONGO_COLLECTIONS_SIZE: value specified in bytes. Set to 0 if not wanting this policy. Minimum value (different than 0) is 4096 bytes
@@ -215,10 +214,9 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_STH_COLLECTION_PREFIX: prefix for the MongoDB collections
     * CYGNUS_STH_RESOLUTIONS: accepted values are month, day, hour, minute and second separated by comma
     * CYGNUS_STH_BATCH_SIZE: number of notifications to be included within a processing batch.
-    * CYGNUS_STH_BATCH_TIMEOUT: timeout for batch accumulation.
+    * CYGNUS_STH_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_STH_BATCH_TTL: number of retries upon persistence error.
     * CYGNUS_STH_DATA_EXPIRATION: value specified in seconds. Set to 0 if not wanting this policy
-    * CYGNUS_STH_COLLECTIONS_SIZE: value specified in bytes. Set to 0 if not wanting this policy. Minimum value (different than 0) is 4096 bytes
 
 * CKAN:
     * It only works for building historical context data in CKAN.
@@ -233,10 +231,9 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_CKAN_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
     * CYGNUS_CKAN_ORION_URL: Orion URL used to compose the resource URL with the convenience operation URL to query it
     * CYGNUS_CKAN_BATCH_SIZE: number of notifications to be included within a processing batch.
-    * CYGNUS_CKAN_BATCH_TIMEOUT: timeout for batch accumulation.
+    * CYGNUS_CKAN_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_CKAN_BATCH_TTL: number of retries upon persistence error.
     * CYGNUS_CKAN_BACKEND_MAX_CONNS: maximum number of Http connections to CKAN backend
-#cygnus-ngsi.sinks.ckan-sink.backend.max_conns = 500
     * CYGNUS_CKAN_BACKEND_MAX_CONSS_PER_ROUTE: maximum number of Http connections per route to CKAN backend
 
 * HDFS:
@@ -257,11 +254,11 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_HDFS_PASSWORD: password for the above username; this is only required for Hive authentication
     * CYGNUS_HDFS_SERVICE_AS_NAMESPACE: true if the notified fiware-service (or the default one, if no one is notified) is used as the HDFS namespace, false otherwis
     * CYGNUS_HDFS_BATCH_SIZE:  number of notifications to be included within a processing batch.
-    * CYGNUS_HDFS_BATCH_TIMEOUT: timeout for batch accumulation.
+    * CYGNUS_HDFS_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_HDFS_BATCH_TTL: number of retries upon persistence error.
     * CYGNUS_HDFS_BATCH_RETRY_INTERVALS
-    * CYGNUS_HDFS_HIVE: Hive enabling
-    * CYGNUS_HDFS_KRB5_AUTH: Kerberos-based authentication enabling
+    * CYGNUS_HDFS_HIVE: true enables Hive, false disabled it
+    * CYGNUS_HDFS_KRB5_AUTH: true enables Kerberos-basded authentication, false disables it
 
 * PostgreSQL:
     * It only works for building historical context data in PostgreSQL.
@@ -275,7 +272,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_POSTGRESQL_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
     * CYGNUS_POSTGRESQL_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
     * CYGNUS_POSTGRESQL_BATCH_SIZE: number of notifications to be included within a processing batch.
-    * CYGNUS_POSTGRESQL_BATCH_TIMEOUT: timeout for batch accumulation.
+    * CYGNUS_POSTGRESQL_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_POSTGRESQL_BATCH_TTL: number of retries upon persistence error.
 
 * Carto:
