@@ -155,34 +155,131 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 ### <a name="section3.2"></a>Using a specific configuration
 As seen above, the default configuration distributed with the image is tied to certain values that may not be suitable for you tests. Specifically:
 
+* Multiagent:
+    * Enable multiagent cygnus: CYGNUS_MULTIAGENT environment variable. If enabled, each sink will run in a diferent port:
+
+| sink   | port   |
+|--:|--:|
+| mysql  | 5050 |
+| mongo | 5051 |
+| ckan | 5052 |
+| hdfs | 5053 |
+| postgresql | 5054 |
+| cartodb | 5055 |
+
+
 * MySQL:
     * It only works for building historical context data in MySQL.
     * The endpoint for MYSQL is `iot-mysql` but can be changed through the CYGNUS_MYSQL_HOST environment variable.
     * The port for MYSQL is `3306` but can be changed through the CYGNUS_MYSQL_PORT environment variable.
     * The user for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_USER environment variable.
     * The pass for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_PASS environment variable.
+    * CYGNUS_MYSQL_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
+    * CYGNUS_MYSQL_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
+    * CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_MYSQL_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
+    * CYGNUS_MYSQL_DATA_MODEL: select the data_model: dm-by-service-path or dm-by-entity.
+    * CYGNUS_MYSQL_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
+    * CYGNUS_MYSQL_BATCH_SIZE: number of notifications to be included within a processing batch.
+    * CYGNUS_MYSQL_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
+    * CYGNUS_MYSQL_BATCH_TTL: number of retries upon persistence error.
+
 * Mongo and STH:
     * Mongo only works for building historical context data in Mongo.
     * STH only works for building historical context data in STH.
     * The endpoint for Mongo and STH, containing host and port, is `iot-mongo:27017` but can be changed through the CYGNUS_MONGO_HOSTS environment variable.
     * The user for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
     * The pass for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_PASS environment variable.
+    * CYGNUS_MONGO_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
+    * CYGNUS_MONGO_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
+    * CYGNUS_MONGO_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_MONGO_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
+    * CYGNUS_MONGO_DATA_MODEL: select the data_model: dm-by-service-path or dm-by-entity.
+    * CYGNUS_MONGO_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
+    * CYGNUS_MONGO_DB_PREFIX: prefix for the MongoDB databases
+    * CYGNUS_MONGO_COLLECTION_PREFIX: prefix for the MongoDB collections
+    * CYGNUS_MONGO_BATCH_SIZE: number of notifications to be included within a processing batch.
+    * CYGNUS_MONGO_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
+    * CYGNUS_MONGO_BATCH_TTL: number of retries upon persistence error.
+    * CYGNUS_MONGO_DATA_EXPIRATION: value specified in seconds. Set to 0 if not wanting this policy
+    * CYGNUS_MONGO_COLLECTIONS_SIZE: value specified in bytes. Set to 0 if not wanting this policy. Minimum value (different than 0) is 4096 bytes
+    * CYGNUS_MONGO_MAX_DOCUMENTS: value specifies the number of documents. Set to 0 if not wanting this policy
+    * CYGNUS_MONGO_IGNORE_WHITE_SPACES: true if exclusively white space-based attribute values must be ignored, false otherwise
+    * CYGNUS_STH_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
+    * CYGNUS_STH_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
+    * CYGNUS_STH_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_STH_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
+    * CYGNUS_STH_DATA_MODEL: select the data_model: dm-by-service-path or dm-by-entity.
+    * CYGNUS_STH_DB_PREFIX: prefix for the MongoDB databases
+    * CYGNUS_STH_COLLECTION_PREFIX: prefix for the MongoDB collections
+    * CYGNUS_STH_RESOLUTIONS: accepted values are month, day, hour, minute and second separated by comma
+    * CYGNUS_STH_BATCH_SIZE: number of notifications to be included within a processing batch.
+    * CYGNUS_STH_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
+    * CYGNUS_STH_BATCH_TTL: number of retries upon persistence error.
+    * CYGNUS_STH_DATA_EXPIRATION: value specified in seconds. Set to 0 if not wanting this policy
+
 * CKAN:
     * It only works for building historical context data in CKAN.
     * The endpoint for CKAN is `iot-ckan` but can be changed through the CYGNUS_CKAN_HOST environment variable.
     * The port for CKAN is `80` but can be changed through the CYGNUS_CKAN_PORT environment variable.
     * The ssl for CKAN is `false` but can be changed through the CYGNUS_CKAN_SSL environment variable.
     * The api_key for CKAN is `` but can be changed through the CYGNUS_CKAN_API_KEY environment variable.
+    * CYGNUS_CKAN_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
+    * CYGNUS_CKAN_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
+    * CYGNUS_CKAN_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_CKAN_DATA_MODEL: select the data_model: dm-by-service-path or dm-by-entity.
+    * CYGNUS_CKAN_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
+    * CYGNUS_CKAN_ORION_URL: Orion URL used to compose the resource URL with the convenience operation URL to query it
+    * CYGNUS_CKAN_BATCH_SIZE: number of notifications to be included within a processing batch.
+    * CYGNUS_CKAN_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
+    * CYGNUS_CKAN_BATCH_TTL: number of retries upon persistence error.
+    * CYGNUS_CKAN_BACKEND_MAX_CONNS: maximum number of Http connections to CKAN backend
+    * CYGNUS_CKAN_BACKEND_MAX_CONSS_PER_ROUTE: maximum number of Http connections per route to CKAN backend
+
 * HDFS:
     * It only works for building historical context data in HDFS.
     * The endpoint for HDFS is `iot-hdfs` but can be changed through the CYGNUS_HDFS_HOST environment variable.
     * The port for HDFS is `50070` but can be changed through the CYGNUS_HDFS_PORT environment variable.
     * The user for HDFS is `hdfs` but can be changed through the CYGNUS_HDFS_USER environment variable.
     * The token for HDFS is empty but can be set through the CYGNUS_HDFS_TOKEN environment variable
+    * CYGNUS_HDFS_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
+    * CYGNUS_HDFS_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
+    * CYGNUS_HDFS_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_HDFS_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
+    * CYGNUS_HDFS_DATA_MODEL: select the data_model: dm-by-service-path or dm-by-entity.
+    * CYGNUS_HDFS_FILE_FORMAT: how the attributes are stored, available formats are json-row, json-column, csv-row and csv-column
+    * CYGNUS_HDFS_BACKEND_IMPL: rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
+    * CYGNUS_HDFS_BACKEND_MAX_CONNS: maximum number of Http connections to HDFS backend
+    * CYGNUS_HDFS_BACKEND_MAX_CONNS_PER_ROUTE: maximum number of Http connections per route to HDFS backend
+    * CYGNUS_HDFS_PASSWORD: password for the above username; this is only required for Hive authentication
+    * CYGNUS_HDFS_SERVICE_AS_NAMESPACE: true if the notified fiware-service (or the default one, if no one is notified) is used as the HDFS namespace, false otherwis
+    * CYGNUS_HDFS_BATCH_SIZE:  number of notifications to be included within a processing batch.
+    * CYGNUS_HDFS_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
+    * CYGNUS_HDFS_BATCH_TTL: number of retries upon persistence error.
+    * CYGNUS_HDFS_BATCH_RETRY_INTERVALS
+    * CYGNUS_HDFS_HIVE: true enables Hive, false disabled it
+    * CYGNUS_HDFS_KRB5_AUTH: true enables Kerberos-basded authentication, false disables it
+
+* PostgreSQL:
+    * It only works for building historical context data in PostgreSQL.
+    * The endpoint for POSTGRESQL is `iot-postgresql` but can be changed through the CYGNUS_POSTGRESQL_HOST environment variable.
+    * The port for POSTGRESQL is `3306` but can be changed through the CYGNUS_POSTGRESQL_PORT environment variable.
+    * The user for PostgreSQL is `postgresql` but can be changed through the CYGNUS_POSTGRESQL_USER environment variable.
+    * The pass for PostgreSQL is `postgresql` but can be changed through the CYGNUS_POSTGRESQL_PASS environment variable.
+    * CYGNUS_POSTGRESQL_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
+    * CYGNUS_POSTGRESQL_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
+    * CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_POSTGRESQL_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
+    * CYGNUS_POSTGRESQL_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
+    * CYGNUS_POSTGRESQL_BATCH_SIZE: number of notifications to be included within a processing batch.
+    * CYGNUS_POSTGRESQL_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
+    * CYGNUS_POSTGRESQL_BATCH_TTL: number of retries upon persistence error.
+
 * Carto:
     * It only works for building historical context data in Carto.
     * The user for Carto is `carto` but can be changed through the CYGNUS_CARTO_USER environment variable.
     * The key for Carto is `carto` but can be changes through the CYGNUS_CARTO_KEY environment variable.
+
 * Log4j configuration file:
     * The logging level is `INFO` but can be changed through the CYGNUS_LOG_LEVEL environment variable.
     * The logging appender is `console` but can be changed through the CYGNUS_LOG_APPENDER environment variable.
