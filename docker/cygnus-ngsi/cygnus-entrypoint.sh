@@ -290,27 +290,12 @@ if [ "$CYGNUS_HDFS_HOST" != "" ]; then
     fi
 fi
 
-# Check if CARTODB ENV vars
-if [ "$CYGNUS_CARTO_USER" != "" ]; then
-    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
-        AGENT_CONF_FILE=agent-carto.conf
-        cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5054 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    fi
-    sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = cartodb-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = cartodb-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-
-    # Change parameters in the cartodb key configuration file
-    sed -i 's/\"user\"/\"'${CYGNUS_CARTO_USER}'\"/g' ${FLUME_HOME}/conf/cartodb_keys.conf
-    sed -i 's/\/\/user/\/\/'${CYGNUS_CARTO_USER}'/g' ${FLUME_HOME}/conf/cartodb_keys.conf
-    sed -i '/"key":/c "key":"'${CYGNUS_CARTO_KEY}'"' ${FLUME_HOME}/conf/cartodb_keys.conf
-fi
-
+# Check if PostgreSQL ENV vars
 if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-postgresql.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5055 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5054 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = postgresql-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = postgresql-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -344,6 +329,22 @@ if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     if [ "$CYGNUS_POSTGRESQL_BATCH_TTL" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.batch_ttl = '${CYGNUS_POSTGRESQL_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+fi
+
+# Check if CARTODB ENV vars
+if [ "$CYGNUS_CARTO_USER" != "" ]; then
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        AGENT_CONF_FILE=agent-carto.conf
+        cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5055 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = cartodb-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = cartodb-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+
+    # Change parameters in the cartodb key configuration file
+    sed -i 's/\"user\"/\"'${CYGNUS_CARTO_USER}'\"/g' ${FLUME_HOME}/conf/cartodb_keys.conf
+    sed -i 's/\/\/user/\/\/'${CYGNUS_CARTO_USER}'/g' ${FLUME_HOME}/conf/cartodb_keys.conf
+    sed -i '/"key":/c "key":"'${CYGNUS_CARTO_KEY}'"' ${FLUME_HOME}/conf/cartodb_keys.conf
 fi
 
 

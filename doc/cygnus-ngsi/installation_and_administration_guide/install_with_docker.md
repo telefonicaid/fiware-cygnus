@@ -156,7 +156,7 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 As seen above, the default configuration distributed with the image is tied to certain values that may not be suitable for you tests. Specifically:
 
 * Multiagent:
-    * Enable multiagent cygnus: CYGNUS_MULTIAGENT environment varialble. If enabled each cygnus sink will run in a diferent port:
+    * Enable multiagent cygnus: CYGNUS_MULTIAGENT environment variable. If enabled, each sink will run in a diferent port:
 
 | sink   | port   |
 |--:|--:|
@@ -164,8 +164,8 @@ As seen above, the default configuration distributed with the image is tied to c
 | mongo | 5051 |
 | ckan | 5052 |
 | hdfs | 5053 |
-| carto | 5054 |
-| postgresql | 5055 |
+| postgresql | 5054 |
+| cartodb | 5055 |
 
 
 * MySQL:
@@ -263,11 +263,6 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_HDFS_HIVE: Hive enabling
     * CYGNUS_HDFS_KRB5_AUTH: Kerberos-based authentication enabling
 
-* Carto:
-    * It only works for building historical context data in Carto.
-    * The user for Carto is `carto` but can be changed through the CYGNUS_CARTO_USER environment variable.
-    * The key for Carto is `carto` but can be changes through the CYGNUS_CARTO_KEY environment variable.
-
 * PostgreSQL:
     * It only works for building historical context data in PostgreSQL.
     * The endpoint for POSTGRESQL is `iot-postgresql` but can be changed through the CYGNUS_POSTGRESQL_HOST environment variable.
@@ -282,6 +277,11 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_POSTGRESQL_BATCH_SIZE: number of notifications to be included within a processing batch.
     * CYGNUS_POSTGRESQL_BATCH_TIMEOUT: timeout for batch accumulation.
     * CYGNUS_POSTGRESQL_BATCH_TTL: number of retries upon persistence error.
+
+* Carto:
+    * It only works for building historical context data in Carto.
+    * The user for Carto is `carto` but can be changed through the CYGNUS_CARTO_USER environment variable.
+    * The key for Carto is `carto` but can be changes through the CYGNUS_CARTO_KEY environment variable.
 
 * Log4j configuration file:
     * The logging level is `INFO` but can be changed through the CYGNUS_LOG_LEVEL environment variable.
