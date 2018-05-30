@@ -158,14 +158,14 @@ As seen above, the default configuration distributed with the image is tied to c
 * Multiagent:
     * Enable multiagent cygnus: CYGNUS_MULTIAGENT environment variable. If enabled, each sink will run in a diferent port:
 
-| sink   | port   |
-|--:|--:|
-| mysql  | 5050 |
-| mongo | 5051 |
-| ckan | 5052 |
-| hdfs | 5053 |
-| postgresql | 5054 |
-| cartodb | 5055 |
+| sink   | port   | admin_port |
+|--:|--:|--:|
+| mysql  | 5050 | 5080 |
+| mongo | 5051 | 5081 |
+| ckan | 5052 | 5082 |
+| hdfs | 5053 | 5083 |
+| postgresql | 5054 | 5084 |
+| cartodb | 5055 | 5085 |
 
 
 * MySQL:
