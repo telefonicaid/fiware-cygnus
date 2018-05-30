@@ -71,6 +71,11 @@ if [ "$CYGNUS_MYSQL_HOST" != "" ]; then
     if [ "$CYGNUS_MYSQL_BATCH_TTL" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.batch_ttl = '${CYGNUS_MYSQL_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        # Run the Cygnus command
+        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5081 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+    fi
 fi
 
 # Check if MONGO ENV vars
@@ -171,6 +176,11 @@ if [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
     if [ "$CYGNUS_STH_DATA_EXPIRATION" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.data_expiration/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.data_expiration = '${CYGNUS_STH_DATA_EXPIRATION} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        # Run the Cygnus command
+        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5082 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+    fi
 fi
 
 # Check if CKAN ENV vars
@@ -219,6 +229,11 @@ if [ "$CYGNUS_CKAN_HOST" != "" ]; then
     fi
     if [ "$CYGNUS_CKAN_BACKEND_MAX_CONNS_PER_ROUTE" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.backend.max_conns_per_route/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.backend.max_conns_per_route = '${CYGNUS_CKAN_MAX_CONNS_PER_ROUTE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        # Run the Cygnus command
+        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5083 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
     fi
 fi
 
@@ -288,6 +303,11 @@ if [ "$CYGNUS_HDFS_HOST" != "" ]; then
     if [ "$CYGNUS_HDFS_KRB5_AUTH" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.krb5_auth/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.krb5_auth = '${CYGNUS_HDFS_KRB5_AUTH} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        # Run the Cygnus command
+        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5084 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+    fi
 fi
 
 # Check if PostgreSQL ENV vars
@@ -329,6 +349,11 @@ if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     if [ "$CYGNUS_POSTGRESQL_BATCH_TTL" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.batch_ttl = '${CYGNUS_POSTGRESQL_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        # Run the Cygnus command
+        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5085 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+    fi
 fi
 
 # Check if CARTODB ENV vars
@@ -345,10 +370,18 @@ if [ "$CYGNUS_CARTO_USER" != "" ]; then
     sed -i 's/\"user\"/\"'${CYGNUS_CARTO_USER}'\"/g' ${FLUME_HOME}/conf/cartodb_keys.conf
     sed -i 's/\/\/user/\/\/'${CYGNUS_CARTO_USER}'/g' ${FLUME_HOME}/conf/cartodb_keys.conf
     sed -i '/"key":/c "key":"'${CYGNUS_CARTO_KEY}'"' ${FLUME_HOME}/conf/cartodb_keys.conf
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        # Run the Cygnus command
+        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5086 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+    fi
 fi
 
 
-# Run the Cygnus command
-${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${CYGNUS_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p ${CYGNUS_API_PORT} -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+
+if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
+    # Run the Cygnus command
+    ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${CYGNUS_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p ${CYGNUS_API_PORT} -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+fi
+
 
 touch /var/log/cygnus/cygnus.log && tail -f /var/log/cygnus/cygnus.log
