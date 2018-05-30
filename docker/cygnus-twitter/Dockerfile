@@ -34,7 +34,7 @@ ENV CYGNUS_LOG_APPENDER "console"
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 ENV GIT_REV_CYGNUS "master"
 
-ENV MVN_VER "3.5.2"
+ENV MVN_VER "3.5.3"
 ENV MVN_TGZ "apache-maven-${MVN_VER}-bin.tar.gz"
 ENV MVN_URL "http://www.eu.apache.org/dist/maven/maven-3/${MVN_VER}/binaries/${MVN_TGZ}"
 ENV MVN_HOME "/opt/apache-maven"
