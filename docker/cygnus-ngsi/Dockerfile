@@ -134,6 +134,7 @@ ENV CYGNUS_POSTGRESQL_ATTR_PERSISTENCE ""
 ENV CYGNUS_POSTGRESQL_BATCH_SIZE ""
 ENV CYGNUS_POSTGRESQL_BATCH_TIMEOUT ""
 ENV CYGNUS_POSTGRESQL_BATCH_TTL ""
+ENV CYGNUS_POSTGRESQL_ENABLE_CACHE ""
 
 # Carto options
 ENV CYGNUS_CARTO_USER ""
@@ -231,10 +232,12 @@ RUN \
       ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
     rm -f ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
     rm -f ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
-    echo "INFO: Copy some files needed for starting cygnus-ngsi" && \
-    cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/cygnus-entrypoint.sh / && \
-    cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/ && \
-    cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/cartodb_keys.conf ${FLUME_HOME}/conf/
+
+
+COPY cygnus-entrypoint.sh / 
+COPY agent.conf ${FLUME_HOME}/conf/ 
+COPY agent.conf ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf
+COPY cartodb_keys.conf ${FLUME_HOME}/conf/
 
 # Define the entry point
 ENTRYPOINT ["/cygnus-entrypoint.sh"]

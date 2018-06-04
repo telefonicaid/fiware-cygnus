@@ -349,6 +349,9 @@ if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     if [ "$CYGNUS_POSTGRESQL_BATCH_TTL" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.batch_ttl = '${CYGNUS_POSTGRESQL_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+    if [ "$CYGNUS_POSTGRESQL_ENABLE_CACHE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.backend.enable_cache/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.backend.enable_cache = '${CYGNUS_POSTGRESQL_ENABLE_CACHE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
 
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         # Run the Cygnus command
