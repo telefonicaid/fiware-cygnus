@@ -67,7 +67,7 @@ RUN yum -y install tar nc which git java-${JAVA_VERSION}-openjdk-devel && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/libext && \
     chown -R cygnus:cygnus ${FLUME_HOME} && \
     # Make a shallow clone to help reduce final image size
-    git clone --depth 1 ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
+    git clone ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
     cd ${CYGNUS_HOME} && \
     git checkout ${GIT_REV_CYGNUS} && \
     # Build and install cygnus-common
