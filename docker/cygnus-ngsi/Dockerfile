@@ -187,7 +187,7 @@ RUN \
     chown -R cygnus:cygnus ${FLUME_HOME} && \
     # Make a shallow clone to help reduce final image size
     echo "INFO: Cloning Cygnus using <${GIT_URL_CYGNUS}> and <${GIT_REV_CYGNUS}>" && \
-    git clone --depth 1 ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
+    git clone ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
     cd ${CYGNUS_HOME} && \
     git checkout ${GIT_REV_CYGNUS} && \
     echo "INFO: Build and install cygnus-common" && \
