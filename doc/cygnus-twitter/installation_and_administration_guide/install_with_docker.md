@@ -78,7 +78,7 @@ SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
 time=2016-05-05T09:57:55.150UTC | lvl=INFO | corr= | trans= | srv= | subsrv= | function=main | comp= | msg=com.telefonica.iot.cygnus.nodes.CygnusApplication[166] : Starting Cygnus, version 0.13.0_SNAPSHOT.5200773899b468930e82df4a0b34d44fd4632893
 ...
 ...
-time=2016-05-05T09:57:56.287UTC | lvl=INFO | corr= | trans= | srv= | subsrv= | function=main | comp=cygnus-twitter | msg=com.telefonica.iot.cygnus.nodes.CygnusApplication[286] : Starting a Jetty server listening on port 8081 (Management Interface)
+time=2016-05-05T09:57:56.287UTC | lvl=INFO | corr= | trans= | srv= | subsrv= | function=main | comp=cygnus-twitter | msg=com.telefonica.iot.cygnus.nodes.CygnusApplication[286] : Starting a Jetty server listening on port 5080 (Management Interface)
 ```
 
 You can check the running container (in a second terminal shell):
@@ -86,7 +86,7 @@ You can check the running container (in a second terminal shell):
 ```
 $ docker ps
 CONTAINER ID        IMAGE               COMMAND                CREATED              STATUS              PORTS                NAMES
-9ce0f09f5676        cygnus-twitter      "/cygnus-entrypoint.   About a minute ago   Up About a minute   5050/tcp, 8081/tcp   focused_kilby
+9ce0f09f5676        cygnus-twitter      "/cygnus-entrypoint.   About a minute ago   Up About a minute   5050/tcp, 5080/tcp   focused_kilby
 ```
 
 You can check the IP address of the container above by doing:
@@ -99,7 +99,7 @@ $ docker inspect 9ce0f09f5676 | grep \"IPAddress\"
 Once the IP address of the container is gotten, you may ask for the Cygnus version (in a second terminal shell):
 
 ```
-$ $ curl "http://172.17.0.13:8081/v1/version"
+$ $ curl "http://172.17.0.13:5080/v1/version"
 {"success":"true","version":"0.13.0_SNAPSHOT.5200773899b468930e82df4a0b34d44fd4632893"}
 ```
 

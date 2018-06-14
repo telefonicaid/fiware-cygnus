@@ -336,7 +336,7 @@ Responses:
 
 Valid path to the instance configuration file:
 ```
-{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnus-common","ADMIN_PORT":"8081","CONFIG_FOLDER":"\/usr\/cygnus\/conf","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}
+{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnus-common","ADMIN_PORT":"5080","CONFIG_FOLDER":"\/usr\/cygnus\/conf","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}
 ```
 
 Invalid path to the instance configuration file:
@@ -414,7 +414,7 @@ Responses:
 Valid path to the instance configuration file:
 
 ```
-{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnus-common","ADMIN_PORT":"8081","CONFIG_FOLDER":"\/usr\/cygnus\/conf","ADMIN_PORT_2":"8082","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}}
+{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnus-common","ADMIN_PORT":"5080","CONFIG_FOLDER":"\/usr\/cygnus\/conf","ADMIN_PORT_2":"5081","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}}
 ```
 
 Invalid path to the instance configuration file:
@@ -426,7 +426,7 @@ Invalid path to the instance configuration file:
 Existing value in the instance configuration file:
 
 ```
-{"success":"false","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnus-common","CONFIG_FOLDER":"\/usr\/cygnus\/conf","ADMIN_PORT":"8081","CYGNUS_USER":"cygnus","LOGFILE_NAME":"cygnus.log","POLLING_INTERVAL":"30"}}}
+{"success":"false","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnus-common","CONFIG_FOLDER":"\/usr\/cygnus\/conf","ADMIN_PORT":"5080","CYGNUS_USER":"cygnus","LOGFILE_NAME":"cygnus.log","POLLING_INTERVAL":"30"}}}
 ```
 
 Instance configuration file not found:
@@ -456,13 +456,13 @@ Responses:
 Valid path to the instance configuration file. Adding `NEW_PARAM` with value `old_value`:
 
 ```
-{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnus-common","ADMIN_PORT":"8081","CONFIG_FOLDER":"\/usr\/cygnus\/conf","NEW_PARAM":"old_value","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}}
+{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnus-common","ADMIN_PORT":"5080","CONFIG_FOLDER":"\/usr\/cygnus\/conf","NEW_PARAM":"old_value","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}}
 ```
 
 Valid path to the instance configuration file. Updating `NEW_PARAM` with value `new_value`:
 
 ```
-{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnus-common","ADMIN_PORT":"8081","CONFIG_FOLDER":"\/usr\/cygnus\/conf","NEW_PARAM":"new_value","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}}
+{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnus-common","ADMIN_PORT":"5080","CONFIG_FOLDER":"\/usr\/cygnus\/conf","NEW_PARAM":"new_value","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}}
 ```
 
 Invalid path to the instance configuration file:
@@ -505,7 +505,7 @@ CONFIG_FILE=/usr/cygnus/conf/agent.conf
 AGENT_NAME=cygnus-common
 
 # Administration port. Must be unique per instance
-ADMIN_PORT=8081
+ADMIN_PORT=5080
 
 # Where is the config folder
 CONFIG_FOLDER=/usr/cygnus/conf
@@ -544,7 +544,7 @@ Responses:
 Valid path to the instance configuration file:
 
 ```
-{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnus-common","ADMIN_PORT":"8081","CONFIG_FOLDER":"\/usr\/cygnus\/conf","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}}
+{"success":"true","result" : {"instance":{"CONFIG_FILE":"\/usr\/cygnus\/conf\/agent.conf","AGENT_NAME":"cygnus-common","ADMIN_PORT":"5080","CONFIG_FOLDER":"\/usr\/cygnus\/conf","LOGFILE_NAME":"cygnus.log","CYGNUS_USER":"cygnus","POLLING_INTERVAL":"30"}}}
 ```
 
 Inexisting value in the instance configuration file:
