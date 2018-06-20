@@ -6,3 +6,4 @@
 [cygnus-ngsi][NGSINameMappingsInterceptor] Allow regular expression replacement for EntityIds (#1456)
 cygnus-ngsi][HttpBackend] Add support to recover data from response header (#1455)
 [cygnus-ngsi][KeystoneUtils] Create new Auth functionality (#1471)
+[cygnus-ngsi] [NGSIDynamoDBSink] [bug #1448] Southeast regions are bad coded (PR #1499)
