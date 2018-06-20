@@ -99,6 +99,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed Jun 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.9.0
+- [cygnus-twitter][Docker] Upgrade to CentOS 7, Maven 3.5.2 and Java 1.8.0 in Dockerfile
+
 * Wed Sep 13 2017 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.8.0
 - [cygnus-twitter][bug] Fix wrong data in spec file (#1407)
 

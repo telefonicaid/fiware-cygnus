@@ -23,7 +23,7 @@ MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "1.8.0_SNAPSHOT"
+ENV CYGNUS_VERSION "1.9.0_SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
@@ -134,6 +134,7 @@ ENV CYGNUS_POSTGRESQL_ATTR_PERSISTENCE ""
 ENV CYGNUS_POSTGRESQL_BATCH_SIZE ""
 ENV CYGNUS_POSTGRESQL_BATCH_TIMEOUT ""
 ENV CYGNUS_POSTGRESQL_BATCH_TTL ""
+ENV CYGNUS_POSTGRESQL_ENABLE_CACHE ""
 
 # Carto options
 ENV CYGNUS_CARTO_USER ""
@@ -186,7 +187,7 @@ RUN \
     chown -R cygnus:cygnus ${FLUME_HOME} && \
     # Make a shallow clone to help reduce final image size
     echo "INFO: Cloning Cygnus using <${GIT_URL_CYGNUS}> and <${GIT_REV_CYGNUS}>" && \
-    git clone --depth 1 ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
+    git clone ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
     cd ${CYGNUS_HOME} && \
     git checkout ${GIT_REV_CYGNUS} && \
     echo "INFO: Build and install cygnus-common" && \
@@ -230,11 +231,13 @@ RUN \
       ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar.pack.gz \
       ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
     rm -f ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
-    rm -f ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
-    echo "INFO: Copy some files needed for starting cygnus-ngsi" && \
-    cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/cygnus-entrypoint.sh / && \
-    cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/ && \
-    cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/cartodb_keys.conf ${FLUME_HOME}/conf/
+    rm -f ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar
+
+
+COPY cygnus-entrypoint.sh / 
+COPY agent.conf ${FLUME_HOME}/conf/ 
+COPY agent.conf ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf
+COPY cartodb_keys.conf ${FLUME_HOME}/conf/
 
 # Define the entry point
 ENTRYPOINT ["/cygnus-entrypoint.sh"]

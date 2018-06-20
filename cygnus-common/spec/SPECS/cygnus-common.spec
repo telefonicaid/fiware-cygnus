@@ -171,6 +171,9 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed Jun 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.9.0
+- [cygnus-common][Docker] Upgrade to CentOS 7, Maven 3.5.2 and Java 1.8.0 in Dockerfile
+
 * Wed Sep 13 2017 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.8.0
 - [cygnus-common, cygnus-ngsi][hardening] Fix FIWARE repository URL (#1435)
 - [cygnus-common, cygnus-ngsi][hardening] Unify test classes (#1332, #1333)
