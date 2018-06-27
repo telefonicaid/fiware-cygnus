@@ -21,13 +21,13 @@ Current stable release is able to persist the following sources of data in the f
 
 * NGSI-like context data in:
     * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
-    * [MySQL](https://www.mysql.com/), the well-know relational database manager.
+    * [MySQL](https://www.mysql.com/), the well-known relational database manager.
     * [CKAN](http://ckan.org/), an Open Data platform.
     * [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
     * [STH Comet](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
     * [Kafka](http://kafka.apache.org/), the publish-subscribe messaging broker.
     * [DynamoDB](https://aws.amazon.com/dynamodb/), a cloud-based NoSQL database by [Amazon Web Services](https://aws.amazon.com/).
-    * [PostgreSQL](http://www.postgresql.org/), the well-know relational database manager.
+    * [PostgreSQL](http://www.postgresql.org/), the well-known relational database manager.
     * [Carto](https://carto.com/), the database specialized in geolocated data.
 * Twitter data in:
     * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.

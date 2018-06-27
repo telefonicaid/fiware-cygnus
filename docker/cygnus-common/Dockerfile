@@ -23,7 +23,7 @@ MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "1.8.0_SNAPSHOT"
+ENV CYGNUS_VERSION "1.9.0_SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-common"
@@ -67,7 +67,7 @@ RUN yum -y install tar nc which git java-${JAVA_VERSION}-openjdk-devel && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/libext && \
     chown -R cygnus:cygnus ${FLUME_HOME} && \
     # Make a shallow clone to help reduce final image size
-    git clone --depth 1 ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
+    git clone ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
     cd ${CYGNUS_HOME} && \
     git checkout ${GIT_REV_CYGNUS} && \
     # Build and install cygnus-common

@@ -99,6 +99,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed Jun 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.9.0
+- [cygnus-ngsi][NGSINameMappingsInterceptor] Allow regular expression replacement for EntityIds (#1456)
+- [cygnus-ngsi][HttpBackend] Add support to recover data from response header (#1455)
+- [cygnus-ngsi][KeystoneUtils] Create new Auth functionality (#1471)
+- [cygnus-ngsi][Docker] Add support to run cygnus docker in multiagent mode (mysql, mongo, ckan, hdfs, postgresql and carto sinks) (#1486)
+- [cygnus-ngsi][Docker] Upgrade to just enable sinks and channels depending on ENV vars (#1482)
+- [cygnus-ngsi][Docker] Upgrade to CentOS 7, Maven 3.5.2 and Java 1.8.0 in Dockerfile
+
 * Wed Sep 13 2017 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.8.0
 - [cygnus-ngsi][hardening] Add complex configuration examples (#629)
 - [cygnus-ngsi][bug] Fix NGSIMySQLSink when persisting bulks of rows with different number of columns (#1409)
