@@ -1,1 +1,3 @@
+[cygnus-ngsi][KafkaSink] Use lower_case option to build topics (#1468)
 [cygnus-ngsi] [NGSIDynamoDBSink] [bug] Southeast regions are bad coded (#1448)
+
