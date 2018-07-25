@@ -96,7 +96,7 @@ Start by cloning the Github repository containing cygnus-common:
 The developed classes must be packaged in a Java jar file. This can be done as a fat Java jar containing all the third-party dependencies  (**recommended**). You may need to edit the `pom.xml` (\*):
 
     $ cd cygnus-common
-    $ APACHE_FLUME_HOME/bin/mvn clean compile exec:exec assembly:single
+    $ APACHE_MAVEN_HOME/bin/mvn clean compile exec:exec assembly:single
     $ cp target/cygnus-common-<x.y.z>-jar-with-dependencies.jar APACHE_FLUME_HOME/plugins.d/cygnus/libext
 
 Or as a thin Java jar file containing only the `cygnus-common` classes. You may need to edit the `pom.xml` if necessary (\*):
@@ -109,7 +109,7 @@ Please observe in this case, and depending on the Cygnus components you are goin
 
 In both cases, the `cygnus-common` dependency must be installed at Maven as well, in order to build any other agent depending on it. Just run the following command:
 
-    $ mvn install:install-file -Dfile=APACHE_MAVEN_HOME/plugins.d/cygnus/libext/cygnus-common-<x.y.z>-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=<x.y.z> -Dpackaging=jar -DgeneratePom=false
+    $ APACHE_MAVEN_HOME/bin/mvn install:install-file -Dfile=APACHE_FLUME_HOME/plugins.d/cygnus/libext/cygnus-common-<x.y.z>-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=<x.y.z> -Dpackaging=jar -DgeneratePom=false
 
 (*) Please have into account from Cygnus 0.10.0 the version of `hadoop-core` within the `pom.xml` must match the Hadoop version you are going to use; on the contrary, the HDFS sink will not work. Of course, if you are not going to use the HDFS sink, simply use the default `hadoop-core` version (1.2.1) within the downloaded `pom.xml` for correct compilation purposes.
 

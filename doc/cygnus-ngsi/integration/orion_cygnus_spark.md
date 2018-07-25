@@ -127,7 +127,7 @@ CONFIG_FOLDER=/usr/cygnus/conf
 CONFIG_FILE=/usr/cygnus/conf/agent_spark.conf
 AGENT_NAME=cygnus-ngsi
 LOGFILE_NAME=cygnus.log
-ADMIN_PORT=8081
+ADMIN_PORT=5080
 POLLING_INTERVAL=30
 ```
 

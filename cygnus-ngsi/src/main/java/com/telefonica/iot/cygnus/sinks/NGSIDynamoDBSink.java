@@ -49,7 +49,7 @@ public class NGSIDynamoDBSink extends NGSISink {
      * Available DynamoDB regions implementation.
      */
     private enum Regions { USEAST1, USWEST1, USWEST2,  EUWEST1, EUCENTRAL1,
-            APNORTHEAST1, APNORTHEAST2, APSHOUTEAST1, APSHOUTEAST2, SAEAST1 }
+            APNORTHEAST1, APNORTHEAST2, APSOUTHEAST1, APSOUTHEAST2, SAEAST1 }
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIDynamoDBSink.class);
     private DynamoDBBackend persistenceBackend;

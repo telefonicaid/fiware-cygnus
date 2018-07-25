@@ -77,7 +77,7 @@ SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
 time=2016-05-17T06:36:23.867UTC | lvl=INFO | corr= | trans= | srv= | subsrv= | function=main | comp= | msg=com.telefonica.iot.cygnus.nodes.CygnusApplication[166] : Starting Cygnus, version 1.0.0_SNAPSHOT.d7cfee4455a59a1854cc53f37e16ff4866b26010
 ...
 ...
-time=2016-05-17T06:36:25.046UTC | lvl=INFO | corr= | trans= | srv= | subsrv= | function=main | comp=cygnus-common | msg=com.telefonica.iot.cygnus.nodes.CygnusApplication[286] : Starting a Jetty server listening on port 8081 (Management Interface)
+time=2016-05-17T06:36:25.046UTC | lvl=INFO | corr= | trans= | srv= | subsrv= | function=main | comp=cygnus-common | msg=com.telefonica.iot.cygnus.nodes.CygnusApplication[286] : Starting a Jetty server listening on port 5080 (Management Interface)
 ```
 
 You can check the running container (in a second terminal shell):
@@ -85,7 +85,7 @@ You can check the running container (in a second terminal shell):
 ```
 $ docker ps
 CONTAINER ID        IMAGE               COMMAND                CREATED             STATUS              PORTS                NAMES
-c88bc1b66cdc        cygnus-common       "/cygnus-entrypoint.   6 seconds ago       Up 5 seconds        5050/tcp, 8081/tcp   naughty_mayer  
+c88bc1b66cdc        cygnus-common       "/cygnus-entrypoint.   6 seconds ago       Up 5 seconds        5050/tcp, 5080/tcp   naughty_mayer  
 ```
 
 You can check the IP address of the container above by doing:
@@ -98,14 +98,14 @@ $ docker inspect c88bc1b66cdc | grep \"IPAddress\"
 Once the IP address of the container is gotten, you may ask for the Cygnus version (in a second terminal shell):
 
 ```
-$ curl "http://172.17.0.8:8081/v1/version"
+$ curl "http://172.17.0.8:5080/v1/version"
 {"success":"true","version":"1.0.0_SNAPSHOT.d7cfee4455a59a1854cc53f37e16ff4866b26010"}
 ```
 
 Even you can use API methods to see how to cygnus-common print the logs at INFO level.
 
 ```
-$ curl -X POST "http://172.17.0.7:8081/v1/subscriptions?ngsi_version=2" -d '{"subscription":{"description": "title_of_subscription","subject": {"entities": [{"idPattern": ".*","type": "Room"}],"condition": {"attrs": ["attr1"],"expression": {"q": "attr1>40"}}},"notification": {"http": {"url": "http://localhost:1234"},"attrs": ["attr1","attr2"]},"expires": "2016-05-05T14:00:00.00Z","throttling": 5}, "endpoint":{"host":"orion_host", "port":"orion_port", "ssl":"false", "xauthtoken":"your_auth_token"}}'
+$ curl -X POST "http://172.17.0.7:5080/v1/subscriptions?ngsi_version=2" -d '{"subscription":{"description": "title_of_subscription","subject": {"entities": [{"idPattern": ".*","type": "Room"}],"condition": {"attrs": ["attr1"],"expression": {"q": "attr1>40"}}},"notification": {"http": {"url": "http://localhost:1234"},"attrs": ["attr1","attr2"]},"expires": "2016-05-05T14:00:00.00Z","throttling": 5}, "endpoint":{"host":"orion_host", "port":"orion_port", "ssl":"false", "xauthtoken":"your_auth_token"}}'
 {"success":"true","result" : { SubscriptionID = 573ac3b6aba73680b1905f5c}
 ```
 
