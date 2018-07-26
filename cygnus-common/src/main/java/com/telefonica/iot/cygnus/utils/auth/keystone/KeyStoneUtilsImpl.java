@@ -169,6 +169,7 @@ public class KeyStoneUtilsImpl extends HttpBackend implements KeyStoneUtils {
 
             // generate JSON Body
             String bodyJSON = getAuthRequestJSON(user, password, fiwareService, fiwareServicePath);
+            LOGGER.debug("Request bodyJSON: " + bodyJSON);
 
             StringEntity entity = new StringEntity(bodyJSON);
 
