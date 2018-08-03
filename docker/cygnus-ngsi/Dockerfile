@@ -37,8 +37,8 @@ ENV CYGNUS_MULTIAGENT false
 # MySQL options
 ENV CYGNUS_MYSQL_HOST ""
 ENV CYGNUS_MYSQL_PORT ""
-ENV CYGNUS_MYSQL_USER ""
-ENV CYGNUS_MYSQL_PASS ""
+# ENV CYGNUS_MYSQL_USER ""  # Warning: For development use only - Storing sensitive information in clear text is insecure
+# ENV CYGNUS_MYSQL_PASS ""  # Warning: For development use only - Storing sensitive information in clear text is insecure
 ENV CYGNUS_MYSQL_ENABLE_ENCODING ""
 ENV CYGNUS_MYSQL_ENABLE_GROUPING ""
 ENV CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS ""
@@ -51,8 +51,8 @@ ENV CYGNUS_MYSQL_BATCH_TTL ""
 
 # MongoDB / STH options
 ENV CYGNUS_MONGO_HOSTS ""
-ENV CYGNUS_MONGO_USER ""
-ENV CYGNUS_MONGO_PASS ""
+# ENV CYGNUS_MONGO_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+# ENV CYGNUS_MONGO_PASS "" # Warning: For development use only - Storing sensitive information in clear text is insecure
 ENV CYGNUS_MONGO_ENABLE_ENCODING ""
 ENV CYGNUS_MONGO_ENABLE_GROUPING ""
 ENV CYGNUS_MONGO_ENABLE_NAME_MAPPINGS ""
@@ -101,8 +101,8 @@ ENV CYGNUS_CKAN_BACKEND_MAX_CONSS_PER_ROUTE ""
 # HDFS options
 ENV CYGNUS_HDFS_HOST ""
 ENV CYGNUS_HDFS_PORT ""
-ENV CYGNUS_HDFS_USER ""
-ENV CYGNUS_HDFS_TOKEN ""
+# ENV CYGNUS_HDFS_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+# ENV CYGNUS_HDFS_TOKEN "" # Warning: For development use only - Storing sensitive information in clear text is insecure
 ENV CYGNUS_HDFS_ENABLE_ENCODING ""
 ENV CYGNUS_HDFS_ENABLE_GROUPING ""
 ENV CYGNUS_HDFS_ENABLE_NAME_MAPPINGS ""
@@ -124,8 +124,8 @@ ENV CYGNUS_HDFS_KRB5_AUTH ""
 # PostgreSQL options
 ENV CYGNUS_POSTGRESQL_HOST ""
 ENV CYGNUS_POSTGRESQL_PORT ""
-ENV CYGNUS_POSTGRESQL_USER ""
-ENV CYGNUS_POSTGRESQL_PASS ""
+# ENV CYGNUS_POSTGRESQL_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+# ENV CYGNUS_POSTGRESQL_PASS "" # Warning: For development use only - Storing sensitive information in clear text is insecure
 ENV CYGNUS_POSTGRESQL_ENABLE_ENCODING ""
 ENV CYGNUS_POSTGRESQL_ENABLE_GROUPING ""
 ENV CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS ""
@@ -137,8 +137,22 @@ ENV CYGNUS_POSTGRESQL_BATCH_TTL ""
 ENV CYGNUS_POSTGRESQL_ENABLE_CACHE ""
 
 # Carto options
-ENV CYGNUS_CARTO_USER ""
-ENV CYGNUS_CARTO_KEY ""
+# ENV CYGNUS_CARTO_USER ""
+# ENV CYGNUS_CARTO_KEY ""
+
+
+# Docker Secrets Support - The following equivalents to storing clear text usernames and passwords are also available:
+#
+# ENV CYGNUS_MYSQL_USER_FILE
+# ENV CYGNUS_MYSQL_PASS_FILE
+# ENV CYGNUS_MONGO_USER_FILE
+# ENV CYGNUS_MONGO_PASS_FILE
+# ENV CYGNUS_HDFS_USER_FILE
+# ENV CYGNUS_HDFS_TOKEN_FILE
+# ENV CYGNUS_POSTGRESQL_USER_FILE
+# ENV CYGNUS_POSTGRESQL_PASS_FILE
+# ENV CYGNUS_CARTO_USER_FILE
+# ENV CYGNUS_CARTO_KEY_FILE
 
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
