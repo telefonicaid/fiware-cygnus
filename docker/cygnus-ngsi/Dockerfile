@@ -161,7 +161,7 @@ ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 ENV GIT_REV_CYGNUS "master"
 #ENV GIT_REV_CYGNUS "mybranch"
 
-ENV MVN_VER "3.5.3"
+ENV MVN_VER "3.5.4"
 ENV MVN_HOME "/opt/apache-maven"
 
 ENV FLUME_VER "1.4.0"
