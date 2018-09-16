@@ -414,6 +414,37 @@ if [ "$CYGNUS_CARTO_USER" != "" ]; then
     fi
 fi
 
+# Check if ELASTICSEARCH ENV vars
+if [ "$CYGNUS_ELASTICSEARCH_HOST" != "" ]; then
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        AGENT_CONF_FILE=agent-elasticsearch.conf
+        cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5056 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = elasticsearch-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = elasticsearch-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.elasticsearch_host/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.elasticsearch_host = '${CYGNUS_ELASTICSEARCH_HOST} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.elasticsearch_port/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.elasticsearch_port = '${CYGNUS_ELASTICSEARCH_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.ssl/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.ssl = '${CYGNUS_ELASTICSEARCH_SSL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    # The following are optional and disabled by default
+    if [ "$CYGNUS_ELASTICSEARCH_INDEX_PREFIX" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.index_prefix/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.index_prefix = '${CYGNUS_ELASTICSEARCH_INDEX_PREFIX} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONNS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.backend.max_conns/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.backend.max_conns = '${CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONNS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONSS_PER_ROUTE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.backend.max_conns_per_route/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.backend.max_conns_per_route = '${CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONSS_PER_ROUTE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ELASTICSEARCH_IGNORE_WHITE_SPACES" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.ignore_white_spaces/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.ignore_white_spaces = '${CYGNUS_ELASTICSEARCH_IGNORE_WHITE_SPACES} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        # Run the Cygnus command
+        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5086 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+    fi
+fi
 
 
 if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
