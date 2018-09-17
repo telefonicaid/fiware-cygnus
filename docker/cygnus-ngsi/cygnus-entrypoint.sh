@@ -430,6 +430,9 @@ if [ "$CYGNUS_ELASTICSEARCH_HOST" != "" ]; then
     if [ "$CYGNUS_ELASTICSEARCH_INDEX_PREFIX" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.index_prefix/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.index_prefix = '${CYGNUS_ELASTICSEARCH_INDEX_PREFIX} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+    if [ "$CYGNUS_ELASTICSEARCH_MAPPING_TYPE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.mapping_type/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.mapping_type = '${CYGNUS_ELASTICSEARCH_MAPPING_TYPE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
     if [ "$CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONNS" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.backend.max_conns/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.backend.max_conns = '${CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONNS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi

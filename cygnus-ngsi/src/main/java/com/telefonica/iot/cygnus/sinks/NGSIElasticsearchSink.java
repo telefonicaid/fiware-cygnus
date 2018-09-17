@@ -56,6 +56,7 @@ public class NGSIElasticsearchSink extends NGSISink {
     private String elasticsearchHost;
     private String elasticsearchPort;
     private String indexPrefix;
+    private String mappingType;
     private boolean ssl;
     private int backendMaxConns;
     private int backendMaxConnsPerRoute;
@@ -101,6 +102,14 @@ public class NGSIElasticsearchSink extends NGSISink {
     protected String getIndexPrefix() {
         return this.indexPrefix;
     } // getIndexPrefix
+
+    /**
+     * Gets the mapping type. It is protected due to it is only required for testing purposes.
+     * @return The mapping type
+     */
+    protected String getMappingType() {
+        return this.mappingType;
+    } // getMappingType
 
     /**
      * Gets the maximum number of Http connections allowed in the backend. It is protected due to it is only required
@@ -182,8 +191,12 @@ public class NGSIElasticsearchSink extends NGSISink {
         this.indexPrefix = context.getString("index_prefix", "cygnus_");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (index_prefix=" + this.indexPrefix + ")");
 
+        this.mappingType = context.getString("mapping_type", "cygnus_type");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mapping_type=" + this.mappingType + ")");
+
         this.backendMaxConns = context.getInteger("backend.max_conns", 500);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns=" + this.backendMaxConns + ")");
+
         this.backendMaxConnsPerRoute = context.getInteger("backend.max_conns_per_route", 100);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns_per_route="
                 + this.backendMaxConnsPerRoute + ")");
@@ -261,7 +274,6 @@ public class NGSIElasticsearchSink extends NGSISink {
         private String jstrfmt;
         private Map<String, List<Map<String, String>>> aggregations;
         private String index;
-        private String type;
 
         public ElasticsearchAggregator() {
             this.aggregations = new HashMap<>();
@@ -277,18 +289,10 @@ public class NGSIElasticsearchSink extends NGSISink {
             return this.index;
         }
 
-        public String getType() {
-            return this.type;
-        }
-
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             String service = event.getServiceForNaming(enableNameMappings);
-            String servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            String entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            String attributeForNaming = event.getAttributeForNaming(enableNameMappings);
             this.index = (NGSIElasticsearchSink.this.indexPrefix + service).toLowerCase().replace("/", "");
-            this.type = (servicePathForNaming + "_" + entityForNaming).toLowerCase().replace("/", "");
-            LOGGER.debug("ElasticsearchAggregator initialize (index=" + this.index + ", type=" + this.type + ")");
+            LOGGER.debug("ElasticsearchAggregator initialize (index=" + this.index + ")");
         } // initialize
 
         public void aggregate(NGSIEvent event) {
@@ -344,12 +348,11 @@ public class NGSIElasticsearchSink extends NGSISink {
     } // ElasticsearchAggregator
 
     private void persistAggregation(ElasticsearchAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError {
-        String type = aggregator.getType();
         for (Map.Entry<String, List<Map<String, String>>> aggregation : aggregator.getAggregations().entrySet()) {
             String idx = aggregation.getKey();
             List<Map<String, String>> data = aggregation.getValue();
-            JsonResponse response = this.persistenceBackend.bulkInsert(idx, type, data);
-            LOGGER.info("[" + this.getName() + "] Persisting data at NGSIElasticsearchSink. (index=" + idx + ", type=" + type + ", data=" + data + ")");
+            JsonResponse response = this.persistenceBackend.bulkInsert(idx, this.mappingType, data);
+            LOGGER.info("[" + this.getName() + "] Persisting data at NGSIElasticsearchSink. (index=" + idx + ", type=" + this.mappingType + ", data=" + data + ")");
         }
     } // persistAggregation
 } // NGSIElasticsearchSink
