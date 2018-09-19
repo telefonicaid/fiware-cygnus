@@ -38,6 +38,7 @@ import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.bind.DatatypeConverter;
 import kafka.common.OffsetOutOfRangeException;
@@ -77,6 +78,12 @@ public final class CommonUtils {
             "yyyy-MM-dd HH:mm:ss").withOffsetParsed().withZoneUTC();
     private static final DateTimeFormatter FORMATTER4 = DateTimeFormat.forPattern(
             "yyyy-MM-dd HH:mm:ss.SSS").withOffsetParsed().withZoneUTC();
+    private static final DateTimeFormatter FORMATTER5 = DateTimeFormat.forPattern(
+            "yyyy-MM-dd'T'HH:mm:ssZ").withOffsetParsed();
+    private static final DateTimeFormatter FORMATTER6 = DateTimeFormat.forPattern(
+            "yyyy-MM-dd'T'HH:mm:ss.SSSZ").withOffsetParsed();
+    private static final Pattern FORMATTER6_PATTERN = Pattern.compile("^(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2})\\.(\\d+)([+-][\\d:]+)$");
+
     private static final Pattern PATTERN = Pattern.compile("^[a-zA-Z0-9_]*$");
     
     /**
@@ -308,7 +315,30 @@ public final class CommonUtils {
                                             dateTime = FORMATTER4.parseDateTime(mdValueTruncated);
                                         } catch (Exception e6) {
                                             LOGGER.debug(e6.getMessage());
-                                            return null;
+
+                                            try {
+                                                // ISO 8601 with offset (without milliseconds)
+                                                dateTime = FORMATTER5.parseDateTime(mdValue);
+                                            } catch (Exception e7) {
+                                                LOGGER.debug(e7.getMessage());
+
+                                                try {
+                                                    // ISO 8601 with offset (with milliseconds)
+                                                    Matcher matcher = FORMATTER6_PATTERN.matcher(mdValue);
+                                                    if (matcher.matches()) {
+                                                        String mdValueTruncated = matcher.group(1) + "."
+                                                          + matcher.group(2).substring(0, 3)
+                                                          + matcher.group(3);
+                                                        dateTime = FORMATTER6.parseDateTime(mdValueTruncated);
+                                                    } else {
+                                                        LOGGER.debug("ISO8601 format does not match");
+                                                        return null;
+                                                    } // if
+                                                } catch (Exception e8) {
+                                                    LOGGER.debug(e8.getMessage());
+                                                    return null;
+                                                } // try catch
+                                            } // try catch
                                         } // try catch
                                     } // try catch
                                 } // try catch
