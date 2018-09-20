@@ -445,6 +445,9 @@ if [ "$CYGNUS_ELASTICSEARCH_HOST" != "" ]; then
     if [ "$CYGNUS_ELASTICSEARCH_TIMEZONE" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.timezone/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.timezone = '${CYGNUS_ELASTICSEARCH_TIMEZONE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+    if [ "$CYGNUS_ELASTICSEARCH_CAST_VALUE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.cast_value/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.cast_value = '${CYGNUS_ELASTICSEARCH_CAST_VALUE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
 
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         # Run the Cygnus command

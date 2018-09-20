@@ -44,6 +44,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.flume.Context;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  * Sink for Elasticsearch.
@@ -62,6 +65,7 @@ public class NGSIElasticsearchSink extends NGSISink {
     private int backendMaxConnsPerRoute;
     private boolean ignoreWhiteSpaces;
     private String timezone;
+    private boolean castValue;
     private ElasticsearchBackend persistenceBackend;
 
     /**
@@ -148,6 +152,15 @@ public class NGSIElasticsearchSink extends NGSISink {
     } // getTimezone
 
     /**
+     * Gets if to cast the attribute value. It is protected due to it is only required for testing
+     * purposes.
+     * @return True if the empty value is ignored, false otherwise
+     */
+    protected boolean getCastValue() {
+        return this.castValue;
+    } // getCastValue
+
+    /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
@@ -212,17 +225,28 @@ public class NGSIElasticsearchSink extends NGSISink {
 
         String ignoreWhiteSpacesStr = context.getString("ignore_white_spaces", "true");
         if (ignoreWhiteSpacesStr.equals("true") || ignoreWhiteSpacesStr.equals("false")) {
-            ignoreWhiteSpaces = Boolean.valueOf(ignoreWhiteSpacesStr);
+            this.ignoreWhiteSpaces = Boolean.valueOf(ignoreWhiteSpacesStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (ignore_white_spaces="
                 + ignoreWhiteSpacesStr + ")");
         }  else {
-            invalidConfiguration = true;
+            this.invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (ignore_white_spaces="
                 + ignoreWhiteSpacesStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
         this.timezone = context.getString("timezone", "UTC");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (index_prefix=" + this.indexPrefix + ")");
+
+        String castValueStr = context.getString("cast_value", "false");
+        if (castValueStr.equals("true") || castValueStr.equals("false")) {
+            this.castValue = Boolean.valueOf(castValueStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (cast_value="
+                + castValueStr + ")");
+        }  else {
+            this.castValue = false;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (cast_value="
+                + castValueStr + ") -- Must be 'true' or 'false'");
+        }  // if else
 
     } // configure
 
@@ -284,14 +308,13 @@ public class NGSIElasticsearchSink extends NGSISink {
      */
     private class ElasticsearchAggregator {
         private DateTimeFormatter indexDateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        private String jstrfmt;
         private Map<String, List<Map<String, String>>> aggregations;
         private String index;
+        private JSONParser parser;
 
         public ElasticsearchAggregator() {
             this.aggregations = new HashMap<>();
-            this.jstrfmt = "{\"recvTime\":\"%s\",\"entityId\":\"%s\",\"entityType\":\"%s\",";
-            this.jstrfmt += "\"attrName\":\"%s\",\"attrType\":\"%s\",\"attrValue\":\"%s\",\"attrMetadata\":%s}";
+            this.parser = new JSONParser();
         } // ElasticsearchAggregator
 
         public Map<String, List<Map<String, String>>> getAggregations() {
@@ -349,12 +372,60 @@ public class NGSIElasticsearchSink extends NGSISink {
                 ZonedDateTime recvTimeDt = ZonedDateTime.now(Clock.fixed(Instant.ofEpochMilli(recvTimeTs),
                                                              ZoneId.of(NGSIElasticsearchSink.this.timezone)));
                 String idx = this.index + "-" + recvTimeDt.format(this.indexDateFormatter);
-                String jstr = String.format(this.jstrfmt, recvTimeDt.format(DateTimeFormatter.ISO_INSTANT),
-                      entityId, entityType, attrName, attrType, attrValue, attrMetadata);
+
+                JSONObject jobj = new JSONObject();
+                jobj.put("recvTime", recvTimeDt.format(DateTimeFormatter.ISO_INSTANT));
+                jobj.put("entityId", entityId);
+                jobj.put("entityType", entityType);
+                jobj.put("attrName", attrName);
+                jobj.put("attrType", attrType);
+
+                if (NGSIElasticsearchSink.this.castValue) {
+                    String t = attrType.toLowerCase();
+                    if (t.startsWith("int")) {
+                        try {
+                            jobj.put("attrValue", Integer.valueOf(attrValue));
+                        } catch (Exception e) {
+                            jobj.put("attrValue", null);
+                        }
+                    } else if (t.startsWith("float")) {
+                        try {
+                            jobj.put("attrValue", Float.valueOf(attrValue));
+                        } catch (Exception e) {
+                            jobj.put("attrValue", null);
+                        }
+                    } else if (t.startsWith("number") || t.startsWith("double")) {
+                        try {
+                            jobj.put("attrValue", Double.valueOf(attrValue));
+                        } catch (Exception e) {
+                            jobj.put("attrValue", null);
+                        }
+                    } else if (t.startsWith("bool")) {
+                        try {
+                            jobj.put("attrValue", Boolean.valueOf(attrValue));
+                        } catch (Exception e) {
+                            jobj.put("attrValue", null);
+                        }
+                    } else {
+                        jobj.put("attrValue", attrValue);
+                    }
+                } else {
+                    jobj.put("attrValue", attrValue);
+                }
+
+                if (attrMetadata != null) {
+                    try {
+                        jobj.put("attrMetadata", parser.parse(attrMetadata));
+                    } catch (ParseException e) {
+                        jobj.put("attrMetadata", null);
+                    }
+                } else {
+                    jobj.put("attrMetadata", null);
+                }
 
                 Map<String, String> elem = new HashMap<>();
                 elem.put("recvTimeTs", String.valueOf(recvTimeTs));
-                elem.put("data", jstr);
+                elem.put("data", jobj.toJSONString());
                 this.aggregations.putIfAbsent(idx, new ArrayList<Map<String, String>>());
                 this.aggregations.get(idx).add(elem);
             } // for
