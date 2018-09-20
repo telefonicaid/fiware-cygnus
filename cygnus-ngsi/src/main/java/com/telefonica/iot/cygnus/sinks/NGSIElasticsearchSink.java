@@ -38,6 +38,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,7 +67,11 @@ public class NGSIElasticsearchSink extends NGSISink {
     private boolean ignoreWhiteSpaces;
     private String timezone;
     private boolean castValue;
+    private int cacheFlashIntervalSec;
     private ElasticsearchBackend persistenceBackend;
+
+    private Map<String, List<Map<String, String>>> aggregations = new HashMap<>();
+    private ZonedDateTime prevDateTimeUTC = ZonedDateTime.now(ZoneId.of("UTC"));
 
     /**
      * Constructor.
@@ -154,11 +159,20 @@ public class NGSIElasticsearchSink extends NGSISink {
     /**
      * Gets if to cast the attribute value. It is protected due to it is only required for testing
      * purposes.
-     * @return True if the empty value is ignored, false otherwise
+     * @return True if to cast attrValue using attrType
      */
     protected boolean getCastValue() {
         return this.castValue;
     } // getCastValue
+
+    /**
+     * Gets the time interval (seconds) to flash the memory cache. It is protected due to it is only required for testing
+     * purposes.
+     * @return ss
+     */
+    protected int getCacheFlashIntervalSec() {
+        return this.cacheFlashIntervalSec;
+    } // getCacheFlashIntervalSec
 
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
@@ -248,6 +262,8 @@ public class NGSIElasticsearchSink extends NGSISink {
                 + castValueStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
+        this.cacheFlashIntervalSec = context.getInteger("cache_flash_interval_sec", 0);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (cacheFlashIntervalSec=" + this.cacheFlashIntervalSec + ")");
     } // configure
 
     @Override
@@ -282,7 +298,7 @@ public class NGSIElasticsearchSink extends NGSISink {
             ArrayList<NGSIEvent> events = batch.getNextEvents();
 
             // Get an aggregator for this destination and initialize it
-            ElasticsearchAggregator aggregator = new ElasticsearchAggregator();
+            ElasticsearchAggregator aggregator = new ElasticsearchAggregator(this.aggregations);
             aggregator.initialize(events.get(0));
 
             for (NGSIEvent event : events) {
@@ -290,7 +306,7 @@ public class NGSIElasticsearchSink extends NGSISink {
             } // for
 
             // Persist the aggregation
-            persistAggregation(aggregator);
+            persistAggregation();
             batch.setNextPersisted(true);
         } // for
     } // persistBatch
@@ -312,8 +328,8 @@ public class NGSIElasticsearchSink extends NGSISink {
         private String index;
         private JSONParser parser;
 
-        public ElasticsearchAggregator() {
-            this.aggregations = new HashMap<>();
+        public ElasticsearchAggregator(Map<String, List<Map<String, String>>> aggregations) {
+            this.aggregations = aggregations;
             this.parser = new JSONParser();
         } // ElasticsearchAggregator
 
@@ -432,12 +448,19 @@ public class NGSIElasticsearchSink extends NGSISink {
         } // aggregate
     } // ElasticsearchAggregator
 
-    private void persistAggregation(ElasticsearchAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError {
-        for (Map.Entry<String, List<Map<String, String>>> aggregation : aggregator.getAggregations().entrySet()) {
-            String idx = aggregation.getKey();
-            List<Map<String, String>> data = aggregation.getValue();
-            JsonResponse response = this.persistenceBackend.bulkInsert(idx, this.mappingType, data);
-            LOGGER.info("[" + this.getName() + "] Persisting data at NGSIElasticsearchSink. (index=" + idx + ", type=" + this.mappingType + ", data=" + data + ")");
-        }
+    private void persistAggregation() throws CygnusPersistenceError, CygnusRuntimeError {
+        ZonedDateTime currentDateTimeUTC = ZonedDateTime.now(ZoneId.of("UTC"));
+
+        if (this.cacheFlashIntervalSec == 0 ||
+            ChronoUnit.SECONDS.between(this.prevDateTimeUTC, currentDateTimeUTC) >= this.cacheFlashIntervalSec) {
+            for (Map.Entry<String, List<Map<String, String>>> aggregation : this.aggregations.entrySet()) {
+                String idx = aggregation.getKey();
+                List<Map<String, String>> data = aggregation.getValue();
+                JsonResponse response = this.persistenceBackend.bulkInsert(idx, this.mappingType, data);
+                LOGGER.info("[" + this.getName() + "] Persisting data at NGSIElasticsearchSink. (index=" + idx + ", type=" + this.mappingType + ", data=" + data + ")");
+            } // for
+            this.aggregations.clear();
+            this.prevDateTimeUTC = currentDateTimeUTC;
+        } // if
     } // persistAggregation
 } // NGSIElasticsearchSink
