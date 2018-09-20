@@ -442,6 +442,9 @@ if [ "$CYGNUS_ELASTICSEARCH_HOST" != "" ]; then
     if [ "$CYGNUS_ELASTICSEARCH_IGNORE_WHITE_SPACES" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.ignore_white_spaces/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.ignore_white_spaces = '${CYGNUS_ELASTICSEARCH_IGNORE_WHITE_SPACES} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+    if [ "$CYGNUS_ELASTICSEARCH_TIMEZONE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.timezone/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.timezone = '${CYGNUS_ELASTICSEARCH_TIMEZONE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
 
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         # Run the Cygnus command

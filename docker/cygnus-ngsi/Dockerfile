@@ -149,6 +149,7 @@ ENV CYGNUS_ELASTICSEARCH_MAPPING_TYPE ""
 ENV CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONNS ""
 ENV CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONSS_PER_ROUTE ""
 ENV CYGNUS_ELASTICSEARCH_IGNORE_WHITE_SPACES ""
+ENV CYGNUS_ELASTICSEARCH_TIMEZONE ""
 
 # Docker Secrets Support - The following equivalents to storing clear text usernames and passwords are also available:
 #
@@ -165,9 +166,9 @@ ENV CYGNUS_ELASTICSEARCH_IGNORE_WHITE_SPACES ""
 
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
-ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
+ARG GIT_URL_CYGNUS="https://github.com/telefonicaid/fiware-cygnus.git"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "master"
+ARG GIT_REV_CYGNUS="master"
 #ENV GIT_REV_CYGNUS "mybranch"
 
 ENV MVN_VER "3.5.4"

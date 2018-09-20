@@ -61,6 +61,7 @@ public class NGSIElasticsearchSink extends NGSISink {
     private int backendMaxConns;
     private int backendMaxConnsPerRoute;
     private boolean ignoreWhiteSpaces;
+    private String timezone;
     private ElasticsearchBackend persistenceBackend;
 
     /**
@@ -139,6 +140,14 @@ public class NGSIElasticsearchSink extends NGSISink {
     } // getIgnoreWhiteSpaces
 
     /**
+     * Gets the timezone. It is protected due to it is only required for testing purposes.
+     * @return The timezone
+     */
+    protected String getTimezone() {
+        return this.timezone;
+    } // getTimezone
+
+    /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
@@ -211,6 +220,10 @@ public class NGSIElasticsearchSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (ignore_white_spaces="
                 + ignoreWhiteSpacesStr + ") -- Must be 'true' or 'false'");
         }  // if else
+
+        this.timezone = context.getString("timezone", "UTC");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (index_prefix=" + this.indexPrefix + ")");
+
     } // configure
 
     @Override
@@ -333,7 +346,8 @@ public class NGSIElasticsearchSink extends NGSISink {
                     recvTimeTs = notifiedRecvTimeTs;
                 } // if else
 
-                ZonedDateTime recvTimeDt = ZonedDateTime.now(Clock.fixed(Instant.ofEpochMilli(recvTimeTs), ZoneId.of("UTC")));
+                ZonedDateTime recvTimeDt = ZonedDateTime.now(Clock.fixed(Instant.ofEpochMilli(recvTimeTs),
+                                                             ZoneId.of(NGSIElasticsearchSink.this.timezone)));
                 String idx = this.index + "-" + recvTimeDt.format(this.indexDateFormatter);
                 String jstr = String.format(this.jstrfmt, recvTimeDt.format(DateTimeFormatter.ISO_INSTANT),
                       entityId, entityType, attrName, attrType, attrValue, attrMetadata);
