@@ -57,6 +57,8 @@ file_env 'CYGNUS_POSTGRESQL_PASS' ''
 file_env 'CYGNUS_CARTO_USER' ''
 file_env 'CYGNUS_CARTO_KEY' ''
 
+PIDS=""
+trap 'kill -TERM $PIDS' TERM INT
 
 
 AGENT_CONF_FILE=agent.conf
@@ -110,6 +112,7 @@ if [ "$CYGNUS_MYSQL_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         # Run the Cygnus command
         ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5080 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -215,6 +218,7 @@ if [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         # Run the Cygnus command
         ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5081 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -269,6 +273,7 @@ if [ "$CYGNUS_CKAN_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         # Run the Cygnus command
         ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5082 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -342,6 +347,7 @@ if [ "$CYGNUS_HDFS_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         # Run the Cygnus command
         ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5083 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -391,6 +397,7 @@ if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         # Run the Cygnus command
         ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5084 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -411,6 +418,7 @@ if [ "$CYGNUS_CARTO_USER" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         # Run the Cygnus command
         ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5085 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -455,6 +463,7 @@ if [ "$CYGNUS_ELASTICSEARCH_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         # Run the Cygnus command
         ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5086 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -462,7 +471,12 @@ fi
 if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
     # Run the Cygnus command
     ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${CYGNUS_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p ${CYGNUS_API_PORT} -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+    PIDS="$PIDS $!"
 fi
 
+touch /var/log/cygnus/cygnus.log && tail -f /var/log/cygnus/cygnus.log &
+PIDS="$PIDS $!"
 
-touch /var/log/cygnus/cygnus.log && tail -f /var/log/cygnus/cygnus.log
+wait $PIDS
+trap - TERM INT
+wait $PIDS
