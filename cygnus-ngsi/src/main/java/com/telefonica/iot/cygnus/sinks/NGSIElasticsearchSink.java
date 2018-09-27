@@ -38,12 +38,15 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.apache.flume.Context;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -70,8 +73,9 @@ public class NGSIElasticsearchSink extends NGSISink {
     private int cacheFlashIntervalSec;
     private ElasticsearchBackend persistenceBackend;
 
-    private Map<String, List<Map<String, String>>> aggregations = new HashMap<>();
-    private ZonedDateTime prevDateTimeUTC = ZonedDateTime.now(ZoneId.of("UTC"));
+    private Map<String, List<Map<String, String>>> aggregations = new ConcurrentHashMap<>();
+    private Runnable persistentTask;
+    private ScheduledExecutorService scheduler;
 
     /**
      * Constructor.
@@ -140,8 +144,7 @@ public class NGSIElasticsearchSink extends NGSISink {
     } // getBackendMaxConnsPerRoute
 
     /**
-     * Gets if the empty value is ignored. It is protected due to it is only required for testing
-     * purposes.
+     * Gets if the empty value is ignored. It is protected due to it is only required for testing purposes.
      * @return True if the empty value is ignored, false otherwise
      */
     protected boolean getIgnoreWhiteSpaces() {
@@ -157,8 +160,7 @@ public class NGSIElasticsearchSink extends NGSISink {
     } // getTimezone
 
     /**
-     * Gets if to cast the attribute value. It is protected due to it is only required for testing
-     * purposes.
+     * Gets if to cast the attribute value. It is protected due to it is only required for testing purposes.
      * @return True if to cast attrValue using attrType
      */
     protected boolean getCastValue() {
@@ -166,9 +168,8 @@ public class NGSIElasticsearchSink extends NGSISink {
     } // getCastValue
 
     /**
-     * Gets the time interval (seconds) to flash the memory cache. It is protected due to it is only required for testing
-     * purposes.
-     * @return ss
+     * Gets the time interval (seconds) to flash the memory cache. It is protected due to it is only required for testing purposes.
+     * @return The interval seconds
      */
     protected int getCacheFlashIntervalSec() {
         return this.cacheFlashIntervalSec;
@@ -263,7 +264,8 @@ public class NGSIElasticsearchSink extends NGSISink {
         }  // if else
 
         this.cacheFlashIntervalSec = context.getInteger("cache_flash_interval_sec", 0);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (cacheFlashIntervalSec=" + this.cacheFlashIntervalSec + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (cache_flash_interval_sec="
+                + this.cacheFlashIntervalSec + ")");
     } // configure
 
     @Override
@@ -276,8 +278,56 @@ public class NGSIElasticsearchSink extends NGSISink {
         } catch (Exception e) {
             LOGGER.error("Error while creating the Elasticsearch persistence backend. Details=" + e.getMessage());
         }
+        this.persistentTask = new Runnable() {
+            public void run() {
+                try {
+                    synchronized(NGSIElasticsearchSink.this.aggregations) {
+                        for (Map.Entry<String, List<Map<String, String>>> aggregation : NGSIElasticsearchSink.this.aggregations.entrySet()) {
+                            String idx = aggregation.getKey();
+                            List<Map<String, String>> data = aggregation.getValue();
+                            JsonResponse response = NGSIElasticsearchSink.this.persistenceBackend.bulkInsert(idx,
+                                    NGSIElasticsearchSink.this.mappingType, data);
+                            LOGGER.info("[" + NGSIElasticsearchSink.this.getName() + "] Persisting data at NGSIElasticsearchSink. (index="
+                                    + idx + ", type=" + NGSIElasticsearchSink.this.mappingType + ", data=" + data + ")");
+                        } // for
+                        NGSIElasticsearchSink.this.aggregations.clear();
+                    } // synchronized
+                } catch (Exception e) {
+                    LOGGER.error("Error while persisting data using backend. Details=" + e.getMessage());
+                    throw new RuntimeException(e);
+                } // try
+            }
+        };
+        // start ScheduledExecutorService to persist data at the cacheFlashIntervalSec intervals
+        // if cacheFlashIntervalSec is 0 (default value), the scheduler service does not start and the data is persisted at every time when 'persistBatch' is called
+        if (this.cacheFlashIntervalSec != 0) {
+            this.scheduler = Executors.newSingleThreadScheduledExecutor();
+            this.scheduler.scheduleWithFixedDelay(this.persistentTask, 0, this.cacheFlashIntervalSec, TimeUnit.SECONDS);
+            LOGGER.debug("[" + this.getName() + "] ScheduledExecutorService started");
+        } // if
+        LOGGER.info("[" + this.getName() + "] started NGSIElasticsearchSink gracefully");
         super.start();
     } // start
+
+    @Override
+    public void stop() {
+        try {
+            // stop scheduler if started
+            if (this.scheduler != null) {
+                this.scheduler.shutdown();
+                this.scheduler.awaitTermination(this.cacheFlashIntervalSec * 2, TimeUnit.SECONDS);
+                LOGGER.debug("[" + this.getName() + "] ScheduledThreadPoolExecutor stopped");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error while shutting down the scheduler. Details=" + e.getMessage());
+        } finally {
+            // persist the remaining data if exists
+            this.persistentTask.run();
+            LOGGER.debug("[" + this.getName() + "] persisted all data");
+        }
+        LOGGER.info("[" + this.getName() + "] stopped NGSIElasticsearchSink gracefully");
+        super.stop();
+    } // stop
 
     @Override
     void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError {
@@ -298,15 +348,17 @@ public class NGSIElasticsearchSink extends NGSISink {
             ArrayList<NGSIEvent> events = batch.getNextEvents();
 
             // Get an aggregator for this destination and initialize it
-            ElasticsearchAggregator aggregator = new ElasticsearchAggregator(this.aggregations);
+            ElasticsearchAggregator aggregator = new ElasticsearchAggregator();
             aggregator.initialize(events.get(0));
 
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
 
-            // Persist the aggregation
-            persistAggregation();
+            // Persist the aggregation if cacheFlashIntervalSec == 0
+            if (this.cacheFlashIntervalSec == 0) {
+                this.persistentTask.run();
+            } // if
             batch.setNextPersisted(true);
         } // for
     } // persistBatch
@@ -324,22 +376,12 @@ public class NGSIElasticsearchSink extends NGSISink {
      */
     private class ElasticsearchAggregator {
         private DateTimeFormatter indexDateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        private Map<String, List<Map<String, String>>> aggregations;
         private String index;
         private JSONParser parser;
 
-        public ElasticsearchAggregator(Map<String, List<Map<String, String>>> aggregations) {
-            this.aggregations = aggregations;
+        public ElasticsearchAggregator() {
             this.parser = new JSONParser();
         } // ElasticsearchAggregator
-
-        public Map<String, List<Map<String, String>>> getAggregations() {
-            return this.aggregations;
-        } // getAggregations
-
-        public String getIndex() {
-            return this.index;
-        }
 
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             String service = event.getServiceForNaming(enableNameMappings);
@@ -442,25 +484,11 @@ public class NGSIElasticsearchSink extends NGSISink {
                 Map<String, String> elem = new HashMap<>();
                 elem.put("recvTimeTs", String.valueOf(recvTimeTs));
                 elem.put("data", jobj.toJSONString());
-                this.aggregations.putIfAbsent(idx, new ArrayList<Map<String, String>>());
-                this.aggregations.get(idx).add(elem);
+                synchronized(NGSIElasticsearchSink.this.aggregations) {
+                    NGSIElasticsearchSink.this.aggregations.putIfAbsent(idx, new ArrayList<Map<String, String>>());
+                    NGSIElasticsearchSink.this.aggregations.get(idx).add(elem);
+                } // synchronized
             } // for
         } // aggregate
     } // ElasticsearchAggregator
-
-    private void persistAggregation() throws CygnusPersistenceError, CygnusRuntimeError {
-        ZonedDateTime currentDateTimeUTC = ZonedDateTime.now(ZoneId.of("UTC"));
-
-        if (this.cacheFlashIntervalSec == 0 ||
-            ChronoUnit.SECONDS.between(this.prevDateTimeUTC, currentDateTimeUTC) >= this.cacheFlashIntervalSec) {
-            for (Map.Entry<String, List<Map<String, String>>> aggregation : this.aggregations.entrySet()) {
-                String idx = aggregation.getKey();
-                List<Map<String, String>> data = aggregation.getValue();
-                JsonResponse response = this.persistenceBackend.bulkInsert(idx, this.mappingType, data);
-                LOGGER.info("[" + this.getName() + "] Persisting data at NGSIElasticsearchSink. (index=" + idx + ", type=" + this.mappingType + ", data=" + data + ")");
-            } // for
-            this.aggregations.clear();
-            this.prevDateTimeUTC = currentDateTimeUTC;
-        } // if
-    } // persistAggregation
 } // NGSIElasticsearchSink
