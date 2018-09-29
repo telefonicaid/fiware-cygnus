@@ -68,6 +68,7 @@ public class NGSIElasticsearchSink extends NGSISink {
     private int backendMaxConns;
     private int backendMaxConnsPerRoute;
     private boolean ignoreWhiteSpaces;
+    private boolean rowAttrPersistence;
     private String timezone;
     private boolean castValue;
     private int cacheFlashIntervalSec;
@@ -152,6 +153,15 @@ public class NGSIElasticsearchSink extends NGSISink {
     } // getIgnoreWhiteSpaces
 
     /**
+     * Gets if row-like storing. It is protected due to it is only required for testing purposes.
+     * @return True if row-like storing, false column-liken storing
+     */
+
+    public boolean getRowAttrPersistence() {
+        return this.rowAttrPersistence;
+    } // getRowAttrPersistence
+
+    /**
      * Gets the timezone. It is protected due to it is only required for testing purposes.
      * @return The timezone
      */
@@ -225,7 +235,7 @@ public class NGSIElasticsearchSink extends NGSISink {
                 + sslStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
-        this.indexPrefix = context.getString("index_prefix", "cygnus_");
+        this.indexPrefix = context.getString("index_prefix", "cygnus");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (index_prefix=" + this.indexPrefix + ")");
 
         this.mappingType = context.getString("mapping_type", "cygnus_type");
@@ -247,6 +257,17 @@ public class NGSIElasticsearchSink extends NGSISink {
             this.invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (ignore_white_spaces="
                 + ignoreWhiteSpacesStr + ") -- Must be 'true' or 'false'");
+        }  // if else
+
+        String attrPersistenceStr = context.getString("attr_persistence", "row");
+        if (attrPersistenceStr.equals("row") || attrPersistenceStr.equals("column")) {
+            rowAttrPersistence = attrPersistenceStr.equals("row");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
+                + attrPersistenceStr + ")");
+        } else {
+            this.invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+                + attrPersistenceStr + ") must be 'row' or 'column'");
         }  // if else
 
         this.timezone = context.getString("timezone", "UTC");
@@ -385,7 +406,8 @@ public class NGSIElasticsearchSink extends NGSISink {
 
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             String service = event.getServiceForNaming(enableNameMappings);
-            this.index = (NGSIElasticsearchSink.this.indexPrefix + service).toLowerCase().replace("/", "");
+            String servicePath = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            this.index = (NGSIElasticsearchSink.this.indexPrefix + "-" + service + servicePath).toLowerCase().replace("/", "-");
             LOGGER.debug("ElasticsearchAggregator initialize (index=" + this.index + ")");
         } // initialize
 
@@ -406,6 +428,14 @@ public class NGSIElasticsearchSink extends NGSISink {
                         + ", type=" + entityType + ")");
                 return;
             } // if
+            if (NGSIElasticsearchSink.this.rowAttrPersistence) {
+                this.aggregateAsRow(notifiedRecvTimeTs, entityId, entityType, contextAttributes);
+            } else {
+                this.aggregateAsColumn(notifiedRecvTimeTs, entityId, entityType, contextAttributes);
+            }
+        } // aggregate
+
+        private void aggregateAsRow(long notifiedRecvTimeTs, String entityId, String entityType, List<ContextAttribute> contextAttributes) {
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
@@ -417,56 +447,17 @@ public class NGSIElasticsearchSink extends NGSISink {
                     continue;
                 } // if
 
-                // check if the metadata contains a TimeInstant value; use the notified reception time instead
-                Long recvTimeTs;
-                Long timeInstant = CommonUtils.getTimeInstant(attrMetadata);
-
-                if (timeInstant != null) {
-                    recvTimeTs = timeInstant;
-                } else {
-                    recvTimeTs = notifiedRecvTimeTs;
-                } // if else
-
-                ZonedDateTime recvTimeDt = ZonedDateTime.now(Clock.fixed(Instant.ofEpochMilli(recvTimeTs),
-                                                             ZoneId.of(NGSIElasticsearchSink.this.timezone)));
-                String idx = this.index + "-" + recvTimeDt.format(this.indexDateFormatter);
+                TimeRelatedValues v = this.getTimeRelatedValues(notifiedRecvTimeTs, attrMetadata);
 
                 JSONObject jobj = new JSONObject();
-                jobj.put("recvTime", recvTimeDt.format(DateTimeFormatter.ISO_INSTANT));
+                jobj.put("recvTime", v.recvTimeDt.format(DateTimeFormatter.ISO_INSTANT));
                 jobj.put("entityId", entityId);
                 jobj.put("entityType", entityType);
                 jobj.put("attrName", attrName);
                 jobj.put("attrType", attrType);
 
                 if (NGSIElasticsearchSink.this.castValue) {
-                    String t = attrType.toLowerCase();
-                    if (t.startsWith("int")) {
-                        try {
-                            jobj.put("attrValue", Integer.valueOf(attrValue));
-                        } catch (Exception e) {
-                            jobj.put("attrValue", null);
-                        }
-                    } else if (t.startsWith("float")) {
-                        try {
-                            jobj.put("attrValue", Float.valueOf(attrValue));
-                        } catch (Exception e) {
-                            jobj.put("attrValue", null);
-                        }
-                    } else if (t.startsWith("number") || t.startsWith("double")) {
-                        try {
-                            jobj.put("attrValue", Double.valueOf(attrValue));
-                        } catch (Exception e) {
-                            jobj.put("attrValue", null);
-                        }
-                    } else if (t.startsWith("bool")) {
-                        try {
-                            jobj.put("attrValue", Boolean.valueOf(attrValue));
-                        } catch (Exception e) {
-                            jobj.put("attrValue", null);
-                        }
-                    } else {
-                        jobj.put("attrValue", attrValue);
-                    }
+                    jobj.put("attrValue", this.convertValueType(attrType, attrValue));
                 } else {
                     jobj.put("attrValue", attrValue);
                 }
@@ -482,13 +473,90 @@ public class NGSIElasticsearchSink extends NGSISink {
                 }
 
                 Map<String, String> elem = new HashMap<>();
-                elem.put("recvTimeTs", String.valueOf(recvTimeTs));
+                elem.put("recvTimeTs", String.valueOf(v.recvTimeTs));
                 elem.put("data", jobj.toJSONString());
                 synchronized(NGSIElasticsearchSink.this.aggregations) {
-                    NGSIElasticsearchSink.this.aggregations.putIfAbsent(idx, new ArrayList<Map<String, String>>());
-                    NGSIElasticsearchSink.this.aggregations.get(idx).add(elem);
+                    NGSIElasticsearchSink.this.aggregations.putIfAbsent(v.idx, new ArrayList<Map<String, String>>());
+                    NGSIElasticsearchSink.this.aggregations.get(v.idx).add(elem);
                 } // synchronized
             } // for
-        } // aggregate
+        } // aggregateAsRow
+
+        private void aggregateAsColumn(long notifiedRecvTimeTs, String entityId, String entityType, List<ContextAttribute> contextAttributes) {
+            String firstAttrMetadata = contextAttributes.get(0).getContextMetadata();
+            TimeRelatedValues v = this.getTimeRelatedValues(notifiedRecvTimeTs, firstAttrMetadata);
+
+            JSONObject jobj = new JSONObject();
+            jobj.put("recvTime", v.recvTimeDt.format(DateTimeFormatter.ISO_INSTANT));
+            jobj.put("entityId", entityId);
+            jobj.put("entityType", entityType);
+
+            for (ContextAttribute contextAttribute : contextAttributes) {
+                String attrName = contextAttribute.getName();
+                String attrType = contextAttribute.getType();
+                String attrValue = contextAttribute.getContextValue(false);
+
+                // check if the attribute value is based on white spaces
+                if (NGSIElasticsearchSink.this.ignoreWhiteSpaces && attrValue.trim().length() == 0) {
+                    continue;
+                } // if
+
+                if (NGSIElasticsearchSink.this.castValue) {
+                    jobj.put(attrName, this.convertValueType(attrType, attrValue));
+                } else {
+                    jobj.put(attrName, attrValue);
+                }
+            }
+
+            Map<String, String> elem = new HashMap<>();
+            elem.put("recvTimeTs", String.valueOf(v.recvTimeTs));
+            elem.put("data", jobj.toJSONString());
+            synchronized(NGSIElasticsearchSink.this.aggregations) {
+                NGSIElasticsearchSink.this.aggregations.putIfAbsent(v.idx, new ArrayList<Map<String, String>>());
+                NGSIElasticsearchSink.this.aggregations.get(v.idx).add(elem);
+            } // synchronized
+        } // aggregateAsColumn
+
+        private class TimeRelatedValues {
+            public Long recvTimeTs;
+            public ZonedDateTime recvTimeDt;
+            public String idx;
+        } // TimeRelatedValues
+
+        private TimeRelatedValues getTimeRelatedValues(long notifiedRecvTimeTs, String attrMetadata) {
+            TimeRelatedValues v = new TimeRelatedValues();
+
+            // check if the metadata contains a TimeInstant value; use the notified reception time instead
+            Long timeInstant = CommonUtils.getTimeInstant(attrMetadata);
+            if (timeInstant != null) {
+                v.recvTimeTs = timeInstant;
+            } else {
+                v.recvTimeTs = notifiedRecvTimeTs;
+            } // if else
+
+            v.recvTimeDt = ZonedDateTime.now(Clock.fixed(Instant.ofEpochMilli(v.recvTimeTs),
+                  ZoneId.of(NGSIElasticsearchSink.this.timezone)));
+            v.idx = this.index + "-" + v.recvTimeDt.format(this.indexDateFormatter);
+            return v;
+        } // getTimeRelatedValues
+
+        private Object convertValueType(String attrType, String attrValue) {
+            String t = attrType.toLowerCase();
+            try {
+                if (t.startsWith("int")) {
+                    return Integer.valueOf(attrValue);
+                } else if (t.startsWith("float")) {
+                    return Float.valueOf(attrValue);
+                } else if (t.startsWith("number") || t.startsWith("double")) {
+                    return Double.valueOf(attrValue);
+                } else if (t.startsWith("bool")) {
+                    return Boolean.valueOf(attrValue);
+                } else {
+                    return attrValue;
+                } // if else
+            } catch (Exception e) {
+                return null;
+            } // try
+        } // convertValueType
     } // ElasticsearchAggregator
 } // NGSIElasticsearchSink
