@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.xml.bind.DatatypeConverter;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
@@ -57,16 +58,24 @@ public class ElasticsearchBackendImpl extends HttpBackend implements Elasticsear
 
     @Override
     public JsonResponse bulkInsert(String index, String type, List<Map<String, String>> data) throws CygnusPersistenceError, CygnusRuntimeError {
+        if (StringUtils.isBlank(index) || StringUtils.isBlank(type)) {
+            throw new CygnusPersistenceError("invalid index or type (index=" + index + ", type=" + type + ")");
+        }
         String relativeURL = "/" + index + "/" + type + "/_bulk";
 
         String jsonLines = "";
         StringEntity entity;
         try {
             for (Map<String, String> elem : data) {
-                byte[] bytes = MessageDigest.getInstance("MD5").digest(elem.get("data").getBytes(StandardCharsets.UTF_8));
+                String edata = elem.get("data");
+                String erecvTimeTs = elem.get("recvTimeTs");
+                if (StringUtils.isBlank(edata) || StringUtils.isBlank(erecvTimeTs)) {
+                    throw new CygnusPersistenceError("invalid data format (data=" + data + ")");
+                }
+                byte[] bytes = MessageDigest.getInstance("MD5").digest(edata.getBytes(StandardCharsets.UTF_8));
                 String hash = DatatypeConverter.printHexBinary(bytes);
-                jsonLines += String.format("{\"index\":{\"_id\":\"%s-%s\"}}\n", elem.get("recvTimeTs"), hash);
-                jsonLines += String.format("%s\n", elem.get("data"));
+                jsonLines += String.format("{\"index\":{\"_id\":\"%s-%s\"}}\n", erecvTimeTs, hash);
+                jsonLines += String.format("%s\n", edata);
             } // for
             entity = new StringEntity(jsonLines);
         } catch (NoSuchAlgorithmException e) {
