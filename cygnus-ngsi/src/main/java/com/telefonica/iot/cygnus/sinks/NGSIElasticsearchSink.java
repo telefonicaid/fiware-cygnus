@@ -75,7 +75,26 @@ public class NGSIElasticsearchSink extends NGSISink {
     private ElasticsearchBackend persistenceBackend;
 
     private Map<String, List<Map<String, String>>> aggregations = new ConcurrentHashMap<>();
-    private Runnable persistentTask;
+    private Runnable persistentTask = new Runnable() {
+        public void run() {
+            try {
+                synchronized(NGSIElasticsearchSink.this.aggregations) {
+                    for (Map.Entry<String, List<Map<String, String>>> aggregation : NGSIElasticsearchSink.this.aggregations.entrySet()) {
+                        String idx = aggregation.getKey();
+                        List<Map<String, String>> data = aggregation.getValue();
+                        JsonResponse response = NGSIElasticsearchSink.this.persistenceBackend.bulkInsert(idx,
+                                NGSIElasticsearchSink.this.mappingType, data);
+                        LOGGER.info("[" + NGSIElasticsearchSink.this.getName() + "] Persisting data at NGSIElasticsearchSink. (index="
+                                + idx + ", type=" + NGSIElasticsearchSink.this.mappingType + ", data=" + data + ")");
+                    } // for
+                    NGSIElasticsearchSink.this.aggregations.clear();
+                } // synchronized
+            } catch (Exception e) {
+                LOGGER.error("Error while persisting data using backend. Details=" + e.getMessage());
+                throw new RuntimeException(e);
+            } // try
+        }
+    };
     private ScheduledExecutorService scheduler;
 
     /**
@@ -201,6 +220,30 @@ public class NGSIElasticsearchSink extends NGSISink {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
 
+    /**
+     * Returns the aggregations. It is protected due to it is only required for testing purposes.
+     * @return The aggregations
+     */
+    protected Map<String, List<Map<String, String>>> getAggregations() {
+        return this.aggregations;
+    } // getAggregations
+
+    /**
+     * Sets the aggregations. It is protected due to it is only required for testing purposes.
+     * @param aggregations
+     */
+    protected void setAggregations(Map<String, List<Map<String, String>>> aggregations) {
+        this.aggregations = aggregations;
+    } // setAggregations
+
+    /**
+     * Returns the scheduler. It is protected due to it is only required for testing purposes.
+     * @return The scheduler
+     */
+    protected ScheduledExecutorService getScheduler() {
+        return this.scheduler;
+    } // getScheduler
+
     @Override
     public void configure(Context context) {
         super.configure(context);
@@ -279,7 +322,7 @@ public class NGSIElasticsearchSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (cast_value="
                 + castValueStr + ")");
         }  else {
-            this.castValue = false;
+            this.invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (cast_value="
                 + castValueStr + ") -- Must be 'true' or 'false'");
         }  // if else
@@ -299,26 +342,12 @@ public class NGSIElasticsearchSink extends NGSISink {
         } catch (Exception e) {
             LOGGER.error("Error while creating the Elasticsearch persistence backend. Details=" + e.getMessage());
         }
-        this.persistentTask = new Runnable() {
-            public void run() {
-                try {
-                    synchronized(NGSIElasticsearchSink.this.aggregations) {
-                        for (Map.Entry<String, List<Map<String, String>>> aggregation : NGSIElasticsearchSink.this.aggregations.entrySet()) {
-                            String idx = aggregation.getKey();
-                            List<Map<String, String>> data = aggregation.getValue();
-                            JsonResponse response = NGSIElasticsearchSink.this.persistenceBackend.bulkInsert(idx,
-                                    NGSIElasticsearchSink.this.mappingType, data);
-                            LOGGER.info("[" + NGSIElasticsearchSink.this.getName() + "] Persisting data at NGSIElasticsearchSink. (index="
-                                    + idx + ", type=" + NGSIElasticsearchSink.this.mappingType + ", data=" + data + ")");
-                        } // for
-                        NGSIElasticsearchSink.this.aggregations.clear();
-                    } // synchronized
-                } catch (Exception e) {
-                    LOGGER.error("Error while persisting data using backend. Details=" + e.getMessage());
-                    throw new RuntimeException(e);
-                } // try
-            }
-        };
+        startInternal();
+        LOGGER.info("[" + this.getName() + "] started NGSIElasticsearchSink gracefully");
+        super.start();
+    } // start
+
+    protected void startInternal() {
         // start ScheduledExecutorService to persist data at the cacheFlashIntervalSec intervals
         // if cacheFlashIntervalSec is 0 (default value), the scheduler service does not start and the data is persisted at every time when 'persistBatch' is called
         if (this.cacheFlashIntervalSec != 0) {
@@ -326,12 +355,16 @@ public class NGSIElasticsearchSink extends NGSISink {
             this.scheduler.scheduleWithFixedDelay(this.persistentTask, 0, this.cacheFlashIntervalSec, TimeUnit.SECONDS);
             LOGGER.debug("[" + this.getName() + "] ScheduledExecutorService started");
         } // if
-        LOGGER.info("[" + this.getName() + "] started NGSIElasticsearchSink gracefully");
-        super.start();
-    } // start
+    } // startInternal
 
     @Override
     public void stop() {
+        stopInternal();
+        LOGGER.info("[" + this.getName() + "] stopped NGSIElasticsearchSink gracefully");
+        super.stop();
+    } // stop
+
+    protected void stopInternal() {
         try {
             // stop scheduler if started
             if (this.scheduler != null) {
@@ -346,9 +379,7 @@ public class NGSIElasticsearchSink extends NGSISink {
             this.persistentTask.run();
             LOGGER.debug("[" + this.getName() + "] persisted all data");
         }
-        LOGGER.info("[" + this.getName() + "] stopped NGSIElasticsearchSink gracefully");
-        super.stop();
-    } // stop
+    } // stopInternal
 
     @Override
     void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError {
