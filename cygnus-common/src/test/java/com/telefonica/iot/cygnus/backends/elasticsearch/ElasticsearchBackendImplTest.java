@@ -45,8 +45,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.mock;
+import org.mockito.MockitoAnnotations;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,7 +77,7 @@ public class ElasticsearchBackendImplTest {
         assertEquals(1, requested.getHeaders("Accept").length);
         assertEquals(1, requested.getFirstHeader("Accept").getElements().length);
         assertEquals("application/json", requested.getFirstHeader("Accept").getElements()[0].getName());
-    }
+    } // assertRequestHeader
 
     @RunWith(Parameterized.class)
     public static class HttpSuccessTest {
@@ -87,11 +89,11 @@ public class ElasticsearchBackendImplTest {
             LogManager.getRootLogger().setLevel(Level.FATAL);
         } // setUpClass
 
-        // mock
-        private HttpClient mockHttpClient = mock(HttpClient.class);
+        @Mock
+        private HttpClient mockHttpClient;
 
-        // captor
-        private ArgumentCaptor<HttpPost> requestCaptor = ArgumentCaptor.forClass(HttpPost.class);
+        @Captor
+        private ArgumentCaptor<HttpPost> requestCaptor;
 
         @Parameters
         public static Collection<Object[]> getParameters() {
@@ -99,7 +101,7 @@ public class ElasticsearchBackendImplTest {
                 {"http", false},
                 {"https", true}
             });
-        }
+        } // getParameters
 
         private String schema;
         private boolean flag;
@@ -107,7 +109,7 @@ public class ElasticsearchBackendImplTest {
         public HttpSuccessTest(String schema, boolean flag) {
             this.schema = schema;
             this.flag = flag;
-        }
+        } // constructor
 
         /**
          * setup test case
@@ -118,6 +120,8 @@ public class ElasticsearchBackendImplTest {
         public void setUp() throws Exception {
             BasicHttpResponse response = new BasicHttpResponse(new ProtocolVersion("http", 1, 1), 200, "ok");
             response.setEntity(new StringEntity("{\"result\": {\"whatever\":\"whatever\"}}"));
+
+            MockitoAnnotations.initMocks(this);
             when(mockHttpClient.execute(Mockito.any(HttpPost.class))).thenReturn(response);
         } // setUp
 
@@ -207,7 +211,7 @@ public class ElasticsearchBackendImplTest {
                 assertEquals(expected, out.toString());
             } catch (Exception e) {
                 fail(e.getMessage());
-            }
+            } // try-catch
         } // assertBulkInsert
     } // HttpSuccessTest
 
@@ -221,11 +225,11 @@ public class ElasticsearchBackendImplTest {
             LogManager.getRootLogger().setLevel(Level.FATAL);
         } // setUpClass
 
-        // mock
-        private HttpClient mockHttpClient = mock(HttpClient.class);
+        @Mock
+        private HttpClient mockHttpClient;
 
-        // captor
-        private ArgumentCaptor<HttpPost> requestCaptor = ArgumentCaptor.forClass(HttpPost.class);
+        @Captor
+        private ArgumentCaptor<HttpPost> requestCaptor;
 
         @Parameters
         public static Collection<Object[]> getParameters() {
@@ -233,7 +237,7 @@ public class ElasticsearchBackendImplTest {
                 {"http", false},
                 {"https", true}
             });
-        }
+        } // getParameters
 
         private String schema;
         private boolean flag;
@@ -241,7 +245,7 @@ public class ElasticsearchBackendImplTest {
         public HttpFailureTest(String schema, boolean flag) {
             this.schema = schema;
             this.flag = flag;
-        }
+        } // constructor
 
         private int statusCode = 500;
 
@@ -254,8 +258,10 @@ public class ElasticsearchBackendImplTest {
         public void setUp() throws Exception {
             BasicHttpResponse response = new BasicHttpResponse(new ProtocolVersion("http", 1, 1), statusCode, "Internal Server Error");
             response.setEntity(new StringEntity("{\"result\": {\"whatever\":\"whatever\"}}"));
+
+            MockitoAnnotations.initMocks(this);
             when(mockHttpClient.execute(Mockito.any(HttpPost.class))).thenReturn(response);
-        }
+        } // setUp
 
         /**
          * [ElasticsearchBackendImplTest$HttpFailureTest.testBulkInsert_woData]
@@ -285,10 +291,10 @@ public class ElasticsearchBackendImplTest {
                     assertEquals(expected, out.toString());
                 } catch (Exception ex) {
                     fail(ex.getMessage());
-                }
+                } // try-catch
             } catch (Exception e) {
                 fail(e.getMessage());
-            }
+            } // try-catch
         } // testBulkInsert_woData
     } // HttpFailureTest
 
@@ -302,8 +308,8 @@ public class ElasticsearchBackendImplTest {
             LogManager.getRootLogger().setLevel(Level.FATAL);
         } // setUpClass
 
-        // mock
-        private HttpClient mockHttpClient = mock(HttpClient.class);
+        @Mock
+        private HttpClient mockHttpClient;
 
         @Parameters
         public static Collection<Object[]> getParameters() {
@@ -316,7 +322,7 @@ public class ElasticsearchBackendImplTest {
                 }
             }
             return params;
-        }
+        } // getParameters
 
         private String invalidIndex;
         private String invalidType;
@@ -324,7 +330,17 @@ public class ElasticsearchBackendImplTest {
         public InvalidIndexAndOrTypeTest(String i, String t) {
             this.invalidIndex = i;
             this.invalidType = t;
-        }
+        } // constructor
+
+        /**
+         * setup test case
+         *
+         * @throws Exception
+         */
+        @Before
+        public void setUp() throws Exception {
+            MockitoAnnotations.initMocks(this);
+        } // setUp
 
         /**
          * [ElasticsearchBackendImplTest$SuccessTest.testBulkInsert_invalidIndexAndOrType]
@@ -346,10 +362,10 @@ public class ElasticsearchBackendImplTest {
                     verify(mockHttpClient, times(0)).execute(Mockito.any(HttpPost.class));
                 } catch (Exception ex) {
                     fail(ex.getMessage());
-                }
+                } // try-catch
             } catch (Exception e) {
                 fail(e.getMessage());
-            }
+            } // try-catch
         } // testBulkInsert_invlalidIndexAndOrType
     } // InvalidIndexAndOrTypeTest
 
@@ -363,8 +379,8 @@ public class ElasticsearchBackendImplTest {
             LogManager.getRootLogger().setLevel(Level.FATAL);
         } // setUpClass
 
-        // mock
-        private HttpClient mockHttpClient = mock(HttpClient.class);
+        @Mock
+        private HttpClient mockHttpClient;
 
         @Parameters
         public static Collection<Object[]> getParameters() {
@@ -410,13 +426,23 @@ public class ElasticsearchBackendImplTest {
                     }
                 }}
             });
-        }
+        } // getParameters
 
         private Map<String, String> elem;
 
         public InvalidDataTest(Map<String, String> elem) {
             this.elem = elem;
-        }
+        } // constructor
+
+        /**
+         * setup test case
+         *
+         * @throws Exception
+         */
+        @Before
+        public void setUp() throws Exception {
+            MockitoAnnotations.initMocks(this);
+        } // setUp
 
         /**
          * [ElasticsearchBackendImplTest$SuccessTest.testBulkInsert_invalidData]
@@ -439,10 +465,10 @@ public class ElasticsearchBackendImplTest {
                     verify(mockHttpClient, times(0)).execute(Mockito.any(HttpPost.class));
                 } catch (Exception ex) {
                     fail(ex.getMessage());
-                }
+                } // try-catch
             } catch (Exception e) {
                 fail(e.getMessage());
-            }
+            } // try-catch
         } // testBulkInsert_invlalidData
     } // InvaidDataTest
 } // ElasticsearchBackendImplTest
