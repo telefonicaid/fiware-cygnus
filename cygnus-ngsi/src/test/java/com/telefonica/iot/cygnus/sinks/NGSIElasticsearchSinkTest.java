@@ -555,6 +555,51 @@ public class NGSIElasticsearchSinkTest {
                 +   "\"id\" : \"Room1\""
                 + "}";
 
+        private final String contextElementStr3 = ""
+                + "{"
+                +   "\"attributes\" : ["
+                +     "{"
+                +       "\"name\" : \"temperature\","
+                +       "\"type\" : \"number\","
+                +       "\"value\" : \"26.5\","
+                +       "\"metadatas\" : ["
+                +         "{"
+                +           "\"name\" : \"TimeInstant\","
+                +           "\"type\" : \"ISO8601\","
+                +           "\"value\" : \"2018-01-02T03:04:05.678+0900\""
+                +         "}"
+                +       "]"
+                +     "},"
+                +     "{"
+                +       "\"name\" : \"roomtype\","
+                +       "\"type\" : \"string\","
+                +       "\"value\" : \"single\","
+                +       "\"metadatas\" : ["
+                +         "{"
+                +           "\"name\" : \"TimeInstant\","
+                +           "\"type\" : \"ISO8601\","
+                +           "\"value\" : \"2018-01-02T03:04:05.678+0900\""
+                +         "}"
+                +       "]"
+                +     "},"
+                +     "{"
+                +       "\"name\" : \"smoking\","
+                +       "\"type\" : \"boolean\","
+                +       "\"value\" : \"true\","
+                +       "\"metadatas\" : ["
+                +         "{"
+                +           "\"name\" : \"TimeInstant\","
+                +           "\"type\" : \"ISO8601\","
+                +           "\"value\" : \"2018-01-02T03:04:05.678+0900\""
+                +         "}"
+                +       "]"
+                +     "}"
+                +   "],"
+                +   "\"type\" : \"Room\","
+                +   "\"isPattern\" : \"false\","
+                +   "\"id\" : \"Room1\""
+                + "}";
+
         private Fixture fixture;
         /**
          * setup test case
@@ -822,10 +867,11 @@ public class NGSIElasticsearchSinkTest {
             assertEquals("Room", jdata.get("entityType"));
             assertEquals("roomtype", jdata.get("attrName"));
             assertEquals("string", jdata.get("attrType"));
+            assertTrue(jdata.get("attrValue") instanceof String);
             assertEquals("", jdata.get("attrValue"));
             assertTrue(jdata.get("attrMetadata") instanceof JSONArray);
             assertEquals(0, ((JSONArray)jdata.get("attrMetadata")).size());
-            assertNull(jdata.get("temperature"));
+            assertNull(jdata.get("roomtype"));
             assertEquals(0, sink.getAggregations().size());
             assertNull(sink.getScheduler());
         } // testPersistBatchWithTwoAttributesWithEmptyRow
@@ -876,7 +922,7 @@ public class NGSIElasticsearchSinkTest {
             assertNull(jdata.get("attrMetadata"));
             assertEquals(0, sink.getAggregations().size());
             assertNull(sink.getScheduler());
-        } // testPersistBatchWithTwoAttributes
+        } // testPersistBatchWithTwoAttributesIgnoreEmptyColumn
 
         /**
          * [NGSIElasticsearchSinkTest$PersistBatchTest.testPersistBatchWithTwoAttributesWithEmptyColumn]
@@ -918,6 +964,7 @@ public class NGSIElasticsearchSinkTest {
                 assertTrue(jdata.get("temperature") instanceof String);
                 assertEquals("26.5", jdata.get("temperature"));
             }
+            assertTrue(jdata.get("roomtype") instanceof String);
             assertEquals("", jdata.get("roomtype"));
             assertNull(jdata.get("attrName"));
             assertNull(jdata.get("attrType"));
@@ -925,7 +972,156 @@ public class NGSIElasticsearchSinkTest {
             assertNull(jdata.get("attrMetadata"));
             assertEquals(0, sink.getAggregations().size());
             assertNull(sink.getScheduler());
-        } // testPersistBatchWithTwoAttributes
+        } // testPersistBatchWithTwoAttributesWithEmptyColumn
+
+        /**
+         * [NGSIElasticsearchSinkTest$PersistBatchTest.testPersistBatchWithTwoAttributesWithEmptyRow]
+         * Test persistBatch(contextElement with two attributes) - row style
+         *
+         */
+        @Test
+        public void testPersistBatchWithThreeAttributesWithMetadataRow() throws Exception {
+            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithThreeAttributesWithMetadataRow] - castValue=" + castValue));
+
+            NGSIElasticsearchSink sink = new NGSIElasticsearchSink();
+            sink.setPersistenceBackend(mockBackend);
+
+            fixture.rowAttrPersistence.value = "row";
+            fixture.castValue.value = castValue;
+            sink.configure(fixture.createContext());
+
+            NGSIBatch batch = createBatch(sink, contextElementStr3);
+            sink.persistBatch(batch);
+            verify(mockBackend, times(1)).bulkInsert(idxCaptor.capture(), mappingTypeCaptor.capture(), dataCaptor.capture());
+
+            assertEquals("cygnus-room_service-room_service_path-2018.01.01", idxCaptor.getValue());
+            assertEquals("cygnus_type", mappingTypeCaptor.getValue());
+
+            List<Map<String, String>> requestedData = dataCaptor.getValue();
+            assertEquals(3, requestedData.size());
+            assertEquals(2, requestedData.get(0).size());
+            assertEquals("1514829845678", requestedData.get(0).get("recvTimeTs"));
+            assertNotNull(requestedData.get(0).get("data"));
+            JSONObject jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(0).get("data"));
+            assertEquals("2018-01-01T18:04:05.678Z", jdata.get("recvTime"));
+            assertEquals("Room1", jdata.get("entityId"));
+            assertEquals("Room", jdata.get("entityType"));
+            assertEquals("temperature", jdata.get("attrName"));
+            assertEquals("number", jdata.get("attrType"));
+            if (castValue == "true") {
+                assertTrue(jdata.get("attrValue") instanceof Double);
+                assertEquals(26.5, jdata.get("attrValue"));
+            } else {
+                assertTrue(jdata.get("attrValue") instanceof String);
+                assertEquals("26.5", jdata.get("attrValue"));
+            }
+            assertTrue(jdata.get("attrMetadata") instanceof JSONArray);
+            assertEquals(1, ((JSONArray)jdata.get("attrMetadata")).size());
+            JSONObject metadata = (JSONObject)((JSONArray)jdata.get("attrMetadata")).get(0);
+            assertEquals("TimeInstant", metadata.get("name"));
+            assertEquals("ISO8601", metadata.get("type"));
+            assertEquals("2018-01-02T03:04:05.678+0900", metadata.get("value"));
+            assertNull(jdata.get("temperature"));
+            assertEquals(2, requestedData.get(1).size());
+            assertEquals("1514829845678", requestedData.get(1).get("recvTimeTs"));
+            assertNotNull(requestedData.get(1).get("data"));
+            jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(1).get("data"));
+            assertEquals("2018-01-01T18:04:05.678Z", jdata.get("recvTime"));
+            assertEquals("Room1", jdata.get("entityId"));
+            assertEquals("Room", jdata.get("entityType"));
+            assertEquals("roomtype", jdata.get("attrName"));
+            assertEquals("string", jdata.get("attrType"));
+            assertTrue(jdata.get("attrValue") instanceof String);
+            assertEquals("single", jdata.get("attrValue"));
+            assertTrue(jdata.get("attrMetadata") instanceof JSONArray);
+            assertEquals(1, ((JSONArray)jdata.get("attrMetadata")).size());
+            metadata = (JSONObject)((JSONArray)jdata.get("attrMetadata")).get(0);
+            assertEquals("TimeInstant", metadata.get("name"));
+            assertEquals("ISO8601", metadata.get("type"));
+            assertEquals("2018-01-02T03:04:05.678+0900", metadata.get("value"));
+            assertNull(jdata.get("roomtype"));
+            assertEquals(0, sink.getAggregations().size());
+            assertNull(sink.getScheduler());
+            assertEquals(2, requestedData.get(2).size());
+            assertEquals("1514829845678", requestedData.get(2).get("recvTimeTs"));
+            assertNotNull(requestedData.get(2).get("data"));
+            jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(2).get("data"));
+            assertEquals("2018-01-01T18:04:05.678Z", jdata.get("recvTime"));
+            assertEquals("Room1", jdata.get("entityId"));
+            assertEquals("Room", jdata.get("entityType"));
+            assertEquals("smoking", jdata.get("attrName"));
+            assertEquals("boolean", jdata.get("attrType"));
+            if (castValue == "true") {
+                assertTrue(jdata.get("attrValue") instanceof Boolean);
+                assertEquals(true, jdata.get("attrValue"));
+            } else {
+                assertTrue(jdata.get("attrValue") instanceof String);
+                assertEquals("true", jdata.get("attrValue"));
+            }
+            assertTrue(jdata.get("attrMetadata") instanceof JSONArray);
+            assertEquals(1, ((JSONArray)jdata.get("attrMetadata")).size());
+            metadata = (JSONObject)((JSONArray)jdata.get("attrMetadata")).get(0);
+            assertEquals("TimeInstant", metadata.get("name"));
+            assertEquals("ISO8601", metadata.get("type"));
+            assertEquals("2018-01-02T03:04:05.678+0900", metadata.get("value"));
+            assertNull(jdata.get("smoking"));
+        } // testPersistBatchWithThreeAttributesWithMetadataRow
+
+        /**
+         * [NGSIElasticsearchSinkTest$PersistBatchTest.testPersistBatchWithThreeAttributesWithMetadataColumn]
+         * Test persistBatch(contextElement with two attributes) - column style
+         *
+         */
+        @Test
+        public void testPersistBatchWithThreeAttributesWithMetadataColumn() throws Exception {
+            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithThreeAttributesWithMetadataColumn] - castValue=" + castValue));
+
+            NGSIElasticsearchSink sink = new NGSIElasticsearchSink();
+            sink.setPersistenceBackend(mockBackend);
+
+            fixture.rowAttrPersistence.value = "column";
+            fixture.castValue.value = castValue;
+            sink.configure(fixture.createContext());
+
+            NGSIBatch batch = createBatch(sink, contextElementStr3);
+            sink.persistBatch(batch);
+            verify(mockBackend, times(1)).bulkInsert(idxCaptor.capture(), mappingTypeCaptor.capture(), dataCaptor.capture());
+
+            assertEquals("cygnus-room_service-room_service_path-2018.01.01", idxCaptor.getValue());
+            assertEquals("cygnus_type", mappingTypeCaptor.getValue());
+
+            List<Map<String, String>> requestedData = dataCaptor.getValue();
+            assertEquals(1, requestedData.size());
+            assertEquals(2, requestedData.get(0).size());
+            assertEquals("1514829845678", requestedData.get(0).get("recvTimeTs"));
+            assertNotNull(requestedData.get(0).get("data"));
+            JSONObject jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(0).get("data"));
+            assertEquals("2018-01-01T18:04:05.678Z", jdata.get("recvTime"));
+            assertEquals("Room1", jdata.get("entityId"));
+            assertEquals("Room", jdata.get("entityType"));
+            if (castValue == "true") {
+                assertTrue(jdata.get("temperature") instanceof Double);
+                assertEquals(26.5, jdata.get("temperature"));
+            } else {
+                assertTrue(jdata.get("temperature") instanceof String);
+                assertEquals("26.5", jdata.get("temperature"));
+            }
+            assertTrue(jdata.get("roomtype") instanceof String);
+            assertEquals("single", jdata.get("roomtype"));
+            if (castValue == "true") {
+                assertTrue(jdata.get("smoking") instanceof Boolean);
+                assertEquals(true, jdata.get("smoking"));
+            } else {
+                assertTrue(jdata.get("temperature") instanceof String);
+                assertEquals("true", jdata.get("smoking"));
+            }
+            assertNull(jdata.get("attrName"));
+            assertNull(jdata.get("attrType"));
+            assertNull(jdata.get("attrValue"));
+            assertNull(jdata.get("attrMetadata"));
+            assertEquals(0, sink.getAggregations().size());
+            assertNull(sink.getScheduler());
+        } // testPersistBatchWithThreeAttributesWithMetadataColumn
     } // PersistBatchTest
 
     @Ignore
