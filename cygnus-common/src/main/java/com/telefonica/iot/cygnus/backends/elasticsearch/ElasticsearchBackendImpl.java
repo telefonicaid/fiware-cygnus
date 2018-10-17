@@ -39,13 +39,14 @@ import org.apache.http.message.BasicHeader;
 /**
  * Implementation of Elasticsearch Backend.
  *
- * @author Nobuyuki Matsui
+ * @author Nobuyuki Matsui (TIS Inc.)
  */
 public class ElasticsearchBackendImpl extends HttpBackend implements ElasticsearchBackend {
     private static final CygnusLogger LOGGER = new CygnusLogger(ElasticsearchBackendImpl.class);
 
     /**
      * Constructor.
+     *
      * @param elasticsearchHost
      * @param elasticsearchPort
      * @param ssl
@@ -56,11 +57,47 @@ public class ElasticsearchBackendImpl extends HttpBackend implements Elasticsear
         super(elasticsearchHost, elasticsearchPort, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
     } // ElasticsearchBackendImpl
 
+    /**
+     * store data to Elasticsearch using REST API.
+     *
+     * @param index index name of Elasticsearch, not {@code null}
+     * @param type type name of Elasticsearch, not {@code null}
+     * @param data  data to be stored, like below (recvTimeTs is used to make unique id), not {@code null}:
+     *   [
+     *     {
+     *       recvTimeTs: "1234567890",
+     *       data: {
+     *         recvTime: "1970-01-15T06:56:07.890Z",
+     *         entityId: "Room1",
+     *         entityType: "Room",
+     *         attrName: "temperature",
+     *         attrType: "number",
+     *         attrValue: "26.5",
+     *         attrMetadata: []
+     *       }
+     *     },
+     *     {
+     *       recvTimeTs: "1234568001",
+     *       data: {
+     *         recvTime: "1970-01-15T06:56:08.001Z",
+     *         entityId: "Room1",
+     *         entityType: "Room",
+     *         attrName: "temperature",
+     *         attrType: "number",
+     *         attrValue: "26.6",
+     *         attrMetadata: []
+     *       }
+     *     }
+     *   ]
+     * @return response of {@code doRequest}
+     * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
+     * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
+     */
     @Override
     public JsonResponse bulkInsert(String index, String type, List<Map<String, String>> data) throws CygnusPersistenceError, CygnusRuntimeError {
-        if (StringUtils.isBlank(index) || StringUtils.isBlank(type)) {
-            throw new CygnusPersistenceError("invalid index or type (index=" + index + ", type=" + type + ")");
-        }
+        if (StringUtils.isBlank(index) || StringUtils.isBlank(type) || data == null) {
+            throw new CygnusPersistenceError("invalid arguments (index=" + index + ", type=" + type + ", data=" + data + ")");
+        } // if
         String relativeURL = "/" + index + "/" + type + "/_bulk";
 
         String jsonLines = "";
@@ -82,7 +119,7 @@ public class ElasticsearchBackendImpl extends HttpBackend implements Elasticsear
             throw new CygnusPersistenceError("Could not create id (data=" + data + "), rootCause=" + e.toString() + ")");
         } catch (UnsupportedEncodingException e) {
             throw new CygnusPersistenceError("Could not create StringEntity (data=" + data + "), rootCause=" + e.toString() + ")");
-        }
+        } // try-catch
         LOGGER.debug("bulk insert (index=" + index + ", type=" + type + ", jsonLines=" + jsonLines + ")");
 
         ArrayList<Header> headers = new ArrayList<Header>();
@@ -95,6 +132,6 @@ public class ElasticsearchBackendImpl extends HttpBackend implements Elasticsear
             return response;
         } else {
             throw new CygnusPersistenceError("Could not insert (index=" + index + ", type=" + type + ", jsonLines=" + jsonLines + ")");
-        }
-    }
-}
+        } // if
+    } // bulkInsert
+} // ElasticsearchBackendImpl

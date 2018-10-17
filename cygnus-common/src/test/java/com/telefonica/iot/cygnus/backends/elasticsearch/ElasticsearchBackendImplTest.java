@@ -357,7 +357,7 @@ public class ElasticsearchBackendImplTest {
                 backend.setHttpClient(mockHttpClient);
                 backend.bulkInsert(invalidIndex, invalidType, data);
             } catch (CygnusPersistenceError e) {
-                assertEquals("CygnusPersistenceError. invalid index or type (index=" + invalidIndex + ", type=" + invalidType + "). ", e.getMessage());
+                assertEquals("CygnusPersistenceError. invalid arguments (index=" + invalidIndex + ", type=" + invalidType + ", data=" + data + "). ", e.getMessage());
                 try {
                     verify(mockHttpClient, times(0)).execute(Mockito.any(HttpPost.class));
                 } catch (Exception ex) {
@@ -385,6 +385,7 @@ public class ElasticsearchBackendImplTest {
         @Parameters
         public static Collection<Object[]> getParameters() {
             return Arrays.asList(new Object[][] {
+                {null},
                 {new HashMap<String, String>()},
                 {new HashMap<String, String>(){
                     {
@@ -451,16 +452,22 @@ public class ElasticsearchBackendImplTest {
         @Test
         public void testBulkInsert_invlalidData() {
             System.out.println(getTestTraceHead(String.format("[ElasticsearchBackendImplTest.bulkInsert Failure, invalidData=%s]", elem)));
-
-            List<Map<String, String>> data = new ArrayList<Map<String, String>>();
-            data.add(elem);
+            List <Map<String, String>> data = null;
+            if (elem != null) {
+                data = new ArrayList<Map<String, String>>();
+                data.add(elem);
+            }
 
             try {
                 ElasticsearchBackendImpl backend = new ElasticsearchBackendImpl(host, port, false, maxConns, maxConnsPerRoute);
                 backend.setHttpClient(mockHttpClient);
                 backend.bulkInsert(idx, type, data);
             } catch (CygnusPersistenceError e) {
-                assertEquals("CygnusPersistenceError. invalid data format (data=" + data + "). ", e.getMessage());
+                if (elem == null) {
+                    assertEquals("CygnusPersistenceError. invalid arguments (index=" + idx + ", type=" + type + ", data=" + data + "). ", e.getMessage());
+                } else {
+                    assertEquals("CygnusPersistenceError. invalid data format (data=" + data + "). ", e.getMessage());
+                }
                 try {
                     verify(mockHttpClient, times(0)).execute(Mockito.any(HttpPost.class));
                 } catch (Exception ex) {
