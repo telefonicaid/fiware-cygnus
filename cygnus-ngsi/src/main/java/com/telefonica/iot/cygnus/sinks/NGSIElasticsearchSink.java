@@ -55,7 +55,7 @@ import org.json.simple.parser.ParseException;
 /**
  * Sink for Elasticsearch.
  *
- * @author Nobuyuki Matsui
+ * @author Nobuyuki Matsui (TIS Inc.)
  */
 public class NGSIElasticsearchSink extends NGSISink {
 
@@ -74,10 +74,27 @@ public class NGSIElasticsearchSink extends NGSISink {
     private int cacheFlashIntervalSec;
     private ElasticsearchBackend persistenceBackend;
 
+    private ScheduledExecutorService scheduler;
+    /**
+     * {@code aggregations} is instance variable to store the aggregated data.
+     * this object is read and written by main thread and ScheduledExecutorService thread.
+     * So you have to synchronize when using this object.
+     *
+     */
     private Map<String, List<Map<String, String>>> aggregations = new ConcurrentHashMap<>();
+
+    /**
+     * {@code persistentTask} is an anonymous objects implements Runnable.
+     * This object is used directly or through ScheduledExecutorService to store the aggregated data to Elasticsearch.
+     *
+     * If {@code cache_flash_interval_sec} is zero, {@code run()} method of this object is called directly when {@code peristBatch()} is fired.
+     * Otherwise, ScheduledExecutorService calls this object periodically at the specified interval.
+     *
+     */
     private Runnable persistentTask = new Runnable() {
         public void run() {
             try {
+                // synchronize aggregations because aggregations is read/written by main thread and ScheduledExecutorService thread.
                 synchronized(NGSIElasticsearchSink.this.aggregations) {
                     for (Map.Entry<String, List<Map<String, String>>> aggregation : NGSIElasticsearchSink.this.aggregations.entrySet()) {
                         String idx = aggregation.getKey();
@@ -92,10 +109,9 @@ public class NGSIElasticsearchSink extends NGSISink {
             } catch (Exception e) {
                 LOGGER.error("Error while persisting data using backend. Details=" + e.getMessage());
                 throw new RuntimeException(e);
-            } // try
-        }
+            } // try-catch
+        } // run
     };
-    private ScheduledExecutorService scheduler;
 
     /**
      * Constructor.
@@ -205,7 +221,7 @@ public class NGSIElasticsearchSink extends NGSISink {
     } // getCacheFlashIntervalSec
 
     /**
-     * Returns the persistence backend. It is protected due to it is only required for testing purposes.
+     * Gets the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
     protected ElasticsearchBackend getPersistenceBackend() {
@@ -214,14 +230,14 @@ public class NGSIElasticsearchSink extends NGSISink {
 
     /**
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
-     * @param persistenceBackend
+     * @param persistenceBackend the persistenceBackend
      */
     protected void setPersistenceBackend(ElasticsearchBackend persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
 
     /**
-     * Returns the aggregations. It is protected due to it is only required for testing purposes.
+     * Gets the aggregations. It is protected due to it is only required for testing purposes.
      * @return The aggregations
      */
     protected Map<String, List<Map<String, String>>> getAggregations() {
@@ -230,20 +246,25 @@ public class NGSIElasticsearchSink extends NGSISink {
 
     /**
      * Sets the aggregations. It is protected due to it is only required for testing purposes.
-     * @param aggregations
+     * @param aggregations the aggregations
      */
     protected void setAggregations(Map<String, List<Map<String, String>>> aggregations) {
         this.aggregations = aggregations;
     } // setAggregations
 
     /**
-     * Returns the scheduler. It is protected due to it is only required for testing purposes.
-     * @return The scheduler
+     * Gets the scheduler. It is protected due to it is only required for testing purposes.
+     * @return The scheduler (if {@code cache_flash_interval_sec} is zero, this method returns {@code null})
      */
     protected ScheduledExecutorService getScheduler() {
         return this.scheduler;
     } // getScheduler
 
+    /**
+     * configure NGSIElasticsearchSink.
+     *
+     * {@inheritDoc}
+     */
     @Override
     public void configure(Context context) {
         super.configure(context);
@@ -314,7 +335,7 @@ public class NGSIElasticsearchSink extends NGSISink {
         }  // if else
 
         this.timezone = context.getString("timezone", "UTC");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (index_prefix=" + this.indexPrefix + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (timezone=" + this.timezone + ")");
 
         String castValueStr = context.getString("cast_value", "false");
         if (castValueStr.equals("true") || castValueStr.equals("false")) {
@@ -332,6 +353,14 @@ public class NGSIElasticsearchSink extends NGSISink {
                 + this.cacheFlashIntervalSec + ")");
     } // configure
 
+    /**
+     * start the NGSIElasticsearchSink.
+     * 1. instanciate persistenceBackend
+     * 2. call startInternal
+     * 3. call super.start()
+     *
+     * {@inheritDoc}
+     */
     @Override
     public void start() {
         try {
@@ -341,15 +370,18 @@ public class NGSIElasticsearchSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Elasticsearch persistence backend created (endpoint=" + endpoint + ")");
         } catch (Exception e) {
             LOGGER.error("Error while creating the Elasticsearch persistence backend. Details=" + e.getMessage());
-        }
+        } // try-catch
         startInternal();
         LOGGER.info("[" + this.getName() + "] started NGSIElasticsearchSink gracefully");
         super.start();
     } // start
 
+    /**
+     * start ScheduledExecutorService if {@code cache_flash_interval_sec} is not zero.
+     * If {@code cache_flash_interval_sec} is not zero, start ScheduledExecutorService to persist data periodically at the {@code cache_flash_interval_sec} intervals.
+     * If {@code cache_flash_interval_sec} is 0 (default value), the ScheduledExecutorService does not start and the data is persisted at every time when {@code persistBatch} is called.
+     */
     protected void startInternal() {
-        // start ScheduledExecutorService to persist data at the cacheFlashIntervalSec intervals
-        // if cacheFlashIntervalSec is 0 (default value), the scheduler service does not start and the data is persisted at every time when 'persistBatch' is called
         if (this.cacheFlashIntervalSec != 0) {
             this.scheduler = Executors.newSingleThreadScheduledExecutor();
             this.scheduler.scheduleWithFixedDelay(this.persistentTask, 0, this.cacheFlashIntervalSec, TimeUnit.SECONDS);
@@ -357,6 +389,13 @@ public class NGSIElasticsearchSink extends NGSISink {
         } // if
     } // startInternal
 
+    /**
+     * stop the NGSIElasticsearchSink gracefully.
+     * 1. call {@code stopInternal()}
+     * 2. call {@code super.stop()}
+     *
+     * {@inheritDoc}
+     */
     @Override
     public void stop() {
         stopInternal();
@@ -364,6 +403,10 @@ public class NGSIElasticsearchSink extends NGSISink {
         super.stop();
     } // stop
 
+    /**
+     * stop NGSIElasticsearchSink gracefully.
+     * {@code stopInternal} stops the ScheduledExecutorService if it was started and persists remaining data if exist.
+     */
     protected void stopInternal() {
         try {
             // stop scheduler if started
@@ -381,6 +424,16 @@ public class NGSIElasticsearchSink extends NGSISink {
         }
     } // stopInternal
 
+    /**
+     * persist the aggregated data using backend.
+     * {@code persistBatch} aggregates the NGSI data using {@code ElasticsearchAggregator} and persists them using {@code persistentTask.run()} directly if {@code cache_flash_interval_sec} is zero.
+     * Otherwise, {@code persistBatch} aggregates the NGSI data, but {@code persistBatch} does not persist them. Because ScheduledExecutorService will persist them later.
+     *
+     * @param batch a data to be persisted
+     * @throws com.telefonica.iot.cygnus.errors.CygnusBadConfiguration
+     * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
+     * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
+     */
     @Override
     void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError {
         if (batch == null) {
@@ -415,26 +468,50 @@ public class NGSIElasticsearchSink extends NGSISink {
         } // for
     } // persistBatch
 
+    /**
+     * Not implemented the size-based capping.
+     *
+     * {@inheritDoc}
+     */
     @Override
     public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
     } // capRecords
 
+    /**
+     * Not implemented the time-based expiration.
+     *
+     * {@inheritDoc}
+     */
     @Override
     public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
     } // expirateRecords
 
     /**
-     * Class for aggregating aggregation.
+     * An innner Class for aggregating aggregation.
      */
     private class ElasticsearchAggregator {
+        /**
+         * {@code indexDateFormatter} is used as a suffix of index name.
+         * By using this suffix, you can switch the Elasticsearch's index at the daily basis.
+         */
         private DateTimeFormatter indexDateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
         private String index;
         private JSONParser parser;
 
+        /**
+         * constructor
+         */
         public ElasticsearchAggregator() {
             this.parser = new JSONParser();
         } // ElasticsearchAggregator
 
+        /**
+         * initialize ElasticsearchAggregator using an NGSIEvent.
+         * this method determines the index name by using FIWARE_SERVICE and FIWARE_SERVICEPATH.
+         *
+         * @param event NGSIEvent using to get FIWARE_SERVICE and FIWARE_SERVICEPATH
+         * @throws com.telefonica.iot.cygnus.errors.CygnusBadConfiguration
+         */
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             String service = event.getServiceForNaming(enableNameMappings);
             String servicePath = event.getServicePathForNaming(enableGrouping, enableNameMappings);
@@ -442,6 +519,11 @@ public class NGSIElasticsearchSink extends NGSISink {
             LOGGER.debug("ElasticsearchAggregator initialize (index=" + this.index + ")");
         } // initialize
 
+        /**
+         * aggregate the NGSIEvent data.
+         *
+         * @param event NGSIEvent to be aggregated
+         */
         public void aggregate(NGSIEvent event) {
             long notifiedRecvTimeTs = event.getRecvTimeTs();
 
@@ -459,13 +541,24 @@ public class NGSIElasticsearchSink extends NGSISink {
                         + ", type=" + entityType + ")");
                 return;
             } // if
+
+            // delegate actual aggregation process to row-style aggregation method or column-style aggregation method
+            // by following the "attr_persistence" value.
             if (NGSIElasticsearchSink.this.rowAttrPersistence) {
                 this.aggregateAsRow(notifiedRecvTimeTs, entityId, entityType, contextAttributes);
             } else {
                 this.aggregateAsColumn(notifiedRecvTimeTs, entityId, entityType, contextAttributes);
-            }
+            } // if
         } // aggregate
 
+        /**
+         * aggregate the ContextAttribute as row-style.
+         *
+         * @param notifiedRecvTimeTs the recvTimeTs of the NGSIEvent to be aggregated
+         * @param entityId the entityId of the NGSIEvent to be aggregated
+         * @param entityType the entityId of the NGSIEvent to be aggregated
+         * @param contextAttributes the list of attributes of the NGSIEvent to be aggregated
+         */
         private void aggregateAsRow(long notifiedRecvTimeTs, String entityId, String entityType, List<ContextAttribute> contextAttributes) {
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
@@ -478,8 +571,10 @@ public class NGSIElasticsearchSink extends NGSISink {
                     continue;
                 } // if
 
+                // get TimeRelatedValues object using notifiedRecvTimeTs and TimeInstant of metadata.
                 TimeRelatedValues v = this.getTimeRelatedValues(notifiedRecvTimeTs, attrMetadata);
 
+                // construct JSONObject as row-style
                 JSONObject jobj = new JSONObject();
                 jobj.put("recvTime", v.recvTimeDt.format(DateTimeFormatter.ISO_INSTANT));
                 jobj.put("entityId", entityId);
@@ -487,12 +582,14 @@ public class NGSIElasticsearchSink extends NGSISink {
                 jobj.put("attrName", attrName);
                 jobj.put("attrType", attrType);
 
+                // cast the instance type of attrValue when "cast_value" is true.
                 if (NGSIElasticsearchSink.this.castValue) {
                     jobj.put("attrValue", this.convertValueType(attrType, attrValue));
                 } else {
                     jobj.put("attrValue", attrValue);
-                }
+                } // if
 
+                // set attrMetadata if it can parse as a json array.
                 if (attrMetadata != null) {
                     try {
                         jobj.put("attrMetadata", parser.parse(attrMetadata));
@@ -501,11 +598,14 @@ public class NGSIElasticsearchSink extends NGSISink {
                     }
                 } else {
                     jobj.put("attrMetadata", null);
-                }
+                } // if
 
+                // create a map object to be add to aggregations
                 Map<String, String> elem = new HashMap<>();
                 elem.put("recvTimeTs", String.valueOf(v.recvTimeTs));
                 elem.put("data", jobj.toJSONString());
+
+                // synchronize aggregations because aggregations is read/written by main thread and ScheduledExecutorService thread.
                 synchronized(NGSIElasticsearchSink.this.aggregations) {
                     NGSIElasticsearchSink.this.aggregations.putIfAbsent(v.idx, new ArrayList<Map<String, String>>());
                     NGSIElasticsearchSink.this.aggregations.get(v.idx).add(elem);
@@ -513,6 +613,14 @@ public class NGSIElasticsearchSink extends NGSISink {
             } // for
         } // aggregateAsRow
 
+        /**
+         * aggregate the ContextAttribute as column-style.
+         *
+         * @param notifiedRecvTimeTs the recvTimeTs of the NGSIEvent to be aggregated
+         * @param entityId the entityId of the NGSIEvent to be aggregated
+         * @param entityType the entityId of the NGSIEvent to be aggregated
+         * @param contextAttributes the list of attributes of the NGSIEvent to be aggregated
+         */
         private void aggregateAsColumn(long notifiedRecvTimeTs, String entityId, String entityType, List<ContextAttribute> contextAttributes) {
             String firstAttrMetadata = contextAttributes.get(0).getContextMetadata();
             TimeRelatedValues v = this.getTimeRelatedValues(notifiedRecvTimeTs, firstAttrMetadata);
@@ -532,28 +640,45 @@ public class NGSIElasticsearchSink extends NGSISink {
                     continue;
                 } // if
 
+                // cast the instance type of attrValue when "cast_value" is true.
                 if (NGSIElasticsearchSink.this.castValue) {
                     jobj.put(attrName, this.convertValueType(attrType, attrValue));
                 } else {
                     jobj.put(attrName, attrValue);
-                }
-            }
+                } // if
+            } // for
 
+            // create a map object to be add to aggregations
             Map<String, String> elem = new HashMap<>();
             elem.put("recvTimeTs", String.valueOf(v.recvTimeTs));
             elem.put("data", jobj.toJSONString());
+
+            // synchronize aggregations because aggregations is read/written by main thread and ScheduledExecutorService thread.
             synchronized(NGSIElasticsearchSink.this.aggregations) {
                 NGSIElasticsearchSink.this.aggregations.putIfAbsent(v.idx, new ArrayList<Map<String, String>>());
                 NGSIElasticsearchSink.this.aggregations.get(v.idx).add(elem);
             } // synchronized
         } // aggregateAsColumn
 
+        /**
+         * data class to hold time related values
+         */
         private class TimeRelatedValues {
             public Long recvTimeTs;
             public ZonedDateTime recvTimeDt;
             public String idx;
         } // TimeRelatedValues
 
+        /**
+         * get the time related values.
+         * 1. check if the metadata contains a TimeInstant value. If absense, use the notifiedRecvTime as recvTimeTs
+         * 2. convert recvTimeTs to ZonedDateTime
+         * 3. create index name using indexDateFormatter suffix
+         *
+         * @param notifiedRecvTimeTs the recvTimeTs of the NGSIEvent to be aggregated
+         * @param attrMetadata metadata of the NGSIEvent to be aggregated
+         * @return time related values
+         */
         private TimeRelatedValues getTimeRelatedValues(long notifiedRecvTimeTs, String attrMetadata) {
             TimeRelatedValues v = new TimeRelatedValues();
 
@@ -571,6 +696,14 @@ public class NGSIElasticsearchSink extends NGSISink {
             return v;
         } // getTimeRelatedValues
 
+        /**
+         * cast the type of attrValue using attrType.
+         * return {@code null} if cast failure.
+         *
+         * @param attrType the type to cast
+         * @param attrValue the value to be casted
+         * @return the casted value or null
+         */
         private Object convertValueType(String attrType, String attrValue) {
             String t = attrType.toLowerCase();
             try {
