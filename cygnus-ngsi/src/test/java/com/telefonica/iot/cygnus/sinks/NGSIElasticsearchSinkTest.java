@@ -512,14 +512,19 @@ public class NGSIElasticsearchSinkTest {
 
         @Parameters
         public static Collection<String[]> getParameters() {
-            return Arrays.asList(new String[][] {
-              {"true"},
-              {"false"}
-            });
+            List<String[]> params = new ArrayList<>();
+            for (String castValueStr : new String[]{"true", "false"}) {
+                for(String timezoneStr : new String[]{"UTC", "Asia/Tokyo"}) {
+                    params.add(new String[]{castValueStr, timezoneStr});
+                }
+            }
+            return params;
         }
         private String castValue;
-        public PersistBatchTest(String cv) {
-            this.castValue = cv;
+        private String timezone;
+        public PersistBatchTest(String castValueStr, String timezoneStr) {
+            this.castValue = castValueStr;
+            this.timezone = timezoneStr;
         }
 
         private final String contextElementStr1 = ""
@@ -652,11 +657,13 @@ public class NGSIElasticsearchSinkTest {
          */
         @Test
         public void testPersistBatchWithoutData() {
-            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithoutData] - castValue=" + castValue));
+            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithoutData] - castValue=" + castValue + ", timezone=" + timezone));
 
             NGSIElasticsearchSink sink = new NGSIElasticsearchSink();
             sink.setPersistenceBackend(mockBackend);
 
+            fixture.castValue.value = castValue;
+            fixture.timezone.value = timezone;
             sink.configure(fixture.createContext());
 
             try {
@@ -676,13 +683,14 @@ public class NGSIElasticsearchSinkTest {
          */
         @Test
         public void testPersistBatchWithOneAttributeRow() throws Exception {
-            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithOneAttributeRow] - castValue=" + castValue));
+            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithOneAttributeRow] - castValue=" + castValue + ", timezone=" + timezone));
 
             NGSIElasticsearchSink sink = new NGSIElasticsearchSink();
             sink.setPersistenceBackend(mockBackend);
 
             fixture.rowAttrPersistence.value = "row";
             fixture.castValue.value = castValue;
+            fixture.timezone.value = timezone;
             sink.configure(fixture.createContext());
 
             NGSIBatch batch = createBatch(sink, contextElementStr1);
@@ -698,7 +706,11 @@ public class NGSIElasticsearchSinkTest {
             assertEquals("1234567890", requestedData.get(0).get("recvTimeTs"));
             assertNotNull(requestedData.get(0).get("data"));
             JSONObject jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(0).get("data"));
-            assertEquals("1970-01-15T06:56:07.890Z", jdata.get("recvTime"));
+            if (timezone == "Asia/Tokyo") {
+                assertEquals("1970-01-15T15:56:07.890+0900", jdata.get("recvTime"));
+            } else {
+                assertEquals("1970-01-15T06:56:07.890+0000", jdata.get("recvTime"));
+            }
             assertEquals("Room1", jdata.get("entityId"));
             assertEquals("Room", jdata.get("entityType"));
             assertEquals("temperature", jdata.get("attrName"));
@@ -724,13 +736,14 @@ public class NGSIElasticsearchSinkTest {
          */
         @Test
         public void testPersistBatchWithOneAttributeColumn() throws Exception {
-            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithOneAttributeColumn] - castValue=" + castValue));
+            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithOneAttributeColumn] - castValue=" + castValue + ", timezone=" + timezone));
 
             NGSIElasticsearchSink sink = new NGSIElasticsearchSink();
             sink.setPersistenceBackend(mockBackend);
 
             fixture.rowAttrPersistence.value = "column";
             fixture.castValue.value = castValue;
+            fixture.timezone.value = timezone;
             sink.configure(fixture.createContext());
 
             NGSIBatch batch = createBatch(sink, contextElementStr1);
@@ -746,7 +759,11 @@ public class NGSIElasticsearchSinkTest {
             assertEquals("1234567890", requestedData.get(0).get("recvTimeTs"));
             assertNotNull(requestedData.get(0).get("data"));
             JSONObject jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(0).get("data"));
-            assertEquals("1970-01-15T06:56:07.890Z", jdata.get("recvTime"));
+            if (timezone == "Asia/Tokyo") {
+                assertEquals("1970-01-15T15:56:07.890+0900", jdata.get("recvTime"));
+            } else {
+                assertEquals("1970-01-15T06:56:07.890+0000", jdata.get("recvTime"));
+            }
             assertEquals("Room1", jdata.get("entityId"));
             assertEquals("Room", jdata.get("entityType"));
             if (castValue == "true") {
@@ -771,7 +788,7 @@ public class NGSIElasticsearchSinkTest {
          */
         @Test
         public void testPersistBatchWithTwoAttributesIgnoreEmptyRow() throws Exception {
-            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithTwoAttributesIgnoreEmptyRow] - castValue=" + castValue));
+            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithTwoAttributesIgnoreEmptyRow] - castValue=" + castValue + ", timezone=" + timezone));
 
             NGSIElasticsearchSink sink = new NGSIElasticsearchSink();
             sink.setPersistenceBackend(mockBackend);
@@ -779,6 +796,7 @@ public class NGSIElasticsearchSinkTest {
             fixture.rowAttrPersistence.value = "row";
             fixture.ignoreWhiteSpaces.value = "true";
             fixture.castValue.value = castValue;
+            fixture.timezone.value = timezone;
             sink.configure(fixture.createContext());
 
             NGSIBatch batch = createBatch(sink, contextElementStr2);
@@ -794,7 +812,11 @@ public class NGSIElasticsearchSinkTest {
             assertEquals("1234567890", requestedData.get(0).get("recvTimeTs"));
             assertNotNull(requestedData.get(0).get("data"));
             JSONObject jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(0).get("data"));
-            assertEquals("1970-01-15T06:56:07.890Z", jdata.get("recvTime"));
+            if (timezone == "Asia/Tokyo") {
+                assertEquals("1970-01-15T15:56:07.890+0900", jdata.get("recvTime"));
+            } else {
+                assertEquals("1970-01-15T06:56:07.890+0000", jdata.get("recvTime"));
+            }
             assertEquals("Room1", jdata.get("entityId"));
             assertEquals("Room", jdata.get("entityType"));
             assertEquals("temperature", jdata.get("attrName"));
@@ -820,7 +842,7 @@ public class NGSIElasticsearchSinkTest {
          */
         @Test
         public void testPersistBatchWithTwoAttributesWithEmptyRow() throws Exception {
-            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithTwoAttributesWithEmptyRow] - castValue=" + castValue));
+            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithTwoAttributesWithEmptyRow] - castValue=" + castValue + ", timezone=" + timezone));
 
             NGSIElasticsearchSink sink = new NGSIElasticsearchSink();
             sink.setPersistenceBackend(mockBackend);
@@ -828,6 +850,7 @@ public class NGSIElasticsearchSinkTest {
             fixture.rowAttrPersistence.value = "row";
             fixture.ignoreWhiteSpaces.value = "false";
             fixture.castValue.value = castValue;
+            fixture.timezone.value = timezone;
             sink.configure(fixture.createContext());
 
             NGSIBatch batch = createBatch(sink, contextElementStr2);
@@ -843,7 +866,11 @@ public class NGSIElasticsearchSinkTest {
             assertEquals("1234567890", requestedData.get(0).get("recvTimeTs"));
             assertNotNull(requestedData.get(0).get("data"));
             JSONObject jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(0).get("data"));
-            assertEquals("1970-01-15T06:56:07.890Z", jdata.get("recvTime"));
+            if (timezone == "Asia/Tokyo") {
+                assertEquals("1970-01-15T15:56:07.890+0900", jdata.get("recvTime"));
+            } else {
+                assertEquals("1970-01-15T06:56:07.890+0000", jdata.get("recvTime"));
+            }
             assertEquals("Room1", jdata.get("entityId"));
             assertEquals("Room", jdata.get("entityType"));
             assertEquals("temperature", jdata.get("attrName"));
@@ -862,7 +889,11 @@ public class NGSIElasticsearchSinkTest {
             assertEquals("1234567890", requestedData.get(1).get("recvTimeTs"));
             assertNotNull(requestedData.get(1).get("data"));
             jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(1).get("data"));
-            assertEquals("1970-01-15T06:56:07.890Z", jdata.get("recvTime"));
+            if (timezone == "Asia/Tokyo") {
+                assertEquals("1970-01-15T15:56:07.890+0900", jdata.get("recvTime"));
+            } else {
+                assertEquals("1970-01-15T06:56:07.890+0000", jdata.get("recvTime"));
+            }
             assertEquals("Room1", jdata.get("entityId"));
             assertEquals("Room", jdata.get("entityType"));
             assertEquals("roomtype", jdata.get("attrName"));
@@ -883,7 +914,7 @@ public class NGSIElasticsearchSinkTest {
          */
         @Test
         public void testPersistBatchWithTwoAttributesIgnoreEmptyColumn() throws Exception {
-            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithTwoAttributesIgnoreEmptyColumn] - castValue=" + castValue));
+            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithTwoAttributesIgnoreEmptyColumn] - castValue=" + castValue + ", timezone=" + timezone));
 
             NGSIElasticsearchSink sink = new NGSIElasticsearchSink();
             sink.setPersistenceBackend(mockBackend);
@@ -891,6 +922,7 @@ public class NGSIElasticsearchSinkTest {
             fixture.rowAttrPersistence.value = "column";
             fixture.ignoreWhiteSpaces.value = "true";
             fixture.castValue.value = castValue;
+            fixture.timezone.value = timezone;
             sink.configure(fixture.createContext());
 
             NGSIBatch batch = createBatch(sink, contextElementStr2);
@@ -906,7 +938,11 @@ public class NGSIElasticsearchSinkTest {
             assertEquals("1234567890", requestedData.get(0).get("recvTimeTs"));
             assertNotNull(requestedData.get(0).get("data"));
             JSONObject jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(0).get("data"));
-            assertEquals("1970-01-15T06:56:07.890Z", jdata.get("recvTime"));
+            if (timezone == "Asia/Tokyo") {
+                assertEquals("1970-01-15T15:56:07.890+0900", jdata.get("recvTime"));
+            } else {
+                assertEquals("1970-01-15T06:56:07.890+0000", jdata.get("recvTime"));
+            }
             assertEquals("Room1", jdata.get("entityId"));
             assertEquals("Room", jdata.get("entityType"));
             if (castValue == "true") {
@@ -931,7 +967,7 @@ public class NGSIElasticsearchSinkTest {
          */
         @Test
         public void testPersistBatchWithTwoAttributesWithEmptyColumn() throws Exception {
-            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithTwoAttributesWithEmptyColumn] - castValue=" + castValue));
+            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithTwoAttributesWithEmptyColumn] - castValue=" + castValue + ", timezone=" + timezone));
 
             NGSIElasticsearchSink sink = new NGSIElasticsearchSink();
             sink.setPersistenceBackend(mockBackend);
@@ -939,6 +975,7 @@ public class NGSIElasticsearchSinkTest {
             fixture.rowAttrPersistence.value = "column";
             fixture.ignoreWhiteSpaces.value = "false";
             fixture.castValue.value = castValue;
+            fixture.timezone.value = timezone;
             sink.configure(fixture.createContext());
 
             NGSIBatch batch = createBatch(sink, contextElementStr2);
@@ -954,7 +991,11 @@ public class NGSIElasticsearchSinkTest {
             assertEquals("1234567890", requestedData.get(0).get("recvTimeTs"));
             assertNotNull(requestedData.get(0).get("data"));
             JSONObject jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(0).get("data"));
-            assertEquals("1970-01-15T06:56:07.890Z", jdata.get("recvTime"));
+            if (timezone == "Asia/Tokyo") {
+                assertEquals("1970-01-15T15:56:07.890+0900", jdata.get("recvTime"));
+            } else {
+                assertEquals("1970-01-15T06:56:07.890+0000", jdata.get("recvTime"));
+            }
             assertEquals("Room1", jdata.get("entityId"));
             assertEquals("Room", jdata.get("entityType"));
             if (castValue == "true") {
@@ -981,20 +1022,25 @@ public class NGSIElasticsearchSinkTest {
          */
         @Test
         public void testPersistBatchWithThreeAttributesWithMetadataRow() throws Exception {
-            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithThreeAttributesWithMetadataRow] - castValue=" + castValue));
+            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithThreeAttributesWithMetadataRow] - castValue=" + castValue + ", timezone=" + timezone));
 
             NGSIElasticsearchSink sink = new NGSIElasticsearchSink();
             sink.setPersistenceBackend(mockBackend);
 
             fixture.rowAttrPersistence.value = "row";
             fixture.castValue.value = castValue;
+            fixture.timezone.value = timezone;
             sink.configure(fixture.createContext());
 
             NGSIBatch batch = createBatch(sink, contextElementStr3);
             sink.persistBatch(batch);
             verify(mockBackend, times(1)).bulkInsert(idxCaptor.capture(), mappingTypeCaptor.capture(), dataCaptor.capture());
 
-            assertEquals("cygnus-room_service-room_service_path-2018.01.01", idxCaptor.getValue());
+            if (timezone == "Asia/Tokyo") {
+                assertEquals("cygnus-room_service-room_service_path-2018.01.02", idxCaptor.getValue());
+            } else {
+                assertEquals("cygnus-room_service-room_service_path-2018.01.01", idxCaptor.getValue());
+            }
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -1003,7 +1049,11 @@ public class NGSIElasticsearchSinkTest {
             assertEquals("1514829845678", requestedData.get(0).get("recvTimeTs"));
             assertNotNull(requestedData.get(0).get("data"));
             JSONObject jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(0).get("data"));
-            assertEquals("2018-01-01T18:04:05.678Z", jdata.get("recvTime"));
+            if (timezone == "Asia/Tokyo") {
+                assertEquals("2018-01-02T03:04:05.678+0900", jdata.get("recvTime"));
+            } else {
+                assertEquals("2018-01-01T18:04:05.678+0000", jdata.get("recvTime"));
+            }
             assertEquals("Room1", jdata.get("entityId"));
             assertEquals("Room", jdata.get("entityType"));
             assertEquals("temperature", jdata.get("attrName"));
@@ -1026,7 +1076,11 @@ public class NGSIElasticsearchSinkTest {
             assertEquals("1514829845678", requestedData.get(1).get("recvTimeTs"));
             assertNotNull(requestedData.get(1).get("data"));
             jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(1).get("data"));
-            assertEquals("2018-01-01T18:04:05.678Z", jdata.get("recvTime"));
+            if (timezone == "Asia/Tokyo") {
+                assertEquals("2018-01-02T03:04:05.678+0900", jdata.get("recvTime"));
+            } else {
+                assertEquals("2018-01-01T18:04:05.678+0000", jdata.get("recvTime"));
+            }
             assertEquals("Room1", jdata.get("entityId"));
             assertEquals("Room", jdata.get("entityType"));
             assertEquals("roomtype", jdata.get("attrName"));
@@ -1046,7 +1100,11 @@ public class NGSIElasticsearchSinkTest {
             assertEquals("1514829845678", requestedData.get(2).get("recvTimeTs"));
             assertNotNull(requestedData.get(2).get("data"));
             jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(2).get("data"));
-            assertEquals("2018-01-01T18:04:05.678Z", jdata.get("recvTime"));
+            if (timezone == "Asia/Tokyo") {
+                assertEquals("2018-01-02T03:04:05.678+0900", jdata.get("recvTime"));
+            } else {
+                assertEquals("2018-01-01T18:04:05.678+0000", jdata.get("recvTime"));
+            }
             assertEquals("Room1", jdata.get("entityId"));
             assertEquals("Room", jdata.get("entityType"));
             assertEquals("smoking", jdata.get("attrName"));
@@ -1074,20 +1132,25 @@ public class NGSIElasticsearchSinkTest {
          */
         @Test
         public void testPersistBatchWithThreeAttributesWithMetadataColumn() throws Exception {
-            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithThreeAttributesWithMetadataColumn] - castValue=" + castValue));
+            System.out.println(getTestTraceHead("[NGSIElasticsearchSinkTest.testPersistBatchWithThreeAttributesWithMetadataColumn] - castValue=" + castValue + ", timezone=" + timezone));
 
             NGSIElasticsearchSink sink = new NGSIElasticsearchSink();
             sink.setPersistenceBackend(mockBackend);
 
             fixture.rowAttrPersistence.value = "column";
             fixture.castValue.value = castValue;
+            fixture.timezone.value = timezone;
             sink.configure(fixture.createContext());
 
             NGSIBatch batch = createBatch(sink, contextElementStr3);
             sink.persistBatch(batch);
             verify(mockBackend, times(1)).bulkInsert(idxCaptor.capture(), mappingTypeCaptor.capture(), dataCaptor.capture());
 
-            assertEquals("cygnus-room_service-room_service_path-2018.01.01", idxCaptor.getValue());
+            if (timezone == "Asia/Tokyo") {
+                assertEquals("cygnus-room_service-room_service_path-2018.01.02", idxCaptor.getValue());
+            } else {
+                assertEquals("cygnus-room_service-room_service_path-2018.01.01", idxCaptor.getValue());
+            }
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -1096,7 +1159,11 @@ public class NGSIElasticsearchSinkTest {
             assertEquals("1514829845678", requestedData.get(0).get("recvTimeTs"));
             assertNotNull(requestedData.get(0).get("data"));
             JSONObject jdata = (JSONObject)(new JSONParser()).parse(requestedData.get(0).get("data"));
-            assertEquals("2018-01-01T18:04:05.678Z", jdata.get("recvTime"));
+            if (timezone == "Asia/Tokyo") {
+                assertEquals("2018-01-02T03:04:05.678+0900", jdata.get("recvTime"));
+            } else {
+                assertEquals("2018-01-01T18:04:05.678+0000", jdata.get("recvTime"));
+            }
             assertEquals("Room1", jdata.get("entityId"));
             assertEquals("Room", jdata.get("entityType"));
             if (castValue == "true") {
