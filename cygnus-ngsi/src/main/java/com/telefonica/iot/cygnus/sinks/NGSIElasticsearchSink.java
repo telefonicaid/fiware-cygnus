@@ -33,16 +33,14 @@ import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -494,7 +492,9 @@ public class NGSIElasticsearchSink extends NGSISink {
          * {@code indexDateFormatter} is used as a suffix of index name.
          * By using this suffix, you can switch the Elasticsearch's index at the daily basis.
          */
-        private DateTimeFormatter indexDateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        private SimpleDateFormat indexDateFormatter = new SimpleDateFormat("yyyy.MM.dd");
+        private SimpleDateFormat isoDateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        // private DateTimeFormatter indexDateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
         private String index;
         private JSONParser parser;
 
@@ -503,6 +503,8 @@ public class NGSIElasticsearchSink extends NGSISink {
          */
         public ElasticsearchAggregator() {
             this.parser = new JSONParser();
+            this.indexDateFormatter.setTimeZone(TimeZone.getTimeZone(NGSIElasticsearchSink.this.timezone));
+            this.isoDateFormatter.setTimeZone(TimeZone.getTimeZone(NGSIElasticsearchSink.this.timezone));
         } // ElasticsearchAggregator
 
         /**
@@ -576,7 +578,7 @@ public class NGSIElasticsearchSink extends NGSISink {
 
                 // construct JSONObject as row-style
                 JSONObject jobj = new JSONObject();
-                jobj.put("recvTime", v.recvTimeDt.format(DateTimeFormatter.ISO_INSTANT));
+                jobj.put("recvTime", isoDateFormatter.format(v.recvTimeDt));
                 jobj.put("entityId", entityId);
                 jobj.put("entityType", entityType);
                 jobj.put("attrName", attrName);
@@ -607,7 +609,9 @@ public class NGSIElasticsearchSink extends NGSISink {
 
                 // synchronize aggregations because aggregations is read/written by main thread and ScheduledExecutorService thread.
                 synchronized(NGSIElasticsearchSink.this.aggregations) {
-                    NGSIElasticsearchSink.this.aggregations.putIfAbsent(v.idx, new ArrayList<Map<String, String>>());
+                    if (!NGSIElasticsearchSink.this.aggregations.containsKey(v.idx)) {
+                        NGSIElasticsearchSink.this.aggregations.put(v.idx, new ArrayList<Map<String, String>>());
+                    }
                     NGSIElasticsearchSink.this.aggregations.get(v.idx).add(elem);
                 } // synchronized
             } // for
@@ -626,7 +630,7 @@ public class NGSIElasticsearchSink extends NGSISink {
             TimeRelatedValues v = this.getTimeRelatedValues(notifiedRecvTimeTs, firstAttrMetadata);
 
             JSONObject jobj = new JSONObject();
-            jobj.put("recvTime", v.recvTimeDt.format(DateTimeFormatter.ISO_INSTANT));
+            jobj.put("recvTime", isoDateFormatter.format(v.recvTimeDt));
             jobj.put("entityId", entityId);
             jobj.put("entityType", entityType);
 
@@ -655,7 +659,9 @@ public class NGSIElasticsearchSink extends NGSISink {
 
             // synchronize aggregations because aggregations is read/written by main thread and ScheduledExecutorService thread.
             synchronized(NGSIElasticsearchSink.this.aggregations) {
-                NGSIElasticsearchSink.this.aggregations.putIfAbsent(v.idx, new ArrayList<Map<String, String>>());
+                if (!NGSIElasticsearchSink.this.aggregations.containsKey(v.idx)) {
+                    NGSIElasticsearchSink.this.aggregations.put(v.idx, new ArrayList<Map<String, String>>());
+                }
                 NGSIElasticsearchSink.this.aggregations.get(v.idx).add(elem);
             } // synchronized
         } // aggregateAsColumn
@@ -665,7 +671,7 @@ public class NGSIElasticsearchSink extends NGSISink {
          */
         private class TimeRelatedValues {
             public Long recvTimeTs;
-            public ZonedDateTime recvTimeDt;
+            public Date recvTimeDt;
             public String idx;
         } // TimeRelatedValues
 
@@ -690,9 +696,8 @@ public class NGSIElasticsearchSink extends NGSISink {
                 v.recvTimeTs = notifiedRecvTimeTs;
             } // if else
 
-            v.recvTimeDt = ZonedDateTime.now(Clock.fixed(Instant.ofEpochMilli(v.recvTimeTs),
-                  ZoneId.of(NGSIElasticsearchSink.this.timezone)));
-            v.idx = this.index + "-" + v.recvTimeDt.format(this.indexDateFormatter);
+            v.recvTimeDt = new Date(v.recvTimeTs);
+            v.idx = this.index + "-" + this.indexDateFormatter.format(v.recvTimeDt);
             return v;
         } // getTimeRelatedValues
 
