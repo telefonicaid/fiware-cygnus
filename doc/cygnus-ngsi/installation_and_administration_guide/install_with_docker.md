@@ -284,6 +284,8 @@ As seen above, the default configuration distributed with the image is tied to c
     * The logging level is `INFO` but can be changed through the CYGNUS_LOG_LEVEL environment variable.
     * The logging appender is `console` but can be changed through the CYGNUS_LOG_APPENDER environment variable.
 
+* Monitoring:
+    * CYGNUS_MONITORING_TYPE: monitoring type. Choose from `http` or `ganglia`. If it is not specified, it will be disabled.
 
 ### Docker Secrets
 
