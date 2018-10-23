@@ -28,11 +28,10 @@ import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.PropertyUtils;
-import com.telefonica.iot.cygnus.utils.auth.keystone.KeyStoneUtilsImpl;
 
 /**
  * 
- * @author joelcamus - PMO Santander Smart City
+ * @author PMO Santander Smart City – Ayuntamiento de Santander
  *
  */
 public class KeyStoneUtilsTest {
@@ -132,7 +131,7 @@ public class KeyStoneUtilsTest {
             Thread.sleep(61000);
 
             System.out.println("------ Getign token for " + fiwareService2 + fiwareServicePath2);
-            token = keyStoneUtils.getSessionToken(user2, password2+"fail", fiwareService2, fiwareServicePath2);
+            token = keyStoneUtils.getSessionToken(user2, password2 + "fail", fiwareService2, fiwareServicePath2);
             System.out.println("Returned token:  " + token);
 
             fail(token);

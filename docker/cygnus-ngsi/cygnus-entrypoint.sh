@@ -414,6 +414,65 @@ if [ "$CYGNUS_CARTO_USER" != "" ]; then
     fi
 fi
 
+# Check if ORION ENV vars
+if [ "$CYGNUS_ORION_HOST" != "" ]; then
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        AGENT_CONF_FILE=agent-orion.conf
+        cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5056 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = orion-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = orion-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_host/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_host = '${CYGNUS_ORION_HOST} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_port/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_port = '${CYGNUS_ORION_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_ssl/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_ssl = '${CYGNUS_ORION_SSL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_username/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_username = '${CYGNUS_ORION_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_password/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_password = '${CYGNUS_ORION_PASS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.keystone_host/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.keystone_host = '${CYGNUS_ORION_KEYSTONE_HOST} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.keystone_port/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.keystone_port = '${CYGNUS_ORION_KEYSTONE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.keystone_ssl/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.keystone_ssl = '${CYGNUS_ORION_KEYSTONE_SSL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_fiware/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_fiware = '${CYGNUS_ORION_FIWARE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_fiware_path/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_fiware_path = '${CYGNUS_ORION_FIWARE_PATH} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}    
+    # The following are optional and disabled by default
+    if [ "$CYGNUS_ORION_ENABLE_ENCODING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_encoding = '${CYGNUS_ORION_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ORION_ENABLE_GROUPING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_grouping = '${CYGNUS_ORION_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ORION_ENABLE_NAME_MAPPINGS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_name_mappings = '${CYGNUS_ORION_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ORION_ENABLE_LOWERCASE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_lowercase/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_lowercase = '${CYGNUS_ORION_ENABLE_LOWERCASE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ORION_ATTR_PERSISTENCE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.attr_persistence/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.attr_persistence = '${CYGNUS_ORION_ATTR_PERSISTENCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ORION_BATCH_SIZE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.batch_size/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.batch_size = '${CYGNUS_ORION_BATCH_SIZE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ORION_BATCH_TIMEOUT" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.batch_timeout/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.batch_timeout = '${CYGNUS_ORION_BATCH_TIMEOUT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ORION_BATCH_TTL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.batch_ttl = '${CYGNUS_ORION_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ORION_BATCH_RETRY_INTERVALS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.batch_retry_intervals/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.bach_retry_intervals = '${CYGNUS_ORION_BATCH_RETRY_INTERNALS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ORION_ENABLE_CACHE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.backend.enable_cache/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.backend.enable_cache = '${CYGNUS_ORION_ENABLE_CACHE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        # Run the Cygnus command
+        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5086 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+    fi
+fi
+
+
 
 
 if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
