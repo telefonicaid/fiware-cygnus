@@ -224,7 +224,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * The endpoint for CKAN is `iot-ckan` but can be changed through the CYGNUS_CKAN_HOST environment variable.
     * The port for CKAN is `80` but can be changed through the CYGNUS_CKAN_PORT environment variable.
     * The ssl for CKAN is `false` but can be changed through the CYGNUS_CKAN_SSL environment variable.
-    * The api_key for CKAN is `` but can be changed through the CYGNUS_CKAN_API_KEY environment variable.
+    * The api_key for CKAN is blank but can be changed through the CYGNUS_CKAN_API_KEY environment variable.
     * CYGNUS_CKAN_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_CKAN_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_CKAN_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
@@ -304,6 +304,31 @@ As seen above, the default configuration distributed with the image is tied to c
 * Log4j configuration file:
     * The logging level is `INFO` but can be changed through the CYGNUS_LOG_LEVEL environment variable.
     * The logging appender is `console` but can be changed through the CYGNUS_LOG_APPENDER environment variable.
+
+
+### Docker Secrets
+
+As an alternative to passing sensitive information via environment variables, `_FILE` may be appended to the previously listed environment variables, causing the initialization script to load the values for those variables from files present in the container. In particular, this can be used to load passwords from Docker secrets stored in `/run/secrets/<secret_name>` files. For example:
+
+```bash
+docker run --name some-cygnus -e CYGNUS_MYSQL_PASS_FILE=/run/secrets/mysql-root -d fiware/cygnus-ngsi:tag
+```
+
+Currently, this is only supported for:
+
+* `CYGNUS_MYSQL_USER`
+* `CYGNUS_MYSQL_PASS`
+* `CYGNUS_MONGO_USER`
+* `CYGNUS_MONGO_PASS`
+* `CYGNUS_HDFS_USER`
+* `CYGNUS_HDFS_TOKEN`
+* `CYGNUS_POSTGRESQL_USER`
+* `CYGNUS_POSTGRESQL_PASS`
+* `CYGNUS_CARTO_USER`
+* `CYGNUS_CARTO_KEY`
+
+
+
 
 [Top](#top)
 

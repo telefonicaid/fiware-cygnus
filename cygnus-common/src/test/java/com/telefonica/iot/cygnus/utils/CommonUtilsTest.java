@@ -219,6 +219,71 @@ public class CommonUtilsTest {
             throw e;
         } // try catch
     } // testGetTimeInstantSQLTimestampWithMicroseconds
+
+    /**
+     * [CommonUtils.getTimeInstant] -------- When getting a time instant, it is properly obtained when passing
+     * a valid ISO 8601 timestamp with offset without miliseconds.
+     */
+    @Test
+    public void testGetTimeInstantISO8601TimestampWithOffsetWithoutMiliseconds() {
+        System.out.println(getTestTraceHead("[CommonUtils.getTimeInstant]")
+                + "-------- When getting a time instant, it is properly obtained when passing a valid "
+                + "ISO 8601 timestamp with offset without miliseconds");
+        String offsets[] = {"+09:00", "+0900", "+09", "-09:00", "-0900", "-09"};
+        for (String offset : offsets) {
+            JSONObject metadataJson = new JSONObject();
+            metadataJson.put("name", "TimeInstant");
+            metadataJson.put("type", "ISO8601");
+            metadataJson.put("value", "2017-01-01T00:00:01" + offset);
+            JSONArray metadatasJson = new JSONArray();
+            metadatasJson.add(metadataJson);
+            String metadatasStr = metadatasJson.toJSONString();
+            Long timeInstant = CommonUtils.getTimeInstant(metadatasStr);
+
+            try {
+                assertTrue(timeInstant != null);
+                System.out.println(getTestTraceHead("[CommonUtils.getTimeInstant]") + "-  OK  - Time instant obtained for '"
+                        + metadatasJson.toJSONString() + "' is '" + timeInstant + "'");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[CommonUtils.getTimeInstant]")
+                        + "- FAIL - Time instant obtained is 'null'");
+                throw e;
+            } // try catch
+        } // for
+    } // testGetTimeInstantISO8601TimestampWithOffsetWithoutMiliseconds
+
+    /**
+     * [CommonUtils.getTimeInstant] -------- When getting a time instant, it is properly obtained when passing
+     * a valid ISO 8601 timestamp with offset with miliseconds.
+     */
+    @Test
+    public void testGetTimeInstantISO8601TimestampWithOffsetWithMiliseconds() {
+        System.out.println(getTestTraceHead("[CommonUtils.getTimeInstant]")
+                + "-------- When getting a time instant, it is properly obtained when passing a valid "
+                + "ISO 8601 timestamp with offset and miliseconds");
+        String offsets[] = {"+11:00", "+1100", "+11", "-11:00", "-1100", "-11"};
+        for (String offset : offsets) {
+            JSONObject metadataJson = new JSONObject();
+            metadataJson.put("name", "TimeInstant");
+            metadataJson.put("type", "ISO8601");
+            metadataJson.put("value", "2017-01-01T00:00:01.123456" + offset);
+            JSONArray metadatasJson = new JSONArray();
+            metadatasJson.add(metadataJson);
+            String metadatasStr = metadatasJson.toJSONString();
+            Long timeInstant = CommonUtils.getTimeInstant(metadatasStr);
+
+            try {
+                assertTrue(timeInstant != null);
+                System.out.println(getTestTraceHead("[CommonUtils.getTimeInstant]") + "-  OK  - Time instant obtained for '"
+                        + metadatasJson.toJSONString() + "' is '" + timeInstant + "'");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[CommonUtils.getTimeInstant]")
+                        + "- FAIL - Time instant obtained is 'null'");
+                throw e;
+            } // try catch
+        }
+    } // testGetTimeInstantISO8601TimestampWithOffsetWithMiliseconds
+
     
     /**
      * [CommonUtils.getMilliseconds] -------- Milliseconds are obtained when passing a valid timestamp.
