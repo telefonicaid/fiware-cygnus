@@ -179,8 +179,7 @@ ENV CYGNUS_ORION_ENABLE_CACHE ""
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
-#ENV GIT_REV_CYGNUS "master"
-ENV GIT_REV_CYGNUS "feature/1447_NGSIOrionSink_create_avega"
+ENV GIT_REV_CYGNUS "master"
 
 ENV MVN_VER "3.5.4"
 ENV MVN_HOME "/opt/apache-maven"
