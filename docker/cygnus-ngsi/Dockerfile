@@ -32,6 +32,7 @@ ENV CYGNUS_LOG_APPENDER "console"
 ENV CYGNUS_SERVICE_PORT "5050"
 ENV CYGNUS_API_PORT "5080"
 ENV CYGNUS_MULTIAGENT false
+ENV CYGNUS_MONITORING_TYPE ""
 # These variables are optional ENV variables to docker runtime
 
 # MySQL options

@@ -108,8 +108,13 @@ if [ "$CYGNUS_MYSQL_HOST" != "" ]; then
     fi
 
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
-        # Run the Cygnus command
-        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5080 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5080 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41415 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5080 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
     fi
 fi
 
@@ -213,8 +218,13 @@ if [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
     fi
 
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
-        # Run the Cygnus command
-        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5081 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5081 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41416 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5081 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
     fi
 fi
 
@@ -267,8 +277,13 @@ if [ "$CYGNUS_CKAN_HOST" != "" ]; then
     fi
 
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
-        # Run the Cygnus command
-        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5082 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5082 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41417 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5082 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
     fi
 fi
 
@@ -340,8 +355,13 @@ if [ "$CYGNUS_HDFS_HOST" != "" ]; then
     fi
 
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
-        # Run the Cygnus command
-        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5083 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5083 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41418 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5083 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
     fi
 fi
 
@@ -389,8 +409,13 @@ if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     fi
 
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
-        # Run the Cygnus command
-        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5084 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5084 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41419 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5084 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
     fi
 fi
 
@@ -409,8 +434,13 @@ if [ "$CYGNUS_CARTO_USER" != "" ]; then
     sed -i 's/\/\/user/\/\/'${CYGNUS_CARTO_USER}'/g' ${FLUME_HOME}/conf/cartodb_keys.conf
     sed -i '/"key":/c "key":"'${CYGNUS_CARTO_KEY}'"' ${FLUME_HOME}/conf/cartodb_keys.conf
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
-        # Run the Cygnus command
-        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5085 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5085 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41420 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5085 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
     fi
 fi
 
@@ -476,8 +506,13 @@ fi
 
 
 if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
-    # Run the Cygnus command
-    ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${CYGNUS_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p ${CYGNUS_API_PORT} -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+    if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+        # Run the Cygnus command with monitoring
+        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${CYGNUS_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p ${CYGNUS_API_PORT} -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41414 &
+    else
+        # Run the Cygnus command
+        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${CYGNUS_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p ${CYGNUS_API_PORT} -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+    fi
 fi
 
 
