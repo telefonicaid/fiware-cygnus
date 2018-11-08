@@ -60,6 +60,7 @@ file_env 'CYGNUS_CARTO_KEY' ''
 
 
 AGENT_CONF_FILE=agent.conf
+GROUPING_CONF_FILE=grouping_rules.conf
 
 if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
     cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -70,6 +71,9 @@ if [ "$CYGNUS_MYSQL_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-mysql.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        GROUPING_CONF_FILE=grouping_rules-mysql.conf
+        cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = mysql-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = mysql-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -124,6 +128,9 @@ if [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
         AGENT_CONF_FILE=agent-mongo.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5051 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        GROUPING_CONF_FILE=grouping_rules-mongo.conf
+        cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = mongo-sink sth-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = mongo-channel sth-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -233,6 +240,9 @@ if [ "$CYGNUS_CKAN_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-ckan.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        GROUPING_CONF_FILE=grouping_rules-ckan.conf
+        cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5052 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = ckan-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -291,7 +301,10 @@ fi
 if [ "$CYGNUS_HDFS_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-hdfs.conf
+        GROUPING_CONF_FILE=grouping_rules-hdfs.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5053 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = hdfs-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -369,7 +382,10 @@ fi
 if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-postgresql.conf
+        GROUPING_CONF_FILE=grouping_rules-postgresql.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5054 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = postgresql-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -423,7 +439,10 @@ fi
 if [ "$CYGNUS_CARTO_USER" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-carto.conf
+        GROUPING_CONF_FILE=grouping_rules-carto.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5055 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = cartodb-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -448,7 +467,10 @@ fi
 if [ "$CYGNUS_ORION_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-orion.conf
+        GROUPING_CONF_FILE=grouping_rules-orion.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5056 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = orion-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
