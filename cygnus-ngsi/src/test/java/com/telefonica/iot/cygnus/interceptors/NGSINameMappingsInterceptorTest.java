@@ -128,6 +128,74 @@ public class NGSINameMappingsInterceptorTest {
             + "   ]"
             + "}";
     
+    private final String nameMappingsStrConfig = ""
+            + "{"
+            + "   \"serviceMappings\": ["
+            + "      {"
+            + "         \"originalService\": \"service\","
+            + "         \"newService\": \"service_new\","
+            + "         \"servicePathMappings\": ["
+            + "            {"
+            + "               \"originalServicePath\": \"/servicePath\","
+            + "               \"newServicePath\": \"/servicePath_House\","
+            + "               \"entityMappings\": ["
+            + "                  {"
+            + "                     \"originalEntityId\": \".*\","
+            + "                     \"originalEntityType\": \"House\","
+            + "                     \"newEntityId\": \".*\","
+            + "                     \"newEntityType\": \"House\","
+            + "                     \"attributeMappings\": []"
+            + "                  }"
+            + "               ]"
+            + "            }"
+            + "            , {"
+            + "               \"originalServicePath\": \"/servicePath\","
+            + "               \"newServicePath\": \"/servicePath_Room\","
+            + "               \"entityMappings\": ["
+            + "                  {"
+            + "                     \"originalEntityId\": \".*\","
+            + "                     \"originalEntityType\": \"Room\","
+            + "                     \"newEntityId\": \".*\","
+            + "                     \"newEntityType\": \"RoomNew\","
+            + "                     \"attributeMappings\": []"
+            + "                  }"
+            + "               ]"
+            + "            }"
+            
+            + "         ]"
+            + "      }"
+            + "   ]"
+            + "}";
+    private final String originalCEStrConfig = ""
+            + "{"
+            +   "\"attributes\" : ["
+            +     "{"
+            +       "\"name\" : \"temperature\","
+            +       "\"type\" : \"centigrade\","
+            +       "\"value\" : \"26.5\""
+            +     "}"
+            +   "],"
+            +   "\"type\" : \"Room\","
+            +   "\"isPattern\" : \"false\","
+            +   "\"id\" : \"Room1\""
+            + "}";
+    
+    private final String expectedCEStrConfig = ""
+            + "{"
+            +   "\"attributes\" : ["
+            +     "{"
+            +       "\"name\" : \"temperature\","
+            +       "\"type\" : \"centigrade\","
+            +       "\"value\" : \"26.5\""
+            +     "}"
+            +   "],"
+            +   "\"type\" : \"RoomNew\","
+            +   "\"isPattern\" : \"false\","
+            +   "\"id\" : \"Room1\""
+            + "}";
+    private final String originalServiceConfig = "service";
+    private final String originalServicePathConfig = "/servicePath";
+    private final String expectedServicePathConfig = "/servicePath_Room"; 
     /**
      * Constructor.
      */
@@ -408,6 +476,59 @@ public class NGSINameMappingsInterceptorTest {
             throw e;
         } // try catch
     } // testDoMap
+    
+    /**
+     * [NGSIGroupingInterceptor.doMapConfig] -------- A mapped ContextElement can be obtained from the Name Mappings.
+     */
+    @Test
+    public void testDoMapConfig() {
+        System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig]")
+                + "-------- A mapped ContextElement can be obtained from the Name Mappings");
+        NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
+        nameMappingsInterceptor.loadNameMappings(nameMappingsStrConfig);
+        ContextElement originalCE;
+        ContextElement expectedCE;
+        
+        try {
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStrConfig);
+            expectedCE = NGSIUtilsForTests.createJsonContextElement(expectedCEStrConfig);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig]")
+                    + "- FAIL - There was some problem when parsing the ContextElements");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(
+                originalServiceConfig, originalServicePathConfig, originalCE);
+        ContextElement mappedCE = map.getRight();
+        boolean equals = true;
+        
+        if (!mappedCE.getType().equals(expectedCE.getType()) || !expectedServicePathConfig.equals(map.getMiddle())) {
+            equals = false;
+        } else {
+            for (int j = 0; j < mappedCE.getAttributes().size(); j++) {
+                ContextAttribute mappedCA = mappedCE.getAttributes().get(j);
+                ContextAttribute expectedCA = expectedCE.getAttributes().get(j);
+
+                if (!mappedCA.getName().equals(expectedCA.getName())
+                        || !mappedCA.getType().equals(expectedCA.getType())) {
+                    equals = false;
+                    break;
+                } // if
+            } // for
+        } // if else
+        
+        try {
+            assertTrue(equals);
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig]")
+                    + "-  OK  - The mapped NotifyContextRequest is equals to the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig]")
+                    + "- FAIL - The mapped NotifyContextRequest is not equals to the expected one");
+            throw e;
+        } // try catch
+    } // testDoMapConfig
+    
     
     /**
      * [NGSIGroupingInterceptor.doMapRegex] -------- A mapped ContextElement can be obtained from the Name Mappings.
