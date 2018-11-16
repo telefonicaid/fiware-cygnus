@@ -188,7 +188,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         private long lastModified;
         private boolean stop;
 
-        public PeriodicalNameMappingsReader(int interval) {
+        PeriodicalNameMappingsReader(int interval) {
             this.interval = interval;
             this.lastModified = 0;
             this.stop = false;
@@ -331,107 +331,102 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             return new ImmutableTriple(newService, newServicePath, newCE);
         } // if
 
-        // Map the service path
-        ServicePathMapping servicePathMapping = null;
 
         for (ServicePathMapping spm : serviceMapping.getServicePathMappings()) {
-            servicePathMapping = spm;
-
-            if (!servicePathMapping.getOriginalServicePathPattern().matcher(originalServicePath).matches()) {
-                servicePathMapping = null;
+            if (!spm.getOriginalServicePathPattern().matcher(originalServicePath).matches()) {
+                spm = null;
                 continue;
             } // if
 
             LOGGER.debug("[nmi] FIWARE service path found: " + originalServicePath);
 
-            if (servicePathMapping.getNewServicePath() != null) {
-                newServicePath = servicePathMapping.getNewServicePath();
+            if (spm.getNewServicePath() != null) {
+                newServicePath = spm.getNewServicePath();
             } // if
 
-            break;
-        } // for
+            if (spm.getEntityMappings() != null && !spm.getEntityMappings().isEmpty()) {
+                for (EntityMapping entityMappingAux : spm.getEntityMappings()) {
+                    if (entityMappingAux == null) {
+                        LOGGER.debug("[nmi] Entity not found: " + newCE.getId() + ", " + newCE.getType());
+                        return new ImmutableTriple(newService, newServicePath, newCE);
+                    } // if
 
-        if (servicePathMapping == null) {
-            LOGGER.debug("[nmi] FIWARE service path not found: " + originalServicePath);
-            return new ImmutableTriple(newService, newServicePath, newCE);
-        } // if
+                    if (!entityMappingAux.getOriginalEntityIdPattern().matcher(newCE.getId()).matches()
+                            || !entityMappingAux.getOriginalEntityTypePattern().matcher(newCE.getType()).matches()) {
+                        continue;
+                    } else {
+                        LOGGER.debug("[nmi] FIWARE type entity found: " + newCE.getType());
 
-        String originalEntityId = newCE.getId();
-        String originalEntityType = newCE.getType();
-        String newEntityId = originalEntityId;
-        String newEntityType = originalEntityType;
-        EntityMapping entityMapping = null;
+                        String originalEntityId = newCE.getId();
+                        String originalEntityType = newCE.getType();
+                        String newEntityId = originalEntityId;
+                        String newEntityType = originalEntityType;
 
-        for (EntityMapping em : servicePathMapping.getEntityMappings()) {
-            entityMapping = em;
+                        LOGGER.debug("[nmi] Entity found: " + originalEntityId + ", " + originalEntityType);
 
-            if (!entityMapping.getOriginalEntityIdPattern().matcher(originalEntityId).matches()
-                    || !entityMapping.getOriginalEntityTypePattern().matcher(originalEntityType).matches()) {
-                entityMapping = null;
-                continue;
+                        if (entityMappingAux.getNewEntityId() != null) {
+                            LOGGER.debug(
+                                    "[nmi] IdPattern : " + entityMappingAux.getOriginalEntityIdPattern().toString());
+                            newEntityId = originalEntityId.replaceAll(
+                                    entityMappingAux.getOriginalEntityIdPattern().toString(),
+                                    entityMappingAux.getNewEntityId());
+                            LOGGER.debug("[nmi] newEntityId : " + newEntityId);
+                        } // if
+
+                        if (entityMappingAux.getNewEntityType() != null) {
+                            newEntityType = entityMappingAux.getNewEntityType();
+                        } // if
+
+                        newCE.setId(newEntityId);
+                        newCE.setType(newEntityType);
+
+                        for (ContextAttribute newCA : newCE.getAttributes()) {
+                            String originalAttributeName = newCA.getName();
+                            String originalAttributeType = newCA.getType();
+                            String newAttributeName = originalAttributeName;
+                            String newAttributeType = originalAttributeType;
+                            AttributeMapping attributeMapping = null;
+
+                            for (AttributeMapping am : entityMappingAux.getAttributeMappings()) {
+                                attributeMapping = am;
+
+                                if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName)
+                                        .matches()
+                                        || !attributeMapping.getOriginalAttributeTypePattern()
+                                                .matcher(originalAttributeType).matches()) {
+                                    attributeMapping = null;
+                                    continue;
+                                } // if
+
+                                LOGGER.debug("[nmi] Attribute found: " + originalAttributeName + ", "
+                                        + originalAttributeType);
+
+                                if (attributeMapping.getNewAttributeName() != null) {
+                                    newAttributeName = attributeMapping.getNewAttributeName();
+                                } // if
+
+                                if (attributeMapping.getNewAttributeType() != null) {
+                                    newAttributeType = attributeMapping.getNewAttributeType();
+                                } // if
+
+                                break;
+                            } // for
+
+                            if (attributeMapping == null) {
+                                LOGGER.debug("[nmi] Attribute not found: " + originalAttributeName + ", "
+                                        + originalAttributeType);
+                                continue;
+                            } // if
+
+                            newCA.setName(newAttributeName);
+                            newCA.setType(newAttributeType);
+                        } // for
+
+                        break;
+                    } // if else
+                } // for
+
             } // if
-
-            LOGGER.debug("[nmi] Entity found: " + originalEntityId + ", " + originalEntityType);
-
-            if (entityMapping.getNewEntityId() != null) {
-                LOGGER.debug("[nmi] IdPattern : " + entityMapping.getOriginalEntityIdPattern().toString());
-                newEntityId = originalEntityId.replaceAll(entityMapping.getOriginalEntityIdPattern().toString(),
-                        entityMapping.getNewEntityId());
-                LOGGER.debug("[nmi] newEntityId : " + newEntityId);
-            } // if
-
-            if (entityMapping.getNewEntityType() != null) {
-                newEntityType = entityMapping.getNewEntityType();
-            } // if
-
-            break;
-        } // for
-
-        if (entityMapping == null) {
-            LOGGER.debug("[nmi] Entity not found: " + originalEntityId + ", " + originalEntityType);
-            return new ImmutableTriple(newService, newServicePath, newCE);
-        } // if
-
-        newCE.setId(newEntityId);
-        newCE.setType(newEntityType);
-
-        for (ContextAttribute newCA : newCE.getAttributes()) {
-            String originalAttributeName = newCA.getName();
-            String originalAttributeType = newCA.getType();
-            String newAttributeName = originalAttributeName;
-            String newAttributeType = originalAttributeType;
-            AttributeMapping attributeMapping = null;
-
-            for (AttributeMapping am : entityMapping.getAttributeMappings()) {
-                attributeMapping = am;
-
-                if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches()
-                        || !attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType)
-                                .matches()) {
-                    attributeMapping = null;
-                    continue;
-                } // if
-
-                LOGGER.debug("[nmi] Attribute found: " + originalAttributeName + ", " + originalAttributeType);
-
-                if (attributeMapping.getNewAttributeName() != null) {
-                    newAttributeName = attributeMapping.getNewAttributeName();
-                } // if
-
-                if (attributeMapping.getNewAttributeType() != null) {
-                    newAttributeType = attributeMapping.getNewAttributeType();
-                } // if
-
-                break;
-            } // for
-
-            if (attributeMapping == null) {
-                LOGGER.debug("[nmi] Attribute not found: " + originalAttributeName + ", " + originalAttributeType);
-                continue;
-            } // if
-
-            newCA.setName(newAttributeName);
-            newCA.setType(newAttributeType);
         } // for
 
         return new ImmutableTriple(newService, newServicePath, newCE);
