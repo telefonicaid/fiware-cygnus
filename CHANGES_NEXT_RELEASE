@@ -6,4 +6,5 @@
 [cygnus-common][CommonUtils][debug] Modify that CommonUtils#getTimeInstant can accepts the ISO8601 format with offset like 2018-01-02T03:04:05+09:00 (#1517)
 [cygnus-ngsi][Docker] Add new env var  CYGNUS_MONITORING_TYPE
 [cygnus-ngsi][KafkaSink] Using global connection to zookeeper instead of creating one each time an event arrives
+[cygnus-ngsi][NGSINameMappingsInterceptor] Now namemapping checks sevice, subervice and (type of entity and id entity) of EntityMapping (#1535) 
 
