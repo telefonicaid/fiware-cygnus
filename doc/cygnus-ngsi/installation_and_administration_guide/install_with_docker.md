@@ -166,6 +166,7 @@ As seen above, the default configuration distributed with the image is tied to c
 | hdfs | 5053 | 5083 |
 | postgresql | 5054 | 5084 |
 | cartodb | 5055 | 5085 |
+| orion | 5056 | 5086 |
 
 
 * MySQL:
@@ -223,7 +224,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * The endpoint for CKAN is `iot-ckan` but can be changed through the CYGNUS_CKAN_HOST environment variable.
     * The port for CKAN is `80` but can be changed through the CYGNUS_CKAN_PORT environment variable.
     * The ssl for CKAN is `false` but can be changed through the CYGNUS_CKAN_SSL environment variable.
-    * The api_key for CKAN is `` but can be changed through the CYGNUS_CKAN_API_KEY environment variable.
+    * The api_key for CKAN is blank but can be changed through the CYGNUS_CKAN_API_KEY environment variable.
     * CYGNUS_CKAN_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_CKAN_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_CKAN_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
@@ -280,9 +281,56 @@ As seen above, the default configuration distributed with the image is tied to c
     * The user for Carto is `carto` but can be changed through the CYGNUS_CARTO_USER environment variable.
     * The key for Carto is `carto` but can be changes through the CYGNUS_CARTO_KEY environment variable.
 
+* Orion:
+    * It only works for building historical context data in Orion.
+    * The endpoint for Orion is `iot-orion-ext` but can be changed through the CYGNUS_ORION_HOST environment variable.
+    * The port for Orion is `1026` but can be changed through the CYGNUS_ORION_PORT environment variable.
+    * The user for Orion is empty but can be changed through the CYGNUS_ORION_USER environment variable.
+    * The pass for Orion is empty but can be changed through the CYGNUS_ORION_PASS environment variable.
+    * CYGNUS_ORION_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
+    * CYGNUS_ORION_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
+    * CYGNUS_ORION_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_ORION_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
+    * CYGNUS_ORION_BATCH_SIZE: number of notifications to be included within a processing batch.
+    * CYGNUS_ORION_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
+    * CYGNUS_ORION_BATCH_TTL: number of retries upon persistence error.
+    * CYGNUS_ORION_SSL: SSL flag for connection to use with Orion.
+    * CYGNUS_ORION_KEYSTONE_HOST: Keystone IDM host used by Orion sink to perform authentication.
+    * CYGNUS_ORION_KEYSTONE_PORT: Keystone IDM port used by Orion sink to perform authentication.
+    * CYGNUS_ORION_KEYSTONE_SSL: SSL flag for connection to use with Keystone IDM.
+    * CYGNUS_ORION_FIWARE: Fiware Service header to provide to Orion sink.
+    * CYGNUS_ORION_FIWARE_PATH=: Fiware ServicePath header to provide to Orion sink.
+
 * Log4j configuration file:
     * The logging level is `INFO` but can be changed through the CYGNUS_LOG_LEVEL environment variable.
     * The logging appender is `console` but can be changed through the CYGNUS_LOG_APPENDER environment variable.
+
+* Monitoring:
+    * CYGNUS_MONITORING_TYPE: monitoring type. Choose from `http` or `ganglia`. If it is not specified, it will be disabled.
+
+### Docker Secrets
+
+As an alternative to passing sensitive information via environment variables, `_FILE` may be appended to the previously listed environment variables, causing the initialization script to load the values for those variables from files present in the container. In particular, this can be used to load passwords from Docker secrets stored in `/run/secrets/<secret_name>` files. For example:
+
+```bash
+docker run --name some-cygnus -e CYGNUS_MYSQL_PASS_FILE=/run/secrets/mysql-root -d fiware/cygnus-ngsi:tag
+```
+
+Currently, this is only supported for:
+
+* `CYGNUS_MYSQL_USER`
+* `CYGNUS_MYSQL_PASS`
+* `CYGNUS_MONGO_USER`
+* `CYGNUS_MONGO_PASS`
+* `CYGNUS_HDFS_USER`
+* `CYGNUS_HDFS_TOKEN`
+* `CYGNUS_POSTGRESQL_USER`
+* `CYGNUS_POSTGRESQL_PASS`
+* `CYGNUS_CARTO_USER`
+* `CYGNUS_CARTO_KEY`
+
+
+
 
 [Top](#top)
 
