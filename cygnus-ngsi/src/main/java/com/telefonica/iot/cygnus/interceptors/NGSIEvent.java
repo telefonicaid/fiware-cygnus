@@ -172,17 +172,17 @@ public class NGSIEvent implements Event {
     public String getAttributeForNaming(boolean enableMappings) {
         if (enableMappings) {
             ArrayList<ContextAttribute> attrs = mappedCE.getAttributes();
-            if (attrs && attrs.get(0)) {
+            if (attrs != null && attrs.get(0) != null) {
                 return attrs.get(0).getName(); // the CE has been filtered for having just one attribute
             } else {
-                return '';
+                return "";
             }
         } else {
             ArrayList<ContextAttribute> attrs = originalCE.getAttributes();
-            if (attrs && attrs.get(0)) {
+            if (attrs  != null && attrs.get(0)  != null) {
                 return attrs.get(0).getName(); // the CE has been filtered for having just one attribute
             } else {
-                return '';
+                return "";
             }
         } // if else
     } // getAttributeForNaming
