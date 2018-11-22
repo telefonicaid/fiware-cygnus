@@ -29,6 +29,7 @@ ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-twitter"
 ENV CYGNUS_LOG_LEVEL "INFO"
 ENV CYGNUS_LOG_APPENDER "console"
+ENV CYGNUS_JAVA_OPTS "-Xms2048m -Xmx4096m"
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
@@ -56,7 +57,7 @@ RUN yum -y install tar nc which git java-${JAVA_VERSION}-openjdk-devel && \
     curl --remote-name --location --insecure --silent --show-error "${MVN_URL}" && \
     tar xzvf ${MVN_TGZ} && \
     mv apache-maven-${MVN_VER} ${MVN_HOME} && \
-    export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8" && \
+    export MAVEN_OPTS="-Xmx4096m -XX:MaxPermSize=256m -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8" && \
     curl --remote-name --location --insecure --silent --show-error "${FLUME_URL}" && \
     tar zxf ${FLUME_TGZ} && \
     mv apache-flume-${FLUME_VER}-bin ${FLUME_HOME} && \
