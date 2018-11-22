@@ -2,19 +2,14 @@
 This quick start overviews the steps a newbie programmer will have to follow in order to get familiar with Cygnus and its basic functionality. For more detailed information, please refer to the [README](https://github.com/telefonicaid/fiware-cygnus/blob/master/README.md); the [Installation and Administration Guide](./installation_and_administration_guide/introduction.md), the [User and Programmer Guide](user_and_programmer_guide/introduction.md) and the [Flume Extensions Catalogue](flume_extensions_catalogue/introduction.md) fully document Cygnus.
 
 ## Installing Cygnus
-Open a terminal and simply configure the FIWARE repository if not yet configured and use your applications manager in order to install the latest version of Cygnus (CentOS/RedHat example):
-
+Open a terminal and simply configure the FIWARE release repository:
 ```
-$ sudo cat > /etc/yum.repos.d/fiware.repo <<EOL
-[Fiware]
-name=FIWARE repository
-baseurl=http://repositories.lab.fiware.org/repo/rpm/6/
-gpgcheck=0
-enabled=1
-EOL
-$ sudo yum install cygnus
+sudo wget -P /etc/yum.repos.d/ https://nexus.lab.fiware.org/repository/raw/public/repositories/el/7/x86_64/fiware-release.repo
 ```
-
+Use your applications manager in order to install the latest version of Cygnus (CentOS/RedHat example):
+```
+sudo yum install cygnus-ngsi
+```
 **IMPORTANT NOTE:**
 
 Cygnus, as it is based on Apache Flume, needs Java SDK is installed. If not yet installed, do it right now:

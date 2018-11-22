@@ -39,7 +39,7 @@ AGENT_NAME=cygnus-common
 # Name of the logfile located at /var/log/cygnus. It is important to put the extension '.log' in order to the log rotation works properly
 LOGFILE_NAME=cygnus.log
 # Administration port. Must be unique per instance
-ADMIN_PORT=8081
+ADMIN_PORT=5080
 # Polling interval (seconds) for the configuration reloading
 POLLING_INTERVAL=30
 ```

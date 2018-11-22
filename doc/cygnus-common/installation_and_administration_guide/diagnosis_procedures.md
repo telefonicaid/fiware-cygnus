@@ -52,20 +52,20 @@ Check the apender value is `LOG_FILE`.
 
 ## <a name="section2"></a>Problem: The API does not work
 ### <a name="section2.1"></a>Reason: There may be a problem with the configured port
-Check the port you are using in the request is the one configued in Cygnus. By default, it is `8081`, but can be modified by Cygnus administrator.
+Check the port you are using in the request is the one configued in Cygnus. By default, it is `5080`, but can be modified by Cygnus administrator.
 
 [Top](#top)
 
 ### <a name="section2.2"></a>Reason: The configured port is not open in the firewall
 The API port may be properly configured but not opened in the firewall (if such a firewall is running) protecting your machine.
 
-The specific solution depends on the specific firewall. Here, `iptables`-based firewalling is shown. Please, check the port is open (default `8081` is used in the examples):
+The specific solution depends on the specific firewall. Here, `iptables`-based firewalling is shown. Please, check the port is open (default `5080` is used in the examples):
 
 ```
 $ (sudo) iptables -L
 Chain INPUT (policy ACCEPT)
 target     prot opt source               destination
-ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:8081
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:5080
 
 Chain FORWARD (policy ACCEPT)
 target     prot opt source               destination
@@ -76,7 +76,7 @@ target     prot opt source               destination
 
 If not, open it:
 
-    $ (sudo) iptables -I INPUT -p tcp --dport 8081 -j ACCEPT
+    $ (sudo) iptables -I INPUT -p tcp --dport 5080 -j ACCEPT
 
 [Top](#top)
 
