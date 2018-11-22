@@ -30,9 +30,11 @@ ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
 ENV CYGNUS_LOG_LEVEL "INFO"
 ENV CYGNUS_LOG_APPENDER "console"
 ENV CYGNUS_SERVICE_PORT "5050"
+ENV CYGNUS_JAVA_OPTS "-Xms2048m -Xmx4096m"
 ENV CYGNUS_API_PORT "5080"
 ENV CYGNUS_MULTIAGENT false
 ENV CYGNUS_MONITORING_TYPE ""
+
 # These variables are optional ENV variables to docker runtime
 
 # MySQL options
@@ -196,7 +198,7 @@ RUN \
     adduser ${CYGNUS_USER} && \
     yum -y install nc java-${JAVA_VERSION}-openjdk-devel git && \
     export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk && \
-    export MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1" && \
+    export MAVEN_OPTS="-Xmx4096m -XX:MaxPermSize=256m -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1" && \
     export MAVEN_ARGS="-B -T4" && \
     # For debug Maven
     # export MAVEN_ARGS="${MAVEN_ARGS} -X -e -Dmaven.compiler.verbose=true" && \
@@ -257,14 +259,6 @@ RUN \
     bash -c 'localedef --list-archive | grep -v -e "en_US" | xargs localedef --delete-from-archive' && \
     /bin/cp -f /usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.tmpl && \
     build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf && \
-    echo "INFO: Compacting Cygnus jar files..." && \
-    # Some class needs to pass file because bytecode errors of old jar dependencies
-    pack200 -J-Xmx512m -J-XX:MaxPermSize=128m --effort=5 --segment-limit=786432 --modification-time=latest --pass-file=org/apache/hadoop/hive/shims/Hadoop23Shims.class \
-      ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar.pack.gz \
-      ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
-    pack200 -J-Xmx512m -J-XX:MaxPermSize=128m --effort=5 --segment-limit=786432 --modification-time=latest --pass-file=org/apache/hadoop/hive/shims/Hadoop23Shims.class \
-      ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar.pack.gz \
-      ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
     rm -f ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
     rm -f ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar
 
