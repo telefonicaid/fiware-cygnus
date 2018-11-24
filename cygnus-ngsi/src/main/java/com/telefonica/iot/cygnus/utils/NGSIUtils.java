@@ -143,5 +143,12 @@ public final class NGSIUtils {
         // The attribute was not related to a geolocation
         return new ImmutablePair(attrValue, false);
     } // getGeometry
-        
+
+    public static Pattern getENCODEPATTERN() {
+        return ENCODEPATTERN;
+    }
+
+    public static Pattern getENCODEPATTERNSLASH() {
+        return ENCODEPATTERNSLASH;
+    }
 } // NGSIUtils
