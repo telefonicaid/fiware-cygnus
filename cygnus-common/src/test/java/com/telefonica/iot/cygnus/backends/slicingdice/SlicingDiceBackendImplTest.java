@@ -1,10 +1,19 @@
 package com.telefonica.iot.cygnus.backends.slicingdice;
 
+import com.telefonica.iot.cygnus.backends.http.JsonResponse;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
+import java.io.IOException;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponseFactory;
+import org.apache.http.HttpVersion;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.message.BasicHttpResponse;
+import org.apache.http.message.BasicStatusLine;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +22,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -68,6 +80,60 @@ public class SlicingDiceBackendImplTest {
         } catch (final Exception e) {
             Assert.fail(e.getMessage());
         } finally {
+            Assert.assertTrue(true);
+        }
+    }
+
+    @Test
+    public void testColumnAlreadyExist() throws IOException, CygnusRuntimeError, CygnusPersistenceError {
+        System.out.println("Testing SlicingDiceBackendImpl.createColumns");
+
+        HttpResponseFactory factory = new DefaultHttpResponseFactory();
+        HttpResponse response = factory
+                .newHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 400, null), null);
+        response.setHeader("Content-Type", "application/json");
+        String responseStr = "{\"errors\": [{\"code\": 3003, \"message\": \"Column: Column already exists.\"}]}";
+        response.setEntity(new StringEntity(responseStr));
+        final JsonResponse jsonRes = backend.createJsonResponse(response);
+
+        final SlicingDiceBackendImpl mockedBackend = mock(SlicingDiceBackendImpl.class);
+        when(mockedBackend.doSlicingDiceRequest(anyString(), anyString(), anyString())).thenReturn(
+                jsonRes);
+        doCallRealMethod().when(mockedBackend).createColumns(anyString());
+
+        try {
+            mockedBackend.setHttpClient(mockHttpClient);
+            mockedBackend.createColumns(COLUMNS_TO_CREATE);
+        } catch (final Exception e) {
+            Assert.fail(e.getMessage());
+        } finally {
+            Assert.assertTrue(true);
+        }
+    }
+
+    @Test
+    public void testColumnError400() throws IOException, CygnusRuntimeError, CygnusPersistenceError {
+        System.out.println("Testing SlicingDiceBackendImpl.createColumns");
+
+        HttpResponseFactory factory = new DefaultHttpResponseFactory();
+        HttpResponse response = factory
+                .newHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, 400, null), null);
+        response.setHeader("Content-Type", "application/json");
+        String responseStr = "{\"errors\": [{\"code\": 4026, \"message\": \"Query: Invalid query format. Must be a list.\"}]}";
+        response.setEntity(new StringEntity(responseStr));
+        final JsonResponse jsonRes = backend.createJsonResponse(response);
+
+        final SlicingDiceBackendImpl mockedBackend = mock(SlicingDiceBackendImpl.class);
+        when(mockedBackend.doSlicingDiceRequest(anyString(), anyString(), anyString())).thenReturn(
+                jsonRes);
+        doCallRealMethod().when(mockedBackend).createColumns(anyString());
+
+        try {
+            mockedBackend.setHttpClient(mockHttpClient);
+            mockedBackend.createColumns(COLUMNS_TO_CREATE);
+            Assert.fail();
+        } catch (final Exception e) {
+            // this response should call an exception because isn't a normal behavior
             Assert.assertTrue(true);
         }
     }

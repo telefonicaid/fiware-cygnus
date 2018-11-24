@@ -121,12 +121,13 @@ public class NGSISlicingDiceSink extends NGSISink {
         // command to create string and integer columns on SlicingDice
         private static final String COLUMN_CREATION_COMMAND =
                 "{\"name\": \"%s\", \"api-name\": \"%s\", \"type\": \"%s\", " +
-                        "\"description\": \"Created using CYGNUS.\"}";
+                        "\"description\": \"Created using CYGNUS.\", \"dimension\": \"%s\"}";
 
         // command to create decimal columns on SlicingDice
         private static final String DECIMAL_COLUMN_CREATION_COMMAND =
                 "{\"name\": \"%s\", \"api-name\": \"%s\", \"type\": \"%s\", " +
-                        "\"description\": \"Created using CYGNUS.\", \"decimal-places\": 5}";
+                        "\"description\": \"Created using CYGNUS.\", \"decimal-places\": 5, " +
+                        "\"dimension\": \"%s\"}";
 
         // object containing the aggregted data
         protected LinkedHashMap<String, ArrayList<String>> aggregation;
@@ -180,7 +181,13 @@ public class NGSISlicingDiceSink extends NGSISink {
                     } // if
 
                     final String value = aggregationEntrySet.getValue().get(i);
-                    final boolean isString = fieldToType.get(columnName).equals("string-event");
+                    final boolean isString;
+
+                    if (columnName.equals(NGSIConstants.FIWARE_SERVICE_PATH)) {
+                        isString = true;
+                    } else {
+                        isString = fieldToType.get(columnName).equals("string-event");
+                    }
                     final String date = timeSeries.get(i);
                     if (isString) {
                         valuesForInsert.append(", \"").append(columnName).append("\": [")
@@ -215,10 +222,10 @@ public class NGSISlicingDiceSink extends NGSISink {
                 final String columnCommand;
                 if (type.contains("decimal")) {
                     columnCommand = String.format(DECIMAL_COLUMN_CREATION_COMMAND, columnName,
-                            columnName, type);
+                            columnName, type, dimensionName);
                 } else {
                     columnCommand = String.format(COLUMN_CREATION_COMMAND, columnName, columnName,
-                            type);
+                            type, dimensionName);
                 }
 
                 if (first) {
@@ -297,7 +304,10 @@ public class NGSISlicingDiceSink extends NGSISink {
             } // if
 
             timeSeries.add(recvTime);
+
             aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(servicePathForData);
+            fieldToType.put(NGSIConstants.FIWARE_SERVICE_PATH, "string-event");
+
             aggregation.get(NGSIConstants.ENTITY_ID).add(entityId);
 
             for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
@@ -463,4 +473,7 @@ public class NGSISlicingDiceSink extends NGSISink {
         } // if else
     } // encode
 
+     public void setPersistenceBackend(final SlicingDiceBackend persistenceBackend) {
+        this.persistenceBackend = persistenceBackend;
+    }
 }

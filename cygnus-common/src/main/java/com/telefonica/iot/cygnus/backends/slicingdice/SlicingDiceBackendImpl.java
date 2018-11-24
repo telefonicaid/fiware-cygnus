@@ -8,8 +8,11 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.ArrayList;
 import org.apache.http.Header;
+import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 public class SlicingDiceBackendImpl extends HttpBackend implements SlicingDiceBackend {
 
@@ -50,6 +53,17 @@ public class SlicingDiceBackendImpl extends HttpBackend implements SlicingDiceBa
         // check the status
         if (res.getStatusCode() == 200) {
             LOGGER.debug("Successful column creation");
+        } else if (res.getStatusCode() == 400) {
+            final JSONArray errors = (JSONArray) res.getJsonObject().get("errors");
+            final JSONObject error = (JSONObject) errors.get(0);
+            final Long code = (Long) error.get("code");
+
+            if (code == 3003) {
+                LOGGER.debug("Column already exists");
+            } else {
+                throw new CygnusPersistenceError("Could not create the columns, " +
+                        "statusCode=" + res.getStatusCode() + ")");
+            }
         } else {
             throw new CygnusPersistenceError("Could not create the columns, " +
                     "statusCode=" + res.getStatusCode() + ")");
@@ -72,7 +86,7 @@ public class SlicingDiceBackendImpl extends HttpBackend implements SlicingDiceBa
         } // if else
     } // insertContextData
 
-    private JsonResponse doSlicingDiceRequest(final String method, final String urlPath,
+    JsonResponse doSlicingDiceRequest(final String method, final String urlPath,
                                               final String jsonString)
             throws CygnusPersistenceError, CygnusRuntimeError {
         ArrayList<Header> headers = new ArrayList<>();
@@ -80,4 +94,9 @@ public class SlicingDiceBackendImpl extends HttpBackend implements SlicingDiceBa
         headers.add(new BasicHeader("Content-Type", "application/json"));
         return doRequest(method, urlPath, true, headers, new StringEntity(jsonString, "UTF-8"));
     } // doSlicingDiceRequest
+
+    @Override
+    protected JsonResponse createJsonResponse(final HttpResponse httpRes) throws CygnusRuntimeError {
+        return super.createJsonResponse(httpRes);
+    }
 }
