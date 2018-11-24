@@ -9,3 +9,4 @@
 [cygnus-ngsi][KafkaSink] Using global connection to zookeeper instead of creating one each time an event arrives
 [cygnus-ngsi][NGSINameMappingsInterceptor] Now namemapping checks sevice, subervice and (type of entity and id entity) of EntityMapping (#1535)
 [cygnus-ngsi][NGSIEvent] Unable to deliver event: null pointer getAttributeForNaming (#1506)
+[cygnus-ngsi][SlicingDiceSink] Added SlicingDice sink to cygnus
