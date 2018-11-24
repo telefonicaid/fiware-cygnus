@@ -57,7 +57,7 @@ public class NGSISlicingDiceSink extends NGSISink {
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (api_key=" + databaseKey + ")");
         }
-        this.autoCreate = context.getBoolean("auto_create", false);
+        this.autoCreate = context.getBoolean("auto_create", true);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (auto_create=" + autoCreate + ")");
     } // configure
 

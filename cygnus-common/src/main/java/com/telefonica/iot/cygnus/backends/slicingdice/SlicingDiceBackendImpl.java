@@ -19,7 +19,7 @@ public class SlicingDiceBackendImpl extends HttpBackend implements SlicingDiceBa
     private static final CygnusLogger LOGGER = new CygnusLogger(SlicingDiceBackendImpl.class);
 
     // this is the SlicingDice host, the user will not be able to change it
-    private static final String SLICING_DICE_HOST = "api.slicingdice.com";
+    private static final String SLICING_DICE_HOST = "api.slicingdice.com/v1";
 
     // this is the SlicingDice port, the user will not be able to change it
     private static final String SLICING_DICE_PORT = "443";
