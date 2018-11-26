@@ -16,6 +16,8 @@
 #
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
+# Modified by: SlicingDice
+#
 
 # Unpack two big jar files
 [[ -f ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar.pack.gz ]] && unpack200 -r ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar.pack.gz ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar

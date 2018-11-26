@@ -14,7 +14,11 @@
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+ *
+ * Modified by: SlicingDice
+ *
  */
+
 package com.telefonica.iot.cygnus.utils;
 
 /**
