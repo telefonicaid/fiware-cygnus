@@ -84,7 +84,7 @@ Optionally, you MAY add an authorship line within the header just after the abov
 * Authorship: <your name/company>
 ```
 
-If the file already exists, you MAY add a line about it at the end of the header in the following form:
+If the file already exists and you modify it, you MAY add a line about it at the end of the header in the following form:
 
 ```
 * Modified by: <your name/company>
