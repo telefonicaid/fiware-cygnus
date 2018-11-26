@@ -5,6 +5,7 @@ Content:
 * [Adopted conventions](#section2)
 * [Contributing to the repository](#section3)
     * [Language of the main repository](#section3.1)
+    * [License header](#section3.1bis)
     * [Repository organization](#section3.2)
     * [Backlog](#section3.3)
     * [Main repository versus forked repositories](#section3.4)
@@ -48,6 +49,46 @@ Any doubt you may have, please refer to [here](https://github.com/telefonicaid/f
 ## <a name="section3"></a>Contributing to the repository
 ### <a name="section3.1"></a>Language of the main repository
 The main repository language MUST be English.
+
+[Top](#top)
+
+### <a name="section3.1bis"></a>License header
+
+All source code files (along with other files of similar nature, i.e. scripts, configuration files, etc.)
+MUST have the following copyrigth header:
+
+```
+/**
+ * Copyright XXXX Telefonica Investigación y Desarrollo, S.A.U
+ *
+ * This file is part of fiware-cygnus (FIWARE project).
+ *
+ * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
+ * http://www.gnu.org/licenses/.
+ *
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+ *
+ */
+```
+
+Optionally, you MAY and authorship line within the header just after the above text:
+
+```
+* Authorship: <your name/company>
+```
+
+If the file already exists, you MAY add a line about it at the end of the header in the following form:
+
+```
+* Modified by: <your name/company>
+```
 
 [Top](#top)
 
