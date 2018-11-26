@@ -78,7 +78,7 @@ MUST have the following copyrigth header:
  */
 ```
 
-Optionally, you MAY and authorship line within the header just after the above text:
+Optionally, you MAY add an authorship line within the header just after the above text:
 
 ```
 * Authorship: <your name/company>
