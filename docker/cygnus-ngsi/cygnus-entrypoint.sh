@@ -57,7 +57,9 @@ file_env 'CYGNUS_POSTGRESQL_PASS' ''
 file_env 'CYGNUS_CARTO_USER' ''
 file_env 'CYGNUS_CARTO_KEY' ''
 
-
+# Export JAVA_OPTS
+JAVA_OPTS=${CYGNUS_JAVA_OPTS}
+export JAVA_OPTS
 
 AGENT_CONF_FILE=agent.conf
 GROUPING_CONF_FILE=grouping_rules.conf
@@ -537,13 +539,5 @@ if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
     fi
 fi
 
-
-# Export JAVA_OPTS
-JAVA_OPTS=${CYGNUS_JAVA_OPTS}
-export JAVA_OPTS
-
-
-# Run the Cygnus command
-${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${CYGNUS_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p ${CYGNUS_API_PORT} -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
 
 touch /var/log/cygnus/cygnus.log && tail -f /var/log/cygnus/cygnus.log
