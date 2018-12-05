@@ -59,6 +59,7 @@ export JAVA_OPTS
 
 AGENT_CONF_FILE=agent.conf
 GROUPING_CONF_FILE=grouping_rules.conf
+NAMEMAPPING_CONF_FILE=name_mappings.conf
 
 if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
     cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -71,6 +72,8 @@ if [ "$CYGNUS_MYSQL_HOST" != "" ]; then
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         GROUPING_CONF_FILE=grouping_rules-mysql.conf
         cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+        NAMEMAPPING_CONF_FILE=name_mappings-mysql.conf
+        cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = mysql-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -128,6 +131,8 @@ if [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5051 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         GROUPING_CONF_FILE=grouping_rules-mongo.conf
         cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+        NAMEMAPPING_CONF_FILE=name_mappings-mongo.conf
+        cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = mongo-sink sth-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -240,6 +245,8 @@ if [ "$CYGNUS_CKAN_HOST" != "" ]; then
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         GROUPING_CONF_FILE=grouping_rules-ckan.conf
         cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+        NAMEMAPPING_CONF_FILE=name_mappings-ckan.conf
+        cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5052 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
@@ -302,6 +309,8 @@ if [ "$CYGNUS_HDFS_HOST" != "" ]; then
         GROUPING_CONF_FILE=grouping_rules-hdfs.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+        NAMEMAPPING_CONF_FILE=name_mappings-hdfs.conf
+        cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5053 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
@@ -383,6 +392,8 @@ if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
         GROUPING_CONF_FILE=grouping_rules-postgresql.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+        NAMEMAPPING_CONF_FILE=name_mappings-postgresql.conf
+        cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5054 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
@@ -440,6 +451,8 @@ if [ "$CYGNUS_CARTO_USER" != "" ]; then
         GROUPING_CONF_FILE=grouping_rules-carto.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+        NAMEMAPPING_CONF_FILE=name_mappings-carto.conf
+        cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5055 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
@@ -468,6 +481,8 @@ if [ "$CYGNUS_ORION_HOST" != "" ]; then
         GROUPING_CONF_FILE=grouping_rules-orion.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+        NAMEMAPPING_CONF_FILE=name_mappings-orion.conf
+        cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5056 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
