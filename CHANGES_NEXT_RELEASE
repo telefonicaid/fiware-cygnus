@@ -1,3 +1,4 @@
+[cygnus-ngsi][Docker] Add name mappings files for multiagent
 [cygnus-common] Update hive dependence from 0.13.1 to 2.3.4 due to a vulnerability alert
 [cygnus-ngsi][Docker] Add grouping rules files for multiagent (#1533)
 [cygnus-ngsi][NGSIOrionSink] Create NGSIOrionSink (#1447)
