@@ -242,6 +242,7 @@ RUN \
     echo "INFO: Instantiate some configuration files" && \
     cp ${CYGNUS_HOME}/cygnus-common/conf/log4j.properties.template ${FLUME_HOME}/conf/log4j.properties && \
     cp ${CYGNUS_HOME}/cygnus-ngsi/conf/grouping_rules.conf.template ${FLUME_HOME}/conf/grouping_rules.conf && \
+    cp ${CYGNUS_HOME}/cygnus-ngsi/conf/name_mappings.conf.template ${FLUME_HOME}/conf/name_mappings.conf && \
     echo "INFO: Create Cygnus log folder" && \
     mkdir -p /var/log/cygnus && \
     echo "INFO: Cleanup to thin the final image... doing optimizations..." && \
