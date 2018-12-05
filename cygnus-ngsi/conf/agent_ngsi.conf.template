@@ -58,6 +58,10 @@ cygnus-ngsi.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus
 # see the doc/design/interceptors document for more details
 cygnus-ngsi.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
 
+# Name mappings NameMappingInterceptor, put the right absolute path to the file if necessary
+cygnus-ngsi.sources.http-source.interceptors.nmi.type = com.telefonica.iot.cygnus.interceptors.NGSINameMappingsInterceptor$Builder
+cygnus-ngsi.sources.http-source.interceptors.nmi.name_mappings_conf_file = /usr/cygnus/conf/name_mappings.conf
+
 # ============================================
 # NGSIHDFSSink configuration
 # channel name from where to read notification events
