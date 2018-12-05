@@ -415,78 +415,78 @@ cygnus-ngsi.sinks.cartodb-sink.keys_conf_file = /usr/cygnus/conf/cartodb_keys.co
 # channel type (must not be changed)
 cygnus-ngsi.channels.hdfs-channel.type = memory
 # capacity of the channel
-cygnus-ngsi.channels.hdfs-channel.capacity = 1000
+cygnus-ngsi.channels.hdfs-channel.capacity = 100000
 # amount of bytes that can be sent per transaction
-cygnus-ngsi.channels.hdfs-channel.transactionCapacity = 100
+cygnus-ngsi.channels.hdfs-channel.transactionCapacity = 10000
 
 # =============================================
 # ckan-channel configuration
 # channel type (must not be changed)
 cygnus-ngsi.channels.ckan-channel.type = memory
 # capacity of the channel
-cygnus-ngsi.channels.ckan-channel.capacity = 1000
+cygnus-ngsi.channels.ckan-channel.capacity = 100000
 # amount of bytes that can be sent per transaction
-cygnus-ngsi.channels.ckan-channel.transactionCapacity = 100
+cygnus-ngsi.channels.ckan-channel.transactionCapacity = 10000
 
 # =============================================
 # mysql-channel configuration
 # channel type (must not be changed)
 cygnus-ngsi.channels.mysql-channel.type = memory
 # capacity of the channel
-cygnus-ngsi.channels.mysql-channel.capacity = 1000
+cygnus-ngsi.channels.mysql-channel.capacity = 100000
 # amount of bytes that can be sent per transaction
-cygnus-ngsi.channels.mysql-channel.transactionCapacity = 100
+cygnus-ngsi.channels.mysql-channel.transactionCapacity = 10000
 
 # =============================================
 # postgresql-channel configuration
 # channel type (must not be changed)
 cygnus-ngsi.channels.postgresql-channel.type = memory
 # capacity of the channel
-cygnus-ngsi.channels.postgresql-channel.capacity = 1000
+cygnus-ngsi.channels.postgresql-channel.capacity = 100000
 # amount of bytes that can be sent per transaction
-cygnus-ngsi.channels.postgresql-channel.transactionCapacity = 100
+cygnus-ngsi.channels.postgresql-channel.transactionCapacity = 10000
 
 # =============================================
 # mongo-channel configuration
 # channel type (must not be changed)
 cygnus-ngsi.channels.mongo-channel.type = memory
 # capacity of the channel
-cygnus-ngsi.channels.mongo-channel.capacity = 1000
+cygnus-ngsi.channels.mongo-channel.capacity = 100000
 # amount of bytes that can be sent per transaction
-cygnus-ngsi.channels.mongo-channel.transactionCapacity = 100
+cygnus-ngsi.channels.mongo-channel.transactionCapacity = 10000
 
 # =============================================
 # sth-channel configuration
 # channel type (must not be changed)
 cygnus-ngsi.channels.sth-channel.type = memory
 # capacity of the channel
-cygnus-ngsi.channels.sth-channel.capacity = 1000
+cygnus-ngsi.channels.sth-channel.capacity = 100000
 # amount of bytes that can be sent per transaction
-cygnus-ngsi.channels.sth-channel.transactionCapacity = 100
+cygnus-ngsi.channels.sth-channel.transactionCapacity = 10000
 
 # =============================================
 # kafka-channel configuration
 # channel type (must not be changed)
 cygnus-ngsi.channels.kafka-channel.type = memory
 # capacity of the channel
-cygnus-ngsi.channels.kafka-channel.capacity = 1000
+cygnus-ngsi.channels.kafka-channel.capacity = 100000
 # amount of bytes that can be sent per transaction
-cygnus-ngsi.channels.kafka-channel.transactionCapacity = 100
+cygnus-ngsi.channels.kafka-channel.transactionCapacity = 10000
 
 # =============================================
 # dynamodb-channel configuration
 # channel type (must not be changed)
 cygnus-ngsi.channels.dynamodb-channel.type = memory
 # capacity of the channel
-cygnus-ngsi.channels.dynamodb-channel.capacity = 1000
+cygnus-ngsi.channels.dynamodb-channel.capacity = 100000
 # amount of bytes that can be sent per transaction
-cygnus-ngsi.channels.dynamodb-channel.transactionCapacity = 100
+cygnus-ngsi.channels.dynamodb-channel.transactionCapacity = 10000
 
 # ============================================
 # cartodb-channel configuration
 # channel type (must not be changed)
 cygnus-ngsi.channels.cartodb-channel.type = memory
 # capacity of the channel
-cygnus-ngsi.channels.cartodb-channel.capacity = 1000
+cygnus-ngsi.channels.cartodb-channel.capacity = 100000
 # amount of bytes that can be sent per transaction
-cygnus-ngsi.channels.cartodb-channel.transactionCapacity = 100
+cygnus-ngsi.channels.cartodb-channel.transactionCapacity = 10000
