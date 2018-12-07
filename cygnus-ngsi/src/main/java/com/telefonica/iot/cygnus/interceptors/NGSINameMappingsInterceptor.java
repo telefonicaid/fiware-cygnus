@@ -331,22 +331,25 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             return new ImmutableTriple(newService, newServicePath, newCE);
         } // if
 
-
+        boolean getServicePath=false;
         for (ServicePathMapping spm : serviceMapping.getServicePathMappings()) {
+            if(getServicePath) {
+                continue;
+            }
             if (!spm.getOriginalServicePathPattern().matcher(originalServicePath).matches()) {
                 spm = null;
                 continue;
             } // if
 
-            
+            LOGGER.debug("[nmi] FIWARE service path found: " + originalServicePath);
+
+            if (spm.getNewServicePath() != null) {
+                newServicePath = spm.getNewServicePath();
+            } // if
 
             if (spm.getEntityMappings() != null && !spm.getEntityMappings().isEmpty()) {
                 for (EntityMapping entityMappingAux : spm.getEntityMappings()) {
-                    LOGGER.debug("[nmi] FIWARE service path found: " + originalServicePath);
-
-                    if (spm.getNewServicePath() != null) {
-                        newServicePath = spm.getNewServicePath();
-                    } // if
+                    
                     
                     if (entityMappingAux == null) {
                         LOGGER.debug("[nmi] Entity not found: " + newCE.getId() + ", " + newCE.getType());
@@ -357,6 +360,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                             || !entityMappingAux.getOriginalEntityTypePattern().matcher(newCE.getType()).matches()) {
                         continue;
                     } else {
+                        getServicePath=true;
                         LOGGER.debug("[nmi] FIWARE type entity found: " + newCE.getType());
 
                         String originalEntityId = newCE.getId();
