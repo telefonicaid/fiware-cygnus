@@ -338,14 +338,16 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 continue;
             } // if
 
-            LOGGER.debug("[nmi] FIWARE service path found: " + originalServicePath);
-
-            if (spm.getNewServicePath() != null) {
-                newServicePath = spm.getNewServicePath();
-            } // if
+            
 
             if (spm.getEntityMappings() != null && !spm.getEntityMappings().isEmpty()) {
                 for (EntityMapping entityMappingAux : spm.getEntityMappings()) {
+                    LOGGER.debug("[nmi] FIWARE service path found: " + originalServicePath);
+
+                    if (spm.getNewServicePath() != null) {
+                        newServicePath = spm.getNewServicePath();
+                    } // if
+                    
                     if (entityMappingAux == null) {
                         LOGGER.debug("[nmi] Entity not found: " + newCE.getId() + ", " + newCE.getType());
                         return new ImmutableTriple(newService, newServicePath, newCE);
