@@ -241,7 +241,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             jsonStr = JsonUtils.readJsonFile(nameMappingsConfFile);
             LOGGER.debug("[nmi] Reading name mappings, Json read: " + jsonStr);
         } catch (Exception e) {
-            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
+            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
             nameMappings = null;
             return;
         } // try catch
@@ -257,7 +257,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
      */
     protected void loadNameMappings(String jsonStr) {
         if (jsonStr == null) {
-            LOGGER.debug("[nmi] Reding name mappings, no file to read");
+            LOGGER.debug("[nmi] Reding name mappings, no file to read");
             nameMappings = null;
             return;
         } // if
@@ -269,7 +269,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             nameMappings = gson.fromJson(jsonStr, NameMappings.class);
             LOGGER.debug("[nmi] Reading attribute mappings, Json parsed");
         } catch (JsonIOException e) {
-            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
+            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
             nameMappings = null;
             return;
         } catch (JsonSyntaxException e) {
@@ -319,7 +319,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 continue;
             } // if
 
-            LOGGER.debug("[nmi] FIWARE service found: " + originalService);
+            LOGGER.debug("[nmi] FIWARE service found: " + originalService);
 
             if (serviceMapping.getNewService() != null) {
                 newService = serviceMapping.getNewService();
@@ -329,7 +329,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         } // for
 
         if (serviceMapping == null) {
-            LOGGER.debug("[nmi] FIWARE service not found: " + originalService);
+            LOGGER.debug("[nmi] FIWARE service not found: " + originalService);
             return new ImmutableTriple(newService, newServicePath, newCE);
         } // if
 
@@ -340,7 +340,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 continue;
             } // if
 
-            LOGGER.debug("[nmi] FIWARE service path found: " + originalServicePath);
+            LOGGER.debug("[nmi] FIWARE service path found: " + originalServicePath);
 
             if (spm.getNewServicePath() != null) {
                 newServicePath = spm.getNewServicePath();
@@ -348,8 +348,9 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
             if (spm.getEntityMappings() != null && !spm.getEntityMappings().isEmpty()) {
                 for (EntityMapping entityMappingAux : spm.getEntityMappings()) {
+                    LOGGER.debug("[nmi] checking with entityMapping: " + entityMappingAux.toString());
                     if (entityMappingAux == null) {
-                        LOGGER.debug("[nmi] Entity not found: " + newCE.getId() + ", " + newCE.getType());
+                        LOGGER.debug("[nmi] Entity not found: " + newCE.getId() + ", " + newCE.getType());
                         return new ImmutableTriple(newService, newServicePath, newCE);
                     } // if
 
@@ -357,7 +358,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                             || !entityMappingAux.getOriginalEntityTypePattern().matcher(newCE.getType()).matches()) {
                         continue;
                     } else {
-                        LOGGER.debug("[nmi] FIWARE type entity found: " + newCE.getType());
+                        LOGGER.debug("[nmi] type entity found: " + newCE.getType());
 
                         String originalEntityId = newCE.getId();
                         String originalEntityType = newCE.getType();
@@ -400,7 +401,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                                     continue;
                                 } // if
 
-                                LOGGER.debug("[nmi] Attribute found: " + originalAttributeName + ", "
+                                LOGGER.debug("[nmi] Attribute found: " + originalAttributeName + ", "
                                         + originalAttributeType);
 
                                 if (attributeMapping.getNewAttributeName() != null) {
