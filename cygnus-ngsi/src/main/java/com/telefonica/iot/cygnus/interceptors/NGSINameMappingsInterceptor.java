@@ -442,7 +442,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                         } // for
 
                         LOGGER.debug("[nmi] newCE: " + newCE.toString());
-                        break;
+                        //break;
+                        continue;
                     } // if else
                 } // for
 
