@@ -349,11 +349,23 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             if (spm.getEntityMappings() != null && !spm.getEntityMappings().isEmpty()) {
                 for (EntityMapping entityMappingAux : spm.getEntityMappings()) {
                     LOGGER.debug("[nmi] checking with entityMapping: " + entityMappingAux.toString());
-                    if (entityMappingAux == null) {
+                    if (entityMappingAux == null) { // never reached!
                         LOGGER.debug("[nmi] Entity not found: " + newCE.getId() + ", " + newCE.getType());
                         return new ImmutableTriple(newService, newServicePath, newCE);
                     } // if
 
+                    // check if match by Type
+                    if (entityMappingAux.getOriginalEntityType() && entityMappingAux.getNewEntityType()) {
+                        if (!entityMappingAux.getOriginalEntityTypePattern().matcher(newCE.getType()).matches()) {
+                            continue;
+                        }
+                    }
+                    // check if match by Id
+                    if (entityMappingAux.getOriginalEntityId() && entityMappingAux.getNewEntityId()) {
+                        if (!entityMappingAux.getOriginalEntityIdPattern().matcher(newCE.getId()).matches()) {
+                            continue;
+                        }
+                    }
                     if (!entityMappingAux.getOriginalEntityIdPattern().matcher(newCE.getId()).matches()
                             || !entityMappingAux.getOriginalEntityTypePattern().matcher(newCE.getType()).matches()) {
                         continue;
