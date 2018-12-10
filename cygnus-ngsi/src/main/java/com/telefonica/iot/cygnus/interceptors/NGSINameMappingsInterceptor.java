@@ -355,13 +355,13 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     } // if
 
                     // check if match by Type
-                    if (entityMappingAux.getOriginalEntityType() && entityMappingAux.getNewEntityType()) {
+                    if (entityMappingAux.getOriginalEntityType()) {
                         if (!entityMappingAux.getOriginalEntityTypePattern().matcher(newCE.getType()).matches()) {
                             continue;
                         }
                     }
                     // check if match by Id
-                    if (entityMappingAux.getOriginalEntityId() && entityMappingAux.getNewEntityId()) {
+                    if (entityMappingAux.getOriginalEntityId()) {
                         if (!entityMappingAux.getOriginalEntityIdPattern().matcher(newCE.getId()).matches()) {
                             continue;
                         }
