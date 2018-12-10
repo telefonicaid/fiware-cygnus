@@ -359,7 +359,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                         if (!entityMappingAux.getOriginalEntityTypePattern().matcher(newCE.getType()).matches()) {
                             continue;
                         } else {
-                            LOGGER.debug("[nmi] " + entityMappingAux.getOriginalEntityType + " matches " + newCE.getType());
+                            LOGGER.debug("[nmi] " + entityMappingAux.getOriginalEntityType() + " matches " + newCE.getType());
                         }
                     }
                     // check if match by Id
@@ -367,7 +367,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                         if (!entityMappingAux.getOriginalEntityIdPattern().matcher(newCE.getId()).matches()) {
                             continue;
                         } else {
-                            LOGGER.debug("[nmi] " + entityMappingAux.getOriginalEntityId + " matches " + newCE.getId());
+                            LOGGER.debug("[nmi] " + entityMappingAux.getOriginalEntityId() + " matches " + newCE.getId());
                         }
                     }
                     if (!entityMappingAux.getOriginalEntityIdPattern().matcher(newCE.getId()).matches()
