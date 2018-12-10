@@ -336,7 +336,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
         for (ServicePathMapping spm : serviceMapping.getServicePathMappings()) {
             if (!spm.getOriginalServicePathPattern().matcher(originalServicePath).matches()) {
-                spm = null;
+                spm = null; // no effect
                 continue;
             } // if
 
@@ -439,18 +439,19 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
                             newCA.setName(newAttributeName);
                             newCA.setType(newAttributeType);
+                            // newCA should be stored into newCE
                         } // for
 
                         LOGGER.debug("[nmi] newCE: " + newCE.toString());
+                        return new ImmutableTriple(newService, newServicePath, newCE);
                         //break;
-                        continue;
                     } // if else
                 } // for
 
             } // if
         } // for
 
-        //LOGGER.debug("[nmi] newCE: " + newCE.toString());
+        LOGGER.debug("[nmi] final newCE: " + newCE.toString());
         return new ImmutableTriple(newService, newServicePath, newCE);
     } // map
 
