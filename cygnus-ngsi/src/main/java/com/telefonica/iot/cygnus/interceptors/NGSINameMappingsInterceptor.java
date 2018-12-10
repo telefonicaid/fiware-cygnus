@@ -358,12 +358,16 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     if (entityMappingAux.getOriginalEntityType() != null) {
                         if (!entityMappingAux.getOriginalEntityTypePattern().matcher(newCE.getType()).matches()) {
                             continue;
+                        } else {
+                            LOGGER.debug("[nmi] " + entityMappingAux.getOriginalEntityType + " matches " + newCE.getType());
                         }
                     }
                     // check if match by Id
                     if (entityMappingAux.getOriginalEntityId() != null) {
                         if (!entityMappingAux.getOriginalEntityIdPattern().matcher(newCE.getId()).matches()) {
                             continue;
+                        } else {
+                            LOGGER.debug("[nmi] " + entityMappingAux.getOriginalEntityId + " matches " + newCE.getId());
                         }
                     }
                     if (!entityMappingAux.getOriginalEntityIdPattern().matcher(newCE.getId()).matches()
@@ -444,6 +448,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             } // if
         } // for
 
+        LOGGER.debug("[nmi] newCE: " + newCE.toString());
         return new ImmutableTriple(newService, newServicePath, newCE);
     } // map
 
