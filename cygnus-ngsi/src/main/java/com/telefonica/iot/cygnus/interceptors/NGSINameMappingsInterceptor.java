@@ -441,6 +441,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                             newCA.setType(newAttributeType);
                         } // for
 
+                        LOGGER.debug("[nmi] newCE: " + newCE.toString());
                         break;
                     } // if else
                 } // for
@@ -448,7 +449,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             } // if
         } // for
 
-        LOGGER.debug("[nmi] newCE: " + newCE.toString());
+        //LOGGER.debug("[nmi] newCE: " + newCE.toString());
         return new ImmutableTriple(newService, newServicePath, newCE);
     } // map
 
