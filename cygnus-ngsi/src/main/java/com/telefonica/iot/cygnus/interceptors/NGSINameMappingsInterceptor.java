@@ -338,20 +338,26 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
         for (ServicePathMapping spm : serviceMapping.getServicePathMappings()) {
             LOGGER.debug("[nmi] checking with servicePathMappings: " + spm.toString());
-            servicePathMapping = spm;
-
-            if (!servicePathMapping.getOriginalServicePathPattern().matcher(originalServicePath).matches()) {
-                servicePathMapping = null;
+            if (!spm.getOriginalServicePathPattern().matcher(originalServicePath).matches()) {
                 continue;
             } // if
 
             LOGGER.debug("[nmi] FIWARE service path found: " + originalServicePath);
 
-            if (servicePathMapping.getNewServicePath() != null) {
-                newServicePath = servicePathMapping.getNewServicePath();
+            if (spm.getNewServicePath() != null) {
+                // check type
+                for (EntityMapping em : spm.getEntityMappings()) {
+                    if (em.getOriginalEntityType() != null) {
+                        if (!em.getOriginalEntityTypePattern().matcher(originalEntityType).matches()) {
+                            continue;
+                        }
+                    } else{
+                        newServicePath = spm.getNewServicePath();
+                        servicePathMapping = spm;
+                        break;
+                    }
+                }
             } // if
-
-            break;
         } // for
 
         if (servicePathMapping == null) {
