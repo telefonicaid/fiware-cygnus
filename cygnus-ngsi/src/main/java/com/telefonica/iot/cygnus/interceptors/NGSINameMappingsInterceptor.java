@@ -347,15 +347,23 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             if (spm.getNewServicePath() != null) {
                 // check type
                 for (EntityMapping em : spm.getEntityMappings()) {
+                    LOGGER.debug("[nmi] checking em: " + em.toString());
                     if (em.getOriginalEntityType() != null) {
                         if (!em.getOriginalEntityTypePattern().matcher(newCE.getType()).matches()) {
                             continue;
+                        } else {
+                            newServicePath = spm.getNewServicePath();
+                            servicePathMapping = spm;
+                            break;
                         }
                     } else{
                         newServicePath = spm.getNewServicePath();
                         servicePathMapping = spm;
                         break;
                     }
+                }
+                if (servicePathMapping != null) {
+                    break;
                 }
             } // if
         } // for
