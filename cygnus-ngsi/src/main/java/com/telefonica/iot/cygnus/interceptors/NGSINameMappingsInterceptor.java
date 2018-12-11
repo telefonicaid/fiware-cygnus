@@ -337,6 +337,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         ServicePathMapping servicePathMapping = null;
 
         for (ServicePathMapping spm : serviceMapping.getServicePathMappings()) {
+            LOGGER.debug("[nmi] checking with servicePathMappings: " + spm.toString());
             servicePathMapping = spm;
 
             if (!servicePathMapping.getOriginalServicePathPattern().matcher(originalServicePath).matches()) {
@@ -369,7 +370,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         // for (EntityMapping em : servicePathMapping.getEntityMappings()) {
         //     entityMapping = em;
             entityMapping = lst.get(i);
-            LOGGER.debug("[nmi] checking with entityMapping: " + entityMapping.toString());
+            LOGGER.debug("[nmi] checking with entityMapping " + i + ": " + entityMapping.toString());
 
             // check if match by Type
             if (entityMapping.getOriginalEntityType() != null) {
