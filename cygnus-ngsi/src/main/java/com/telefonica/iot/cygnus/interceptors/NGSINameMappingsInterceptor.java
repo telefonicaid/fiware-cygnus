@@ -348,7 +348,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 // check type
                 for (EntityMapping em : spm.getEntityMappings()) {
                     if (em.getOriginalEntityType() != null) {
-                        if (!em.getOriginalEntityTypePattern().matcher(originalEntityType).matches()) {
+                        if (!em.getOriginalEntityTypePattern().matcher(newCE.getType()).matches()) {
                             continue;
                         }
                     } else{
