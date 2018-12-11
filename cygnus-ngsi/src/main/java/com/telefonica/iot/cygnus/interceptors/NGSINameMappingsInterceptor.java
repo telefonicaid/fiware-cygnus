@@ -278,13 +278,15 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             return;
         } // try catch
 
-        // Check if any of the mappings is not valid, e.g. some field is missing
-        nameMappings.purge();
-        LOGGER.debug("[nmi] Reading name mappings, Json purged");
+        if (nameMappings != null) {
+            // Check if any of the mappings is not valid, e.g. some field is missing
+            nameMappings.purge();
+            LOGGER.debug("[nmi] Reading name mappings, Json purged");
 
-        // Pre-compile the regular expressions
-        nameMappings.compilePatterns();
-        LOGGER.debug("[nmi] Reading name mappings, regular expressions pre-compiled");
+            // Pre-compile the regular expressions
+            nameMappings.compilePatterns();
+            LOGGER.debug("[nmi] Reading name mappings, regular expressions pre-compiled");
+        }
     } // loadNameMappings
 
     /**
