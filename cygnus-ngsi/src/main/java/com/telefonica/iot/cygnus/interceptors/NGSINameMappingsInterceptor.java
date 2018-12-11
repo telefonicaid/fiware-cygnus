@@ -364,8 +364,11 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         String newEntityType = originalEntityType;
         EntityMapping entityMapping = null;
 
-        for (EntityMapping em : servicePathMapping.getEntityMappings()) {
-            entityMapping = em;
+        ArrayList<EntityMapping> lst = servicePathMapping.getEntityMappings();
+        for (int i = 0; i < lst.size(); i++) {
+        // for (EntityMapping em : servicePathMapping.getEntityMappings()) {
+        //     entityMapping = em;
+            entityMapping = lst.get(i);
             LOGGER.debug("[nmi] checking with entityMapping: " + entityMapping.toString());
 
             // check if match by Type
