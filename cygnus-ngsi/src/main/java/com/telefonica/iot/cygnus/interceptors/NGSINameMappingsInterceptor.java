@@ -371,6 +371,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             // check if match by Type
             if (entityMapping.getOriginalEntityType() != null) {
                 if (!entityMapping.getOriginalEntityTypePattern().matcher(originalEntityType).matches()) {
+                    LOGGER.debug("[nmi] not matches type");
                     continue;
                 } else {
                     LOGGER.debug("[nmi] " + entityMapping.getOriginalEntityType() + " matches " + newCE.getType());
@@ -379,6 +380,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             // check if match by Id
             if (entityMapping.getOriginalEntityId() != null) {
                 if (!entityMapping.getOriginalEntityIdPattern().matcher(originalEntityId).matches()) {
+                    LOGGER.debug("[nmi] not matches entityId");
                     continue;
                 } else {
                     LOGGER.debug("[nmi] " + entityMapping.getOriginalEntityId() + " matches " + newCE.getId());
@@ -386,6 +388,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             }
             if (!entityMapping.getOriginalEntityIdPattern().matcher(originalEntityId).matches()
                     || !entityMapping.getOriginalEntityTypePattern().matcher(originalEntityType).matches()) {
+                LOGGER.debug("[nmi] not matches both type and entityId");
                 entityMapping = null;
                 continue;
             } // if
