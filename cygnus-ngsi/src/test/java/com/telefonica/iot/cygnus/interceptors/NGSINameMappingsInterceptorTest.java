@@ -154,14 +154,26 @@ public class NGSINameMappingsInterceptorTest {
             + "               \"entityMappings\": ["
             + "                  {"
             + "                     \"originalEntityId\": \".*\","
-            + "                     \"originalEntityType\": \"Room\","
+            + "                     \"originalEntityType\": \"RoomT\","
             + "                     \"newEntityId\": \".*\","
             + "                     \"newEntityType\": \"RoomNew\","
             + "                     \"attributeMappings\": []"
             + "                  }"
             + "               ]"
             + "            }"
-            
+            + "            , {"
+            + "               \"originalServicePath\": \"/servicePath\","
+            + "               \"newServicePath\": \"/servicePath_Room2\","
+            + "               \"entityMappings\": ["
+            + "                  {"
+            + "                     \"originalEntityId\": \".*\","
+            + "                     \"originalEntityType\": \"Room\","
+            + "                     \"newEntityId\": \".*\","
+            + "                     \"newEntityType\": \"RoomNew2\","
+            + "                     \"attributeMappings\": []"
+            + "                  }"
+            + "               ]"
+            + "            }"
             + "         ]"
             + "      }"
             + "   ]"
@@ -175,7 +187,7 @@ public class NGSINameMappingsInterceptorTest {
             +       "\"value\" : \"26.5\""
             +     "}"
             +   "],"
-            +   "\"type\" : \"Room\","
+            +   "\"type\" : \"RoomT\","
             +   "\"isPattern\" : \"false\","
             +   "\"id\" : \"Room1\""
             + "}";
@@ -195,7 +207,27 @@ public class NGSINameMappingsInterceptorTest {
             + "}";
     private final String originalServiceConfig = "service";
     private final String originalServicePathConfig = "/servicePath";
-    private final String expectedServicePathConfig = "/servicePath_Room"; 
+    private final String expectedServicePathConfig = "/servicePath_Room";
+
+    private final String originalCEStrConfig2 = ""
+            + "{"
+            +   "\"attributes\" : ["
+            +   "],"
+            +   "\"type\" : \"House\","
+            +   "\"isPattern\" : \"false\","
+            +   "\"id\" : \"House1\""
+            + "}";
+
+    private final String expectedCEStrConfig2 = ""
+            + "{"
+            +   "\"attributes\" : ["
+            +   "],"
+            +   "\"type\" : \"House\","
+            +   "\"isPattern\" : \"false\","
+            +   "\"id\" : \"House1\""
+            + "}";
+    private final String expectedServicePathConfig2 = "/servicePath_House";
+
     /**
      * Constructor.
      */
@@ -528,6 +560,59 @@ public class NGSINameMappingsInterceptorTest {
             throw e;
         } // try catch
     } // testDoMapConfig
+
+
+    /**
+     * [NGSIGroupingInterceptor.doMapConfig] -------- A mapped ContextElement can be obtained from the Name Mappings.
+     */
+    @Test
+    public void testDoMapConfig2() {
+        System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig2]")
+                + "-------- A mapped ContextElement can be obtained from the Name Mappings");
+        NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
+        nameMappingsInterceptor.loadNameMappings(nameMappingsStrConfig);
+        ContextElement originalCE;
+        ContextElement expectedCE;
+
+        try {
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStrConfig2);
+            expectedCE = NGSIUtilsForTests.createJsonContextElement(expectedCEStrConfig2);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig2]")
+                    + "- FAIL - There was some problem when parsing the ContextElements");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+
+        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(
+                originalServiceConfig, originalServicePathConfig, originalCE);
+        ContextElement mappedCE = map.getRight();
+        boolean equals = true;
+
+        if (!mappedCE.getType().equals(expectedCE.getType()) || !expectedServicePathConfig2.equals(map.getMiddle())) {
+            equals = false;
+        } else {
+            for (int j = 0; j < mappedCE.getAttributes().size(); j++) {
+                ContextAttribute mappedCA = mappedCE.getAttributes().get(j);
+                ContextAttribute expectedCA = expectedCE.getAttributes().get(j);
+
+                if (!mappedCA.getName().equals(expectedCA.getName())
+                        || !mappedCA.getType().equals(expectedCA.getType())) {
+                    equals = false;
+                    break;
+                } // if
+            } // for
+        } // if else
+
+        try {
+            assertTrue(equals);
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig2]")
+                    + "-  OK  - The mapped NotifyContextRequest is equals to the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig2]")
+                    + "- FAIL - The mapped NotifyContextRequest is not equals to the expected one");
+            throw e;
+        } // try catch
+    } // testDoMapConfig2
     
     
     /**
