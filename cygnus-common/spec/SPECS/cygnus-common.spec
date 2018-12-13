@@ -171,6 +171,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Thu Dec 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.10.0
+- [cygnus-common] Update hive dependence from 0.13.1 to 2.3.4 due to a vulnerability alert
+- [cygnus-common] Update httpclient dependence to 4.3.6 due to a vulnerability
+- [cygnus-common][CommonUtils][debug] Modify that CommonUtils#getTimeInstant can accepts the ISO8601 format with offset like 2018-01-02T03:04:05+09:00 (#1517)
+
 * Wed Jun 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.9.0
 - [cygnus-common][Docker] Upgrade to CentOS 7, Maven 3.5.2 and Java 1.8.0 in Dockerfile
 

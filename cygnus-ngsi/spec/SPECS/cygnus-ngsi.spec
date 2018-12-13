@@ -99,6 +99,17 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Thu Dec 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.10.0
+- [cygnus-ngsi][NGSINameMappingsInterceptor] Now namemapping checks sevice, subervice and (type of entity and id entity) of EntityMapping (#1535)
+- [cygnus-ngsi][NGSIEvent] Unable to deliver event: null pointer getAttributeForNaming (#1506)
+- [cygnus-ngsi][NGSIOrionSink] Create NGSIOrionSink (#1447)
+- [cygnus-ngsi][NGSIDynamoDBSink] [bug] Southeast regions are bad coded (#1448)
+- [cygnus-ngsi][KafkaSink] Use lower_case option to build topics (#1468)
+- [cygnus-ngsi][KafkaSink] Using global connection to zookeeper instead of creating one each time an event arrives
+- [cygnus-ngsi][Docker] Add name mappings files for multiagent
+- [cygnus-ngsi][Docker] Add grouping rules files for multiagent (#1533)
+- [cygnus-ngsi][Docker] Add new env var CYGNUS_MONITORING_TYPE
+
 * Wed Jun 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.9.0
 - [cygnus-ngsi][NGSINameMappingsInterceptor] Allow regular expression replacement for EntityIds (#1456)
 - [cygnus-ngsi][HttpBackend] Add support to recover data from response header (#1455)
