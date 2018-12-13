@@ -16,6 +16,8 @@
 #
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
+# Modified by: SlicingDice
+#
 
 # Change parameters in the agent configuration file
 rm -f ${FLUME_HOME}/conf/agent*.conf
@@ -580,6 +582,34 @@ if [ "$CYGNUS_ORION_HOST" != "" ]; then
 fi
 
 
+# Check if SLICINGDICE ENV vars
+if [ "$CYGNUS_SLICINGDICE_DATABASE_KEY" != "" ]; then
+    sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = slicingdice-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = slicingdice-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.database_key/c '${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.database_key = '${$CYGNUS_SLICINGDICE_DATABASE_KEY} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    # The following are optional and disabled by default
+    if [ "$CYGNUS_SLICINGDICE_ENABLE_ENCODING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.enable_encoding = '${CYGNUS_SLICINGDICE_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_SLICINGDICE_ENABLE_GROUPING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.enable_grouping = '${CYGNUS_SLICINGDICE_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_SLICINGDICE_ENABLE_NAME_MAPPINGS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.enable_name_mappings = '${CYGNUS_SLICINGDICE_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_SLICINGDICE_ENABLE_LOWERCASE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.enable_lowercase/c '${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.enable_lowercase = '${CYGNUS_SLICINGDICE_ENABLE_LOWERCASE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_SLICINGDICE_DATA_MODEL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.data_model/c '${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.data_model = '${CYGNUS_SLICINGDICE_DATA_MODEL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_SLICINGDICE_ATTR_PERSISTENCE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.attr_persistence/c '${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.attr_persistence = '${CYGNUS_SLICINGDICE_ATTR_PERSISTENCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_SLICINGDICE_AUTO_CREATE" != "" ]; then
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.auto_create/c '${CYGNUS_AGENT_NAME}'.sinks.slicingdice-sink.auto_create = '${CYGNUS_SLICINGDICE_AUTO_CREATE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+fi
 
 
 if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then

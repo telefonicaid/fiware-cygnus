@@ -14,6 +14,9 @@
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+ *
+ * Modified by: SlicingDice
+ *
  */
 
 package com.telefonica.iot.cygnus.utils;
@@ -88,7 +91,11 @@ public final class NGSIConstants {
     //NGSIMySQLSink specific constants
     // http://dev.mysql.com/doc/refman/5.7/en/identifiers.html
     public static final int MYSQL_MAX_NAME_LEN = 64;
-    
+
+    // NGSISlicingDiceSink specific constants
+    // https://docs.slicingdice.com/v1/docs/api-errors
+    public static final int SLICINGDICE_MAX_NAME_LEN = 64;
+
     // NGSIPostgreSQLSink specific constants
     // http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
     public static final int POSTGRESQL_MAX_NAME_LEN = 63;

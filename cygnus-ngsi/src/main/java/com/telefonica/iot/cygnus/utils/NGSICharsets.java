@@ -14,7 +14,11 @@
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+ *
+ * Modified by: SlicingDice
+ *
  */
+
 package com.telefonica.iot.cygnus.utils;
 
 /**
@@ -162,6 +166,51 @@ public final class NGSICharsets {
         
         return out;
     } // encodeCKAN
+
+    /**
+     * Encodes a string for SlicingDice. Only lowercase alphanumerics and - are allowed.
+     * @param in
+     * @return The encoded string
+     */
+    public static String encodeSlicingDice(String in) {
+        String out = "";
+
+        for (int i = 0; i < in.length(); i++) {
+            char c = in.charAt(i);
+            int code = c;
+
+            if (code >= 97 && code <= 119) { // a-w --> a-w
+                out += c;
+            } else if (c == 'x') {
+                String next4;
+
+                if (i + 4 < in.length()) {
+                    next4 = in.substring(i + 1, i + 5);
+                } else {
+                    next4 = "WXYZ"; // whatever except a unicode
+                } // if else
+
+                if (next4.matches("^[0-9a-fA-F]{4}$")) { // x --> xx
+                    out += "xx";
+                } else { // x --> x
+                    out += c;
+                } // if else
+            } else if (code == 121 || code == 122) { // yz --> yz
+                out += c;
+            } else if (code >= 48 && code <= 57) { // 0-9 --> 0-9
+                out += c;
+            } else if (c == '-') { // - --> -
+                out += c;
+            } else if (c == '=') { // = --> xffff
+                out += "xffff";
+            } else { // --> xUNICODE
+                String hex = Integer.toHexString(code);
+                out += "x" + ("0000" + hex).substring(hex.length());
+            } // else
+        } // for
+
+        return out;
+    } // encodeSlicingDice
     
     /**
      * Encodes a string for MySQL.
