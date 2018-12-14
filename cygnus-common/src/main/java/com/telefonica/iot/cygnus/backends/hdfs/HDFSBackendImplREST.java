@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2014-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -21,6 +21,7 @@ package com.telefonica.iot.cygnus.backends.hdfs;
 import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.ArrayList;
 import org.apache.http.Header;
@@ -85,7 +86,7 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
     } // HDFSBackendImplREST
    
     @Override
-    public void createDir(String dirPath) throws Exception {
+    public void createDir(String dirPath) throws CygnusPersistenceError, CygnusRuntimeError {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + dirPath
                 + "?op=mkdirs&user.name=" + hdfsUser;
         JsonResponse response = doRequest("PUT", relativeURL, true, headers, null);
@@ -105,8 +106,7 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
     } // createDir
     
     @Override
-    public void createFile(String filePath, String data)
-        throws Exception {
+    public void createFile(String filePath, String data) throws CygnusPersistenceError, CygnusRuntimeError {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
                 + "?op=create&user.name=" + hdfsUser;
         JsonResponse response = doRequest("PUT", relativeURL, true, headers, null);
@@ -151,7 +151,7 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
     } // createFile
     
     @Override
-    public void append(String filePath, String data) throws Exception {
+    public void append(String filePath, String data) throws CygnusPersistenceError, CygnusRuntimeError {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
                 + "?op=append&user.name=" + hdfsUser;
         JsonResponse response = doRequest("POST", relativeURL, true, headers, null);
@@ -196,7 +196,7 @@ public class HDFSBackendImplREST extends HttpBackend implements HDFSBackend {
     } // append
     
     @Override
-    public boolean exists(String filePath) throws Exception {
+    public boolean exists(String filePath) throws CygnusPersistenceError, CygnusRuntimeError {
         String relativeURL = BASE_URL + (serviceAsNamespace ? "" : (hdfsUser + "/")) + filePath
                 + "?op=getfilestatus&user.name=" + hdfsUser;
         JsonResponse response = doRequest("GET", relativeURL, true, headers, null);

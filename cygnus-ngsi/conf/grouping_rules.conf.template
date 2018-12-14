@@ -1,6 +1,7 @@
-# Copyright 2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of fiware-cygnus (FI-WARE project).
+# Copyright 2015-2017 Telefónica Investigación y Desarrollo, S.A.U
+#
+# This file is part of fiware-cygnus (FIWARE project).
 #
 # fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
 # Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
@@ -13,6 +14,7 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+#
 
 # This file defines a set of grouping rules for context data grouping. It works by defining a set of fields within the
 # Orion notification and a regular expression to be applied over the concatenation of those fields. If there is a

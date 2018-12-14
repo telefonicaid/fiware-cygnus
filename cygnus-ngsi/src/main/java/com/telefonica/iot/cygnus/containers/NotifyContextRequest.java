@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2014-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -18,9 +18,10 @@
 
 package com.telefonica.iot.cygnus.containers;
 
+import java.util.ArrayList;
+
 import com.google.gson.JsonElement;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
-import java.util.ArrayList;
 
 /**
 *
@@ -30,7 +31,6 @@ import java.util.ArrayList;
 * Gson (a Json parser) can store in memory a notification.
 */
 public class NotifyContextRequest {
-    
     private String subscriptionId;
     private String originator;
     private ArrayList<ContextElementResponse> contextResponses;
@@ -296,7 +296,7 @@ public class NotifyContextRequest {
      * Class for storing contextAttribute information from a notifyContextRequest.
      */
     public class ContextAttribute {
-        
+    
         private String name;
         private String type;
         private JsonElement value;
@@ -334,6 +334,23 @@ public class NotifyContextRequest {
             } else {
                 return value.getAsString();
             } // if then else if
+        } // getContextValue
+        
+        /**
+         * Gets context value as is in the input.
+         * Quoted or not quoted.
+         * @return The context value for this context attribute in String format.
+         */
+        public String getContextValue() {
+            if (value.isJsonNull()) {
+                return null;
+            } else if (value.isJsonObject()) {
+                return value.getAsJsonObject().toString();
+            } else if (value.isJsonArray()) {
+                return value.getAsJsonArray().toString();
+            } else {
+                return  "" + value;
+            }  // if then else if
         } // getContextValue
         
         /**
@@ -405,9 +422,8 @@ public class NotifyContextRequest {
         
         @Override
         public String toString() {
-            String s = "{\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":\"" + value
-                    + "\",\"metadatas\":[";
-            
+            String s = "{\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":" + value
+                    + ",\"metadatas\":[";
             if (metadatas != null) {
                 boolean first = true;
 
@@ -489,7 +505,7 @@ public class NotifyContextRequest {
         
         @Override
         public String toString() {
-            return "{\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":\"" + value + "\"}";
+            return "{\"name\":\"" + name + "\",\"type\":\"" + type + "\",\"value\":" + value + "}";
         } // toStrng
         
     } // ContextMetadata

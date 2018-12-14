@@ -1,4 +1,4 @@
-#<a name="top"></a>Grouping Rules
+# <a name="top"></a>Grouping Rules
 **IMPORTANT NOTE: from release 1.6.0, this feature is deprecated in favour of Name Mappings. More details can be found [here](./deprecated_and_removed.md#section2.1).**
 
 Grouping rules are an advanced global feature of Cygnus. It is global because it is available for all NGSI sinks. They allow changing the notified <b>FIWARE service path</b> and the concatenation of <b>entity ID</b> and <b>entity type</b> (this is called the destination).
@@ -32,10 +32,10 @@ Explained fields of a Grouping Rule:
 * <b>destination</b>: Name of the HDFS file or CKAN resource where the data will be effectively persisted. In the case of MySQL, Mongo and STH Comet this sufixes the table/collection name.
 * <b>fiware\_service\_path</b>: New `fiware-servicePath` replacing the notified one. The sinks will translate this into the name of the HDFS folder or CKAN package where the above destination entity will be placed. In the case of MySQL, Mongo and STH Comet this prefixes the table/collection name. It must start with `/` or the whole rule will be discarded.
 
-##Important notes
+## Important notes
 Please observe the grouping rules definition is global to all the sinks, at NGSIRestHandler, but then the application is local to the sink, depending on the `enable_grouping` parameter. Thus, if any of your sinks is going to take advantage of the grouping rules, simply leave blank the grouping rules configuration file in the REST handler. That will avoid unnecessary interception with grouping actions.
 
-##Grouping rules vs Name mappings
+## Grouping rules vs Name mappings
 As seen, the name mappings feature is quite similar to the already existent grouping rules. Both of them are Flume interceptors and both of them allow changing certain notified name elements. Thus, which are the differences? Mainly:
 
 | Grouping rules | Name mappings |
@@ -46,7 +46,7 @@ As seen, the name mappings feature is quite similar to the already existent grou
 
 [Top](#top)
 
-##Further reading
+## Further reading
 Please, check the [specific documentation](../flume_extensions_catalogue/ngsi_grouping_interceptor.md) for this custom interceptor in the Flume extensions catalogue for cygnus-ngsi agent.
 
 [Top](#top)

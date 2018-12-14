@@ -1,6 +1,7 @@
-# Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
 #
-# This file is part of fiware-cygnus (FI-WARE project).
+# Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
+#
+# This file is part of fiware-cygnus (FIWARE project).
 #
 # fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
 # Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
@@ -13,6 +14,7 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+#
 
 Summary:          Package for Cygnus Twitter component
 Name:             cygnus-twitter
@@ -97,7 +99,17 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
-* Fri Dec 02 2016 Francisco Romero <frnacisco.romerobueno@telefonica.com> 1.6.0
+* Thu Dec 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.10.0
+
+* Wed Jun 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.9.0
+- [cygnus-twitter][Docker] Upgrade to CentOS 7, Maven 3.5.2 and Java 1.8.0 in Dockerfile
+
+* Wed Sep 13 2017 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.8.0
+- [cygnus-twitter][bug] Fix wrong data in spec file (#1407)
+
+* Tue Jan 31 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.7.0
+
+* Fri Dec 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.6.0
 
 * Wed Nov 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.5.0
 

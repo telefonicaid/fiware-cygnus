@@ -1,6 +1,6 @@
-#Backends catalogue
+# Backends catalogue
 
-* [Introduction](./ckan_backend.md)
+* [CKAN backend](./ckan_backend.md)
 * [DynamoDB backend](./dynamodb_backend.md)
 * [HDFS backend](./hdfs_backend.md)
 * [Hive backend](./hive_backend.md)

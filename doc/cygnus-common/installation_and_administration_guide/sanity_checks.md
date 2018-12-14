@@ -1,4 +1,4 @@
-#<a name="top"></a>Sanity checks
+# <a name="top"></a>Sanity checks
 Content:
 
 * [How to proceed](#section1)
@@ -6,14 +6,14 @@ Content:
 * [Check: API port](#section3)
 * [Check: GUI port](#section4)
 
-##<a name="section1"></a>How to proceed
+## <a name="section1"></a>How to proceed
 Verify all the sanity checks included in this document, one by one.
 
 If you have any problem with one specific check, please go to the proper section of the [diagnosis procedures](./diagnosis_procedures.md) document.
 
 [Top](#top)
 
-##<a name="section2"></a>Check: Logs
+## <a name="section2"></a>Check: Logs
 Any Cygnus agent logs in `/var/log/cygnus/cygnus.log`, unless the `console` appender is used.
 
 In any case, traced logs must look like the following ones:
@@ -63,7 +63,7 @@ time=2016-05-09T09:50:34.207CEST | lvl=INFO | corr= | trans= | svc= | subsvc= | 
 time=2016-05-09T09:50:34.224CEST | lvl=INFO | corr= | trans= | svc= | subsvc= | function=<init> | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules[61] : Grouping rules read: {    "grouping_rules": [        {            "id": 1,            "fields": [                "servicePath"            ],            "regex": "/moba",            "destination": "newdest1",            "fiware_service_path": "/newservpath1"        },        {            "id": 2,            "fields": [                "entityType"            ],            "regex": "TYPEMATCH:2",            "destination": "newdest2",            "fiware_service_path": "/newservpath2"        },        {            "id": 3,            "fields": [                "entityId",                "entityType"            ],            "regex": "DEVMATCH:3TYPEMATCH:3",            "destination": "newdest3",            "fiware_service_path": "/newservpath3"        },        {            "id": 4,            "fields": [                "entityType"            ],            "regex": "Room",            "destination": "allrooms",            "fiware_service_path": "/rooms"        }      ]}
 time=2016-05-09T09:50:34.225CEST | lvl=INFO | corr= | trans= | svc= | subsvc= | function=<init> | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules[71] : Grouping rules syntax is OK
 time=2016-05-09T09:50:34.225CEST | lvl=INFO | corr= | trans= | svc= | subsvc= | function=<init> | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.interceptors.CygnusGroupingRules[75] : Grouping rules regex'es have been compiled
-time=2016-05-09T09:50:34.407CEST | lvl=INFO | corr= | trans= | svc= | subsvc= | function=main | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.nodes.CygnusApplication[286] : Starting a Jetty server listening on port 8081 (Management Interface)
+time=2016-05-09T09:50:34.407CEST | lvl=INFO | corr= | trans= | svc= | subsvc= | function=main | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.nodes.CygnusApplication[286] : Starting a Jetty server listening on port 5080 (Management Interface)
 time=2016-05-09T09:50:34.683CEST | lvl=INFO | corr= | trans= | svc= | subsvc= | function=register | comp=cygnus-ngsi | msg=org.apache.flume.instrumentation.MonitoredCounterGroup[110] : Monitoried counter group for type: SOURCE, name: http-source, registered successfully.
 time=2016-05-09T09:50:34.684CEST | lvl=INFO | corr= | trans= | svc= | subsvc= | function=start | comp=cygnus-ngsi | msg=org.apache.flume.instrumentation.MonitoredCounterGroup[94] : Component type: SOURCE, name: http-source started
 ```
@@ -89,23 +89,23 @@ time=2016-05-09T09:50:34.225CEST | lvl=INFO | corr= | trans= | svc= | subsvc= | 
 
 And the Management Interface is setup: 
 
-    time=2016-05-09T09:50:34.407CEST | lvl=INFO | corr= | trans= | svc= | subsvc= | function=main | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.nodes.CygnusApplication[286] : Starting a Jetty server listening on port 8081 (Management Interface)
+    time=2016-05-09T09:50:34.407CEST | lvl=INFO | corr= | trans= | svc= | subsvc= | function=main | comp=cygnus-ngsi | msg=com.telefonica.iot.cygnus.nodes.CygnusApplication[286] : Starting a Jetty server listening on port 5080 (Management Interface)
 
 [Top](#top)
 
-##<a name="section3"></a>Check: API port
-The API must be up and running in the port you configured (either using the `-p` option in the command line, either using the `ADMIN_PORT` parameter in the `cygnus_instance_<id>.conf` file). `8081` is the default.
+## <a name="section3"></a>Check: API port
+The API must be up and running in the port you configured (either using the `-p` option in the command line, either using the `ADMIN_PORT` parameter in the `cygnus_instance_<id>.conf` file). `5080` is the default.
 
 You can check it by asking for the Cygnus version:
 
 ```
-$ curl "http://localhost:8081/v1/version"
+$ curl "http://localhost:5080/v1/version"
 {"success":"true","version":"0.13.0_SNAPSHOT.180fd310917cade2f1f3f5f864610ea0b15907f9"}
 ```
 
 [Top](#top)
 
-##<a name="section4"></a>Check: GUI port
+## <a name="section4"></a>Check: GUI port
 Coming soon.
 
 [Top](#top)

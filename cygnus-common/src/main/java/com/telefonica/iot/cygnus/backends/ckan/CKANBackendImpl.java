@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -25,6 +25,9 @@ import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import org.json.simple.JSONObject;
@@ -41,6 +44,7 @@ import org.json.simple.JSONArray;
 public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(CKANBackendImpl.class);
+    private static final int RECORDSPERPAGE = 100;
     private final String orionUrl;
     private final String apiKey;
     private final String viewer;
@@ -72,7 +76,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
     @Override
     public void persist(String orgName, String pkgName, String resName, String records, boolean createEnabled)
-        throws Exception {
+        throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         LOGGER.debug("Going to lookup for the resource id, the cache may be updated during the process (orgName="
                 + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
         String resId = resourceLookupOrCreate(orgName, pkgName, resName, createEnabled);
@@ -88,7 +92,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
     } // persist
     
     private String resourceLookupOrCreate(String orgName, String pkgName, String resName, boolean createEnabled)
-        throws Exception {
+        throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         if (!cache.isCachedOrg(orgName)) {
             LOGGER.debug("The organization was not cached nor existed in CKAN (orgName=" + orgName + ")");
             
@@ -161,36 +165,25 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
      * @param records Records to be inserted in Json format
      * @throws Exception
      */
-    private void insert(String resId, String records) throws Exception {
+    private void insert(String resId, String records) throws CygnusRuntimeError, CygnusPersistenceError {
         String jsonString = "{ \"resource_id\": \"" + resId
                     + "\", \"records\": [ " + records + " ], "
                     + "\"method\": \"insert\", "
                     + "\"force\": \"true\" }";
-        String urlPath;
         
-        try {
-            // create the CKAN request URL
-            urlPath = "/api/3/action/datastore_upsert";
-        
-            // do the CKAN request
-            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
-            
-            // check the status
-            if (res.getStatusCode() == 200) {
-                LOGGER.debug("Successful insert (resource/datastore id=" + resId + ")");
-            } else {
-                throw new CygnusPersistenceError("Could not insert (resId=" + resId + ", statusCode="
-                        + res.getStatusCode() + ")");
-            } // if else
-        } catch (Exception e) {
-            if (e instanceof CygnusRuntimeError
-                    || e instanceof CygnusPersistenceError
-                    || e instanceof CygnusBadConfiguration) {
-                throw e;
-            } else {
-                throw new CygnusRuntimeError(e.getMessage());
-            } // if else
-        } // try catch
+        // create the CKAN request URL
+        String urlPath = "/api/3/action/datastore_upsert";
+
+        // do the CKAN request
+        JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+        // check the status
+        if (res.getStatusCode() == 200) {
+            LOGGER.debug("Successful insert (resource/datastore id=" + resId + ")");
+        } else {
+            throw new CygnusPersistenceError("Could not insert (resId=" + resId + ", statusCode="
+                    + res.getStatusCode() + ")");
+        } // if else
     } // insert
 
     /**
@@ -199,35 +192,25 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
      * @throws Exception
      * @return The organization id
      */
-    private String createOrganization(String orgName) throws Exception {
-        try {
-            // create the CKAN request JSON
-            String jsonString = "{ \"name\": \"" + orgName + "\"}";
-            
-            // create the CKAN request URL
-            String urlPath = "/api/3/action/organization_create";
-            
-            // do the CKAN request
-            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+    private String createOrganization(String orgName) throws CygnusRuntimeError, CygnusPersistenceError {
+        // create the CKAN request JSON
+        String jsonString = "{ \"name\": \"" + orgName + "\"}";
 
-            // check the status
-            if (res.getStatusCode() == 200) {
-                String orgId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
-                LOGGER.debug("Successful organization creation (orgName/OrgId=" + orgName + "/" + orgId + ")");
-                return orgId;
-            } else {
-                throw new CygnusPersistenceError("Could not create the orgnaization (orgName=" + orgName
-                        + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else
-        } catch (Exception e) {
-            if (e instanceof CygnusRuntimeError
-                    || e instanceof CygnusPersistenceError
-                    || e instanceof CygnusBadConfiguration) {
-                throw e;
-            } else {
-                throw new CygnusRuntimeError(e.getMessage());
-            } // if else
-        } // try catch
+        // create the CKAN request URL
+        String urlPath = "/api/3/action/organization_create";
+
+        // do the CKAN request
+        JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+        // check the status
+        if (res.getStatusCode() == 200) {
+            String orgId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
+            LOGGER.debug("Successful organization creation (orgName/OrgId=" + orgName + "/" + orgId + ")");
+            return orgId;
+        } else {
+            throw new CygnusPersistenceError("Could not create the orgnaization (orgName=" + orgName
+                    + ", statusCode=" + res.getStatusCode() + ")");
+        } // if else
     } // createOrganization
 
     /**
@@ -237,50 +220,40 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
      * @return A package identifier if the package was created or an exception if something went wrong
      * @throws Exception
      */
-    private String createPackage(String pkgName, String orgId) throws Exception {
-        try {
-            // create the CKAN request JSON
-            String jsonString = "{ \"name\": \"" + pkgName + "\", " + "\"owner_org\": \"" + orgId + "\" }";
-            
-            // create the CKAN request URL
-            String urlPath = "/api/3/action/package_create";
-            
-            // do the CKAN request
-            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+    private String createPackage(String pkgName, String orgId) throws CygnusRuntimeError, CygnusPersistenceError {
+        // create the CKAN request JSON
+        String jsonString = "{ \"name\": \"" + pkgName + "\", " + "\"owner_org\": \"" + orgId + "\" }";
 
-            // check the status
-            if (res.getStatusCode() == 200) {
-                String packageId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
-                LOGGER.debug("Successful package creation (pkgName/pkgId=" + pkgName + "/" + packageId + ")");
+        // create the CKAN request URL
+        String urlPath = "/api/3/action/package_create";
+
+        // do the CKAN request
+        JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+        // check the status
+        if (res.getStatusCode() == 200) {
+            String packageId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
+            LOGGER.debug("Successful package creation (pkgName/pkgId=" + pkgName + "/" + packageId + ")");
+            return packageId;
+        /*
+        This is not deleted if in the future we try to activate deleted elements again
+
+        } else if (res.getStatusCode() == 409) {
+            logger.debug("The package exists but its state is \"deleted\", activating it (pkgName="
+                    + pkgName + ")");
+            String packageId = activateElementState(httpClient, pkgName, "dataset");
+
+            if (packageId != null) {
+                logger.debug("Successful package activation (pkgId=" + packageId + ")");
                 return packageId;
-            /*
-            This is not deleted if in the future we try to activate deleted elements again
-
-            } else if (res.getStatusCode() == 409) {
-                logger.debug("The package exists but its state is \"deleted\", activating it (pkgName="
-                        + pkgName + ")");
-                String packageId = activateElementState(httpClient, pkgName, "dataset");
-                
-                if (packageId != null) {
-                    logger.debug("Successful package activation (pkgId=" + packageId + ")");
-                    return packageId;
-                } else {
-                    throw new CygnusRuntimeError("Could not activate the package (pkgId=" + pkgName + ")");
-                } // if else
-            */
             } else {
-                throw new CygnusPersistenceError("Could not create the package (orgId=" + orgId
-                        + ", pkgName=" + pkgName + ", statusCode=" + res.getStatusCode() + ")");
+                throw new CygnusRuntimeError("Could not activate the package (pkgId=" + pkgName + ")");
             } // if else
-        } catch (Exception e) {
-            if (e instanceof CygnusRuntimeError
-                    || e instanceof CygnusPersistenceError
-                    || e instanceof CygnusBadConfiguration) {
-                throw e;
-            } else {
-                throw new CygnusRuntimeError(e.getMessage());
-            } // if else
-        } // try catch
+        */
+        } else {
+            throw new CygnusPersistenceError("Could not create the package (orgId=" + orgId
+                    + ", pkgName=" + pkgName + ", statusCode=" + res.getStatusCode() + ")");
+        } // if else
     } // createPackage
 
     /**
@@ -290,39 +263,29 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
      * @return A resource identifier if the resource was created or an exception if something went wrong
      * @throws Exception
      */
-    private String createResource(String resName, String pkgId) throws Exception {
-        try {
-            // create the CKAN request JSON
-            String jsonString = "{ \"name\": \"" + resName + "\", "
-                    + "\"url\": \"none\", "
-                    + "\"format\": \"\", "
-                    + "\"package_id\": \"" + pkgId + "\" }";
-            
-            // create the CKAN request URL
-            String urlPath = "/api/3/action/resource_create";
-            
-            // do the CKAN request
-            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+    private String createResource(String resName, String pkgId) throws CygnusRuntimeError, CygnusPersistenceError {
+        // create the CKAN request JSON
+        String jsonString = "{ \"name\": \"" + resName + "\", "
+                + "\"url\": \"none\", "
+                + "\"format\": \"\", "
+                + "\"package_id\": \"" + pkgId + "\" }";
 
-            // check the status
-            if (res.getStatusCode() == 200) {
-                String resourceId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
-                LOGGER.debug("Successful resource creation (resName/resId=" + resName + "/" + resourceId
-                        + ")");
-                return resourceId;
-            } else {
-                throw new CygnusPersistenceError("Could not create the resource (pkgId=" + pkgId
-                        + ", resName=" + resName + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else
-        } catch (Exception e) {
-            if (e instanceof CygnusRuntimeError
-                    || e instanceof CygnusPersistenceError
-                    || e instanceof CygnusBadConfiguration) {
-                throw e;
-            } else {
-                throw new CygnusRuntimeError(e.getMessage());
-            } // if else
-        } // try catch
+        // create the CKAN request URL
+        String urlPath = "/api/3/action/resource_create";
+
+        // do the CKAN request
+        JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+        // check the status
+        if (res.getStatusCode() == 200) {
+            String resourceId = ((JSONObject) res.getJsonObject().get("result")).get("id").toString();
+            LOGGER.debug("Successful resource creation (resName/resId=" + resName + "/" + resourceId
+                    + ")");
+            return resourceId;
+        } else {
+            throw new CygnusPersistenceError("Could not create the resource (pkgId=" + pkgId
+                    + ", resName=" + resName + ", statusCode=" + res.getStatusCode() + ")");
+        } // if else
     } // createResource
 
     /**
@@ -330,46 +293,36 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
      * @param resId Identifies the resource whose datastore is going to be created.
      * @throws Exception
      */
-    private void createDataStore(String resId) throws Exception {
-        try {
-            // create the CKAN request JSON
-            // CKAN types reference: http://docs.ckan.org/en/ckan-2.2/datastore.html#valid-types
-            String jsonString = "{ \"resource_id\": \"" + resId
-                    + "\", \"fields\": [ "
-                    + "{ \"id\": \"" + CommonConstants.RECV_TIME_TS + "\", \"type\": \"int\"},"
-                    + "{ \"id\": \"" + CommonConstants.RECV_TIME + "\", \"type\": \"timestamp\"},"
-                    + "{ \"id\": \"" + CommonConstants.FIWARE_SERVICE_PATH + "\", \"type\": \"text\"},"
-                    + "{ \"id\": \"" + CommonConstants.ENTITY_ID + "\", \"type\": \"text\"},"
-                    + "{ \"id\": \"" + CommonConstants.ENTITY_TYPE + "\", \"type\": \"text\"},"
-                    + "{ \"id\": \"" + CommonConstants.ATTR_NAME + "\", \"type\": \"text\"},"
-                    + "{ \"id\": \"" + CommonConstants.ATTR_TYPE + "\", \"type\": \"text\"},"
-                    + "{ \"id\": \"" + CommonConstants.ATTR_VALUE + "\", \"type\": \"json\"},"
-                    + "{ \"id\": \"" + CommonConstants.ATTR_MD + "\", \"type\": \"json\"}"
-                    + "], "
-                    + "\"force\": \"true\" }";
-            
-            // create the CKAN request URL
-            String urlPath = "/api/3/action/datastore_create";
-            
-            // do the CKAN request
-            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+    private void createDataStore(String resId) throws CygnusRuntimeError, CygnusPersistenceError {
+        // create the CKAN request JSON
+        // CKAN types reference: http://docs.ckan.org/en/ckan-2.2/datastore.html#valid-types
+        String jsonString = "{ \"resource_id\": \"" + resId
+                + "\", \"fields\": [ "
+                + "{ \"id\": \"" + CommonConstants.RECV_TIME_TS + "\", \"type\": \"int\"},"
+                + "{ \"id\": \"" + CommonConstants.RECV_TIME + "\", \"type\": \"timestamp\"},"
+                + "{ \"id\": \"" + CommonConstants.FIWARE_SERVICE_PATH + "\", \"type\": \"text\"},"
+                + "{ \"id\": \"" + CommonConstants.ENTITY_ID + "\", \"type\": \"text\"},"
+                + "{ \"id\": \"" + CommonConstants.ENTITY_TYPE + "\", \"type\": \"text\"},"
+                + "{ \"id\": \"" + CommonConstants.ATTR_NAME + "\", \"type\": \"text\"},"
+                + "{ \"id\": \"" + CommonConstants.ATTR_TYPE + "\", \"type\": \"text\"},"
+                + "{ \"id\": \"" + CommonConstants.ATTR_VALUE + "\", \"type\": \"json\"},"
+                + "{ \"id\": \"" + CommonConstants.ATTR_MD + "\", \"type\": \"json\"}"
+                + "], "
+                + "\"force\": \"true\" }";
 
-            // check the status
-            if (res.getStatusCode() == 200) {
-                LOGGER.debug("Successful datastore creation (resourceId=" + resId + ")");
-            } else {
-                throw new CygnusPersistenceError("Could not create the datastore (resId=" + resId
-                        + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else
-        } catch (Exception e) {
-            if (e instanceof CygnusRuntimeError
-                    || e instanceof CygnusPersistenceError
-                    || e instanceof CygnusBadConfiguration) {
-                throw e;
-            } else {
-                throw new CygnusRuntimeError(e.getMessage());
-            } // if else
-        } // try catch
+        // create the CKAN request URL
+        String urlPath = "/api/3/action/datastore_create";
+
+        // do the CKAN request
+        JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+        // check the status
+        if (res.getStatusCode() == 200) {
+            LOGGER.debug("Successful datastore creation (resourceId=" + resId + ")");
+        } else {
+            throw new CygnusPersistenceError("Could not create the datastore (resId=" + resId
+                    + ", statusCode=" + res.getStatusCode() + ")");
+        } // if else
     } // createResource
     
     /**
@@ -377,164 +330,147 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
      * @param resId Identifies the resource whose view is going to be created.
      * @throws Exception
      */
-    private void createView(String resId) throws Exception {
+    private void createView(String resId) throws CygnusRuntimeError, CygnusPersistenceError {
         if (!existsView(resId)) {
-            try {
-                // create the CKAN request JSON
-                String jsonString = "{ \"resource_id\": \"" + resId + "\","
-                        + "\"view_type\": \"" + viewer + "\","
-                        + "\"title\": \"Recline grid view\" }";
+            // create the CKAN request JSON
+            String jsonString = "{ \"resource_id\": \"" + resId + "\","
+                    + "\"view_type\": \"" + viewer + "\","
+                    + "\"title\": \"Recline grid view\" }";
 
-                // create the CKAN request URL
-                String urlPath = "/api/3/action/resource_view_create";
+            // create the CKAN request URL
+            String urlPath = "/api/3/action/resource_view_create";
 
-                // do the CKAN request
-                JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+            // do the CKAN request
+            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
 
-                // check the status
-                if (res.getStatusCode() == 200) {
-                    LOGGER.debug("Successful view creation (resourceId=" + resId + ")");
-                } else {
-                    throw new CygnusPersistenceError("Could not create the datastore (resId=" + resId
-                        + ", statusCode=" + res.getStatusCode() + ")");
-                } // if else
-            } catch (Exception e) {
-                if (e instanceof CygnusRuntimeError
-                        || e instanceof CygnusPersistenceError
-                        || e instanceof CygnusBadConfiguration) {
-                    throw e;
-                } else {
-                    throw new CygnusRuntimeError(e.getMessage());
-                } // if else
-            } // try catch
+            // check the status
+            if (res.getStatusCode() == 200) {
+                LOGGER.debug("Successful view creation (resourceId=" + resId + ")");
+            } else {
+                throw new CygnusPersistenceError("Could not create the datastore (resId=" + resId
+                    + ", statusCode=" + res.getStatusCode() + ")");
+            } // if else
         } // if
     } // createView
     
-    private boolean existsView(String resId) throws Exception {
-        try {
-            // create the CKAN request JSON
-            String jsonString = "{ \"id\": \"" + resId + "\" }";
+    private boolean existsView(String resId) throws CygnusRuntimeError, CygnusPersistenceError {
+        // create the CKAN request JSON
+        String jsonString = "{ \"id\": \"" + resId + "\" }";
 
-            // create the CKAN request URL
-            String urlPath = "/api/3/action/resource_view_list";
+        // create the CKAN request URL
+        String urlPath = "/api/3/action/resource_view_list";
 
-            // do the CKAN request
-            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+        // do the CKAN request
+        JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
 
-            // check the status
-            if (res.getStatusCode() == 200) {
-                LOGGER.debug("Successful view listing (resourceId=" + resId + ")");
-                return (((JSONArray) res.getJsonObject().get("result")).size() > 0);
-            } else {
-                throw new CygnusPersistenceError("Could not check if the view exists (resId=" + resId
-                        + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else
-        } catch (Exception e) {
-            if (e instanceof CygnusRuntimeError
-                    || e instanceof CygnusPersistenceError
-                    || e instanceof CygnusBadConfiguration) {
-                throw e;
-            } else {
-                throw new CygnusRuntimeError(e.getMessage());
-            } // if else
-        } // try catch
+        // check the status
+        if (res.getStatusCode() == 200) {
+            LOGGER.debug("Successful view listing (resourceId=" + resId + ")");
+            return (((JSONArray) res.getJsonObject().get("result")).size() > 0);
+        } else {
+            throw new CygnusPersistenceError("Could not check if the view exists (resId=" + resId
+                    + ", statusCode=" + res.getStatusCode() + ")");
+        } // if else
     } // existsView
-    
-    private JSONObject getRecords(String resId, String filters) throws Exception {
-        try {
-            // create the CKAN request JSON
-            String jsonString = "{\"id\": \"" + resId + "\"";
-        
-            if (filters == null || filters.isEmpty()) {
-                jsonString += "}";
-            } else {
-                jsonString += ",\"filters\":\"" + filters + "\"}";
-            } // if else
 
-            // create the CKAN request URL
-            String urlPath = "/api/3/action/datastore_search";
+    private JSONObject getRecords(String resId, String filters, int offset, int limit)
+        throws CygnusRuntimeError, CygnusPersistenceError {
+        // create the CKAN request JSON
+        String jsonString = "{\"id\": \"" + resId + "\",\"sort\":\"_id\",\"offset\":" + offset
+                + ",\"limit\":" + limit;
 
-            // do the CKAN request
-            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+        if (filters == null || filters.isEmpty()) {
+            jsonString += "}";
+        } else {
+            jsonString += ",\"filters\":\"" + filters + "\"}";
+        } // if else
 
-            // check the status
-            if (res.getStatusCode() == 200) {
-                LOGGER.debug("Successful search (resourceId=" + resId + ")");
-                return res.getJsonObject();
-            } else {
-                throw new CygnusPersistenceError("Could not search for the records (resId=" + resId
-                        + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else
-        } catch (Exception e) {
-            if (e instanceof CygnusRuntimeError
-                    || e instanceof CygnusPersistenceError
-                    || e instanceof CygnusBadConfiguration) {
-                throw e;
-            } else {
-                throw new CygnusRuntimeError(e.getMessage());
-            } // if else
-        } // try catch
+        // create the CKAN request URL
+        String urlPath = "/api/3/action/datastore_search";
+
+        // do the CKAN request
+        JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+        // check the status
+        if (res.getStatusCode() == 200) {
+            LOGGER.debug("Successful search (resourceId=" + resId + ")");
+            return res.getJsonObject();
+        } else {
+            throw new CygnusPersistenceError("Could not search for the records (resId=" + resId
+                    + ", statusCode=" + res.getStatusCode() + ")");
+        } // if else
     } // getRecords
     
-    private void deleteRecords(String resId, String filters) throws Exception {
-        try {
-            // create the CKAN request JSON
-            String jsonString = "{\"id\": \"" + resId + "\",\"force\":\"true\"";
-        
-            if (filters == null || filters.isEmpty()) {
-                jsonString += "}";
-            } else {
-                jsonString += ",\"filters\":" + filters + "}";
-            } // if else
+    private void deleteRecords(String resId, String filters) throws CygnusRuntimeError, CygnusPersistenceError {
+        // create the CKAN request JSON
+        String jsonString = "{\"id\": \"" + resId + "\",\"force\":\"true\"";
 
-            // create the CKAN request URL
-            String urlPath = "/api/3/action/datastore_delete";
+        if (filters == null || filters.isEmpty()) {
+            jsonString += "}";
+        } else {
+            jsonString += ",\"filters\":" + filters + "}";
+        } // if else
 
-            // do the CKAN request
-            JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+        // create the CKAN request URL
+        String urlPath = "/api/3/action/datastore_delete";
 
-            // check the status
-            if (res.getStatusCode() == 200) {
-                LOGGER.debug("Successful deletion (resourceId=" + resId + ")");
-            } else {
-                throw new CygnusPersistenceError("Could not delete the records (resId=" + resId
-                        + ", statusCode=" + res.getStatusCode() + ")");
-            } // if else
-        } catch (Exception e) {
-            if (e instanceof CygnusRuntimeError
-                    || e instanceof CygnusPersistenceError
-                    || e instanceof CygnusBadConfiguration) {
-                throw e;
-            } else {
-                throw new CygnusRuntimeError(e.getMessage());
-            } // if else
-        } // try catch
+        // do the CKAN request
+        JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
+
+        // check the status
+        if (res.getStatusCode() == 200) {
+            LOGGER.debug("Successful deletion (resourceId=" + resId + ")");
+        } else {
+            throw new CygnusPersistenceError("Could not delete the records (resId=" + resId
+                    + ", statusCode=" + res.getStatusCode() + ")");
+        } // if else
     } // deleteRecords
     
     @Override
-    public void capRecords(String orgName, String pkgName, String resName, long maxRecords) throws Exception {
+    public void capRecords(String orgName, String pkgName, String resName, long maxRecords)
+        throws CygnusRuntimeError, CygnusPersistenceError {
         // Get the resource ID by querying the cache
         String resId = cache.getResId(orgName, pkgName, resName);
-        
-        // Get certain information about the records within the resource
-        JSONObject result = (JSONObject) getRecords(resId, null).get("result");
-        long total = (Long) result.get("total");
-        JSONArray records = (JSONArray) result.get("records");
         
         // Create the filters for a datastore deletion
         String filters = "";
         
-        if (total > maxRecords) {
-            for (int i = 0; i < (total - maxRecords); i++) {
+        // Get the record pages, some variables
+        int offset = 0;
+        long toBeDeleted = 0;
+        long alreadyDeleted = 0;
+        
+        do {
+            // Get the number of records to be deleted
+            JSONObject result = (JSONObject) getRecords(resId, null, offset, RECORDSPERPAGE).get("result");
+            long total = (Long) result.get("total");
+            toBeDeleted = total - maxRecords;
+            
+            if (toBeDeleted < 0) {
+                break;
+            } // if
+            
+            // Get how much records within the current page must be deleted
+            long remaining = toBeDeleted - alreadyDeleted;
+            long toBeDeletedNow = (remaining > RECORDSPERPAGE ? RECORDSPERPAGE : remaining);
+            
+            // Get the records to be deleted from the current page and get their ID
+            JSONArray records = (JSONArray) result.get("records");
+
+            for (int i = 0; i < toBeDeletedNow; i++) {
                 long id = (Long) ((JSONObject) records.get(i)).get("_id");
-                
+
                 if (filters.isEmpty()) {
                     filters += "{\"_id\":[" + id;
                 } else {
                     filters += "," + id;
                 } // if else
             } // for
-        } // if
+            
+            // Updates
+            alreadyDeleted += toBeDeletedNow;
+            offset += RECORDSPERPAGE;
+        } while (alreadyDeleted < toBeDeleted);
         
         if (filters.isEmpty()) {
             LOGGER.debug("No records to be deleted");
@@ -546,12 +482,13 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
     } // capRecords
     
     @Override
-    public void expirateRecords(String orgName, String pkgName, String resName, long expirationTime) throws Exception {
+    public void expirateRecords(String orgName, String pkgName, String resName, long expirationTime)
+        throws CygnusRuntimeError, CygnusPersistenceError {
         throw new UnsupportedOperationException("Not supported yet.");
     } // expirateRecords
 
     @Override
-    public void expirateRecordsCache(long expirationTime) throws Exception {
+    public void expirateRecordsCache(long expirationTime) throws CygnusRuntimeError, CygnusPersistenceError {
         // Iterate on the cached resource IDs
         cache.startResIterator();
         
@@ -559,27 +496,49 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             // Get the next resource ID
             String resId = cache.getNextResId();
             
-            // Get the records within the resource
-            JSONObject result = (JSONObject) getRecords(resId, null).get("result");
-            JSONArray records = (JSONArray) result.get("records");
-
             // Create the filters for a datastore deletion
             String filters = "";
 
-            for (Object recordObj : records) {
-                JSONObject record = (JSONObject) recordObj;
-                long id = (Long) record.get("_id");
-                long recordTime = (Long) record.get("recvTimeTs");
-                long currentTime = new Date().getTime() / 1000;
+            // Get the record pages, some variables
+            int offset = 0;
+            boolean morePages = true;
 
-                if (recordTime < (currentTime - expirationTime)) {
-                    if (filters.isEmpty()) {
-                        filters += "{\"_id\":[" + id;
-                    } else {
-                        filters += "," + id;
-                    } // if else
-                } // if
-            } // for
+            do {
+                // Get the records within the current page
+                JSONObject result = (JSONObject) getRecords(resId, null, offset, RECORDSPERPAGE).get("result");
+                JSONArray records = (JSONArray) result.get("records");
+
+                try {
+                    for (Object recordObj : records) {
+                        JSONObject record = (JSONObject) recordObj;
+                        long id = (Long) record.get("_id");
+                        String recvTime = (String) record.get("recvTime");
+                        long recordTime = CommonUtils.getMilliseconds(recvTime);
+                        long currentTime = new Date().getTime();
+
+                        if (recordTime < (currentTime - (expirationTime * 1000))) {
+                            if (filters.isEmpty()) {
+                                filters += "{\"_id\":[" + id;
+                            } else {
+                                filters += "," + id;
+                            } // if else
+                        } else {
+                            // Since records are sorted by _id, once the first not expirated record is found the loop
+                            // can finish
+                            morePages = false;
+                            break;
+                        } // if else
+                    } // for
+                } catch (ParseException e) {
+                    throw new CygnusRuntimeError("Data expiration error", "ParseException", e.getMessage());
+                } // try catch
+
+                if (records.isEmpty()) {
+                    morePages = false;
+                } else {
+                    offset += RECORDSPERPAGE;
+                } // if else
+            } while (morePages);
             
             if (filters.isEmpty()) {
                 LOGGER.debug("No records to be deleted");
@@ -599,7 +558,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         this.cache = cache;
     } // setCache
     
-    private JsonResponse doCKANRequest(String method, String urlPath, String jsonString) throws Exception {
+    private JsonResponse doCKANRequest(String method, String urlPath, String jsonString) throws CygnusRuntimeError,
+        CygnusPersistenceError {
         ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
         headers.add(new BasicHeader("Content-Type", "application/json; charset=utf-8"));

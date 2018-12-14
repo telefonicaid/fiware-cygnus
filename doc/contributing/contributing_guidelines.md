@@ -1,10 +1,11 @@
-#<a name="section0"></a>Contributing guidelines
+# <a name="section0"></a>Contributing guidelines
 Content:
 
 * [Introduction](#section1)
 * [Adopted conventions](#section2)
 * [Contributing to the repository](#section3)
     * [Language of the main repository](#section3.1)
+    * [License header](#section3.1bis)
     * [Repository organization](#section3.2)
     * [Backlog](#section3.3)
     * [Main repository versus forked repositories](#section3.4)
@@ -24,7 +25,7 @@ Content:
     * [Section in the documentation](#section6.2)
 * [Configuration files](#section7)
 
-##<a name="section1"></a>Introduction
+## <a name="section1"></a>Introduction
 This document is intended to developers aiming at contributing a complete Cygnus agent to the Cygnus suite. In order to accept those contributions a [contribution policy](./ContributionPolicy.txt) document has to be signed beforehand.
 
 Within this document developers will find detailed guidelines regarding how to contribute to the main Cygnus repository.
@@ -33,7 +34,7 @@ Any doubt you may have, please refer to [here](https://github.com/telefonicaid/f
 
 [Top](#top)
 
-##<a name="section2"></a>Adopted conventions
+## <a name="section2"></a>Adopted conventions
 1. This document uses the following guidelines with regard to the usage of MUST, SHOULD and MAY (and NOT) keywords:
     * MUST Guidelines. They are mandatory and your agent must conform to that.
     * SHOULD Guidelines. They are not mandatory but highly recommended if you want to have a mature development process.
@@ -45,13 +46,53 @@ Any doubt you may have, please refer to [here](https://github.com/telefonicaid/f
 
 [Top](#top)
 
-##<a name="section3"></a>Contributing to the repository
-###<a name="section3.1"></a>Language of the main repository
+## <a name="section3"></a>Contributing to the repository
+### <a name="section3.1"></a>Language of the main repository
 The main repository language MUST be English.
 
 [Top](#top)
 
-###<a name="section3.2"></a>Repository organization
+### <a name="section3.1bis"></a>License header
+
+All source code files (along with other files of similar nature, i.e. scripts, configuration files, etc.)
+MUST have the following copyrigth header:
+
+```
+/**
+ * Copyright XXXX Telefonica Investigación y Desarrollo, S.A.U
+ *
+ * This file is part of fiware-cygnus (FIWARE project).
+ *
+ * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+ * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * fiware-cygnus is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with fiware-cygnus. If not, see
+ * http://www.gnu.org/licenses/.
+ *
+ * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+ *
+ */
+```
+
+Optionally, you MAY add an authorship line within the header just after the above text:
+
+```
+* Authorship: <your name/company>
+```
+
+If the file already exists and you modify it, you MAY add a line about it at the end of the header in the following form:
+
+```
+* Modified by: <your name/company>
+```
+
+[Top](#top)
+
+### <a name="section3.2"></a>Repository organization
 Each agent MUST have a dedicated folder. Each folder MUST be prefixed with `cygnus-`. For instance:
 
 * `cygnus-ngsi`
@@ -89,7 +130,7 @@ As can be seen, despite the repository organization, from a Java perspective all
 
 [Top](#top)
 
-###<a name="section3.3"></a>Backlog
+### <a name="section3.3"></a>Backlog
 The <i>issues</i> section of the main repository MUST be used for tracking all the features, hardening, bugs and task to be implemented by every agent.
 
 The name of each issue MUST follow the following format:
@@ -112,14 +153,14 @@ There MUST NOT be assignee because each issue is considered to be assigned to a 
 
 [Top](#top)
 
-###<a name="section3.4"></a>Main repository versus forked repositories
+### <a name="section3.4"></a>Main repository versus forked repositories
 Every team in charge of an agent MUST create one or more forks of the main repository. Every team SHOULD synchronize their forked repositories with the main one after opening a pull request (see next section).
 
 Only those contributions merged into the main repository MUST be considered as part of the official Cygnus development.
 
 [Top](#top)
 
-###<a name="section3.5"></a>Pull requests
+### <a name="section3.5"></a>Pull requests
 Any contribution MUST be done through a new opened pull request (PR). These PRs MUST compare certain branch at any forked repository against the `develop` base branch in the main repository.
 
 The review process made by the Cygnus Core Team MUST check that the content of the PR is aligned with guidelines. In addition, as any other contribution, a code-wise review MAY be performed by the Cygnus Core Team or any other member of the Community.
@@ -130,7 +171,7 @@ Internally to every team, private code reviews SHOULD be done before pull reques
 
 [Top](#top)
 
-###<a name="section3.6"></a>Contribution contents
+### <a name="section3.6"></a>Contribution contents
 Every contribution/PR MUST include:
 
 * The code implementing the feature/hardening/bug/task.
@@ -149,12 +190,18 @@ Where <i>short description</i> MAY enclose other “[...]” sublevels. For inst
 
 [Top](#top)
 
-###<a name="section3.7"></a>Coding style
+### <a name="section3.7"></a>Coding style
 The `fiware-cygnus/telefonica_checkstyle.xml` file MUST be configured in any Integrated Development Environment (IDE) used by the different development teams as a coding style checker. This XML file contains all the coding style rules accepted by Telefónica.
+
+NOTE: it some cases we have found problems with `telefonica_checkstyle.xml` in recent versions of checkstyle with the [Eclipse plugin](http://eclipse-cs.sourceforge.net), which are solved commenting out the following line:
+
+```
+<module name="RedundantThrows"/>
+```
 
 [Top](#top)
 
-###<a name="section3.8"></a>Commits and squashing
+### <a name="section3.8"></a>Commits and squashing
 Commits within PRs MUST include a comment following this format:
 
     [<issue number>][<agent name>] <short description>
@@ -169,7 +216,7 @@ With regards to the [squashing policy](https://help.github.com/articles/about-pu
 
 [Top](#top)
 
-###<a name="section3.9"></a>Releasing
+### <a name="section3.9"></a>Releasing
 When generating a new version of Cygnus from the main repository, all the agents MUST be released at the same time as a whole.
 
 A minor version (0.X.0, at the moment of writing 0.13.0) of Cygnus MUST be released at the end of each sprint/milestone. A sprint SHOULD comprise a natural month, however sometimes the sprints MAY comprise a different period, for instance a month and a half or half a month (usually, in order to adapt to holydays time). Every sprint MUST be scheduled in advance by Cygnus Core Team in the form of deadline in the related milestone. Agent teams SHOULD use this information in order to, internally, schedule the sprint in terms of issues to be implemented.
@@ -190,8 +237,8 @@ Releases MUST be published in the <i>releases</i> section of the main repository
 
 As a result of the release, `CHANGES_NEXT_RELEASE` file MUST be emptied in Github repo.
 
-##<a name="section4"></a>Deployers
-###<a name="section4.1"></a>RPMs
+## <a name="section4"></a>Deployers
+### <a name="section4.1"></a>RPMs
 There MUST exist a `rpm/` folder at the root of the main repository. A packaging script MUST generate a RPM based on the spec file of each Cygnus agent, including `cygnus-common`. Such a spec file MUST live at the `spec` subfolder within the agent folder.
 
 Upon releasing, these RPMs MUST be created and uploaded to some repository in order they are available. As an example, `cygnus-ngsi` agent's RPM is uploaded to `http://repositories.testbed.fiware.org`.
@@ -202,7 +249,7 @@ All RPMs spec files (spec for `cygnus-common` and any other agent) MUST contain 
 
 [Top](#top)
 
-###<a name="section4.2"></a>Dockers
+### <a name="section4.2"></a>Dockers
 There MUST exist a `docker/` folder at the root of the main repository. Every Cygnus agent MUST include a docker subfolder as per the following rules:
 
 * `docker/cygnus-common`
@@ -216,8 +263,8 @@ Upon releasing, images for the agents MUST be uploaded to `https://hub.docker.co
 
 [Top](#top)
 
-##<a name="section5"></a>Documentation
-###<a name="section5.1"></a>Repository documentation
+## <a name="section5"></a>Documentation
+### <a name="section5.1"></a>Repository documentation
 There MUST exist a `doc/` folder at the root of the main repository. Every Cygnus agent MUST include a documentation subfolder as per the following rules:
 
 * `doc/cygnus-common`
@@ -237,7 +284,7 @@ The following elements SHOULD be present as well:
 
 [Top](#top)
 
-###<a name="section5.2"></a>`readthedocs.org` documentation
+### <a name="section5.2"></a>`readthedocs.org` documentation
 The documentation within the `doc/` folder MUST be published to `readthedocs.org`. In order to achieve this, a `mkdocs.yml` file MUST live in the root of the main repository acting as a hook.
 
 The format of this `mkdocs.yml` file MUST follow this example:
@@ -279,8 +326,8 @@ pages:
 
 [Top](#top)
 
-##<a name="section6"></a>Logs and alarms
-###<a name="section6.1"></a>log4j
+## <a name="section6"></a>Logs and alarms
+### <a name="section6.1"></a>log4j
 log4j is the logging system used by Apache Flume, thus Cygnus agents MUST use log4j.
 
 Logs traced by any Cygnus agent MUST contain the following log4 layout:
@@ -301,7 +348,7 @@ Field by field:
 
 [Top](#top)
 
-###<a name="section6.2"></a>Repository documentation
+### <a name="section6.2"></a>Repository documentation
 The installation and administration guide of any agent (`doc/<agent name>/installation_and_administration_guide/`) MUST contain a section about logs and alarms.
 
 Such a section MUST describe the main log message types the agent uses. It is a set of easily identifiable strings or <i>tags</i> in the traces text, and each log traced by the agent MUST be of any of the types among the set. For instance, `cygnus-ngsi` considers the following ones:
@@ -325,7 +372,7 @@ In addition, a table MUST be included in charge of defining a set of alarm condi
 
 [Top](#top)
 
-##<a name="section7"></a>Configuration
+## <a name="section7"></a>Configuration
 When adding a new agent to Cygnus, it MUST include an agent configuration template in [Flume format](https://flume.apache.org/FlumeUserGuide.html#setup). Other configuration files MAY be added as well.
 
 The specific agent configuration template MUST replace the one handled by `cygnus-common` in the Flume deployment donde by `cygnus-common` RPM.

@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
@@ -19,12 +19,10 @@
 package com.telefonica.iot.cygnus.containers;
 
 import static org.junit.Assert.*; // this is required by "fail" like assertions
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.StatusCode;
-import com.telefonica.iot.cygnus.utils.TestUtils;
-import java.util.ArrayList;
+import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import org.junit.Test;
 
 /**
@@ -33,403 +31,365 @@ import org.junit.Test;
  */
 public class NotifyContextRequestTest {
 
-    private final String notifyJsonSimple = ""
+    private final String contextElement = ""
+            + "{"
+            +    "\"attributes\" : ["
+            +       "{"
+            +          "\"name\" : \"an0\","
+            +          "\"type\" : \"at0\","
+            +          "\"value\" : 0,"
+            +          "\"metadatas\": ["
+            +             "{"
+            +                "\"name\": \"mn1\","
+            +                "\"type\": \"mt1\","
+            +                "\"value\": \"mv1\""
+            +             "}"
+            +          "]"
+            +       "},"
+            +       "{"
+            +          "\"name\" : \"an1\","
+            +          "\"type\" : \"at1\","
+            +          "\"value\" : \"av1\","
+            +          "\"metadatas\": ["
+            +             "{"
+            +                "\"name\": \"mn1\","
+            +                "\"type\": \"mt1\","
+            +                "\"value\": \"mv1\""
+            +             "}"
+            +          "]"
+            +       "},"
+            +       "{"
+            +          "\"name\" : \"an2\","
+            +          "\"type\" : \"at2\","
+            +          "\"value\" : { \"a\": \"1\", \"b\": \"2\" },"
+            +          "\"metadatas\": ["
+            +             "{"
+            +                "\"name\": \"mn2\","
+            +                "\"type\": \"mt2\","
+            +                "\"value\": \"mv2\""
+            +             "}"
+            +          "]"
+            +       "},"
+            +       "{"
+            +          "\"name\" : \"an3\","
+            +          "\"type\" : \"at3\","
+            +          "\"value\" : [ \"v1\", \"v2\" ],"
+            +          "\"metadatas\": ["
+            +             "{"
+            +                "\"name\": \"mn3\","
+            +                "\"type\": \"mt3\","
+            +                "\"value\": \"mv3\""
+            +             "}"
+            +          "]"
+            +       "},"
+            +       "{"
+            +          "\"name\" : \"an4\","
+            +          "\"type\" : \"at4\","
+            +          "\"value\" : null,"
+            +          "\"metadatas\": []"
+            +       "}"
+            +    "],"
+            +    "\"id\" : \"ei\","
+            +    "\"type\" : \"et\","
+            +    "\"isPattern\" : \"false\""
+            + "}";
+    private final String statusCode = ""
+            + "{"
+            +    "\"code\" : \"200\","
+            +    "\"reasonPhrase\" : \"OK\""
+            + "}";
+    private final String notification = ""
             + "{"
             +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
             +   "\"originator\" : \"localhost\","
             +   "\"contextResponses\" : ["
             +     "{"
-            +       "\"contextElement\" : {"
-            +         "\"attributes\" : ["
-            +           "{"
-            +             "\"name\" : \"temperature\","
-            +             "\"type\" : \"centigrade\","
-            +             "\"value\" : \"26.5\""
-            +           "}"
-            +         "],"
-            +         "\"type\" : \"Room\","
-            +         "\"isPattern\" : \"false\","
-            +         "\"id\" : \"Room1\""
-            +       "},"
-            +       "\"statusCode\" : {"
-            +         "\"code\" : \"200\","
-            +         "\"reasonPhrase\" : \"OK\""
-            +       "}"
+            +       "\"contextElement\" :"
+            +          contextElement + ","
+            +       "\"statusCode\" :"
+            +          statusCode
             +     "}"
             +   "]"
             + "}";
-    private final String notifyJsonCompound = ""
-            + "{"
-            +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
-            +   "\"originator\" : \"localhost\","
-            +   "\"contextResponses\" : ["
-            +     "{"
-            +       "\"contextElement\" : {"
-            +         "\"attributes\" : ["
-            +           "{"
-            +             "\"name\" : \"field1\","
-            +             "\"type\" : \"type1\","
-            +             "\"value\" : { \"a\": \"1\", \"b\": \"2\" }"
-            +           "},"
-            +           "{"
-            +             "\"name\" : \"field2\","
-            +             "\"type\" : \"type2\","
-            +             "\"value\" : [ \"v1\", \"v2\" ]"
-            +           "}"
-            +         "],"
-            +         "\"type\" : \"Room\","
-            +         "\"isPattern\" : \"false\","
-            +         "\"id\" : \"Room2\""
-            +       "},"
-            +       "\"statusCode\" : {"
-            +         "\"code\" : \"200\","
-            +         "\"reasonPhrase\" : \"OK\""
-            +       "}"
-            +     "}"
-            +   "]"
-            + "}";
-    private final String notifyJsonCompoundNested = ""
-            + "{"
-            +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
-            +   "\"originator\" : \"localhost\","
-            +   "\"contextResponses\" : ["
-            +     "{"
-            +       "\"contextElement\" : {"
-            +         "\"attributes\" : ["
-            +           "{"
-            +             "\"name\" : \"field1\","
-            +             "\"type\" : \"type1\","
-            +             "\"value\" : {\"a\":{\"x\":{\"y\":\"v1\"},\"z\":\"v2\"},\"b\":\"v3\"}"
-            +           "},"
-            +           "{"
-            +             "\"name\" : \"field2\","
-            +             "\"type\" : \"type2\","
-            +             "\"value\" : [[[\"v1\",\"v2\"]],{\"x\":[\"v3\",\"v4\"]}]"
-            +           "}"
-            +         "],"
-            +         "\"type\" : \"Room\","
-            +         "\"isPattern\" : \"false\","
-            +         "\"id\" : \"Room2\""
-            +       "},"
-            +       "\"statusCode\" : {"
-            +         "\"code\" : \"200\","
-            +         "\"reasonPhrase\" : \"OK\""
-            +       "}"
-            +     "}"
-            +   "]"
-            + "}";
-    private final String notifyJsonMetadata = ""
-            + "{"
-            +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
-            +   "\"originator\" : \"localhost\","
-            +   "\"contextResponses\" : ["
-            +     "{"
-            +       "\"contextElement\" : {"
-            +         "\"attributes\" : ["
-            +           "{"
-            +             "\"name\" : \"temperature\","
-            +             "\"type\" : \"centigrade\","
-            +             "\"value\" : \"26.5\","
-            +             "\"metadatas\": ["
-            +               "{"
-            +                 "\"name\": \"ID\","
-            +                 "\"type\": \"string\","
-            +                 "\"value\": \"ground\""
-            +               "}"
-            +             "]"
-            +           "}"
-            +         "],"
-            +         "\"type\" : \"Room\","
-            +         "\"isPattern\" : \"false\","
-            +         "\"id\" : \"Room1\""
-            +       "},"
-            +       "\"statusCode\" : {"
-            +         "\"code\" : \"200\","
-            +         "\"reasonPhrase\" : \"OK\""
-            +       "}"
-            +     "}"
-            +   "]"
-            + "}";
-    private final String notifyJsonSimpleUnordered = ""
-            + "{"
-            +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
-            +   "\"originator\" : \"localhost\","
-            +   "\"contextResponses\" : ["
-            +     "{"
-            +       "\"statusCode\" : {"
-            +         "\"code\" : \"200\","
-            +         "\"reasonPhrase\" : \"OK\""
-            +       "},"
-            +       "\"contextElement\" : {"
-            +         "\"attributes\" : ["
-            +           "{"
-            +             "\"type\" : \"centigrade\","
-            +             "\"name\" : \"temperature\","
-            +             "\"value\" : \"26.5\""
-            +           "}"
-            +         "],"
-            +         "\"type\" : \"Room\","
-            +         "\"isPattern\" : \"false\","
-            +         "\"id\" : \"Room1\""
-            +       "}"
-            +     "}"
-            +   "]"
-            + "}";
-    private final String notifyJsonSimpleNullAttrs = ""
-            + "{"
-            +   "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\","
-            +   "\"originator\" : \"localhost\","
-            +   "\"contextResponses\" : ["
-            +     "{"
-            +       "\"statusCode\" : {"
-            +         "\"code\" : \"200\","
-            +         "\"reasonPhrase\" : \"OK\""
-            +       "},"
-            +       "\"contextElement\" : {"
-            +         "\"type\" : \"Room\","
-            +         "\"isPattern\" : \"false\","
-            +         "\"id\" : \"Room1\""
-            +       "}"
-            +     "}"
-            +   "]"
-            + "}";
-
+    
     /**
-     * Test of getSubscriptionId method, of class NotifyContextRequest.
-     * @throws java.lang.Exception
+     * [NotifyContextRequest.getSubscriptionId] -------- Subscription ID can be retrieved.
      */
     @Test
-    public void testGetSubscriptionId() throws Exception {
-        String expResult = "51c0ac9ed714fb3b37d7d5a8";
-        // test case for nofity-json-simple
-        System.out.println("getSubscriptionId (notify-json-simple)");
-        NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimple);
-        String result = instance.getSubscriptionId();
-        assertEquals(expResult, result);
-
-        // test case for nofify-json-compound
-        System.out.println("getSubscriptionId (notify-json-compound)");
-        instance = TestUtils.createJsonNotifyContextRequest(notifyJsonCompound);
-        result = instance.getSubscriptionId();
-        assertEquals(expResult, result);
-
-        // test case for nofify-json-metadata
-        System.out.println("getSubscriptionId (notify-json-metadata)");
-        instance = TestUtils.createJsonNotifyContextRequest(notifyJsonMetadata);
-        result = instance.getSubscriptionId();
-        assertEquals(expResult, result);
-    } // testGetSubscriptionID
+    public void testNotifyContextRequestGetSubscriptionId() {
+        System.out.println(getTestTraceHead("[NotifyContextRequest.getSubscriptionId]")
+                + "-------- Subscription ID can be retrieved");
+        NotifyContextRequest ncr;
+        
+        try {
+            ncr = NGSIUtilsForTests.createJsonNotifyContextRequest(notification);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.getSubscriptionId]")
+                    + "- FAIL - There was a problem when creating the NotifyContextRequest");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        try {
+            assertEquals("51c0ac9ed714fb3b37d7d5a8", ncr.getSubscriptionId());
+            System.out.println(getTestTraceHead("[NotifyContextRequest.getSubscriptionId]")
+                    + "-  OK  - The retrieved subscription ID matches the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.getSubscriptionId]")
+                    + "- FAIL - The retrieved subscription ID does not match the expected one");
+            throw e;
+        } // try catch
+    } // testNotifyContextRequestGetSubscriptionId
 
     /**
-     * Test of getOriginator method, of class NotifyContextRequest.
-     * @throws java.lang.Exception
+     * [NotifyContextRequest.getOriginator] -------- Originator can be retrieved.
      */
     @Test
-    public void testGetOriginator() throws Exception {
-        String expResult = "localhost";
-        // test case for nofity-json-simple
-        System.out.println("getOriginator (notify-json-simple)");
-        NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimple);
-        String result = instance.getOriginator();
-        assertEquals(expResult, result);
-
-        // test case for nofify-json-compound
-        System.out.println("getOriginator (notify-json-compound)");
-        instance = TestUtils.createJsonNotifyContextRequest(notifyJsonCompound);
-        result = instance.getOriginator();
-        assertEquals(expResult, result);
-
-        // test case for nofify-json-metadata
-        System.out.println("getOriginator (notify-json-metadata)");
-        instance = TestUtils.createJsonNotifyContextRequest(notifyJsonMetadata);
-        result = instance.getOriginator();
-        assertEquals(expResult, result);
-    } // testGetOriginator
-
+    public void testNotifyContextRequestGetOriginator() {
+        System.out.println(getTestTraceHead("[NotifyContextRequest.getOriginator]")
+                + "-------- Originator can be retrieved");
+        NotifyContextRequest ncr;
+        
+        try {
+            ncr = NGSIUtilsForTests.createJsonNotifyContextRequest(notification);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.getOriginator]")
+                    + "- FAIL - There was a problem when creating the NotifyContextRequest");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        try {
+            assertEquals("localhost", ncr.getOriginator());
+            System.out.println(getTestTraceHead("[NotifyContextRequest.getOriginator]")
+                    + "-  OK  - The retrieved originator matches the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.getOriginator]")
+                    + "- FAIL - The retrieved originator does not match the expected one");
+            throw e;
+        } // try catch
+    } // testNotifyContextRequestGetOriginator
+    
     /**
-     * Test of getContextResponses method, of class NotifyContextRequest.
-     * @throws java.lang.Exception
+     * [NotifyContextRequest.toString] -------- String representation of this object is OK.
      */
     @Test
-    public void testGetContextResponses() throws Exception {
-        testGetCxtResJsonSimple();
-        testGetCxtResJsonCompound();
-        testGetCxtResJsonCompoundNested();
-        testGetCxtResJsonMd();
-        testGetCxtResJsonSimpleUnordered();
-        testGetCxtResJsonSimpleNullAttrs();
-    } // testGetContextResponses
-
+    public void testNotifyContextRequestToString() {
+        System.out.println(getTestTraceHead("[NotifyContextRequest.toString]")
+                + "-------- String representation of this object is OK");
+        NotifyContextRequest ncr;
+        
+        try {
+            ncr = NGSIUtilsForTests.createJsonNotifyContextRequest(notification);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.toString]")
+                    + "- FAIL - There was a problem when creating the NotifyContextRequest");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        try {
+            NGSIUtilsForTests.createJsonNotifyContextRequest(ncr.toString());
+            System.out.println(getTestTraceHead("[NotifyContextRequest.toString]")
+                    + "-  OK  - The string representation of this object is OK");
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.toString]")
+                    + "- FAIL - The string representation of this object is not OK");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+    } // testNotifyContextRequestToString
+    
     /**
-     * Sub-test case for nofity-json-simple.
+     * [NotifyContextRequest.ContextElement.getId] -------- The entity ID can be retrieved.
      */
-    private void testGetCxtResJsonSimple() throws Exception {
-        System.out.println("getOriginator (notify-json-simple)");
-        NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimple);
-        ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
-        assertTrue(cerList != null);
-
-        ContextElementResponse cer = cerList.get(0);
-
-        ContextElement ce = cer.getContextElement();
-        assertEquals(ce.getId(), "Room1");
-        assertEquals(ce.getIsPattern(), "false");
-        assertEquals(ce.getType(), "Room");
-        ArrayList<ContextAttribute> caList = ce.getAttributes();
-
-        ContextAttribute ca = caList.get(0);
-        assertEquals(ca.getName(), "temperature");
-        assertEquals(ca.getType(), "centigrade");
-        assertEquals(ca.getContextValue(true), "\"26.5\"");
-        assertEquals(ca.getContextMetadata(), "[]");
-
-        StatusCode sc = cer.getStatusCode();
-        assertEquals(sc.getCode(), "200");
-        assertEquals(sc.getReasonPhrase(), "OK");
-    } // testGetCxtResJsonSimple
-
+    @Test
+    public void testContextElementGetId() {
+        System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getId]")
+                + "-------- The entity ID can be retrieved");
+        ContextElement ce;
+        
+        try {
+            ce = NGSIUtilsForTests.createJsonContextElement(contextElement);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getId]")
+                    + "- FAIL - There was a problem when creating the ContextElement");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        try {
+            assertEquals("ei", ce.getId());
+            System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getId]")
+                    + "-  OK  - The retrieved entity ID matches the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getId]")
+                    + "- FAIL - The retrieved entity ID does not match the expected one");
+            throw e;
+        } // try catch
+    } // testContextElementGetId
+    
     /**
-     * Sub-test case for nofity-json-compound.
+     * [NotifyContextRequest.ContextElement.getType] -------- The entity type can be retrieved.
      */
-    private void testGetCxtResJsonCompound() throws Exception {
-        System.out.println("getOriginator (notify-json-compound)");
-        NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonCompound);
-        ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
-        assertTrue(cerList != null);
-
-        ContextElementResponse cer = cerList.get(0);
-
-        ContextElement ce = cer.getContextElement();
-        assertEquals("Room2", ce.getId());
-        assertEquals("false", ce.getIsPattern());
-        assertEquals("Room", ce.getType());
-        ArrayList<ContextAttribute> caList = ce.getAttributes();
-        ContextAttribute ca = caList.get(0);
-        assertEquals("field1", ca.getName());
-        assertEquals("type1", ca.getType());
-        assertEquals("{\"a\":\"1\",\"b\":\"2\"}", ca.getContextValue(true));
-        assertEquals("[]", ca.getContextMetadata());
-        ca = caList.get(1);
-        assertEquals("field2", ca.getName());
-        assertEquals("type2", ca.getType());
-        assertEquals("[\"v1\",\"v2\"]", ca.getContextValue(true));
-        assertEquals("[]", ca.getContextMetadata());
-
-        StatusCode sc = cer.getStatusCode();
-        assertEquals("200", sc.getCode());
-        assertEquals("OK", sc.getReasonPhrase());
-    } // testGetCxtResJsonCompound
-
+    @Test
+    public void testContextElementGetType() {
+        System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getType]")
+                + "-------- The entity type can be retrieved");
+        ContextElement ce;
+        
+        try {
+            ce = NGSIUtilsForTests.createJsonContextElement(contextElement);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getType]")
+                    + "- FAIL - There was a problem when creating the ContextElement");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        try {
+            assertEquals("et", ce.getType());
+            System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getType]")
+                    + "-  OK  - The retrieved entity type matches the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getType]")
+                    + "- FAIL - The retrieved entity type does not match the expected one");
+            throw e;
+        } // try catch
+    } // testContextElementGetType
+    
     /**
-     * Sub-test case for nofity-json-compound.
+     * [NotifyContextRequest.ContextElement.getIsPattern] -------- The entity type can be retrieved.
      */
-    private void testGetCxtResJsonCompoundNested() throws Exception {
-        System.out.println("getOriginator (notify-json-compound-nested)");
-        NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonCompoundNested);
-        ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
-        assertTrue(cerList != null);
-
-        ContextElementResponse cer = cerList.get(0);
-
-        ContextElement ce = cer.getContextElement();
-        assertEquals("Room2", ce.getId());
-        assertEquals("false", ce.getIsPattern());
-        assertEquals("Room", ce.getType());
-        ArrayList<ContextAttribute> caList = ce.getAttributes();
-        ContextAttribute ca = caList.get(0);
-        assertEquals("field1", ca.getName());
-        assertEquals("type1", ca.getType());
-        assertEquals("{\"a\":{\"x\":{\"y\":\"v1\"},\"z\":\"v2\"},\"b\":\"v3\"}", ca.getContextValue(true));
-        assertEquals("[]", ca.getContextMetadata());
-        ca = caList.get(1);
-        assertEquals("field2", ca.getName());
-        assertEquals("type2", ca.getType());
-        assertEquals("[[[\"v1\",\"v2\"]],{\"x\":[\"v3\",\"v4\"]}]", ca.getContextValue(true));
-        assertEquals("[]", ca.getContextMetadata());
-
-        StatusCode sc = cer.getStatusCode();
-        assertEquals("200", sc.getCode());
-        assertEquals("OK", sc.getReasonPhrase());
-    } // testGetCxtResJsonCompoundNested
-
+    @Test
+    public void testContextElementGetIsPattern() {
+        System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getIsPattern]")
+                + "-------- The entity type can be retrieved");
+        ContextElement ce;
+        
+        try {
+            ce = NGSIUtilsForTests.createJsonContextElement(contextElement);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getIsPattern]")
+                    + "- FAIL - There was a problem when creating the ContextElement");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        try {
+            assertEquals("false", ce.getIsPattern());
+            System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getIsPattern]")
+                    + "-  OK  - The retrieved entity type matches the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.getIsPattern]")
+                    + "- FAIL - The retrieved entity type does not match the expected one");
+            throw e;
+        } // try catch
+    } // testContextElementGetIsPattern
+    
     /**
-     * Sub-test case for nofity-json-metadata.
+     * [NotifyContextRequest.ContextElement.toString] -------- String representation of this object is OK.
      */
-    private void testGetCxtResJsonMd() throws Exception {
-        System.out.println("getOriginator (notify-json-metadata)");
-        NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonMetadata);
-        ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
-        assertTrue(cerList != null);
-
-        ContextElementResponse cer = cerList.get(0);
-
-        ContextElement ce = cer.getContextElement();
-        assertEquals(ce.getId(), "Room1");
-        assertEquals(ce.getIsPattern(), "false");
-        assertEquals(ce.getType(), "Room");
-        ArrayList<ContextAttribute> caList = ce.getAttributes();
-        ContextAttribute ca = caList.get(0);
-        assertEquals(ca.getName(), "temperature");
-        assertEquals(ca.getType(), "centigrade");
-        assertEquals(ca.getContextValue(true), "\"26.5\"");
-        String s = ca.getContextMetadata();
-        assertEquals(ca.getContextMetadata(), "[{\"name\":\"ID\",\"type\":\"string\",\"value\":\"ground\"}]");
-
-        StatusCode sc = cer.getStatusCode();
-        assertEquals(sc.getCode(), "200");
-        assertEquals(sc.getReasonPhrase(), "OK");
-    } // testGetCxtResJsonMd
-
+    @Test
+    public void testContextElementToString() {
+        System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.toString]")
+                + "-------- String representation of this object is OK");
+        ContextElement ce;
+        
+        try {
+            ce = NGSIUtilsForTests.createJsonContextElement(contextElement);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.toString]")
+                    + "- FAIL - There was a problem when creating the ContextElement");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        try {
+            NGSIUtilsForTests.createJsonContextElement(ce.toString());
+            System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.toString]")
+                    + "-  OK  - The string representation of this object is OK");
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.ContextElement.toString]")
+                    + "- FAIL - The string representation of this object is not OK");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+    } // testContextElementToString
+    
     /**
-     * Sub-test case for nofity-json-simple-unordered.
+     * [NotifyContextRequest.StatusCode.getCode] -------- The code can be retrieved.
      */
-    private void testGetCxtResJsonSimpleUnordered() throws Exception {
-        System.out.println("getOriginator (notify-json-simple-unordered)");
-        NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimpleUnordered);
-        ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
-        assertTrue(cerList != null);
-
-        ContextElementResponse cer = cerList.get(0);
-
-        ContextElement ce = cer.getContextElement();
-        assertEquals(ce.getId(), "Room1");
-        assertEquals(ce.getIsPattern(), "false");
-        assertEquals(ce.getType(), "Room");
-        ArrayList<ContextAttribute> caList = ce.getAttributes();
-
-        ContextAttribute ca = caList.get(0);
-        assertEquals(ca.getName(), "temperature");
-        assertEquals(ca.getType(), "centigrade");
-        assertEquals(ca.getContextValue(true), "\"26.5\"");
-        assertEquals(ca.getContextMetadata(), "[]");
-
-        StatusCode sc = cer.getStatusCode();
-        assertEquals(sc.getCode(), "200");
-        assertEquals(sc.getReasonPhrase(), "OK");
-    } // testGetCxtResJsonSimpleUnordered
-
+    @Test
+    public void testStatusCodeGetCode() {
+        System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.getCode]")
+                + "-------- The code can be retrieved");
+        StatusCode sc;
+        
+        try {
+            sc = NGSIUtilsForTests.createJsonStatusCode(statusCode);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.getCode]")
+                    + "- FAIL - There was a problem when creating the StatusCode");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        try {
+            assertEquals("200", sc.getCode());
+            System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.getCode]")
+                    + "-  OK  - The retrieved code matches the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.getCode]")
+                    + "- FAIL - The retrieved code does not match the expected one");
+            throw e;
+        } // try catch
+    } // testStatusCodeGetCode
+    
     /**
-     * Sub-test case for nofity-json-simple-unordered.
+     * [NotifyContextRequest.StatusCode.getReasonPhrase] -------- The code can be retrieved.
      */
-    private void testGetCxtResJsonSimpleNullAttrs() throws Exception {
-        System.out.println("getOriginator (notify-json-simple-null-attrs)");
-        NotifyContextRequest instance = TestUtils.createJsonNotifyContextRequest(notifyJsonSimpleNullAttrs);
-        ArrayList<ContextElementResponse> cerList = instance.getContextResponses();
-        assertTrue(cerList != null);
-
-        ContextElementResponse cer = cerList.get(0);
-
-        ContextElement ce = cer.getContextElement();
-        assertEquals(ce.getId(), "Room1");
-        assertEquals(ce.getIsPattern(), "false");
-        assertEquals(ce.getType(), "Room");
-        ArrayList<ContextAttribute> caList = ce.getAttributes();
-
-        assertTrue(caList == null);
-
-        StatusCode sc = cer.getStatusCode();
-        assertEquals(sc.getCode(), "200");
-        assertEquals(sc.getReasonPhrase(), "OK");
-    } // testGetCxtResJsonSimpleNullAttrs
+    @Test
+    public void testStatusCodeGetReasonPhrase() {
+        System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.getReasonPhrase]")
+                + "-------- The code can be retrieved");
+        StatusCode sc;
+        
+        try {
+            sc = NGSIUtilsForTests.createJsonStatusCode(statusCode);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.getReasonPhrase]")
+                    + "- FAIL - There was a problem when creating the StatusCode");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        try {
+            assertEquals("OK", sc.getReasonPhrase());
+            System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.getReasonPhrase]")
+                    + "-  OK  - The retrieved reason phrase matches the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.getReasonPhrase]")
+                    + "- FAIL - The retrieved reason phrase does not match the expected one");
+            throw e;
+        } // try catch
+    } // testStatusCodeGetReasonPhrase
+    
+    /**
+     * [NotifyContextRequest.StatusCode.toString] -------- String representation of this object is OK.
+     */
+    @Test
+    public void testStatusCodeToString() {
+        System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.toString]")
+                + "-------- String representation of this object is OK");
+        StatusCode sc;
+        
+        try {
+            sc = NGSIUtilsForTests.createJsonStatusCode(statusCode);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.toString]")
+                    + "- FAIL - There was a problem when creating the StatusCode");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+        
+        try {
+            NGSIUtilsForTests.createJsonContextElement(sc.toString());
+            System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.toString]")
+                    + "-  OK  - The string representation of this object is OK");
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NotifyContextRequest.StatusCode.toString]")
+                    + "- FAIL - The string representation of this object is not OK");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+    } // testStatusCodeToString
 
 } // NotifyContextRequestTest

@@ -1,7 +1,7 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -22,14 +22,24 @@ package com.telefonica.iot.cygnus.errors;
  *
  * @author frb
  */
-public class CygnusBadConfiguration extends Exception {
+public class CygnusBadConfiguration extends CygnusError {
     
     /**
      * Constructor.
-     * @param message
+     * @param cygnusMessage
      */
-    public CygnusBadConfiguration(String message) {
-        super("Bad configuration (" + message + ")");
+    public CygnusBadConfiguration(String cygnusMessage) {
+        super("CygnusBadConfiguration", null, cygnusMessage, null);
+    } // CygnusBadConfiguration
+    
+    /**
+     * Constructor.
+     * @param cygnusMessage
+     * @param javaException
+     * @param javaMessage
+     */
+    public CygnusBadConfiguration(String cygnusMessage, String javaException, String javaMessage) {
+        super("CygnusBadConfiguration", javaException, cygnusMessage, javaMessage);
     } // CygnusBadConfiguration
     
 } // CygnusBadConfiguration

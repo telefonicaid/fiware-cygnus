@@ -1,6 +1,7 @@
-# Copyright 2016 Telefónica Investigación y Desarrollo, S.A.U
 #
-# This file is part of fiware-cygnus (FI-WARE project).
+# Copyright 2015-2017 Telefónica Investigación y Desarrollo, S.A.U
+#
+# This file is part of fiware-cygnus (FIWARE project).
 #
 # fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
 # Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
@@ -13,6 +14,7 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+#
 
 #=============================================
 # To be put in APACHE_FLUME_HOME/conf/agent.conf
@@ -55,6 +57,10 @@ cygnus-ngsi.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus
 # Grouping rules for the GroupingInterceptor, put the right absolute path to the file if necessary
 # see the doc/design/interceptors document for more details
 cygnus-ngsi.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
+
+# Name mappings NameMappingInterceptor, put the right absolute path to the file if necessary
+cygnus-ngsi.sources.http-source.interceptors.nmi.type = com.telefonica.iot.cygnus.interceptors.NGSINameMappingsInterceptor$Builder
+cygnus-ngsi.sources.http-source.interceptors.nmi.name_mappings_conf_file = /usr/cygnus/conf/name_mappings.conf
 
 # ============================================
 # NGSIHDFSSink configuration
@@ -255,6 +261,8 @@ cygnus-ngsi.sinks.mongo-sink.channel = mongo-channel
 #cygnus-ngsi.sinks.mongo-sink.data_model = dm-by-entity
 # how the attributes are stored, either per row either per column (row, column)
 #cygnus-ngsi.sinks.mongo-sink.attr_persistence = row
+# true if the metadata will be stored, false by default
+#cygnus-ngsi.sinks.mongo-sink.attr_metadata_store = false
 # number of notifications to be included within a processing batch
 #cygnus-ngsi.sinks.mongo-sink.batch_size = 100
 # timeout for batch accumulation

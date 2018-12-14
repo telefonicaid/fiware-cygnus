@@ -1,4 +1,4 @@
-#<a name="top"></a>cygnus-ngsi agent configuration
+# <a name="top"></a>cygnus-ngsi agent configuration
 cygnus-ngsi, as any other Cygnus agent, follows the multi-instance configuration of cygnus-common.
 
 The file `agent_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/agent_ngsi.conf.template`.
@@ -245,6 +245,8 @@ cygnus-ngsi.sinks.mongo-sink.channel = mongo-channel
 #cygnus-ngsi.sinks.mongo-sink.data_model = dm-by-entity  
 # how the attributes are stored, either per row either per column (row, column)
 #cygnus-ngsi.sinks.mongo-sink.attr_persistence = column
+# true if the attribute metadata will be stored, false by default
+#cygnus-ngsi.sinks.mongo-sink.attr_metadata_store = false
 # number of notifications to be included within a processing batch
 #cygnus-ngsi.sinks.mongo-sink.batch_size = 100
 # timeout for batch accumulation

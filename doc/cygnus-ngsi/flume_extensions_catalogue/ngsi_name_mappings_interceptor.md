@@ -1,4 +1,4 @@
-#<a name="top"></a>NGSINameMappingsInterceptor
+# <a name="top"></a>NGSINameMappingsInterceptor
 Content:
 
 * [Functionality](#section1)
@@ -9,7 +9,7 @@ Content:
     * [Configuration](#section2.1)
     * [Management Interface related operations](#section2.2)
 
-##<a name="section1"></a>Functionality
+## <a name="section1"></a>Functionality
 This is a custom Interceptor specifically designed for Cygnus. Its purpose is to alter an original `NGSIEvent` object (which comes from a NGSI notification handled by [`NGSIRestHandler`](./ngsi_rest_handler.md)) by <i>replacing</i> (one or more at the same time):
 
 * The FIWARE service Http header sent with the notification.
@@ -27,7 +27,7 @@ As known, a `NGSIEvent` contains a set of headers and an already parsed version 
 
 [Top](#top)
 
-###<a name="section1.1"></a>Name mappings syntax
+### <a name="section1.1"></a>Name mappings syntax
 There exists a <i>name mappings</i> file containing a Json following this format:
 
 ```
@@ -77,7 +77,7 @@ However, certain special behaviours must be noticed:
 
 [Top](#top)
 
-###<a name="section1.2"></a>Headers before and after intercepting
+### <a name="section1.2"></a>Headers before and after intercepting
 Before interception, these are the headers added by the [`NGSIRestHandler`](./ngsi_rest_handler.md) to all the internal Flume events of type `Event`:
 
 * `fiware-service`. FIWARE service which the entity related to the notified data belongs to.
@@ -94,7 +94,7 @@ Other interceptors may add further headers, such as the `timestamp` header added
 
 [Top](#top)
 
-###<a name="section1.3"></a>Example
+### <a name="section1.3"></a>Example
 Let's assume these name mappings:
 
 ```
@@ -264,8 +264,8 @@ intercepted-ngsi-event-2={
 
 [Top](#top)
 
-##<a name="section2"></a>Administration guide
-###<a name="section2.1"></a>Configuration
+## <a name="section2"></a>Administration guide
+### <a name="section2.1"></a>Configuration
 `NGSINameMappingsInterceptor` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -286,7 +286,7 @@ Please check the specific sink documentation in the [Flume extensions catalogue]
 
 [Top](#top)
 
-###<a name="section2.2"></a>Management Interface related operations
+### <a name="section2.2"></a>Management Interface related operations
 Coming soon.
 
 [Top](#top)

@@ -1,6 +1,7 @@
-# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
 #
-# This file is part of fiware-cygnus (FI-WARE project).
+# Copyright 2014-2017 Telefonica Investigación y Desarrollo, S.A.U
+#
+# This file is part of fiware-cygnus (FIWARE project).
 #
 # fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
 # Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
@@ -13,6 +14,7 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+#
 
 Summary:          Package for Cygnus common component
 Name:             cygnus-common
@@ -169,6 +171,26 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Thu Dec 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.10.0
+- [cygnus-common] Update hive dependence from 0.13.1 to 2.3.4 due to a vulnerability alert
+- [cygnus-common] Update httpclient dependence to 4.3.6 due to a vulnerability
+- [cygnus-common][CommonUtils][debug] Modify that CommonUtils#getTimeInstant can accepts the ISO8601 format with offset like 2018-01-02T03:04:05+09:00 (#1517)
+
+* Wed Jun 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.9.0
+- [cygnus-common][Docker] Upgrade to CentOS 7, Maven 3.5.2 and Java 1.8.0 in Dockerfile
+
+* Wed Sep 13 2017 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.8.0
+- [cygnus-common, cygnus-ngsi][hardening] Fix FIWARE repository URL (#1435)
+- [cygnus-common, cygnus-ngsi][hardening] Unify test classes (#1332, #1333)
+- [cygnus-common][bug] Allow disabling YAFS in order to avoid crashes upon configuration reloads (#1074)
+
+* Tue Jan 31 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.7.0
+- [cygnus] Add Travis CI (#1347)
+- [cygnus][hardening] Fix "FIWARE" name in license headers (#1369)
+- [cygnus-common][hardening] Clean and modularize ManagementInterface.java (#1368)
+- [cygnus-common][feature] Add KPIs API (#1339)
+- [cygnus-common][bug] Fix error handling upon MongoDB collection creation (#1377)
+
 * Fri Dec 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.6.0
 - [cygnus][hardening] Add IPv6 support to API and GUI (#1261)
 

@@ -1,5 +1,5 @@
-#PostgreSQL backend
-##`PostgreSQLBackend` interface
+# PostgreSQL backend
+## `PostgreSQLBackend` interface
 This class enumerates the methods any [PostgreSQL](http://www.postgresql.org/) backend implementation must expose. In this case, the following ones:
 
     void createSchema(String schemaName) throws Exception;
@@ -14,7 +14,7 @@ This class enumerates the methods any [PostgreSQL](http://www.postgresql.org/) b
 
 > Persists the accumulated context data (in the form of the given field values) regarding an entity within the given table. This table belongs to the given database. The field names are given as well to ensure the right insert of the field values.
 
-##`PostgreSQLBackendImpl` class
+## `PostgreSQLBackendImpl` class
 This is a convenience backend class for PostgreSQL that implements the `PostgreSQLBackend` interface described above.
 
 `PostgreSQLBackendImpl` really wraps the [PostgreSQL JDBC driver](https://jdbc.postgresql.org/).

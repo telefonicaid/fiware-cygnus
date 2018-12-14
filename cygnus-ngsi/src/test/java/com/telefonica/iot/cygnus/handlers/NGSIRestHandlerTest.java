@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2014-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -526,36 +526,6 @@ public class NGSIRestHandlerTest {
             throw e1;
         } // try catch
     } // testGetEventsMultiValuedServicePath
-    
-    /**
-     * [NGSIRestHandler.getEvents] -------- When a Flume event is generated, the Flume body is null.
-     */
-    @Test
-    public void testGetEventsBodyInFlumeEvent() {
-        System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                + "-------- When a Flume event is generated, the Flume body is null");
-        NGSIRestHandler handler = new NGSIRestHandler();
-        handler.configure(createContext(null, null, null)); // default configuration
-        byte[] body;
-        
-        try {
-            body = handler.getEvents(mockHttpServletRequest).get(0).getBody();
-            
-            try {
-                Assert.assertArrayEquals(null, body);
-                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                        + "-  OK  - The event body is null");
-            } catch (AssertionError e1) {
-                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                        + "- FAIL - The event body is not null");
-                throw e1;
-            } // try catch
-        } catch (Exception e) {
-            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                    + "- FAIL - There was some problem while processing the events");
-            assertTrue(false);
-        } // try catch
-    } // testGetEventsBodyInFlumeEvent
     
     /**
      * [NGSIRestHandler.generateUniqueId] -------- An internal transaction ID is generated.

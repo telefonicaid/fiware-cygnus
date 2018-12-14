@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -22,6 +22,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextMetadata;
+import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.sinks.NGSICartoDBSink.CartoDBAggregator;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -73,17 +74,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null;
+        String enableDistanceHistoric = null;
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null;
+        String enableRawHistoric = null;
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         try {
             assertEquals(500, sink.getBackendMaxConns());
@@ -146,16 +147,6 @@ public class NGSICartoDBSinkTest {
         } // try catch
         
         try {
-            assertTrue(!sink.getEnableDistance());
-            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                    + "-  OK  - 'enable_distance=false' configured by default");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
-                    + "- FAIL - 'enable_distance=false' not configured by default");
-            throw e;
-        } // try catch
-        
-        try {
             assertTrue(!sink.getEnableGrouping());
             System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
                     + "-  OK  - 'enable_grouping=false' configured by default");
@@ -176,7 +167,7 @@ public class NGSICartoDBSinkTest {
         } // try catch
 
         try {
-            assertTrue(sink.getEnableRaw());
+            assertTrue(sink.getEnableRawHistoric());
             System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
                     + "-  OK  - 'enable_raw=true' configured by default");
         } catch (AssertionError e) {
@@ -186,12 +177,22 @@ public class NGSICartoDBSinkTest {
         } // try catch
         
         try {
-            assertTrue(!sink.getEnableSnapshotRaw());
+            assertTrue(!sink.getEnableRawSnapshot());
             System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
                     + "-  OK  - 'enable_raw_snapshot=false' configured by default");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
                     + "- FAIL - 'enable_raw_snapshot=false' not configured by default");
+            throw e;
+        } // try catch
+        
+        try {
+            assertTrue(!sink.getEnableDistanceHistoric());
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "-  OK  - 'enable_distance=false' configured by default");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "- FAIL - 'enable_distance=false' not configured by default");
             throw e;
         } // try catch
     } // testConfigureDefaults
@@ -210,17 +211,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null;
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         try {
             assertEquals(25, sink.getBackendMaxConns());
@@ -247,17 +248,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null;
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         try {
             assertEquals(3, sink.getBackendMaxConnsPerRoute());
@@ -285,17 +286,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = "false";
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         try {
             assertTrue(sink.enableLowercase);
@@ -322,17 +323,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = "falso"; // wrong value
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         try {
             assertTrue(sink.enableLowercase);
@@ -346,10 +347,10 @@ public class NGSICartoDBSinkTest {
     } // testConfigureSwapCoordinatesOK
     
     /**
-     * [NGSICartoDBSink.configure] -------- Configured 'enable_raw' cannot be different than 'true' or 'false'.
+     * [NGSICartoDBSink.configure] -------- Configured 'enable_raw_historic' cannot be different than 'true' or 'false'.
      */
     @Test
-    public void testConfigureEnableRawOK() {
+    public void testConfigureEnableRawHistoricOK() {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
                 + "-------- Configured 'enable_raw' cannot be different than 'true' or 'false'");
         String apiKey = "1234567890abcdef";
@@ -359,17 +360,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = "falso"; // wrong value
+        String enableRawHistoric = "falso"; // wrong value
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default value
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         try {
             assertTrue(sink.invalidConfiguration);
@@ -380,13 +381,14 @@ public class NGSICartoDBSinkTest {
                     + "- FAIL - 'enable_raw=falso' was not detected");
             throw e;
         } // try catch
-    } // testConfigureEnableRawOK
+    } // testConfigureEnableRawHistoricOK
     
     /**
-     * [NGSICartoDBSink.configure] -------- Configured 'enable_distance' cannot be different than 'true' or 'false'.
+     * [NGSICartoDBSink.configure] -------- Configured 'enable_distance_historic' cannot be different than 'true' or
+     * 'false'.
      */
     @Test
-    public void testConfigureEnableDistanceOK() {
+    public void testConfigureEnableDistanceHistoricOK() {
         System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
                 + "-------- Configured 'enable_distance' cannot be different than 'true' or 'false'");
         String apiKey = "1234567890abcdef";
@@ -396,17 +398,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = "falso"; // wrong value
+        String enableDistanceHistoric = "falso"; // wrong value
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         try {
             assertTrue(sink.invalidConfiguration);
@@ -417,7 +419,7 @@ public class NGSICartoDBSinkTest {
                     + "- FAIL - 'enable_distance=falso' was not detected");
             throw e;
         } // try catch
-    } // testConfigureEnableDistanceOK
+    } // testConfigureEnableDistanceHistoricOK
     
     /**
      * [NGSICartoDBSink.configure] -------- Configured 'enable_raw_snapshot' cannot be different than 'true' or 'false'.
@@ -433,17 +435,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default value
+        String enableRawHistoric = null; // default value
         String enableRawSnapshot = "falso"; // wrong value
         String swapCoordinates = null; // default value
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         try {
             assertTrue(sink.invalidConfiguration);
@@ -470,17 +472,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null; // default_one
+        String enableDistanceHistoric = null; // default_one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = null; // empty file
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         try {
             assertTrue(sink.invalidConfiguration);
@@ -505,7 +507,8 @@ public class NGSICartoDBSinkTest {
         try {
             file = folder.newFile("keys.conf");
             PrintWriter out = new PrintWriter(file);
-            out.println("{\"cartodb_keys\":[{\"username\":\"frb\",\"endpoint\":\"http://frb.com\",\"key\":\"xxx\"}]}");
+            out.println("{\"cartodb_keys\":[{\"username\":\"frb\",\"endpoint\":\"http://frb.com\","
+                    + "\"key\":\"xxx\",\"type\":\"personal\"}]}");
             out.flush();
             out.close();
         } catch (IOException e) {
@@ -521,17 +524,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = file.getAbsolutePath();
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         sink.setChannel(new MemoryChannel());
         sink.start();
         
@@ -574,17 +577,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = file.getAbsolutePath();
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         sink.setChannel(new MemoryChannel());
         sink.start();
         
@@ -628,17 +631,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = file.getAbsolutePath();
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         sink.setChannel(new MemoryChannel());
         sink.start();
         
@@ -669,17 +672,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = "dm-by-service";
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         try {
             assertTrue(sink.invalidConfiguration);
@@ -694,8 +697,8 @@ public class NGSICartoDBSinkTest {
         dataModel = "dm-by-attribute";
         sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         try {
             assertTrue(sink.invalidConfiguration);
@@ -737,16 +740,16 @@ public class NGSICartoDBSinkTest {
         String batchTTL = null;
         String dataModel = null; // default one
         String enableLowercase = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = file.getAbsolutePath();
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         sink.setChannel(new MemoryChannel());
         sink.start();
         
@@ -790,17 +793,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = file.getAbsolutePath();
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         sink.setChannel(new MemoryChannel());
         sink.start();
         
@@ -846,16 +849,16 @@ public class NGSICartoDBSinkTest {
         String batchTTL = null;
         String dataModel = null; // default one
         String enableLowercase = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = file.getAbsolutePath();
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         sink.setChannel(new MemoryChannel());
         sink.start();
         
@@ -899,17 +902,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = file.getAbsolutePath();
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         sink.setChannel(new MemoryChannel());
         sink.start();
         
@@ -953,17 +956,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = file.getAbsolutePath();
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         sink.setChannel(new MemoryChannel());
         sink.start();
         
@@ -995,17 +998,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null; // default one
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         String service = "someService";
         
         try {
@@ -1021,7 +1024,7 @@ public class NGSICartoDBSinkTest {
                         + "- FAIL - '" + builtSchemaName + "' is not equals to the encoding of <service>");
                 throw e;
             } // try catch
-        } catch (Exception e) {
+        } catch (CygnusBadConfiguration e) {
             System.out.println(getTestTraceHead("[NGSICartoDBSink.buildSchemaName]")
                     + "- FAIL - There was some problem when building the schema name");
             throw e;
@@ -1045,17 +1048,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = "dm-by-service-path";
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         String servicePath = "/somePath";
         String entity = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
@@ -1073,7 +1076,7 @@ public class NGSICartoDBSinkTest {
                         + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <service-path>");
                 throw e;
             } // try catch
-        } catch (Exception e) {
+        } catch (CygnusBadConfiguration e) {
             System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                     + "- FAIL - There was some problem when building the table name");
             throw e;
@@ -1098,17 +1101,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = "dm-by-entity";
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         String servicePath = "/somePath";
         String entity = "someId=someType"; // using the internal concatenator
         String attribute = null; // irrelevant for this test
@@ -1127,7 +1130,7 @@ public class NGSICartoDBSinkTest {
                         + "x002f<servicePath>xffff<entityId>xffff<entityType>");
                 throw e;
             } // try catch
-        } catch (Exception e) {
+        } catch (CygnusBadConfiguration e) {
             System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                     + "- FAIL - There was some problem when building the table name");
             throw e;
@@ -1151,17 +1154,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = "dm-by-service-path";
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         String servicePath = "/";
         String entity = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
@@ -1178,7 +1181,7 @@ public class NGSICartoDBSinkTest {
                         + "- FAIL - '" + builtTableName + "' is not equals to x002f");
                 throw e;
             } // try catch
-        } catch (Exception e) {
+        } catch (CygnusBadConfiguration e) {
             System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                     + "- FAIL - There was some problem when building the table name");
             throw e;
@@ -1204,17 +1207,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = "dm-by-entity";
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         String servicePath = "/";
         String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
@@ -1234,7 +1237,7 @@ public class NGSICartoDBSinkTest {
                         + "<service-path>, <entityId> and <entityType>");
                 throw e;
             } // try catch
-        } catch (Exception e) {
+        } catch (CygnusBadConfiguration e) {
             System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                     + "- FAIL - There was some problem when building the table name");
             throw e;
@@ -1259,17 +1262,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = "dm-by-entity";
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -1291,7 +1294,7 @@ public class NGSICartoDBSinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = createContextElement();
-        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1305,7 +1308,7 @@ public class NGSICartoDBSinkTest {
                         + "- FAIL - A table name has not been created");
                 throw e;
             } // try catch
-        } catch (Exception e) {
+        } catch (CygnusBadConfiguration e) {
             System.out.println(getTestTraceHead("[CartoDBAggregator.initialize]")
                     + "- FAIL - There was some problem when initializing CartoDBAggregator");
             throw e;
@@ -1333,17 +1336,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = "dm-by-entity";
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -1365,7 +1368,7 @@ public class NGSICartoDBSinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = createContextElement();
-        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1400,7 +1403,7 @@ public class NGSICartoDBSinkTest {
                         + "- FAIL - '" + NGSIConstants.CARTO_DB_THE_GEOM + "' is not in the fields '" + fields + "'");
                 throw e;
             } // try catch
-        } catch (Exception e) {
+        } catch (CygnusBadConfiguration e) {
             System.out.println(getTestTraceHead("[CartoDBAggregator.initialize]")
                     + "- FAIL - There was some problem when initializing CartoDBAggregator");
             throw e;
@@ -1426,17 +1429,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = "dm-by-entity";
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -1458,7 +1461,7 @@ public class NGSICartoDBSinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = createContextElement();
-        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1493,7 +1496,7 @@ public class NGSICartoDBSinkTest {
                         + "- FAIL - '" + fields + "' does not end with ')'");
                 throw e;
             } // try catch
-        } catch (Exception e) {
+        } catch (CygnusBadConfiguration e) {
             System.out.println(getTestTraceHead("[CartoDBAggregator.initialize]")
                     + "- FAIL - There was some problem when initializing CartoDBAggregator");
             throw e;
@@ -1521,17 +1524,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = "dm-by-entity";
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -1553,7 +1556,7 @@ public class NGSICartoDBSinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = createContextElement();
-        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1596,7 +1599,7 @@ public class NGSICartoDBSinkTest {
                         + rows + "'");
                 throw e;
             } // try catch
-        } catch (Exception e) {
+        } catch (CygnusBadConfiguration e) {
             System.out.println(getTestTraceHead("[CartoDBAggregator.initialize]")
                     + "- FAIL - There was some problem when initializing CartoDBAggregator");
             throw e;
@@ -1622,17 +1625,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = "dm-by-entity";
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default one
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -1654,7 +1657,7 @@ public class NGSICartoDBSinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = createContextElement();
-        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1680,7 +1683,7 @@ public class NGSICartoDBSinkTest {
                         + "- FAIL - '" + rows + "' does not end with ')'");
                 throw e;
             } // try catch
-        } catch (Exception e) {
+        } catch (CygnusBadConfiguration e) {
             System.out.println(getTestTraceHead("[CartoDBAggregator.aggregate]")
                     + "- FAIL - There was some problem when aggregating in CartoDBAggregator");
             throw e;
@@ -1706,17 +1709,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = "dm-by-entity";
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default one
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = "true";
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         
         // Create a CartoDBAggregator
         CartoDBAggregator aggregator = sink.new CartoDBAggregator();
@@ -1738,7 +1741,7 @@ public class NGSICartoDBSinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         ContextElement originalCE = createContextElement();
-        NGSIEvent event = new NGSIEvent(headers, originalCE, null);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
         
         try {
             aggregator.initialize(event);
@@ -1754,7 +1757,7 @@ public class NGSICartoDBSinkTest {
                         + "- FAIL - '" + rows + "' done not contain the coordinates '-3.7167, 40.3833' swapped");
                 throw e;
             } // try catch
-        } catch (Exception e) {
+        } catch (CygnusBadConfiguration e) {
             System.out.println(getTestTraceHead("[CartoDBAggregator.aggregate]")
                     + "- FAIL - There was some problem when aggregating in CartoDBAggregator");
             throw e;
@@ -1779,17 +1782,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = "dm-by-service-path";
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
         String entity = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
@@ -1799,7 +1802,7 @@ public class NGSICartoDBSinkTest {
             System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                     + "- FAIL - A table name length greater than 63 characters has not been detected");
             assertTrue(false);
-        } catch (Exception e) {
+        } catch (CygnusBadConfiguration e) {
             assertTrue(true);
             System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                     + "-  OK  - A table name length greater than 63 characters has been detected");
@@ -1823,17 +1826,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = "dm-by-entity";
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         String servicePath = "/tooLoooooooooooooooooooooooooooongServicePath";
         String entity = "tooLoooooooooooooooooooooooooooongEntity";
         String attribute = null; // irrelevant for this test
@@ -1843,7 +1846,7 @@ public class NGSICartoDBSinkTest {
             System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                     + "- FAIL - A table name length greater than 63 characters has not been detected");
             assertTrue(false);
-        } catch (Exception e) {
+        } catch (CygnusBadConfiguration e) {
             assertTrue(true);
             System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                     + "-  OK  - A table name length greater than 63 characters has been detected");
@@ -1868,17 +1871,17 @@ public class NGSICartoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = "dm-by-attribute";
-        String enableDistance = null; // default one
+        String enableDistanceHistoric = null; // default one
         String enableGrouping = null;
         String enableLowercase = null; // default
-        String enableRaw = null; // default one
+        String enableRawHistoric = null; // default one
         String enableRawSnapshot = null; // defatul one
         String swapCoordinates = null; // default
         String keysConfFile = "/keys.conf";
         NGSICartoDBSink sink = new NGSICartoDBSink();
         sink.configure(createContext(apiKey, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTimeout,
-                batchTTL, dataModel, enableDistance, enableGrouping, enableLowercase, enableRaw, enableRawSnapshot,
-                swapCoordinates, keysConfFile));
+                batchTTL, dataModel, enableDistanceHistoric, enableGrouping, enableLowercase, enableRawHistoric,
+                enableRawSnapshot, swapCoordinates, keysConfFile));
         String servicePath = "/tooLooooooooooooooongServicePath";
         String entity = "tooLooooooooooooooooooongEntity";
         String attribute = "tooLooooooooooooongAttribute";
@@ -1888,16 +1891,131 @@ public class NGSICartoDBSinkTest {
             System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                     + "- FAIL - A table name length greater than 63 characters has not been detected");
             assertTrue(false);
-        } catch (Exception e) {
+        } catch (CygnusBadConfiguration e) {
             assertTrue(true);
             System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                     + "-  OK  - A table name length greater than 63 characters has been detected");
         } // try catch
     } // testBuildTableNameLengthDataModelByAttribute
     
+    /**
+     * [NGSICartoDBSink.configure] -------- When enable_raw and enable_raw_historic are configured, the second one
+     * value is used. This must be removed once enable_raw parameter is removed (currently it is just deprecated).
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testConfigureEnableRawAndEnableRawHistoric() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                + "-------- When enable_raw and enable_raw_historic are configured, the second one value is used");
+        // Create a NGSICartoDBSink
+        Context context = new Context();
+        context.put("enable_raw", "false");
+        context.put("enable_raw_historic", "true");
+        context.put("keys_conf_file", ""); // any value except for null
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(context);
+        
+        try {
+            assertTrue(sink.getEnableRawHistoric());
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "-  OK  - Both 'enable_raw' and 'enable_raw_historic' where configured, but "
+                    + "'enable_raw_historic' value is used");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "- FAIL - Both 'enable_raw' and 'enable_raw_historic' where configured, but "
+                    + "'enable_raw' value is used");
+            throw e;
+        } // try catch
+    } // testConfigureEnableRawAndEnableRawHistoric
+    
+    /**
+     * [NGSICartoDBSink.configure] -------- When enable_distance and enable_distance_historic are configured, the second
+     * one value is used. This must be removed once enable_raw parameter is removed (currently it is just deprecated).
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testConfigureEnableDistanceAndEnableDistanceHistoric() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                + "-------- When enable_distance and enable_distance_historic are configured, the second one value "
+                + "is used");
+        // Create a NGSICartoDBSink
+        Context context = new Context();
+        context.put("enable_distance", "true");
+        context.put("enable_distance_historic", "false");
+        context.put("keys_conf_file", ""); // any value except for null
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(context);
+        
+        try {
+            assertTrue(!sink.getEnableDistanceHistoric());
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "-  OK  - Both 'enable_distance' and 'enable_distance_historic' where configured, but "
+                    + "'enable_distance_historic' value is used");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "- FAIL - Both 'enable_distance' and 'enable_distnace_historic' where configured, but "
+                    + "'enable_distance' value is used");
+            throw e;
+        } // try catch
+    } // testConfigureEnableDistanceAndEnableDistanceHistoric
+    
+    /**
+     * [NGSICartoDBSink.configure] -------- Only enable_raw configuration works. This must be removed once
+     * enable_raw parameter is removed (currently it is just deprecated).
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testConfigureEnableRawOnly() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                + "-------- Only enable_raw configuration works");
+        // Create a NGSICartoDBSink
+        Context context = new Context();
+        context.put("enable_raw", "false");
+        context.put("keys_conf_file", ""); // any value except for null
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(context);
+        
+        try {
+            assertTrue(!sink.getEnableRawHistoric());
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "-  OK  - Only 'enable_raw' was configured and worked");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "- FAIL - Only 'enable_raw' was configured and did not work");
+            throw e;
+        } // try catch
+    } // testConfigureEnableRawOnly
+    
+    /**
+     * [NGSICartoDBSink.configure] -------- Only enable_distance configuration works. This must be removed
+     * once enable_raw parameter is removed (currently it is just deprecated).
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testConfigureEnableDistanceOnly() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                + "-------- Only enable_distance configuration works");
+        // Create a NGSICartoDBSink
+        Context context = new Context();
+        context.put("enable_distance", "true");
+        context.put("keys_conf_file", ""); // any value except for null
+        NGSICartoDBSink sink = new NGSICartoDBSink();
+        sink.configure(context);
+        
+        try {
+            assertTrue(sink.getEnableDistanceHistoric());
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "-  OK  - Only 'enable_distance' was configured and worked");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSICartoDBSink.configure]")
+                    + "- FAIL - Only 'enable_distance' was configured and did not work");
+            throw e;
+        } // try catch
+    } // testConfigureEnableDistanceOnly
+    
     private Context createContext(String apiKey, String backendMaxConns, String backendMaxConnsPerRoute,
-            String batchSize, String batchTimeout, String batchTTL, String dataModel, String enableDistance,
-            String enableGrouping, String enableLowercase, String enableRaw, String enableRawSnapshot,
+            String batchSize, String batchTimeout, String batchTTL, String dataModel, String enableDistanceHistoric,
+            String enableGrouping, String enableLowercase, String enableRawHistoric, String enableRawSnapshot,
             String swapCoordinates, String keysConfFile) {
         Context context = new Context();
         context.put("api_key", apiKey);
@@ -1907,10 +2025,10 @@ public class NGSICartoDBSinkTest {
         context.put("batch_timeout", batchTimeout);
         context.put("batch_ttl", batchTTL);
         context.put("data_model", dataModel);
-        context.put("enable_distance", enableDistance);
+        context.put("enable_distance_historic", enableDistanceHistoric);
         context.put("enable_grouping", enableGrouping);
         context.put("enable_lowercase", enableLowercase);
-        context.put("enable_raw", enableRaw);
+        context.put("enable_raw_historic", enableRawHistoric);
         context.put("enable_raw_snapshot", enableRawSnapshot);
         context.put("swap_coordinates", swapCoordinates);
         context.put("keys_conf_file", keysConfFile);
@@ -1923,7 +2041,7 @@ public class NGSICartoDBSinkTest {
         contextMetadata.setName("location");
         contextMetadata.setType("string");
         contextMetadata.setContextMetadata(new JsonPrimitive("WGS84"));
-        ArrayList<ContextMetadata> metadata = new ArrayList<ContextMetadata>();
+        ArrayList<ContextMetadata> metadata = new ArrayList<>();
         metadata.add(contextMetadata);
         ContextAttribute contextAttribute1 = notifyContextRequest.new ContextAttribute();
         contextAttribute1.setName("someName1");
@@ -1935,7 +2053,7 @@ public class NGSICartoDBSinkTest {
         contextAttribute2.setType("someType2");
         contextAttribute2.setContextValue(new JsonPrimitive("someValue2"));
         contextAttribute2.setContextMetadata(null);
-        ArrayList<ContextAttribute> attributes = new ArrayList<ContextAttribute>();
+        ArrayList<ContextAttribute> attributes = new ArrayList<>();
         attributes.add(contextAttribute1);
         attributes.add(contextAttribute2);
         ContextElement contextElement = notifyContextRequest.new ContextElement();

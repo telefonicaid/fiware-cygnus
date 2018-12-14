@@ -16,60 +16,189 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
-FROM centos:6
+FROM centos:centos7.4.1708
 
 MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
 
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "1.6.0_SNAPSHOT"
+ENV CYGNUS_VERSION "1.10.0_SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
 ENV CYGNUS_LOG_LEVEL "INFO"
 ENV CYGNUS_LOG_APPENDER "console"
 ENV CYGNUS_SERVICE_PORT "5050"
-ENV CYGNUS_API_PORT "8081"
-ENV CYGNUS_MYSQL_HOST "iot-mysql"
-ENV CYGNUS_MYSQL_PORT "3306"
-ENV CYGNUS_MYSQL_USER "mysql"
-ENV CYGNUS_MYSQL_PASS "mysql"
-ENV CYGNUS_MONGO_HOSTS "iot-mongo:27017"
-ENV CYGNUS_MONGO_USER "mongo"
-ENV CYGNUS_MONGO_PASS "mongo"
-ENV CYGNUS_CKAN_HOST "iot-ckan"
-ENV CYGNUS_CKAN_PORT "80"
+ENV CYGNUS_JAVA_OPTS "-Xms2048m -Xmx4096m"
+ENV CYGNUS_API_PORT "5080"
+ENV CYGNUS_MULTIAGENT false
+ENV CYGNUS_MONITORING_TYPE ""
+
+# These variables are optional ENV variables to docker runtime
+
+# MySQL options
+ENV CYGNUS_MYSQL_HOST ""
+ENV CYGNUS_MYSQL_PORT ""
+# ENV CYGNUS_MYSQL_USER ""  # Warning: For development use only - Storing sensitive information in clear text is insecure
+# ENV CYGNUS_MYSQL_PASS ""  # Warning: For development use only - Storing sensitive information in clear text is insecure
+ENV CYGNUS_MYSQL_ENABLE_ENCODING ""
+ENV CYGNUS_MYSQL_ENABLE_GROUPING ""
+ENV CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS ""
+ENV CYGNUS_MYSQL_ENABLE_LOWERCASE ""
+ENV CYGNUS_MYSQL_DATA_MODEL ""
+ENV CYGNUS_MYSQL_ATTR_PERSISTENCE ""
+ENV CYGNUS_MYSQL_BATCH_SIZE ""
+ENV CYGNUS_MYSQL_BATCH_TIMEOUT ""
+ENV CYGNUS_MYSQL_BATCH_TTL ""
+
+# MongoDB / STH options
+ENV CYGNUS_MONGO_HOSTS ""
+# ENV CYGNUS_MONGO_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+# ENV CYGNUS_MONGO_PASS "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+ENV CYGNUS_MONGO_ENABLE_ENCODING ""
+ENV CYGNUS_MONGO_ENABLE_GROUPING ""
+ENV CYGNUS_MONGO_ENABLE_NAME_MAPPINGS ""
+ENV CYGNUS_MONGO_ENABLE_LOWERCASE ""
+ENV CYGNUS_MONGO_DATA_MODEL ""
+ENV CYGNUS_MONGO_ATTR_PERSISTENCE ""
+ENV CYGNUS_MONGO_DB_PREFIX ""
+ENV CYGNUS_MONGO_COLLECTION_PREFIX ""
+ENV CYGNUS_MONGO_BATCH_SIZE ""
+ENV CYGNUS_MONGO_BATCH_TIMEOUT ""
+ENV CYGNUS_MONGO_BATCH_TTL ""
+ENV CYGNUS_MONGO_DATA_EXPIRATION ""
+ENV CYGNUS_MONGO_COLLECTIONS_SIZE ""
+ENV CYGNUS_MONGO_MAX_DOCUMENTS ""
+ENV CYGNUS_MONGO_IGNORE_WHITE_SPACES ""
+ENV CYGNUS_STH_ENABLE_ENCODING ""
+ENV CYGNUS_STH_ENABLE_GROUPING ""
+ENV CYGNUS_STH_ENABLE_NAME_MAPPINGS ""
+ENV CYGNUS_STH_ENABLE_LOWERCASE ""
+ENV CYGNUS_STH_DATA_MODEL ""
+ENV CYGNUS_STH_DB_PREFIX ""
+ENV CYGNUS_STH_COLLECTION_PREFIX ""
+ENV CYGNUS_STH_RESOLUTIONS ""
+ENV CYGNUS_STH_BATCH_SIZE ""
+ENV CYGNUS_STH_BATCH_TIMEOUT ""
+ENV CYGNUS_STH_BATCH_TTL ""
+ENV CYGNUS_STH_DATA_EXPIRATION ""
+
+# CKAN options
+ENV CYGNUS_CKAN_HOST ""
+ENV CYGNUS_CKAN_PORT ""
 ENV CYGNUS_CKAN_API_KEY ""
-ENV CYGNUS_CKAN_SSL "false"
-ENV CYGNUS_HDFS_HOST "iot-hdfs"
-ENV CYGNUS_HDFS_PORT "50070"
-ENV CYGNUS_HDFS_USER "hdfs"
-ENV CYGNUS_HDFS_TOKEN ""
-ENV CYGNUS_CARTO_USER "carto"
-ENV CYGNUS_CARTO_KEY "carto"
+ENV CYGNUS_CKAN_SSL ""
+ENV CYGNUS_CKAN_ENABLE_ENCODING ""
+ENV CYGNUS_CKAN_ENABLE_GROUPING ""
+ENV CYGNUS_CKAN_ENABLE_NAME_MAPPINGS ""
+ENV CYGNUS_CKAN_DATA_MODEL ""
+ENV CYGNUS_CKAN_ATTR_PERSISTENCE ""
+ENV CYGNUS_CKAN_ORION_URL ""
+ENV CYGNUS_CKAN_BATCH_SIZE ""
+ENV CYGNUS_CKAN_BATCH_TIMEOUT ""
+ENV CYGNUS_CKAN_BATCH_TTL ""
+ENV CYGNUS_CKAN_BACKEND_MAX_CONNS ""
+ENV CYGNUS_CKAN_BACKEND_MAX_CONSS_PER_ROUTE ""
+
+# HDFS options
+ENV CYGNUS_HDFS_HOST ""
+ENV CYGNUS_HDFS_PORT ""
+# ENV CYGNUS_HDFS_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+# ENV CYGNUS_HDFS_TOKEN "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+ENV CYGNUS_HDFS_ENABLE_ENCODING ""
+ENV CYGNUS_HDFS_ENABLE_GROUPING ""
+ENV CYGNUS_HDFS_ENABLE_NAME_MAPPINGS ""
+ENV CYGNUS_HDFS_ENABLE_LOWERCASE ""
+ENV CYGNUS_HDFS_DATA_MODEL ""
+ENV CYGNUS_HDFS_FILE_FORMAT ""
+ENV CYGNUS_HDFS_BACKEND_IMPL ""
+ENV CYGNUS_HDFS_BACKEND_MAX_CONNS ""
+ENV CYGNUS_HDFS_BACKEND_MAX_CONNS_PER_ROUTE ""
+ENV CYGNUS_HDFS_PASSWORD ""
+ENV CYGNUS_HDFS_SERVICE_AS_NAMESPACE ""
+ENV CYGNUS_HDFS_BATCH_SIZE ""
+ENV CYGNUS_HDFS_BATCH_TIMEOUT ""
+ENV CYGNUS_HDFS_BATCH_TTL ""
+ENV CYGNUS_HDFS_BATCH_RETRY_INTERVALS ""
+ENV CYGNUS_HDFS_HIVE ""
+ENV CYGNUS_HDFS_KRB5_AUTH ""
+
+# PostgreSQL options
+ENV CYGNUS_POSTGRESQL_HOST ""
+ENV CYGNUS_POSTGRESQL_PORT ""
+# ENV CYGNUS_POSTGRESQL_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+# ENV CYGNUS_POSTGRESQL_PASS "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+ENV CYGNUS_POSTGRESQL_ENABLE_ENCODING ""
+ENV CYGNUS_POSTGRESQL_ENABLE_GROUPING ""
+ENV CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS ""
+ENV CYGNUS_POSTGRESQL_ENABLE_LOWERCASE ""
+ENV CYGNUS_POSTGRESQL_ATTR_PERSISTENCE ""
+ENV CYGNUS_POSTGRESQL_BATCH_SIZE ""
+ENV CYGNUS_POSTGRESQL_BATCH_TIMEOUT ""
+ENV CYGNUS_POSTGRESQL_BATCH_TTL ""
+ENV CYGNUS_POSTGRESQL_ENABLE_CACHE ""
+
+# Carto options
+# ENV CYGNUS_CARTO_USER ""
+# ENV CYGNUS_CARTO_KEY ""
+
+
+# Docker Secrets Support - The following equivalents to storing clear text usernames and passwords are also available:
+#
+# ENV CYGNUS_MYSQL_USER_FILE
+# ENV CYGNUS_MYSQL_PASS_FILE
+# ENV CYGNUS_MONGO_USER_FILE
+# ENV CYGNUS_MONGO_PASS_FILE
+# ENV CYGNUS_HDFS_USER_FILE
+# ENV CYGNUS_HDFS_TOKEN_FILE
+# ENV CYGNUS_POSTGRESQL_USER_FILE
+# ENV CYGNUS_POSTGRESQL_PASS_FILE
+# ENV CYGNUS_CARTO_USER_FILE
+# ENV CYGNUS_CARTO_KEY_FILE
+
+# Orion options
+ENV CYGNUS_ORION_ENABLE_ENCODING ""
+ENV CYGNUS_ORION_ENABLE_GROUPING ""
+ENV CYGNUS_ORION_ENABLE_NAME_MAPPINGS ""
+ENV CYGNUS_ORION_ENABLE_LOWERCASE ""
+ENV CYGNUS_ORION_HOST ""
+ENV CYGNUS_ORION_PORT ""
+ENV CYGNUS_ORION_SSL ""
+ENV CYGNUS_ORION_USER ""
+ENV CYGNUS_ORION_PASS ""
+ENV CYGNUS_ORION_KEYSTONE_HOST ""
+ENV CYGNUS_ORION_KEYSTONE_PORT ""
+ENV CYGNUS_ORION_KEYSTONE_SSL ""
+ENV CYGNUS_ORION_FIWARE ""
+ENV CYGNUS_ORION_FIWARE_PATH ""
+ENV CYGNUS_ORION_BATCH_SIZE ""
+ENV CYGNUS_ORION_BATCH_TIMEOUT ""
+ENV CYGNUS_ORION_BATCH_TTL ""
+ENV CYGNUS_ORION_BATCH_RETRY_INTERVALS ""
+ENV CYGNUS_ORION_ENABLE_CACHE ""
+
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
 ENV GIT_REV_CYGNUS "master"
-# ENV GIT_REV_CYGNUS "mybranch"
 
-ENV MVN_VER "3.3.9"
+ENV MVN_VER "3.5.4"
 ENV MVN_HOME "/opt/apache-maven"
 
 ENV FLUME_VER "1.4.0"
 ENV FLUME_HOME "/opt/apache-flume"
 
-ENV JAVA_VERSION "1.7.0"
+ENV JAVA_VERSION "1.8.0"
 
 # Install
 RUN \
     # Add Cygnus user
     adduser ${CYGNUS_USER} && \
     yum -y install nc java-${JAVA_VERSION}-openjdk-devel git && \
-    export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION} && \
-    export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1" && \
+    export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk && \
+    export MAVEN_OPTS="-Xmx4096m -XX:MaxPermSize=256m -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1" && \
     export MAVEN_ARGS="-B -T4" && \
     # For debug Maven
     # export MAVEN_ARGS="${MAVEN_ARGS} -X -e -Dmaven.compiler.verbose=true" && \
@@ -95,7 +224,7 @@ RUN \
     chown -R cygnus:cygnus ${FLUME_HOME} && \
     # Make a shallow clone to help reduce final image size
     echo "INFO: Cloning Cygnus using <${GIT_URL_CYGNUS}> and <${GIT_REV_CYGNUS}>" && \
-    git clone --depth 1 ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
+    git clone ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
     cd ${CYGNUS_HOME} && \
     git checkout ${GIT_REV_CYGNUS} && \
     echo "INFO: Build and install cygnus-common" && \
@@ -113,37 +242,30 @@ RUN \
     echo "INFO: Instantiate some configuration files" && \
     cp ${CYGNUS_HOME}/cygnus-common/conf/log4j.properties.template ${FLUME_HOME}/conf/log4j.properties && \
     cp ${CYGNUS_HOME}/cygnus-ngsi/conf/grouping_rules.conf.template ${FLUME_HOME}/conf/grouping_rules.conf && \
+    cp ${CYGNUS_HOME}/cygnus-ngsi/conf/name_mappings.conf.template ${FLUME_HOME}/conf/name_mappings.conf && \
     echo "INFO: Create Cygnus log folder" && \
     mkdir -p /var/log/cygnus && \
     echo "INFO: Cleanup to thin the final image... doing optimizations..." && \
-    echo "INFO: Java runtime not needs JAVA_HOME... Unsetting..." && \
-    unset JAVA_HOME && \
     cd ${CYGNUS_HOME}/cygnus-common && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
     cd ${CYGNUS_HOME}/cygnus-ngsi && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
     rm -rf /root/.m2 && rm -rf ${MVN_HOME} && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz && \
+    echo "INFO: Java runtime not needs JAVA_HOME... Unsetting..." && \
+    unset JAVA_HOME && \
     yum erase -y git java-${JAVA_VERSION}-openjdk-devel && \
     rpm -qa redhat-logos gtk2 pulseaudio-libs libvorbis jpackage* groff alsa* atk cairo libX* | xargs -r rpm -e --nodeps && yum -y erase libss && \
     yum clean all && rpm -vv --rebuilddb && rm -rf /var/lib/yum/yumdb && rm -rf /var/lib/yum/history && \
     find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en_US' ! -name 'locale.alias' | xargs -r rm -r && rm -f /var/log/*log && \
     bash -c 'localedef --list-archive | grep -v -e "en_US" | xargs localedef --delete-from-archive' && \
     /bin/cp -f /usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.tmpl && \
-    build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf && \
-    echo "INFO: Compacting Cygnus jar files..." && \
-    # Some class needs to pass file because bytecode errors of old jar dependencies
-    pack200 -J-Xmx512m -J-XX:MaxPermSize=128m --effort=5 --segment-limit=786432 --modification-time=latest --pass-file=org/apache/hadoop/hive/shims/Hadoop23Shims.class \
-      ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar.pack.gz \
-      ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
-    pack200 -J-Xmx512m -J-XX:MaxPermSize=128m --effort=5 --segment-limit=786432 --modification-time=latest --pass-file=org/apache/hadoop/hive/shims/Hadoop23Shims.class \
-      ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar.pack.gz \
-      ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
-    rm -f ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
-    rm -f ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
-    echo "INFO: Copy some files needed for starting cygnus-ngsi" && \
-    cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/cygnus-entrypoint.sh / && \
-    cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/ && \
-    cp -p ${CYGNUS_HOME}/docker/cygnus-ngsi/cartodb_keys.conf ${FLUME_HOME}/conf/
+    build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf
+
+
+COPY cygnus-entrypoint.sh / 
+COPY agent.conf ${FLUME_HOME}/conf/ 
+COPY agent.conf ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf
+COPY cartodb_keys.conf ${FLUME_HOME}/conf/
 
 # Define the entry point
 ENTRYPOINT ["/cygnus-entrypoint.sh"]

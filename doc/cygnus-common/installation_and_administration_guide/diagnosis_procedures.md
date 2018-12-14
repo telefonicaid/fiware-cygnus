@@ -1,4 +1,4 @@
-#<a name="top"></a>Diagnosis procedures
+# <a name="top"></a>Diagnosis procedures
 Content:
 
 * [Problem: Logs are not traced](#section1)
@@ -10,8 +10,8 @@ Content:
 * [Problem: The GUI does not work](#section4)
 * [Other problems](#section5)
 
-##<a name="section1"></a>Problem: Logs are not traced
-###<a name="section1.1"></a>Reason: There may be a problem with the logging folder
+## <a name="section1"></a>Problem: Logs are not traced
+### <a name="section1.1"></a>Reason: There may be a problem with the logging folder
 First, check the folder `/var/log/cygnus` has been created:
 
 ```
@@ -32,7 +32,7 @@ Third, check the permissions of the log folder. If the permissions does not cont
 
 [Top](#top)
 
-###<a name="section1.2"></a>Reason: There may be a problem with the logging configuration of Cygnus
+### <a name="section1.2"></a>Reason: There may be a problem with the logging configuration of Cygnus
 Check the log4j configuration is using a file-related appender.
 
 First of all, check you have a valid `lo4j.properties` file (not a template) in `/usr/cygnus/conf/`.
@@ -50,22 +50,22 @@ Check the apender value is `LOG_FILE`.
 
 [Top](#top)
 
-##<a name="section2"></a>Problem: The API does not work
-###<a name="section2.1"></a>Reason: There may be a problem with the configured port
-Check the port you are using in the request is the one configued in Cygnus. By default, it is `8081`, but can be modified by Cygnus administrator.
+## <a name="section2"></a>Problem: The API does not work
+### <a name="section2.1"></a>Reason: There may be a problem with the configured port
+Check the port you are using in the request is the one configued in Cygnus. By default, it is `5080`, but can be modified by Cygnus administrator.
 
 [Top](#top)
 
-###<a name="section2.2"></a>Reason: The configured port is not open in the firewall
+### <a name="section2.2"></a>Reason: The configured port is not open in the firewall
 The API port may be properly configured but not opened in the firewall (if such a firewall is running) protecting your machine.
 
-The specific solution depends on the specific firewall. Here, `iptables`-based firewalling is shown. Please, check the port is open (default `8081` is used in the examples):
+The specific solution depends on the specific firewall. Here, `iptables`-based firewalling is shown. Please, check the port is open (default `5080` is used in the examples):
 
 ```
 $ (sudo) iptables -L
 Chain INPUT (policy ACCEPT)
 target     prot opt source               destination
-ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:8081
+ACCEPT     tcp  --  anywhere             anywhere            tcp dpt:5080
 
 Chain FORWARD (policy ACCEPT)
 target     prot opt source               destination
@@ -76,16 +76,16 @@ target     prot opt source               destination
 
 If not, open it:
 
-    $ (sudo) iptables -I INPUT -p tcp --dport 8081 -j ACCEPT
+    $ (sudo) iptables -I INPUT -p tcp --dport 5080 -j ACCEPT
 
 [Top](#top)
 
-##<a name="section3"></a>Problem: The GUI does not work
+## <a name="section3"></a>Problem: The GUI does not work
 Coming soon.
 
 [Top](#top)
 
-##<a name="section4"></a>Other problems
+## <a name="section4"></a>Other problems
 Please look for `fiware-cygnus` tag in [stackoverflow.com](http://stackoverflow.com/search?q=fiware+cygnus).
 
 [Top](#top)

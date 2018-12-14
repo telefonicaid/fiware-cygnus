@@ -1,7 +1,7 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -93,16 +93,16 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
 
             try {
                 stmt = con.createStatement();
-            } catch (Exception e) {
-                throw new CygnusRuntimeError(e.getMessage());
+            } catch (SQLException e) {
+                throw new CygnusRuntimeError("Schema creation error", "SQLException", e.getMessage());
             } // try catch
 
             try {
                 String query = "CREATE SCHEMA IF NOT EXISTS " + schemaName;
                 LOGGER.debug("Executing SQL query '" + query + "'");
                 stmt.executeUpdate(query);
-            } catch (Exception e) {
-                throw new CygnusRuntimeError(e.getMessage());
+            } catch (SQLException e) {
+                throw new CygnusRuntimeError("Schema creation error", "SQLException", e.getMessage());
             } // try catch
 
             closePostgreSQLObjects(con, stmt);
@@ -130,16 +130,16 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
 
             try {
                 stmt = con.createStatement();
-            } catch (Exception e) {
-                throw new CygnusRuntimeError(e.getMessage());
+            } catch (SQLException e) {
+                throw new CygnusRuntimeError("Table creation error", "SQLException", e.getMessage());
             } // try catch
 
             try {
                 String query = "CREATE TABLE IF NOT EXISTS " + schemaName + "." + tableName + " " + typedFieldNames;
                 LOGGER.debug("Executing SQL query '" + query + "'");
                 stmt.executeUpdate(query);
-            } catch (Exception e) {
-                throw new CygnusRuntimeError(e.getMessage());
+            } catch (SQLException e) {
+                throw new CygnusRuntimeError("Table creation error", "SQLException", e.getMessage());
             } // try catch
 
             closePostgreSQLObjects(con, stmt);
@@ -158,8 +158,8 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
 
         try {
             stmt = con.createStatement();
-        } catch (Exception e) {
-            throw new CygnusRuntimeError(e.getMessage());
+        } catch (SQLException e) {
+            throw new CygnusRuntimeError("Data insertion error", "SQLException", e.getMessage());
         } // try catch
 
         try {
@@ -167,9 +167,9 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
             LOGGER.debug("Executing SQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
-            throw new CygnusPersistenceError(e.getMessage());
+            throw new CygnusPersistenceError("Data insertion error", "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
-            throw new CygnusBadContextData(e.getMessage());
+            throw new CygnusBadContextData("Data insertion error", "SQLException", e.getMessage());
         } // try catch
     } // insertContextData
 
@@ -184,8 +184,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
             try {
                 con.close();
             } catch (SQLException e) {
-                throw new CygnusRuntimeError("The Hive connection could not be closed. Details="
-                        + e.getMessage());
+                throw new CygnusRuntimeError("Objects closing error", "SQLException", e.getMessage());
             } // try catch
         } // if
 
@@ -193,8 +192,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
             try {
                 stmt.close();
             } catch (SQLException e) {
-                throw new CygnusRuntimeError("The Hive statement could not be closed. Details="
-                        + e.getMessage());
+                throw new CygnusRuntimeError("Objects closing error", "SQLException", e.getMessage());
             } // try catch
         } // if
     } // closePostgreSQLObjects
@@ -221,7 +219,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
          */
         public PostgreSQLDriver(String postgresqlHost, String postgresqlPort, String postgresqlDatabase, 
                 String postgresqlUsername, String postgresqlPassword) {
-            connections = new HashMap<String, Connection>();
+            connections = new HashMap<>();
             this.postgresqlHost = postgresqlHost;
             this.postgresqlPort = postgresqlPort;
             this.postgresqlDatabase = postgresqlDatabase;
@@ -252,9 +250,9 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
 
                 return con;
             } catch (ClassNotFoundException e) {
-                throw new CygnusPersistenceError(e.getMessage());
+                throw new CygnusPersistenceError("Connection error", "ClassNotFoundException", e.getMessage());
             } catch (SQLException e) {
-                throw new CygnusPersistenceError(e.getMessage());
+                throw new CygnusPersistenceError("Connection error", "SQLException", e.getMessage());
             } // try catch
         } // getConnection
 

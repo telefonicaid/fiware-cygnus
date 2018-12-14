@@ -23,6 +23,7 @@ pages:
           - 'Flume environment configuration': 'cygnus-common/installation_and_administration_guide/flume_env_conf.md'
           - 'log4j configuration': 'cygnus-common/installation_and_administration_guide/log4j_conf.md'
           - 'Running as a process': 'cygnus-common/installation_and_administration_guide/running_as_process.md'
+          - 'YAFS': 'cygnus-common/installation_and_administration_guide/yafs.md'
           - 'Testing': 'cygnus-common/installation_and_administration_guide/testing.md'
           - 'Logs and alarms': 'cygnus-common/installation_and_administration_guide/logs_and_alarms.md'
           - 'Original API': 'cygnus-common/installation_and_administration_guide/management_interface.md'
@@ -54,9 +55,11 @@ pages:
           - 'Configuration examples': 'cygnus-ngsi/installation_and_administration_guide/configuration_examples.md'
           - 'Running as a service': 'cygnus-ngsi/installation_and_administration_guide/running_as_service.md'
           - 'Testing': 'cygnus-ngsi/installation_and_administration_guide/testing.md'
+          - 'Backends as short-term historics': 'cygnus-ngsi/installation_and_administration_guide/backends_as_sth.md'
           - 'Name mappings': 'cygnus-ngsi/installation_and_administration_guide/name_mappings.md'
           - 'Grouping Rules': 'cygnus-ngsi/installation_and_administration_guide/grouping_rules.md'
           - 'Multitenancy': 'cygnus-ngsi/installation_and_administration_guide/multitenancy.md'
+          - 'Reliability': 'cygnus-ngsi/installation_and_administration_guide/reliability.md'
           - 'Performance tips': 'cygnus-ngsi/installation_and_administration_guide/performance_tips.md'
           - 'NGSIv2 support': 'cygnus-ngsi/installation_and_administration_guide/ngsiv2_support.md'
           - 'IPv6 support': 'cygnus-ngsi/installation_and_administration_guide/ipv6_support.md'
@@ -86,6 +89,9 @@ pages:
           - 'NGSINameMappingsInterceptor': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md'
           - 'RoundRobinChannelSelector': 'cygnus-ngsi/flume_extensions_catalogue/round_robin_channel_selector.md'
           - 'Reporting issues and contact information': 'cygnus-ngsi/flume_extensions_catalogue/issues_and_contact.md'
+      - 'Integration examples':
+          - 'Integration with Apache Spark': 'cygnus-ngsi/integration/orion_cygnus_spark.md'
+          - 'Integration with Apache Kafka': 'cygnus-ngsi/integration/orion_cygnus_kafka.md'
   - 'cygnus-twitter agent':
       - 'Installation and Administration Guide':
           - 'Introduction': 'cygnus-twitter/installation_and_administration_guide/introduction.md'

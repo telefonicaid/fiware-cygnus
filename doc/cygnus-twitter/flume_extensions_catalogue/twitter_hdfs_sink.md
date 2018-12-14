@@ -16,7 +16,7 @@ Content:
     * [OAuth2 authentication](#section3.3)
     * [Kerberos authentication](#section3.4)
 
-##<a name="section1"></a>Functionality
+## <a name="section1"></a>Functionality
 `com.telefonica.iot.cygnus.sinks.TwitterHDFSSink`, or simply `TwitterHDFSSink` is a sink designed to persist tweets data events within a [HDFS](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html) deployment. The data is provided by Twitter.
 
 Tweets are always transformed into internal Flume events at twitter agent source. In the end, the information within these Flume events must be mapped into specific HDFS data structures at the Twitter agent sinks.
@@ -25,14 +25,14 @@ Next sections will explain this in detail.
 
 [Top](#top)
 
-###<a name="section1.1"></a>Mapping Twitter events to flume events
+### <a name="section1.1"></a>Mapping Twitter events to flume events
 Received Twitter events are transformed into Flume events (specifically `TwitterEvent`), independently of the final backend where it is persisted.
 
 The body of a flume TwitterEvent is the representation of a tweet in JSON format. Once translated, the data (now, as a Flume event) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
-###<a name="section1.2"></a>Mapping Flume events to HDFS data structures
+### <a name="section1.2"></a>Mapping Flume events to HDFS data structures
 [HDFS organizes](https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html#The_File_System_Namespace) the data in folders containinig big data files. Such organization is exploited by `TwitterHDFSSink` each time a Flume event is going to be persisted.
 
 A file named `/user/<hdfs_folder>/<hdfs_file>` is created (if not existing yet), where `<hdfs_folder>` and `<hdfs_file>` are configuration parameters.
@@ -41,14 +41,14 @@ In this file, a JSON line is created per each tweet. The tweet contains all the 
 To avoid confusions and make the HDFS file reliable all `\n` in tweets have been removed (since they do not provide semantic information). This way, the only `\n` characters that appear in the file are those that split tweets into lines.
 [Top](#top)
 
-###<a name="section1.3"></a>Hive
+### <a name="section1.3"></a>Hive
 Hive is currently not supported in this version of the `TwitterHDFSSink`.
 
 [Top](#top)
 
 
-##<a name="section2"></a>Administration guide
-###<a name="section2.1"></a>Configuration
+## <a name="section2"></a>Administration guide
+### <a name="section2.1"></a>Configuration
 `TwitterHDFSSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -134,9 +134,9 @@ A configuration example could be:
 
 
 
-###<a name="section2.3"></a>Important notes
+### <a name="section2.3"></a>Important notes
 
-####<a name="section2.3.2"></a>About the binary backend
+#### <a name="section2.3.2"></a>About the binary backend
 Current implementation of the HDFS binary backend does not support any authentication mechanism.
 
 A desirable authentication method would be OAuth2, since it is the standard in FIWARE, but this is not currenty supported by the remote RPC server the binary backend accesses.
@@ -149,7 +149,7 @@ There exists an [issue](https://github.com/telefonicaid/fiware-cosmos/issues/111
 
 [Top](#top)
 
-####<a name="section2.3.3"></a>About batching
+#### <a name="section2.3.3"></a>About batching
 As explained in the [programmers guide](#section3), `TwitterHDFSSink` extends `TwitterSink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows exteding classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 Flume events. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same HDFS file. If processing the events one by one, we would need 100 writes to HDFS; nevertheless, in this example only one write is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination HDFS file. In the worst case, the whole 100 entities will be about 100 different entities (100 different HDFS destinations), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 writes of the event by event approach with only 10-15 writes.
@@ -160,8 +160,8 @@ By default, `TwitterHDFSSink` has a configured batch size and batch accumulation
 
 [Top](#top)
 
-##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`TwitterHDFSSink` class
+## <a name="section3"></a>Programmers guide
+### <a name="section3.1"></a>`TwitterHDFSSink` class
 `TwitterHDFSSink` extends the base `TwitterSink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
@@ -178,7 +178,7 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-###<a name="section3.2"></a>`HDFSBackendImpl` class
+### <a name="section3.2"></a>`HDFSBackendImpl` class
 This is a convenience backend class for HDFS that extends the `HttpBackend` abstract class (provides common logic for any Http connection-based backend) and implements the `HDFSBackend` interface (provides the methods that any HDFS backend must implement). Relevant methods are:
 
     public void createDir(String dirPath) throws Exception;
@@ -201,7 +201,7 @@ Checks if a HDFS file, given its path, exists ot not.
 
 [Top](#top)
 
-###<a name="section3.3"></a>OAuth2 authentication
+### <a name="section3.3"></a>OAuth2 authentication
 [OAuth2](http://oauth.net/2/) is the evolution of the OAuth protocol, an open standard for authorization. Using OAuth, client applications can access in a secure way certain server resources on behalf of the resource owner, and the best, without sharing their credentials with the service. This works because of a trusted authorization service in charge of emitting some pieces of security information: the access tokens. Once requested, the access token is attached to the service request in order the server may ask the authorization service for the validity of the user requesting the access (authentication) and the availability of the resource itself for this user (authorization).
 
 A detailed architecture of OAuth2 can be found [here](http://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/PEP_Proxy_-_Wilma_-_Installation_and_Administration_Guide), but in a nutshell, FIWARE implements the above concept through the Identity Manager GE ([Keyrock](http://catalogue.fiware.org/enablers/identity-management-keyrock) implementation) and the Access Control ([AuthZForce](http://catalogue.fiware.org/enablers/authorization-pdp-authzforce) implementation); the join of this two enablers conform the OAuth2-based authorization service in FIWARE:
@@ -220,7 +220,7 @@ As you can see, your FIWARE Lab credentials are required in the payload, in the 
 
 [Top](#top)
 
-###<a name="section3.4"></a>Kerberos authentication
+### <a name="section3.4"></a>Kerberos authentication
 Hadoop Distributed File System (HDFS) can be remotely managed through a REST API called [WebHDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/WebHDFS.html). This API may be used without any kind of security (in this case, it is enough knowing a valid HDFS user name in order to access this user HDFS space), or a Kerberos infrastructure may be used for authenticating the users.
 
 [Kerberos](http://web.mit.edu/kerberos/) is an authentication protocol created by MIT, current version is 5. It is based in symmetric key cryptography and a trusted third party, the Kerberos servers themselves. The protocol is as easy as authenticating to the Authentication Server (AS), which forwards the user to the Key Distribution Center (KDC) with a ticket-granting ticket (TGT) that can be used to retrieve the definitive client-to-server ticket. This ticket can then be used for authentication purposes against a service server (in both directions).
@@ -237,7 +237,7 @@ Nevertheless, Cygnus needs this process to be automated. Let's see how through t
 
 [Top](#top)
 
-####`conf/cygnus.conf`
+#### `conf/cygnus.conf`
 This file can be built from the distributed `conf/cugnus.conf.template`. Edit appropriately this part of the `NGSIHDFSSink` configuration:
 
     # Kerberos-based authentication enabling
@@ -255,7 +255,7 @@ I.e. start enabling (or not) the Kerberos authentication. Then, configure a user
 
 [Top](#top)
 
-####`conf/krb5_login.conf`
+#### `conf/krb5_login.conf`
 
 Contains the following line, which must not be changed (thus, the distributed file is not a template but the definitive one).
 
@@ -265,7 +265,7 @@ Contains the following line, which must not be changed (thus, the distributed fi
 
 [Top](#top)
 
-####`conf/krb5.conf`
+#### `conf/krb5.conf`
 
 This file can be built from the distributed `conf/krb5.conf.template`. Edit it appropriately, basically by replacing `EXAMPLE.COM` by your Kerberos realm (this is the same than your domain, but uppercase, i.e. the realm for `example.com` is `EXAMPLE.COM`) and by configuring your Kerberos Key Distribution Center (KDC) and your Kerberos admin/authentication server (ask your netowork administrator in order to know them).
 

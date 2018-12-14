@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
@@ -18,7 +18,7 @@
 package com.telefonica.iot.cygnus.interceptors;
 
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-import com.telefonica.iot.cygnus.utils.TestUtils;
+import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import java.util.Map;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
@@ -167,7 +167,7 @@ public class NGSIGroupingInterceptorTest {
         NGSIEvent originalEvent;
         
         try {
-            originalEvent = TestUtils.createNGSIEvent(originalCEStr, null, service, servicePath, correlatorID);
+            originalEvent = NGSIUtilsForTests.createNGSIEvent(originalCEStr, null, service, servicePath, correlatorID);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[GroupingInterceptor.intercept]")
                     + "- FAIL - There was a problem when creating the NGSIEvent");

@@ -1,7 +1,7 @@
 /**
- * Copyright 2015 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -18,6 +18,10 @@
 
 package com.telefonica.iot.cygnus.backends.ckan;
 
+import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
+
 /**
  * Interface for those backends implementing the persistence in CKAN.
  * 
@@ -32,10 +36,12 @@ public interface CKANBackend {
      * @param resName Resource name
      * @param records Recods to be added to the resource
      * @param createEnabled
-     * @throws Exception
+     * @throws CygnusBadConfiguration
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
      */
     void persist(String orgName, String pkgName, String resName, String records, boolean createEnabled)
-        throws Exception;
+        throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError;
     
     /**
      * Caps the resource within the given package, within the given organization up to the maximum number of records.
@@ -43,9 +49,11 @@ public interface CKANBackend {
      * @param pkgName
      * @param resName
      * @param maxRecords
-     * @throws Exception
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
      */
-    void capRecords(String orgName, String pkgName, String resName, long maxRecords) throws Exception;
+    void capRecords(String orgName, String pkgName, String resName, long maxRecords)
+        throws CygnusRuntimeError, CygnusPersistenceError;
     
     /**
      * Expirates records within the given resource within the given package, within the given organization, based on
@@ -54,15 +62,18 @@ public interface CKANBackend {
      * @param pkgName
      * @param resName
      * @param expirationTime
-     * @throws Exception
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
      */
-    void expirateRecords(String orgName, String pkgName, String resName, long expirationTime) throws Exception;
+    void expirateRecords(String orgName, String pkgName, String resName, long expirationTime)
+        throws CygnusRuntimeError, CygnusPersistenceError;
     
     /**
      * Expirates records within all the cached resources based on the expiration time.
      * @param expirationTime
-     * @throws Exception
+     * @throws CygnusRuntimeError
+     * @throws CygnusPersistenceError
      */
-    void expirateRecordsCache(long expirationTime) throws Exception;
+    void expirateRecordsCache(long expirationTime) throws CygnusRuntimeError, CygnusPersistenceError;
     
 } // CKANBackend

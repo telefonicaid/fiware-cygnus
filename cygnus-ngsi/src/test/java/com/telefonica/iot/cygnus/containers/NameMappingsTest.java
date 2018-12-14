@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
@@ -22,7 +22,7 @@ import com.telefonica.iot.cygnus.containers.NameMappings.EntityMapping;
 import com.telefonica.iot.cygnus.containers.NameMappings.ServiceMapping;
 import com.telefonica.iot.cygnus.containers.NameMappings.ServicePathMapping;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-import com.telefonica.iot.cygnus.utils.TestUtils;
+import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 import static org.junit.Assert.assertEquals;
@@ -277,7 +277,7 @@ public class NameMappingsTest {
     public void testNameMappingsSuccessfullyParsed() throws Exception {
         System.out.println(getTestTraceHead("[NameMappings.parse]")
                 + "-------- Service mappings can be retrieved");
-        NameMappings nameMappings = TestUtils.createJsonNameMappings(nameMappingsOK);
+        NameMappings nameMappings = NGSIUtilsForTests.createJsonNameMappings(nameMappingsOK);
         ArrayList<ServiceMapping> serciceMappings = nameMappings.getServiceMappings();
         
         try {
@@ -469,7 +469,7 @@ public class NameMappingsTest {
     public void testNameMappingsPatternsCompiled() throws Exception {
         System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
                 + "-------- Patterns are successfully compiled");
-        NameMappings nameMappings = TestUtils.createJsonNameMappings(nameMappingsRegex);
+        NameMappings nameMappings = NGSIUtilsForTests.createJsonNameMappings(nameMappingsRegex);
         nameMappings.compilePatterns();
         ServiceMapping serviceMapping = nameMappings.getServiceMappings().get(0);
        

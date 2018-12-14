@@ -1,4 +1,4 @@
-#Installation and Administration Guide
+# Installation and Administration Guide
 
 * [Introduction](./introduction.md)
 * Installation:
@@ -11,6 +11,7 @@
 * Running:
     * [Running as a process](./running_as_process.md)
     * [Running as a service](./running_as_service.md)
+    * [YAFS](./yafs.md)
 * [Testing](./testing.md)
 * [Logs and alarm](./logs_and_alarms.md)
 * [Original API](./management_interface.md)

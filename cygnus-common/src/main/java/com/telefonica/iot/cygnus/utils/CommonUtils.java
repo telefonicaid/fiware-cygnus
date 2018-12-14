@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -38,12 +38,14 @@ import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.xml.bind.DatatypeConverter;
 import kafka.common.OffsetOutOfRangeException;
 import kafka.tools.KafkaMigrationTool;
 import org.I0Itec.zkclient.exception.ZkNoNodeException;
 import org.apache.flume.interceptor.RegexExtractorInterceptorMillisSerializer;
-import org.apache.hadoop.hive.jdbc.HivePreparedStatement;
+import org.apache.hive.jdbc.HivePreparedStatement;
 import org.apache.hadoop.hive.ql.exec.AbstractMapJoinOperator;
 import org.apache.hadoop.metrics.spi.AbstractMetricsContext;
 import org.apache.http.impl.DefaultBHttpServerConnection;
@@ -76,6 +78,12 @@ public final class CommonUtils {
             "yyyy-MM-dd HH:mm:ss").withOffsetParsed().withZoneUTC();
     private static final DateTimeFormatter FORMATTER4 = DateTimeFormat.forPattern(
             "yyyy-MM-dd HH:mm:ss.SSS").withOffsetParsed().withZoneUTC();
+    private static final DateTimeFormatter FORMATTER5 = DateTimeFormat.forPattern(
+            "yyyy-MM-dd'T'HH:mm:ssZ").withOffsetParsed();
+    private static final DateTimeFormatter FORMATTER6 = DateTimeFormat.forPattern(
+            "yyyy-MM-dd'T'HH:mm:ss.SSSZ").withOffsetParsed();
+    private static final Pattern FORMATTER6_PATTERN = Pattern.compile("^(\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2})\\.(\\d+)([+-][\\d:]+)$");
+
     private static final Pattern PATTERN = Pattern.compile("^[a-zA-Z0-9_]*$");
     
     /**
@@ -160,6 +168,16 @@ public final class CommonUtils {
         humanRedable += sdf.format(new Date(ts)) + (addUTC ? "Z" : "");
         return humanRedable;
     } // getHumanRedable
+    
+    /**
+     * Gets the milliseconds version of the given timestamp.
+     * @param timestamp
+     * @return The milliseconds version of the given timestamp
+     * @throws java.text.ParseException
+     */
+    public static long getMilliseconds(String timestamp) throws java.text.ParseException {
+        return DatatypeConverter.parseDateTime(timestamp).getTime().getTime();
+    } // getMilliseconds
     
     /**
      * Decides if a given string is a number.
@@ -297,7 +315,30 @@ public final class CommonUtils {
                                             dateTime = FORMATTER4.parseDateTime(mdValueTruncated);
                                         } catch (Exception e6) {
                                             LOGGER.debug(e6.getMessage());
-                                            return null;
+
+                                            try {
+                                                // ISO 8601 with offset (without milliseconds)
+                                                dateTime = FORMATTER5.parseDateTime(mdValue);
+                                            } catch (Exception e7) {
+                                                LOGGER.debug(e7.getMessage());
+
+                                                try {
+                                                    // ISO 8601 with offset (with milliseconds)
+                                                    Matcher matcher = FORMATTER6_PATTERN.matcher(mdValue);
+                                                    if (matcher.matches()) {
+                                                        String mdValueTruncated = matcher.group(1) + "."
+                                                          + matcher.group(2).substring(0, 3)
+                                                          + matcher.group(3);
+                                                        dateTime = FORMATTER6.parseDateTime(mdValueTruncated);
+                                                    } else {
+                                                        LOGGER.debug("ISO8601 format does not match");
+                                                        return null;
+                                                    } // if
+                                                } catch (Exception e8) {
+                                                    LOGGER.debug(e8.getMessage());
+                                                    return null;
+                                                } // try catch
+                                            } // try catch
                                         } // try catch
                                     } // try catch
                                 } // try catch
@@ -345,10 +386,10 @@ public final class CommonUtils {
     /**
      * Only works in DEBUG level.
      * Prints the loaded .jar files at the start of Cygnus run.
-     */ 
+     */
     public static void printLoadedJars() {
-        // trace the file containing the httpclient library        
-        URL myClassURL = PoolingClientConnectionManager.class.getProtectionDomain().getCodeSource().getLocation();        
+        // trace the file containing the httpclient library
+        URL myClassURL = PoolingClientConnectionManager.class.getProtectionDomain().getCodeSource().getLocation();
         LOGGER.debug("Loading httpclient from " + myClassURL.toExternalForm());
         
         // trace the file containing the httpcore library
@@ -360,7 +401,8 @@ public final class CommonUtils {
         LOGGER.debug("Loading junit from " + myClassURL.toExternalForm());
         
         // trace the file containing the flume-ng-node library
-        myClassURL = RegexExtractorInterceptorMillisSerializer.class.getProtectionDomain().getCodeSource().getLocation();
+        myClassURL =
+                RegexExtractorInterceptorMillisSerializer.class.getProtectionDomain().getCodeSource().getLocation();
         LOGGER.debug("Loading flume-ng-node from " + myClassURL.toExternalForm());
         
         // trace the file containing the libthrift library
@@ -381,7 +423,7 @@ public final class CommonUtils {
         
         // trace the file containing the postgresql library
         myClassURL = BlobOutputStream.class.getProtectionDomain().getCodeSource().getLocation();
-        LOGGER.debug("Loading postgresql from " + myClassURL.toExternalForm());      
+        LOGGER.debug("Loading postgresql from " + myClassURL.toExternalForm());
         
         // trace the file containing the log4j library
         myClassURL = SequenceNumberPatternConverter.class.getProtectionDomain().getCodeSource().getLocation();

@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -31,6 +31,7 @@ import org.json.simple.JSONObject;
 public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
     
     private final String apiKey;
+    private final boolean isPersonalAccount;
     private static final String BASE_URL = "/api/v2/sql?q=";
     
     /**
@@ -39,17 +40,23 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
      * @param port
      * @param ssl
      * @param apiKey
+     * @param isPersonalAccount
      * @param maxConns
      * @param maxConnsPerRoute
      */
-    public CartoDBBackendImpl(String host, String port, boolean ssl, String apiKey, int maxConns,
-            int maxConnsPerRoute) {
+    public CartoDBBackendImpl(String host, String port, boolean ssl, String apiKey, boolean isPersonalAccount,
+            int maxConns, int maxConnsPerRoute) {
         super(host, port, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
         this.apiKey = apiKey;
+        this.isPersonalAccount = isPersonalAccount;
     } // CartoDBBackendImpl
     
     @Override
     public boolean isEmpty(String schema, String tableName) throws Exception {
+        // Set the appropiate schema depending on the account type
+        schema = (isPersonalAccount ? "public" : schema);
+        
+        // Do the check
         String query = "SELECT COUNT(*) FROM " + schema + "." + tableName;
         String encodedQuery = URLEncoder.encode(query, "UTF-8");
         String relativeURL = BASE_URL + encodedQuery + "&api_key=" + apiKey;
@@ -69,6 +76,9 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
 
     @Override
     public void createTable(String schema, String tableName, String fields) throws Exception {
+        // Set the appropiate schema depending on the account type
+        schema = (isPersonalAccount ? "public" : schema);
+
         // Create the table
         String query = "CREATE TABLE " + schema + "." + tableName + " " + fields;
         String encodedQuery = URLEncoder.encode(query, "UTF-8");
@@ -94,6 +104,10 @@ public class CartoDBBackendImpl extends HttpBackend implements CartoDBBackend {
     
     @Override
     public void insert(String schema, String tableName, String withs, String fields, String rows) throws Exception {
+        // Set the appropiate schema depending on the account type
+        schema = (isPersonalAccount ? "public" : schema);
+        
+        // Do the insertion
         String query = withs + "INSERT INTO " + schema + "." + tableName + " " + fields + " VALUES " + rows;
         String encodedQuery = URLEncoder.encode(query, "UTF-8");
         String relativeURL = BASE_URL + encodedQuery + "&api_key=" + apiKey;
