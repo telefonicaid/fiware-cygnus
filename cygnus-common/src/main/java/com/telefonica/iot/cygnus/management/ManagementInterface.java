@@ -84,8 +84,12 @@ public class ManagementInterface extends AbstractHandler {
     private final ImmutableMap<String, SinkRunner> sinks;
     private final int apiPort;
     private final int guiPort;
-    private final String configurationPath;
-    
+    private final String configurationPath;    
+    private OrionBackendImpl orionBackend;
+    private static final int MAX_CONNS = 50;
+    private static final int MAX_CONNS_PER_ROUTE = 10;
+
+
     /**
      * Constructor.
      * @param configurationPath
