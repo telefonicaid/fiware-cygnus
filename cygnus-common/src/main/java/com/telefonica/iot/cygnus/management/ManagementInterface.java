@@ -43,6 +43,7 @@ public class ManagementInterface extends AbstractHandler {
     private static final CygnusLogger LOGGER = new CygnusLogger(ManagementInterface.class);
     private final File configurationFile;
     private String groupingRulesConfFile;
+    private String nameMappingsConfFile;    
     private final ImmutableMap<String, SourceRunner> sources;
     private final ImmutableMap<String, Channel> channels;
     private final ImmutableMap<String, SinkRunner> sinks;
@@ -72,7 +73,15 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("There was a problem while obtaining the grouping rules configuration file. Details: "
                     + e.getMessage());
         } // try catch
-        
+
+        try {
+            this.nameMappingsConfFile = getNameMappingsConfFile();
+        } catch (Exception e) {
+            this.nameMappingsConfFile = null;
+            LOGGER.error("There was a problem while obtainin the name mappings configuration file: Details: "
+                    + e.getMessage());
+} // try catch
+
         this.sources = sources;
         this.channels = channels;
         this.sinks = sinks;
