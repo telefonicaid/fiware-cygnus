@@ -511,6 +511,24 @@ public class ManagementInterface extends AbstractHandler {
             } // while
         } // try
         
+        return nmConfFile;
+    } // getNameMappingsConfFile
+
+
+   private void handlePostGroupingRules(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json; charset=utf-8");
+
+        // read the new rule wanted to be added
+        BufferedReader reader = request.getReader();
+        String ruleStr = "";
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            ruleStr += line;
+        } // while
+
+        reader.close();
+        
         // set the given header to the response or create it
         response.setHeader(CommonConstants.HEADER_CORRELATOR_ID, ManagementInterfaceUtils.setCorrelator(request));
 
