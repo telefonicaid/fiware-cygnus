@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2014-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -18,19 +18,21 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.sinks.NGSISink.Accumulator;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.TestUtils;
+import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.lifecycle.LifecycleState;
 import org.apache.log4j.Level;
@@ -88,17 +90,18 @@ public class NGSISinkTest {
     private class NGSISinkImpl extends NGSISink {
 
         @Override
-        void persistBatch(NGSIBatch batch) throws Exception {
+        void persistBatch(NGSIBatch batch) throws CygnusPersistenceError {
             throw new UnsupportedOperationException("Not supported yet.");
         } // persistBatch
 
         @Override
-        public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+        public void capRecords(NGSIBatch batch, long size) throws CygnusCappingError {
             throw new UnsupportedOperationException("Not supported yet.");
         } // capRecords
 
         @Override
-        public void expirateRecords(long time) {
+        public void expirateRecords(long time) throws CygnusExpiratingError {
+            throw new UnsupportedOperationException("Not supported yet.");
         } // expirateRecords
         
     } // NGSISinkImpl
@@ -503,9 +506,9 @@ public class NGSISinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
-        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        ContextElement originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
@@ -607,9 +610,9 @@ public class NGSISinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
-        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        ContextElement originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
@@ -711,9 +714,9 @@ public class NGSISinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
-        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        ContextElement originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
@@ -817,9 +820,9 @@ public class NGSISinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
-        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        ContextElement originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
@@ -925,9 +928,9 @@ public class NGSISinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
-        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        ContextElement originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
@@ -1032,9 +1035,9 @@ public class NGSISinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
-        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        ContextElement originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
@@ -1139,9 +1142,9 @@ public class NGSISinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
-        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        ContextElement originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();
@@ -1248,9 +1251,9 @@ public class NGSISinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        ContextElement originalCE = TestUtils.createJsonContextElement(originalCEStr);
-        ContextElement mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        ContextElement originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+        ContextElement mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, mappedCE);
         acc.accumulate(event);
         NGSIBatch batch = acc.getBatch();
         batch.startIterator();

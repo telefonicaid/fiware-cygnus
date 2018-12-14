@@ -1,4 +1,4 @@
-#<a name="top"></a>NGSICKANSink
+# <a name="top"></a>NGSICKANSink
 Content:
 
 * [Functionality](#section1)
@@ -28,7 +28,7 @@ Content:
 * [Annexes](#section4)
     * [Provisioning a CKAN resource for the column mode](#section4.1)
 
-##<a name="section1"></a>Functionality
+## <a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSICKANSink`, or simply `NGSICKANSink` is a sink designed to persist NGSI-like context data events within a [CKAN](http://ckan.org/) server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific CKAN data structures.
@@ -37,19 +37,19 @@ Next sections will explain this in detail.
 
 [Top](#top)
 
-###<a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
+### <a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
 Notified NGSI events (containing context data) are transformed into `NGSIEvent` objects (for each context element a `NGSIEvent` is created; such an event is a mix of certain headers and a `ContextElement` object), independently of the NGSI data generator or the final backend where it is persisted.
 
 This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_rest_handler.md). Once translated, the data (now, as `NGSIEvent` objects) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
-###<a name="section1.2"></a>Mapping `NGSIEvent`s to CKAN data structures
+### <a name="section1.2"></a>Mapping `NGSIEvent`s to CKAN data structures
 [CKAN organizes](http://docs.ckan.org/en/latest/user-guide.html) the data in organizations containing packages or datasets; each one of these packages/datasets contains several resources whose data is finally stored in a PostgreSQL database (CKAN Datastore) or plain files (CKAN Filestore). Such organization is exploited by `NGSICKANSink` each time a `NGSIEvent` is going to be persisted.
 
 [Top](#top)
 
-####<a name="section1.2.1"></a>Organizations naming conventions
+#### <a name="section1.2.1"></a>Organizations naming conventions
 An organization named as the notified `fiware-service` header value (or, in absence of such a header, the defaulted value for the FIWARE service) is created (if not existing yet).
 
 Since based in [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
@@ -58,7 +58,7 @@ Nevertheless, different than PostgreSQL, [organization lengths](http://docs.ckan
 
 [Top](#top)
 
-####<a name="section1.2.2"></a>Packages/datasets naming conventions
+#### <a name="section1.2.2"></a>Packages/datasets naming conventions
 A package/dataset named as the concatenation of the notified `fiware-service` and `fiware-servicePath` header values (or, in absence of such headers, the defaulted value for the FIWARE service and service path) is created (if not existing yet) in the above organization.
 
 Since based in [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to  certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
@@ -67,7 +67,7 @@ Nevertheless, different than PostgreSQL, [dataset lengths](http://docs.ckan.org/
 
 [Top](#top)
 
-####<a name="section1.2.3"></a>Resources naming conventions
+#### <a name="section1.2.3"></a>Resources naming conventions
 CKAN resources follow a single data model (see the [Configuration](#section2.1) section for more details), i.e. per entity. Thus, a resource name always take the concatenation of the entity ID and type. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
 
 It must be noticed a CKAN Datastore (and a viewer) is also created and associated to the resource above. This datastore, which in the end is a PostgreSQL table, will hold the persisted data.
@@ -78,7 +78,7 @@ Despite there is no real limit on the resource names, Cygnus will keep limiting 
 
 [Top](#top)
 
-####<a name="section1.2.4"></a>Row-like storing
+#### <a name="section1.2.4"></a>Row-like storing
 Regarding the specific data stored within the datastore associated to the resource, if `attr_persistence` parameter is set to `row` (default storing mode) then the notified data is stored attribute by attribute, composing an insert for each one of them. Each insert contains the following fields:
 
 * `recvTimeTs`: UTC timestamp expressed in miliseconds.
@@ -93,7 +93,7 @@ Regarding the specific data stored within the datastore associated to the resour
 
 [Top](#top)
 
-####<a name="section1.2.4"></a>Column-like storing
+#### <a name="section1.2.4"></a>Column-like storing
 Regarding the specific data stored within the datastore associated to the resource, if `attr_persistence` parameter is set to `column` then a single line is composed for the whole notified entity, containing the following fields:
 
 * `recvTime`: UTC timestamp in human-redable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
@@ -105,8 +105,8 @@ Regarding the specific data stored within the datastore associated to the resour
 
 [Top](#top)
 
-###<a name="section1.3"></a>Example
-####<a name="section1.3.1"></a>`NGSIEvent`
+### <a name="section1.3"></a>Example
+#### <a name="section1.3.1"></a>`NGSIEvent`
 Assuming the following `NGSIEvent` is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     ngsi-event={
@@ -140,7 +140,7 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
 [Top](#top)
 
-####<a section="1.3.2"></a>Organization, dataset and resource names
+#### <a section="1.3.2"></a>Organization, dataset and resource names
 Given the above example and using the old encoding, these are the CKAN elements created
 
 * Orgnaization: `vehicles`.
@@ -155,7 +155,7 @@ Using the new encdoing:
 
 [Top](#top)
 
-####<a section="1.3.2"></a>Row-like storing
+#### <a section="1.3.2"></a>Row-like storing
 Assuming `attr_persistence=row` as configuration parameter, then `NGSICKANSink` will persist the data within the body as:
 
     $ curl -s -S -H "Authorization: myapikey" "http://192.168.80.34:80/api/3/action/datastore_search?resource_id=3254b3b4-6ffe-4f3f-8eef-c5c98bfff7a7"
@@ -242,7 +242,7 @@ Assuming `attr_persistence=row` as configuration parameter, then `NGSICKANSink` 
 
 [Top](#top)
 
-####<a section="1.3.2"></a>Column-like storing
+#### <a section="1.3.2"></a>Column-like storing
 If `attr_persistence=colum` then `NGSICKANSink` will persist the data within the body as:
 
     $ curl -s -S -H "Authorization: myapikey" "http://130.206.83.8:80/api/3/action/datastore_search?resource_id=611417a4-8196-4faf-83bc-663c173f6986"
@@ -314,8 +314,8 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 
 [Top](#top)
 
-##<a name="section2"></a>Administration guide
-###<a name="section2.1"></a>Configuration
+## <a name="section2"></a>Administration guide
+### <a name="section2.1"></a>Configuration
 `NGSICKANSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -373,13 +373,13 @@ A configuration example could be:
 
 [Top](#top)
 
-###<a name="section2.2"></a>Use cases
+### <a name="section2.2"></a>Use cases
 Use `NGSICKANSink` if you are looking for a database storage not growing so much in the mid-long term.
 
 [Top](#top)
 
-###<a name="section2.3"></a>Important notes
-####<a name="section2.3.1"></a>About the persistence mode
+### <a name="section2.3"></a>Important notes
+#### <a name="section2.3.1"></a>About the persistence mode
 Please observe not always the same number of attributes is notified; this depends on the subscription made to the NGSI-like sender. This is not a problem for the `row` persistence mode, since fixed 8-fields rows are upserted for each notified attribute. Nevertheless, the `column` mode may be affected by several rows of different lengths (in term of fields). Thus, the `column` mode is only recommended if your subscription is designed for always sending the same attributes, event if they were not updated since the last notification.
 
 In addition, when running in `column` mode, due to the number of notified attributes (and therefore the number of fields to be written within the Datastore) is unknown by Cygnus, the Datastore cannot be automatically created, and must be provisioned previously to the Cygnus execution. That's not the case of the `row` mode since the number of fields to be written is always constant, independently of the number of notified attributes.
@@ -388,7 +388,7 @@ Please check the [Annexes](#section4) in order to know how to provision a resour
 
 [Top](#top)
 
-####<a name="section2.3.2"></a>About batching
+#### <a name="section2.3.2"></a>About batching
 As explained in the [programmers guide](#section3), `NGSICKANSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 `NGSIEvent`s. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same CKAN resource. If processing the events one by one, we would need 100 inserts into CKAN; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination CKAN resource. In the worst case, the whole 100 entities will be about 100 different entities (100 different CKAN resources), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
@@ -401,7 +401,7 @@ By default, `NGSICKANSink` has a configured batch size and batch accumulation ti
 
 [Top](#top)
 
-####<a name="section2.3.3"></a>About the encoding
+#### <a name="section2.3.3"></a>About the encoding
 Until version 1.2.0 (included), Cygnus applied a very simple encoding:
 
 * All non alphanumeric characters were replaced by underscore, `_`.
@@ -424,7 +424,7 @@ Despite the old encoding will be deprecated in the future, it is possible to swi
 
 [Top](#top)
 
-####<a name="section2.3.4"></a>About geolocation attributes
+#### <a name="section2.3.4"></a>About geolocation attributes
 CKAN supports several [viewers](http://docs.ckan.org/en/latest/maintaining/data-viewer.html), among them we can find the `recline_map_viewer`. This is a typical 2D map where geolocation data can be rendered.
 
 Geolocation data in CKAN can be add in two ways:
@@ -441,7 +441,7 @@ Finally, it must be said this way of mapping geolocated context information into
 
 [Top](#top)
 
-####<a name="section2.3.5"></a>About capping resources and expirating records
+#### <a name="section2.3.5"></a>About capping resources and expirating records
 Capping and expiration are disabled by default. Nevertheless, if desired, this can be enabled:
 
 * Capping by the number of records. This allows the resource growing up until certain configured maximum number of records is reached (`persistence_policy.max_records`), and then maintains a such a constant number of records.
@@ -449,8 +449,8 @@ Capping and expiration are disabled by default. Nevertheless, if desired, this c
 
 [Top](#top)
 
-##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`NGSICKANSink` class
+## <a name="section3"></a>Programmers guide
+### <a name="section3.1"></a>`NGSICKANSink` class
 As any other NGSI-like sink, `NGSICKANSink` extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(NGSIBatch batch) throws Exception;
@@ -475,9 +475,9 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-##<a name="section4"></a>Annexes
+## <a name="section4"></a>Annexes
 
-###<a name="section4.1"></a>Provisioning a CKAN resource for the column mode
+### <a name="section4.1"></a>Provisioning a CKAN resource for the column mode
 This section is built upon the assumption you are familiar with the CKAN API. If not, please have a look on [it](http://docs.ckan.org/en/latest/api/).
 
 First of all, you'll need a CKAN organization and package/dataset before creating a resource and an associated datastore in order to persist the data.

@@ -1,4 +1,4 @@
-#<a name="top"></a>NGSIGroupingInterceptor
+# <a name="top"></a>NGSIGroupingInterceptor
 **IMPORTANT NOTE: from release 1.6.0, this feature is deprecated in favour of Name Mappings. More details can be found [here](./deprecated_and_removed.md#section2.1).**
 
 Content:
@@ -11,7 +11,7 @@ Content:
     * [Configuration](#section2.1)
     * [Management Interface related operations](#section2.2)
 
-##<a name="section1"></a>Functionality
+## <a name="section1"></a>Functionality
 This is a custom Interceptor specifically designed for Cygnus. Its purpose is to alter an original `NGSIEvent` object (which comes from a NGSI notification handled by [`NGSIRestHandler`](./ngsi_rest_handler.md)) by inferring the destination entity where the data regarding a notified entity is going to be persisted. This destination entity, depending on the used sinks, may be a HDFS file name, a MySQL table name or a CKAN resource name. In addition, a new `fiware-servicePath` containing the destination entity may be configured; for instance, in case of HDFS, this is a folder; in case of CKAN this is a package; in case of MySQL this is simply a prefix for the table name.
 
 Such an inference is made by inspecting (but not modifying) certain configured fields within the `ContextElement` object of the `NGSIEvent`; if the concatenation of such fields matches a configured regular expression, then:
@@ -25,7 +25,7 @@ This way, those sinks having enabled the grouping rules will use both the `group
 
 [Top](#top)
 
-###<a name="section1.1"></a>Grouping rules syntax
+### <a name="section1.1"></a>Grouping rules syntax
 There exists a file containing Json-like <i>rules</i> definition, following this format:
 
     {
@@ -57,7 +57,7 @@ Regarding the syntax of the rules, all the fields are mandatory and must have a 
 
 [Top](#top)
 
-###<a name="section1.2"></a>Headers before and after intercepting
+### <a name="section1.2"></a>Headers before and after intercepting
 Before interception, these are the headers added by the [NGSIRestHandler](./ngsi_rest_handler.md) to all the internal Flume events:
 
 * `fiware-service`. FIWARE service which the entity related to the notified data belongs to.
@@ -75,7 +75,7 @@ Other interceptors may add further headers, such as the `timestamp` header added
 
 [Top](#top)
 
-###<a name="section1.3"></a>Example
+### <a name="section1.3"></a>Example
 Let's assume these rules:
 
     {
@@ -224,8 +224,8 @@ intercepted-ngsi-event-2={
 
 [Top](#top)
 
-##<a name="section2"></a>Administration guide
-###<a name="section2.1"></a>Configuration
+## <a name="section2"></a>Administration guide
+### <a name="section2.1"></a>Configuration
 `NGSIGroupingInterceptor` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -242,7 +242,7 @@ A configuration example could be:
 
 [Top](#top)
 
-###<a name="section2.2"></a>Management Interface related operations
+### <a name="section2.2"></a>Management Interface related operations
 
 The Management Interface of Cygnus exposes a set of operations under the `/v1/groupingrules` path related to the grouping rules feature, allowing listing/updating/removing the rules. For instance:
 

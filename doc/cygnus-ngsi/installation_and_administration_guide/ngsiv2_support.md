@@ -1,4 +1,4 @@
-#NGSIv2 support
+# NGSIv2 support
 Currently, cygnus-ngsi does not support [NGSIv2](http://telefonicaid.github.io/fiware-orion/api/v2/stable/). Only notification format within NGSIv1 is accepted by `NGSIRestHandler`, i.e. something like:
 
 ```

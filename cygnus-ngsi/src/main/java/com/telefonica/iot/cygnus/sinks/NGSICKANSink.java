@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -22,6 +22,10 @@ import com.telefonica.iot.cygnus.backends.ckan.CKANBackendImpl;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackend;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
@@ -32,8 +36,8 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
 import java.util.Locale;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 
 /**
  *
@@ -222,7 +226,7 @@ public class NGSICKANSink extends NGSISink {
     } // start
 
     @Override
-    void persistBatch(NGSIBatch batch) throws Exception {
+    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -238,23 +242,28 @@ public class NGSICKANSink extends NGSISink {
 
             // Get the events within the current sub-batch
             ArrayList<NGSIEvent> events = batch.getNextEvents();
+            
+            // Get the first event, it will give us useful information
+            NGSIEvent firstEvent = events.get(0);
+            String service = firstEvent.getServiceForData();
+            String servicePath = firstEvent.getServicePathForData();
 
-            // Get an aggregator for this entity and initialize it
+            // Get an aggregator for this entity and initialize it based on the first event
             CKANAggregator aggregator = getAggregator(this.rowAttrPersistence);
-            aggregator.initialize(events.get(0));
+            aggregator.initialize(firstEvent);
 
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
 
             // Persist the aggregation
-            persistAggregation(aggregator);
+            persistAggregation(aggregator, service, servicePath);
             batch.setNextPersisted(true);
         } // while
     } // persistBatch
 
     @Override
-    public void capRecords(NGSIBatch batch, long maxRecords) throws EventDeliveryException {
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -282,17 +291,28 @@ public class NGSICKANSink extends NGSISink {
                 LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",orgName="
                         + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
                 persistenceBackend.capRecords(orgName, pkgName, resName, maxRecords);
-            } catch (Exception e) {
-                throw new EventDeliveryException(e.getMessage());
+            } catch (CygnusBadConfiguration e) {
+                throw new CygnusCappingError("Data capping error", "CygnusBadConfiguration", e.getMessage());
+            } catch (CygnusRuntimeError e) {
+                throw new CygnusCappingError("Data capping error", "CygnusRuntimeError", e.getMessage());
+            } catch (CygnusPersistenceError e) {
+                throw new CygnusCappingError("Data capping error", "CygnusPersistenceError", e.getMessage());
             } // try catch
         } // while
     } // capRecords
 
     @Override
-    public void expirateRecords(long expirationTime) throws Exception {
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
         LOGGER.debug("[" + this.getName() + "] Expirating records (time=" + expirationTime + ")");
-        persistenceBackend.expirateRecordsCache(expirationTime);
-    } // expirateRecords
+        
+        try {
+            persistenceBackend.expirateRecordsCache(expirationTime);
+        } catch (CygnusRuntimeError e) {
+            throw new CygnusExpiratingError("Data expiration error", "CygnusRuntimeError", e.getMessage());
+        } catch (CygnusPersistenceError e) {
+            throw new CygnusExpiratingError("Data expiration error", "CygnusPersistenceError", e.getMessage());
+        } // try catch
+    } // truncateByTime
 
     /**
      * Class for aggregating fieldValues.
@@ -343,7 +363,7 @@ public class NGSICKANSink extends NGSISink {
             } // if else
         } // getResName
 
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
@@ -353,7 +373,7 @@ public class NGSICKANSink extends NGSISink {
             resName = buildResName(entityForNaming);
         } // initialize
 
-        public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
+        public abstract void aggregate(NGSIEvent cygnusEvent);
 
     } // CKANAggregator
 
@@ -363,12 +383,12 @@ public class NGSICKANSink extends NGSISink {
     private class RowAggregator extends CKANAggregator {
 
         @Override
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             super.initialize(event);
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -425,12 +445,12 @@ public class NGSICKANSink extends NGSISink {
     private class ColumnAggregator extends CKANAggregator {
 
         @Override
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             super.initialize(event);
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -487,7 +507,8 @@ public class NGSICKANSink extends NGSISink {
         } // if else
     } // getAggregator
 
-    private void persistAggregation(CKANAggregator aggregator) throws Exception {
+    private void persistAggregation(CKANAggregator aggregator, String service, String servicePath)
+        throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         String aggregation = aggregator.getAggregation();
         String orgName = aggregator.getOrgName(enableLowercase);
         String pkgName = aggregator.getPkgName(enableLowercase);
@@ -496,20 +517,32 @@ public class NGSICKANSink extends NGSISink {
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSICKANSink (orgName=" + orgName
                 + ", pkgName=" + pkgName + ", resName=" + resName + ", data=" + aggregation + ")");
 
-        if (aggregator instanceof RowAggregator) {
-            persistenceBackend.persist(orgName, pkgName, resName, aggregation, true);
-        } else {
-            persistenceBackend.persist(orgName, pkgName, resName, aggregation, false);
-        } // if else
+        ((CKANBackendImpl) persistenceBackend).startTransaction();
+        
+        // Do try-catch only for metrics gathering purposes... after that, re-throw
+        try {
+            if (aggregator instanceof RowAggregator) {
+                persistenceBackend.persist(orgName, pkgName, resName, aggregation, true);
+            } else {
+                persistenceBackend.persist(orgName, pkgName, resName, aggregation, false);
+            } // if else
+            
+            ImmutablePair<Long, Long> bytes = ((CKANBackendImpl) persistenceBackend).finishTransaction();
+            serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
+        } catch (CygnusBadConfiguration | CygnusRuntimeError | CygnusPersistenceError e) {
+            ImmutablePair<Long, Long> bytes = ((CKANBackendImpl) persistenceBackend).finishTransaction();
+            serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
+            throw e;
+        } // catch
     } // persistAggregation
 
     /**
      * Builds an organization name given a fiwareService. It throws an exception if the naming conventions are violated.
      * @param fiwareService
-     * @return
-     * @throws Exception
+     * @return Organization name
+     * @throws CygnusBadConfiguration
      */
-    public String buildOrgName(String fiwareService) throws Exception {
+    public String buildOrgName(String fiwareService) throws CygnusBadConfiguration {
         String orgName;
         
         if (enableEncoding) {
@@ -534,10 +567,10 @@ public class NGSICKANSink extends NGSISink {
      * conventions are violated.
      * @param fiwareService
      * @param fiwareServicePath
-     * @return
-     * @throws Exception
+     * @return Package name
+     * @throws CygnusBadConfiguration
      */
-    public String buildPkgName(String fiwareService, String fiwareServicePath) throws Exception {
+    public String buildPkgName(String fiwareService, String fiwareServicePath) throws CygnusBadConfiguration {
         String pkgName;
         
         if (enableEncoding) {
@@ -567,10 +600,10 @@ public class NGSICKANSink extends NGSISink {
     /**
      * Builds a resource name given a entity. It throws an exception if the naming conventions are violated.
      * @param entity
-     * @return
-     * @throws Exception
+     * @return Resource name
+     * @throws CygnusBadConfiguration
      */
-    public String buildResName(String entity) throws Exception {
+    public String buildResName(String entity) throws CygnusBadConfiguration {
         String resName;
         
         if (enableEncoding) {

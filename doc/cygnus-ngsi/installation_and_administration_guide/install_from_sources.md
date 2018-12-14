@@ -1,4 +1,4 @@
-#<a name="top"></a>Installing cygnus-ngsi from sources
+# <a name="top"></a>Installing cygnus-ngsi from sources
 Content:
 
 * [Prerequisites](#section1)
@@ -8,13 +8,13 @@ Content:
     * [Known issues](#section2.3)
 * [Installing dependencies](#section3)
 
-##<a name="section1"></a>Prerequisites
+## <a name="section1"></a>Prerequisites
 [`cygnus-common`](../../cygnus-common/installation_and_administration_guide/install_from_sources.md) must be installed. This includes Maven, `cygnus` user creation, `log4j` path creation, Apache Flume and `cygnus-flume-ng` script installation.
 
 [Top](#top)
 
-##<a name="section2"></a>Installing Cygnus
-###<a name="section2.1"></a>Cloning `fiware-cygnus`
+## <a name="section2"></a>Installing Cygnus
+### <a name="section2.1"></a>Cloning `fiware-cygnus`
 Start by cloning the Github repository:
 
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
@@ -25,7 +25,7 @@ Start by cloning the Github repository:
 
 [Top](#top)
 
-###<a name="section2.2"></a>Installing `cygnus-ngsi`
+### <a name="section2.2"></a>Installing `cygnus-ngsi`
 `cygnus-ngsi` can be built as a fat Java jar file containing all third-party dependencies (**recommended**):
 
     $ cd cygnus-ngsi
@@ -42,14 +42,14 @@ Finally, please find a `compile.sh` script containing all the commands shown in 
 
 [Top](#top)
 
-###<a name="section2.3"></a>Known issues
+### <a name="section2.3"></a>Known issues
 It may happen while compiling `cygnus-ngsi` the Maven JVM has not enough memory. This can be changed as detailed at the [Maven official documentation](https://cwiki.apache.org/confluence/display/MAVEN/OutOfMemoryError):
 
     $ export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m"
 
 [Top](#top)
 
-##<a name="section3"></a>Installing dependencies
+## <a name="section3"></a>Installing dependencies
 These are the packages you will need to install under `APACHE_FLUME_HOME/plugins.d/cygnus/libext/` **if you did not included them in the cygnus-common jar**:
 
 | Cygnus dependencies | Version | Required by / comments |

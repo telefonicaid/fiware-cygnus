@@ -1,5 +1,5 @@
-#DynamoDB backend
-##`DynamoDBBackend` interface
+# DynamoDB backend
+## `DynamoDBBackend` interface
 This class enumerates the methods any [DynamoDB](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html) backend implementation must expose. In this case, the following ones:
 
     void createTable(String tableName, String primaryKey) throws Exception;
@@ -10,7 +10,7 @@ This class enumerates the methods any [DynamoDB](http://docs.aws.amazon.com/amaz
     
 > Puts, in the given table, as many items as contained within the given aggregation.
 
-##`DynamoDBBackendImpl` class
+## `DynamoDBBackendImpl` class
 This is a convenience backend class for DynamoDB that implements the `DynamoDBBackend` interface described above.
 
 `DynamoDBBackendImpl` really wraps the [DynamoDB API](http://docs.aws.amazon.com/amazondynamodb/latest/APIReference/Welcome.html).

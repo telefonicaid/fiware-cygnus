@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -35,7 +35,9 @@ public class NGSIKafkaSinkTest {
     private final String servicePathSlash = "/";
     private final String entity = "entityId=entityType";
     private final String attribute = "attributeName";
+    private final boolean enableLowercase = false;
     private String expectedTopic;
+
     
     /**
      * Constructor.
@@ -55,7 +57,7 @@ public class NGSIKafkaSinkTest {
                 + "name is <service>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-service"));
-        String topic = sink.buildTopicName(service, servicePath, entity, attribute);
+        String topic = sink.buildTopicName(service, servicePath, entity, attribute, enableLowercase);
         
         try {
             expectedTopic = "service";
@@ -81,7 +83,7 @@ public class NGSIKafkaSinkTest {
                 + "topic name is <service>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-service"));
-        String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
+        String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute, enableLowercase);
         
         try {
             expectedTopic = "service";
@@ -107,7 +109,7 @@ public class NGSIKafkaSinkTest {
                 + "the Kafka topic name is the concatenation of <service> and <service-path>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-service-path"));
-        String topic = sink.buildTopicName(service, servicePath, entity, attribute);
+        String topic = sink.buildTopicName(service, servicePath, entity, attribute, enableLowercase);
         
         try {
             expectedTopic = "servicexffffx002fservicePath";
@@ -133,7 +135,7 @@ public class NGSIKafkaSinkTest {
                 + "the Kafka topic name is the concatenation of <service> and <service-path>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-service-path"));
-        String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
+        String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute, enableLowercase);
         
         try {
             expectedTopic = "servicexffffx002f";
@@ -159,7 +161,7 @@ public class NGSIKafkaSinkTest {
                 + "Kafka topic name is the concatenation of <service>, <service-path>, <entityId> and <entityType>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-entity"));
-        String topic = sink.buildTopicName(service, servicePath, entity, attribute);
+        String topic = sink.buildTopicName(service, servicePath, entity, attribute, enableLowercase);
         
         try {
             expectedTopic = "servicexffffx002fservicePathxffffentityIdxffffentityType";
@@ -185,7 +187,7 @@ public class NGSIKafkaSinkTest {
                 + "name is the concatenation of <service>, <service-path>, <entityId> and <entityType>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-entity"));
-        String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
+        String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute, enableLowercase);
         
         try {
             expectedTopic = "servicexffffx002fxffffentityIdxffffentityType";
@@ -212,7 +214,7 @@ public class NGSIKafkaSinkTest {
                 + "<attrName>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-attribute"));
-        String topic = sink.buildTopicName(service, servicePath, entity, attribute);
+        String topic = sink.buildTopicName(service, servicePath, entity, attribute, enableLowercase);
         
         try {
             expectedTopic = "servicexffffx002fservicePathxffffentityIdxffffentityTypexffffattributeName";
@@ -238,7 +240,7 @@ public class NGSIKafkaSinkTest {
                 + "<attrName>");
         NGSIKafkaSink sink = new NGSIKafkaSink();
         sink.configure(createContext("false", "dm-by-attribute"));
-        String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute);
+        String topic = sink.buildTopicName(service, servicePathSlash, entity, attribute, enableLowercase);
         
         try {
             expectedTopic = "servicexffffx002fxffffentityIdxffffentityTypexffffattributeName";

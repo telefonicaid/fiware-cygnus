@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -32,17 +32,20 @@ import org.apache.flume.Event;
 public class NGSIEvent implements Event {
     
     private Map<String, String> headers;
+    private byte[] body;
     private ContextElement originalCE;
     private ContextElement mappedCE;
     
     /**
      * Constructor.
      * @param headers
+     * @param body
      * @param originalCE
      * @param mappedCE
      */
-    public NGSIEvent(Map<String, String> headers, ContextElement originalCE, ContextElement mappedCE) {
+    public NGSIEvent(Map<String, String> headers, byte[] body, ContextElement originalCE, ContextElement mappedCE) {
         this.headers = headers;
+        this.body = body;
         this.originalCE = originalCE;
         this.mappedCE = mappedCE;
     } // NGSIEvent
@@ -59,11 +62,12 @@ public class NGSIEvent implements Event {
 
     @Override
     public byte[] getBody() {
-        return null;
+        return body;
     } // getBody
 
     @Override
-    public void setBody(byte[] bytes) {
+    public void setBody(byte[] body) {
+        this.body = body;
     } // setBody
     
     public ContextElement getOriginalCE() {
@@ -89,6 +93,10 @@ public class NGSIEvent implements Event {
     public long getRecvTimeTs() {
         return new Long(headers.get(NGSIConstants.FLUME_HEADER_TIMESTAMP));
     } // getRecvTimeTs
+    
+    public String getServiceForData() {
+        return headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
+    } // getServiceForData
     
     /**
      * Gets the service both for data and for naming.
@@ -164,10 +172,18 @@ public class NGSIEvent implements Event {
     public String getAttributeForNaming(boolean enableMappings) {
         if (enableMappings) {
             ArrayList<ContextAttribute> attrs = mappedCE.getAttributes();
-            return attrs.get(0).getName(); // the CE has been filtered for having just one attribute
+            if (attrs != null && attrs.get(0) != null) {
+                return attrs.get(0).getName(); // the CE has been filtered for having just one attribute
+            } else {
+                return "";
+            }
         } else {
             ArrayList<ContextAttribute> attrs = originalCE.getAttributes();
-            return attrs.get(0).getName(); // the CE has been filtered for having just one attribute
+            if (attrs  != null && attrs.get(0)  != null) {
+                return attrs.get(0).getName(); // the CE has been filtered for having just one attribute
+            } else {
+                return "";
+            }
         } // if else
     } // getAttributeForNaming
     

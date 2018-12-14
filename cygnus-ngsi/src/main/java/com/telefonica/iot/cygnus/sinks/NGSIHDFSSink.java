@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2014-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -26,7 +26,11 @@ import com.telefonica.iot.cygnus.backends.hive.HiveBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
@@ -41,11 +45,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 /**
  *
  * @author frb
@@ -456,7 +461,7 @@ public class NGSIHDFSSink extends NGSISink {
     } // start
 
     @Override
-    void persistBatch(NGSIBatch batch) throws Exception {
+    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusBadContextData, CygnusPersistenceError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -472,17 +477,22 @@ public class NGSIHDFSSink extends NGSISink {
 
             // Get the events within the current sub-batch
             ArrayList<NGSIEvent> events = batch.getNextEvents();
+            
+            // Get the first event, it will give us useful information
+            NGSIEvent firstEvent = events.get(0);
+            String service = firstEvent.getServiceForData();
+            String servicePath = firstEvent.getServicePathForData();
 
-            // Get an aggregator for this destination and initialize it
+            // Get an aggregator for this entity and initialize it based on the first event
             HDFSAggregator aggregator = getAggregator(fileFormat);
-            aggregator.initialize(events.get(0));
+            aggregator.initialize(firstEvent);
 
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
 
             // Persist the aggregation
-            persistAggregation(aggregator);
+            persistAggregation(aggregator, service, servicePath);
             batch.setNextPersisted(true);
 
             // Persist the metadata aggregations only in CSV-like file formats
@@ -508,11 +518,11 @@ public class NGSIHDFSSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
     } // capRecords
 
     @Override
-    public void expirateRecords(long time) throws Exception {
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
     } // expirateRecords
 
     /**
@@ -569,7 +579,7 @@ public class NGSIHDFSSink extends NGSISink {
             return hiveFields;
         } // getHiveFields
 
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
@@ -578,7 +588,7 @@ public class NGSIHDFSSink extends NGSISink {
             hdfsFile = buildFilePath(service, servicePathForNaming, entityForNaming);
         } // initialize
 
-        public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
+        public abstract void aggregate(NGSIEvent cygnusEvent) throws CygnusBadContextData;
 
     } // HDFSAggregator
 
@@ -588,7 +598,7 @@ public class NGSIHDFSSink extends NGSISink {
     private class JSONRowAggregator extends HDFSAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
             hiveFields = NGSICharsets.encodeHive(NGSIConstants.RECV_TIME_TS) + " bigint,"
                     + NGSICharsets.encodeHive(NGSIConstants.RECV_TIME) + " string,"
@@ -603,7 +613,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) throws CygnusBadContextData {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -661,7 +671,7 @@ public class NGSIHDFSSink extends NGSISink {
     private class JSONColumnAggregator extends HDFSAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
 
             // particular initialization
@@ -685,7 +695,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -739,7 +749,7 @@ public class NGSIHDFSSink extends NGSISink {
     private class CSVRowAggregator extends HDFSAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
             hiveFields = NGSICharsets.encodeHive(NGSIConstants.RECV_TIME_TS) + " bigint,"
                     + NGSICharsets.encodeHive(NGSIConstants.RECV_TIME) + " string,"
@@ -753,7 +763,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) throws CygnusBadContextData {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -821,12 +831,18 @@ public class NGSIHDFSSink extends NGSISink {
             } // for
         } // aggregate
 
-        private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws Exception {
+        private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws CygnusBadContextData {
             String csvMd = "";
 
             // metadata is in JSON format, decode it
             JSONParser jsonParser = new JSONParser();
-            JSONArray attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+            JSONArray attrMetadataJSON;
+            
+            try {
+                attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+            } catch (ParseException e) {
+                throw new CygnusBadContextData("Metadata parsing error", "ParseException", e.getMessage());
+            } // try catch
 
             // iterate on the metadata
             for (Object mdObject : attrMetadataJSON) {
@@ -854,7 +870,7 @@ public class NGSIHDFSSink extends NGSISink {
     private class CSVColumnAggregator extends HDFSAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
 
             // particular initialization
@@ -882,7 +898,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // initialize
 
         @Override
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) throws CygnusBadContextData {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -948,12 +964,18 @@ public class NGSIHDFSSink extends NGSISink {
             } // if else
         } // aggregate
 
-        private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws Exception {
+        private String getCSVMetadata(String attrMetadata, long recvTimeTs) throws CygnusBadContextData {
             String csvMd = "";
 
             // metadata is in JSON format, decode it
             JSONParser jsonParser = new JSONParser();
-            JSONArray attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+            JSONArray attrMetadataJSON;
+            
+            try {
+                attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+            } catch (ParseException e) {
+                throw new CygnusBadContextData("Metadata parsing error", "ParseException", e.getMessage());
+            } // try catch
 
             // iterate on the metadata
             for (Object mdObject : attrMetadataJSON) {
@@ -990,15 +1012,26 @@ public class NGSIHDFSSink extends NGSISink {
         } // switch
     } // getAggregator
 
-    private void persistAggregation(HDFSAggregator aggregator) throws Exception {
+    private void persistAggregation(HDFSAggregator aggregator, String service, String servicePath)
+        throws CygnusPersistenceError {
         String aggregation = aggregator.getAggregation();
         String hdfsFolder = aggregator.getFolder(enableLowercase);
         String hdfsFile = aggregator.getFile(enableLowercase);
+        
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIHDFSSink. HDFS file ("
                 + hdfsFile + "), Data (" + aggregation + ")");
+        
+        // Some variables related to persistence backends looping
         boolean persisted = false;
+        long transactionRequestBytes = 0;
+        long transactionResponseBytes = 0;
 
+        // Iterate on all the available persistence backends
         for (HDFSBackend persistenceBackend: persistenceBackends) {
+            if (persistenceBackend instanceof HDFSBackendImplREST) {
+                ((HDFSBackendImplREST) persistenceBackend).startTransaction();
+            } // if
+            
             try {
                 if (persistenceBackend.exists(hdfsFile)) {
                     persistenceBackend.append(hdfsFile, aggregation);
@@ -1007,6 +1040,7 @@ public class NGSIHDFSSink extends NGSISink {
                     persistenceBackend.createFile(hdfsFile, aggregation);
                 } // if else
 
+                // Set the current persistence backend as the favourite one
                 if (!persistenceBackends.getFirst().equals(persistenceBackend)) {
                     persistenceBackends.remove(persistenceBackend);
                     persistenceBackends.add(0, persistenceBackend);
@@ -1015,19 +1049,36 @@ public class NGSIHDFSSink extends NGSISink {
                 } // if
 
                 persisted = true;
+                
+                if (persistenceBackend instanceof HDFSBackendImplREST) {
+                    ImmutablePair<Long, Long> bytes = ((HDFSBackendImplREST) persistenceBackend).finishTransaction();
+                    transactionRequestBytes += bytes.left;
+                    transactionResponseBytes += bytes.right;
+                } // if
+                
                 break;
-            } catch (Exception e) {
+            } catch (CygnusPersistenceError | CygnusRuntimeError e) {
+                if (persistenceBackend instanceof HDFSBackendImplREST) {
+                    ImmutablePair<Long, Long> bytes = ((HDFSBackendImplREST) persistenceBackend).finishTransaction();
+                    transactionRequestBytes += bytes.left;
+                    transactionResponseBytes += bytes.right;
+                } // if
+                
                 LOGGER.info("[" + this.getName() + "] There was some problem with the current endpoint, "
                         + "trying other one. Details: " + e.getMessage());
             } // try catch
         } // for
         
+        // Add metrics after iterating on the persistence backends
+        serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0,
+                transactionRequestBytes, transactionResponseBytes, 0);
+        
         if (!persisted) {
-            throw new CygnusPersistenceError("[" + this.getName() + "] No endpoint was available");
+            throw new CygnusPersistenceError("No endpoint was available");
         } // if
     } // persistAggregation
 
-    private void persistMDAggregations(HDFSAggregator aggregator) throws Exception {
+    private void persistMDAggregations(HDFSAggregator aggregator) throws CygnusPersistenceError {
         Set<String> attrMDFiles = aggregator.getAggregatedAttrMDFiles();
 
         for (String hdfsMDFile : attrMDFiles) {
@@ -1054,7 +1105,7 @@ public class NGSIHDFSSink extends NGSISink {
                     } // if
                     
                     break;
-                } catch (Exception e) {
+                } catch (CygnusPersistenceError | CygnusRuntimeError e) {
                     LOGGER.info("[" + this.getName() + "] There was some problem with the current endpoint, "
                             + "trying other one. Details: " + e.getMessage());
                 } // try catch
@@ -1062,7 +1113,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // for
     } // persistMDAggregations
 
-    private void provisionHiveTable(HDFSAggregator aggregator, String dbName) throws Exception {
+    private void provisionHiveTable(HDFSAggregator aggregator, String dbName) throws CygnusPersistenceError {
         String dirPath = aggregator.getFolder(enableLowercase);
         String fields = aggregator.getHiveFields();
         String tag;
@@ -1139,7 +1190,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // if else
         
         if (folderPath.length() > NGSIConstants.HDFS_MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building folder path name '" + folderPath + "' and its length is "
+            throw new CygnusBadConfiguration("-, Building folder path name '" + folderPath + "' and its length is "
                     + "greater than " + NGSIConstants.HDFS_MAX_NAME_LEN);
         } // if
         
@@ -1169,7 +1220,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // if else
         
         if (filePath.length() > NGSIConstants.HDFS_MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building file path name '" + filePath + "' and its length is "
+            throw new CygnusBadConfiguration("-, Building file path name '" + filePath + "' and its length is "
                     + "greater than " + NGSIConstants.HDFS_MAX_NAME_LEN);
         } // if
         

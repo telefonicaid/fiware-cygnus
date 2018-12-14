@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -17,6 +17,11 @@
  */
 package com.telefonica.iot.cygnus.utils;
 
+import com.google.gson.Gson;
+import com.telefonica.iot.cygnus.containers.NameMappings;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
+import java.util.HashMap;
 import org.apache.flume.Context;
 
 /**
@@ -60,5 +65,116 @@ public final class NGSIUtilsForTests {
         context.put("mongo_username", "");
         return context;
     } // createContextForMongoSTH
+    
+    
+    /**
+     * Creates a Flume context for Orion sinks.
+     * 
+     * @param orionHost
+     * @param orionPort
+     * @param orionHostKey
+     * @param orionPortKey
+     * @param orionUsername
+     * @param orionPassword
+     * @param orionFiware
+     * @param orionFiwarePath
+     * @return
+     */
+    public static Context createContextForOrion(String orionHost, String orionPort,
+            String orionHostKey, String orionPortKey,
+            String orionUsername, String orionPassword, String orionFiware, String orionFiwarePath) {
+        Context context = new Context();
+        context.put("orion_host", orionHost);
+        context.put("orion_port", orionPort);
+        context.put("keystone_host", orionHostKey);
+        context.put("keystone_port", orionPortKey);
+        context.put("orion_username", orionUsername);
+        context.put("orion_password", orionPassword);
+        context.put("orion_fiware", orionFiware);
+        context.put("orion_fiware_path", orionFiwarePath);
+        return context;
+    } // createContextForOrion
+    
+    /**
+     * Creates a Json-based NotifyContextRequest given the string representation of such Json.
+     * @param jsonStr
+     * @return The Json-based NotifyContextRequest
+     * @throws java.lang.Exception
+     */
+    public static NotifyContextRequest createJsonNotifyContextRequest(String jsonStr) throws Exception {
+        Gson gson = new Gson();
+        return gson.fromJson(jsonStr, NotifyContextRequest.class);
+    } // createJsonNotifyContextRequest
+
+    /**
+     * Creates a Json-based StatusCode given the string representation of such Json.
+     * @param jsonStr
+     * @return The Json-based StatusCode
+     * @throws java.lang.Exception
+     */
+    public static NotifyContextRequest.StatusCode createJsonStatusCode(String jsonStr) throws Exception {
+        Gson gson = new Gson();
+        return gson.fromJson(jsonStr, NotifyContextRequest.StatusCode.class);
+    } // createJsonStatusCode
+
+    /**
+     * Creates a NGSIEvent as NGSIRestHandler would create it (not intercepted).
+     * @param originalCEStr
+     * @param mappedCEStr
+     * @param service
+     * @param servicePath
+     * @param correlatorID
+     * @return A NGSIEvent as NGSIRestHandler would create it (not intercepted)
+     * @throws java.lang.Exception
+     */
+    public static NGSIEvent createNGSIEvent(String originalCEStr, String mappedCEStr, String service,
+            String servicePath, String correlatorID) throws Exception {
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, service);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, servicePath);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorID);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, correlatorID);
+        NotifyContextRequest.ContextElement originalCE = createJsonContextElement(originalCEStr);
+        NotifyContextRequest.ContextElement mappedCE = createJsonContextElement(mappedCEStr);
+        return new NGSIEvent(headers, (originalCEStr + CommonConstants.CONCATENATOR).getBytes(), originalCE, mappedCE);
+    } // createNGSIEvent
+
+    /**
+     * Creates a Json-based NameMappings given the string representation of such Json.
+     * @param jsonStr
+     * @return The Json-based NameMappings
+     * @throws java.lang.Exception
+     */
+    public static NameMappings createJsonNameMappings(String jsonStr) throws Exception {
+        Gson gson = new Gson();
+        return gson.fromJson(jsonStr, NameMappings.class);
+    } // createJsonNameMappings
+
+    /**
+     * Creates a NGSIEvent as NGSINameMappings would create it.
+     * @param originalCEStr
+     * @param mappedCEStr
+     * @return A NGSIEvent as NGSINameMappings would create it
+     * @throws java.lang.Exception
+     */
+    public static NGSIEvent createInterceptedNGSIEvent(String originalCEStr, String mappedCEStr) throws Exception {
+        HashMap<String, String> headers = new HashMap<>();
+        NotifyContextRequest.ContextElement originalCE = createJsonContextElement(originalCEStr);
+        NotifyContextRequest.ContextElement mappedCE = createJsonContextElement(mappedCEStr);
+        return new NGSIEvent(headers, originalCE == null ? null : originalCE.toString().getBytes(), originalCE,
+                mappedCE);
+    } // createInterceptedNGSIEvent
+
+    
+    /**
+     * Creates a Json-based ContextElement given the string representation of such Json.
+     * @param jsonStr
+     * @return The Json-based ContextElement
+     * @throws java.lang.Exception
+     */
+    public static NotifyContextRequest.ContextElement createJsonContextElement(String jsonStr) throws Exception {
+        Gson gson = new Gson();
+        return gson.fromJson(jsonStr, NotifyContextRequest.ContextElement.class);
+    } // createJsonContextElement
     
 } // NGSIUtilsForTests

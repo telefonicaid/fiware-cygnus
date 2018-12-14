@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -29,6 +29,9 @@ public final class CommonConstants {
      */
     private CommonConstants() {
     } // CommonConstants
+    
+    // Not applicable
+    public static final String NA = "N/A";
     
     // Http header names
     public static final String HTTP_HEADER_CONTENT_TYPE = "content-type";
@@ -67,9 +70,9 @@ public final class CommonConstants {
     
     // Header for API uses
     public static final String CYGNUS_IPR_HEADER = "#####\n"
-            + "# Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U\n"
+            + "# Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U\n"
             + "# \n"
-            + "# This file is part of fiware-cygnus (FI-WARE project).\n"
+            + "# This file is part of fiware-cygnus (FIWARE project).\n"
             + "# \n"
             + "# fiware-cygnus is free software: you can redistribute it and/or modify it under "
             + "the terms of the GNU Affero General\n"

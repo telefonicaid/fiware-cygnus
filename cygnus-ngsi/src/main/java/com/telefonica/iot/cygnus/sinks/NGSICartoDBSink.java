@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -21,6 +21,9 @@ import com.telefonica.iot.cygnus.backends.cartodb.CartoDBBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
@@ -36,7 +39,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -49,8 +51,8 @@ public class NGSICartoDBSink extends NGSISink {
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSICartoDBSink.class);
     private String keysConfFile;
     private boolean swapCoordinates;
-    private boolean enableRaw;
-    private boolean enableDistance;
+    private boolean enableRawHistoric;
+    private boolean enableDistanceHistoric;
     private boolean enableRawSnapshot;
     private int backendMaxConns;
     private int backendMaxConnsPerRoute;
@@ -99,21 +101,21 @@ public class NGSICartoDBSink extends NGSISink {
      * Gets if the distance-based analysis is enabled.
      * @return True if the distance-based analysis is enabled, false otherwise
      */
-    protected boolean getEnableDistance() {
-        return enableDistance;
-    } // getEnableDistance
+    protected boolean getEnableDistanceHistoric() {
+        return enableDistanceHistoric;
+    } // getEnableDistanceHistoric
     
     /**
      * Gets if the raw-based analysis is enabled.
      * @return True if the raw-based analysis is enabled, false otherwise
      */
-    protected boolean getEnableRaw() {
-        return enableRaw;
-    } // getEnableRaw
+    protected boolean getEnableRawHistoric() {
+        return enableRawHistoric;
+    } // getEnableRawHistoric
     
-    protected boolean getEnableSnapshotRaw() {
+    protected boolean getEnableRawSnapshot() {
         return enableRawSnapshot;
-    } // getEnableSnapshotRaw
+    } // getEnableRawSnapshot
     
     @Override
     public void configure(Context context) {
@@ -185,29 +187,61 @@ public class NGSICartoDBSink extends NGSISink {
             return;
         } // if else
         
-        String enableRawStr = context.getString("enable_raw", "true");
+        String enableRawStr = context.getString("enable_raw");
+        String enableRawHistoricStr = context.getString("enable_raw_historic");
 
-        if (enableRawStr.equals("true") || enableRawStr.equals("false")) {
-            enableRaw = enableRawStr.equals("true");
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_raw="
-                    + enableRawStr + ")");
+        if (enableRawHistoricStr == null || enableRawHistoricStr.isEmpty()) {
+            if (enableRawStr == null || enableRawStr.isEmpty()) {
+                enableRawHistoric = true; // default value
+            } else if (enableRawStr.equals("true") || enableRawStr.equals("false")) {
+                enableRawHistoric = enableRawStr.equals("true");
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_raw="
+                        + enableRawStr + ") -- Deprecated, use enable_raw_historic instead");
+            } else {
+                invalidConfiguration = true;
+                LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_raw="
+                        + enableRawStr + ") -- Must be 'true' or 'false' -- Deprecated, use enable_raw_historic instead");
+                return;
+            } // if else
         } else {
-            invalidConfiguration = true;
-            LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_raw="
-                    + enableRawStr + ") -- Must be 'true' or 'false'");
-            return;
+            if (enableRawHistoricStr.equals("true") || enableRawHistoricStr.equals("false")) {
+                enableRawHistoric = enableRawHistoricStr.equals("true");
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_raw_historic="
+                        + enableRawHistoricStr + ")");
+            } else {
+                invalidConfiguration = true;
+                LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_raw_historic="
+                        + enableRawHistoricStr + ") -- Must be 'true' or 'false'");
+                return;
+            } // if else
         } // if else
 
-        String enableDistanceStr = context.getString("enable_distance", "false");
-
-        if (enableDistanceStr.equals("true") || enableDistanceStr.equals("false")) {
-            enableDistance = enableDistanceStr.equals("true");
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_distance="
-                    + enableDistanceStr + ")");
+        String enableDistanceStr = context.getString("enable_distance");
+        String enableDistanceHistoricStr = context.getString("enable_distance_historic");
+        
+        if (enableDistanceHistoricStr == null || enableDistanceHistoricStr.isEmpty()) {
+            if (enableDistanceStr == null || enableDistanceStr.isEmpty()) {
+                enableDistanceHistoric = false; // default value
+            } else if (enableDistanceStr.equals("true") || enableDistanceStr.equals("false")) {
+                enableDistanceHistoric = enableDistanceStr.equals("true");
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_distance="
+                        + enableDistanceStr + ") -- Deprecated, use enable_distance_historic instead");
+            } else {
+                invalidConfiguration = true;
+                LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_distance="
+                        + enableDistanceStr + ") -- Must be 'true' or 'false' -- Deprecated, use "
+                        + "enable_distance_historic instead");
+            } // if else
         } else {
-            invalidConfiguration = true;
-            LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_distance="
-                    + enableDistanceStr + ") -- Must be 'true' or 'false'");
+            if (enableDistanceHistoricStr.equals("true") || enableDistanceHistoricStr.equals("false")) {
+                enableDistanceHistoric = enableDistanceHistoricStr.equals("true");
+                LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_distance_historic="
+                        + enableDistanceHistoricStr + ")");
+            } else {
+                invalidConfiguration = true;
+                LOGGER.error("[" + this.getName() + "] Invalid configuration (enable_distance_historic="
+                        + enableDistanceHistoricStr + ") -- Must be 'true' or 'false'");
+            } // if else
         } // if else
         
         String enableRawSnapshotStr = context.getString("enable_raw_snapshot", "false");
@@ -309,9 +343,22 @@ public class NGSICartoDBSink extends NGSISink {
                 LOGGER.warn("[" + this.getName() + "] Invalid API key entry, key is null or empty. Discarding it.");
                 continue;
             } // if
-
-            backends.put(username, new CartoDBBackendImpl(host, port, ssl, key, backendMaxConns,
-                    backendMaxConnsPerRoute));
+            
+            String type = (String) obj.get("type");
+            
+            if (type == null || type.isEmpty()) {
+                LOGGER.warn("[" + this.getName() + "] Invalid API key entry, type is null or empty. Discarding it.");
+                continue;
+            } // if
+            
+            if (!type.equals("personal") && !type.equals("enterprise")) {
+                LOGGER.warn("[" + this.getName() + "] Invalid API key entry, type is not 'personal' or 'enterprise'. "
+                        + "Discarding it.");
+                continue;
+            } // if
+            
+            backends.put(username, new CartoDBBackendImpl(host, port, ssl, key, type.equals("personal"),
+                    backendMaxConns, backendMaxConnsPerRoute));
         } // for
         
         if (backends.isEmpty()) {
@@ -320,7 +367,7 @@ public class NGSICartoDBSink extends NGSISink {
     } // initializeBackend
 
     @Override
-    void persistBatch(NGSIBatch batch) throws Exception {
+    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -336,20 +383,27 @@ public class NGSICartoDBSink extends NGSISink {
 
             // Get the events within the current sub-batch
             ArrayList<NGSIEvent> events = batch.getNextEvents();
+            
+            // Get the first event, it will give us useful information
+            NGSIEvent firstEvent = events.get(0);
+            String service = firstEvent.getServiceForData();
+            String servicePath = firstEvent.getServicePathForData();
+            
+            // Raw aggregator
             CartoDBAggregator aggregator = null;
 
-            if (enableRaw) {
+            if (enableRawHistoric) {
                 // Get an aggregator for this destination and initialize it
                 aggregator = new CartoDBAggregator();
-                aggregator.initialize(events.get(0));
+                aggregator.initialize(firstEvent);
             } // if
 
             for (NGSIEvent event : events) {
-                if (enableRaw && aggregator != null) {
+                if (enableRawHistoric && aggregator != null) {
                     aggregator.aggregate(event);
                 } // if
                 
-                if (enableDistance) {
+                if (enableDistanceHistoric) {
                     persistDistanceEvent(event);
                 } // if
                 
@@ -358,9 +412,9 @@ public class NGSICartoDBSink extends NGSISink {
                 } // if
             } // for
 
-            if (enableRaw) {
+            if (enableRawHistoric) {
                 // Persist the aggregation
-                persistRawAggregation(aggregator);
+                persistRawAggregation(aggregator, service, servicePath);
             } // if
             
             batch.setNextPersisted(true);
@@ -368,11 +422,11 @@ public class NGSICartoDBSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
     } // capRecords
 
     @Override
-    public void expirateRecords(long time) throws Exception {
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
     } // expirateRecords
     
     /**
@@ -461,9 +515,9 @@ public class NGSICartoDBSink extends NGSISink {
         /**
          * Initializes an aggregation.
          * @param event
-         * @throws Exception
+         * @throws CygnusBadConfiguration
          */
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
@@ -503,9 +557,8 @@ public class NGSICartoDBSink extends NGSISink {
         /**
          * Aggregates a given Cygnus getRecvTimeTs.
          * @param event
-         * @throws Exception
          */
-        public void aggregate(NGSIEvent event) throws Exception {
+        public void aggregate(NGSIEvent event) {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -552,7 +605,8 @@ public class NGSICartoDBSink extends NGSISink {
         
     } // CartoDBAggregator
 
-    private void persistRawAggregation(CartoDBAggregator aggregator) throws Exception {
+    private void persistRawAggregation(CartoDBAggregator aggregator, String service, String servicePath)
+        throws CygnusPersistenceError {
         //String dbName = aggregator.getDbName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
         String tableName = aggregator.getTableName(); // enable_lowercase is unncessary, PostgreSQL is case insensitive
         String schema = aggregator.getSchemaName();
@@ -561,12 +615,23 @@ public class NGSICartoDBSink extends NGSISink {
         String rows = aggregator.getRows();
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
                 + "), Table (" + tableName + "), Data (" + rows + ")");
-        backends.get(schema).insert(schema, tableName, withs, fields, rows);
+        
+        try {
+            ((CartoDBBackendImpl) backends.get(schema)).startTransaction();
+            backends.get(schema).insert(schema, tableName, withs, fields, rows);
+            ImmutablePair<Long, Long> bytes = ((CartoDBBackendImpl) backends.get(schema)).finishTransaction();
+            serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
+        } catch (Exception e) {
+            ImmutablePair<Long, Long> bytes = ((CartoDBBackendImpl) backends.get(schema)).finishTransaction();
+            serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
+            throw new CygnusPersistenceError("-, " + e.getMessage());
+        } // try catch
     } // persistRawAggregation
     
-    private void persistDistanceEvent(NGSIEvent event) throws Exception {
+    private void persistDistanceEvent(NGSIEvent event) throws CygnusBadConfiguration, CygnusPersistenceError {
         // Get some values
         String schema = buildSchemaName(event.getServiceForNaming(enableNameMappings));
+        String service = event.getServiceForData();
         String servicePath = event.getServicePathForData();
         String entityId = event.getContextElement().getId();
         String entityType = event.getContextElement().getType();
@@ -578,6 +643,8 @@ public class NGSICartoDBSink extends NGSISink {
             return;
         } // if
 
+        ((CartoDBBackendImpl) backends.get(schema)).startTransaction();
+        
         for (ContextAttribute contextAttribute : contextAttributes) {
             long recvTimeTs = event.getRecvTimeTs();
             String attrType = contextAttribute.getType();
@@ -614,7 +681,7 @@ public class NGSICartoDBSink extends NGSISink {
                     LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
                             + "), Table (" + tableName + "), Data (" + rows + ")");
                     backends.get(schema).insert(schema, tableName, withs, fields, rows);
-                } catch (Exception e) {
+                } catch (Exception e1) {
                     String withs = ""
                             + "WITH geom AS ("
                             + "   SELECT " + location.getLeft() + " AS point"
@@ -686,13 +753,25 @@ public class NGSICartoDBSink extends NGSISink {
                             + "(SELECT num_samples FROM inserts))";
                     LOGGER.info("[" + this.getName() + "] Persisting data at NGSICartoDBSink. Schema (" + schema
                             + "), Table (" + tableName + "), Data (" + rows + ")");
-                    backends.get(schema).insert(schema, tableName, withs, fields, rows);
+                    
+                    try {
+                        backends.get(schema).insert(schema, tableName, withs, fields, rows);
+                    } catch (Exception e2) {
+                        ImmutablePair<Long, Long> bytes = ((CartoDBBackendImpl) backends.get(schema)).finishTransaction();
+                        serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
+                        throw new CygnusPersistenceError("-, " + e2.getMessage());
+                    } // try catch
                 } // try catch
             } // if
         } // for
+        
+        ImmutablePair<Long, Long> bytes = ((CartoDBBackendImpl) backends.get(schema)).finishTransaction();
+        serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
     } // persistDistanceEvent
     
-    private void rawUpdateEvent(NGSIEvent event) throws Exception {
+    private void rawUpdateEvent(NGSIEvent event) throws CygnusBadConfiguration, CygnusPersistenceError {
+        String service = event.getServiceForData();
+        String servicePath = event.getServicePathForData();
         long recvTimeTs = event.getRecvTimeTs();
         String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
         String schema = buildSchemaName(event.getServiceForNaming(enableNameMappings));
@@ -756,24 +835,44 @@ public class NGSICartoDBSink extends NGSISink {
                 + "' AND entityType='" + event.getOriginalCE().getType() + "'";
         LOGGER.info("[" + this.getName() + "] Updating data at NGSICartoDBSink. Schema (" + schema
                 + "), Table (" + tableName + "), Sets (" + sets + "), Where (" + where + ")");
-        boolean updated = backends.get(schema).update(schema, tableName, sets, where);
+        boolean updated = false;
+        
+        ((CartoDBBackendImpl) backends.get(schema)).startTransaction();
+        
+        try {
+            updated = backends.get(schema).update(schema, tableName, sets, where);
+        } catch (Exception e) {
+            ImmutablePair<Long, Long> bytes = ((CartoDBBackendImpl) backends.get(schema)).finishTransaction();
+            serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
+            throw new CygnusPersistenceError("-, " + e.getMessage());
+        } // try catch
         
         if (!updated) {
             // Insert
             String withs = "";
             LOGGER.info("[" + this.getName() + "] Inserting initial data at NGSICartoDBSink. Schema (" + schema
                     + "), Table (" + tableName + "), Data (" + rows + ")");
-            backends.get(schema).insert(schema, tableName, withs, fields, rows);
+            
+            try {
+                backends.get(schema).insert(schema, tableName, withs, fields, rows);
+            } catch (Exception e) {
+                ImmutablePair<Long, Long> bytes = ((CartoDBBackendImpl) backends.get(schema)).finishTransaction();
+                serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
+                throw new CygnusPersistenceError("-, " + e.getMessage());
+            } // try catch
         } // if
+        
+        ImmutablePair<Long, Long> bytes = ((CartoDBBackendImpl) backends.get(schema)).finishTransaction();
+        serviceMetrics.add(service, servicePath, 0, 0, 0, 0, 0, 0, bytes.left, bytes.right, 0);
     } // rawUpdateEvent
     
     /**
      * Builds a schema name for CartoDB given a service.
      * @param service
      * @return The schema name for CartoDB
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
-    protected String buildSchemaName(String service) throws Exception {
+    protected String buildSchemaName(String service) throws CygnusBadConfiguration {
         String name = NGSICharsets.encodePostgreSQL(service);
 
         if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
@@ -790,9 +889,10 @@ public class NGSICartoDBSink extends NGSISink {
      * @param entity
      * @param attribute
      * @return The table name for CartoDB
-     * @throws Exception
+     * @throws CygnusBadConfiguration
      */
-    protected String buildTableName(String servicePath, String entity, String attribute) throws Exception {
+    protected String buildTableName(String servicePath, String entity, String attribute)
+        throws CygnusBadConfiguration {
         String name;
         
         switch(dataModel) {

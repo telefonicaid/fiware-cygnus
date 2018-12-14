@@ -1,4 +1,4 @@
-#<a name="top"></a>Persisting information from Orion to Kafka, using Cygnus
+# <a name="top"></a>Persisting information from Orion to Kafka, using Cygnus
 Content:
 
 * [Introduction](#section1)
@@ -11,13 +11,13 @@ Content:
 * [Appending entities](#section6)
 * [Updating entities](#section7)
 
-##<a name="section1"></a>Introduction
+## <a name="section1"></a>Introduction
 
 Step-by-step guide for storing NGSI-like context data in Kafka topics using Cygnus. This process has some components that have to be explained detailedly. All the components are running in a local machine, using localhost and differents ports for every component.  
 
 [Top](#top)
 
-##<a name="section2"></a>Running Orion
+## <a name="section2"></a>Running Orion
 
 (Orion Context Broker)[https://github.com/telefonicaid/fiware-orion] must be installed following [this guide](https://github.com/telefonicaid/fiware-orion/blob/develop/doc/manuals/admin/install.md). Orion allows us to manage all the whole lifecycle of context information including updates, queries, registrations and subscriptions. In this case we are going to do subscriptions to context information and update this information with new values.
 
@@ -44,7 +44,7 @@ $ curl -X GET http://localhost:1026/version
 
 [Top](#top)
 
-##<a name="section3"></a>Running Kafka
+## <a name="section3"></a>Running Kafka
 
 [Kafka](http://kafka.apache.org/) is a distributed, partitioned, and replicated commit log service. The information is stored by topics, published by producers in brokers and consumed by consumers. Our case needs to run a [Zookeeper](https://zookeeper.apache.org/), necessary for manage the consumer and producer actions and the functionality of the brokers connected. Instead, we need to configure the `brokers` in order to store the information properly.
 
@@ -56,7 +56,7 @@ This section is divided in two components: Zookeepers and Brokers. Every part ne
 
 [Top](#top)
 
-###<a name="section3.1"></a>Zookeeper
+### <a name="section3.1"></a>Zookeeper
 
 [Zookeeper](https://zookeeper.apache.org/) is a part of Kafka that must be started before Brokers. In this case we need to adjust some configuration files: consumer, producer and Zookeeper.
 
@@ -222,7 +222,7 @@ At this moment we have a local Orion ContextBroker running on por 1026 and a loc
 
 [Top](#top)
 
-###<a name="section3.2"></a>Brokers
+### <a name="section3.2"></a>Brokers
 
 Brokers, known as 'servers' too, need to be configured with some values. This concrete case show how to configure 1 broker, enough for this task. They are managed by a configuration file which name is `serverx.properties`, being x the number of the broker. We are going to configure `server1.properties`.
 ```
@@ -423,7 +423,7 @@ At this moment we have a local Orion ContextBroker running on port 1026, a local
 
 [Top](#top)
 
-##<a name="section4"></a>Running Cygnus
+## <a name="section4"></a>Running Cygnus
 
 Cygnus is the connector in charge of persisting Orion context data in Kafka, creating a historical view of such data. Cygnus runs once we have configured the file `agent.conf`, that contains all the values necessary. We are going to use the agent below:
 ```
@@ -473,7 +473,7 @@ At this moment we have a local Orion ContextBroker running on por 1026, a local 
 
 [Top](#top)
 
-##<a name="section5"></a>Creating a subscription
+## <a name="section5"></a>Creating a subscription
 
 After all the previous requisites we can do a subscription. Now we have to define the behaviour of our subscription, defining an entity, a type for that entity, a Fiware-Service and a Fiware-ServicePath that will be part of the request. For this example we use:
 * Entity: Book1
@@ -543,7 +543,7 @@ orion-library       0.031GB
 
 [Top](#top)
 
-##<a name="section6"></a>Appending entities
+## <a name="section6"></a>Appending entities
 
 The first action that we need is to append an entity. As we said previously we are going to append an entity `Book1` of type `Book`. Sending a request to our local Orion with the `APPEND` option we store the entity for future notifications:
 ```
@@ -652,7 +652,7 @@ time=2016-08-30T08:03:16.065CEST | lvl=INFO | corr=31ce961a-2767-4acd-bd5e-b623c
 
 [Top](#top)
 
-##<a name="section7"></a>Updating entities
+## <a name="section7"></a>Updating entities
 
 Once appended the entity, we are going to update the information. This request is the same as `APPEND`, the only different is that, in this case, we have to send the `UPDATE` option.
 ```

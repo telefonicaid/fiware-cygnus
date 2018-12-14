@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2014-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -19,6 +19,7 @@
 package com.telefonica.iot.cygnus.backends.hdfs;
 
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -82,31 +83,60 @@ public class HDFSBackendImplBinary implements HDFSBackend {
     } // setFSGetter
 
     @Override
-    public void createDir(String dirPath) throws Exception {
+    public void createDir(String dirPath) throws CygnusPersistenceError, CygnusRuntimeError {
         CreateDirPEA pea = new CreateDirPEA(dirPath);
         UserGroupInformation ugi = UserGroupInformation.createRemoteUser(hdfsUser);
-        ugi.doAs(pea);
+        
+        try {
+            ugi.doAs(pea);
+        } catch (IOException e) {
+            throw new CygnusPersistenceError("Directory creation error", "IOException", e.getMessage());
+        } catch (InterruptedException e) {
+            throw new CygnusPersistenceError("Directory creation error", "InterruptedException", e.getMessage());
+        } // try catch
     } // createDir
 
     @Override
-    public void createFile(String filePath, String data) throws Exception {
+    public void createFile(String filePath, String data) throws CygnusPersistenceError, CygnusRuntimeError {
         CreateFilePEA pea = new CreateFilePEA(filePath, data);
         UserGroupInformation ugi = UserGroupInformation.createRemoteUser(hdfsUser);
-        ugi.doAs(pea);
+        
+        try {
+            ugi.doAs(pea);
+        } catch (IOException e) {
+            throw new CygnusPersistenceError("File creation error", "IOException", e.getMessage());
+        } catch (InterruptedException e) {
+            throw new CygnusPersistenceError("File creation error", "InterruptedException", e.getMessage());
+        } // try catch
     } // createFile
 
     @Override
-    public void append(String filePath, String data) throws Exception {
+    public void append(String filePath, String data) throws CygnusPersistenceError, CygnusRuntimeError {
         AppendPEA pea = new AppendPEA(filePath, data);
         UserGroupInformation ugi = UserGroupInformation.createRemoteUser(hdfsUser);
-        ugi.doAs(pea);
+        
+        try {
+            ugi.doAs(pea);
+        } catch (IOException e) {
+            throw new CygnusPersistenceError("File appending error", "IOException", e.getMessage());
+        } catch (InterruptedException e) {
+            throw new CygnusPersistenceError("File appending error", "InterruptedException", e.getMessage());
+        } // try catch
     } // append
 
     @Override
-    public boolean exists(String filePath) throws Exception {
+    public boolean exists(String filePath) throws CygnusPersistenceError, CygnusRuntimeError {
         ExistsPEA pea = new ExistsPEA(filePath);
         UserGroupInformation ugi = UserGroupInformation.createRemoteUser(hdfsUser);
-        ugi.doAs(pea);
+        
+        try {
+            ugi.doAs(pea);
+        } catch (IOException e) {
+            throw new CygnusPersistenceError("File existence checking error", "IOException",  e.getMessage());
+        } catch (InterruptedException e) {
+            throw new CygnusPersistenceError("File existence checking error", "InterruptedException", e.getMessage());
+        } // try catch
+        
         return pea.exists();
     } // exists
     

@@ -1,4 +1,4 @@
-#Flume extensions catalogue
+# Flume extensions catalogue
 
 * [Introduction](./introduction.md)
 * Http source handlers
@@ -15,7 +15,7 @@
     * [NGSISTHSink](./ngsi_sth_sink.md)
     * [NGSITestSink](./ngsi_test_sink.md)
 * Interceptors
-    * [GroupingInterceptor](./grouping_interceptor.md)
+    * [GroupingInterceptor](./ngsi_grouping_interceptor.md)
 * Channel selectors
     * [RoundRobinChannelSelector](./round_robin_channel_selector.md)
 * [Reporting issues and contact information](./issues_and_contact.md)

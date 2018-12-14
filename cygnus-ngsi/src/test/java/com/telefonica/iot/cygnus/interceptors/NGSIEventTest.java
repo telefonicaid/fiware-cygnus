@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
@@ -21,10 +21,11 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.TestUtils;
+import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import java.util.HashMap;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
+import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -103,12 +104,13 @@ public class NGSIEventTest {
                 + "-------- The timestamp is returned");
         HashMap<String, String> headers = new HashMap<>();
         headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE = null; // irrelevant for this test
         ContextElement mappedCE = null; // irrelevant for this test
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
-            assertEquals(new Long(timestamp).longValue(), event.getRecvTimeTs());
+            assertEquals(Long.parseLong(timestamp), event.getRecvTimeTs());
             System.out.println(getTestTraceHead("[NGSIEvent.getRecvTimeTs]")
                     + "-  OK  - The timestamp has been returned");
         } catch (AssertionError e) {
@@ -117,6 +119,31 @@ public class NGSIEventTest {
             throw e;
         } // try catch
     } // testGetRecvTimeTs
+    
+    /**
+     * [NGSIEvent.getServiceForData] -------- The original service is returned.
+     */
+    @Test
+    public void testGetServiceForData() {
+        System.out.println(getTestTraceHead("[NGSIEvent.getServiceForData]")
+                + "-------- The original service is returned");
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        byte[] body = null; // irrelevant for this test
+        ContextElement originalCE = null; // irrelevant for this test
+        ContextElement mappedCE = null; // irrelevant for this test
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
+        
+        try {
+            assertEquals(originalService, event.getServiceForData());
+            System.out.println(getTestTraceHead("[NGSIEvent.getServiceForData]")
+                    + "-  OK  - The original service has been returned");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIEvent.getServiceForData]")
+                    + "- FAIL - The original service has not been returned");
+            throw e;
+        } // try catch
+    } // testGetServiceForData
     
     /**
      * [NGSIEvent.getServiceForNaming] -------- When name mappings are not enabled, the original service is returned.
@@ -128,9 +155,10 @@ public class NGSIEventTest {
         HashMap<String, String> headers = new HashMap<>();
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE = null; // irrelevant for this test
         ContextElement mappedCE = null; // irrelevant for this test
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
             assertEquals(originalService, event.getServiceForNaming(false));
@@ -153,9 +181,10 @@ public class NGSIEventTest {
         HashMap<String, String> headers = new HashMap<>();
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE = null; // irrelevant for this test
         ContextElement mappedCE = null; // irrelevant for this test
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
             assertEquals(mappedService, event.getServiceForNaming(true));
@@ -179,9 +208,10 @@ public class NGSIEventTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH, groupedServicePath);
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE = null; // irrelevant for this test
         ContextElement mappedCE = null; // irrelevant for this test
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
             assertEquals(originalServicePath, event.getServicePathForData());
@@ -206,9 +236,10 @@ public class NGSIEventTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH, groupedServicePath);
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE = null; // irrelevant for this test
         ContextElement mappedCE = null; // irrelevant for this test
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
             assertEquals(originalServicePath, event.getServicePathForNaming(false, false));
@@ -232,9 +263,10 @@ public class NGSIEventTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH, groupedServicePath);
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE = null; // irrelevant for this test
         ContextElement mappedCE = null; // irrelevant for this test
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
             assertEquals(groupedServicePath, event.getServicePathForNaming(true, false));
@@ -258,9 +290,10 @@ public class NGSIEventTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH, groupedServicePath);
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE = null; // irrelevant for this test
         ContextElement mappedCE = null; // irrelevant for this test
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
             assertEquals(mappedServicePath, event.getServicePathForNaming(false, true));
@@ -283,19 +316,20 @@ public class NGSIEventTest {
                 + "-------- When grouping, mappings and new encoding are not enabled, the original entity "
                 + "(not encoded) is returned");
         HashMap<String, String> headers = null; // irrelevant for this test
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE;
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
             throw new AssertionError(e.getMessage());
         } // try catch
         
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
             assertEquals(originalEntityNoEncoding, event.getEntityForNaming(false, false, false));
@@ -318,19 +352,20 @@ public class NGSIEventTest {
                 + "-------- When grouping and mappings are not enabled and new encoding is enabled, the original "
                 + "entity (encoded) is returned");
         HashMap<String, String> headers = null; // irrelevant for this test
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE;
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
             throw new AssertionError(e.getMessage());
         } // try catch
         
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
             assertEquals(originalEntityEncoding, event.getEntityForNaming(false, false, true));
@@ -354,19 +389,20 @@ public class NGSIEventTest {
                 + "returned");
         HashMap<String, String> headers = new HashMap<>();
         headers.put(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY, groupedEntity);
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE;
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
             throw new AssertionError(e.getMessage());
         } // try catch
         
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
             assertEquals(groupedEntity, event.getEntityForNaming(true, false, true));
@@ -389,19 +425,20 @@ public class NGSIEventTest {
                 + "-------- When mappings is enabled and new encoding is not enabled, the concatenation of the mapped "
                 + "entity ID and type (no encoding) is returned");
         HashMap<String, String> headers = null; // irrelevant for this test
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE;
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
             throw new AssertionError(e.getMessage());
         } // try catch
         
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
             assertEquals(mappedEntityID + "_" + mappedEntityType, event.getEntityForNaming(false, true, false));
@@ -425,19 +462,20 @@ public class NGSIEventTest {
                 + "-------- When mappings and new encoding are enabled, the concatenation of the mapped entity ID and "
                 + "type (no encoding) is returned");
         HashMap<String, String> headers = null; // irrelevant for this test
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE;
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
             throw new AssertionError(e.getMessage());
         } // try catch
         
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
             assertEquals(mappedEntityID + "=" + mappedEntityType, event.getEntityForNaming(false, true, true));
@@ -460,19 +498,20 @@ public class NGSIEventTest {
                 + "-------- When mappings is enabled and the mapped type is empty, independently of the new encoding, "
                 + "the mapped entity ID is returned");
         HashMap<String, String> headers = null; // irrelevant for this test
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE;
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEEmptyTypeStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEEmptyTypeStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
             throw new AssertionError(e.getMessage());
         } // try catch
         
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
             assertEquals(mappedEntityID, event.getEntityForNaming(false, true, true));
@@ -493,19 +532,20 @@ public class NGSIEventTest {
         System.out.println(getTestTraceHead("[NGSIEvent.getAttributeForNaming]")
                 + "-------- When mappings is not enabled, the original attribute name is returned");
         HashMap<String, String> headers = null; // irrelevant for this test
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE;
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getAttributeForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
             throw new AssertionError(e.getMessage());
         } // try catch
         
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
             assertEquals(originalAttribute, event.getAttributeForNaming(false));
@@ -526,19 +566,20 @@ public class NGSIEventTest {
         System.out.println(getTestTraceHead("[NGSIEvent.getAttributeForNaming]")
                 + "-------- When mappings is enabled, the mapped attribute name is returned");
         HashMap<String, String> headers = null; // irrelevant for this test
+        byte[] body = null; // irrelevant for this test
         ContextElement originalCE;
         ContextElement mappedCE;
         
         try {
-            originalCE = TestUtils.createJsonContextElement(originalCEStr);
-            mappedCE = TestUtils.createJsonContextElement(mappedCEStr);
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
+            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getAttributeForNaming]")
                     + "- FAIL - There was some problem when setting up the test");
             throw new AssertionError(e.getMessage());
         } // try catch
         
-        NGSIEvent event = new NGSIEvent(headers, originalCE, mappedCE);
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
             assertEquals(mappedAttribute, event.getAttributeForNaming(true));
@@ -550,5 +591,55 @@ public class NGSIEventTest {
             throw e;
         } // try catch
     } // testGetAttributeForNamingNM
+    
+    /**
+     * [NGSIEvent.getBody] -------- Bytes regarding the original context element are returned.
+     */
+    @Test
+    public void testGetBody() {
+        System.out.println(getTestTraceHead("[NGSIEvent.getBody]")
+                + "-------- Bytes regarding the original context element are returned");
+        HashMap<String, String> headers = null; // irrelevant for this test
+        byte[] body = originalCEStr.getBytes();
+        ContextElement originalCE = null; // irrelevant for this test
+        ContextElement mappedCE = null; // irrelevant for this test
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
+        
+        try {
+            Assert.assertArrayEquals(body, event.getBody());
+            System.out.println(getTestTraceHead("[NGSIEvent.getBody]")
+                    + "-  OK  - Bytes regarding the original context element have been returned");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIEvent.getBody]")
+                    + "- FAIL - Bytes regarding the original context element have not been returned");
+            throw e;
+        } // try catch
+    } // testGetBody
+    
+    /**
+     * [NGSIEvent.setBody] -------- Bytes are correctly set.
+     */
+    @Test
+    public void testSetBody() {
+        System.out.println(getTestTraceHead("[NGSIEvent.setBody]")
+                + "-------- Bytes are correctly set");
+        HashMap<String, String> headers = null; // irrelevant for this test
+        byte[] body = originalCEStr.getBytes();
+        ContextElement originalCE = null; // irrelevant for this test
+        ContextElement mappedCE = null; // irrelevant for this test
+        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
+        event.setBody((originalCEStr + CommonConstants.CONCATENATOR + mappedCEStr).getBytes());
+        
+        try {
+            Assert.assertArrayEquals((originalCEStr + CommonConstants.CONCATENATOR + mappedCEStr).getBytes(),
+                    event.getBody());
+            System.out.println(getTestTraceHead("[NGSIEvent.setBody]")
+                    + "-  OK  - Bytes regarding the original context element have been returned");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIEvent.setBody]")
+                    + "- FAIL - Bytes regarding the original context element have not been returned");
+            throw e;
+        } // try catch
+    } // testSetBody
     
 } // NGSIEventTest

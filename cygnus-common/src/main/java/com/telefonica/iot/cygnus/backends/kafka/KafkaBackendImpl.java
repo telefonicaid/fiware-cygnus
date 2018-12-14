@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -37,6 +37,7 @@ public class KafkaBackendImpl implements KafkaBackend {
     private KafkaProducer<String, String> kafkaProducer;
     private static final CygnusLogger LOGGER = new CygnusLogger(KafkaBackendImpl.class);
     private final String zkEndpoint;
+    private ZkClient zookeeperClient;
     
     /**
      * Constructor.
@@ -51,18 +52,17 @@ public class KafkaBackendImpl implements KafkaBackend {
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         kafkaProducer = new KafkaProducer<String, String>(properties);
+        zookeeperClient = new ZkClient(zkEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
     } // KafkaBackendImpl
 
     @Override
     public boolean topicExists(String topic) throws Exception {
         LOGGER.debug("Checking if topic '" + topic + "' already exists.");
-        ZkClient zookeeperClient = new ZkClient(zkEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
         return AdminUtils.topicExists(zookeeperClient, topic);
     } // topicExists
 
     @Override
     public void createTopic(String topic, int partitions, int replicationFactor) {
-        ZkClient zookeeperClient = new ZkClient(zkEndpoint, 10000, 10000, ZKStringSerializer$.MODULE$);
         AdminUtils.createTopic(zookeeperClient, topic, partitions, replicationFactor, new Properties());
         LOGGER.debug("Creating topic: " + topic + " , partitions: " + partitions
                 + " , " + "replication factor: " + replicationFactor + ".");

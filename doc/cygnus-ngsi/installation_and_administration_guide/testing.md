@@ -1,10 +1,10 @@
-#<a name="top"></a>Testing
+# <a name="top"></a>Testing
 Content:
 
 * [Unit testing](#section1)
 * [e2e testing](#section2)
 
-##<a name="section1"></a>Unit testing
+## <a name="section1"></a>Unit testing
 Running the tests require [Apache Maven](https://maven.apache.org/) installed and Cygnus sources downloaded.
 
     $ git clone https://github.com/telefonicaid/fiware-cygnus.git
@@ -300,7 +300,7 @@ Tests run: 85, Failures: 0, Errors: 0, Skipped: 0
 
 [Top](#top)
 
-##<a name="section2"></a>e2e testing
+## <a name="section2"></a>e2e testing
 Cygnus can be tested form a e2e point of view by using any of the scripts, [given with this repo](../../../cygnus-ngsi/resources/ngsi-examples), emulating a NGSI-like notification. You can find both Json and XML examples of simple and compound notifications, with or without metadata, even model entities and loops of continuous notifiers.
 
 For instance, if running the `notification-json-simple.sh`:

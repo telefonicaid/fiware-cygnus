@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2014-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -17,8 +17,8 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
+import com.telefonica.iot.cygnus.metrics.CygnusMetrics;
 import java.util.Date;
-import org.apache.flume.EventDeliveryException;
 import org.apache.flume.sink.AbstractSink;
 
 /**
@@ -31,6 +31,7 @@ public abstract class CygnusSink extends AbstractSink {
     protected final long setupTime = new Date().getTime();
     protected long numProcessedEvents = 0;
     protected long numPersistedEvents = 0;
+    protected CygnusMetrics serviceMetrics = new CygnusMetrics();
     
     /**
      * Gets the setup time.
@@ -71,5 +72,21 @@ public abstract class CygnusSink extends AbstractSink {
     public void setNumPersistedEvents(long n) {
         numPersistedEvents = n;
     } // setNumPersistedEvents
+    
+    /**
+     * Gets serviceMetrics.
+     * @return serviceMetrics
+     */
+    public CygnusMetrics getServiceMetrics() {
+        return serviceMetrics;
+    } // getServiceSubserviceMetrics
+    
+    /**
+     * Sets serviceMetrics.
+     * @param serviceMetrics
+     */
+    public void setServiceMetrics(CygnusMetrics serviceMetrics) {
+        this.serviceMetrics = serviceMetrics;
+    } // setServiceMetrics
     
 } // CygnusSink

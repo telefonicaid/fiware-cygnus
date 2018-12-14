@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -17,8 +17,14 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
+import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusCappingError;
+import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import static com.telefonica.iot.cygnus.sinks.NGSIMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
@@ -26,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import org.bson.Document;
 import org.apache.flume.Context;
-import org.apache.flume.EventDeliveryException;
 
 /**
  * @author frb
@@ -41,7 +46,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
     private long maxDocuments;
 
     private boolean rowAttrPersistence;
-    
+    private String attrMetadataStore;
     /**
      * Constructor.
      */
@@ -80,11 +85,22 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                 + attrPersistenceStr + ") must be 'row' or 'column'");
         }  // if else
         
+        attrMetadataStore = context.getString("attr_metadata_store", "false");
+
+        if (attrMetadataStore.equals("true") || attrMetadataStore.equals("false")) {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_metadata_store="
+                    + attrMetadataStore + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
+                    + attrMetadataStore + ") must be 'true' or 'false'");
+        } // if else 
+		
         super.configure(context);
     } // configure
 
     @Override
-    void persistBatch(NGSIBatch batch) throws Exception {
+    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -116,11 +132,11 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
     } // persistBatch
     
     @Override
-    public void capRecords(NGSIBatch batch, long size) throws EventDeliveryException {
+    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
     } // capRecords
 
     @Override
-    public void expirateRecords(long time) throws Exception {
+    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
     } // expirateRecords
     
     /**
@@ -163,7 +179,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             } // if else
         } // getCollectionName
         
-        public void initialize(NGSIEvent event) throws Exception {
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
@@ -173,7 +189,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             collectionName = buildCollectionName(servicePathForNaming, entityForNaming, attributeForNaming);
         } // initialize
         
-        public abstract void aggregate(NGSIEvent cygnusEvent) throws Exception;
+        public abstract void aggregate(NGSIEvent cygnusEvent);
         
     } // MongoDBAggregator
     
@@ -183,12 +199,12 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
     private class RowAggregator extends MongoDBAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
         } // initialize
         
         @Override
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
+        public void aggregate(NGSIEvent cygnusEvent) {
             // get the event headers
             long notifiedRecvTimeTs = cygnusEvent.getRecvTimeTs();
 
@@ -232,10 +248,49 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                 
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                Document doc = createDoc(recvTimeTs, entityId, entityType, attrName, attrType, attrValue);
+                
+                Document doc;
+
+                if(attrMetadataStore.equals("true")){
+                    doc = createDocWithMetadata(recvTimeTs, entityId, entityType, attrName, attrType, attrValue, attrMetadata);
+                } else {
+                    doc = createDoc(recvTimeTs, entityId, entityType, attrName, attrType, attrValue);
+                } // if else
+		                
                 aggregation.add(doc);
             } // for
         } // aggregate
+        
+        private Document createDocWithMetadata(Long recvTimeTs, String entityId, String entityType, String attrName,
+                String attrType, String attrValue, String attrMetadata) {
+            Document doc = new Document("recvTime", new Date(recvTimeTs));
+
+            switch (dataModel) {
+            case DMBYSERVICEPATH:
+                doc.append("entityId", entityId)
+                        .append("entityType", entityType)
+                        .append("attrName", attrName)
+                        .append("attrType", attrType)
+                        .append("attrValue", attrValue)
+                        .append("attrMetadata", (DBObject)JSON.parse(attrMetadata));
+                break;
+            case DMBYENTITY:
+                doc.append("attrName", attrName)
+                        .append("attrType", attrType)
+                        .append("attrValue", attrValue)
+                        .append("attrMetadata", (DBObject)JSON.parse(attrMetadata));
+                break;
+            case DMBYATTRIBUTE:
+                doc.append("attrType", attrType)
+                        .append("attrValue", attrValue)
+                        .append("attrMetadata", (DBObject)JSON.parse(attrMetadata));
+                break;
+            default:
+                return null; // this will never be reached
+            } // switch
+
+            return doc;			
+        } // createDocWithMetadata
         
         private Document createDoc(long recvTimeTs, String entityId, String entityType, String attrName,
                 String attrType, String attrValue) {
@@ -273,12 +328,12 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
     private class ColumnAggregator extends MongoDBAggregator {
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws Exception {
+        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
         } // initialize
         
         @Override
-        public void aggregate(NGSIEvent cygnusEvent) throws Exception {
+        public void aggregate(NGSIEvent cygnusEvent) {
             // get the event headers
             long recvTimeTs = cygnusEvent.getRecvTimeTs();
 
@@ -346,7 +401,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         } // if else
     } // getAggregator
     
-    private void persistAggregation(MongoDBAggregator aggregator) throws Exception {
+    private void persistAggregation(MongoDBAggregator aggregator) throws CygnusPersistenceError {
         ArrayList<Document> aggregation = aggregator.getAggregation();
         
         if (aggregation.isEmpty()) {
@@ -357,9 +412,14 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         String collectionName = aggregator.getCollectionName(enableLowercase);
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIMongoSink. Database: "
                 + dbName + ", Collection: " + collectionName + ", Data: " + aggregation.toString());
-        backend.createDatabase(dbName);
-        backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);
-        backend.insertContextDataRaw(dbName, collectionName, aggregation);
+        
+        try {
+            backend.createDatabase(dbName);
+            backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);
+            backend.insertContextDataRaw(dbName, collectionName, aggregation);
+        } catch (Exception e) {
+            throw new CygnusPersistenceError("-, " + e.getMessage());
+        } // try catch
     } // persistAggregation
 
 } // NGSIMongoSink

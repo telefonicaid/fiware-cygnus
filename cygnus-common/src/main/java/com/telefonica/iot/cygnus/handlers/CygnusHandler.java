@@ -1,7 +1,7 @@
 /**
- * Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2016-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
- * This file is part of fiware-cygnus (FI-WARE project).
+ * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
  * General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your
@@ -17,6 +17,7 @@
  */
 package com.telefonica.iot.cygnus.handlers;
 
+import com.telefonica.iot.cygnus.metrics.CygnusMetrics;
 import java.util.Date;
 
 /**
@@ -28,10 +29,11 @@ public abstract class CygnusHandler {
     protected static final long BOOTTIME = new Date().getTime();
     protected static long numReceivedEvents = 0;
     protected static long numProcessedEvents = 0;
+    protected CygnusMetrics serviceMetrics = new CygnusMetrics();
     
     /**
      * Gets the number of received events.
-     * @return The number of received events
+     * @return The number of received eventsObje
      */
     public long getNumReceivedEvents() {
         return numReceivedEvents;
@@ -68,5 +70,21 @@ public abstract class CygnusHandler {
     public long getBootTime() {
         return BOOTTIME;
     } // getBootTime
+    
+    /**
+     * Gets serviceMetrics.
+     * @return serviceMetrics
+     */
+    public CygnusMetrics getServiceMetrics() {
+        return serviceMetrics;
+    } // getServiceSubserviceMetrics
+    
+    /**
+     * Sets serviceMetrics.
+     * @param serviceMetrics
+     */
+    public void setServiceMetrics(CygnusMetrics serviceMetrics) {
+        this.serviceMetrics = serviceMetrics;
+    } // setServiceMetrics
     
 } // CygnusHandler

@@ -1,4 +1,4 @@
-#<a name="top"></a>NGSIMongoSink
+# <a name="top"></a>NGSIMongoSink
 Content:
 
 * [Functionality](#section1)
@@ -20,12 +20,13 @@ Content:
         * [About batching](#section2.3.1)
         * [About `recvTime` and `TimeInstant` metadata](#section2.3.2)
         * [About the encoding](#section2.3.3)
+        * [About supported versions of MongoDB](#section2.3.4)
 * [Programmers guide](#section3)
     * [`NGSIMongoSink` class](#section3.1)
     * [`NGSIMongoBackend` class](#section3.2)
     * [Authentication and authorization](#section3.3)
 
-##<a name="section1"></a>Functionality
+## <a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIMongoSink`, or simply `NGSIMongoSink` is a sink designed to persist NGSI-like context data events within a MongoDB server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific HDFS data structures at the Cygnus sinks.
@@ -34,19 +35,19 @@ Next sections will explain this in detail.
 
 [Top](#top)
 
-###<a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
+### <a name="section1.1"></a>Mapping NGSI events to `NGSIEvent` objects
 Notified NGSI events (containing context data) are transformed into `NGSIEvent` objects (for each context element a `NGSIEvent` is created; such an event is a mix of certain headers and a `ContextElement` object), independently of the NGSI data generator or the final backend where it is persisted.
 
 This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_rest_handler.md). Once translated, the data (now, as `NGSIEvent` objects) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
-###<a name="section1.2"></a>Mapping `NGSIEvent`s to MongoDB data structures
+### <a name="section1.2"></a>Mapping `NGSIEvent`s to MongoDB data structures
 MongoDB organizes the data in databases that contain collections of Json documents. Such organization is exploited by `NGSIMongoSink` each time a `NGSIEvent` is going to be persisted.
 
 [Top](#top)
 
-####<a name="section1.2.1"></a>MongoDB databases naming conventions
+#### <a name="section1.2.1"></a>MongoDB databases naming conventions
 A database called as the `fiware-service` header value within the event is created (if not existing yet). A configured prefix is added (by default, `sth_`).
 
 It must be said [MongoDB does not accept](https://docs.mongodb.com/manual/reference/limits/#naming-restrictions) `/`, `\`, `.`, `"` and `$` in the database names. This leads to certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
@@ -55,7 +56,7 @@ MongoDB [namespaces (database + collection) name length](https://docs.mongodb.co
 
 [Top](#top)
 
-####<a name="section1.2.2"></a>MongoDB collections naming conventions
+#### <a name="section1.2.2"></a>MongoDB collections naming conventions
 The name of these collections depends on the configured data model and analysis mode (see the [Configuration](#section2.1) section for more details):
 
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md)) is used as the name of the collection. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The configured prefix is prepended to the collection name.
@@ -84,7 +85,7 @@ Please observe the concatenation of entity ID and type is already given in the `
 
 [Top](#top)
 
-####<a name="section1.2.3"></a>Row-like storing
+#### <a name="section1.2.3"></a>Row-like storing
 Regarding the specific data stored within the above collections, if `attr_persistence` parameter is set to `row` (default storing mode) then the notified data is stored attribute by attribute, composing a Json document for each one of them. Each document contains a variable number of fields, depending on the configured `data_model`:
 
 * Data model by service path:
@@ -95,21 +96,24 @@ Regarding the specific data stored within the above collections, if `attr_persis
     * `attrName`: Notified attribute name.
     * `attrType`: Notified attribute type.
     * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
+    * `attrMetadata`: will be stored only if it was configured to (attr_metadata_store set to true in the configuration file ngsi_agent.conf). It is a Json object.
 * Data model by entity:
     * `recvTimeTs`: UTC timestamp expressed in miliseconds.
     * `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
     * `attrName`: Notified attribute name.
     * `attrType`: Notified attribute type.
     * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
+    * `attrMetadata`: will be stored only if it was configured to (attr_metadata_store set to true in the configuration file ngsi_agent.conf). It is a Json object.
 * Data model by attribute:
     * `recvTimeTs`: UTC timestamp expressed in miliseconds.
     * `recvTime`: UTC timestamp in human-readable format ([ISO 8601](http://en.wikipedia.org/wiki/ISO_8601)).
     * `attrType`: Notified attribute type.
     * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
+    * `attrMetadata`: will be stored only if it was configured to (attr_metadata_store set to true in the configuration file ngsi_agent.conf). It is a Json object.
 
 [Top](#top)
 
-####<a name="section1.2.4"></a>Column-like storing
+#### <a name="section1.2.4"></a>Column-like storing
 Regarding the specific data stored within the above collections, if `attr_persistence` parameter is set to `column` then a single Json document is composed for the whole notified entity. Each document contains a variable number of fields, depending on the configured `data_model`:
 
 * Data model by service path:
@@ -128,8 +132,8 @@ Regarding the specific data stored within the above collections, if `attr_persis
 
 [Top](#top)
 
-###<a name="section1.3"></a>Example
-####<a name="section1.3.1"></a>`NGSIEvent`
+### <a name="section1.3"></a>Example
+#### <a name="section1.3.1"></a>`NGSIEvent`
 Assuming the following `NGSIEvent` is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
 
     ngsi-event={
@@ -163,7 +167,7 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
 [Top](#top)
 
-####<a name="section1.3.2"></a>Database and collection names
+#### <a name="section1.3.2"></a>Database and collection names
 A MongoDB database named as the concatenation of the prefix and the notified FIWARE service path, i.e. `sth_vehicles`, will be created.
 
 Regarding the collection names, the MongoDB collection names will be, depending on the configured data model, the following ones (old encoding):
@@ -182,7 +186,7 @@ Using the new encoding:
 
 [Top](#top)
 
-####<a name="section1.3.3"></a>Row-like storing
+#### <a name="section1.3.3"></a>Row-like storing
 Assuming `data_model=dm-by-service-path` and `attr_persistence=row` as configuration parameters, then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
@@ -244,7 +248,7 @@ If `data_model=dm-by-attribute` and `attr_persistence=row` then `NGSIMongoSink` 
 
 [Top](#top)
 
-####<a name="section1.3.4"></a>Column-like storing
+#### <a name="section1.3.4"></a>Column-like storing
 If `data_model=dm-by-service-path` and `attr_persistence=column` then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
@@ -283,8 +287,8 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 
 [Top](#top)
 
-##<a name="section2"></a>Administration guide
-###<a name="section2.1"></a>Configuration
+## <a name="section2"></a>Administration guide
+### <a name="section2.1"></a>Configuration
 `NGSIMongoSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -297,6 +301,7 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data\_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported. |
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
+| attr\_metadata\_store | no | false | <i>true</i> or <i>false</i>. |
 | mongo\_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
 | mongo\_username | no | <i>empty</i> | If empty, no authentication is done. |
 | mongo\_password | no | <i>empty</i> | If empty, no authentication is done. |
@@ -341,13 +346,13 @@ A configuration example could be:
 
 [Top](#top)
 
-###<a neme="section2.2"></a>Use cases
+### <a neme="section2.2"></a>Use cases
 Use `NGSIMongoSink` if you are looking for a Json-based document storage not growing so much in the mid-long term.
 
 [Top](#top)
 
-###<a name="section2.3"></a>Important notes
-####<a name="section2.3.1"></a>About batching
+### <a name="section2.3"></a>Important notes
+#### <a name="section2.3.1"></a>About batching
 As explained in the [programmers guide](#section3), `NGSIMongoSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 `NGSIEvent`s. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same MongoDB collection. If processing the events one by one, we would need 100 inserts into MongoDB; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination MongoDB collection. In the worst case, the whole 100 entities will be about 100 different entities (100 different MongoDB collections), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
@@ -360,12 +365,12 @@ By default, `NGSIMongoSink` has a configured batch size and batch accumulation t
 
 [Top](#top)
 
-####<a name="section2.3.2"></a>About `recvTime` and `TimeInstant` metadata
+#### <a name="section2.3.2"></a>About `recvTime` and `TimeInstant` metadata
 By default, `NGSIMongoSink` stores the notification reception timestamp. Nevertheless, if (and only if) working in `row` mode and a metadata named `TimeInstant` is notified, then such metadata value is used instead of the reception timestamp. This is useful when wanting to persist a measure generation time (which is thus notified as a `TimeInstant` metadata) instead of the reception time.
 
 [Top](#top)
 
-####<a name="section2.3.3"></a>About the encoding
+#### <a name="section2.3.3"></a>About the encoding
 `NGSIMongoSink` follows the [MongoDB naming restrictions](https://docs.mongodb.org/manual/reference/limits/#naming-restrictions). In a nutshell:
 
 Until version 1.2.0 (included), Cygnus applied a very simple encoding:
@@ -384,8 +389,16 @@ Despite the old encoding will be deprecated in the future, it is possible to swi
 
 [Top](#top)
 
-##<a name="section3"></a>Programmers guide
-###<a name="section3.1"></a>`NGSISTHSink` class
+#### <a name="section2.3.4"></a>About supported versions of MongoDB
+This sink has been tested with the following versions of Mongo:
+
+* 3.2.6
+* 3.4
+
+[Top](#top)
+
+## <a name="section3"></a>Programmers guide
+### <a name="section3.1"></a>`NGSISTHSink` class
 `NGSIMongoSink` extends `NGSIMongoBaseSink`, which as any other NGSI-like sink, extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
@@ -402,7 +415,7 @@ A complete configuration as the described above is read from the given `Context`
 
 [Top](#top)
 
-###<a name="section3.2"></a>`MongoBackend` class
+### <a name="section3.2"></a>`MongoBackend` class
 This is a convenience backend class for MongoDB that provides methods to persist the context data both in raw of aggregated format. Relevant methods regarding raw format are:
 
     public void createDatabase(String dbName) throws Exception;
@@ -421,7 +434,7 @@ Nothing special is done with regards to the encoding. Since Cygnus generally wor
 
 [Top](#top)
 
-###<a name="section3.3"></a>Authentication and authorization
+### <a name="section3.3"></a>Authentication and authorization
 Current implementation of `NGSIMongoSink` relies on the username and password credentials created at the MongoDB endpoint.
 
 [Top](#top)

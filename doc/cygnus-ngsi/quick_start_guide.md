@@ -1,20 +1,15 @@
-#Cygnus Quick Start Guide
+# Cygnus Quick Start Guide
 This quick start overviews the steps a newbie programmer will have to follow in order to get familiar with Cygnus and its basic functionality. For more detailed information, please refer to the [README](https://github.com/telefonicaid/fiware-cygnus/blob/master/README.md); the [Installation and Administration Guide](./installation_and_administration_guide/introduction.md), the [User and Programmer Guide](user_and_programmer_guide/introduction.md) and the [Flume Extensions Catalogue](flume_extensions_catalogue/introduction.md) fully document Cygnus.
 
-##Installing Cygnus
-Open a terminal and simply configure the FIWARE repository if not yet configured and use your applications manager in order to install the latest version of Cygnus (CentOS/RedHat example):
-
+## Installing Cygnus
+Open a terminal and simply configure the FIWARE release repository:
 ```
-$ sudo cat > /etc/yum.repos.d/fiware.repo <<EOL
-[Fiware]
-name=FIWARE repository
-baseurl=http://repositories.testbed.fi-ware.eu/repo/rpm/x86_64/
-gpgcheck=0
-enabled=1
-EOL
-$ sudo yum install cygnus
+sudo wget -P /etc/yum.repos.d/ https://nexus.lab.fiware.org/repository/raw/public/repositories/el/7/x86_64/fiware-release.repo
 ```
-
+Use your applications manager in order to install the latest version of Cygnus (CentOS/RedHat example):
+```
+sudo yum install cygnus-ngsi
+```
 **IMPORTANT NOTE:**
 
 Cygnus, as it is based on Apache Flume, needs Java SDK is installed. If not yet installed, do it right now:
@@ -31,7 +26,7 @@ $ export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk.x86_64
 
 In order to do it permanently, edit `/root/.bash_profile` (root user) or `/etc/profile` (other users).
 
-##Configuring a test agent
+## Configuring a test agent
 
 This kind of agent is the simplest one you can configure with Cygnus. It is based on a standard `HTTPSource`, a `MemoryChannel` and a `NGSITestSink`. Don't worry about the configuration details, specially those about the source; simply think on a Http listener waiting for Orion notifications on port TCP/5050 and sending that notifications in the form of Flume events to a testing purpose sink that will not really persist anything in a third-party storage, but will log the notified context data.
 
@@ -125,7 +120,7 @@ time=2015-12-10T14:31:49.486CET | lvl=INFO | trans=1449754282-690-0000000000 | s
 
 ```
 
-##Reporting issues and contact information
+## Reporting issues and contact information
 There are several channels suited for reporting issues and asking for doubts in general. Each one depends on the nature of the question:
 
 * Use [stackoverflow.com](http://stackoverflow.com) for specific questions about this software. Typically, these will be related to installation problems, errors and bugs. Development questions when forking the code are welcome as well. Use the `fiware-cygnus` tag.

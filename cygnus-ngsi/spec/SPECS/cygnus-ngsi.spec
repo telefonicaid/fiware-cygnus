@@ -1,6 +1,7 @@
-# Copyright 2016 Telefonica Investigación y Desarrollo, S.A.U
 #
-# This file is part of fiware-cygnus (FI-WARE project).
+# Copyright 2014-2017 Telefonica Investigación y Desarrollo, S.A.U
+#
+# This file is part of fiware-cygnus (FIWARE project).
 #
 # fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
 # Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any
@@ -13,6 +14,7 @@
 # http://www.gnu.org/licenses/.
 #
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+#
 
 Summary:          Package for Cygnus NGSI component
 Name:             cygnus-ngsi
@@ -97,6 +99,57 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Thu Dec 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.10.0
+- [cygnus-ngsi][NGSINameMappingsInterceptor] Now namemapping checks sevice, subervice and (type of entity and id entity) of EntityMapping (#1535)
+- [cygnus-ngsi][NGSIEvent] Unable to deliver event: null pointer getAttributeForNaming (#1506)
+- [cygnus-ngsi][NGSIOrionSink] Create NGSIOrionSink (#1447)
+- [cygnus-ngsi][NGSIDynamoDBSink] [bug] Southeast regions are bad coded (#1448)
+- [cygnus-ngsi][KafkaSink] Use lower_case option to build topics (#1468)
+- [cygnus-ngsi][KafkaSink] Using global connection to zookeeper instead of creating one each time an event arrives
+- [cygnus-ngsi][Docker] Add name mappings files for multiagent
+- [cygnus-ngsi][Docker] Add grouping rules files for multiagent (#1533)
+- [cygnus-ngsi][Docker] Add new env var CYGNUS_MONITORING_TYPE
+
+* Wed Jun 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.9.0
+- [cygnus-ngsi][NGSINameMappingsInterceptor] Allow regular expression replacement for EntityIds (#1456)
+- [cygnus-ngsi][HttpBackend] Add support to recover data from response header (#1455)
+- [cygnus-ngsi][KeystoneUtils] Create new Auth functionality (#1471)
+- [cygnus-ngsi][Docker] Add support to run cygnus docker in multiagent mode (mysql, mongo, ckan, hdfs, postgresql and carto sinks) (#1486)
+- [cygnus-ngsi][Docker] Upgrade to just enable sinks and channels depending on ENV vars (#1482)
+- [cygnus-ngsi][Docker] Upgrade to CentOS 7, Maven 3.5.2 and Java 1.8.0 in Dockerfile
+
+* Wed Sep 13 2017 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.8.0
+- [cygnus-ngsi][hardening] Add complex configuration examples (#629)
+- [cygnus-ngsi][bug] Fix NGSIMySQLSink when persisting bulks of rows with different number of columns (#1409)
+- [cygnus-ngsi][feature] Add metadata storing in NGSIMongoSink (#1156)
+- [cygnus-ngsi][hardening] Set transaction and correlation IDs to 'N/A' when there is no activity (#1175)
+- [cygnus-ngsi][hardening] Pre-aggregate batches in NGSISTHSink (#1359)
+- [cygnus-ngsi][hardening] Change the name of historic-related enabling parameters (#1314)
+- [cygnus-ngsi][bug] Fix NotifyContextRequest.ContextAttribute.toString(), removing double quote for attribute values (#1430)
+- [cygnus-ngsi][bug] Add support for file channels (#1419)
+- [cygnus-ngsi][hardening] Add a document about reliability (#1433)
+- [cygnus-ngsi][hardening] Add a note about optional channels when using Flume's ReplicatingChannelSelector (#510)
+- [cygnus-ngsi][hardening] Improve HDFS sink logs (#1358)
+- [cygnus-ngsi][hardening] Add CygnusError base class (#1441)
+- [cygnus-common, cygnus-ngsi][hardening] Fix FIWARE repository URL (#1435)
+- [cygnus-common, cygnus-ngsi][hardening] Unify test classes (#1332, #1333)
+
+* Tue Jan 31 2017 Francisco Romero <francisco.romerobueno@telefonica.com> 1.7.0 
+- [cygnus-ngsi][feature] Add global data capping/expirationn options based on time and size (#1317)
+- [cygnus-ngsi][feature] Add specific data capping/expiration implementation for NGSICKANSink (#1344)
+- [cygnus-ngsi][feature] Add specific data capping/expiration implementation for NGSIMySQLSink (#1365)
+- [cygnus] Add Travis CI (#1347)
+- [cygnus-ngsi][hardening] Force lowercase organization, dataset and resource names in NGSICKANSink (#1352)
+- [cygnus-ngsi][hardening] Replace warnings upon unnecessary header received with debug traces at NGSIRestHandler (#1354)
+- [cygnus-ngsi][hardening] Improve persistence error logs at NGSISink (#1358)
+- [cygnus-ngsi][hardening] Add raw bytes to NGSIEvent (#1345)
+- [cygnus-ngsi][hardening] Add cache to NGSIMySQLSink (#130)
+- [cygnus][hardening] Fix "FIWARE" name in license headers (#1369)
+- [cygnus-ngsi][bug] Differentiate among enterprise and individual Carto accounts (#1382)
+- [cygnus-ngsi][hardening] Add integration example with Apache Spark (#1397)
+- [cygnus-ngsi][hardening] Add a piece of documentation about capping and/or expirating records in CKAN, MySQL, MongoDB and STH Comet (#1391)
+- [cygnus-ngsi][hardening] Update Cygnus NGSI README with last features and new advanced topics (#1390)
+
 * Fri Dec 02 2016 Francisco Romero <francisco.romerobueno@telefonica.com> 1.6.0
 - [cygnus-ngsi][hardening] Update migration script for HDFS regarding new encoding (#1271)
 - [cygnus-ngsi][feature] Add support for geo:json Orion's type in NGSICartoDBSink (#1275)
