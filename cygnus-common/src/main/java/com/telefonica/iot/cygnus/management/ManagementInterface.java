@@ -150,7 +150,7 @@ public class ManagementInterface extends AbstractHandler {
                     } else if (uri.startsWith("/v1/admin/log/appenders")) {
                         LogHandlers.postAppenders(request, response, configurationPath);
                     } else if (uri.startsWith("/v1/namemappings")) {
--                        NameMappingsHandlers.post(request, response, nameMappingsConfFile);
+                        NameMappingsHandlers.post(request, response, nameMappingsConfFile);
                     } else {
                         response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                         response.getWriter().println(method + " " + uri + " not implemented");
