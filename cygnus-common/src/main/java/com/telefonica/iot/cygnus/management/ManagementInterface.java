@@ -664,7 +664,7 @@ public class ManagementInterface extends AbstractHandler {
             } // try catch
 
             // check if the subscription and endpoint are valid
-            int err = cygnusSubscriptionv1.isValid();
+            int err = cygnusSubscriptionv1.validate();
 
             if (err > 0) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -730,7 +730,7 @@ public class ManagementInterface extends AbstractHandler {
             } // try catch
             
             // check if the subscription and endpoint are valid
-            int err = cygnusSubscriptionv2.isValid();
+            int err = cygnusSubscriptionv2.validate();
 
             if (err > 0) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
