@@ -289,6 +289,6 @@ public class ManagementInterface extends AbstractHandler {
         } // try
         
         return nmConfFile;
-    } // getGroupingRulesConfFile
+    } // getNameMappingsConfFile
 
 } // ManagementInterface
