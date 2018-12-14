@@ -209,7 +209,7 @@ Response:
 [Top](#top)
 
 ###<a name="section5.2"></a>`POST /v1/namemappings`
-Adds new [name mappings](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md) to the configured ones. The new mappings are given within the request payload, following the Name Mappings Json format (for instance, if a new entity mapping has to be added, the service and the service path it belongs to must be present in the Json as well). All the mappings within the payload that are not present in the configuration are added.
+Adds new [name mappings](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md) to the configured ones. The new mappings are given within the request payload, following the Name Mappings Json format (for instance, if a new entity mapping has to be added, the service and the service path it belongs to must be present in the Json as well). All the mappings within the payload that are not present in the configuration are added. More details in [name mappings sintax](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md#section1.1)
 
 ```
 POST http://<cygnus_host>:<management_port>/v1/namemappings
