@@ -393,7 +393,7 @@ Response:
 [Top](#top)
 
 ###<a name="section5.4"></a>`DELETE /v1/namemappings`
-Updates already existent [name mappings](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md). The deleted mappings are given within the request payload, following the Name Mappings Json format (for instance, if an already existent entity mapping has to be deleted, the service and the service path it belongs to must be present in the Json as well). All the mappings within the payload that are present in the configuration are deleted.
+Deletes already existent [name mappings](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md). The deleted mappings are given within the request payload, following the Name Mappings Json format (for instance, if an already existent entity mapping has to be deleted, the service and the service path it belongs to must be present in the Json as well). All the mappings within the payload that are present in the configuration are deleted.
 
 ```
 DELETE http://<cygnus_host>:<management_port>/v1/namemappings
@@ -527,10 +527,10 @@ Adds a new rule, passed as a Json in the payload, to the [grouping rules](../../
 ```
 POST http://<cygnus_host>:<management_port>/v1/groupingrules
 {
-	"regex": "Room",
-	"destination": "allrooms",
-	"fiware_service_path": "rooms",
-	"fields": ["entityType"]
+    "regex": "Room",
+    "destination": "allrooms",
+    "fiware_service_path": "rooms",
+    "fields": ["entityType"]
 }
 ```
 
@@ -550,10 +550,10 @@ Updates an already existent [grouping rules](../../cygnus-ngsi/flume_extensions_
 ```
 PUT http://<cygnus_host>:<management_port>/v1/groupingrules=id=2
 {
-	"regex": "Room",
-	"destination": "otherrooms",
-	"fiware_service_path": "rooms",
-	"fields": ["entityType"]
+    "regex": "Room",
+    "destination": "otherrooms",
+    "fiware_service_path": "rooms",
+    "fields": ["entityType"]
 }
 ```
 
@@ -989,14 +989,14 @@ Puts an appender in a running Cygnus given a JSON with the information about the
 ```
 PUT "http://<cygnus_host>:<management_port>/v1/admin/log/appenders?transient=<transient_value>" -d
 '{
-	"appender": {
-		"name":".....",
-		"class":"....."
-	  },
-	  "pattern": {
-		"layout":".....",
-		"ConversionPattern":"....."  
-	  }
+      "appender": {
+        "name":".....",
+        "class":"....."
+      },
+      "pattern": {
+        "layout":".....",
+        "ConversionPattern":"....."
+      }
   }'
 ```
 
@@ -1038,14 +1038,14 @@ Posts an appender in a running Cygnus given a JSON with the information about th
 ```
 POST "http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=<transient_value>" -d
 '{
-	"appender": {
-		"name":".....",
-		"class":"....."
-	  },
-	  "pattern": {
-		"layout":".....",
-		"ConversionPattern":"....."  
-	 }
+      "appender": {
+        "name":".....",
+        "class":"....."
+      },
+      "pattern": {
+        "layout":".....",
+        "ConversionPattern":"....."
+     }
   }'
 ```
 
@@ -1087,10 +1087,10 @@ Puts an logger in a running Cygnus given a JSON with the information about the n
 ```
 PUT "http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=false" -d
 '{
-	"logger": {
-		"name":".....",
-		"level":"....."
-	}
+    "logger": {
+        "name":".....",
+        "level":"....."
+    }
 }'
 ```
 
@@ -1133,10 +1133,10 @@ Posts an logger in a running Cygnus given a JSON with the information about the 
 ```
 POST "http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=false" -d
 '{
-	"logger": {
-		"name":".....",
-		"level":"....."
-	}
+    "logger": {
+        "name":".....",
+        "level":"....."
+    }
 }'
 ```
 
