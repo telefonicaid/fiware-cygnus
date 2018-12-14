@@ -48,7 +48,7 @@ Content:
     * [DELETE `/v1/namemappings`](#section9.4)
 
 ## <a name="section1"></a>Apiary version of this document
-This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/latests) as well.
+This API specification can be checked at [Apiary](https://telefonicaid.github.io/fiware-cygnus/api/latests) as well.
 
 [Top](#top)
 
