@@ -76,8 +76,58 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         } // if
     } // initialize
 
+    // @Override
+    // public Event intercept(Event event) {
+    //     if (invalidConfiguration) {
+    //         return event;
+    //     } // if
+
+    //     LOGGER.debug("[nmi] Event intercepted, id=" + event.hashCode());
+
+    //     // Casting to NGSIEvent
+    //     NGSIEvent ngsiEvent = (NGSIEvent) event;
+
+    //     // Get the original headers
+    //     Map<String, String> headers = event.getHeaders();
+
+    //     // Get some original header values
+    //     String originalService = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
+    //     String originalServicePath = headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
+
+    //     // Create the mapped NotifyContextRequest
+    //     ImmutableTriple<String, String, ContextElement> map = doMap(originalService, originalServicePath,
+    //             ngsiEvent.getOriginalCE());
+    //     LOGGER.debug("[nmi] Mapped ContextElement: " + map.getRight().toString());
+
+    //     // Add the mapped ContextElement to the NGSIEvent
+    //     ngsiEvent.setMappedCE(map.getRight());
+
+    //     // Add the bytes version of the mapped ContextElement to event's body
+    //     byte[] originalCEBytes = ngsiEvent.getBody();
+    //     byte[] mappedCEBytes = map.getRight().toString().getBytes();
+    //     byte[] newBody = new byte[originalCEBytes.length + mappedCEBytes.length];
+    //     System.arraycopy(originalCEBytes, 0, newBody, 0, originalCEBytes.length);
+    //     System.arraycopy(mappedCEBytes, 0, newBody, originalCEBytes.length, mappedCEBytes.length);
+    //     ngsiEvent.setBody(newBody);
+    //     LOGGER.debug("[nmi] New body: " + new String(newBody));
+
+    //     // Add the mapped service and service path to the headers
+    //     headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, map.getLeft());
+    //     LOGGER.debug("[nmi] Header added to NGSI event (" + NGSIConstants.FLUME_HEADER_MAPPED_SERVICE + ": "
+    //             + map.getLeft() + ")");
+    //     headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, map.getMiddle());
+    //     LOGGER.debug("[nmi] Header added to NGSI event (" + NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH + ": "
+    //             + map.getMiddle() + ")");
+
+    //     // Return the intercepted event
+    //     //LOGGER.debug("[nmi] Event put in the channel, id=" + event.hashCode());
+    //     LOGGER.debug("[nmi] Event put in the channel, id=" + ngsiEvent.hashCode());
+    //     return ngsiEvent;
+    // } // intercept
+
+
     @Override
-    public Event intercept(Event event) {
+    public List<Event> intercept(Event event) {
         if (invalidConfiguration) {
             return event;
         } // if
@@ -85,7 +135,9 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         LOGGER.debug("[nmi] Event intercepted, id=" + event.hashCode());
 
         // Casting to NGSIEvent
+        List<Event> ngsiEvents = new ArrayList<>(2);
         NGSIEvent ngsiEvent = (NGSIEvent) event;
+
 
         // Get the original headers
         Map<String, String> headers = event.getHeaders();
@@ -104,10 +156,10 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
         // Add the bytes version of the mapped ContextElement to event's body
         byte[] originalCEBytes = ngsiEvent.getBody();
-        byte[] mappedCEBytes = map.getRight().toString().getBytes();
-        byte[] newBody = new byte[originalCEBytes.length + mappedCEBytes.length];
+        //byte[] mappedCEBytes = map.getRight().toString().getBytes();
+        byte[] newBody = new byte[originalCEBytes.length];
         System.arraycopy(originalCEBytes, 0, newBody, 0, originalCEBytes.length);
-        System.arraycopy(mappedCEBytes, 0, newBody, originalCEBytes.length, mappedCEBytes.length);
+        //System.arraycopy(mappedCEBytes, 0, newBody, originalCEBytes.length, mappedCEBytes.length);
         ngsiEvent.setBody(newBody);
         LOGGER.debug("[nmi] New body: " + new String(newBody));
 
@@ -121,8 +173,17 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
         // Return the intercepted event
         //LOGGER.debug("[nmi] Event put in the channel, id=" + event.hashCode());
-        LOGGER.debug("[nmi] Event put in the channel, id=" + ngsiEvent.hashCode());        
-        return ngsiEvent;
+        LOGGER.debug("[nmi] Event put in the channel, id=" + ngsiEvent.hashCode());
+        ngsiEvents.add(ngsiEvent);
+        ///////////////////////////////
+        NGSIEvent ngsiEvent2 = (NGSIEvent) event;
+        byte[] mappedCEBytes = map.getRight().toString().getBytes();
+        byte[] newBody2 = new byte[mappedCEBytes.length];
+        System.arraycopy(mappedCEBytes, 0, newBody2, 0, mappedCEBytes.length);
+        ngsiEvent2.setBody(newBody2);
+        ngsiEvents.add(ngsiEvent2);
+        ////////////////////////////////
+        return ngsiEvents;
     } // intercept
 
     @Override
@@ -135,10 +196,16 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             for (Event event : events) {
                 byte[] eventBody = event.getBody();
                 LOGGER.debug("[nmi] event eventBody: " + new String(eventBody));
-                Event interceptedEvent = intercept(event);
-                byte[] interceptedEventBody = interceptedEvent.getBody();
-                LOGGER.debug("[nmi] event intercepted eventBody: " + new String(interceptedEventBody));
-                interceptedEvents.add(interceptedEvent);
+                // Event interceptedEvent = intercept(event);
+                // byte[] interceptedEventBody = interceptedEvent.getBody();
+                // LOGGER.debug("[nmi] event intercepted eventBody: " + new String(interceptedEventBody));
+                // interceptedEvents.add(interceptedEvent);
+                List<Event> interceptedEvents = intercept(event);
+                for (Event interceptEvent : interceptedEvents) {
+                    byte[] interceptedEventBody = interceptEvent.getBody();
+                    LOGGER.debug("[nmi] event intercept eventBody: " + new String(interceptEventBody));
+                    interceptedEvents.add(interceptEvent);
+                }
             } // for
 
             return interceptedEvents;
