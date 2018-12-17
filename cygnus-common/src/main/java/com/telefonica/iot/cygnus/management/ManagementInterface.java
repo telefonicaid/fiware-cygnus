@@ -43,6 +43,7 @@ public class ManagementInterface extends AbstractHandler {
     private static final CygnusLogger LOGGER = new CygnusLogger(ManagementInterface.class);
     private final File configurationFile;
     private String groupingRulesConfFile;
+    private String nameMappingsConfFile;    
     private final ImmutableMap<String, SourceRunner> sources;
     private final ImmutableMap<String, Channel> channels;
     private final ImmutableMap<String, SinkRunner> sinks;
@@ -72,7 +73,15 @@ public class ManagementInterface extends AbstractHandler {
             LOGGER.error("There was a problem while obtaining the grouping rules configuration file. Details: "
                     + e.getMessage());
         } // try catch
-        
+
+        try {
+            this.nameMappingsConfFile = getNameMappingsConfFile();
+        } catch (Exception e) {
+            this.nameMappingsConfFile = null;
+            LOGGER.error("There was a problem while obtainin the name mappings configuration file: Details: "
+                    + e.getMessage());
+} // try catch
+
         this.sources = sources;
         this.channels = channels;
         this.sinks = sinks;
@@ -124,6 +133,8 @@ public class ManagementInterface extends AbstractHandler {
                         LogHandlers.getAppenders(request, response, configurationPath);
                     } else if (uri.startsWith("/v1/admin/metrics") || uri.startsWith("/admin/metrics")) {
                         MetricsHandlers.get(request, response, sources, sinks);
+                    } else if (uri.startsWith("/v1/namemappings")) {
+                        NameMappingsHandlers.get(request, response, nameMappingsConfFile);
                     } else {
                         response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                         response.getWriter().println(method + " " + uri + " not implemented");
@@ -147,6 +158,8 @@ public class ManagementInterface extends AbstractHandler {
                         LogHandlers.postLoggers(request, response, configurationPath);
                     } else if (uri.startsWith("/v1/admin/log/appenders")) {
                         LogHandlers.postAppenders(request, response, configurationPath);
+                    } else if (uri.startsWith("/v1/namemappings")) {
+                        NameMappingsHandlers.post(request, response, nameMappingsConfFile);
                     } else {
                         response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                         response.getWriter().println(method + " " + uri + " not implemented");
@@ -197,6 +210,8 @@ public class ManagementInterface extends AbstractHandler {
                         LogHandlers.deleteAppenders(request, response, configurationPath);
                     } else if (uri.startsWith("/v1/admin/metrics") || uri.startsWith("/admin/metrics")) {
                         MetricsHandlers.delete(response, sources, sinks);
+                    } else if (uri.startsWith("/v1/namemappings")) {
+                        NameMappingsHandlers.delete(request, response, nameMappingsConfFile);
                     } else {
                         response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
                         response.getWriter().println(method + " " + uri + " not implemented");
@@ -283,6 +298,6 @@ public class ManagementInterface extends AbstractHandler {
         } // try
         
         return nmConfFile;
-    } // getGroupingRulesConfFile
+    } // getNameMappingsConfFile
 
 } // ManagementInterface
