@@ -496,7 +496,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             newCA.setName(newAttributeName);
             newCA.setType(newAttributeType);
             LOGGER.debug("[nmi] newCA: " + newCA.toString());
-            newCE.setAttributes([newCA]);
+            //newCE.setAttributes([newCA]);
         } // for
         LOGGER.debug("[nmi] newCE: " + newCE.toString());
         return new ImmutableTriple(newService, newServicePath, newCE);
