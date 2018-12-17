@@ -449,8 +449,28 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 attributeMapping = am;
                 LOGGER.debug("[nmi] checking with attributeMapping: " + attributeMapping.toString());
 
+                // Check attribute type
+                if (attributeMappping.getOriginalAttributeType() != null) {
+                    if (!attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType).matches()) {
+                        LOGGER.debug("[nmi] not matches atribute type");
+                        continue;
+                    } else {
+                        LOGGER.debug("[nmi] " + attributeMappping.getOriginalAttributeType() + " matches ");
+                    }
+                }
+                // Check attribute name
+                if (attributeMappping.getOriginalAttributeName() != null) {
+                    if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches()) {
+                        LOGGER.debug("[nmi] not matches atribute type");
+                        continue;
+                    } else {
+                        LOGGER.debug("[nmi] " + attributeMappping.getOriginalAttributeName() + " matches ");
+                    }
+                }
+
                 if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches() ||
                     !attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType).matches()) {
+                    LOGGER.debug("[nmi] not matches both attribute type and name");
                     attributeMapping = null;
                     continue;
                 } // if
