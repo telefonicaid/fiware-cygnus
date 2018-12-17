@@ -323,7 +323,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
             if (serviceMapping.getNewService() != null) {
                 newService = originalService.replaceAll(serviceMapping.getOriginalServicePattern().toString(),
-                                                        serviceMapping.getNewService);
+                                                        serviceMapping.getNewService());
                 LOGGER.debug("[nmi] FIWARE new service obtained: " + newService);
             } // if
 
