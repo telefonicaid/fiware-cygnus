@@ -199,7 +199,7 @@ In addition, above mentioned Java-based regular expressions can be also used in 
 The contents of /path/to/conf/name_mappings.conf provide the name mappings used by Cygnus at startup time. However,
 they can be managed using a REST-based API. Using such API, new name mappings can be defined, modified or deleted.
 
-The name mappings API is described in [this piece of documentation](../..//cygnus-common/installation_and_administration_guidemanagement_interface_v1.md#section9).
+The name mappings API is described in [this piece of documentation](../../cygnus-common/installation_and_administration_guide/management_interface_v1.md#section9).
 
 [Top](#top)
 
