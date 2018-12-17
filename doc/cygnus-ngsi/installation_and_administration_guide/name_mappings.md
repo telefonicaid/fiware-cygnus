@@ -194,6 +194,13 @@ In addition, above mentioned Java-based regular expressions can be also used in 
 
 [Top](#top)
 
+## Name Mappings API
+
+The contents of /path/to/conf/name_mappings.conf provide the name mappings used by Cygnus at startup time. However,
+they can be managed using a REST-based API. Using such API, new name mappings can be defined, modified or deleted.
+
+The name mappings API is described in [this piece of documentation](management_interface_v1.md#section9).
+
 ## Name Mappings vs. grouping rules
 As seen, the Name Mappings feature is quite similar to the already existent grouping rules. Both of them are Flume interceptors and both of them allow changing certain notified name elements. Thus, which are the differences? Mainly:
 
