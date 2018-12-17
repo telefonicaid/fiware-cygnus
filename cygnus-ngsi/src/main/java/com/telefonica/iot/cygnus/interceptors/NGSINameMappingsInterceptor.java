@@ -464,7 +464,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                         LOGGER.debug("[nmi] not matches atribute name");
                         continue;
                     } else {
-                        LOGGER.debug("[nmi] " + attributeMappping.getOriginalAttributeName() + " matches ");
+                        LOGGER.debug("[nmi] " + attributeMapping.getOriginalAttributeName() + " matches ");
                     }
                 }
 
