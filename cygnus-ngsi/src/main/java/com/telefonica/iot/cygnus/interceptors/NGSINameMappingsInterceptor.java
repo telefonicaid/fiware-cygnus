@@ -352,18 +352,14 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                         if (!em.getOriginalEntityTypePattern().matcher(newCE.getType()).matches()) {
                             continue;
                         } else {
-                            newServicePath = spm.getNewServicePath();
-                            LOGGER.debug("[nmi] newServicePath replaced: " +
-                                         originalServicePath.replaceAll(spm.getOriginalServicePathPattern().toString(),
-                                                                        spm.getNewServicePath()));
+                            newServicePath = originalServicePath.replaceAll(spm.getOriginalServicePathPattern().toString(),
+                                                                            spm.getNewServicePath());
                             servicePathMapping = spm;
                             break;
                         }
                     } else{
-                        newServicePath = spm.getNewServicePath();
-                        LOGGER.debug("[nmi] newServicePath replaced: " +
-                                     originalServicePath.replaceAll(spm.getOriginalServicePathPattern().toString(),
-                                                                    spm.getNewServicePath()));
+                        newServicePath = originalServicePath.replaceAll(spm.getOriginalServicePathPattern().toString(),
+                                                                        spm.getNewServicePath());
                         servicePathMapping = spm;
                         break;
                     }
