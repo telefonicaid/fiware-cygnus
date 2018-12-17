@@ -360,7 +360,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                         newServicePath = spm.getNewServicePath();
                         LOGGER.debug("[nmi] newServicePath replaced: " +
                                      originalServicePath.replaceAll(spm.getOriginalServicePathPattern().toString(),
-                                                                    spm.getNewServicePath());
+                                                                    spm.getNewServicePath()));
                         servicePathMapping = spm;
                         break;
                     }
