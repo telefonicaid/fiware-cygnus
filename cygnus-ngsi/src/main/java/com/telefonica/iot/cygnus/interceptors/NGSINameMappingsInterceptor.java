@@ -200,8 +200,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 // byte[] interceptedEventBody = interceptedEvent.getBody();
                 // LOGGER.debug("[nmi] event intercepted eventBody: " + new String(interceptedEventBody));
                 // interceptedEvents.add(interceptedEvent);
-                List<Event> interceptedEvents = intercept(event);
-                for (Event interceptEvent : interceptedEvents) {
+                List<Event> interceptEvents = intercept(event);
+                for (Event interceptEvent : interceptEvents) {
                     byte[] interceptedEventBody = interceptEvent.getBody();
                     LOGGER.debug("[nmi] event intercept eventBody: " + new String(interceptEventBody));
                     interceptedEvents.add(interceptEvent);
