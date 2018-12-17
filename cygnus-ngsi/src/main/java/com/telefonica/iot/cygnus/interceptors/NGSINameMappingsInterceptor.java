@@ -452,7 +452,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 // Check attribute type
                 if (attributeMapping.getOriginalAttributeType() != null) {
                     if (!attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType).matches()) {
-                        LOGGER.debug("[nmi] not matches atribute type");
+                        LOGGER.debug("[nmi] not matches attribute type");
                         continue;
                     } else {
                         LOGGER.debug("[nmi] " + attributeMapping.getOriginalAttributeType() + " matches ");
@@ -461,7 +461,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 // Check attribute name
                 if (attributeMapping.getOriginalAttributeName() != null) {
                     if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches()) {
-                        LOGGER.debug("[nmi] not matches atribute name");
+                        LOGGER.debug("[nmi] not matches attribute name");
                         continue;
                     } else {
                         LOGGER.debug("[nmi] " + attributeMapping.getOriginalAttributeName() + " matches ");
@@ -495,6 +495,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
             newCA.setName(newAttributeName);
             newCA.setType(newAttributeType);
+            LOGGER.debug("[nmi] newCA: " + newCA.toString());
+            newCE.setAttributes(newCA);
         } // for
         LOGGER.debug("[nmi] newCE: " + newCE.toString());
         return new ImmutableTriple(newService, newServicePath, newCE);
