@@ -120,7 +120,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 + map.getMiddle() + ")");
 
         // Return the intercepted event
-        LOGGER.debug("[nmi] Event put in the channel, id=" + event.hashCode());
+        //LOGGER.debug("[nmi] Event put in the channel, id=" + event.hashCode());
+        LOGGER.debug("[nmi] Event put in the channel, id=" + ngsiEvent.hashCode());        
         return ngsiEvent;
     } // intercept
 
@@ -132,7 +133,11 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             List<Event> interceptedEvents = new ArrayList<>(events.size());
 
             for (Event event : events) {
+                byte[] eventBody = event.getBody();
+                LOGGER.debug("[nmi] event eventBody: " + new String(eventBody));
                 Event interceptedEvent = intercept(event);
+                byte[] interceptedEventBody = interceptedEvent.getBody();
+                LOGGER.debug("[nmi] event intercepted eventBody: " + new String(interceptedEventBody));
                 interceptedEvents.add(interceptedEvent);
             } // for
 
