@@ -455,13 +455,13 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                         LOGGER.debug("[nmi] not matches atribute type");
                         continue;
                     } else {
-                        LOGGER.debug("[nmi] " + attributeMappping.getOriginalAttributeType() + " matches ");
+                        LOGGER.debug("[nmi] " + attributeMapping.getOriginalAttributeType() + " matches ");
                     }
                 }
                 // Check attribute name
                 if (attributeMapping.getOriginalAttributeName() != null) {
                     if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches()) {
-                        LOGGER.debug("[nmi] not matches atribute type");
+                        LOGGER.debug("[nmi] not matches atribute name");
                         continue;
                     } else {
                         LOGGER.debug("[nmi] " + attributeMappping.getOriginalAttributeName() + " matches ");
