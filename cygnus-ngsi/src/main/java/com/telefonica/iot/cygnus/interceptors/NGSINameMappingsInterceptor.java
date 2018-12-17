@@ -322,7 +322,9 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             LOGGER.debug("[nmi] FIWARE service found: " + originalService);
 
             if (serviceMapping.getNewService() != null) {
-                newService = serviceMapping.getNewService();
+                newService = originalService.replaceAll(serviceMapping.getOriginalServicePattern().toString(),
+                                                        serviceMapping.getNewService);
+                LOGGER.debug("[nmi] FIWARE new service obtained: " + newService);
             } // if
 
             break;
@@ -354,12 +356,14 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                         } else {
                             newServicePath = originalServicePath.replaceAll(spm.getOriginalServicePathPattern().toString(),
                                                                             spm.getNewServicePath());
+                            LOGGER.debug("[nmi] FIWARE new service path obtained: " + newServicePath);
                             servicePathMapping = spm;
                             break;
                         }
                     } else{
                         newServicePath = originalServicePath.replaceAll(spm.getOriginalServicePathPattern().toString(),
                                                                         spm.getNewServicePath());
+                        LOGGER.debug("[nmi] FIWARE new service path obtained: " + newServicePath);
                         servicePathMapping = spm;
                         break;
                     }
@@ -443,10 +447,10 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
             for (AttributeMapping am : entityMapping.getAttributeMappings()) {
                 attributeMapping = am;
+                LOGGER.debug("[nmi] checking with attributeMapping: " + attributeMapping.toString());
 
-                if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches()
-                        || !attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType)
-                                .matches()) {
+                if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches() ||
+                    !attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType).matches()) {
                     attributeMapping = null;
                     continue;
                 } // if
