@@ -450,7 +450,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 LOGGER.debug("[nmi] checking with attributeMapping: " + attributeMapping.toString());
 
                 // Check attribute type
-                if (attributeMappping.getOriginalAttributeType() != null) {
+                if (attributeMapping.getOriginalAttributeType() != null) {
                     if (!attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType).matches()) {
                         LOGGER.debug("[nmi] not matches atribute type");
                         continue;
@@ -459,7 +459,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     }
                 }
                 // Check attribute name
-                if (attributeMappping.getOriginalAttributeName() != null) {
+                if (attributeMapping.getOriginalAttributeName() != null) {
                     if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches()) {
                         LOGGER.debug("[nmi] not matches atribute type");
                         continue;
