@@ -439,6 +439,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         newCE.setType(newEntityType);
 
         for (ContextAttribute newCA : newCE.getAttributes()) {
+            LOGGER.debug("[nmi] checking with CA: " + newCA.toString());            
             String originalAttributeName = newCA.getName();
             String originalAttributeType = newCA.getType();
             String newAttributeName = originalAttributeName;
