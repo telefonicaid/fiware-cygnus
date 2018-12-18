@@ -218,7 +218,7 @@ public class NGSINameMappingsInterceptorTest {
             + "         \"newService\": \"service_new\","
             + "         \"servicePathMappings\": ["
             + "            {"
-            + "               \"originalServicePath\": \"/servicePath_House\","
+            + "               \"originalServicePath\": \"/servicePath\","
             + "               \"entityMappings\": ["
             + "                  {"
             + "                     \"originalEntityId\": \".*\","
@@ -277,7 +277,7 @@ public class NGSINameMappingsInterceptorTest {
             +   "\"isPattern\" : \"false\","
             +   "\"id\" : \"House1\""
             + "}";
-    private final String expectedServicePathConfig2 = "/servicePath_House";
+    private final String expectedServicePathConfig2 = "/servicePath";
 
     private final String nameMappingsStrConfig3 = ""
             + "{"
