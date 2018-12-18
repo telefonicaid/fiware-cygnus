@@ -48,7 +48,7 @@ Content:
     * [DELETE `/v1/namemappings`](#section9.4)
 
 ## <a name="section1"></a>Apiary version of this document
-This API specification can be checked at [Apiary](https://telefonicaid.github.io/fiware-cygnus/api/latests) as well.
+This API specification can be checked at [Apiary](https://telefonicaid.github.io/fiware-cygnus/api/latest) as well.
 
 [Top](#top)
 
@@ -1050,8 +1050,8 @@ Response:
 
 [Top](#top)
 
-## <a name="section5"></a>Name Mappings
-### <a name="section5.1"></a>`GET /v1/namemappings`
+## <a name="section9"></a>Name Mappings
+### <a name="section9.1"></a>`GET /v1/namemappings`
 Gets the configured [name mappings](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md).
 
 ```
@@ -1105,7 +1105,7 @@ Response:
 
 [Top](#top)
 
-### <a name="section5.2"></a>`POST /v1/namemappings`
+### <a name="section9.2"></a>`POST /v1/namemappings`
 Adds new [name mappings](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md) to the configured ones. The new mappings are given within the request payload, following the Name Mappings Json format (for instance, if a new entity mapping has to be added, the service and the service path it belongs to must be present in the Json as well). All the mappings within the payload that are not present in the configuration are added. More details in [name mappings sintax](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md#section1.1)
 
 ```
@@ -1197,7 +1197,7 @@ Response:
 
 [Top](#top)
 
-### <a name="section5.3"></a>`PUT /v1/namemappings`
+### <a name="section9.3"></a>`PUT /v1/namemappings`
 Updates already existent [name mappings](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md). The updated mappings are given within the request payload, following the Name Mappings Json format (for instance, if an already existent entity mapping has to be updated, the service and the service path it belongs to must be present in the Json as well). All the mappings within the payload that are present in the configuration are updated.
 
 ```
@@ -1289,7 +1289,7 @@ Response:
 
 [Top](#top)
 
-### <a name="section5.4"></a>`DELETE /v1/namemappings`
+### <a name="section9.4"></a>`DELETE /v1/namemappings`
 Deletes already existent [name mappings](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md). The deleted mappings are given within the request payload, following the Name Mappings Json format (for instance, if an already existent entity mapping has to be deleted, the service and the service path it belongs to must be present in the Json as well). All the mappings within the payload that are present in the configuration are deleted.
 
 ```
