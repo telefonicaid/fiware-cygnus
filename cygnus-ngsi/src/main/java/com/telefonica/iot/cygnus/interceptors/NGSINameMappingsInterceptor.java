@@ -362,7 +362,6 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                         break;
                     }
                 } else {
-                    // TODO check entityId ??
                     if (spm.getNewServicePath() != null) {
                         newServicePath = originalServicePath.replaceAll(spm.getOriginalServicePathPattern().toString(),
                                                                         spm.getNewServicePath());
