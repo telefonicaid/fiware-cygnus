@@ -120,7 +120,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 + map.getMiddle() + ")");
 
         // Return the intercepted event
-        LOGGER.debug("[nmi] Event put in the channel, id=" + event.hashCode());
+        LOGGER.debug("[nmi] Event put in the channel, id=" + ngsiEvent.hashCode());
         return ngsiEvent;
     } // intercept
 
