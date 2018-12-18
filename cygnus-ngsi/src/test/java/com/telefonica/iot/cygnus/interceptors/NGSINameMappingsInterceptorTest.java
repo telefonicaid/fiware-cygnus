@@ -209,6 +209,57 @@ public class NGSINameMappingsInterceptorTest {
     private final String originalServicePathConfig = "/servicePath";
     private final String expectedServicePathConfig = "/servicePath_Room";
 
+
+    private final String nameMappingsStrConfig2 = ""
+            + "{"
+            + "   \"serviceMappings\": ["
+            + "      {"
+            + "         \"originalService\": \"service\","
+            + "         \"newService\": \"service_new\","
+            + "         \"servicePathMappings\": ["
+            + "            {"
+            + "               \"originalServicePath\": \"/servicePath_House\","
+            + "               \"entityMappings\": ["
+            + "                  {"
+            + "                     \"originalEntityId\": \".*\","
+            + "                     \"originalEntityType\": \"House\","
+            + "                     \"newEntityId\": \".*\","
+            + "                     \"newEntityType\": \"House\","
+            + "                     \"attributeMappings\": []"
+            + "                  }"
+            + "               ]"
+            + "            }"
+            + "            , {"
+            + "               \"originalServicePath\": \"/servicePath\","
+            + "               \"newServicePath\": \"/servicePath_Room\","
+            + "               \"entityMappings\": ["
+            + "                  {"
+            + "                     \"originalEntityId\": \".*\","
+            + "                     \"originalEntityType\": \"RoomT\","
+            + "                     \"newEntityId\": \".*\","
+            + "                     \"newEntityType\": \"RoomNew\","
+            + "                     \"attributeMappings\": []"
+            + "                  }"
+            + "               ]"
+            + "            }"
+            + "            , {"
+            + "               \"originalServicePath\": \"/servicePath\","
+            + "               \"newServicePath\": \"/servicePath_Room2\","
+            + "               \"entityMappings\": ["
+            + "                  {"
+            + "                     \"originalEntityId\": \".*\","
+            + "                     \"originalEntityType\": \"Room\","
+            + "                     \"newEntityId\": \".*\","
+            + "                     \"newEntityType\": \"RoomNew2\","
+            + "                     \"attributeMappings\": []"
+            + "                  }"
+            + "               ]"
+            + "            }"
+            + "         ]"
+            + "      }"
+            + "   ]"
+            + "}";
+
     private final String originalCEStrConfig2 = ""
             + "{"
             +   "\"attributes\" : ["
@@ -563,14 +614,14 @@ public class NGSINameMappingsInterceptorTest {
 
 
     /**
-     * [NGSIGroupingInterceptor.doMapConfig] -------- A mapped ContextElement can be obtained from the Name Mappings.
+     * [NGSIGroupingInterceptor.doMapConfig2] -------- A mapped ContextElement can be obtained from the Name Mappings.
      */
     @Test
     public void testDoMapConfig2() {
         System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig2]")
                 + "-------- A mapped ContextElement can be obtained from the Name Mappings");
         NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
-        nameMappingsInterceptor.loadNameMappings(nameMappingsStrConfig);
+        nameMappingsInterceptor.loadNameMappings(nameMappingsStrConfig2);
         ContextElement originalCE;
         ContextElement expectedCE;
 
