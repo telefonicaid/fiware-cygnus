@@ -1,2 +1,3 @@
 - [cygnus-common][feature] Add /v1/namemappings route to API (#1277)
+- [cygnus-common][bugfix] Support empty servicenames in mamemappings 
 

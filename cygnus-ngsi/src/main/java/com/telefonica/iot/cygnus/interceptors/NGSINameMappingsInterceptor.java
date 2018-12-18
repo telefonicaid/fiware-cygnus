@@ -120,7 +120,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 + map.getMiddle() + ")");
 
         // Return the intercepted event
-        LOGGER.debug("[nmi] Event put in the channel, id=" + event.hashCode());
+        LOGGER.debug("[nmi] Event put in the channel, id=" + ngsiEvent.hashCode());
         return ngsiEvent;
     } // intercept
 
@@ -322,7 +322,9 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             LOGGER.debug("[nmi] FIWARE service found: " + originalService);
 
             if (serviceMapping.getNewService() != null) {
-                newService = serviceMapping.getNewService();
+                newService = originalService.replaceAll(serviceMapping.getOriginalServicePattern().toString(),
+                                                        serviceMapping.getNewService());
+                LOGGER.debug("[nmi] FIWARE new service obtained: " + newService);
             } // if
 
             break;
@@ -344,28 +346,34 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
             LOGGER.debug("[nmi] FIWARE service path found: " + originalServicePath);
 
-            if (spm.getNewServicePath() != null) {
+            for (EntityMapping em : spm.getEntityMappings()) {
+                LOGGER.debug("[nmi] checking em: " + em.toString());
                 // check type
-                for (EntityMapping em : spm.getEntityMappings()) {
-                    LOGGER.debug("[nmi] checking em: " + em.toString());
-                    if (em.getOriginalEntityType() != null) {
-                        if (!em.getOriginalEntityTypePattern().matcher(newCE.getType()).matches()) {
-                            continue;
-                        } else {
-                            newServicePath = spm.getNewServicePath();
-                            servicePathMapping = spm;
-                            break;
+                if (em.getOriginalEntityType() != null) {
+                    if (!em.getOriginalEntityTypePattern().matcher(newCE.getType()).matches()) {
+                        continue;
+                    } else {
+                        if (spm.getNewServicePath() != null) {
+                            newServicePath = originalServicePath.replaceAll(spm.getOriginalServicePathPattern().toString(),
+                                                                            spm.getNewServicePath());
                         }
-                    } else{
-                        newServicePath = spm.getNewServicePath();
+                        LOGGER.debug("[nmi] FIWARE new service path obtained: " + newServicePath);
                         servicePathMapping = spm;
                         break;
                     }
-                }
-                if (servicePathMapping != null) {
+                } else {
+                    if (spm.getNewServicePath() != null) {
+                        newServicePath = originalServicePath.replaceAll(spm.getOriginalServicePathPattern().toString(),
+                                                                        spm.getNewServicePath());
+                    }
+                    LOGGER.debug("[nmi] FIWARE new service path obtained: " + newServicePath);
+                    servicePathMapping = spm;
                     break;
                 }
-            } // if
+            }
+            if (servicePathMapping != null) {
+                break;
+            }
         } // for
 
         if (servicePathMapping == null) {
@@ -401,8 +409,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     LOGGER.debug("[nmi] " + entityMapping.getOriginalEntityId() + " matches " + newCE.getId());
                 }
             }
-            if (!entityMapping.getOriginalEntityIdPattern().matcher(originalEntityId).matches()
-                    || !entityMapping.getOriginalEntityTypePattern().matcher(originalEntityType).matches()) {
+            if (!entityMapping.getOriginalEntityIdPattern().matcher(originalEntityId).matches() ||
+                !entityMapping.getOriginalEntityTypePattern().matcher(originalEntityType).matches()) {
                 LOGGER.debug("[nmi] not matches both type and entityId");
                 entityMapping = null;
                 continue;
@@ -433,6 +441,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         newCE.setType(newEntityType);
 
         for (ContextAttribute newCA : newCE.getAttributes()) {
+            LOGGER.debug("[nmi] checking with CA: " + newCA.toString());
             String originalAttributeName = newCA.getName();
             String originalAttributeType = newCA.getType();
             String newAttributeName = originalAttributeName;
@@ -441,10 +450,30 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
             for (AttributeMapping am : entityMapping.getAttributeMappings()) {
                 attributeMapping = am;
+                LOGGER.debug("[nmi] checking with attributeMapping: " + attributeMapping.toString());
 
-                if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches()
-                        || !attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType)
-                                .matches()) {
+                // Check attribute type
+                if (attributeMapping.getOriginalAttributeType() != null) {
+                    if (!attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType).matches()) {
+                        LOGGER.debug("[nmi] not matches attribute type");
+                        continue;
+                    } else {
+                        LOGGER.debug("[nmi] " + attributeMapping.getOriginalAttributeType() + " matches ");
+                    }
+                }
+                // Check attribute name
+                if (attributeMapping.getOriginalAttributeName() != null) {
+                    if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches()) {
+                        LOGGER.debug("[nmi] not matches attribute name");
+                        continue;
+                    } else {
+                        LOGGER.debug("[nmi] " + attributeMapping.getOriginalAttributeName() + " matches ");
+                    }
+                }
+
+                if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches() ||
+                    !attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType).matches()) {
+                    LOGGER.debug("[nmi] not matches both attribute type and name");
                     attributeMapping = null;
                     continue;
                 } // if
@@ -469,6 +498,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
             newCA.setName(newAttributeName);
             newCA.setType(newAttributeType);
+            LOGGER.debug("[nmi] newCA: " + newCA.toString());
         } // for
         LOGGER.debug("[nmi] newCE: " + newCE.toString());
         return new ImmutableTriple(newService, newServicePath, newCE);
