@@ -359,12 +359,7 @@ public class NGSIMySQLSink extends NGSISink {
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
             entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            ContextElement mappedCE = event.getMappedCE();
-            LOGGER.debug("[MySQLSINK] mappedCE: " + mappedCE.toString());
-            ArrayList<ContextAttribute> attrs = mappedCE.getAttributes();
-            LOGGER.debug("[MySQLSINK] attrs: " + attrs.toString());
             attribute = event.getAttributeForNaming(enableNameMappings);
-            LOGGER.debug("[MySQLSINK] attribute: " + attribute);            
             dbName = buildDbName(service);
             tableName = buildTableName(servicePathForNaming, entityForNaming, attribute);
         } // initialize
