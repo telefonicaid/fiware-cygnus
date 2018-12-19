@@ -1,3 +1,3 @@
 - [cygnus-common][feature] Add /v1/namemappings route to API (#1277)
 - [cygnus-common][bugfix] Support empty servicenames in mamemappings 
-- [cygnus-common][docker] Truncate to 0.5GB sth collections
+- [cygnus-common][docker] Set default truncate size to 0.5GB for sth collections
