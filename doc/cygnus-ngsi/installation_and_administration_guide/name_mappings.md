@@ -175,22 +175,389 @@ In addition, above mentioned Java-based regular expressions can be also used in 
 
 ```
 {
-	"serviceMappings": [{
-		"originalService": "service",
-		"newService": "new_service",
-		"servicePathMappings": [{
-			"originalServicePath": "/subservice",
-			"newServicePath": "/new_subservice",
-			"entityMappings": [{
-				"originalEntityType": "myentitytype",
-				"originalEntityId": "(myentityid)([0-9]*)",
-				"newEntityId": "new_myentityid$2",
-				"attributeMappings": []
-			}]
-		}]
-	}]
+    "serviceMappings": [{
+        "originalService": "service",
+        "newService": "new_service",
+        "servicePathMappings": [{
+            "originalServicePath": "/subservice",
+            "newServicePath": "/new_subservice",
+            "entityMappings": [{
+                "originalEntityType": "myentitytype",
+                "originalEntityId": "(myentityid)([0-9]*)",
+                "newEntityId": "new_myentityid$2",
+                "attributeMappings": []
+            }]
+        }]
+    }]
 }
 ```
+
+Sumarizing these are some useful examples and their result in a sink like MySQL:
+
+### Case 1:
+- Service Mapping
+```
+{
+  "serviceMappings": [
+    {
+      "originalService": "city012",
+      "newService": "database_name",
+      "servicePathMappings": [
+        {
+          "originalServicePath": "/electricidad",
+          "newServicePath": "/tableprefix",
+          "entityMappings": [
+            {
+              "originalEntityType": "luminaria",
+              "newEntityType": "tablesufix",
+              "originalEntityId": "luminaria_1",
+              "newEntityId": "tableid",
+              "attributeMappings": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"luminaria1",
+   "type":"luminaria",
+   ...
+}
+```
+
+This create in db `citi012` a table named `tableprefix_luminaria_tablesufix`
+
+
+### Case 2:
+- Service Mapping
+```
+{
+  "serviceMappings": [
+    {
+      "originalService": "city012",
+      "newService": "database_name",
+      "servicePathMappings": [
+        {
+          "originalServicePath": "/electricidad",
+          "newServicePath": "/tableprefix",
+          "entityMappings": [
+            {
+              "originalEntityId": "pro(.+)",
+              "newEntityId": "tablepro",
+              "originalEntityType": ".+",
+              "newEntityType": "tablesufix",
+              "attributeMappings": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"pro1",
+   "type":"luminaria",
+   ...
+}
+```
+This create in db ```citi012``` a table named ```tableprefix_tablepro_tablesufix```
+
+### Case 3:
+- Service Mapping
+```
+{
+  "serviceMappings": [
+    {
+      "originalService": "city012",
+      "newService": "database_name",
+      "servicePathMappings": [
+        {
+          "originalServicePath": "/(.+)",
+          "newServicePath": "/$1",
+          "entityMappings": [
+            {
+              "originalEntityId": "(.+)",
+              "newEntityId": "any",
+              "originalEntityType": "(.+)",
+              "attributeMappings": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"pro1",
+   "type":"luminaria",
+   ...
+}
+```
+This create in db ```citi012``` a table named ```elecricidad_any_luminaria```
+
+### Case 4:
+- Service Mapping
+```
+{
+  "serviceMappings": [
+    {
+      "originalService": "city012",
+      "newService": "database_name",
+      "servicePathMappings": [
+        {
+          "originalServicePath": "/(.+)",
+          "newServicePath": "/global",
+          "entityMappings": [
+            {
+              "originalEntityId": "(.+)",
+              "newEntityId": "any",
+              "originalEntityType": "(.+)",
+              "attributeMappings": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"pro1",
+   "type":"luminaria",
+   ...
+}
+```
+This create in db ```citi012``` a table named ```global_any_luminaria```
+
+### Case 5:
+- Service Mapping
+```
+{
+  "serviceMappings": [
+    {
+      "originalService": "city012",
+      "newService": "database_name",
+      "servicePathMappings": [
+        {
+          "originalServicePath": "/electricidad",
+          "newServicePath": "/tableprefix",
+          "entityMappings": [
+            {
+              "originalEntityType": "luminaria",
+              "newEntityType": "tablesufix",
+              "originalEntityId": "luminaria_1",
+              "newEntityId": "tableid",
+              "attributeMappings": [
+                {
+                  "originalAttributeName": "temperatura",
+                  "originalAttributeType": "string",
+                  "newAttributeName": "new_myattributename1",
+                  "newAttributeType": "new_myattributetype1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+And agent is configured  with option `DM by Attribute`
+
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"pro1",
+   "type":"luminaria",
+   "temperatura": {
+       "type": "string",
+       "value": "13"
+   }
+}
+```
+This create in db ```citi012``` a table named ```tableprefix_tableid_tablesufix_new_myattributename1```
+
+### Case 6:
+- Service Mapping
+```
+{
+  "serviceMappings": [
+    {
+      "originalService": "city012",
+      "newService": "database_name",
+      "servicePathMappings": [
+        {
+          "newServicePath": "/tableprefix",
+          "entityMappings": [
+            {
+              "originalEntityType": "luminaria",
+              "newEntityType": "tablesufix",
+              "originalEntityId": "luminaria_1",
+              "newEntityId": "tableid",
+              "attributeMappings": [
+                {
+                  "originalAttributeName": "temperatura",
+                  "originalAttributeType": "string",
+                  "newAttributeName": "new_myattributename1",
+                  "newAttributeType": "new_myattributetype1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+And agent is configured  with option `DM by Attribute`
+
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"pro1",
+   "type":"luminaria",
+   "temperatura": {
+       "type": "string",
+       "value": "13"
+   }
+}
+```
+This create in db ```citi012``` a table named ```tableprefix_tableid_tablesufix_new_myattributename1```
+
+### Case 7:
+- Service Mapping
+```
+{
+  "serviceMappings": [
+    {
+      "originalService": "city012",
+      "newService": "database_name",
+      "servicePathMappings": [
+        {
+          "originalServicePath": "/electricidad",
+          "newServicePath": "/tableprefix",
+          "entityMappings": [
+             {
+              "originalEntityType": "luminaria",
+              "newEntityType": "tablesufix",
+              "originalEntityId": "([cabeco,isa]+)(.+)",
+              "newEntityId": "$1",
+              "attributeMappings": [
+                {
+                  "originalAttributeName": "temperatura",
+                  "originalAttributeType": "string",
+                  "newAttributeName": "new_myattributename1",
+                  "newAttributeType": "new_myattributetype1"
+                }
+              ]
+            },
+             {
+              "originalEntityType": "(.+)",
+              "originalEntityId": ".+",
+              "newEntityId": "othertype",
+              "attributeMappings": [
+              ]
+             }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+And agent is configured  with option `DM by Attribute`
+
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"cabeco_33",
+   "type":"luminaria",
+   "temperatura": {
+       "type": "string",
+       "value": "13"
+   }
+}
+```
+This create in db ```citi012``` a table named ```tableprefix_cabeco_tablesufix_new_myattributename1```
+
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"otherthing_22",
+   "type":"container",
+   "temperatura": {
+       "type": "string",
+       "value": "13"
+   }
+}
+```
+This create in db ```citi012``` a table named ```tableprefix_othertype_tablesufix```
+
 
 [Top](#top)
 
