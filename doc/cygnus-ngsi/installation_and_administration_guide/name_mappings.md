@@ -401,7 +401,7 @@ This create in db ```citi012``` a table named ```global_any_luminaria```
   ]
 }
 ```
-And agent is configured  with option `DM by Attribute`
+And agent is configured with option `data_model=dm-by-attribute`
 
 - Headers:
 ```
@@ -455,7 +455,7 @@ This create in db ```citi012``` a table named ```tableprefix_tableid_tablesufix_
   ]
 }
 ```
-And agent is configured  with option `DM by Attribute`
+And agent is configured  with option `data_model=dm-by-attribute`
 
 - Headers:
 ```
@@ -518,7 +518,7 @@ This create in db ```citi012``` a table named ```tableprefix_tableid_tablesufix_
 }
 ```
 
-And agent is configured  with option `DM by Attribute`
+And agent is configured  with option `data_model=dm-by-attribute`
 
 - Headers:
 ```
