@@ -195,7 +195,7 @@ In addition, above mentioned Java-based regular expressions can be also used in 
 Sumarizing these are some useful examples and their result in a sink like MySQL:
 
 ### Case 1:
-- Service Mapping
+- Service Mapping:
 ```
 {
   "serviceMappings": [
@@ -237,11 +237,11 @@ Sumarizing these are some useful examples and their result in a sink like MySQL:
 }
 ```
 
-This create in db `citi012` a table named `tableprefix_luminaria_tablesufix`
+This case creates in `citi012` db a table with name `tableprefix_luminaria_tablesufix`
 
 
 ### Case 2:
-- Service Mapping
+- Service Mapping:
 ```
 {
   "serviceMappings": [
@@ -281,10 +281,10 @@ This create in db `citi012` a table named `tableprefix_luminaria_tablesufix`
    ...
 }
 ```
-This create in db ```citi012``` a table named ```tableprefix_tablepro_tablesufix```
+This case creates in `citi012` db a table with name `tableprefix_tablepro_tablesufix`
 
 ### Case 3:
-- Service Mapping
+- Service Mapping:
 ```
 {
   "serviceMappings": [
@@ -323,10 +323,10 @@ This create in db ```citi012``` a table named ```tableprefix_tablepro_tablesufix
    ...
 }
 ```
-This create in db ```citi012``` a table named ```elecricidad_any_luminaria```
+This case creates in `citi012` db a table with name `elecricidad_any_luminaria`
 
 ### Case 4:
-- Service Mapping
+- Service Mapping:
 ```
 {
   "serviceMappings": [
@@ -365,10 +365,10 @@ This create in db ```citi012``` a table named ```elecricidad_any_luminaria```
    ...
 }
 ```
-This create in db ```citi012``` a table named ```global_any_luminaria```
+This case creates db `citi012` db a table with name `global_any_luminaria`
 
 ### Case 5:
-- Service Mapping
+- Service Mapping:
 ```
 {
   "serviceMappings": [
@@ -420,10 +420,10 @@ And agent is configured with option `data_model=dm-by-attribute`
    }
 }
 ```
-This create in db ```citi012``` a table named ```tableprefix_tableid_tablesufix_new_myattributename1```
+This case creates in `citi012` db a table with name `tableprefix_tableid_tablesufix_new_myattributename1`
 
 ### Case 6:
-- Service Mapping
+- Service Mapping:
 ```
 {
   "serviceMappings": [
@@ -474,10 +474,10 @@ And agent is configured  with option `data_model=dm-by-attribute`
    }
 }
 ```
-This create in db ```citi012``` a table named ```tableprefix_tableid_tablesufix_new_myattributename1```
+This case creates in `citi012` db a table with name `tableprefix_tableid_tablesufix_new_myattributename1`
 
 ### Case 7:
-- Service Mapping
+- Service Mapping:
 ```
 {
   "serviceMappings": [
@@ -537,7 +537,7 @@ And agent is configured  with option `data_model=dm-by-attribute`
    }
 }
 ```
-This create in db ```citi012``` a table named ```tableprefix_cabeco_tablesufix_new_myattributename1```
+This case creates in `citi012` db a table with name `tableprefix_cabeco_tablesufix_new_myattributename1`
 
 - Headers:
 ```
@@ -556,7 +556,7 @@ This create in db ```citi012``` a table named ```tableprefix_cabeco_tablesufix_n
    }
 }
 ```
-This create in db ```citi012``` a table named ```tableprefix_othertype_tablesufix```
+This case creates in `citi012` db  a table with name `tableprefix_othertype_tablesufix`
 
 
 [Top](#top)
