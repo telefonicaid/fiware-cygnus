@@ -116,15 +116,15 @@ Statistics can be reset by a PUT request.
             "success":"true"
         }
 
-# Group Grouping Rules API
-API operations used to manage the grouping rules of Cygnus.
+# Name Mappings Rules API
+API operations used to manage the name mappings of Cygnus.
 
 ## Methods [/Name Mappings API]
 
 ### "GET /v1/namemappings" [GET /v1/namemappings]
 Name mappings can be retrieved by GET methods.
 
-+ Request 
++ Request
 
       GET http://<cygnus_host>:<management_port>/v1/namemappings
 
@@ -162,6 +162,165 @@ Name mappings can be retrieved by GET methods.
             ]
         }
 
+
+### "POST /v1/namemappings" [POST /v1/namemappings]
+Name mappings can be provisioned by POST methods.
+
++ Request
+
+      POST http://<cygnus_host>:<management_port>/v1/namemappings
+       {
+            "serviceMapping": [
+                {
+                    "originalService":"service",
+                    "newService":"newService",
+                    "servicePathMappings": [
+                        {
+                            "originalServicePath":"/servicePath",
+                            "newServicePath":"/newServicePath",
+                            "entityMappings": [
+                                {
+                                    "originalEntityId":"Room1",
+                                    "originalEntityType":"Room",
+                                    "newEntityId":"BigRoom1",
+                                    "newEntityType":"BigRoom",
+                                    "attributeMappings":[
+                                        {
+                                            "originalAttributeName":"temperature",
+                                            "originalAttributeType":"float",
+                                            "newAttributeName":"bedsNumber",
+                                            "newAttributeType":"integer"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+            }
+
++ Response 200 (application/json)
+
+        {
+            "success":"true",
+        }
+
+### "PUT /v1/namemappings" [PUT /v1/namemappings]
+Name mappings can be modified by PUT methods.
+
++ Request
+
+      PUT http://<cygnus_host>:<management_port>/v1/namemappings
+       {
+            "serviceMapping": [
+                {
+                    "originalService":"service",
+                    "newService":"newService",
+                    "servicePathMappings": [
+                        {
+                            "originalServicePath":"/servicePath",
+                            "newServicePath":"/newServicePath",
+                            "entityMappings": [
+                                {
+                                    "originalEntityId":"Room1",
+                                    "originalEntityType":"Room",
+                                    "newEntityId":"BigRoom1",
+                                    "newEntityType":"BigRoom",
+                                    "attributeMappings":[
+                                        {
+                                            "originalAttributeName":"temperature",
+                                            "originalAttributeType":"float",
+                                            "newAttributeName":"bedsNumber",
+                                            "newAttributeType":"integer"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+            }
+
++ Response 200 (application/json)
+        {
+            "success":"true",
+            "serviceMapping": [
+                {
+                    "originalService":"service",
+                    "newService":"newService",
+                    "servicePathMappings": [
+                        {
+                            "originalServicePath":"/servicePath",
+                            "newServicePath":"/newServicePath",
+                            "entityMappings": [
+                                {
+                                    "originalEntityId":"Room1",
+                                    "originalEntityType":"Room",
+                                    "newEntityId":"BigRoom1",
+                                    "newEntityType":"BigRoom",
+                                    "attributeMappings":[
+                                        {
+                                            "originalAttributeName":"temperature",
+                                            "originalAttributeType":"float",
+                                            "newAttributeName":"bedsNumber",
+                                            "newAttributeType":"integer"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+
+### "DELETE /v1/namemappings" [DELETE /v1/namemappings]
+Name mappings can be deleted by DELETE methods.
+
++ Request
+
+      DELETE http://<cygnus_host>:<management_port>/v1/namemappings
+       {
+            "serviceMapping": [
+                {
+                    "originalService":"service",
+                    "newService":"newService",
+                    "servicePathMappings": [
+                        {
+                            "originalServicePath":"/servicePath",
+                            "newServicePath":"/newServicePath",
+                            "entityMappings": [
+                                {
+                                    "originalEntityId":"Room1",
+                                    "originalEntityType":"Room",
+                                    "newEntityId":"BigRoom1",
+                                    "newEntityType":"BigRoom",
+                                    "attributeMappings":[
+                                        {
+                                            "originalAttributeName":"temperature",
+                                            "originalAttributeType":"float",
+                                            "newAttributeName":"bedsNumber",
+                                            "newAttributeType":"integer"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+            }
+
++ Response 200 (application/json)
+
+        {
+            "success":"true",
+        }
+
+# Group Grouping Rules API
+API operations used to manage the grouping rules of Cygnus.
 
 ## Methods [/Grouping Rules API]
 
