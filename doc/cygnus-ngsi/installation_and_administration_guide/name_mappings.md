@@ -194,7 +194,7 @@ In addition, above mentioned Java-based regular expressions can be also used in 
 
 Sumarizing these are some useful examples and their result in a sink like MySQL:
 
-### Case 1:
+### Case 1: groups matching exactly by service, subservice, entityid and entitytype
 - Service Mapping:
 ```
 {
@@ -240,7 +240,7 @@ Sumarizing these are some useful examples and their result in a sink like MySQL:
 This case creates in `citi012` db a table with name `tableprefix_luminaria_tablesufix`
 
 
-### Case 2:
+### Case 2: groups match exactly by service, subservice and entityid and any entitytype
 - Service Mapping:
 ```
 {
@@ -283,7 +283,7 @@ This case creates in `citi012` db a table with name `tableprefix_luminaria_table
 ```
 This case creates in `citi012` db a table with name `tableprefix_tablepro_tablesufix`
 
-### Case 3:
+### Case 3: groups maching service by subservice and entitytype all entityid
 - Service Mapping:
 ```
 {
@@ -325,7 +325,7 @@ This case creates in `citi012` db a table with name `tableprefix_tablepro_tables
 ```
 This case creates in `citi012` db a table with name `elecricidad_any_luminaria`
 
-### Case 4:
+### Case 4: groups maching service by entitytype all subservice and entityid
 - Service Mapping:
 ```
 {
@@ -367,7 +367,7 @@ This case creates in `citi012` db a table with name `elecricidad_any_luminaria`
 ```
 This case creates db `citi012` db a table with name `global_any_luminaria`
 
-### Case 5:
+### Case 5: groups maching service, subservice, entitytype, entityid and attribute name and attribute type
 - Service Mapping:
 ```
 {
@@ -422,7 +422,7 @@ And agent is configured with option `data_model=dm-by-attribute`
 ```
 This case creates in `citi012` db a table with name `tableprefix_tableid_tablesufix_new_myattributename1`
 
-### Case 6:
+### Case 6: groups maching service, entitytype, entityid and attribute name and attribute type in the same tableprefix
 - Service Mapping:
 ```
 {
@@ -476,7 +476,7 @@ And agent is configured  with option `data_model=dm-by-attribute`
 ```
 This case creates in `citi012` db a table with name `tableprefix_tableid_tablesufix_new_myattributename1`
 
-### Case 7:
+### Case 7: groups maching service, entitytype, attribute name and attribute type in the same tableprefix depending on entityid
 - Service Mapping:
 ```
 {
