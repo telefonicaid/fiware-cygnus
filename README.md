@@ -62,7 +62,7 @@ Cygnus (more specifically, cygnus-ngsi agent) plays the role of a connector betw
 
 ## Roadmap
 
- The roadmap of this FIWARE GE is described [here](doc/roadmap.md)
+The roadmap of this FIWARE GE is described [here](doc/roadmap.md).
 
 ## Further documentation
 The per agent **Quick Start Guide** found at readthedocs.org provides a good documentation summary ([cygnus-ngsi](http://fiware-cygnus.readthedocs.io/en/latest/cygnus-ngsi/quick_start_guide/index.html), [cygnus-twitter](http://fiware-cygnus.readthedocs.io/en/latest/cygnus-twitter/quick_start_guide/index.html)).
