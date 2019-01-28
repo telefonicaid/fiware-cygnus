@@ -25,6 +25,7 @@ check the FIWARE Catalogue entry for the
 ## Contents
 
 -   [Background](#background)
+-   [Roadmap](#roadmap)
 -   [Further Documentation](#further-documentation)
 -   [License](#license)
 
@@ -58,6 +59,10 @@ cygus-twitter : [![Docker badge](https://img.shields.io/docker/pulls/fiware/cygn
 Cygnus (more specifically, cygnus-ngsi agent) plays the role of a connector between Orion Context Broker (which is a NGSI source of data) and many FIWARE storages such as CKAN, Cosmos Big Data (Hadoop) and STH Comet. Of course, as previously said, you may add MySQL, Kafka, Carto, etc as other non FIWARE storages to the FIWARE architecture.
 
 ![FIWARE architecture](doc/images/fiware_architecture.png)
+
+## Roadmap
+
+The roadmap of this FIWARE GE is described [here](doc/roadmap.md).
 
 ## Further documentation
 The per agent **Quick Start Guide** found at readthedocs.org provides a good documentation summary ([cygnus-ngsi](http://fiware-cygnus.readthedocs.io/en/latest/cygnus-ngsi/quick_start_guide/index.html), [cygnus-twitter](http://fiware-cygnus.readthedocs.io/en/latest/cygnus-twitter/quick_start_guide/index.html)).
