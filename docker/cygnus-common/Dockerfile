@@ -16,7 +16,7 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
-FROM centos:centos7.4.1708
+FROM centos:centos7.6.1810
 
 MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
 
