@@ -4,3 +4,4 @@
 - [cygnus-ngsi][KafkaSink] Upgrade libthrift dependency from 0.9.1 to 0.12.0 due to github vulnerability report
 - [cygnus-common][mysql] Upgrade mysql connector from 5.1.31 to 5.1.47
 - [cygnus-common][mongo] Upgrade mongo driver from 3.0.0 to 3.0.4
+- [cygnus-common][cygnus-ngsi][cygnus-twitter] Upgrade log4j from 1.2.17 to 2.11.2
