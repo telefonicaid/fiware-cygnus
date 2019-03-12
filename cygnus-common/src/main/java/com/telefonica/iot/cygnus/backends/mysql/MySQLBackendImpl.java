@@ -407,6 +407,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
                     con = createConnection(dbName);
                     connections.put(dbName, con);
+                    LOGGER.debug("Number of cached mysql connections: " + connections.size());
                 } // if
 
                 return con;
