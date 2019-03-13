@@ -7,3 +7,17 @@ maven-deps/
 .DS_Store
 archived/
 cygnus-ngsi/ignore
+.metadata/*
+.recommenders/*
+telefonica_checkstyle.xml
+sun_checkstyle.xml
+telefonica_checkstyle.xml
+RemoteSystemsTempFiles/*
+*.prefs
+cygnus-common/.classpath
+cygnus-common/.project
+cygnus-ngsi/.classpath
+cygnus-ngsi/.project
+cygnus-twitter/.classpath
+cygnus-twitter/.project
+telefonica_checkstyle.xml

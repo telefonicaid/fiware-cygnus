@@ -18,6 +18,13 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+
+import org.apache.flume.Context;
+
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
@@ -34,11 +41,6 @@ import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import org.apache.flume.Context;
 
 /**
  *
@@ -49,11 +51,19 @@ import org.apache.flume.Context;
  */
 public class NGSIMySQLSink extends NGSISink {
     
+    private static final String DEFAULT_ROW_ATTR_PERSISTENCE = "row";
+    private static final String DEFAULT_PASSWORD = "";
+    private static final String DEFAULT_PORT = "3306";
+    private static final String DEFAULT_HOST = "localhost";
+    private static final String DEFAULT_USER_NAME = "root";
+    private static final int DEFAULT_MAX_POOL_SIZE = 5;
+    
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIMySQLSink.class);
     private String mysqlHost;
     private String mysqlPort;
     private String mysqlUsername;
     private String mysqlPassword;
+    private int maxPoolSize;
     private boolean rowAttrPersistence;
     private MySQLBackendImpl persistenceBackend;
     
@@ -123,9 +133,9 @@ public class NGSIMySQLSink extends NGSISink {
     
     @Override
     public void configure(Context context) {
-        mysqlHost = context.getString("mysql_host", "localhost");
+        mysqlHost = context.getString("mysql_host", DEFAULT_HOST);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_host=" + mysqlHost + ")");
-        mysqlPort = context.getString("mysql_port", "3306");
+        mysqlPort = context.getString("mysql_port", DEFAULT_PORT);
         int intPort = Integer.parseInt(mysqlPort);
         
         if ((intPort <= 0) || (intPort > 65535)) {
@@ -136,13 +146,17 @@ public class NGSIMySQLSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_port=" + mysqlPort + ")");
         }  // if else
         
-        mysqlUsername = context.getString("mysql_username", "root");
+        mysqlUsername = context.getString("mysql_username", DEFAULT_USER_NAME);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_username=" + mysqlUsername + ")");
-        // FIXME: mysqlPassword should be read as a SHA1 and decoded here
-        mysqlPassword = context.getString("mysql_password", "");
+        // FIXME: mysqlPassword should be read encrypted and decoded here
+        mysqlPassword = context.getString("mysql_password", DEFAULT_PASSWORD);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
-        rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        String persistence = context.getString("attr_persistence", "row");
+        
+        maxPoolSize = context.getInteger("mysql_maxPoolSize", DEFAULT_MAX_POOL_SIZE);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_maxPoolSize=" + maxPoolSize + ")");
+        
+        rowAttrPersistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE).equals("row");
+        String persistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE);
         
         if (persistence.equals("row") || persistence.equals("column")) {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
@@ -159,7 +173,7 @@ public class NGSIMySQLSink extends NGSISink {
     @Override
     public void start() {
         try {
-            persistenceBackend = new MySQLBackendImpl(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword);
+            persistenceBackend = new MySQLBackendImpl(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize);
             LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the MySQL persistence backend. Details="
@@ -260,20 +274,76 @@ public class NGSIMySQLSink extends NGSISink {
     private abstract class MySQLAggregator {
         
         // object containing the aggregted data
-        protected LinkedHashMap<String, ArrayList<String>> aggregation;
+        private LinkedHashMap<String, ArrayList<String>> aggregation;
 
-        protected String service;
-        protected String servicePathForData;
-        protected String servicePathForNaming;
-        protected String entityForNaming;
-        protected String attribute;
-        protected String dbName;
-        protected String tableName;
+        private String service;
+        private String servicePathForData;
+        private String servicePathForNaming;
+        private String entityForNaming;
+        private String attribute;
+        private String dbName;
+        private String tableName;
         
-        public MySQLAggregator() {
+        MySQLAggregator() {
             aggregation = new LinkedHashMap<>();
         } // MySQLAggregator
         
+        protected LinkedHashMap<String, ArrayList<String>> getAggregation() {
+            return aggregation;
+        } //getAggregation
+
+        @SuppressWarnings("unused")
+        protected void setAggregation(LinkedHashMap<String, ArrayList<String>> aggregation) {
+            this.aggregation = aggregation;
+        } //setAggregation
+
+
+        @SuppressWarnings("unused")
+        protected String getService() {
+            return service;
+        } //getService
+
+
+        @SuppressWarnings("unused")
+        protected void setService(String service) {
+            this.service = service;
+        } //setService
+
+        protected String getServicePathForData() {
+            return servicePathForData;
+        } //getServicePathForData
+
+
+        @SuppressWarnings("unused")
+        protected void setServicePathForData(String servicePathForData) {
+            this.servicePathForData = servicePathForData;
+        } //setServicePathForData
+
+
+        @SuppressWarnings("unused")
+        protected String getServicePathForNaming() {
+            return servicePathForNaming;
+        } //getServicePathForNaming
+
+
+        @SuppressWarnings("unused")
+        protected void setServicePathForNaming(String servicePathForNaming) {
+            this.servicePathForNaming = servicePathForNaming;
+        } //setServicePathForNaming
+
+
+        @SuppressWarnings("unused")
+        protected String getTableName() {
+            return tableName;
+        } //getTableName
+
+        @SuppressWarnings("unused")
+        protected void setTableName(String tableName) {
+            this.tableName = tableName;
+        } //setTableName
+
+
+
         public String getDbName(boolean enableLowercase) {
             if (enableLowercase) {
                 return dbName.toLowerCase();
@@ -302,7 +372,7 @@ public class NGSIMySQLSink extends NGSISink {
                 } // if else
                 
                 boolean first = true;
-                Iterator it = aggregation.keySet().iterator();
+                Iterator<String> it = aggregation.keySet().iterator();
             
                 while (it.hasNext()) {
                     ArrayList<String> values = (ArrayList<String>) aggregation.get((String) it.next());
@@ -323,7 +393,7 @@ public class NGSIMySQLSink extends NGSISink {
         public String getFieldsForCreate() {
             String fieldsForCreate = "(";
             boolean first = true;
-            Iterator it = aggregation.keySet().iterator();
+            Iterator<String> it = aggregation.keySet().iterator();
             
             while (it.hasNext()) {
                 if (first) {
@@ -340,7 +410,7 @@ public class NGSIMySQLSink extends NGSISink {
         public String getFieldsForInsert() {
             String fieldsForInsert = "(";
             boolean first = true;
-            Iterator it = aggregation.keySet().iterator();
+            Iterator<String> it = aggregation.keySet().iterator();
             
             while (it.hasNext()) {
                 if (first) {
@@ -376,6 +446,7 @@ public class NGSIMySQLSink extends NGSISink {
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
+            LinkedHashMap<String, ArrayList<String>> aggregation = getAggregation();
             aggregation.put(NGSIConstants.RECV_TIME_TS, new ArrayList<String>());
             aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<String>());
             aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<String>());
@@ -418,9 +489,10 @@ public class NGSIMySQLSink extends NGSISink {
                         + attrType + ")");
                 
                 // aggregate the attribute information
+                LinkedHashMap<String, ArrayList<String>> aggregation = getAggregation();
                 aggregation.get(NGSIConstants.RECV_TIME_TS).add(Long.toString(recvTimeTs));
                 aggregation.get(NGSIConstants.RECV_TIME).add(recvTime);
-                aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(servicePathForData);
+                aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(getServicePathForData());
                 aggregation.get(NGSIConstants.ENTITY_ID).add(entityId);
                 aggregation.get(NGSIConstants.ENTITY_TYPE).add(entityType);
                 aggregation.get(NGSIConstants.ATTR_NAME).add(attrName);
@@ -442,6 +514,7 @@ public class NGSIMySQLSink extends NGSISink {
             super.initialize(cygnusEvent);
             
             // particular initialization
+            LinkedHashMap<String, ArrayList<String>> aggregation = getAggregation();
             aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<String>());
             aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<String>());
             aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<String>());
@@ -464,7 +537,7 @@ public class NGSIMySQLSink extends NGSISink {
         @Override
         public void aggregate(NGSIEvent event) {
             // Number of previous values
-            int numPreviousValues = aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).size();
+            int numPreviousValues = getAggregation().get(NGSIConstants.FIWARE_SERVICE_PATH).size();
             
             // Get the event headers
             long recvTimeTs = event.getRecvTimeTs();
@@ -485,9 +558,10 @@ public class NGSIMySQLSink extends NGSISink {
                         + ", type=" + entityType + ")");
                 return;
             } // if
-            
+
+            LinkedHashMap<String, ArrayList<String>> aggregation = getAggregation();
             aggregation.get(NGSIConstants.RECV_TIME).add(recvTime);
-            aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(servicePathForData);
+            aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(getServicePathForData());
             aggregation.get(NGSIConstants.ENTITY_ID).add(entityId);
             aggregation.get(NGSIConstants.ENTITY_TYPE).add(entityType);
             
@@ -505,10 +579,10 @@ public class NGSIMySQLSink extends NGSISink {
                     aggregation.get(attrName).add(attrValue);
                     aggregation.get(attrName + "_md").add(attrMetadata);
                 } else {
-                    ArrayList values = new ArrayList<>(Collections.nCopies(numPreviousValues, ""));
+                    ArrayList<String> values = new ArrayList<>(Collections.nCopies(numPreviousValues, ""));
                     values.add(attrValue);
                     aggregation.put(attrName, values);
-                    ArrayList valuesMd = new ArrayList<>(Collections.nCopies(numPreviousValues, ""));
+                    ArrayList<String> valuesMd = new ArrayList<>(Collections.nCopies(numPreviousValues, ""));
                     valuesMd.add(attrMetadata);
                     aggregation.put(attrName + "_md", valuesMd);
                 } // if else
@@ -516,7 +590,7 @@ public class NGSIMySQLSink extends NGSISink {
             
             // Iterate on all the aggregations, checking for not updated attributes; add an empty value if missing
             for (String key : aggregation.keySet()) {
-                ArrayList values = aggregation.get(key);
+                ArrayList<String> values = aggregation.get(key);
                 
                 if (values.size() == numPreviousValues) {
                     values.add("");
@@ -591,7 +665,7 @@ public class NGSIMySQLSink extends NGSISink {
         String name;
 
         if (enableEncoding) {
-            switch(dataModel) {
+            switch (dataModel) {
                 case DMBYSERVICEPATH:
                     name = NGSICharsets.encodeMySQL(servicePath);
                     break;
@@ -612,7 +686,7 @@ public class NGSIMySQLSink extends NGSISink {
                             + "'. Please, use dm-by-service-path, dm-by-entity or dm-by-attribute");
             } // switch
         } else {
-            switch(dataModel) {
+            switch (dataModel) {
                 case DMBYSERVICEPATH:
                     if (servicePath.equals("/")) {
                         throw new CygnusBadConfiguration("Default service path '/' cannot be used with "

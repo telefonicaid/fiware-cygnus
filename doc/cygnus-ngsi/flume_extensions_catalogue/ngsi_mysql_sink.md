@@ -235,6 +235,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.mysql-sink.mysql_port = 3306
     cygnus-ngsi.sinks.mysql-sink.mysql_username = myuser
     cygnus-ngsi.sinks.mysql-sink.mysql_password = mypassword
+    cygnus-ngsi.sinks.mysql-sink.mysql_maxPoolSize = 5
     cygnus-ngsi.sinks.mysql-sink.attr_persistence = row
     cygnus-ngsi.sinks.mysql-sink.batch_size = 100
     cygnus-ngsi.sinks.mysql-sink.batch_timeout = 30
