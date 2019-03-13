@@ -447,10 +447,10 @@ public class MySQLBackendImpl implements MySQLBackend {
                     LOGGER.debug("Recovered database connection from cache (" + dbName + ")");
                 }
 
-                if (con == null || !con.isValid(0)) {
-                    if (con != null) {
+                if (connection == null || !connection.isValid(0)) {
+                    if (connection != null) {
                         LOGGER.debug("Closing invalid mysql connection for db " + dbName);
-                        con.close();
+                        connection.close();
                     } // if
 
                     DataSource datasource = createConnectionPool(dbName);
