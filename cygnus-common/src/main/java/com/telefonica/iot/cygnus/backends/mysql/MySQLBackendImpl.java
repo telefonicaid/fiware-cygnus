@@ -402,6 +402,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
                 if (con == null || !con.isValid(0)) {
                     if (con != null) {
+                        LOGGER.debug("Closing invalid mysql connection for db " + dbName);
                         con.close();
                     } // if
 
