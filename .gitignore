@@ -1,3 +1,9 @@
-.DS_Store	.DS_Store
-archived/	archived/
+target/
+# IntelliJ local files
+*.idea
+*.iml
+nbactions.xml
+maven-deps/
+.DS_Store
+archived/
 cygnus-ngsi/ignore
