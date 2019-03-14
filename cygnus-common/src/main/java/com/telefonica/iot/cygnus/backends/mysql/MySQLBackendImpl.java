@@ -54,7 +54,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(MySQLBackendImpl.class);
     private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
-    private MySQLDriver driver;
+    private MySQLDriver driver;  // FIXME: Change it to static, to allow balanced sinks to share Driver and connection pooling. Be aware of concurrency issues.
     private final MySQLCache cache;
 
     /**
@@ -558,6 +558,7 @@ public class MySQLBackendImpl implements MySQLBackend {
                 // Creates an Instance of GenericObjectPool That Holds Our Pool of Connections Object!
                 gPool = new GenericObjectPool();
                 gPool.setMaxActive(this.maxPoolSize);
+                pools.put(dbName, gPool);
     
                 // Creates a ConnectionFactory Object Which Will Be Used by the Pool to Create the Connection Object!
                 LOGGER.debug("Creating connection pool jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName
