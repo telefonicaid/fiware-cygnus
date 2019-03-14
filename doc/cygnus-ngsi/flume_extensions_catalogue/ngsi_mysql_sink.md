@@ -210,6 +210,7 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | mysql\_port | no | 3306 ||
 | mysql\_username | no | root | `root` is the default username that is created automatically |
 | mysql\_password | no | N/A | Empty value as default (no password is created automatically) |
+| mysql\_maxPoolSize | no | 1 | Max number of connections per database pool (don't change this parameter) |
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
@@ -235,7 +236,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.mysql-sink.mysql_port = 3306
     cygnus-ngsi.sinks.mysql-sink.mysql_username = myuser
     cygnus-ngsi.sinks.mysql-sink.mysql_password = mypassword
-    cygnus-ngsi.sinks.mysql-sink.mysql_maxPoolSize = 5
+    cygnus-ngsi.sinks.mysql-sink.mysql_maxPoolSize = 1 
     cygnus-ngsi.sinks.mysql-sink.attr_persistence = row
     cygnus-ngsi.sinks.mysql-sink.batch_size = 100
     cygnus-ngsi.sinks.mysql-sink.batch_timeout = 30
