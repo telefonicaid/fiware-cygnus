@@ -46,7 +46,7 @@ public class LoadBalancingMySQLProcessor extends LoadBalancingSinkProcessor {
                         NGSIMySQLSink sink = (NGSIMySQLSink)s;
                         sink.setConnectionDriver(commonDriver);
                     }else{
-                        LOGGER.error("Sinks in MySQL load balancer must be NGSIMySQLSink. " +firstSink.getName() + " skipped.");
+                        LOGGER.error("Sinks in MySQL load balancer must be NGSIMySQLSink. " +s.getName() + " skipped.");
                     }
                 }
             }else {
@@ -71,7 +71,7 @@ public class LoadBalancingMySQLProcessor extends LoadBalancingSinkProcessor {
         
         List<Sink> sinkList = getSinks();
         for(Sink s : sinkList) {
-          s.start();
+          s.stop();
         }
         fixedState = LifecycleState.STOP;
     }
