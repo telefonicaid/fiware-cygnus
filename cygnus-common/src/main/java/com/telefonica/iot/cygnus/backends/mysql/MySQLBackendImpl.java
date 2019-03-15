@@ -54,7 +54,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(MySQLBackendImpl.class);
     private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
-    private MySQLDriver driver;  // FIXME: Change it to static, to allow balanced sinks to share Driver and connection pooling. Be aware of concurrency issues.
+    private MySQLDriver driver;
     private final MySQLCache cache;
 
     /**
@@ -84,11 +84,11 @@ public class MySQLBackendImpl implements MySQLBackend {
      * @param driver
      *            The MySQL driver to be set.
      */
-    protected void setDriver(MySQLDriver driver) {
+    public void setDriver(MySQLDriver driver) {
         this.driver = driver;
     } // setDriver
 
-    protected MySQLDriver getDriver() {
+    public MySQLDriver getDriver() {
         return driver;
     } // getDriver
 
@@ -408,7 +408,7 @@ public class MySQLBackendImpl implements MySQLBackend {
      * This code has been extracted from MySQLBackendImpl.getConnection() for
      * testing purposes. By extracting it into a class then it can be mocked.
      */
-    protected class MySQLDriver {
+    public class MySQLDriver {
 
         private final HashMap<String, DataSource> datasources;
         private final HashMap<String, GenericObjectPool> pools;

@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import org.apache.flume.Context;
 
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
+import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl.MySQLDriver;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -725,5 +726,21 @@ public class NGSIMySQLSink extends NGSISink {
 
         return name;
     } // buildTableName
+    
+    /**
+     * Returns connection driver used in the shink
+     * @return
+     */
+    public MySQLDriver getConnectionDriver (){
+        return this.persistenceBackend.getDriver();
+    }
+    
+    /**
+     * Sets connection driver
+     * @param driver
+     */
+    public void setConnectionDriver (MySQLDriver driver){
+        this.persistenceBackend.setDriver(driver);
+    }
 
 } // NGSIMySQLSink
