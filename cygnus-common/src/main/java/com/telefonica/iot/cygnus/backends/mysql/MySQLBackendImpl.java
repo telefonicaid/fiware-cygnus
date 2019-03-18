@@ -647,13 +647,14 @@ public class MySQLBackendImpl implements MySQLBackend {
                     }
                     LOGGER.debug("Number of Pools closed: " + poolCount + "/" + poolsSize);
                     
-                    this.poolListSemaphore.release();
                     this.closed = true;
                } else {
                    LOGGER.warn("Triying to close same MySQLBackend twice.");
                }
             } catch (InterruptedException e) {
                 LOGGER.error("Can't block pool list while closing MySQLbackend.");
+            } finally {
+                this.poolListSemaphore.release();
             }
             
         } // close

@@ -187,8 +187,7 @@ public class NGSIMySQLSink extends NGSISink {
             }
         } catch (Exception e) {
             LOGGER.error("Error while creating the MySQL persistence backend for sink " + this.getName() + ". Details="
-                    + e.getCause().getMessage() + "\n\t" + e.getMessage()
-                    + "\n\t" + e.getCause().getCause().getStackTrace()[0].toString());
+                    + e.getMessage());
         } // try catch
         
         super.start();
