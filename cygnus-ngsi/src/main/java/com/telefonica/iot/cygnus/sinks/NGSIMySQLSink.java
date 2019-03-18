@@ -26,7 +26,6 @@ import java.util.LinkedHashMap;
 import org.apache.flume.Context;
 
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
-import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl.MySQLDriver;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -67,12 +66,14 @@ public class NGSIMySQLSink extends NGSISink {
     private int maxPoolSize;
     private boolean rowAttrPersistence;
     private MySQLBackendImpl persistenceBackend;
+    private NGSIMySQLSink parentLoadBalanceSink = null;
     
     /**
      * Constructor.
      */
     public NGSIMySQLSink() {
         super();
+        parentLoadBalanceSink = null;
     } // NGSIMySQLSink
     
     /**
@@ -173,12 +174,21 @@ public class NGSIMySQLSink extends NGSISink {
 
     @Override
     public void start() {
+        LOGGER.debug("Starting Sink " + this.getName());
         try {
-            persistenceBackend = new MySQLBackendImpl(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize);
-            LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
+            if (this.parentLoadBalanceSink == null) {
+                persistenceBackend = new MySQLBackendImpl(mysqlHost, mysqlPort, mysqlUsername,
+                                                            mysqlPassword, maxPoolSize);
+                LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
+            } else {
+                persistenceBackend = new MySQLBackendImpl(parentLoadBalanceSink.getPersistenceBackend());
+                LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created and linked to "
+                            + parentLoadBalanceSink.getName());
+            }
         } catch (Exception e) {
-            LOGGER.error("Error while creating the MySQL persistence backend. Details="
-                    + e.getMessage());
+            LOGGER.error("Error while creating the MySQL persistence backend for sink " + this.getName() + ". Details="
+                    + e.getCause().getMessage() + "\n\t" + e.getMessage()
+                    + "\n\t" + e.getCause().getCause().getStackTrace()[0].toString());
         } // try catch
         
         super.start();
@@ -187,7 +197,9 @@ public class NGSIMySQLSink extends NGSISink {
     @Override
     public void stop() {
         super.stop();
-        if (persistenceBackend != null) persistenceBackend.close();
+        if (persistenceBackend != null) {
+            persistenceBackend.close();
+        }
     } // stop
     
     @Override
@@ -728,19 +740,12 @@ public class NGSIMySQLSink extends NGSISink {
     } // buildTableName
     
     /**
-     * Returns connection driver used in the shink
-     * @return
+     * This method makes two or more NGSIMySQLSinks to share the same connection pool.
+     * @param sourceSink
      */
-    public MySQLDriver getConnectionDriver (){
-        return this.persistenceBackend.getDriver();
+    public void shareConnectionsFrom(NGSIMySQLSink sourceSink) {
+        LOGGER.debug("Linking " + this.getName() + " sink, to " + sourceSink.getName());
+        this.parentLoadBalanceSink = sourceSink;
     }
     
-    /**
-     * Sets connection driver
-     * @param driver
-     */
-    public void setConnectionDriver (MySQLDriver driver){
-        this.persistenceBackend.setDriver(driver);
-    }
-
 } // NGSIMySQLSink

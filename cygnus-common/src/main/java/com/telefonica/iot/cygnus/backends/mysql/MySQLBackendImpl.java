@@ -25,7 +25,9 @@ import java.sql.SQLTimeoutException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 
 import javax.sql.DataSource;
 import javax.sql.rowset.CachedRowSet;
@@ -55,6 +57,7 @@ public class MySQLBackendImpl implements MySQLBackend {
     private static final CygnusLogger LOGGER = new CygnusLogger(MySQLBackendImpl.class);
     private static final String DRIVER_NAME = "com.mysql.jdbc.Driver";
     private MySQLDriver driver;
+    private boolean delegatedDriver = false;
     private final MySQLCache cache;
 
     /**
@@ -71,10 +74,26 @@ public class MySQLBackendImpl implements MySQLBackend {
     } // MySQLBackendImpl
     
     /**
+     * Load balancing constructor.
+     * @param parent backend to share connections
+     * @throws CygnusRuntimeError 
+     */
+    public MySQLBackendImpl (MySQLBackendImpl parent) throws CygnusRuntimeError{
+        if (parent != null) {
+            this.driver = parent.driver;
+            this.delegatedDriver = true;
+            cache = new MySQLCache();
+        } else {
+            LOGGER.error("Error Creating MySQLBackendImpl, parent mustn't be null.");
+            throw new CygnusRuntimeError("Error Creating MySQLBackendImpl, parent mustn't be null.");
+        }
+    }
+    
+    /**
      * Releases resources
      */
-    public void close(){
-        if (driver != null) driver.close();
+    public void close() {
+        if (driver != null && !delegatedDriver) driver.close();
     } // close
 
     /**
@@ -84,13 +103,22 @@ public class MySQLBackendImpl implements MySQLBackend {
      * @param driver
      *            The MySQL driver to be set.
      */
-    public void setDriver(MySQLDriver driver) {
+    protected void setDriver(MySQLDriver driver) {
         this.driver = driver;
     } // setDriver
 
-    public MySQLDriver getDriver() {
+    protected MySQLDriver getDriver() {
         return driver;
     } // getDriver
+    
+    /**
+     * This method makes two or more MySQLBackends to share the same connection pool.
+     * @param sourceMysqlBackend
+     */
+    public void shareConnectionsFrom (MySQLBackendImpl sourceMysqlBackend) {
+        this.setDriver(sourceMysqlBackend.getDriver());
+        this.delegatedDriver = true;
+    }
 
     @Override
     public void createDatabase(String dbName) throws CygnusRuntimeError, CygnusPersistenceError {
@@ -408,15 +436,17 @@ public class MySQLBackendImpl implements MySQLBackend {
      * This code has been extracted from MySQLBackendImpl.getConnection() for
      * testing purposes. By extracting it into a class then it can be mocked.
      */
-    public class MySQLDriver {
+    protected class MySQLDriver {
 
-        private final HashMap<String, DataSource> datasources;
-        private final HashMap<String, GenericObjectPool> pools;
+        private final Map<String, DataSource> datasources;
+        private final Map<String, GenericObjectPool> pools;
         private final String mysqlHost;
         private final String mysqlPort;
         private final String mysqlUsername;
         private final String mysqlPassword;
         private final int maxPoolSize;
+        private final Semaphore poolListSemaphore;
+        private boolean closed;
 
         /**
          * Constructor.
@@ -426,14 +456,17 @@ public class MySQLBackendImpl implements MySQLBackend {
          * @param mysqlUsername
          * @param mysqlPassword
          */
-        public MySQLDriver(String mysqlHost, String mysqlPort, String mysqlUsername, String mysqlPassword, int maxPoolSize) {
-            datasources = new HashMap<>();
-            pools = new HashMap<>();
+        public MySQLDriver(String mysqlHost, String mysqlPort, String mysqlUsername
+                            ,String mysqlPassword, int maxPoolSize) {
+            datasources = new ConcurrentHashMap<String, DataSource>();
+            pools = new ConcurrentHashMap<String, GenericObjectPool>();
+            poolListSemaphore = new Semaphore(1, true);
             this.mysqlHost = mysqlHost;
             this.mysqlPort = mysqlPort;
             this.mysqlUsername = mysqlUsername;
             this.mysqlPassword = mysqlPassword;
             this.maxPoolSize = maxPoolSize;
+            this.closed = false;
         } // MySQLDriver
 
         /**
@@ -450,32 +483,40 @@ public class MySQLBackendImpl implements MySQLBackend {
                 // a certain number; with such a limit
                 // number, if a new connection is needed, the oldest one is closed
                 Connection connection = null;
-
-                if (datasources.containsKey(dbName)) {
-                    connection = datasources.get(dbName).getConnection();
-                    LOGGER.debug("Recovered database connection from cache (" + dbName + ")");
-                }
-
-                if (connection == null || !connection.isValid(0)) {
-                    if (connection != null) {
-                        LOGGER.debug("Closing invalid mysql connection for db " + dbName);
-                        connection.close();
+                if (!closed) {
+                    if (datasources.containsKey(dbName)) {
+                        connection = datasources.get(dbName).getConnection();
+                        LOGGER.debug("Recovered database connection from cache (" + dbName + ")");
+                    }
+    
+                    if (connection == null || !connection.isValid(0)) {
+                        if (connection != null) {
+                            LOGGER.debug("Closing invalid mysql connection for db " + dbName);
+                            connection.close();
+                        } // if
+    
+                        DataSource datasource = createConnectionPool(dbName);
+                        datasources.put(dbName, datasource);
+                        connection = datasource.getConnection();
                     } // if
-
-                    DataSource datasource = createConnectionPool(dbName);
-                    datasources.put(dbName, datasource);
-                    connection = datasource.getConnection();
-                } // if
-                
-                // Check Pool cache and log status
-                if (pools.containsKey(dbName)){
-                    GenericObjectPool pool = pools.get(dbName);
-                    LOGGER.debug("Pool status (" + dbName + ") Max.: " + pool.getMaxActive() + "; Active: " 
-                            + pool.getNumActive() + "; Idle: " + pool.getNumIdle());
-                }else{
-                    LOGGER.error("Can't find dabase in pool cache (" + dbName + ")");
+                    
+                    // Check Pool cache and log status
+                    if (pools.containsKey(dbName)) {
+                        GenericObjectPool pool = pools.get(dbName);
+                        LOGGER.debug("Pool status (" + dbName + ") Max.: " + pool.getMaxActive() + "; Active: " 
+                                + pool.getNumActive() + "; Idle: " + pool.getNumIdle());
+                        if (pool.getNumActive()>1) { 
+                            LOGGER.debug(dbName + " Using more than one connection in the pool (Active: "
+                                    + pool.getNumActive() + ")");
+                            }
+                    } else {
+                        LOGGER.error("Can't find dabase in pool cache (" + dbName + ")");
+                    }
+                } else {
+                    LOGGER.debug("MySQLDriver.getConnection: Triying to create a new connection on a closed MySQLDriver"
+                            + " dbName: " + dbName );
+                    throw new CygnusRuntimeError("Triying to create a new connection on a closed MySQLDriver.");
                 }
-                
                 return connection;
             } catch (ClassNotFoundException e) {
                 throw new CygnusRuntimeError("Connection error", "ClassNotFoundException", e.getMessage());
@@ -498,15 +539,15 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // isConnectionCreated
 
         /**
-         * Returns the actual number of active connections 
+         * Returns the actual number of active connections. 
          * @return
          */
         protected int activePoolConnections() {
             int connectionCount = 0;
-            for ( String dbName : pools.keySet()){
+            for ( String dbName : pools.keySet()) {
                 GenericObjectPool pool = pools.get(dbName);
                 connectionCount += pool.getNumActive();
-                LOGGER.debug("Pool status (" + dbName + ") Max.: " + pool.getMaxActive() + "; Active: " 
+                LOGGER.debug("Pool status (" + dbName + ") Max.: " + pool.getMaxActive() + "; Active: "
                         + pool.getNumActive() + "; Idle: " + pool.getNumIdle());
             }
             LOGGER.debug("Total pool's active connections: " + connectionCount);
@@ -514,15 +555,15 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // activePoolConnections
         
         /**
-         * Returns the Maximum number of connections 
+         * Returns the Maximum number of connections.
          * @return
          */
         protected int maxPoolConnections() {
             int connectionCount = 0;
-            for ( String dbName : pools.keySet()){
+            for ( String dbName : pools.keySet()) {
                 GenericObjectPool pool = pools.get(dbName);
                 connectionCount += pool.getMaxActive();
-                LOGGER.debug("Pool status (" + dbName + ") Max.: " + pool.getMaxActive() + "; Active: " 
+                LOGGER.debug("Pool status (" + dbName + ") Max.: " + pool.getMaxActive() + "; Active: "
                         + pool.getNumActive() + "; Idle: " + pool.getNumIdle());
             }
             LOGGER.debug("Max pool connections: " + connectionCount);
@@ -546,59 +587,81 @@ public class MySQLBackendImpl implements MySQLBackend {
          * @throws Exception
          */
         @SuppressWarnings("unused")
-        private DataSource createConnectionPool(String dbName) throws Exception {
+        private synchronized DataSource createConnectionPool(String dbName) throws Exception {
             GenericObjectPool gPool = null;
-            if (pools.containsKey(dbName)){
-                LOGGER.debug("Pool recovered from Cache (" + dbName + ")");
-                gPool = pools.get(dbName);
-            }else{
-                String jdbcUrl = "jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName;
-                Class.forName(DRIVER_NAME);
-    
-                // Creates an Instance of GenericObjectPool That Holds Our Pool of Connections Object!
-                gPool = new GenericObjectPool();
-                gPool.setMaxActive(this.maxPoolSize);
-                pools.put(dbName, gPool);
-    
-                // Creates a ConnectionFactory Object Which Will Be Used by the Pool to Create the Connection Object!
-                LOGGER.debug("Creating connection pool jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName
-                        + "?user=" + mysqlUsername + "&password=XXXXXXXXXX");
-                ConnectionFactory cf = new DriverManagerConnectionFactory(jdbcUrl, mysqlUsername, mysqlPassword);
-    
-                // Creates a PoolableConnectionFactory That Will Wraps the Connection Object Created by
-                // the ConnectionFactory to Add Object Pooling Functionality!
-                PoolableConnectionFactory pcf = new PoolableConnectionFactory(cf, gPool, null, null, false, true);
-            } //else
             
+            // Semaphore to prevent diferent threads from creating connections at the same time
+            this.poolListSemaphore.acquire();
+            if (!closed) {
+                if (pools.containsKey(dbName)) {
+                    LOGGER.debug("Pool recovered from Cache (" + dbName + ")");
+                    gPool = pools.get(dbName);
+                } else {
+                    String jdbcUrl = "jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName;
+                    Class.forName(DRIVER_NAME);
+        
+                    // Creates an Instance of GenericObjectPool That Holds Our Pool of Connections Object!
+                    gPool = new GenericObjectPool();
+                    gPool.setMaxActive(this.maxPoolSize);
+                    pools.put(dbName, gPool);
+        
+                    // Creates a ConnectionFactory Object Which Will Be Used by the Pool 
+                    // to Create the Connection Object!
+                    LOGGER.debug("Creating connection pool jdbc:mysql://" + mysqlHost + ":" + mysqlPort + "/" + dbName
+                            + "?user=" + mysqlUsername + "&password=XXXXXXXXXX");
+                    ConnectionFactory cf = new DriverManagerConnectionFactory(jdbcUrl, mysqlUsername, mysqlPassword);
+        
+                    // Creates a PoolableConnectionFactory That Will Wraps the Connection Object Created by
+                    // the ConnectionFactory to Add Object Pooling Functionality!
+                    PoolableConnectionFactory pcf = new PoolableConnectionFactory(cf, gPool, null, null, false, true);
+                } //else
+            } else {
+                LOGGER.error("Triyin to create a new ConnectionPool on a closed MySQLBackend for database " + dbName);
+            } //else
+            this.poolListSemaphore.release();
             return new PoolingDataSource(gPool);
         } // createConnectionPool
         
         /**
-         * Closes the Driver releasing resources
+         * Closes the Driver releasing resources.
          * @return
          */
         public void close() {
-            int poolCount = 0;
-            int poolsSize = pools.size();
-                        
-            for ( String dbName : pools.keySet()){
-                GenericObjectPool pool = pools.get(dbName);
-                try {
-                    pool.close();
-                    pools.remove(dbName);
-                    poolCount ++;
-                    LOGGER.debug("Pool closed: (" + dbName + ")");
-                } catch (Exception e) {
-                    LOGGER.error("Error closing MySQL pool " + dbName +": " + e.getMessage());
-                }
+            try {
+                this.poolListSemaphore.acquire();
+                
+                if (!closed) {
+                    int poolCount = 0;
+                    int poolsSize = pools.size();
+                                
+                    for ( String dbName : pools.keySet()) {
+                        GenericObjectPool pool = pools.get(dbName);
+                        try {
+                            pool.close();
+                            pools.remove(dbName);
+                            poolCount++;
+                            LOGGER.debug("Pool closed: (" + dbName + ")");
+                        } catch (Exception e) {
+                            LOGGER.error("Error closing MySQL pool " + dbName + ": " + e.getMessage());
+                        }
+                    }
+                    LOGGER.debug("Number of Pools closed: " + poolCount + "/" + poolsSize);
+                    
+                    this.poolListSemaphore.release();
+                    this.closed = true;
+               } else {
+                   LOGGER.warn("Triying to close same MySQLBackend twice.");
+               }
+            } catch (InterruptedException e) {
+                LOGGER.error("Can't block pool list while closing MySQLbackend.");
             }
-            LOGGER.debug("Number of Pools closed: " + poolCount + "/" + poolsSize);
+            
         } // close
         
         /**
-         * Last resort releasing resources
+         * Last resort releasing resources.
          */
-        public void Finally(){
+        public void Finally() {
             this.close();
         }
 
