@@ -1,7 +1,6 @@
 language: java
 sudo: false
 jdk:
-  - openjdk7
   - openjdk8
   - oraclejdk8
 script: ./test.sh
