@@ -14,8 +14,9 @@
     * [YAFS](./yafs.md)
 * [Testing](./testing.md)
 * [Logs and alarm](./logs_and_alarms.md)
-* [Original API](./management_interface.md)
-* [v1 API (beta)](./management_interface_v1.md)
+* Management Interface:
+    * [Original API](./management_interface.md)
+    * [v1 API (beta)](./management_interface_v1.md)
 * [Sanity checks](./sanity_checks.md)
 * [Diagnosis procedures](./diagnosis_procedures.md)
 * [Reporting issues and contact information](./issues_and_contact.md)
