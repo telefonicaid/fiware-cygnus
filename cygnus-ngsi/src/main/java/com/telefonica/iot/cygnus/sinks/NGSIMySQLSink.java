@@ -22,8 +22,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
+import org.apache.flume.Sink.Status;
 
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
@@ -66,7 +70,13 @@ public class NGSIMySQLSink extends NGSISink {
     private int maxPoolSize;
     private boolean rowAttrPersistence;
     private MySQLBackendImpl persistenceBackend;
+    
+    // Concurrent load balancing properties
     private NGSIMySQLSink parentLoadBalanceSink = null;
+    private Status lastStatus;
+    private AtomicBoolean processInBackground;  // Indicator for background process.
+    private final Semaphore backgroundSemaphore;  // Semaphore waiting background process to stop.
+    private final Semaphore processingSemaphore;  // Semaphore processing control.
     
     /**
      * Constructor.
@@ -74,6 +84,12 @@ public class NGSIMySQLSink extends NGSISink {
     public NGSIMySQLSink() {
         super();
         parentLoadBalanceSink = null;
+        lastStatus = Status.READY;
+        
+     // true = No background process launched yet
+        processInBackground = new AtomicBoolean(false);
+        backgroundSemaphore = new Semaphore(1, true);
+        processingSemaphore = new Semaphore(1, true);
     } // NGSIMySQLSink
     
     /**
@@ -134,7 +150,7 @@ public class NGSIMySQLSink extends NGSISink {
     } // setPersistenceBackend
     
     @Override
-    public void configure(Context context) {
+    public synchronized void configure(Context context) {
         mysqlHost = context.getString("mysql_host", DEFAULT_HOST);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_host=" + mysqlHost + ")");
         mysqlPort = context.getString("mysql_port", DEFAULT_PORT);
@@ -173,7 +189,7 @@ public class NGSIMySQLSink extends NGSISink {
     } // configure
 
     @Override
-    public void start() {
+    public synchronized void start() {
         LOGGER.debug("Starting Sink " + this.getName());
         try {
             if (this.parentLoadBalanceSink == null) {
@@ -194,7 +210,19 @@ public class NGSIMySQLSink extends NGSISink {
     } // start
 
     @Override
-    public void stop() {
+    public synchronized void stop() {
+        if (processInBackground.get()){
+            LOGGER.debug("Closing Background process for sink " + this.getName());
+            processInBackground.set(false);
+            notifyAll();  // Send finish signal to background thread
+            try {
+                // Just wait for background thread to finish
+                backgroundSemaphore.acquire();
+                backgroundSemaphore.release();
+            } catch (InterruptedException e) {
+                LOGGER.error("Error releasing Background Process for sink " + this.getName());
+            }
+        }
         super.stop();
         if (persistenceBackend != null) {
             persistenceBackend.close();
@@ -202,7 +230,7 @@ public class NGSIMySQLSink extends NGSISink {
     } // stop
     
     @Override
-    void persistBatch(NGSIBatch batch)
+    synchronized void persistBatch(NGSIBatch batch)
         throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
@@ -235,7 +263,7 @@ public class NGSIMySQLSink extends NGSISink {
     } // persistBatch
     
     @Override
-    public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
+    public synchronized void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -274,7 +302,7 @@ public class NGSIMySQLSink extends NGSISink {
     } // capRecords
 
     @Override
-    public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
+    public synchronized void expirateRecords(long expirationTime) throws CygnusExpiratingError {
         LOGGER.debug("[" + this.getName() + "] Expirating records (time=" + expirationTime + ")");
         
         try {
@@ -634,7 +662,7 @@ public class NGSIMySQLSink extends NGSISink {
         String dbName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
         
-        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIMySQLSink. Database ("
+        LOGGER.info("[" + this.getName() + "] (" + Thread.currentThread().getId() + ") Persisting data at NGSIMySQLSink. Database (" 
                 + dbName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
                 + valuesForInsert + ")");
         
@@ -745,6 +773,85 @@ public class NGSIMySQLSink extends NGSISink {
     public void shareConnectionsFrom(NGSIMySQLSink sourceSink) {
         LOGGER.debug("Linking " + this.getName() + " sink, to " + sourceSink.getName());
         this.parentLoadBalanceSink = sourceSink;
-    }
+    } // shareConnectionsFrom
+    
+    /**
+     * Process override.
+     * @return
+     * @throws EventDeliveryException
+     */
+    @Override
+    public synchronized Status process() throws EventDeliveryException {
+        // Background or foreground process
+        try{     
+            if (!processInBackground.get()){
+                lastStatus = super.process();
+            } else {
+                processingSemaphore.acquire(); 
+                    LOGGER.trace("Notify background process for sink " + this.getName());
+                    notify(); // Run background thread
+                processingSemaphore.release();
+            }
+        return lastStatus;
+        } catch (InterruptedException e){
+            LOGGER.error("Error triying to process sink " + this.getName());
+            return lastStatus;
+        }
+    } // process
+
+    /**
+     * Runs Process() in Background using a new Thread.
+     * The new thread will remain alive until stop() is called.
+     * @return true on success.
+     */
+    public boolean runBackgroundProcess(){
+        if (!processInBackground.get()){
+            LOGGER.debug("Running process in background for sink " + this.getName());
+            // set finish flag to false
+            processInBackground.set(true);
+            new Thread(){  
+                public void run(){
+                    backgroundProcess();
+                }  
+            }.start();
+            return true;
+        } else {
+            LOGGER.error("Triying to start background process twice for sink " +this.getName());
+            return false;
+        }
+    } // runBackgroundProcess
+    
+    /**
+     * Process Method to be executed in background
+     */
+    private synchronized void backgroundProcess(){
+        try {
+            this.backgroundSemaphore.acquire();
+            LOGGER.debug("Starting Background process for sink " + this.getName()
+                    + ", thread: " + Thread.currentThread().getId()); 
+            while (processInBackground.get()){
+                processingSemaphore.acquire();
+                    try {
+                        LOGGER.trace("Processing sink " + this.getName() 
+                                + " in background, thread: " + Thread.currentThread().getId());
+                        lastStatus = super.process();
+                    } catch (EventDeliveryException e) {
+                        LOGGER.error("Error processing Background sink: " + this.getName());
+                        lastStatus = Status.BACKOFF;
+                    }
+                processingSemaphore.release();
+                wait(); // Wait for the next execution notify
+            }
+            
+            LOGGER.debug("Finishing Background process for sink " + this.getName());            
+            processInBackground.set(false);
+            this.backgroundSemaphore.release();
+        } catch (InterruptedException e) {
+            lastStatus = Status.BACKOFF;
+            processInBackground.set(false);
+            LOGGER.error("Error launching background process for sink " + this.getName());
+        }
+        
+    } // backgroundProcess
     
 } // NGSIMySQLSink

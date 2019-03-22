@@ -71,7 +71,7 @@ public class CygnusLogger {
             traceAndExit(e);
         } // try catch
     } // error
-    
+
     /**
      * Traces a message with DEBUG level.
      * @param msg
@@ -83,6 +83,18 @@ public class CygnusLogger {
             traceAndExit(e);
         } // try catch
     } // debug
+
+    /**
+     * Traces a message with TRACE level.
+     * @param msg
+     */
+    public void trace(Object msg) {
+        try {
+            logger.log(fqcn, Level.TRACE, msg, null);
+        } catch (Exception e) {
+            traceAndExit(e);
+        } // try catch
+    } // trace
     
     /**
      * Traces a message with INFO level.

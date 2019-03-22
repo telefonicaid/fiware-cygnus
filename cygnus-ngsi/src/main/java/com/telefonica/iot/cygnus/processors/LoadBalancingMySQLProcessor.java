@@ -30,7 +30,10 @@ public class LoadBalancingMySQLProcessor extends LoadBalancingSinkProcessor {
     @Override
     public void configure(Context context) {
         super.configure(context);
-
+        
+        LOGGER.debug("Configuring LB type: " + context.getString(CONFIG_SELECTOR,
+                "DEFAULT VALUE= " + SELECTOR_NAME_ROUND_ROBIN));
+        
         // Set a common connection Driver to all NGSIMySQLSinks
         List<Sink> sinkList = getSinks();
         if (sinkList.size() > 1) {
@@ -68,7 +71,9 @@ public class LoadBalancingMySQLProcessor extends LoadBalancingSinkProcessor {
         List<Sink> sinkList = getSinks();
         LOGGER.debug("Load Balancer starting " + sinkList.size() + " sinks.");
         for (Sink s : sinkList) {
-            s.start();
+            NGSIMySQLSink sink = (NGSIMySQLSink) s;
+            sink.start();
+            sink.runBackgroundProcess();
         }
 
         fixedState = LifecycleState.START;
