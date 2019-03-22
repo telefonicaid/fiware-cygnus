@@ -118,31 +118,31 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
     ngsi-event={
         headers={
-	         content-type=application/json,
-	         timestamp=1429535775,
-	         transactionId=1429535775-308-0000000000,
-	         correlationId=1429535775-308-0000000000,
-	         fiware-service=vehicles,
-	         fiware-servicepath=/4wheels,
-	         <grouping_rules_interceptor_headers>,
-	         <name_mappings_interceptor_headers>
+             content-type=application/json,
+             timestamp=1429535775,
+             transactionId=1429535775-308-0000000000,
+             correlationId=1429535775-308-0000000000,
+             fiware-service=vehicles,
+             fiware-servicepath=/4wheels,
+             <grouping_rules_interceptor_headers>,
+             <name_mappings_interceptor_headers>
         },
         body={
-	        entityId=car1,
-	        entityType=car,
-	        attributes=[
-	            {
-	                attrName=speed,
-	                attrType=float,
-	                attrValue=112.9
-	            },
-	            {
-	                attrName=oil_level,
-	                attrType=float,
-	                attrValue=74.6
-	            }
-	        ]
-	    }
+            entityId=car1,
+            entityType=car,
+            attributes=[
+                {
+                    attrName=speed,
+                    attrType=float,
+                    attrValue=112.9
+                },
+                {
+                    attrName=oil_level,
+                    attrType=float,
+                    attrValue=74.6
+                }
+            ]
+        }
     }
 
 [Top](#top)
@@ -210,7 +210,7 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | mysql\_port | no | 3306 ||
 | mysql\_username | no | root | `root` is the default username that is created automatically |
 | mysql\_password | no | N/A | Empty value as default (no password is created automatically) |
-| mysql\_maxPoolSize | no | 1 | Max number of connections per database pool (don't change this parameter) |
+| mysql\_maxPoolSize | no | 3 | Max number of connections per database pool |
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
@@ -236,7 +236,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.mysql-sink.mysql_port = 3306
     cygnus-ngsi.sinks.mysql-sink.mysql_username = myuser
     cygnus-ngsi.sinks.mysql-sink.mysql_password = mypassword
-    cygnus-ngsi.sinks.mysql-sink.mysql_maxPoolSize = 1 
+    cygnus-ngsi.sinks.mysql-sink.mysql_maxPoolSize = 3
     cygnus-ngsi.sinks.mysql-sink.attr_persistence = row
     cygnus-ngsi.sinks.mysql-sink.batch_size = 100
     cygnus-ngsi.sinks.mysql-sink.batch_timeout = 30
