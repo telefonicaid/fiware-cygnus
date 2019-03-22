@@ -56,7 +56,7 @@ public class NGSIMySQLSink extends NGSISink {
     private static final String DEFAULT_PORT = "3306";
     private static final String DEFAULT_HOST = "localhost";
     private static final String DEFAULT_USER_NAME = "root";
-    private static final int DEFAULT_MAX_POOL_SIZE = 1;
+    private static final int DEFAULT_MAX_POOL_SIZE = 3;
     
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIMySQLSink.class);
     private String mysqlHost;
