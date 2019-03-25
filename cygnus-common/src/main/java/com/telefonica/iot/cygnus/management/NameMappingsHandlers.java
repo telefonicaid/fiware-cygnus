@@ -24,6 +24,7 @@ import com.telefonica.iot.cygnus.containers.NameMappings;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.JsonUtils;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -140,7 +141,7 @@ public final class NameMappingsHandlers {
             response.getWriter().println(responseStr);
             LOGGER.debug("Response: " + responseStr);
             return;
-        }
+        } // if
 
         // Check if the name mappings are null
         if (nameMappings == null) {
