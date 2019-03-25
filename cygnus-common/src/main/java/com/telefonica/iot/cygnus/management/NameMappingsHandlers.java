@@ -130,8 +130,8 @@ public final class NameMappingsHandlers {
         // Get the name mappings from the configuration file
         NameMappings nameMappings = loadNameMappings(nameMappingsConfFile);
 
-        // Check if the name mappings are null
-        if (nameMappings == null) {
+        // Check if the name mappings file exits
+        if (!new File(nameMappingConfFile).exists()) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             String responseStr =
                     "{\"success\":\"false\","
@@ -140,8 +140,19 @@ public final class NameMappingsHandlers {
             response.getWriter().println(responseStr);
             LOGGER.debug("Response: " + responseStr);
             return;
+
+        // Check if the name mappings are null
+        if (nameMappings == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            String responseStr =
+                    "{\"success\":\"false\","
+                    + "\"error\":\"Configuration file for Name Mappings is empty. Details: "
+                    + nameMappingsConfFile + "\"}";
+            response.getWriter().println(responseStr);
+            LOGGER.debug("Response: " + responseStr);
+            return;
         } // if
-        
+
         response.setStatus(HttpServletResponse.SC_OK);
         String responseStr = "{\"success\":\"true\",\"result\":" + nameMappings.toString() + "}";
         response.getWriter().println(responseStr);
