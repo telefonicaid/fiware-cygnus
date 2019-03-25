@@ -131,7 +131,7 @@ public final class NameMappingsHandlers {
         NameMappings nameMappings = loadNameMappings(nameMappingsConfFile);
 
         // Check if the name mappings file exits
-        if (!new File(nameMappingConfFile).exists()) {
+        if (!new File(nameMappingsConfFile).exists()) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             String responseStr =
                     "{\"success\":\"false\","
@@ -140,6 +140,7 @@ public final class NameMappingsHandlers {
             response.getWriter().println(responseStr);
             LOGGER.debug("Response: " + responseStr);
             return;
+        }
 
         // Check if the name mappings are null
         if (nameMappings == null) {
