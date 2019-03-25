@@ -22,11 +22,6 @@ public class LoadBalancingMySQLProcessor extends LoadBalancingSinkProcessor {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(MySQLBackendImpl.class);
 
-    // FIXME: This attribute overrides Apache flume v1.4 bug stoping sinks
-    // https://github.com/apache/flume/commit/f017ce5aca00d280ad6ee94e63fe3b44c326c5cf#diff-6cbd0fd434c136c1fa50dc7e33b736e1
-    // This attribute must be removed when Apache Flume version >= 1.7.0
-    private LifecycleState fixedState;
-
     @Override
     public void configure(Context context) {
         super.configure(context);
@@ -41,10 +36,12 @@ public class LoadBalancingMySQLProcessor extends LoadBalancingSinkProcessor {
             LOGGER.debug("Loading LoadBalancingMySQLProcessor for " + sinkList.size() + " sinks");
             if (firstSink instanceof NGSIMySQLSink) {
                 NGSIMySQLSink firstMysqlSink = (NGSIMySQLSink) firstSink;
-
+                
+                int numberOfSinks = 1;
                 for (Sink s : sinkList) {
                     if (s != firstSink) { // Skip first one, who's used as parent.
                         if (s instanceof NGSIMySQLSink) {
+                            numberOfSinks++;
                             NGSIMySQLSink sink = (NGSIMySQLSink) s;
                             sink.shareConnectionsFrom(firstMysqlSink);
                             LOGGER.debug("Configuring sink " + sink.getName() + " to use connections from "
@@ -55,6 +52,9 @@ public class LoadBalancingMySQLProcessor extends LoadBalancingSinkProcessor {
                         }
                     }
                 }
+                // Set default pool size to be equal than Sinks size
+                firstMysqlSink.setMaxPoolSize(numberOfSinks);
+                
             } else {
                 LOGGER.error("All Sinks in MySQL load balancer must be NGSIMySQLSink. " + firstSink.getName()
                         + " isn't. All sinks skipped.");
@@ -64,36 +64,5 @@ public class LoadBalancingMySQLProcessor extends LoadBalancingSinkProcessor {
                     + "Please configure more than one sinks and try again.");
         }
     }
-
-    @Override
-    public void start() { // FIXME remove if Apache Flume version >= 1.7.0
-
-        List<Sink> sinkList = getSinks();
-        LOGGER.debug("Load Balancer starting " + sinkList.size() + " sinks.");
-        for (Sink s : sinkList) {
-            NGSIMySQLSink sink = (NGSIMySQLSink) s;
-            sink.start();
-            sink.runBackgroundProcess();
-        }
-
-        fixedState = LifecycleState.START;
-    }
-
-    @Override
-    public void stop() { // FIXME remove if Apache Flume version >= 1.7.0
-
-        List<Sink> sinkList = getSinks();
-        LOGGER.debug("Load Balancer stopping " + sinkList.size() + " sinks.");
-        for (Sink s : sinkList) {
-            s.stop();
-        }
-        fixedState = LifecycleState.STOP;
-    }
-
-    @Override
-    public LifecycleState getLifecycleState() { // FIXME remove if Apache Flume
-                                                // version >= 1.7.0
-        return fixedState;
-    }
-
+ 
 }

@@ -85,6 +85,7 @@ public class NGSIMySQLSink extends NGSISink {
         super();
         parentLoadBalanceSink = null;
         lastStatus = Status.READY;
+        maxPoolSize = DEFAULT_MAX_POOL_SIZE;
         
      // true = No background process launched yet
         processInBackground = new AtomicBoolean(false);
@@ -92,6 +93,19 @@ public class NGSIMySQLSink extends NGSISink {
         processingSemaphore = new Semaphore(1, true);
     } // NGSIMySQLSink
     
+    
+    
+    /**
+     * @param maxPoolSize the maxPoolSize to set, Integer greater than cero.
+     */
+    public void setMaxPoolSize(int maxPoolSize) {
+        if (maxPoolSize >= 1) {
+            this.maxPoolSize = maxPoolSize;
+        } else {
+            LOGGER.error("MaxPoolSize must be greater than cero in sink " + this.getName());
+        }
+    }
+
     /**
      * Gets the MySQL host. It is protected due to it is only required for testing purposes.
      * @return The MySQL host
@@ -170,7 +184,7 @@ public class NGSIMySQLSink extends NGSISink {
         mysqlPassword = context.getString("mysql_password", DEFAULT_PASSWORD);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
         
-        maxPoolSize = context.getInteger("mysql_maxPoolSize", DEFAULT_MAX_POOL_SIZE);
+        maxPoolSize = context.getInteger("mysql_maxPoolSize", maxPoolSize);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_maxPoolSize=" + maxPoolSize + ")");
         
         rowAttrPersistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE).equals("row");
@@ -212,14 +226,17 @@ public class NGSIMySQLSink extends NGSISink {
     @Override
     public synchronized void stop() {
         if (processInBackground.get()){
-            LOGGER.debug("Closing Background process for sink " + this.getName());
             processInBackground.set(false);
-            notifyAll();  // Send finish signal to background thread
+            LOGGER.debug("Closing Background process for sink " + this.getName());
+            
+            notify();  // Send finish signal to background thread
+
             try {
                 // Just wait for background thread to finish
+                LOGGER.trace("Stop Waiting for semaphore..... ");
                 backgroundSemaphore.acquire();
-                backgroundSemaphore.release();
-            } catch (InterruptedException e) {
+                backgroundSemaphore.release(0);
+            } catch (Exception e) {
                 LOGGER.error("Error releasing Background Process for sink " + this.getName());
             }
         }
@@ -830,6 +847,7 @@ public class NGSIMySQLSink extends NGSISink {
             LOGGER.debug("Starting Background process for sink " + this.getName()
                     + ", thread: " + Thread.currentThread().getId()); 
             while (processInBackground.get()){
+                LOGGER.trace("BackgroundProcess waiting semaphore.. "+ this.getName());
                 processingSemaphore.acquire();
                     try {
                         LOGGER.trace("Processing sink " + this.getName() 
@@ -840,16 +858,19 @@ public class NGSIMySQLSink extends NGSISink {
                         lastStatus = Status.BACKOFF;
                     }
                 processingSemaphore.release();
+                LOGGER.trace("Background Process waiting notifications.. " + this.getName());
                 wait(); // Wait for the next execution notify
             }
             
-            LOGGER.debug("Finishing Background process for sink " + this.getName());            
+            LOGGER.debug("Background process Finished for sink " + this.getName());            
             processInBackground.set(false);
             this.backgroundSemaphore.release();
+            
         } catch (InterruptedException e) {
             lastStatus = Status.BACKOFF;
             processInBackground.set(false);
             LOGGER.error("Error launching background process for sink " + this.getName());
+            this.backgroundSemaphore.release();
         }
         
     } // backgroundProcess

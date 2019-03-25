@@ -210,7 +210,7 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | mysql\_port | no | 3306 ||
 | mysql\_username | no | root | `root` is the default username that is created automatically |
 | mysql\_password | no | N/A | Empty value as default (no password is created automatically) |
-| mysql\_maxPoolSize | no | 1 | Max number of connections per database pool (don't change this parameter) |
+| mysql\_maxPoolSize | no |  | Max number of connections per database pool. </br> Default values: </br> <ul> <li>Single sink: maxPoolSize = 1</li><li>`LoadBalancingProcessor`</i>: maxPoolSize = 1 <i>(one pool per Sink)</i></li> <li>`LoadBalancingMySQLProcessor`: maxPoolSize = number of balanced sinks <i>(Same pool for all sinks)</i></li> </ul> </br> Recommended size = number of sinks in the pool, but this parameter can be overrided if needed, setting a diferent value in config file. |
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
