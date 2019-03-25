@@ -55,6 +55,7 @@ import com.telefonica.iot.cygnus.utils.NGSIUtils;
  */
 public class NGSIMySQLSink extends NGSISink {
     
+    private static final int UNSET_MAX_POOL_SIZE = 0;
     private static final String DEFAULT_ROW_ATTR_PERSISTENCE = "row";
     private static final String DEFAULT_PASSWORD = "";
     private static final String DEFAULT_PORT = "3306";
@@ -85,7 +86,7 @@ public class NGSIMySQLSink extends NGSISink {
         super();
         parentLoadBalanceSink = null;
         lastStatus = Status.READY;
-        maxPoolSize = DEFAULT_MAX_POOL_SIZE;
+        maxPoolSize = UNSET_MAX_POOL_SIZE;
         
      // true = No background process launched yet
         processInBackground = new AtomicBoolean(false);
@@ -98,8 +99,8 @@ public class NGSIMySQLSink extends NGSISink {
     /**
      * @param maxPoolSize the maxPoolSize to set, Integer greater than cero.
      */
-    public void setMaxPoolSize(int maxPoolSize) {
-        if (maxPoolSize >= 1) {
+    public void setDefaultMaxPoolSize(int maxPoolSize) {
+        if (maxPoolSize >= 1 && this.maxPoolSize == UNSET_MAX_POOL_SIZE) {
             this.maxPoolSize = maxPoolSize;
         } else {
             LOGGER.error("MaxPoolSize must be greater than cero in sink " + this.getName());
@@ -184,7 +185,7 @@ public class NGSIMySQLSink extends NGSISink {
         mysqlPassword = context.getString("mysql_password", DEFAULT_PASSWORD);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
         
-        maxPoolSize = context.getInteger("mysql_maxPoolSize", maxPoolSize);
+        maxPoolSize = context.getInteger("mysql_maxPoolSize", 0);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_maxPoolSize=" + maxPoolSize + ")");
         
         rowAttrPersistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE).equals("row");
@@ -207,6 +208,8 @@ public class NGSIMySQLSink extends NGSISink {
         LOGGER.debug("Starting Sink " + this.getName());
         try {
             if (this.parentLoadBalanceSink == null) {
+                // If Pool size is unset, neither by loadbalancer or config file.
+                if(maxPoolSize == UNSET_MAX_POOL_SIZE ) maxPoolSize = DEFAULT_MAX_POOL_SIZE;
                 persistenceBackend = new MySQLBackendImpl(mysqlHost, mysqlPort, mysqlUsername,
                                                             mysqlPassword, maxPoolSize);
                 LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");

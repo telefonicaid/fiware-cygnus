@@ -53,7 +53,7 @@ public class LoadBalancingMySQLProcessor extends LoadBalancingSinkProcessor {
                     }
                 }
                 // Set default pool size to be equal than Sinks size
-                firstMysqlSink.setMaxPoolSize(numberOfSinks);
+                firstMysqlSink.setDefaultMaxPoolSize(numberOfSinks);
                 
             } else {
                 LOGGER.error("All Sinks in MySQL load balancer must be NGSIMySQLSink. " + firstSink.getName()
