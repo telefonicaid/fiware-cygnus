@@ -393,7 +393,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
      * @return True is the header value length is wrong, otherwise false
      */
     protected boolean wrongContentType(String headerValue) {
-        return !headerValue.contains("application/json; charset=utf-8");
+        return !headerValue.toLowerCase(Locale.ENGLISH).contains("application/json; charset=utf-8");
     } // wrongContentType
     
     /**
