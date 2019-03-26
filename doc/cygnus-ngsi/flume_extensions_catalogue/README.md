@@ -13,6 +13,7 @@
     * [NGSIMySQLSink](./ngsi_mysql_sink.md)
     * [NGSIPostgreSQLSink](./ngsi_postgresql_sink.md)
     * [NGSISTHSink](./ngsi_sth_sink.md)
+    * [NGSIOrionSink](./ngsi_orion_sink.md)
     * [NGSITestSink](./ngsi_test_sink.md)
 * Interceptors
     * [GroupingInterceptor](./ngsi_grouping_interceptor.md)
