@@ -24,6 +24,7 @@ import com.telefonica.iot.cygnus.containers.NameMappings;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.JsonUtils;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -130,8 +131,8 @@ public final class NameMappingsHandlers {
         // Get the name mappings from the configuration file
         NameMappings nameMappings = loadNameMappings(nameMappingsConfFile);
 
-        // Check if the name mappings are null
-        if (nameMappings == null) {
+        // Check if the name mappings file exits
+        if (!new File(nameMappingsConfFile).exists()) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             String responseStr =
                     "{\"success\":\"false\","
@@ -141,7 +142,19 @@ public final class NameMappingsHandlers {
             LOGGER.debug("Response: " + responseStr);
             return;
         } // if
-        
+
+        // Check if the name mappings are null
+        if (nameMappings == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            String responseStr =
+                    "{\"success\":\"false\","
+                    + "\"error\":\"Configuration file for Name Mappings is empty. Details: "
+                    + nameMappingsConfFile + "\"}";
+            response.getWriter().println(responseStr);
+            LOGGER.debug("Response: " + responseStr);
+            return;
+        } // if
+
         response.setStatus(HttpServletResponse.SC_OK);
         String responseStr = "{\"success\":\"true\",\"result\":" + nameMappings.toString() + "}";
         response.getWriter().println(responseStr);

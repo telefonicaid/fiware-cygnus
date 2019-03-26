@@ -1,3 +1,4 @@
+- [cygnus-common][bugfix] Support empty files in mamemappings 
 - [cygnus-ngsi][Docker] Set default agent file names for "agent_"
 - [cygnus-common][MySQLBackend] Implement connection pooling (#1598, #1597)
 - [cygnus-common][feature] Add /v1/namemappings route to API (#1277)
