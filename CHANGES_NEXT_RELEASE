@@ -1,4 +1,5 @@
 - [cygnus-common][bugfix] Support empty files in mamemappings 
+- [cygnus-ngsi][Docker] Set default agent file names for "agent_"
 - [cygnus-common][MySQLBackend] Implement connection pooling (#1598, #1597)
 - [cygnus-common][feature] Add /v1/namemappings route to API (#1277)
 - [cygnus-common][bugfix] Support empty servicenames in mamemappings 
@@ -8,3 +9,4 @@
 - [cygnus-common][mongo] Upgrade mongo driver from 3.0.0 to 3.0.4
 - [cygnus-common] Upgrade flume-ng-node version from 1.4.0 to 1.9.0
 - [cygnus-twitter] Upgrade flume-ng-node version from 1.4.0 to 1.9.0
+- [cygnus-ngsi][NGSIRestHandler]Fix Content Type header validation issue. (#1609)

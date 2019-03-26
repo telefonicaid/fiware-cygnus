@@ -68,15 +68,15 @@ fi
 # Check if MYSQL ENV vars
 if [ "$CYGNUS_MYSQL_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
-        AGENT_CONF_FILE=agent-mysql.conf
+        AGENT_CONF_FILE=agent_mysql.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_MYSQL_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules-mysql.conf
+            GROUPING_CONF_FILE=grouping_rules_mysql.conf
             cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
         if [ "${CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
-            NAMEMAPPING_CONF_FILE=name_mappings-mysql.conf
+            NAMEMAPPING_CONF_FILE=name_mappings_mysql.conf
             cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -132,16 +132,16 @@ fi
 # Check if MONGO ENV vars
 if [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
-        AGENT_CONF_FILE=agent-mongo.conf
+        AGENT_CONF_FILE=agent_mongo.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5051 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_MONGOL_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules-mongo.conf
+            GROUPING_CONF_FILE=grouping_rules_mongo.conf
             cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
         if [ "${CYGNUS_MONGO_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
-            NAMEMAPPING_CONF_FILE=name_mappings-mongo.conf
+            NAMEMAPPING_CONF_FILE=name_mappings_mongo.conf
             cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -253,15 +253,15 @@ fi
 # Check if CKAN ENV vars
 if [ "$CYGNUS_CKAN_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
-        AGENT_CONF_FILE=agent-ckan.conf
+        AGENT_CONF_FILE=agent_ckan.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_CKAN_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules-ckan.conf
+            GROUPING_CONF_FILE=grouping_rules_ckan.conf
             cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
         if [ "${CYGNUS_CKAN_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
-            NAMEMAPPING_CONF_FILE=name_mappings-ckan.conf
+            NAMEMAPPING_CONF_FILE=name_mappings_ckan.conf
             cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -323,15 +323,15 @@ fi
 # Check if HDFS ENV vars
 if [ "$CYGNUS_HDFS_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
-        AGENT_CONF_FILE=agent-hdfs.conf
+        AGENT_CONF_FILE=agent_hdfs.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_HDFS_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules-hdfs.conf
+            GROUPING_CONF_FILE=grouping_rules_hdfs.conf
             cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
         if [ "${CYGNUS_HDFS_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
-            NAMEMAPPING_CONF_FILE=name_mappings-hdfs.conf
+            NAMEMAPPING_CONF_FILE=name_mappings_hdfs.conf
             cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -412,15 +412,15 @@ fi
 # Check if PostgreSQL ENV vars
 if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
-        AGENT_CONF_FILE=agent-postgresql.conf
+        AGENT_CONF_FILE=agent_postgresql.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_POSTGRESQL_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules-postgresql.conf
+            GROUPING_CONF_FILE=grouping_rules_postgresql.conf
             cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
         if [ "${CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
-            NAMEMAPPING_CONF_FILE=name_mappings-postgresql.conf
+            NAMEMAPPING_CONF_FILE=name_mappings_postgresql.conf
             cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -477,15 +477,15 @@ fi
 # Check if CARTODB ENV vars
 if [ "$CYGNUS_CARTO_USER" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
-        AGENT_CONF_FILE=agent-carto.conf
+        AGENT_CONF_FILE=agent_carto.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_CARTO_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules-carto.conf
+            GROUPING_CONF_FILE=grouping_rules_carto.conf
             cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
         if [ "${CYGNUS_CARTO_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
-            NAMEMAPPING_CONF_FILE=name_mappings-carto.conf
+            NAMEMAPPING_CONF_FILE=name_mappings_carto.conf
             cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -513,15 +513,15 @@ fi
 # Check if ORION ENV vars
 if [ "$CYGNUS_ORION_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
-        AGENT_CONF_FILE=agent-orion.conf
+        AGENT_CONF_FILE=agent_orion.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_ORION_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules-orion.conf
+            GROUPING_CONF_FILE=grouping_rules_orion.conf
             cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
         if [ "${CYGNUS_ORION_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
-            NAMEMAPPING_CONF_FILE=name_mappings-orion.conf
+            NAMEMAPPING_CONF_FILE=name_mappings_orion.conf
             cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
