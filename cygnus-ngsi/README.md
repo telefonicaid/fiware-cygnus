@@ -32,6 +32,7 @@ Current stable release is able to persist Orion context data in:
 * [DynamoDB](https://aws.amazon.com/dynamodb/), a cloud-based NoSQL database by [Amazon Web Services](https://aws.amazon.com/).
 * [PostgreSQL](http://www.postgresql.org/), the well-know relational database manager.
 * [Carto](https://carto.com/), the database specialized in geolocated data.
+* [Orion](https://github.com/telefonicaid/fiware-orion), the FIWARE Context Broker.
 
 You may consider to visit [Cygnus NGSI Quick Start Guide](../doc/cygnus-ngsi/quick_start_guide.md) before going deep into the details.
 
