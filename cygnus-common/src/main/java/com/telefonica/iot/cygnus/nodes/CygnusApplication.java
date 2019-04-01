@@ -461,13 +461,16 @@ public class CygnusApplication extends Application {
         public void run() {
             Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
             Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
+
+            // Regex matching Jetty thread names, like: qtp586434923-27 or @qtp586434923-27
+            String jettyThreadNamePattern = "^@?qtp\\d{2,}-\\d+";
             
             while (true) {
                 for (Thread t: threadArray) {
                     // exit Cygnus if some thread (except for the main one and threads from the Jetty
                     // QueuedThreadPool (@qtp)) is found to be not alive or in a terminated state
                     if ((t.getState() == State.TERMINATED || !t.isAlive())
-                            && !t.getName().equals("main") && !t.getName().contains("@qtp")) {
+                            && !t.getName().equals("main") && !t.getName().matches(jettyThreadNamePattern)) {
                         LOGGER.error("Thread found not alive, exiting Cygnus. ID=" + t.getId()
                                 + ", name=" + t.getName());
                         System.exit(-1);
