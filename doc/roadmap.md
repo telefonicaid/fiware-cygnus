@@ -24,15 +24,15 @@ Disclaimer:
   to be done along time which is fully valid only at the time of writing it. This
   roadmap has not be understood as a commitment on features and/or dates.
 * Some of the roadmap items may be implemented by external community developers, 
-  out of the scope of GEi owners. Thus, the moment in which these features will be
+  out of the scope of GE owners. Thus, the moment in which these features will be
   finalized cannot be assured.
 
 ## Short term
 
 The following list of features are planned to be addressed in the short term,
-and incorporated in the next release of the product:
+and incorporated in a next release of the product in the short term:
 
--   Make this GEi compatible with [FIWARE GE requirements](https://docs.google.com/spreadsheets/d/13Pzhbq-xwd8gTCvYqeNkfaoDt-iGCedc1zlb_elxv2M/edit#gid=0)
+-   Make this GE compatible with [FIWARE GE requirements](https://docs.google.com/spreadsheets/d/13Pzhbq-xwd8gTCvYqeNkfaoDt-iGCedc1zlb_elxv2M/edit#gid=0)
 -   NameMapping API and improvements
 -   Upgrade component dependencies (including Flume)
 
@@ -43,8 +43,8 @@ typically within the subsequent release(s) generated in the next **9 months**
 after next planned release:
 
 -   NGSIv2 notification reception endpoint
--   New sink: ElasticSearch (community)
--   New sink: SlicingDice (community)
+-   New sink: ElasticSearch (to be contributed by members of the Community beyond GE owners)
+-   New sink: SlicingDice (to be contributed by members of the Community beyond GE owners)
 
 ## Long term
 
