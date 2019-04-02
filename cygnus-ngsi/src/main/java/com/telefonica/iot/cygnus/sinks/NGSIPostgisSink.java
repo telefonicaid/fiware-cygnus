@@ -195,8 +195,7 @@ public class NGSIPostgisSink extends NGSISink {
     @Override
     public void start() {
         try {
-            persistenceBackend = new PostgreSQLBackendImpl(postgisHost, postgisPort, postgisDatabase,
-                    postgisUsername, postgisPassword, enableCache);
+            persistenceBackend = new PostgreSQLBackendImpl(postgisHost, postgisPort, postgisUsername, postgisPassword, enableCache);
         } catch (Exception e) {
             LOGGER.error("Error while creating the Postgis persistence backend. Details="
                     + e.getMessage());
@@ -207,7 +206,8 @@ public class NGSIPostgisSink extends NGSISink {
     } // start
 
     @Override
-    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError {
+    void persistBatch(NGSIBatch batch)
+        throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -520,7 +520,7 @@ public class NGSIPostgisSink extends NGSISink {
         } // if else
     } // getAggregator
 
-    private void persistAggregation(PostgisAggregator aggregator) throws CygnusPersistenceError {
+    private void persistAggregation(PostgisAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         String typedFieldNames = aggregator.getTypedFieldNames();
         String fieldNames = aggregator.getFieldNames();
         String fieldValues = aggregator.getAggregation();
@@ -531,18 +531,14 @@ public class NGSIPostgisSink extends NGSISink {
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
                 + fieldValues + ")");
         
-        try {
-            if (aggregator instanceof RowAggregator) {
-                persistenceBackend.createSchema(schemaName);
-                persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
-            } // if
-            // creating the database and the table has only sense if working in row mode, in column node
-            // everything must be provisioned in advance
+        if (aggregator instanceof RowAggregator) {
+            persistenceBackend.createSchema(schemaName);
+            persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+        } // if
+        // creating the database and the table has only sense if working in row mode, in column node
+        // everything must be provisioned in advance
 
-            persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
-        } catch (Exception e) {
-            throw new CygnusPersistenceError("-, " + e.getMessage());
-        } // try catch
+        persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
     } // persistAggregation
     
     /**
