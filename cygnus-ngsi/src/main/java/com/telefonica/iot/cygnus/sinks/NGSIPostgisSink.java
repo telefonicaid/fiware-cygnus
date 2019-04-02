@@ -392,10 +392,9 @@ public class NGSIPostgisSink extends NGSISink {
                 if (location.right) {
                     LOGGER.debug("location=" + location.getLeft());
                     // TBD ?
-                    row += + "','";
-                    row += location.getLeft()
+                    row += "','" + location.getLeft() + "')";
                 } else {
-                    + "')";
+                    row += "')";
                 }
 
                 if (aggregation.isEmpty()) {
