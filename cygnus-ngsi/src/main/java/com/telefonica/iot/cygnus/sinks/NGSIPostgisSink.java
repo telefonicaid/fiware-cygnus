@@ -144,26 +144,26 @@ public class NGSIPostgisSink extends NGSISink {
         // Impose enable lower case, since Postgis only accepts lower case
         enableLowercase = true;
         
-        postgisHost = context.getString("postgresql_host", "localhost");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_host=" + postgisHost + ")");
-        postgisPort = context.getString("postgresql_port", "5432");
+        postgisHost = context.getString("postgist_host", "localhost");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgist_host=" + postgisHost + ")");
+        postgisPort = context.getString("postgist_port", "5432");
         int intPort = Integer.parseInt(postgisPort);
 
         if ((intPort <= 0) || (intPort > 65535)) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (postgresql_port=" + postgisPort + ")"
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (postgis_port=" + postgisPort + ")"
                     + " -- Must be between 0 and 65535");
         } else {
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_port=" + postgisPort + ")");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_port=" + postgisPort + ")");
         }  // if else
 
-        postgisDatabase = context.getString("postgresql_database", "postgres");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_database=" + postgisDatabase + ")");
-        postgisUsername = context.getString("postgresql_username", "postgres");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_username=" + postgisUsername + ")");
+        postgisDatabase = context.getString("postgis_database", "postgres");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_database=" + postgisDatabase + ")");
+        postgisUsername = context.getString("postgis_username", "postgres");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_username=" + postgisUsername + ")");
         // FIXME: postgisPassword should be read as a SHA1 and decoded here
-        postgisPassword = context.getString("postgresql_password", "");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_password=" + postgisPassword + ")");
+        postgisPassword = context.getString("postgis_password", "posgres");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_password=" + postgisPassword + ")");
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         String persistence = context.getString("attr_persistence", "row");
 
