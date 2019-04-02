@@ -89,7 +89,7 @@ public final class NGSIUtils {
      * @param attrType
      * @param metadata
      * @param swapCoordinates
-     * @return The geometry value, ready for insertion in CartoDB, or the value as it is
+     * @return The geometry value, ready for insertion in CartoDB/PostGIS, or the value as it is
      */
     public static ImmutablePair<String, Boolean> getGeometry(String attrValue, String attrType, String metadata,
             boolean swapCoordinates) {
@@ -109,6 +109,14 @@ public final class NGSIUtils {
         if (attrType.equals("geo:json")) {
             return new ImmutablePair("ST_GeomFromGeoJSON('" + attrValue + "')", true);
         } // if
+
+        // TBD: What about:  ?
+          // 'geojson-line'
+          // 'geojson-polygon'
+          // 'geojson-multipoint'
+          // 'geojson-multiline'
+          // 'geojson-multipolygon'
+
         
         // The type was not 'geo:point' nor 'geo:json', thus try the metadata
         JSONParser parser = new JSONParser();
