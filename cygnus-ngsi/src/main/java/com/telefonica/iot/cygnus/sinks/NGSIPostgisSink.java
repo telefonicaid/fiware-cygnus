@@ -42,7 +42,7 @@ import org.apache.flume.Context;
  Detailed documentation can be found at:
   *** TDB *** 
  */
-public class NGSIPostgreSQLSink extends NGSISink {
+public class NGSIPostgisSink extends NGSISink {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgisSink.class);
     private String postgisHost;
@@ -391,7 +391,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
 
                 if (location.right) {
                     LOGGER.debug("location=" + location.getLeft());
-                    // TBD ¿?
+                    // TBD ?
                     row += + "','";
                     row += location.getLeft()
                 } else {
@@ -493,7 +493,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
 
                 if (location.right) {
                     LOGGER.debug("location=" + location.getLeft());
-                    // TBD ¿?
+                    // TBD ?
                     column += ",'" + attrValue + "','"  + attrMetadata + "','"  + location.getLeft() + "'";
 
                 } else {
