@@ -265,7 +265,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
          * @return
          * @throws Exception
          */
-        public Connection getConnection(String schemaName) throws Exception {
+        public Connection getConnection(String schemaName) throws CygnusRuntimeError, CygnusPersistenceError {
             try {
                 // FIXME: the number of cached connections should be limited to a certain number; with such a limit
                 //        number, if a new connection is needed, the oldest one is closed
