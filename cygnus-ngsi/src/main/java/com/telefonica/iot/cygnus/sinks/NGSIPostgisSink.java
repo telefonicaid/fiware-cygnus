@@ -188,14 +188,14 @@ public class NGSIPostgisSink extends NGSISink {
         }  // if else
 
         // TBD: possible option for postgisSink
-        swapCoordinates = false;        
+        swapCoordinates = false;
         
     } // configure
 
     @Override
     public void start() {
         try {
-            persistenceBackend = new PostgreSQLBackendImpl(postgisHost, postgisPort, postgisUsername, postgisPassword, enableCache);
+            persistenceBackend = new PostgreSQLBackendImpl(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize);
         } catch (Exception e) {
             LOGGER.error("Error while creating the Postgis persistence backend. Details="
                     + e.getMessage());

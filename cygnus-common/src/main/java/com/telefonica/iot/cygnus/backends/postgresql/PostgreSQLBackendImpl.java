@@ -67,14 +67,14 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
      * @param postgresqlPassword
      * @param enableCache
      */
-    public PostgreSQLBackendImpl(String postgresqlHost, String postgresqlPort, String postgresqlUsername, String postgresqlPassword, boolean enableCache) {
+    public PostgreSQLBackendImpl(String postgresqlHost, String postgresqlPort, String postgresqlUsername, String postgresqlPassword, int maxPoolSize) {
         if (enableCache) {
             cache = new PostgreSQLCache();
             LOGGER.info("PostgreSQL cache created succesfully");
         } // if
         
         driver = new PostgreSQLDriver(postgresqlHost, postgresqlPort,
-                                      postgresqlUsername, postgresqlPassword);
+                                      postgresqlUsername, postgresqlPassword, maxPoolSize);
     } // PostgreSQLBackendImpl
 
 
@@ -133,7 +133,6 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         closePostgreSQLObjects(con, stmt);
         LOGGER.debug("Trying to add '" + schemaName + "' to the cache after database creation");
         cache.persistSchemaInCache(schemaName);
-        
     } // createSchema
 
     /**
@@ -174,7 +173,6 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         closePostgreSQLObjects(con, stmt);
         LOGGER.debug("Trying to add '" + tableName + "' to the cache after table creation");
         cache.persistTableInCache(schemaName, tableName);
-        
     } // createTable
 
     @Override
@@ -201,7 +199,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         } catch (SQLException e) {
             throw new CygnusBadContextData("Data insertion error", "SQLException", e.getMessage());
         } finally {
-            closeMySQLObjects(con, stmt);
+            closePostgreSQLObjects(con, stmt);
         } // try catch
         LOGGER.debug("Trying to add '" + schemaName + "' and '" + tableName + "' to the cache after insertion");
         cache.persistSchemaInCache(schemaName);
@@ -407,7 +405,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
                     poolCount ++;
                     LOGGER.debug("Pool closed: (" + schemaName + ")");
                 } catch (Exception e) {
-                    LOGGER.error("Error closing MySQL pool " + schemaName +": " + e.getMessage());
+                    LOGGER.error("Error closing PostgreSQL pool " + schemaName +": " + e.getMessage());
                 }
             }
             LOGGER.debug("Number of Pools closed: " + poolCount + "/" + poolsSize);
