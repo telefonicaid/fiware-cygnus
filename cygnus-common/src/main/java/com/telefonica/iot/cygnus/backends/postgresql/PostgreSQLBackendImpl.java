@@ -68,13 +68,10 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
      * @param enableCache
      */
     public PostgreSQLBackendImpl(String postgresqlHost, String postgresqlPort, String postgresqlUsername, String postgresqlPassword, int maxPoolSize) {
-        if (enableCache) {
-            cache = new PostgreSQLCache();
-            LOGGER.info("PostgreSQL cache created succesfully");
-        } // if
-        
+
         driver = new PostgreSQLDriver(postgresqlHost, postgresqlPort,
                                       postgresqlUsername, postgresqlPassword, maxPoolSize);
+        cache = new PostgreSQLCache();
     } // PostgreSQLBackendImpl
 
 
