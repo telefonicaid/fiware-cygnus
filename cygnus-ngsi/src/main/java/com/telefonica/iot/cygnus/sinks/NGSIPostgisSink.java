@@ -161,8 +161,8 @@ public class NGSIPostgisSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_port=" + postgisPort + ")");
         }  // if else
 
-        // postgisDatabase = context.getString("postgis_database", "postgres");
-        // LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_database=" + postgisDatabase + ")");
+        postgisDatabase = context.getString("postgis_database", "postgres");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_database=" + postgisDatabase + ")");
         postgisUsername = context.getString("postgis_username", "postgres");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_username=" + postgisUsername + ")");
         // FIXME: postgisPassword should be read as a SHA1 and decoded here
@@ -203,7 +203,7 @@ public class NGSIPostgisSink extends NGSISink {
     @Override
     public void start() {
         try {
-            persistenceBackend = new PostgreSQLBackendImpl(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize);
+            persistenceBackend = new PostgreSQLBackendImpl(postgisHost, postgisPort, postgisDatabase, postgisUsername, postgisPassword, maxPoolSize);
         } catch (Exception e) {
             LOGGER.error("Error while creating the Postgis persistence backend. Details="
                     + e.getMessage());

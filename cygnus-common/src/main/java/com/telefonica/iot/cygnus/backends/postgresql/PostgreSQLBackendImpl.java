@@ -67,9 +67,9 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
      * @param postgresqlPassword
      * @param enableCache
      */
-    public PostgreSQLBackendImpl(String postgresqlHost, String postgresqlPort, String postgresqlUsername, String postgresqlPassword, int maxPoolSize) {
+    public PostgreSQLBackendImpl(String postgresqlHost, String postgresqlPort, String postgresqlDatabase, String postgresqlUsername, String postgresqlPassword, int maxPoolSize) {
 
-        driver = new PostgreSQLDriver(postgresqlHost, postgresqlPort,
+        driver = new PostgreSQLDriver(postgresqlHost, postgresqlPort, postgresqlDatabase,
                                       postgresqlUsername, postgresqlPassword, maxPoolSize);
         cache = new PostgreSQLCache();
     } // PostgreSQLBackendImpl
@@ -238,6 +238,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         private final HashMap<String, GenericObjectPool> pools;
         private final String postgresqlHost;
         private final String postgresqlPort;
+        private final String postgresqlDatabase;
         private final String postgresqlUsername;
         private final String postgresqlPassword;
         private final int maxPoolSize;
@@ -246,16 +247,18 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
          * Constructor.
          * @param postgresqlHost
          * @param postgresqlPort
+         * @param postgresqlDatabase
          * @param postgresqlUsername
          * @param postgresqlPassword
          */
-        public PostgreSQLDriver(String postgresqlHost, String postgresqlPort, String postgresqlUsername, String postgresqlPassword, int maxPoolSize) {
+        public PostgreSQLDriver(String postgresqlHost, String postgresqlPort, String postgresqlDatabase, String postgresqlUsername, String postgresqlPassword, int maxPoolSize) {
             datasources = new HashMap<>();
             pools = new HashMap<>();
             this.postgresqlHost = postgresqlHost;
             this.postgresqlPort = postgresqlPort;
             this.postgresqlUsername = postgresqlUsername;
             this.postgresqlPassword = postgresqlPassword;
+            this.postgresqlDatabase = postgresqlDatabase;
             this.maxPoolSize = maxPoolSize;
         } // PostgreSQLDriver
 
@@ -366,7 +369,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
                 gPool = pools.get(schemaName);
             } else {
                 String jdbcUrl = "jdbc:postgresql://" + this.postgresqlHost + ":" + this.postgresqlPort
-                    + "/" + schemaName;
+                    + "/" + this.postgresqlDatabase;
                 Class.forName(DRIVER_NAME);
 
                 // Creates an Instance of GenericObjectPool That Holds Our Pool of Connections Object!
