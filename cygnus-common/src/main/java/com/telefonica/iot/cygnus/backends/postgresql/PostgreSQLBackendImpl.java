@@ -174,7 +174,6 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         closePostgreSQLObjects(con, stmt);
         LOGGER.debug("Trying to add '" + tableName + "' to the cache after table creation");
         cache.persistTableInCache(schemaName, tableName);
-        } // if
         
     } // createTable
 
