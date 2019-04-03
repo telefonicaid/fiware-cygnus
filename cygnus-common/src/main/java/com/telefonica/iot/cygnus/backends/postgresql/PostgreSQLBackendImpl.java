@@ -356,7 +356,8 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
          * @return PollingDataSource
          * @throws Exception
          */
-        private Connection createConnectionPool(String schemaName)
+        @SuppressWarnings("unused")
+        private DataSource createConnectionPool(String schemaName)
             throws Exception {
             GenericObjectPool gPool = null;
 
