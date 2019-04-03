@@ -393,17 +393,15 @@ public class NGSIPostgisSink extends NGSISink {
                     + entityId + "','"
                     + entityType + "','"
                     + attrName + "','"
-                    + attrType + "','"
-                    + attrValue + "','"
-                    + attrMetadata;
-
+                    + attrType + "','";
+                    // + attrValue + "','"
+                    // + attrMetadata;
 
                 if (location.right) {
                     LOGGER.debug("location=" + location.getLeft());
-                    // TBD ?
-                    row += "','" + location.getLeft() + "')";
+                    row += location.getLeft() + "','"  + attrMetadata + "')";
                 } else {
-                    row += "')";
+                    row += attrValue + "','"  + attrMetadata + "')";
                 }
 
                 if (aggregation.isEmpty()) {
@@ -501,8 +499,7 @@ public class NGSIPostgisSink extends NGSISink {
 
                 if (location.right) {
                     LOGGER.debug("location=" + location.getLeft());
-                    // TBD ?
-                    column += ",'" + attrValue + "','"  + attrMetadata + "','"  + location.getLeft() + "'";
+                    column += ",'" + location.getLeft() + "','"  + attrMetadata;
 
                 } else {
                     // create part of the column with the current attribute (a.k.a. a column)
