@@ -277,7 +277,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
 
                 if (connection == null || !connection.isValid(0)) {
                     if (connection != null) {
-                        LOGGER.debug("Closing invalid mysql connection for db " + schemaName);
+                        LOGGER.debug("Closing invalid postgresql connection for db " + schemaName);
                         connection.close();
                     } // if
 

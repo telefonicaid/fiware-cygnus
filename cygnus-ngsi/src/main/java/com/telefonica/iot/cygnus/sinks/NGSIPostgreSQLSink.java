@@ -168,7 +168,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_password=" + postgresqlPassword + ")");
 
         maxPoolSize = context.getInteger("postgresql_maxPoolSize", DEFAULT_MAX_POOL_SIZE);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_maxPoolSize=" + maxPoolSize + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_maxPoolSize=" + maxPoolSize + ")");
 
         rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
         String persistence = context.getString("attr_persistence", "row");
@@ -595,9 +595,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
             } // switch
         } // if else
 
-        if (name.length() > NGSIConstants.MYSQL_MAX_NAME_LEN) {
+        if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building table name '" + name
-                    + "' and its length is greater than " + NGSIConstants.MYSQL_MAX_NAME_LEN);
+                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_NAME_LEN);
         } // if
 
         return name;
