@@ -209,7 +209,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
      * @param stmt
      * @return True if the PostgreSQL objects have been closed, false otherwise.
      */
-    private void closePostgreSQLObjects(Connection con, Statement stmt) throws Exception {
+    private void closePostgreSQLObjects(Connection con, Statement stmt) throws CygnusRuntimeError {
         LOGGER.debug("Closing PostgreSQL connection objects.");
         if (stmt != null) {
             try {
