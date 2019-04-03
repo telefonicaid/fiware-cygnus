@@ -394,8 +394,6 @@ public class NGSIPostgisSink extends NGSISink {
                     + entityType + "','"
                     + attrName + "','"
                     + attrType + "','";
-                    // + attrValue + "','"
-                    // + attrMetadata;
 
                 if (location.right) {
                     LOGGER.debug("location=" + location.getLeft());
