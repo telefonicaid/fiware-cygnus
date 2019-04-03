@@ -22,9 +22,11 @@ import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
 import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -207,7 +209,7 @@ public class NGSIPostgisSink extends NGSISink {
 
     @Override
     void persistBatch(NGSIBatch batch)
-        throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError {
+        throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;

@@ -97,7 +97,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
     /**
      * Creates a schema given its name, if not exists.
      * @param schemaName
-     * @throws Exception
+     * @throws CygnusRuntimeError, CygnusPersistenceError
      */
     @Override
     public void createSchema(String schemaName) throws CygnusRuntimeError, CygnusPersistenceError {
