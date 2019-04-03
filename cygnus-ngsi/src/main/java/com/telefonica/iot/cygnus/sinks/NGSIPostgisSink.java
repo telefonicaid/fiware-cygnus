@@ -54,6 +54,7 @@ public class NGSIPostgisSink extends NGSISink {
     private String postgisUsername;
     private String postgisPassword;
     private boolean rowAttrPersistence;
+    private int maxPoolSize;
     private PostgreSQLBackendImpl persistenceBackend;
     private boolean enableCache;
     private boolean swapCoordinates;

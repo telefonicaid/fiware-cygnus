@@ -56,7 +56,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private int maxPoolSize;
     private boolean rowAttrPersistence;
     private PostgreSQLBackendImpl persistenceBackend;
-    //private boolean enableCache;
+    private boolean enableCache;
 
     /**
      * Constructor.
