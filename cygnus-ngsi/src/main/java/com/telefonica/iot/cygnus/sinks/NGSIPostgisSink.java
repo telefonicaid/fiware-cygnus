@@ -147,9 +147,9 @@ public class NGSIPostgisSink extends NGSISink {
         // Impose enable lower case, since Postgis only accepts lower case
         enableLowercase = true;
         
-        postgisHost = context.getString("postgist_host", "localhost");
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgist_host=" + postgisHost + ")");
-        postgisPort = context.getString("postgist_port", "5432");
+        postgisHost = context.getString("postgis_host", "localhost");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_host=" + postgisHost + ")");
+        postgisPort = context.getString("postgis_port", "5432");
         int intPort = Integer.parseInt(postgisPort);
 
         if ((intPort <= 0) || (intPort > 65535)) {
