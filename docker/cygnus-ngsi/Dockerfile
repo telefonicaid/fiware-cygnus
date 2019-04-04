@@ -199,7 +199,7 @@ ENV CYGNUS_POSTGIS_ENABLE_CACHE ""
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "task/add_postgis_sink"
+ENV GIT_REV_CYGNUS "master"
 
 ENV MVN_VER "3.5.4"
 ENV MVN_HOME "/opt/apache-maven"
