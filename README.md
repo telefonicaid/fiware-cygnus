@@ -47,6 +47,7 @@ Current stable release is able to persist the following sources of data in the f
     * [DynamoDB](https://aws.amazon.com/dynamodb/), a cloud-based NoSQL database by [Amazon Web Services](https://aws.amazon.com/).
     * [PostgreSQL](http://www.postgresql.org/), the well-known relational database manager.
     * [Carto](https://carto.com/), the database specialized in geolocated data.
+    * [PostGIS](http://postgis.net/), a spatial database extender for PostgreSQL object-relational database.
     * [Orion](https://github.com/telefonicaid/fiware-orion), the FIWARE Context Broker.
 * Twitter data in:
     * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
