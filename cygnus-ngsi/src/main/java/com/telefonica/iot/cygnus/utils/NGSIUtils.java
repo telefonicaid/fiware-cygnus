@@ -111,11 +111,12 @@ public final class NGSIUtils {
         } // if
 
         // TBD: What about:  ?
-          // 'geojson-line'
-          // 'geojson-polygon'
-          // 'geojson-multipoint'
-          // 'geojson-multiline'
-          // 'geojson-multipolygon'
+          // 'geo:line'
+          // 'geo:box'
+          // 'geo:polygon'
+          // 'geo:multipoint'
+          // 'geo:multiline'
+          // 'geo:multipolygon'
 
         
         // The type was not 'geo:point' nor 'geo:json', thus try the metadata

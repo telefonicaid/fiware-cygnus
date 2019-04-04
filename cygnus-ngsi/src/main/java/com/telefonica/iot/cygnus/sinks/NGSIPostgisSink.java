@@ -47,7 +47,15 @@ import org.apache.flume.Context;
  */
 public class NGSIPostgisSink extends NGSISink {
 
+    private static final String DEFAULT_ROW_ATTR_PERSISTENCE = "row";
+    private static final String DEFAULT_PASSWORD = "";
+    private static final String DEFAULT_PORT = "5432";
+    private static final String DEFAULT_HOST = "localhost";
+    private static final String DEFAULT_USER_NAME = "postgres";
+    private static final String DEFAULT_DATABASE = "postgres";
+    private static final String DEFAULT_ENABLE_CACHE = "false";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
+
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgisSink.class);
     private String postgisHost;
     private String postgisPort;
@@ -148,9 +156,9 @@ public class NGSIPostgisSink extends NGSISink {
         // Impose enable lower case, since Postgis only accepts lower case
         enableLowercase = true;
         
-        postgisHost = context.getString("postgis_host", "localhost");
+        postgisHost = context.getString("postgis_host", DEFAULT_HOST);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_host=" + postgisHost + ")");
-        postgisPort = context.getString("postgis_port", "5432");
+        postgisPort = context.getString("postgis_port", DEFAULT_PORT);
         int intPort = Integer.parseInt(postgisPort);
 
         if ((intPort <= 0) || (intPort > 65535)) {
@@ -161,19 +169,19 @@ public class NGSIPostgisSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_port=" + postgisPort + ")");
         }  // if else
 
-        postgisDatabase = context.getString("postgis_database", "postgres");
+        postgisDatabase = context.getString("postgis_database", DEFAULT_DATABASE);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_database=" + postgisDatabase + ")");
-        postgisUsername = context.getString("postgis_username", "postgres");
+        postgisUsername = context.getString("postgis_username", DEFAULT_USER_NAME);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_username=" + postgisUsername + ")");
         // FIXME: postgisPassword should be read as a SHA1 and decoded here
-        postgisPassword = context.getString("postgis_password", "postgres");
+        postgisPassword = context.getString("postgis_password", DEFAULT_PASSWORD);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_password=" + postgisPassword + ")");
 
         maxPoolSize = context.getInteger("postgis_maxPoolSize", DEFAULT_MAX_POOL_SIZE);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_maxPoolSize=" + maxPoolSize + ")");
 
-        rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        String persistence = context.getString("attr_persistence", "row");
+        rowAttrPersistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE).equals("row");
+        String persistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE);
 
         if (persistence.equals("row") || persistence.equals("column")) {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
@@ -184,7 +192,7 @@ public class NGSIPostgisSink extends NGSISink {
                 + persistence + ") -- Must be 'row' or 'column'");
         }  // if else
                 
-        String enableCacheStr = context.getString("backend.enable_cache", "false");
+        String enableCacheStr = context.getString("backend.enable_cache", DEFAULT_ENABLE_CACHE);
         
         if (enableCacheStr.equals("true") || enableCacheStr.equals("false")) {
             enableCache = Boolean.valueOf(enableCacheStr);
