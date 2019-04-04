@@ -1,0 +1,2 @@
+[cygnus-common][PostgreSQL] Add connection pool
+[cygnus-ngsi][PostGIS] Add PostGIS sink based on PostgreSQL backend (#1618)
