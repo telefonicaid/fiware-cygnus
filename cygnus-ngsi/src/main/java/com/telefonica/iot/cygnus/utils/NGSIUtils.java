@@ -107,7 +107,7 @@ public final class NGSIUtils {
         } // if
         
         if (attrType.equals("geo:json")) {
-            return new ImmutablePair("ST_GeomFromGeoJSON('" + attrValue + "')", true);
+            return new ImmutablePair("ST_GeomFromGeoJSON(" + attrValue + ")", true);
         } // if
 
         // TBD: What about:  ?
