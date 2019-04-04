@@ -171,6 +171,15 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed Apr 03 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.11.0
+- [cygnus-common] Upgrade flume-ng-node version from 1.4.0 to 1.9.0
+- [cygnus-common][mongo] Upgrade mongo driver from 3.0.0 to 3.0.4
+- [cygnus-common][mysql] Upgrade mysql connector from 5.1.31 to 5.1.47
+- [cygnus-common][feature] Add /v1/namemappings route to API (#1277)
+- [cygnus-common][MySQLBackend] Implement connection pooling (#1598, #1597)
+- [cygnus-common][bugfix] Support empty files in mamemappings
+- [cygnus-common][bugfix] Support empty servicenames in mamemappings
+
 * Thu Dec 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.10.0
 - [cygnus-common] Update hive dependence from 0.13.1 to 2.3.4 due to a vulnerability alert
 - [cygnus-common] Update httpclient dependence to 4.3.6 due to a vulnerability

@@ -99,6 +99,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed Apr 03 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.11.0
+- [cygnus-ngsi][Docker] Set default agent file names for "agent_"
+- [cygnus-ngsi][Docker] Set default truncate size to 0.5GB for sth collections
+- [cygnus-ngsi][KafkaSink] Upgrade libthrift dependency from 0.9.1 to 0.12.0 due to github vulnerability report
+- [cygnus-ngsi][NGSIRestHandler]Fix Content Type header validation issue (#1609)
+
 * Thu Dec 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.10.0
 - [cygnus-ngsi][NGSINameMappingsInterceptor] Now namemapping checks sevice, subervice and (type of entity and id entity) of EntityMapping (#1535)
 - [cygnus-ngsi][NGSIEvent] Unable to deliver event: null pointer getAttributeForNaming (#1506)
