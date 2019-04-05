@@ -26,7 +26,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextMetadata
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.sinks.NGSIPostgisSink.PostgisAggregator;
-import com.telefonica.iot.cygnus.utils.CommonConstants
+import com.telefonica.iot.cygnus.utils.CommonConstants;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.io.File;
