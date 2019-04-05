@@ -929,7 +929,7 @@ public class NGSIPostgisSinkTest {
 
 
     @Test
-    public void testInitializeBuildTable() {
+    public void testInitializeBuildTable() throws Exception {
         System.out.println(getTestTraceHead("[NGSIPostgisSink.initialize]")
                 + "-------- default'");
         String attrPersistence = null; // default
