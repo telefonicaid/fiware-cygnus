@@ -18,24 +18,14 @@
 
 package com.telefonica.iot.cygnus.nodes;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-import com.telefonica.iot.cygnus.channels.CygnusChannel;
-import com.telefonica.iot.cygnus.channels.CygnusFileChannel;
-import com.telefonica.iot.cygnus.channels.CygnusMemoryChannel;
-import com.telefonica.iot.cygnus.http.JettyServer;
-import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.management.ManagementInterface;
-import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -55,6 +45,19 @@ import org.apache.flume.node.MaterializedConfiguration;
 import org.apache.flume.node.PollingPropertiesFileConfigurationProvider;
 import org.apache.flume.node.PropertiesFileConfigurationProvider;
 import org.slf4j.MDC;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+import com.telefonica.iot.cygnus.channels.CygnusChannel;
+import com.telefonica.iot.cygnus.channels.CygnusFileChannel;
+import com.telefonica.iot.cygnus.channels.CygnusMemoryChannel;
+import com.telefonica.iot.cygnus.http.JettyServer;
+import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.management.ManagementInterface;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 
 /**
  * CygnusApplication is an extension of the already existing org.apache.flume.node.Application. CygnusApplication
@@ -85,6 +88,8 @@ public class CygnusApplication extends Application {
     private static final int DEF_GUI_PORT = 8082;
     private static final int DEF_POLLING_INTERVAL = 30;
     private boolean firstTime = true;
+    
+    private static YAFS yafs = null;
     
     /**
      * Constructor.
@@ -130,6 +135,12 @@ public class CygnusApplication extends Application {
     @Override
     @Subscribe
     public synchronized void handleConfigurationEvent(MaterializedConfiguration conf) {
+        // Stop checking threads until configuration is loaded
+        if (yafs != null) {
+            yafs.setReloading(true);
+            LOGGER.debug("Pausing YAFS.");
+        }
+        
         if (firstTime) {
             // get references to the different elements of the agent, this will be needed when shutting down Cygnus in a
             // certain order
@@ -149,8 +160,14 @@ public class CygnusApplication extends Application {
         channelsRef = conf.getChannels();
         sinksRef = conf.getSinkRunners();
         LOGGER.debug("References to Flume components have been taken");
+        
+        // Resume Thread checking
+        if (yafs != null) {
+            yafs.setReloading(false);
+            LOGGER.debug("Resuming YAFS.");
+        }
     } // handleConfigurationEvent
-
+   
     /**
      * Main application to be run when this CygnusApplication is invoked. The only differences with the original one
      * are the CygnusApplication is used instead of the Application one, and the Management Interface port option in
@@ -162,7 +179,7 @@ public class CygnusApplication extends Application {
             // Set some MDC logging fields to 'N/A' for this thread
             // Later in this method the component field will be given a value
             org.apache.log4j.MDC.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_TRANS,CommonConstants.NA);
+            org.apache.log4j.MDC.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
             org.apache.log4j.MDC.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
             org.apache.log4j.MDC.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
             org.apache.log4j.MDC.put(CommonConstants.LOG4J_COMP, CommonConstants.NA);
@@ -322,9 +339,8 @@ public class CygnusApplication extends Application {
             if (!noYAFS) {
                 // create a hook "listening" for shutdown interrupts (runtime.exit(int), crtl+c, etc)
                 Runtime.getRuntime().addShutdownHook(new AgentShutdownHook("agent-shutdown-hook", supervisorRef));
-
                 // start YAFS
-                YAFS yafs = new YAFS();
+                yafs = new YAFS();
                 yafs.start();
             } // if
         } catch (IllegalArgumentException | ParseException e) {
@@ -456,29 +472,68 @@ public class CygnusApplication extends Application {
      * this: https://github.com/telefonicaid/fiware-cygnus/issues/354
      */
     private static class YAFS extends Thread {
-        
+
+        private AtomicBoolean reloading = new AtomicBoolean(false); //Cysgnus is reloading configuration
+        private AtomicBoolean waiting = new AtomicBoolean(false); //Waiting for Cygnus to finish new configuration load
+                
+        /**
+         * @return if it is reloading
+         */
+        public boolean isReloading() {
+            return reloading.get();
+        }
+
+        /**
+         * @param reloading value to set
+         */
+        public void setReloading(boolean reloading) {
+            if (reloading) {
+                waiting.set(true);
+            }
+            this.reloading.set(reloading);
+        }
+
         @Override
         public void run() {
+            
             Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
             Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
+
+            // Regex matching Jetty thread names, like: qtp586434923-27 or 106024875@qtp-1176250385-1
+            String jettyThreadNamePattern = "^(\\d+@)?qtp-?\\d{2,}-\\d+";
             
             while (true) {
-                for (Thread t: threadArray) {
-                    // exit Cygnus if some thread (except for the main one and threads from the Jetty
-                    // QueuedThreadPool (@qtp)) is found to be not alive or in a terminated state
-                    if ((t.getState() == State.TERMINATED || !t.isAlive())
-                            && !t.getName().equals("main") && !t.getName().contains("@qtp")) {
-                        LOGGER.error("Thread found not alive, exiting Cygnus. ID=" + t.getId()
-                                + ", name=" + t.getName());
+                if (waiting.get()) {
+                    if (!reloading.get()) {
+                        LOGGER.debug("YAFS reloading Thread List.");
+                        threadSet = Thread.getAllStackTraces().keySet();
+                        threadArray = threadSet.toArray(new Thread[threadSet.size()]);
+                        waiting.set(false);
+                    } else {
+                        try {
+                            Thread.sleep(YAFS_CHECKING_INTERVAL);
+                        } catch (InterruptedException ex) {
+                            LOGGER.error("YAFS: Error trying to sleep thread.");
+                        }
+                    }
+                } else {
+                    for (Thread t: threadArray) {
+                        // exit Cygnus if some thread (except for the main one and threads from the Jetty
+                        // QueuedThreadPool (qtp)) is found to be not alive or in a terminated state
+                        if ((t.getState() == State.TERMINATED || !t.isAlive())
+                                && !t.getName().equals("main") && !t.getName().matches(jettyThreadNamePattern)) {
+                            LOGGER.error("Thread found not alive, exiting Cygnus. ID=" + t.getId()
+                                    + ", name=" + t.getName());
+                            System.exit(-1);
+                        } // if
+                    } // for
+                    
+                    try {
+                        Thread.sleep(YAFS_CHECKING_INTERVAL);
+                    } catch (InterruptedException ex) {
                         System.exit(-1);
-                    } // if
-                } // for
-                
-                try {
-                    Thread.sleep(YAFS_CHECKING_INTERVAL);
-                } catch (InterruptedException ex) {
-                    System.exit(-1);
-                }
+                    }
+                } // if waiting
             } // while
         } // run
         
