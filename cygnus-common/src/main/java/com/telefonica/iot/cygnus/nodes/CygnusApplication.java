@@ -462,8 +462,8 @@ public class CygnusApplication extends Application {
             Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
             Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
 
-            // Regex matching Jetty thread names, like: qtp586434923-27 or @qtp586434923-27
-            String jettyThreadNamePattern = "^@?qtp\\d{2,}-\\d+";
+            // Regex matching Jetty thread names, like: qtp586434923-27 or 106024875@qtp-1176250385-1
+            String jettyThreadNamePattern = "^(\\d+@)?qtp-?\\d{2,}-\\d+";
             
             while (true) {
                 for (Thread t: threadArray) {
