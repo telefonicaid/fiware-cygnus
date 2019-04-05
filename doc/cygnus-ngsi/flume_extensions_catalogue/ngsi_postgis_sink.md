@@ -6,7 +6,7 @@ Content:
 * [Programmers guide](#section3)
 
 ## <a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.NGSIPostGISSink`, or simply `NGSIPostGISSink` is a sink designed to persist NGSI-like context data events within a [PostGIS server](https://postgis.net/) which is relational database exteion of [PostgreSQL server](https://www.postgresql.org/) which allows store GIS objects (Geographic Information Systems). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.NGSIPostGISSink`, or simply `NGSIPostGISSink` is a sink designed to persist NGSI-like context data events within a [PostGIS server](https://postgis.net/) which is relational database extension of [PostgreSQL server](https://www.postgresql.org/) which allows store GIS objects (Geographic Information Systems). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific PostgreSQL data structures.
 
