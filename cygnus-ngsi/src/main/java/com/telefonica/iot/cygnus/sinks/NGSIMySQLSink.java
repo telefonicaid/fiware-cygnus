@@ -842,7 +842,7 @@ public class NGSIMySQLSink extends NGSISink {
             }
             return lastStatus;
         } catch (InterruptedException e) {
-            LOGGER.error("Error triying to process sink " + this.getName());
+            LOGGER.error("Error triying to process sink " + this.getName() + " " + e.getMessage());
             return lastStatus;
         }
     } // process
