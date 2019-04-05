@@ -49,7 +49,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class NGSIPostgisSinkTest {
 
-
+    /**
      * Constructor.
      */
     public NGSIPostgisSinkTest() {
