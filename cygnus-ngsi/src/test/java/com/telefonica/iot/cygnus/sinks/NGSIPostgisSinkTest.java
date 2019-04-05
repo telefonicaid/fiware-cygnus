@@ -18,6 +18,7 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
+import com.google.gson.JsonPrimitive;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
@@ -976,7 +977,7 @@ public class NGSIPostgisSinkTest {
             aggregator.initialize(event);
 
             try {
-                assertTrue(aggregator.getTableName() != null);
+                assertTrue(aggregator.getTableName(false) != null);
                 System.out.println(getTestTraceHead("[PostgisBAggregator.initialize]")
                         + "-  OK  - A table name has been created");
             } catch (AssertionError e) {
