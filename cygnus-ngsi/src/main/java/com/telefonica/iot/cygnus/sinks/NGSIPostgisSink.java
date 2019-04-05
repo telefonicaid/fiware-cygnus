@@ -329,7 +329,7 @@ public class NGSIPostgisSink extends NGSISink {
     /**
      * Class for aggregating batches in row mode.
      */
-    private class RowAggregator extends PostgisAggregator {
+    protected class RowAggregator extends PostgisAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -423,7 +423,7 @@ public class NGSIPostgisSink extends NGSISink {
     /**
      * Class for aggregating batches in column mode.
      */
-    private class ColumnAggregator extends PostgisAggregator {
+    protected class ColumnAggregator extends PostgisAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {

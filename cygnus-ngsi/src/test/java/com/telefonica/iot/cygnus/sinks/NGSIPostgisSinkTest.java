@@ -25,7 +25,7 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextMetadata;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
-import com.telefonica.iot.cygnus.sinks.NGSIPostgisSink.PostgisAggregator;
+import com.telefonica.iot.cygnus.sinks.NGSIPostgisSink.RowAggregator;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
@@ -50,20 +50,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class NGSIPostgisSinkTest {
 
 
-
-    // Include some base tests about postgreSQL
-    // include geo tests at carto
-
-
-
-
-
-
-
-
-
-    
-    /**
      * Constructor.
      */
     public NGSIPostgisSinkTest() {
@@ -964,7 +950,7 @@ public class NGSIPostgisSinkTest {
 
 
         // Create a PostgisAggregator
-        PostgisAggregator aggregator = sink.new PostigsAggregator();
+        RowAggregator aggregator = sink.new RowAggregator();
         
         // Create a NGSIEvent
         String timestamp = "1461136795801";
