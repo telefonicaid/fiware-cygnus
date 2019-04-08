@@ -10,3 +10,4 @@
 - [cygnus-common] Upgrade flume-ng-node version from 1.4.0 to 1.9.0
 - [cygnus-twitter] Upgrade flume-ng-node version from 1.4.0 to 1.9.0
 - [cygnus-ngsi][NGSIRestHandler]Fix Content Type header validation issue. (#1609)
+- [cygnus-common][YAFS][bugfix] Fixed issue, missmatching Jetty threads causes Cygnus crash. (#1616)
