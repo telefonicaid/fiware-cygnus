@@ -455,7 +455,7 @@ public class CygnusApplication extends Application {
      * class from Apache Flume, which can be be hard to do. Nevertheless, a tech debt issue has been created regarding
      * this: https://github.com/telefonicaid/fiware-cygnus/issues/354
      */
-    private static class YAFS extends Thread {
+    protected static class YAFS extends Thread {
         
         @Override
         public void run() {
