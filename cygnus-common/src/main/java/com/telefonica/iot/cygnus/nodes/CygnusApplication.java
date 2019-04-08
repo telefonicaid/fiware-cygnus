@@ -471,7 +471,7 @@ public class CygnusApplication extends Application {
      * class from Apache Flume, which can be be hard to do. Nevertheless, a tech debt issue has been created regarding
      * this: https://github.com/telefonicaid/fiware-cygnus/issues/354
      */
-    private static class YAFS extends Thread {
+    protected static class YAFS extends Thread {
 
         private AtomicBoolean reloading = new AtomicBoolean(false); //Cysgnus is reloading configuration
         private AtomicBoolean waiting = new AtomicBoolean(false); //Waiting for Cygnus to finish new configuration load
