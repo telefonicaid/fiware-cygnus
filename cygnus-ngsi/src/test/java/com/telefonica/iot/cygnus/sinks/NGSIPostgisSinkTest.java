@@ -927,11 +927,15 @@ public class NGSIPostgisSinkTest {
         } // try catch
     } // testConfigureEnableEncoding
 
-
+    /**
+     * [PostgisAggregator.initialize] -------- When initializing through an initial geolocated event, a table
+     * name is created.
+     * @throws java.lang.Exception
+     */
     @Test
     public void testInitializeBuildTable() throws Exception {
         System.out.println(getTestTraceHead("[NGSIPostgisSink.initialize]")
-                + "-------- default'");
+                + "-------- When initializing through an initial geolocated event, a table name is created");
         String attrPersistence = null; // default
         String batchSize = null; // default
         String batchTime = null; // default
@@ -994,11 +998,18 @@ public class NGSIPostgisSinkTest {
 
     } // testConfigureEnableEncoding
 
-
+    /**
+     * [PostgisAggregator.initialize] -------- When initializing through an initial geolocated event, the
+     * aggregation fields string contains a field and a metadata field for each attribute in the event except
+     * for the geolocation attribute, which is added as a specific field ('the_geom').
+     * @throws java.lang.Exception
+     */
     @Test
     public void testInitializeFieldsOK() throws Exception {
         System.out.println(getTestTraceHead("[NGSIPostgisSink.initialize]")
-                + "-------- default'");
+                + "-------- When initializing through an initial geolocated event, the aggregation fields "
+                + "string contains a field and a metadata field for each attribute in the event except for "
+                + "the geolocation attribute, which is added as a specific field ('the_geom')");
         String attrPersistence = null; // default
         String batchSize = null; // default
         String batchTime = null; // default
@@ -1080,6 +1091,287 @@ public class NGSIPostgisSinkTest {
         } // try catch
     } // testInitializeFieldsOK
 
+    /**
+     * [PostgisAggregator.initialize] -------- When initializing through an initial geolocated event,
+     * the aggregation fields string is lower case, starts with '(' and finishes with ')'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testInitializeStringOK() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgisSink.initialize]")
+                + "-------- When initializing through an initial geolocated event, the aggregation fields "
+                + "string is lower case, starts with '(' and finishes with ')'");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null;
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgisSink sink = new NGSIPostgisSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+
+
+        // Create a PostgisAggregator
+        RowAggregator aggregator = sink.new RowAggregator();
+
+        // Create a NGSIEvent
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        ContextElement originalCE = createContextElement();
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
+
+        try {
+            aggregator.initialize(event);
+            String fields = aggregator.getFields();
+
+            try {
+                assertEquals(fields, fields.toLowerCase());
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "-  OK  - '" + fields + "' is lower case");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "- FAIL - '" + fields + "' is not lower case");
+                throw e;
+            } // try catch
+
+            try {
+                assertTrue(fields.startsWith("("));
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "-  OK  - '" + fields + "' starts with '('");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "- FAIL - '" + fields + "' does not start with '('");
+                throw e;
+            } // try catch
+
+            try {
+                assertTrue(fields.endsWith(")"));
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "-  OK  - '" + fields + "' ends with ')'");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "- FAIL - '" + fields + "' does not end with ')'");
+                throw e;
+            } // try catch
+        } catch (CygnusBadConfiguration e) {
+            System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                    + "- FAIL - There was some problem when initializing PostgisAggregator");
+            throw e;
+        } // try catch
+    } // testInitializeFieldsStringOK
+
+
+    /**
+     * [PostgisAggregator.aggregate] -------- When aggregating a single geolocated event, the aggregation
+     * values string contains a value and a metadata value for each attribute in the event except for the
+     * geolocation attribute, which is added as a specific value (a point).
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testAggregateValuesOK() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgisSink.aggregate]")
+                + "-------- When aggregating a single geolocated event, the aggregation values string "
+                + "contains a value and a metadata value for each attribute in the event except for the "
+                + "geolocation attribute, which is added as a specific value (a point)");
+
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null;
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgisSink sink = new NGSIPostgisSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+
+
+        // Create a PostgisAggregator
+        RowAggregator aggregator = sink.new RowAggregator();
+
+        // Create a NGSIEvent
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        ContextElement originalCE = createContextElement();
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
+
+        try {
+            aggregator.initialize(event);
+            aggregator.aggregate(event);
+            String rows = aggregator.getRows();
+
+            try {
+                assertTrue(!rows.contains("'-3.7167, 40.3833'")
+                        && !rows.contains("'{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}'"));
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "-  OK  - '-3.7167, 40.3833' and "
+                        + "'{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}' "
+                        + "are not in the rows '" + rows + "'");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "- FAIL - '-3.7167, 40.3833' and "
+                        + "'{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}' "
+                        + "are in the rows '" + rows + "'");
+                throw e;
+            } // try catch
+
+            try {
+                assertTrue(rows.contains("'someValue2'") && rows.contains("'[]'"));
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "-  OK  - 'someValue2' and '[]' are in the rows '" + rows + "'");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "- FAIL - 'someValue2' and '[]' are not in the rows '" + rows + "'");
+                throw e;
+            } // try catch
+
+            try {
+                assertTrue(rows.contains("ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326)"));
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "-  OK  - 'ST_SetSRID(ST_MakePoint(-3.7167, 40.3833), 4326)' is in the rows '" + rows
+                        + "'");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "- FAIL - 'ST_SetSRID(ST_MakePoint(-3.7167, 40.3833), 4326)' is not in the rows '"
+                        + rows + "'");
+                throw e;
+            } // try catch
+        } catch (CygnusBadConfiguration e) {
+            System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                    + "- FAIL - There was some problem when initializing PostgisAggregator");
+            throw e;
+        } // try catch
+    } // testAggregateValuesOK
+
+    /**
+     * [PostgisAggregator.aggregate] -------- When aggregating a single geolocated event, the aggregation
+     * values string starts with '(' and finishes with ')'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testAggregateValuesStringOK() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgisSink.aggregate]")
++ "-------- When aggregating a single geolocated event, the aggregation values string starts "
+                + "with '(' and finishes with ')'");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null;
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgisSink sink = new NGSIPostgisSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+
+
+        // Create a PostgisAggregator
+        RowAggregator aggregator = sink.new RowAggregator();
+
+        // Create a NGSIEvent
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        ContextElement originalCE = createContextElement();
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
+
+        try {
+            aggregator.initialize(event);
+            aggregator.aggregate(event);
+
+            try {
+                assertEquals(fields, fields.toLowerCase());
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "-  OK  - '" + fields + "' is lower case");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "- FAIL - '" + fields + "' is not lower case");
+                throw e;
+            } // try catch
+
+            try {
+                assertTrue(fields.startsWith("("));
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "-  OK  - '" + fields + "' starts with '('");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "- FAIL - '" + fields + "' does not start with '('");
+                throw e;
+            } // try catch
+
+            try {
+                assertTrue(fields.endsWith(")"));
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "-  OK  - '" + fields + "' ends with ')'");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "- FAIL - '" + fields + "' does not end with ')'");
+                throw e;
+            } // try catch
+        } catch (CygnusBadConfiguration e) {
+            System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                    + "- FAIL - There was some problem when initializing PostgisAggregator");
+            throw e;
+        } // try catch
+    } // testInitializeFieldsStringOK
 
 
     private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
