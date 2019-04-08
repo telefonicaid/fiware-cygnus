@@ -1,0 +1,1 @@
+[cygnus-common][YAFS] Fixed issue, Stopping YAFS while config reloading. (#1624)
