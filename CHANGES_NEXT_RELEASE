@@ -1,0 +1,1 @@
+- [cygnus-common][YAFS][bugfix] Fixed issue, missmatching Jetty threads causes Cygnus crash. (#1616)

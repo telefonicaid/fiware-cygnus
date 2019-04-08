@@ -455,19 +455,22 @@ public class CygnusApplication extends Application {
      * class from Apache Flume, which can be be hard to do. Nevertheless, a tech debt issue has been created regarding
      * this: https://github.com/telefonicaid/fiware-cygnus/issues/354
      */
-    private static class YAFS extends Thread {
+    protected static class YAFS extends Thread {
         
         @Override
         public void run() {
             Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
             Thread[] threadArray = threadSet.toArray(new Thread[threadSet.size()]);
+
+            // Regex matching Jetty thread names, like: qtp586434923-27 or 106024875@qtp-1176250385-1
+            String jettyThreadNamePattern = "^(\\d+@)?qtp-?\\d{2,}-\\d+";
             
             while (true) {
                 for (Thread t: threadArray) {
                     // exit Cygnus if some thread (except for the main one and threads from the Jetty
                     // QueuedThreadPool (@qtp)) is found to be not alive or in a terminated state
                     if ((t.getState() == State.TERMINATED || !t.isAlive())
-                            && !t.getName().equals("main") && !t.getName().contains("@qtp")) {
+                            && !t.getName().equals("main") && !t.getName().matches(jettyThreadNamePattern)) {
                         LOGGER.error("Thread found not alive, exiting Cygnus. ID=" + t.getId()
                                 + ", name=" + t.getName());
                         System.exit(-1);
