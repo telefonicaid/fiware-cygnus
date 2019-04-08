@@ -810,7 +810,7 @@ public class NGSIPostgisSinkTest {
     } // testBuildTableNameLengthDataModelByServicePath
     
     /**
-     * [NGSICartoDBSink.buildTableName] -------- When data model is by entity, a table name length greater than 63
+     * [NGSIPostgisSink.buildTableName] -------- When data model is by entity, a table name length greater than 63
      * characters is detected.
      * @throws java.lang.Exception
      */
@@ -851,7 +851,7 @@ public class NGSIPostgisSinkTest {
     } // testBuildTableNameLengthDataModelByEntity
     
     /**
-     * [NGSICartoDBSink.buildTableName] -------- When data model is by attribute, a table name length greater than 63
+     * [NGSIPostgisSink.buildTableName] -------- When data model is by attribute, a table name length greater than 63
      * characters is detected.
      * @throws java.lang.Exception
      */
@@ -1052,7 +1052,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             aggregator.initialize(event);
-            String fields = aggregator.getFields();
+            String fields = aggregator.getFieldNames();
 
             try {
                 assertTrue(!fields.contains("somename1") && !fields.contains("somname1_md"));
@@ -1143,7 +1143,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             aggregator.initialize(event);
-            String fields = aggregator.getFields();
+            String fields = aggregator.getFieldNames();
 
             try {
                 assertEquals(fields, fields.toLowerCase());
