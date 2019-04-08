@@ -1052,7 +1052,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             aggregator.initialize(event);
-            String fields = aggregator.getFieldNames();
+            String fields = aggregator.getFields();
 
             try {
                 assertTrue(!fields.contains("somename1") && !fields.contains("somname1_md"));
@@ -1143,7 +1143,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             aggregator.initialize(event);
-            String fields = aggregator.getFieldNames();
+            String fields = aggregator.getFields();
 
             try {
                 assertEquals(fields, fields.toLowerCase());
@@ -1336,42 +1336,33 @@ public class NGSIPostgisSinkTest {
         try {
             aggregator.initialize(event);
             aggregator.aggregate(event);
+            String rows = aggregator.getRows();
 
             try {
-                assertEquals(fields, fields.toLowerCase());
-                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
-                        + "-  OK  - '" + fields + "' is lower case");
+                assertTrue(rows.startsWith("("));
+                System.out.println(getTestTraceHead("[PostgisAggregator.aggregate]")
+                        + "-  OK  - '" + rows + "' starts with '('");
             } catch (AssertionError e) {
-                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
-                        + "- FAIL - '" + fields + "' is not lower case");
+                System.out.println(getTestTraceHead("[PostgisAggregator.aggregate]")
+                        + "- FAIL - '" + rows + "' does not start with '('");
                 throw e;
             } // try catch
 
             try {
-                assertTrue(fields.startsWith("("));
-                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
-                        + "-  OK  - '" + fields + "' starts with '('");
+                assertTrue(rows.endsWith(")"));
+                System.out.println(getTestTraceHead("[PostgisAggregator.aggregate]")
+                        + "-  OK  - '" + rows + "' ends with ')'");
             } catch (AssertionError e) {
-                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
-                        + "- FAIL - '" + fields + "' does not start with '('");
-                throw e;
-            } // try catch
-
-            try {
-                assertTrue(fields.endsWith(")"));
-                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
-                        + "-  OK  - '" + fields + "' ends with ')'");
-            } catch (AssertionError e) {
-                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
-                        + "- FAIL - '" + fields + "' does not end with ')'");
+                System.out.println(getTestTraceHead("[PostgisAggregator.aggregate]")
+                        + "- FAIL - '" + rows + "' does not end with ')'");
                 throw e;
             } // try catch
         } catch (CygnusBadConfiguration e) {
-            System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
-                    + "- FAIL - There was some problem when initializing PostgisAggregator");
+            System.out.println(getTestTraceHead("[PostgisAggregator.aggregate]")
+                    + "- FAIL - There was some problem when aggregating in PostgisAggregator");
             throw e;
         } // try catch
-    } // testInitializeFieldsStringOK
+    } // testAggregateValuesStringOK
 
 
     private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
