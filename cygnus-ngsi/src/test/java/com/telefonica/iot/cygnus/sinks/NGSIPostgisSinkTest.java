@@ -952,7 +952,7 @@ public class NGSIPostgisSinkTest {
 
         // Create a PostgisAggregator
         RowAggregator aggregator = sink.new RowAggregator();
-        
+
         // Create a NGSIEvent
         String timestamp = "1461136795801";
         String correlatorId = "123456789";
@@ -990,12 +990,98 @@ public class NGSIPostgisSinkTest {
             System.out.println(getTestTraceHead("[NGSIPostgisSink.initialize]")
                     + "- FAIL - There was some problem when initializing PosgtisSinkAggregator");
             throw e;
-        } // try catch            
+        } // try catch
 
     } // testConfigureEnableEncoding
 
-    
-    
+
+    @Test
+    public void testInitializeFieldsOK() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgisSink.initialize]")
+                + "-------- default'");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null;
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgisSink sink = new NGSIPostgisSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+
+
+        // Create a PostgisAggregator
+        RowAggregator aggregator = sink.new RowAggregator();
+
+        // Create a NGSIEvent
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        ContextElement originalCE = createContextElement();
+        NGSIEvent event = new NGSIEvent(headers, originalCE.toString().getBytes(), originalCE, null);
+
+        try {
+            aggregator.initialize(event);
+            String fields = aggregator.getFields();
+
+            try {
+                assertTrue(!fields.contains("somename1") && !fields.contains("somname1_md"));
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "-  OK  - 'somename1' and 'somename1_md' are not in the fields '" + fields + "'");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "- FAIL - 'somename1' and 'somename1_md' are in the fields '" + fields + "'");
+                throw e;
+            } // try catch
+
+
+            try {
+                assertTrue(fields.contains("somename2") && fields.contains("somename2_md"));
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "-  OK  - 'somename2' and 'somename2_md' are in the fields '" + fields + "'");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "- FAIL - 'somename2' and 'somename2_md' are not in the fields '" + fields + "'");
+                throw e;
+            } // try catch
+
+            try {
+                assertTrue(fields.contains(NGSIConstants.CARTO_DB_THE_GEOM));
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "-  OK  - '" + NGSIConstants.CARTO_DB_THE_GEOM + "' is in the fields '" + fields + "'");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[PostgisAggregator.initialize]")
+                        + "- FAIL - '" + NGSIConstants.CARTO_DB_THE_GEOM + "' is not in the fields '" + fields + "'");
+                throw e;
+            } // try catch
+        } catch (CygnusBadConfiguration e) {
+            System.out.println(getTestTraceHead("[PostgisBAggregator.initialize]")
+                    + "- FAIL - There was some problem when initializing PostgisAggregator");
+            throw e;
+        } // try catch
+    } // testInitializeFieldsOK
+
+
+
     private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
             String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
             String password, String port, String username, String cache) {
