@@ -312,69 +312,6 @@ public class NGSIPostgisSink extends NGSISink {
             return fieldNames;
         } // getFieldNames
 
-
-        /**
-         * Gets PostgreSQL-like rows from the aggregation.
-         * @return
-         */
-        public String getRows() {
-            String rows = "";
-            int numEvents = aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).size();
-
-            for (int i = 0; i < numEvents; i++) {
-                if (i == 0) {
-                    rows += "(";
-                } else {
-                    rows += ",(";
-                } // if else
-
-                boolean first = true;
-
-                for (String field : aggregation.keySet()) {
-                    ArrayList<String> values = (ArrayList<String>) aggregation.get(field);
-                    String value = values.get(i);
-
-                    if (!field.equals("the_geom")) {
-                        value = "'" + value + "'";
-                    } // if
-
-                    if (first) {
-                        rows += value;
-                        first = false;
-                    } else {
-                        rows += "," + value;
-                    } // if else
-                }
-
-                rows += ")";
-            } // for
-
-            return rows;
-        } // getRows
-
-        /**
-         * Gets PostgreSLQ-like fields from the aggregation.
-         * @return
-         */
-        public String getFields() {
-            String fields = "(";
-            boolean first = true;
-            Iterator it = aggregation.keySet().iterator();
-
-            while (it.hasNext()) {
-                if (first) {
-                    fields += (String) it.next();
-                    first = false;
-                } else {
-                    fields += "," + (String) it.next();
-                } // if else
-            } // while
-
-            fields += ")";
-            return fields.toLowerCase();
-        } // getFields
-
-
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
