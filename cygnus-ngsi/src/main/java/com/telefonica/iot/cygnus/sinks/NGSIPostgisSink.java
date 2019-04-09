@@ -55,6 +55,7 @@ public class NGSIPostgisSink extends NGSISink {
     private static final String DEFAULT_DATABASE = "postgres";
     private static final String DEFAULT_ENABLE_CACHE = "false";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
+    private static final String DEFAULT_POSTGIS_TYPE = "geometry";
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgisSink.class);
     private String postgisHost;
@@ -400,14 +401,13 @@ public class NGSIPostgisSink extends NGSISink {
                     + servicePathForData + "','"
                     + entityId + "','"
                     + entityType + "','"
-                    + attrName + "','"
-                    + attrType + "','";
+                    + attrName + "','";
 
                 if (location.right) {
                     LOGGER.debug("location=" + location.getLeft());
-                    row += location.getLeft() + "','"  + attrMetadata + "')";
+                    row += DEFAULT_POSTGIS_TYPE + "','" + location.getLeft() + "','"  + attrMetadata + "')";
                 } else {
-                    row += attrValue + "','"  + attrMetadata + "')";
+                    row += attrType + "','" + attrValue + "','"  + attrMetadata + "')";
                 }
 
                 if (aggregation.isEmpty()) {
