@@ -19,9 +19,9 @@ Basically PostGIS sink translates NGSI attribute value about geometry (geo:point
 
     geo:json -> ST_GeomFromGeoJSON()
 
-Colum should be provisioned as `geometry(Point,4326)`
+Colum should be provisioned as `geometry`
 
-    CREATE TABLE myTable ( geom geometry(Point,4326) );
+    CREATE TABLE myTable ( geom geometry );
 
 [Top](#top)
 
