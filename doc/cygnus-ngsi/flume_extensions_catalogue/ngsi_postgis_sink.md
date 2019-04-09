@@ -10,8 +10,7 @@ Content:
 
 Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific PostgreSQL data structures.
 
-For futher detail please refear to [`NGSIPostgreSQLSink`](/ngsi_postgresql_sink.md)] 
-
+For futher detail please refear to [`NGSIPostgreSQLSink`](/ngsi_postgresql_sink.md)
 Basically PostGIS sink translates NGSI attribute value about geometry (geo:point, geo:json) to PostGIS format and insert it.
 
 
@@ -26,7 +25,7 @@ Colum should be provisioned as `geometry`
 [Top](#top)
 
 ## <a name="section2"></a>Administration guide
-Please refear to [`NGSIPostgreSQLSink`](/ngsi_postgresql_sink.md)] since all administration options about PostgreSQLSink applies to PostGISSink.
+Please refear to [`NGSIPostgreSQLSink`](/ngsi_postgresql_sink.md) since all administration options about PostgreSQLSink applies to PostGISSink.
 
 ## <a name="section3"></a>Programmers guide
-Please refear to [`NGSIPostgreSQLSink`](/ngsi_postgresql_sink.md)] since all programing details about PostgreSQLSink applies to PostGISSink.
+Please refear to [`NGSIPostgreSQLSink`](/ngsi_postgresql_sink.md) since all programing details about PostgreSQLSink applies to PostGISSink.
