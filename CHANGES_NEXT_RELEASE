@@ -1,4 +1,4 @@
-- [cygnus-ngsi][NGSIHandler] Fix unexpected exception instead 404/405 when a non valid API request (#1588)
+- [cygnus-ngsi][NGSIHandler] Fix unexpected exception, instead 400 is returned when a non valid API request (#1588)
 - [cygnus-common][PostgreSQL] Add connection pool
 - [cygnus-ngsi][PostGIS] Add PostGIS sink based on PostgreSQL backend (#1618)
 - [cygnus-common][YAFS][bugfix] Fixed issue, missmatching Jetty threads causes Cygnus crash. (#1616)
