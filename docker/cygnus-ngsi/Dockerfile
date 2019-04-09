@@ -179,6 +179,23 @@ ENV CYGNUS_ORION_BATCH_RETRY_INTERVALS ""
 ENV CYGNUS_ORION_ENABLE_CACHE ""
 
 
+
+# PostgreGIS options
+ENV CYGNUS_POSTGIS_HOST ""
+ENV CYGNUS_POSTGIS_PORT ""
+# ENV CYGNUS_POSTGIS_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+# ENV CYGNUS_POSTGIS_PASS "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+ENV CYGNUS_POSTGIS_ENABLE_ENCODING ""
+ENV CYGNUS_POSTGIS_ENABLE_GROUPING ""
+ENV CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS ""
+ENV CYGNUS_POSTGIS_ENABLE_LOWERCASE ""
+ENV CYGNUS_POSTGIS_ATTR_PERSISTENCE ""
+ENV CYGNUS_POSTGIS_BATCH_SIZE ""
+ENV CYGNUS_POSTGIS_BATCH_TIMEOUT ""
+ENV CYGNUS_POSTGIS_BATCH_TTL ""
+ENV CYGNUS_POSTGIS_ENABLE_CACHE ""
+
+
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"

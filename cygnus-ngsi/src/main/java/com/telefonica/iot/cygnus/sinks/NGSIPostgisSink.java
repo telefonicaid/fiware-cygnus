@@ -1,5 +1,5 @@
 /**
- * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2019 Telefonica
  *
  * This file is part of fiware-cygnus (FIWARE project).
  *
@@ -35,16 +35,17 @@ import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
 
 /**
  *
- * @author hermanjunge
+ * @author smartcities
 
  Detailed documentation can be found at:
- https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/design/NGSIPostgreSQLSink.md
+  *** TDB *** 
  */
-public class NGSIPostgreSQLSink extends NGSISink {
+public class NGSIPostgisSink extends NGSISink {
 
     private static final String DEFAULT_ROW_ATTR_PERSISTENCE = "row";
     private static final String DEFAULT_PASSWORD = "";
@@ -55,71 +56,72 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private static final String DEFAULT_ENABLE_CACHE = "false";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
 
-    private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgreSQLSink.class);
-    private String postgresqlHost;
-    private String postgresqlPort;
-    private String postgresqlDatabase;
-    private String postgresqlUsername;
-    private String postgresqlPassword;
-    private int maxPoolSize;
+    private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgisSink.class);
+    private String postgisHost;
+    private String postgisPort;
+    private String postgisDatabase;
+    private String postgisUsername;
+    private String postgisPassword;
     private boolean rowAttrPersistence;
+    private int maxPoolSize;
     private PostgreSQLBackendImpl persistenceBackend;
     private boolean enableCache;
+    private boolean swapCoordinates;
 
     /**
      * Constructor.
      */
-    public NGSIPostgreSQLSink() {
+    public NGSIPostgisSink() {
         super();
-    } // NGSIPostgreSQLSink
+    } // NGSIPostgisSink
 
     /**
-     * Gets the PostgreSQL host. It is protected due to it is only required for testing purposes.
-     * @return The PostgreSQL host
+     * Gets the Postgis host. It is protected due to it is only required for testing purposes.
+     * @return The Postgis host
      */
-    protected String getPostgreSQLHost() {
-        return postgresqlHost;
-    } // getPostgreSQLHost
+    protected String getPostgisHost() {
+        return postgisHost;
+    } // getPostgisHost
     
     /**
-     * Gets the PostgreSQL cache. It is protected due to it is only required for testing purposes.
-     * @return The PostgreSQL cache state
+     * Gets the Postgis cache. It is protected due to it is only required for testing purposes.
+     * @return The Postgis cache state
      */
     protected boolean getEnableCache() {
         return enableCache;
-    } // getPostgreSQLHost
+    } // getEnableCache
 
     /**
-     * Gets the PostgreSQL port. It is protected due to it is only required for testing purposes.
-     * @return The PostgreSQL port
+     * Gets the Postgis port. It is protected due to it is only required for testing purposes.
+     * @return The Postgis port
      */
-    protected String getPostgreSQLPort() {
-        return postgresqlPort;
-    } // getPostgreSQLPort
+    protected String getPostgisPort() {
+        return postgisPort;
+    } // getPostgisPort
 
     /**
-     * Gets the PostgreSQL database. It is protected due to it is only required for testing purposes.
-     * @return The PostgreSQL database
+     * Gets the Postgis database. It is protected due to it is only required for testing purposes.
+     * @return The Postgis database
      */
-    protected String getPostgreSQLDatabase() {
-        return postgresqlDatabase;
-    } // getPostgreSQLDatabase
+    protected String getPostgisDatabase() {
+        return postgisDatabase;
+    } // getPostgisDatabase
 
     /**
-     * Gets the PostgreSQL username. It is protected due to it is only required for testing purposes.
-     * @return The PostgreSQL username
+     * Gets the Postgis username. It is protected due to it is only required for testing purposes.
+     * @return The Postgis username
      */
-    protected String getPostgreSQLUsername() {
-        return postgresqlUsername;
-    } // getPostgreSQLUsername
+    protected String getPostgisUsername() {
+        return postgisUsername;
+    } // getPostgisUsername
 
     /**
-     * Gets the PostgreSQL password. It is protected due to it is only required for testing purposes.
-     * @return The PostgreSQL password
+     * Gets the Postgis password. It is protected due to it is only required for testing purposes.
+     * @return The Postgis password
      */
-    protected String getPostgreSQLPassword() {
-        return postgresqlPassword;
-    } // getPostgreSQLPassword
+    protected String getPostgisPassword() {
+        return postgisPassword;
+    } // getPostgisPassword
 
     /**
      * Returns if the attribute persistence is row-based. It is protected due to it is only required for testing
@@ -151,32 +153,32 @@ public class NGSIPostgreSQLSink extends NGSISink {
         // Read NGSISink general configuration
         super.configure(context);
         
-        // Impose enable lower case, since PostgreSQL only accepts lower case
+        // Impose enable lower case, since Postgis only accepts lower case
         enableLowercase = true;
         
-        postgresqlHost = context.getString("postgresql_host", DEFAULT_HOST);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_host=" + postgresqlHost + ")");
-        postgresqlPort = context.getString("postgresql_port", DEFAULT_PORT);
-        int intPort = Integer.parseInt(postgresqlPort);
+        postgisHost = context.getString("postgis_host", DEFAULT_HOST);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_host=" + postgisHost + ")");
+        postgisPort = context.getString("postgis_port", DEFAULT_PORT);
+        int intPort = Integer.parseInt(postgisPort);
 
         if ((intPort <= 0) || (intPort > 65535)) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (postgresql_port=" + postgresqlPort + ")"
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (postgis_port=" + postgisPort + ")"
                     + " -- Must be between 0 and 65535");
         } else {
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_port=" + postgresqlPort + ")");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_port=" + postgisPort + ")");
         }  // if else
 
-        postgresqlDatabase = context.getString("postgresql_database", DEFAULT_DATABASE);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_database=" + postgresqlDatabase + ")");
-        postgresqlUsername = context.getString("postgresql_username", DEFAULT_USER_NAME);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_username=" + postgresqlUsername + ")");
-        // FIXME: postgresqlPassword should be read as a SHA1 and decoded here
-        postgresqlPassword = context.getString("postgresql_password", DEFAULT_PASSWORD);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_password=" + postgresqlPassword + ")");
+        postgisDatabase = context.getString("postgis_database", DEFAULT_DATABASE);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_database=" + postgisDatabase + ")");
+        postgisUsername = context.getString("postgis_username", DEFAULT_USER_NAME);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_username=" + postgisUsername + ")");
+        // FIXME: postgisPassword should be read as a SHA1 and decoded here
+        postgisPassword = context.getString("postgis_password", DEFAULT_PASSWORD);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_password=" + postgisPassword + ")");
 
-        maxPoolSize = context.getInteger("postgresql_maxPoolSize", DEFAULT_MAX_POOL_SIZE);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_maxPoolSize=" + maxPoolSize + ")");
+        maxPoolSize = context.getInteger("postgis_maxPoolSize", DEFAULT_MAX_POOL_SIZE);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_maxPoolSize=" + maxPoolSize + ")");
 
         rowAttrPersistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE).equals("row");
         String persistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE);
@@ -200,15 +202,18 @@ public class NGSIPostgreSQLSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (backend.enable_cache="
                 + enableCache + ") -- Must be 'true' or 'false'");
         }  // if else
+
+        // TBD: possible option for postgisSink
+        swapCoordinates = false;
         
     } // configure
 
     @Override
     public void start() {
         try {
-            persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlDatabase, postgresqlUsername, postgresqlPassword, maxPoolSize);
+            persistenceBackend = new PostgreSQLBackendImpl(postgisHost, postgisPort, postgisDatabase, postgisUsername, postgisPassword, maxPoolSize);
         } catch (Exception e) {
-            LOGGER.error("Error while creating the PostgreSQL persistence backend. Details="
+            LOGGER.error("Error while creating the Postgis persistence backend. Details="
                     + e.getMessage());
         } // try catch
 
@@ -236,7 +241,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             ArrayList<NGSIEvent> events = batch.getNextEvents();
 
             // get an aggregator for this destination and initialize it
-            PostgreSQLAggregator aggregator = getAggregator(rowAttrPersistence);
+            PostgisAggregator aggregator = getAggregator(rowAttrPersistence);
             aggregator.initialize(events.get(0));
 
             for (NGSIEvent event : events) {
@@ -260,7 +265,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     /**
      * Class for aggregating fieldValues.
      */
-    private abstract class PostgreSQLAggregator {
+    private abstract class PostgisAggregator {
 
         // string containing the data fieldValues
         protected String aggregation;
@@ -275,9 +280,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
         protected String typedFieldNames;
         protected String fieldNames;
 
-        public PostgreSQLAggregator() {
+        public PostgisAggregator() {
             aggregation = "";
-        } // PostgreSQLAggregator
+        } // PostgisAggregator
 
         public String getAggregation() {
             return aggregation;
@@ -289,7 +294,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             } else {
                 return schemaName;
             } // if else
-        } // getDbName
+        } // getSchemaDbName
 
         public String getTableName(boolean enableLowercase) {
             if (enableLowercase) {
@@ -319,12 +324,12 @@ public class NGSIPostgreSQLSink extends NGSISink {
 
         public abstract void aggregate(NGSIEvent cygnusEvent);
 
-    } // PostgreSQLAggregator
+    } // PostgisAggregator
 
     /**
      * Class for aggregating batches in row mode.
      */
-    private class RowAggregator extends PostgreSQLAggregator {
+    protected class RowAggregator extends PostgisAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -382,6 +387,11 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
+                ImmutablePair<String, Boolean> location =
+                    NGSIUtils.getGeometry(attrValue,
+                                          attrType,
+                                          attrMetadata,
+                                          swapCoordinates);
 
                 // create a column and aggregate it
                 String row = "('"
@@ -391,10 +401,14 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     + entityId + "','"
                     + entityType + "','"
                     + attrName + "','"
-                    + attrType + "','"
-                    + attrValue + "','"
-                    + attrMetadata
-                    + "')";
+                    + attrType + "','";
+
+                if (location.right) {
+                    LOGGER.debug("location=" + location.getLeft());
+                    row += location.getLeft() + "','"  + attrMetadata + "')";
+                } else {
+                    row += attrValue + "','"  + attrMetadata + "')";
+                }
 
                 if (aggregation.isEmpty()) {
                     aggregation += row;
@@ -409,7 +423,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     /**
      * Class for aggregating batches in column mode.
      */
-    private class ColumnAggregator extends PostgreSQLAggregator {
+    protected class ColumnAggregator extends PostgisAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -434,8 +448,18 @@ public class NGSIPostgreSQLSink extends NGSISink {
 
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
-                typedFieldNames += "," + attrName + " text," + attrName + "_md text";
-                fieldNames += "," + attrName + "," + attrName + "_md";
+                
+                String attrType = contextAttribute.getType();
+                String attrValue = contextAttribute.getContextValue(false);
+                String attrMetadata = contextAttribute.getContextMetadata();
+
+                if (!NGSIUtils.getGeometry(attrValue,
+                                           attrType,
+                                           attrMetadata,
+                                           swapCoordinates).getRight()) {
+                    typedFieldNames += "," + attrName + " text," + attrName + "_md text";
+                    fieldNames += "," + attrName + "," + attrName + "_md";
+                }
             } // for
 
             typedFieldNames += ")";
@@ -473,9 +497,20 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
+                ImmutablePair<String, Boolean> location =
+                    NGSIUtils.getGeometry(attrValue,
+                                          attrType,
+                                          attrMetadata,
+                                          swapCoordinates);
 
-                // create part of the column with the current attribute (a.k.a. a column)
-                column += ",'" + attrValue + "','"  + attrMetadata + "'";
+                if (location.right) {
+                    LOGGER.debug("location=" + location.getLeft());
+                    column += ",'" + location.getLeft() + "','"  + attrMetadata;
+
+                } else {
+                    // create part of the column with the current attribute (a.k.a. a column)
+                    column += ",'" + attrValue + "','"  + attrMetadata + "'";
+                }
             } // for
 
             // now, aggregate the column
@@ -488,7 +523,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
 
     } // ColumnAggregator
 
-    private PostgreSQLAggregator getAggregator(boolean rowAttrPersistence) {
+    private PostgisAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
             return new RowAggregator();
         } else {
@@ -496,35 +531,31 @@ public class NGSIPostgreSQLSink extends NGSISink {
         } // if else
     } // getAggregator
 
-    private void persistAggregation(PostgreSQLAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
+    private void persistAggregation(PostgisAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         String typedFieldNames = aggregator.getTypedFieldNames();
         String fieldNames = aggregator.getFieldNames();
         String fieldValues = aggregator.getAggregation();
         String schemaName = aggregator.getSchemaName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 
-        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgreSQLSink. Schema ("
+        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgisSink. Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
                 + fieldValues + ")");
         
-        try {
-            if (aggregator instanceof RowAggregator) {
-                persistenceBackend.createSchema(schemaName);
-                persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
-            } // if
-            // creating the database and the table has only sense if working in row mode, in column node
-            // everything must be provisioned in advance
+        if (aggregator instanceof RowAggregator) {
+            persistenceBackend.createSchema(schemaName);
+            persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+        } // if
+        // creating the database and the table has only sense if working in row mode, in column node
+        // everything must be provisioned in advance
 
-            persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
-        } catch (Exception e) {
-            throw new CygnusPersistenceError("-, " + e.getMessage());
-        } // try catch
+        persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
     } // persistAggregation
     
     /**
-     * Creates a PostgreSQL DB name given the FIWARE service.
+     * Creates a Postgis DB name given the FIWARE service.
      * @param service
-     * @return The PostgreSQL DB name
+     * @return The Postgis DB name
      * @throws CygnusBadConfiguration
      */
     public String buildSchemaName(String service) throws CygnusBadConfiguration {
@@ -545,11 +576,11 @@ public class NGSIPostgreSQLSink extends NGSISink {
     } // buildSchemaName
 
     /**
-     * Creates a PostgreSQL table name given the FIWARE service path, the entity and the attribute.
+     * Creates a Postgis table name given the FIWARE service path, the entity and the attribute.
      * @param servicePath
      * @param entity
      * @param attribute
-     * @return The PostgreSQL table name
+     * @return The Postgis table name
      * @throws CygnusBadConfiguration
      */
     public String buildTableName(String servicePath, String entity, String attribute) throws CygnusBadConfiguration {
@@ -611,4 +642,4 @@ public class NGSIPostgreSQLSink extends NGSISink {
         return name;
     } // buildTableName
 
-} // NGSIPostgreSQLSink
+} // NGSIPostgisSink

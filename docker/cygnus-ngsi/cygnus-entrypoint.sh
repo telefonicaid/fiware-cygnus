@@ -50,6 +50,8 @@ file_env 'CYGNUS_HDFS_USER' ''
 file_env 'CYGNUS_HDFS_TOKEN' ''
 file_env 'CYGNUS_POSTGRESQL_USER' ''
 file_env 'CYGNUS_POSTGRESQL_PASS' ''
+file_env 'CYGNUS_POSTGIS_USER' ''
+file_env 'CYGNUS_POSTGIS_PASS' ''
 file_env 'CYGNUS_CARTO_USER' ''
 file_env 'CYGNUS_CARTO_KEY' ''
 
@@ -579,7 +581,70 @@ if [ "$CYGNUS_ORION_HOST" != "" ]; then
     fi
 fi
 
+# Check if POSTGIS ENV vars
+if [ "$CYGNUS_POSTGIS_HOST" != "" ]; then
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        AGENT_CONF_FILE=agent_postgis.conf
+        cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        if [ "${CYGNUS_POSTGIS_ENABLE_GROUPING,,}" == "true" ]; then
+            GROUPING_CONF_FILE=grouping_rules_postgis.conf
+            cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        fi
+        if [ "${CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
+            NAMEMAPPING_CONF_FILE=name_mappings_postgis.conf
+            cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
+            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        fi
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5057 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = postgis-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = postgis-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
 
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.postgis_host/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.postgis_host = '${CYGNUS_POSTGIS_HOST} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.postgis_port/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.postgis_port = '${CYGNUS_POSTGIS_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.postgis_username/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.postgis_username = '${CYGNUS_POSTGIS_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.postgis_password/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.postgis_password = '${CYGNUS_POSTGIS_PASS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    # The following are optional and disabled by default
+    if [ "$CYGNUS_POSTGIS_ENABLE_ENCODING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.enable_encoding = '${CYGNUS_POSTGIS_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGIS_ENABLE_GROUPING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.enable_grouping = '${CYGNUS_POSTGIS_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.enable_name_mappings = '${CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGIS_ENABLE_LOWERCASE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.enable_lowercase/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.enable_lowercase = '${CYGNUS_POSTGIS_ENABLE_LOWERCASE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGIS_ATTR_PERSISTENCE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.attr_persistence/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.attr_persistence = '${CYGNUS_POSTGIS_ATTR_PERSISTENCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGIS_BATCH_SIZE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.batch_size/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.batch_size = '${CYGNUS_POSTGIS_BATCH_SIZE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGIS_BATCH_TIMEOUT" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.batch_timeout/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.batch_timeout = '${CYGNUS_POSTGIS_BATCH_TIMEOUT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGIS_BATCH_TTL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.batch_ttl = '${CYGNUS_POSTGIS_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGIS_ENABLE_CACHE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.backend.enable_cache/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.backend.enable_cache = '${CYGNUS_POSTGIS_ENABLE_CACHE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5087 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41421 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5087 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
+    fi
+fi
 
 
 if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
