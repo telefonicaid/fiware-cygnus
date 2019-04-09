@@ -83,6 +83,7 @@ pages:
           - 'NGSIMongoSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_mongo_sink.md'
           - 'NGSIMySQLSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_mysql_sink.md'
           - 'NGSIPostgreSQLSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_postgresql_sink.md'
+          - 'NGSIPostGISSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_postgis_sink.md'
           - 'NGSISTHSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_sth_sink.md'
           - 'NGSIOrionSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_orion_sink.md'
           - 'NGSITestSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_test_sink.md'
