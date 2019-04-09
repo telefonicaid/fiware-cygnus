@@ -261,7 +261,11 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         if (!method.equals("POST")) {
             serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
             LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (" + method + " method not supported)");
-            throw new MethodNotSupportedException(method + " method not supported");
+            // It would be more precise to use 405 Method Not Allowed (along with the explanatory "Allow" header
+            // in the response. However, we are limited to the ones provided by Flume
+            // (see https://flume.apache.org/releases/content/1.9.0/apidocs/org/apache/flume/FlumeException.html)
+            // so we HTTPBadRequestException for 400 Bad Request instead
+            throw new HTTPBadRequestException(method + " method not supported");
         } // if
 
         // Check the notificationTarget
