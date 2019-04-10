@@ -99,6 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed Apr 10 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.12.0
+- [cygnus-ngsi][NGSIHandler] Fix unexpected exception, instead 400 is returned when a non valid API request (#1588)
+- [cygnus-ngsi][PostGIS] Add PostGIS sink based on PostgreSQL backend (#1618)
+
 * Wed Apr 03 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.11.0
 - [cygnus-ngsi][Docker] Set default agent file names for "agent_"
 - [cygnus-ngsi][Docker] Set default truncate size to 0.5GB for sth collections

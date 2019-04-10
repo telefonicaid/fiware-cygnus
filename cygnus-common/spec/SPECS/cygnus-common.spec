@@ -171,6 +171,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed Apr 10 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.12.0
+- [cygnus-common][PostgreSQL] Add connection pool
+- [cygnus-common][YAFS][bugfix] Fixed issue, missmatching Jetty threads causes Cygnus crash (#1616)
+- [cygnus-common][YAFS] Fixed issue, stopping Cygnus after config reloading (#1624)
+
 * Wed Apr 03 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.11.0
 - [cygnus-common] Upgrade flume-ng-node version from 1.4.0 to 1.9.0
 - [cygnus-common][mongo] Upgrade mongo driver from 3.0.0 to 3.0.4
