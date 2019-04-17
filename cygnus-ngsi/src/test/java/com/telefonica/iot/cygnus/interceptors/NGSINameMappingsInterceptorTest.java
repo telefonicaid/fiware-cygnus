@@ -329,7 +329,35 @@ public class NGSINameMappingsInterceptorTest {
             + "      }"
             + "   ]"
             + "}";
-
+    private final String nameMappingsStrConfig4 = ""
+            + "{"
+            + "   \"serviceMappings\": ["
+            + "      {"
+            + "         \"newService\": \"service_new\","
+            + "         \"servicePathMappings\": ["
+            + "            {"
+            + "               \"entityMappings\": ["
+            + "                  {"
+            + "                     \"newEntityId\": \"$1_new\","
+            + "                     \"newEntityType\": \"House\","
+            + "                     \"attributeMappings\": []"
+            + "                  }"
+            + "               ]"
+            + "            }"
+            + "         ]"
+            + "      }"
+            + "   ]"
+            + "}";
+    
+    private final String expectedCEStrConfig4 = ""
+            + "{"
+            +   "\"attributes\" : ["
+            +   "],"
+            +   "\"type\" : \"House\","
+            +   "\"isPattern\" : \"false\","
+            +   "\"id\" : \"House1_new\""
+            + "}";
+    private final String expectedServiceConfig4 = "service_new";
     /**
      * Constructor.
      */
@@ -361,12 +389,12 @@ public class NGSINameMappingsInterceptorTest {
     } // testBuilderConfigureNameMappingsConfFileNotEmpty
     
     /**
-     * [NGSINameMappingsInterceptor.Builder.configure] -------- Configured 'grouping_rules_conf_file' cannot be null.
+     * [NGSINameMappingsInterceptor.Builder.configure] -------- Original field can be omitted.
      */
     @Test
     public void testBuilderConfigureNameMappingsConfFileNotNull() {
         System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.Builder.configure]")
-                + "-------- Configured 'name_mappings_conf_file' cannot be null");
+                + "-------- Original field can be omitted.");
         NGSINameMappingsInterceptor.Builder builder = new NGSINameMappingsInterceptor.Builder();
         String nameMappingsConfFile = null; // wrong value
         Context context = createBuilderContext(nameMappingsConfFile);
@@ -381,7 +409,7 @@ public class NGSINameMappingsInterceptorTest {
                     + "- FAIL - Null 'name_mappings_conf_file' has not been detected");
             throw e;
         } // try catch
-    } // testBuilderConfigureNameMappingsConfFileNotNull
+    } // testBuilderConfigureNameMappingsMissedOriginalFields
     
     /**
      * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI getRecvTimeTs is put in the channel, it contains
@@ -732,7 +760,7 @@ public class NGSINameMappingsInterceptorTest {
             originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStrConfig2);
             expectedCE = NGSIUtilsForTests.createJsonContextElement(expectedCEStrConfig2);
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig2]")
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig3]")
                     + "- FAIL - There was some problem when parsing the ContextElements");
             throw new AssertionError(e.getMessage());
         } // try catch
@@ -826,4 +854,59 @@ public class NGSINameMappingsInterceptorTest {
         return context;
     } // createBuilderContext
 
+    /**
+     * [NGSIGroupingInterceptor.doMapConfig4] -------- Original fields can be omitted.
+     */
+    @Test
+    public void testDoMapConfig4() {
+        System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
+                + "-------- Original fields can be omitted");
+        NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
+        nameMappingsInterceptor.loadNameMappings(nameMappingsStrConfig4);
+        ContextElement originalCE;
+        ContextElement expectedCE;
+
+        try {
+            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStrConfig2);
+            expectedCE = NGSIUtilsForTests.createJsonContextElement(expectedCEStrConfig4);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
+                    + "- FAIL - There was some problem when parsing the ContextElements");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+
+        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(
+                originalServiceConfig, originalServicePathConfig, originalCE);
+        ContextElement mappedCE = map.getRight();
+        boolean equals = true;
+
+        if (!mappedCE.getType().equals(expectedCE.getType()) ) {
+        	System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
+                    + "-  ERROR  - The mapped type is not equal to the expected one");
+        	equals = false;
+        } else if (!expectedServicePathConfig2.equals(map.getMiddle())) {
+        	System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
+                    + "-  ERROR  - The mapped servicePath is not equal to the expected one");
+            equals = false;
+        } else if (!mappedCE.getId().equals(expectedCE.getId()) ) {
+        	System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
+                    + "-  ERROR  - The mapped Id is not equal to the expected one");
+        	equals = false;
+        } else if (!map.getLeft().equals(expectedServiceConfig4)) {
+        	System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
+                    + "-  ERROR  - The Service tyepe is not equal to the expected one");
+        	equals = false;
+        } else if (true) {}
+
+        try {
+            assertTrue(equals);
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
+                    + "-  OK  - The mapped NotifyContextRequest is equals to the expected one");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
+                    + "- FAIL - The mapped NotifyContextRequest is not equals to the expected one");
+            throw e;
+        } // try catch
+    } // testDoMapConfig4
+    
 } // NGSINameMappingsInterceptorTest
