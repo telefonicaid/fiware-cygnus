@@ -36,337 +36,148 @@ import org.junit.Test;
  * @author frb
  */
 public class NGSINameMappingsInterceptorTest {
-    
-    private final String nameMappingsStr = ""
-            + "{"
-            + "   \"serviceMappings\": ["
-            + "      {"
-            + "         \"originalService\": \".*\","
-            + "         \"newService\": \"new_default\","
-            + "         \"servicePathMappings\": ["
-            + "            {"
-            + "               \"originalServicePath\": \"/.*\","
-            + "               \"newServicePath\": \"/new_any\","
-            + "               \"entityMappings\": ["
-            + "                  {"
+
+    private final String nameMappingsStr = "" + "{" + "   \"serviceMappings\": [" + "      {"
+            + "         \"originalService\": \".*\"," + "         \"newService\": \"new_default\","
+            + "         \"servicePathMappings\": [" + "            {"
+            + "               \"originalServicePath\": \"/.*\"," + "               \"newServicePath\": \"/new_any\","
+            + "               \"entityMappings\": [" + "                  {"
             + "                     \"originalEntityId\": \"Room(\\\\d*)\","
             + "                     \"originalEntityType\": \"Room\","
             + "                     \"newEntityId\": \"new_Room1\","
-            + "                     \"newEntityType\": \"new_Room\","
-            + "                     \"attributeMappings\": ["
-            + "                        {"
-            + "                           \"originalAttributeName\": \"temp(.*)\","
+            + "                     \"newEntityType\": \"new_Room\"," + "                     \"attributeMappings\": ["
+            + "                        {" + "                           \"originalAttributeName\": \"temp(.*)\","
             + "                           \"originalAttributeType\": \"cent(.*)\","
             + "                           \"newAttributeName\": \"new_temperature\","
-            + "                           \"newAttributeType\": \"new_centigrade\""
-            + "                        }"
-            + "                     ]"
-            + "                  }"
-            + "               ]"
-            + "            }"
-            + "         ]"
-            + "      }"
-            + "   ]"
-            + "}";
+            + "                           \"newAttributeType\": \"new_centigrade\"" + "                        }"
+            + "                     ]" + "                  }" + "               ]" + "            }" + "         ]"
+            + "      }" + "   ]" + "}";
     private final String originalService = "default";
     private final String originalServicePath = "/any";
-    private final String originalCEStr = ""
-            + "{"
-            +   "\"attributes\" : ["
-            +     "{"
-            +       "\"name\" : \"temperature\","
-            +       "\"type\" : \"centigrade\","
-            +       "\"value\" : \"26.5\""
-            +     "}"
-            +   "],"
-            +   "\"type\" : \"Room\","
-            +   "\"isPattern\" : \"false\","
-            +   "\"id\" : \"Room1\""
-            + "}";
-    private final String expectedCEStr = ""
-            + "{"
-            +   "\"attributes\" : ["
-            +     "{"
-            +       "\"name\" : \"new_temperature\","
-            +       "\"type\" : \"new_centigrade\","
-            +       "\"value\" : \"26.5\""
-            +     "}"
-            +   "],"
-            +   "\"type\" : \"new_Room\","
-            +   "\"isPattern\" : \"false\","
-            +   "\"id\" : \"new_Room1\""
-            + "}";
-    private final String nameMappingsRegexStr = ""
-            + "{"
-            + "   \"serviceMappings\": ["
-            + "      {"
-            + "         \"originalService\": \".*\","
-            + "         \"newService\": \"new_default\","
-            + "         \"servicePathMappings\": ["
-            + "            {"
-            + "               \"originalServicePath\": \"/.*\","
-            + "               \"newServicePath\": \"/new_any\","
-            + "               \"entityMappings\": ["
-            + "                  {"
+    private final String originalCEStr = "" + "{" + "\"attributes\" : [" + "{" + "\"name\" : \"temperature\","
+            + "\"type\" : \"centigrade\"," + "\"value\" : \"26.5\"" + "}" + "]," + "\"type\" : \"Room\","
+            + "\"isPattern\" : \"false\"," + "\"id\" : \"Room1\"" + "}";
+    private final String expectedCEStr = "" + "{" + "\"attributes\" : [" + "{" + "\"name\" : \"new_temperature\","
+            + "\"type\" : \"new_centigrade\"," + "\"value\" : \"26.5\"" + "}" + "]," + "\"type\" : \"new_Room\","
+            + "\"isPattern\" : \"false\"," + "\"id\" : \"new_Room1\"" + "}";
+    private final String nameMappingsRegexStr = "" + "{" + "   \"serviceMappings\": [" + "      {"
+            + "         \"originalService\": \".*\"," + "         \"newService\": \"new_default\","
+            + "         \"servicePathMappings\": [" + "            {"
+            + "               \"originalServicePath\": \"/.*\"," + "               \"newServicePath\": \"/new_any\","
+            + "               \"entityMappings\": [" + "                  {"
             + "                     \"originalEntityId\": \"(Room)([0-9]*)\","
             + "                     \"originalEntityType\": \"Room\","
             + "                     \"newEntityId\": \"new_Room$2\","
-            + "                     \"newEntityType\": \"new_Room\","
-            + "                     \"attributeMappings\": ["
-            + "                        {"
-            + "                           \"originalAttributeName\": \"temp(.*)\","
+            + "                     \"newEntityType\": \"new_Room\"," + "                     \"attributeMappings\": ["
+            + "                        {" + "                           \"originalAttributeName\": \"temp(.*)\","
             + "                           \"originalAttributeType\": \"cent(.*)\","
             + "                           \"newAttributeName\": \"new_temperature\","
-            + "                           \"newAttributeType\": \"new_centigrade\""
-            + "                        }"
-            + "                     ]"
-            + "                  }"
-            + "               ]"
-            + "            }"
-            + "         ]"
-            + "      }"
-            + "   ]"
-            + "}";
-    
-    private final String nameMappingsStrConfig = ""
-            + "{"
-            + "   \"serviceMappings\": ["
-            + "      {"
-            + "         \"originalService\": \"service\","
-            + "         \"newService\": \"service_new\","
-            + "         \"servicePathMappings\": ["
-            + "            {"
+            + "                           \"newAttributeType\": \"new_centigrade\"" + "                        }"
+            + "                     ]" + "                  }" + "               ]" + "            }" + "         ]"
+            + "      }" + "   ]" + "}";
+
+    private final String nameMappingsStrConfig = "" + "{" + "   \"serviceMappings\": [" + "      {"
+            + "         \"originalService\": \"service\"," + "         \"newService\": \"service_new\","
+            + "         \"servicePathMappings\": [" + "            {"
             + "               \"originalServicePath\": \"/servicePath\","
-            + "               \"newServicePath\": \"/servicePath_House\","
-            + "               \"entityMappings\": ["
-            + "                  {"
-            + "                     \"originalEntityId\": \".*\","
+            + "               \"newServicePath\": \"/servicePath_House\"," + "               \"entityMappings\": ["
+            + "                  {" + "                     \"originalEntityId\": \".*\","
             + "                     \"originalEntityType\": \"House\","
-            + "                     \"newEntityId\": \".*\","
-            + "                     \"newEntityType\": \"House\","
-            + "                     \"attributeMappings\": []"
-            + "                  }"
-            + "               ]"
-            + "            }"
-            + "            , {"
-            + "               \"originalServicePath\": \"/servicePath\","
-            + "               \"newServicePath\": \"/servicePath_Room\","
-            + "               \"entityMappings\": ["
-            + "                  {"
-            + "                     \"originalEntityId\": \".*\","
+            + "                     \"newEntityId\": \".*\"," + "                     \"newEntityType\": \"House\","
+            + "                     \"attributeMappings\": []" + "                  }" + "               ]"
+            + "            }" + "            , {" + "               \"originalServicePath\": \"/servicePath\","
+            + "               \"newServicePath\": \"/servicePath_Room\"," + "               \"entityMappings\": ["
+            + "                  {" + "                     \"originalEntityId\": \".*\","
             + "                     \"originalEntityType\": \"RoomT\","
-            + "                     \"newEntityId\": \".*\","
-            + "                     \"newEntityType\": \"RoomNew\","
-            + "                     \"attributeMappings\": []"
-            + "                  }"
-            + "               ]"
-            + "            }"
-            + "            , {"
-            + "               \"originalServicePath\": \"/servicePath\","
-            + "               \"newServicePath\": \"/servicePath_Room2\","
-            + "               \"entityMappings\": ["
-            + "                  {"
-            + "                     \"originalEntityId\": \".*\","
-            + "                     \"originalEntityType\": \"Room\","
-            + "                     \"newEntityId\": \".*\","
-            + "                     \"newEntityType\": \"RoomNew2\","
-            + "                     \"attributeMappings\": []"
-            + "                  }"
-            + "               ]"
-            + "            }"
-            + "         ]"
-            + "      }"
-            + "   ]"
-            + "}";
-    private final String originalCEStrConfig = ""
-            + "{"
-            +   "\"attributes\" : ["
-            +     "{"
-            +       "\"name\" : \"temperature\","
-            +       "\"type\" : \"centigrade\","
-            +       "\"value\" : \"26.5\""
-            +     "}"
-            +   "],"
-            +   "\"type\" : \"RoomT\","
-            +   "\"isPattern\" : \"false\","
-            +   "\"id\" : \"Room1\""
-            + "}";
-    
-    private final String expectedCEStrConfig = ""
-            + "{"
-            +   "\"attributes\" : ["
-            +     "{"
-            +       "\"name\" : \"temperature\","
-            +       "\"type\" : \"centigrade\","
-            +       "\"value\" : \"26.5\""
-            +     "}"
-            +   "],"
-            +   "\"type\" : \"RoomNew\","
-            +   "\"isPattern\" : \"false\","
-            +   "\"id\" : \"Room1\""
-            + "}";
+            + "                     \"newEntityId\": \".*\"," + "                     \"newEntityType\": \"RoomNew\","
+            + "                     \"attributeMappings\": []" + "                  }" + "               ]"
+            + "            }" + "            , {" + "               \"originalServicePath\": \"/servicePath\","
+            + "               \"newServicePath\": \"/servicePath_Room2\"," + "               \"entityMappings\": ["
+            + "                  {" + "                     \"originalEntityId\": \".*\","
+            + "                     \"originalEntityType\": \"Room\"," + "                     \"newEntityId\": \".*\","
+            + "                     \"newEntityType\": \"RoomNew2\"," + "                     \"attributeMappings\": []"
+            + "                  }" + "               ]" + "            }" + "         ]" + "      }" + "   ]" + "}";
+    private final String originalCEStrConfig = "" + "{" + "\"attributes\" : [" + "{" + "\"name\" : \"temperature\","
+            + "\"type\" : \"centigrade\"," + "\"value\" : \"26.5\"" + "}" + "]," + "\"type\" : \"RoomT\","
+            + "\"isPattern\" : \"false\"," + "\"id\" : \"Room1\"" + "}";
+
+    private final String expectedCEStrConfig = "" + "{" + "\"attributes\" : [" + "{" + "\"name\" : \"temperature\","
+            + "\"type\" : \"centigrade\"," + "\"value\" : \"26.5\"" + "}" + "]," + "\"type\" : \"RoomNew\","
+            + "\"isPattern\" : \"false\"," + "\"id\" : \"Room1\"" + "}";
     private final String originalServiceConfig = "service";
     private final String originalServicePathConfig = "/servicePath";
     private final String expectedServicePathConfig = "/servicePath_Room";
 
-
-    private final String nameMappingsStrConfig2 = ""
-            + "{"
-            + "   \"serviceMappings\": ["
-            + "      {"
-            + "         \"originalService\": \"service\","
-            + "         \"newService\": \"service_new\","
-            + "         \"servicePathMappings\": ["
-            + "            {"
-            + "               \"originalServicePath\": \"/servicePath\","
-            + "               \"entityMappings\": ["
-            + "                  {"
-            + "                     \"originalEntityId\": \".*\","
+    private final String nameMappingsStrConfig2 = "" + "{" + "   \"serviceMappings\": [" + "      {"
+            + "         \"originalService\": \"service\"," + "         \"newService\": \"service_new\","
+            + "         \"servicePathMappings\": [" + "            {"
+            + "               \"originalServicePath\": \"/servicePath\"," + "               \"entityMappings\": ["
+            + "                  {" + "                     \"originalEntityId\": \".*\","
             + "                     \"originalEntityType\": \"House\","
-            + "                     \"newEntityId\": \".*\","
-            + "                     \"newEntityType\": \"House\","
-            + "                     \"attributeMappings\": []"
-            + "                  }"
-            + "               ]"
-            + "            }"
-            + "            , {"
-            + "               \"originalServicePath\": \"/servicePath\","
-            + "               \"newServicePath\": \"/servicePath_Room\","
-            + "               \"entityMappings\": ["
-            + "                  {"
-            + "                     \"originalEntityId\": \".*\","
+            + "                     \"newEntityId\": \".*\"," + "                     \"newEntityType\": \"House\","
+            + "                     \"attributeMappings\": []" + "                  }" + "               ]"
+            + "            }" + "            , {" + "               \"originalServicePath\": \"/servicePath\","
+            + "               \"newServicePath\": \"/servicePath_Room\"," + "               \"entityMappings\": ["
+            + "                  {" + "                     \"originalEntityId\": \".*\","
             + "                     \"originalEntityType\": \"RoomT\","
-            + "                     \"newEntityId\": \".*\","
-            + "                     \"newEntityType\": \"RoomNew\","
-            + "                     \"attributeMappings\": []"
-            + "                  }"
-            + "               ]"
-            + "            }"
-            + "            , {"
-            + "               \"originalServicePath\": \"/servicePath\","
-            + "               \"newServicePath\": \"/servicePath_Room2\","
-            + "               \"entityMappings\": ["
-            + "                  {"
-            + "                     \"originalEntityId\": \".*\","
-            + "                     \"originalEntityType\": \"Room\","
-            + "                     \"newEntityId\": \".*\","
-            + "                     \"newEntityType\": \"RoomNew2\","
-            + "                     \"attributeMappings\": []"
-            + "                  }"
-            + "               ]"
-            + "            }"
-            + "         ]"
-            + "      }"
-            + "   ]"
-            + "}";
+            + "                     \"newEntityId\": \".*\"," + "                     \"newEntityType\": \"RoomNew\","
+            + "                     \"attributeMappings\": []" + "                  }" + "               ]"
+            + "            }" + "            , {" + "               \"originalServicePath\": \"/servicePath\","
+            + "               \"newServicePath\": \"/servicePath_Room2\"," + "               \"entityMappings\": ["
+            + "                  {" + "                     \"originalEntityId\": \".*\","
+            + "                     \"originalEntityType\": \"Room\"," + "                     \"newEntityId\": \".*\","
+            + "                     \"newEntityType\": \"RoomNew2\"," + "                     \"attributeMappings\": []"
+            + "                  }" + "               ]" + "            }" + "         ]" + "      }" + "   ]" + "}";
 
-    private final String originalCEStrConfig2 = ""
-            + "{"
-            +   "\"attributes\" : ["
-            +   "],"
-            +   "\"type\" : \"House\","
-            +   "\"isPattern\" : \"false\","
-            +   "\"id\" : \"House1\""
-            + "}";
+    private final String originalCEStrConfig2 = "" + "{" + "\"attributes\" : [" + "]," + "\"type\" : \"House\","
+            + "\"isPattern\" : \"false\"," + "\"id\" : \"House1\"" + "}";
 
-    private final String expectedCEStrConfig2 = ""
-            + "{"
-            +   "\"attributes\" : ["
-            +   "],"
-            +   "\"type\" : \"House\","
-            +   "\"isPattern\" : \"false\","
-            +   "\"id\" : \"House1\""
-            + "}";
+    private final String expectedCEStrConfig2 = "" + "{" + "\"attributes\" : [" + "]," + "\"type\" : \"House\","
+            + "\"isPattern\" : \"false\"," + "\"id\" : \"House1\"" + "}";
     private final String expectedServicePathConfig2 = "/servicePath";
 
-    private final String nameMappingsStrConfig3 = ""
-            + "{"
-            + "   \"serviceMappings\": ["
-            + "      {"
-            + "         \"originalService\": \"service\","
-            + "         \"newService\": \"service_new\","
-            + "         \"servicePathMappings\": ["
-            + "            {"
-            + "               \"originalServicePath\": \"/(.+)\","
-            + "               \"newServicePath\": \"/$1\","
-            + "               \"entityMappings\": ["
-            + "                  {"
+    private final String nameMappingsStrConfig3 = "" + "{" + "   \"serviceMappings\": [" + "      {"
+            + "         \"originalService\": \"service\"," + "         \"newService\": \"service_new\","
+            + "         \"servicePathMappings\": [" + "            {"
+            + "               \"originalServicePath\": \"/(.+)\"," + "               \"newServicePath\": \"/$1\","
+            + "               \"entityMappings\": [" + "                  {"
             + "                     \"originalEntityId\": \".*\","
             + "                     \"originalEntityType\": \"House\","
-            + "                     \"newEntityId\": \".*\","
-            + "                     \"newEntityType\": \"House\","
-            + "                     \"attributeMappings\": []"
-            + "                  }"
-            + "               ]"
-            + "            }"
-            + "            , {"
-            + "               \"originalServicePath\": \"/servicePath\","
-            + "               \"newServicePath\": \"/servicePath_Room\","
-            + "               \"entityMappings\": ["
-            + "                  {"
-            + "                     \"originalEntityId\": \".*\","
+            + "                     \"newEntityId\": \".*\"," + "                     \"newEntityType\": \"House\","
+            + "                     \"attributeMappings\": []" + "                  }" + "               ]"
+            + "            }" + "            , {" + "               \"originalServicePath\": \"/servicePath\","
+            + "               \"newServicePath\": \"/servicePath_Room\"," + "               \"entityMappings\": ["
+            + "                  {" + "                     \"originalEntityId\": \".*\","
             + "                     \"originalEntityType\": \"RoomT\","
-            + "                     \"newEntityId\": \".*\","
-            + "                     \"newEntityType\": \"RoomNew\","
-            + "                     \"attributeMappings\": []"
-            + "                  }"
-            + "               ]"
-            + "            }"
-            + "            , {"
-            + "               \"originalServicePath\": \"/servicePath\","
-            + "               \"newServicePath\": \"/servicePath_Room2\","
-            + "               \"entityMappings\": ["
-            + "                  {"
-            + "                     \"originalEntityId\": \".*\","
-            + "                     \"originalEntityType\": \"Room\","
-            + "                     \"newEntityId\": \".*\","
-            + "                     \"newEntityType\": \"RoomNew2\","
-            + "                     \"attributeMappings\": []"
-            + "                  }"
-            + "               ]"
-            + "            }"
-            + "         ]"
-            + "      }"
-            + "   ]"
-            + "}";
-    private final String nameMappingsStrConfig4 = ""
-            + "{"
-            + "   \"serviceMappings\": ["
-            + "      {"
-            + "         \"newService\": \"service_new\","
-            + "         \"servicePathMappings\": ["
-            + "            {"
-            + "               \"entityMappings\": ["
-            + "                  {"
-            + "                     \"newEntityId\": \"$1_new\","
-            + "                     \"newEntityType\": \"House\","
-            + "                     \"attributeMappings\": []"
-            + "                  }"
-            + "               ]"
-            + "            }"
-            + "         ]"
-            + "      }"
-            + "   ]"
-            + "}";
-    
-    private final String expectedCEStrConfig4 = ""
-            + "{"
-            +   "\"attributes\" : ["
-            +   "],"
-            +   "\"type\" : \"House\","
-            +   "\"isPattern\" : \"false\","
-            +   "\"id\" : \"House1_new\""
-            + "}";
+            + "                     \"newEntityId\": \".*\"," + "                     \"newEntityType\": \"RoomNew\","
+            + "                     \"attributeMappings\": []" + "                  }" + "               ]"
+            + "            }" + "            , {" + "               \"originalServicePath\": \"/servicePath\","
+            + "               \"newServicePath\": \"/servicePath_Room2\"," + "               \"entityMappings\": ["
+            + "                  {" + "                     \"originalEntityId\": \".*\","
+            + "                     \"originalEntityType\": \"Room\"," + "                     \"newEntityId\": \".*\","
+            + "                     \"newEntityType\": \"RoomNew2\"," + "                     \"attributeMappings\": []"
+            + "                  }" + "               ]" + "            }" + "         ]" + "      }" + "   ]" + "}";
+    private final String nameMappingsStrConfig4 = "" + "{" + "   \"serviceMappings\": [" + "      {"
+            + "         \"newService\": \"service_new\"," + "         \"servicePathMappings\": [" + "            {"
+            + "               \"entityMappings\": [" + "                  {"
+            + "                     \"newEntityId\": \"$1_new\"," + "                     \"newEntityType\": \"House\","
+            + "                     \"attributeMappings\": []" + "                  }" + "               ]"
+            + "            }" + "         ]" + "      }" + "   ]" + "}";
+
+    private final String expectedCEStrConfig4 = "" + "{" + "\"attributes\" : [" + "]," + "\"type\" : \"House\","
+            + "\"isPattern\" : \"false\"," + "\"id\" : \"House1_new\"" + "}";
     private final String expectedServiceConfig4 = "service_new";
+
     /**
      * Constructor.
      */
     public NGSINameMappingsInterceptorTest() {
         LogManager.getRootLogger().setLevel(Level.FATAL);
     } // NGSINameMappingsInterceptorTest
-    
+
     /**
-     * [NGSINameMappingsInterceptor.Builder.configure] -------- Configured 'name_mappings_conf_file' cannot be empty.
+     * [NGSINameMappingsInterceptor.Builder.configure] -------- Configured
+     * 'name_mappings_conf_file' cannot be empty.
      */
     @Test
     public void testBuilderConfigureNameMappingsConfFileNotEmpty() {
@@ -376,7 +187,7 @@ public class NGSINameMappingsInterceptorTest {
         String nameMappingsConfFile = ""; // wrong value
         Context context = createBuilderContext(nameMappingsConfFile);
         builder.configure(context);
-        
+
         try {
             assertTrue(builder.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.Builder.configure]")
@@ -387,9 +198,10 @@ public class NGSINameMappingsInterceptorTest {
             throw e;
         } // try catch
     } // testBuilderConfigureNameMappingsConfFileNotEmpty
-    
+
     /**
-     * [NGSINameMappingsInterceptor.Builder.configure] -------- Original field can be omitted.
+     * [NGSINameMappingsInterceptor.Builder.configure] -------- Original field
+     * can be omitted.
      */
     @Test
     public void testBuilderConfigureNameMappingsConfFileNotNull() {
@@ -399,7 +211,7 @@ public class NGSINameMappingsInterceptorTest {
         String nameMappingsConfFile = null; // wrong value
         Context context = createBuilderContext(nameMappingsConfFile);
         builder.configure(context);
-        
+
         try {
             assertTrue(builder.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.Builder.configure]")
@@ -410,10 +222,11 @@ public class NGSINameMappingsInterceptorTest {
             throw e;
         } // try catch
     } // testBuilderConfigureNameMappingsMissedOriginalFields
-    
+
     /**
-     * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI getRecvTimeTs is put in the channel, it contains
-     * fiware-service, fiware-servicepath, fiware-correlator, transaction-id, mapped-fiware-service and
+     * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI getRecvTimeTs is
+     * put in the channel, it contains fiware-service, fiware-servicepath,
+     * fiware-correlator, transaction-id, mapped-fiware-service and
      * mapped-fiware-servicepath headers.
      */
     @Test
@@ -424,7 +237,7 @@ public class NGSINameMappingsInterceptorTest {
         NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
         nameMappingsInterceptor.initialize();
         NGSIEvent originalEvent;
-        
+
         try {
             originalEvent = NGSIUtilsForTests.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
                     "12345");
@@ -433,26 +246,25 @@ public class NGSINameMappingsInterceptorTest {
                     + "- FAIL - There was some problem when creating the NGSIEVent");
             throw new AssertionError(e.getMessage());
         } // try catch
-        
+
         Map<String, String> interceptedEventHeaders = nameMappingsInterceptor.intercept(originalEvent).getHeaders();
 
         try {
             assertTrue(interceptedEventHeaders.containsKey(CommonConstants.HEADER_FIWARE_SERVICE));
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "-  OK  - The generated NGSI event contains '"
-                    + CommonConstants.HEADER_FIWARE_SERVICE + "'");
+                    + "-  OK  - The generated NGSI event contains '" + CommonConstants.HEADER_FIWARE_SERVICE + "'");
         } catch (AssertionError e1) {
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "- FAIL - The generated NGSI event does not contain '"
-                    + CommonConstants.HEADER_FIWARE_SERVICE + "'");
+                    + "- FAIL - The generated NGSI event does not contain '" + CommonConstants.HEADER_FIWARE_SERVICE
+                    + "'");
             throw e1;
         } // try catch
 
         try {
             assertTrue(interceptedEventHeaders.containsKey(CommonConstants.HEADER_FIWARE_SERVICE_PATH));
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "-  OK  - The generated NGSI event contains '"
-                    + CommonConstants.HEADER_FIWARE_SERVICE_PATH + "'");
+                    + "-  OK  - The generated NGSI event contains '" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
+                    + "'");
         } catch (AssertionError e2) {
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
                     + "- FAIL - The generated NGSI event does not contain '"
@@ -463,44 +275,41 @@ public class NGSINameMappingsInterceptorTest {
         try {
             assertTrue(interceptedEventHeaders.containsKey(CommonConstants.HEADER_CORRELATOR_ID));
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "-  OK  - The generated NGSI event contains '"
-                    + CommonConstants.HEADER_CORRELATOR_ID + "'");
+                    + "-  OK  - The generated NGSI event contains '" + CommonConstants.HEADER_CORRELATOR_ID + "'");
         } catch (AssertionError e3) {
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "- FAIL - The generated NGSI event does not contain '"
-                    + CommonConstants.HEADER_CORRELATOR_ID + "'");
+                    + "- FAIL - The generated NGSI event does not contain '" + CommonConstants.HEADER_CORRELATOR_ID
+                    + "'");
             throw e3;
         } // try catch
 
         try {
             assertTrue(interceptedEventHeaders.containsKey(NGSIConstants.FLUME_HEADER_TRANSACTION_ID));
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "-  OK  - The generated NGSI event contains '"
-                    + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + "'");
+                    + "-  OK  - The generated NGSI event contains '" + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + "'");
         } catch (AssertionError e4) {
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "- FAIL - The generated NGSI event does not contain '"
-                    + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + "'");
+                    + "- FAIL - The generated NGSI event does not contain '" + NGSIConstants.FLUME_HEADER_TRANSACTION_ID
+                    + "'");
             throw e4;
         } // try catch
-        
+
         try {
             assertTrue(interceptedEventHeaders.containsKey(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE));
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "-  OK  - The generated NGSI event contains '"
-                    + NGSIConstants.FLUME_HEADER_MAPPED_SERVICE + "'");
+                    + "-  OK  - The generated NGSI event contains '" + NGSIConstants.FLUME_HEADER_MAPPED_SERVICE + "'");
         } catch (AssertionError e5) {
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "- FAIL - The generated NGSI event does not contain '"
-                    + NGSIConstants.FLUME_HEADER_MAPPED_SERVICE + "'");
+                    + "- FAIL - The generated NGSI event does not contain '" + NGSIConstants.FLUME_HEADER_MAPPED_SERVICE
+                    + "'");
             throw e5;
         } // try catch
-        
+
         try {
             assertTrue(interceptedEventHeaders.containsKey(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH));
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
-                    + "-  OK  - The generated NGSI event contains '"
-                    + NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH + "'");
+                    + "-  OK  - The generated NGSI event contains '" + NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH
+                    + "'");
         } catch (AssertionError e6) {
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
                     + "- FAIL - The generated NGSI event does not contain '"
@@ -508,10 +317,11 @@ public class NGSINameMappingsInterceptorTest {
             throw e6;
         } // try catch
     } // testGetEventsHeadersInNGSIFlumeEvent
-    
+
     /**
-     * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI event is put in the channel, it contains
-     * the original ContextElement and the mapped one as objects.
+     * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI event is put in
+     * the channel, it contains the original ContextElement and the mapped one
+     * as objects.
      */
     @Test
     public void testGetContextElementsInNGSIEvent() {
@@ -521,14 +331,14 @@ public class NGSINameMappingsInterceptorTest {
         NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
         nameMappingsInterceptor.loadNameMappings(nameMappingsStr);
         NGSIEvent originalEvent;
-        
+
         try {
             originalEvent = NGSIUtilsForTests.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
                     "12345");
         } catch (Exception e) {
             throw new AssertionError(e.getMessage());
         } // try catch
-        
+
         NGSIEvent interceptedEvent = (NGSIEvent) nameMappingsInterceptor.intercept(originalEvent);
 
         try {
@@ -540,7 +350,7 @@ public class NGSINameMappingsInterceptorTest {
                     + "- FAIL - The generated NGSI event does not contain the original ContextElement as object");
             throw e;
         } // try catch
-        
+
         try {
             assertTrue(interceptedEvent.getOriginalCE() != null);
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.intercept]")
@@ -551,10 +361,11 @@ public class NGSINameMappingsInterceptorTest {
             throw e;
         } // try catch
     } // testGetContextElementsInNGSIEvent
-    
+
     /**
-     * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI event is put in the channel, it contains
-     * the original ContextElement and the mapped one as bytes in the body.
+     * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI event is put in
+     * the channel, it contains the original ContextElement and the mapped one
+     * as bytes in the body.
      */
     @Test
     public void testGetBodyInNGSIEvent() {
@@ -564,14 +375,14 @@ public class NGSINameMappingsInterceptorTest {
         NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
         nameMappingsInterceptor.loadNameMappings(nameMappingsStr);
         NGSIEvent originalEvent;
-        
+
         try {
             originalEvent = NGSIUtilsForTests.createNGSIEvent(originalCEStr, null, originalService, originalServicePath,
                     "12345");
         } catch (Exception e) {
             throw new AssertionError(e.getMessage());
         } // try catch
-        
+
         NGSIEvent interceptedEvent = (NGSIEvent) nameMappingsInterceptor.intercept(originalEvent);
 
         try {
@@ -586,9 +397,10 @@ public class NGSINameMappingsInterceptorTest {
             throw e;
         } // try catch
     } // testGetBodyInNGSIEvent
-    
+
     /**
-     * [NGSIGroupingInterceptor.doMap] -------- A mapped ContextElement can be obtained from the Name Mappings.
+     * [NGSIGroupingInterceptor.doMap] -------- A mapped ContextElement can be
+     * obtained from the Name Mappings.
      */
     @Test
     public void testDoMap() {
@@ -598,7 +410,7 @@ public class NGSINameMappingsInterceptorTest {
         nameMappingsInterceptor.loadNameMappings(nameMappingsStr);
         ContextElement originalCE;
         ContextElement expectedCE;
-        
+
         try {
             originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
             expectedCE = NGSIUtilsForTests.createJsonContextElement(expectedCEStr);
@@ -607,12 +419,12 @@ public class NGSINameMappingsInterceptorTest {
                     + "- FAIL - There was some problem when parsing the ContextElements");
             throw new AssertionError(e.getMessage());
         } // try catch
-        
-        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(
-                originalService, originalServicePath, originalCE);
+
+        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(originalService,
+                originalServicePath, originalCE);
         ContextElement mappedCE = map.getRight();
         boolean equals = true;
-        
+
         if (!mappedCE.getId().equals(expectedCE.getId()) || !mappedCE.getType().equals(expectedCE.getType())) {
             equals = false;
         } else {
@@ -627,7 +439,7 @@ public class NGSINameMappingsInterceptorTest {
                 } // if
             } // for
         } // if else
-        
+
         try {
             assertTrue(equals);
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMap]")
@@ -638,9 +450,10 @@ public class NGSINameMappingsInterceptorTest {
             throw e;
         } // try catch
     } // testDoMap
-    
+
     /**
-     * [NGSIGroupingInterceptor.doMapConfig] -------- A mapped ContextElement can be obtained from the Name Mappings.
+     * [NGSIGroupingInterceptor.doMapConfig] -------- A mapped ContextElement
+     * can be obtained from the Name Mappings.
      */
     @Test
     public void testDoMapConfig() {
@@ -650,7 +463,7 @@ public class NGSINameMappingsInterceptorTest {
         nameMappingsInterceptor.loadNameMappings(nameMappingsStrConfig);
         ContextElement originalCE;
         ContextElement expectedCE;
-        
+
         try {
             originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStrConfig);
             expectedCE = NGSIUtilsForTests.createJsonContextElement(expectedCEStrConfig);
@@ -659,12 +472,12 @@ public class NGSINameMappingsInterceptorTest {
                     + "- FAIL - There was some problem when parsing the ContextElements");
             throw new AssertionError(e.getMessage());
         } // try catch
-        
-        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(
-                originalServiceConfig, originalServicePathConfig, originalCE);
+
+        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(originalServiceConfig,
+                originalServicePathConfig, originalCE);
         ContextElement mappedCE = map.getRight();
         boolean equals = true;
-        
+
         if (!mappedCE.getType().equals(expectedCE.getType()) || !expectedServicePathConfig.equals(map.getMiddle())) {
             equals = false;
         } else {
@@ -679,7 +492,7 @@ public class NGSINameMappingsInterceptorTest {
                 } // if
             } // for
         } // if else
-        
+
         try {
             assertTrue(equals);
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig]")
@@ -691,9 +504,9 @@ public class NGSINameMappingsInterceptorTest {
         } // try catch
     } // testDoMapConfig
 
-
     /**
-     * [NGSIGroupingInterceptor.doMapConfig2] -------- A mapped ContextElement can be obtained from the Name Mappings.
+     * [NGSIGroupingInterceptor.doMapConfig2] -------- A mapped ContextElement
+     * can be obtained from the Name Mappings.
      */
     @Test
     public void testDoMapConfig2() {
@@ -713,8 +526,8 @@ public class NGSINameMappingsInterceptorTest {
             throw new AssertionError(e.getMessage());
         } // try catch
 
-        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(
-                originalServiceConfig, originalServicePathConfig, originalCE);
+        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(originalServiceConfig,
+                originalServicePathConfig, originalCE);
         ContextElement mappedCE = map.getRight();
         boolean equals = true;
 
@@ -745,7 +558,8 @@ public class NGSINameMappingsInterceptorTest {
     } // testDoMapConfig2
 
     /**
-     * [NGSIGroupingInterceptor.doMapConfig3] -------- A mapped ContextElement can be obtained from the Name Mappings.
+     * [NGSIGroupingInterceptor.doMapConfig3] -------- A mapped ContextElement
+     * can be obtained from the Name Mappings.
      */
     @Test
     public void testDoMapConfig3() {
@@ -765,8 +579,8 @@ public class NGSINameMappingsInterceptorTest {
             throw new AssertionError(e.getMessage());
         } // try catch
 
-        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(
-                originalServiceConfig, originalServicePathConfig, originalCE);
+        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(originalServiceConfig,
+                originalServicePathConfig, originalCE);
         ContextElement mappedCE = map.getRight();
         boolean equals = true;
 
@@ -795,9 +609,10 @@ public class NGSINameMappingsInterceptorTest {
             throw e;
         } // try catch
     } // testDoMapConfig3
-    
+
     /**
-     * [NGSIGroupingInterceptor.doMapRegex] -------- A mapped ContextElement can be obtained from the Name Mappings.
+     * [NGSIGroupingInterceptor.doMapRegex] -------- A mapped ContextElement can
+     * be obtained from the Name Mappings.
      */
     @Test
     public void testDoMapRegex() {
@@ -807,7 +622,7 @@ public class NGSINameMappingsInterceptorTest {
         nameMappingsInterceptor.loadNameMappings(nameMappingsRegexStr);
         ContextElement originalCE;
         ContextElement expectedCE;
-        
+
         try {
             originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
             expectedCE = NGSIUtilsForTests.createJsonContextElement(expectedCEStr);
@@ -816,12 +631,12 @@ public class NGSINameMappingsInterceptorTest {
                     + "- FAIL - There was some problem when parsing the ContextElements");
             throw new AssertionError(e.getMessage());
         } // try catch
-        
-        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(
-                originalService, originalServicePath, originalCE);
+
+        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(originalService,
+                originalServicePath, originalCE);
         ContextElement mappedCE = map.getRight();
         boolean equals = true;
-        
+
         if (!mappedCE.getId().equals(expectedCE.getId()) || !mappedCE.getType().equals(expectedCE.getType())) {
             equals = false;
         } else {
@@ -836,7 +651,7 @@ public class NGSINameMappingsInterceptorTest {
                 } // if
             } // for
         } // if else
-        
+
         try {
             assertTrue(equals);
             System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapRegex]")
@@ -847,7 +662,7 @@ public class NGSINameMappingsInterceptorTest {
             throw e;
         } // try catch
     } // testDoMapRegex
-    
+
     private Context createBuilderContext(String nameMappingsConfFile) {
         Context context = new Context();
         context.put("name_mappings_conf_file", nameMappingsConfFile);
@@ -855,12 +670,13 @@ public class NGSINameMappingsInterceptorTest {
     } // createBuilderContext
 
     /**
-     * [NGSIGroupingInterceptor.doMapConfig4] -------- Original fields can be omitted.
+     * [NGSIGroupingInterceptor.doMapConfig4] -------- Original fields can be
+     * omitted.
      */
     @Test
     public void testDoMapConfig4() {
-        System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
-                + "-------- Original fields can be omitted");
+        System.out.println(
+                getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]") + "-------- Original fields can be omitted");
         NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
         nameMappingsInterceptor.loadNameMappings(nameMappingsStrConfig4);
         ContextElement originalCE;
@@ -875,28 +691,28 @@ public class NGSINameMappingsInterceptorTest {
             throw new AssertionError(e.getMessage());
         } // try catch
 
-        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(
-                originalServiceConfig, originalServicePathConfig, originalCE);
+        ImmutableTriple<String, String, ContextElement> map = nameMappingsInterceptor.doMap(originalServiceConfig,
+                originalServicePathConfig, originalCE);
         ContextElement mappedCE = map.getRight();
         boolean equals = true;
 
-        if (!mappedCE.getType().equals(expectedCE.getType()) ) {
-        	System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
+        if (!mappedCE.getType().equals(expectedCE.getType())) {
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
                     + "-  ERROR  - The mapped type is not equal to the expected one");
-        	equals = false;
+            equals = false;
         } else if (!expectedServicePathConfig2.equals(map.getMiddle())) {
-        	System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
                     + "-  ERROR  - The mapped servicePath is not equal to the expected one");
             equals = false;
-        } else if (!mappedCE.getId().equals(expectedCE.getId()) ) {
-        	System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
+        } else if (!mappedCE.getId().equals(expectedCE.getId())) {
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
                     + "-  ERROR  - The mapped Id is not equal to the expected one");
-        	equals = false;
+            equals = false;
         } else if (!map.getLeft().equals(expectedServiceConfig4)) {
-        	System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
+            System.out.println(getTestTraceHead("[NGSIGroupingInterceptor.doMapConfig4]")
                     + "-  ERROR  - The Service tyepe is not equal to the expected one");
-        	equals = false;
-        } else if (true) {}
+            equals = false;
+        } 
 
         try {
             assertTrue(equals);
@@ -908,5 +724,5 @@ public class NGSINameMappingsInterceptorTest {
             throw e;
         } // try catch
     } // testDoMapConfig4
-    
+
 } // NGSINameMappingsInterceptorTest
