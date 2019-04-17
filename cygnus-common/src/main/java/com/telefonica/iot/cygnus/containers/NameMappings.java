@@ -28,7 +28,7 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
  */
 public class NameMappings {
     
-    private static final String DEFAULT_ORIGINAL_MAPPING = "^.*";
+    private static final String DEFAULT_ORIGINAL_MAPPING = "^(.*)";
     private final ArrayList<ServiceMapping> serviceMappings;
     
     private static final CygnusLogger LOGGER = new CygnusLogger(NameMappings.class);
