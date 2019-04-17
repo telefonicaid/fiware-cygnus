@@ -200,13 +200,13 @@ public class NGSINameMappingsInterceptorTest {
     } // testBuilderConfigureNameMappingsConfFileNotEmpty
 
     /**
-     * [NGSINameMappingsInterceptor.Builder.configure] -------- Original field
-     * can be omitted.
+     * [NGSINameMappingsInterceptor.Builder.configure] -------- Configured
+     * 'grouping_rules_conf_file' cannot be null.
      */
     @Test
     public void testBuilderConfigureNameMappingsConfFileNotNull() {
         System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.Builder.configure]")
-                + "-------- Original field can be omitted.");
+                + "-------- Configured 'name_mappings_conf_file' cannot be null");
         NGSINameMappingsInterceptor.Builder builder = new NGSINameMappingsInterceptor.Builder();
         String nameMappingsConfFile = null; // wrong value
         Context context = createBuilderContext(nameMappingsConfFile);
@@ -221,7 +221,7 @@ public class NGSINameMappingsInterceptorTest {
                     + "- FAIL - Null 'name_mappings_conf_file' has not been detected");
             throw e;
         } // try catch
-    } // testBuilderConfigureNameMappingsMissedOriginalFields
+    } // testBuilderConfigureNameMappingsConfFileNotNull
 
     /**
      * [NGSIGroupingInterceptor.getEvents] -------- When a NGSI getRecvTimeTs is
