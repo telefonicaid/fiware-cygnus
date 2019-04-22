@@ -20,14 +20,18 @@ package com.telefonica.iot.cygnus.containers;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
+import com.telefonica.iot.cygnus.log.CygnusLogger;
+
 /**
  *
  * @author frb
  */
 public class NameMappings {
     
+    private static final String DEFAULT_ORIGINAL_MAPPING = "^(.*)";
     private final ArrayList<ServiceMapping> serviceMappings;
     
+    private static final CygnusLogger LOGGER = new CygnusLogger(NameMappings.class);
     /**
      * Constructor.
      */
@@ -43,6 +47,11 @@ public class NameMappings {
      * Purges the Name Mappings if any field is missing or has an invalid value.
      */
     public void purge() {
+        if (serviceMappings != null) {
+            for (ServiceMapping serviceMapping : serviceMappings) {
+                serviceMapping.purge();
+            } // for
+        } // if
     } // purge
     
     /**
@@ -169,6 +178,21 @@ public class NameMappings {
         } // getOriginalServicePattern
         
         /**
+         * Purges the ServiceMappings if any field is missing or has an invalid value.
+         */
+        public void purge() {
+            if (originalService == null ) {
+                originalService = DEFAULT_ORIGINAL_MAPPING;
+                LOGGER.debug("[NameMappings] No originalService found in mapping, using default.");
+            }
+            if (servicePathMappings != null) {
+                for (ServicePathMapping servicePathMapping : servicePathMappings) {
+                    servicePathMapping.purge();
+                } // for
+            } // if
+        } // purge
+        
+        /**
          * Compiles the regular expressions into Java Patterns.
          */
         public void compilePatterns() {
@@ -293,6 +317,21 @@ public class NameMappings {
         public Pattern getOriginalServicePathPattern() {
             return originalServicePathPattern;
         } // getOriginalServicePathPattern
+        
+        /**
+         * Purges the ServicePathMappings if any field is missing or has an invalid value.
+         */
+        public void purge() {
+            if (originalServicePath == null ) {
+                originalServicePath = DEFAULT_ORIGINAL_MAPPING;
+                LOGGER.debug("[NameMappings] No originalServicePath found in mapping, using default.");
+            }
+            if (entityMappings != null) {
+                for (EntityMapping entityMapping : entityMappings) {
+                    entityMapping.purge();
+                } // for
+            } // if
+        } // purge
         
         /**
          * Compiles the regular expressions into Java Patterns.
@@ -438,6 +477,21 @@ public class NameMappings {
         public Pattern getOriginalEntityTypePattern() {
             return originalEntityTypePattern;
         } // getOriginalEntityTypePattern
+        
+        /**
+         * Purges the EntityMappings if any field is missing or has an invalid value.
+         */
+        public void purge() {
+            if (originalEntityId == null ) {
+                originalEntityId = DEFAULT_ORIGINAL_MAPPING;
+                LOGGER.debug("[NameMappings] No originalEntityId found in mapping, using default.");
+            }
+            if (originalEntityType == null ) {
+                originalEntityType = DEFAULT_ORIGINAL_MAPPING;
+                LOGGER.debug("[NameMappings] No originalEntityType found in mapping, using default.");
+            }
+            //TODO purge attributes
+        } // purge
         
         /**
          * Compiles the regular expressions into Java Patterns.
