@@ -243,11 +243,12 @@ public class NGSIMySQLSink extends NGSISink {
             String service = event.getServiceForNaming(enableNameMappings);
             String servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
             String entity = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            String entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
             String attribute = event.getAttributeForNaming(enableNameMappings);
             
             try {
                 String dbName = buildDbName(service);
-                String tableName = buildTableName(servicePathForNaming, entity, attribute);
+                String tableName = buildTableName(servicePathForNaming, entity, entityType, attribute);
                 LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",dbName="
                         + dbName + ", tableName=" + tableName + ")");
                 persistenceBackend.capRecords(dbName, tableName, maxRecords);
@@ -286,6 +287,7 @@ public class NGSIMySQLSink extends NGSISink {
         private String servicePathForData;
         private String servicePathForNaming;
         private String entityForNaming;
+        private String entityType;
         private String attribute;
         private String dbName;
         private String tableName;
@@ -435,9 +437,10 @@ public class NGSIMySQLSink extends NGSISink {
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
             entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
             attribute = event.getAttributeForNaming(enableNameMappings);
             dbName = buildDbName(service);
-            tableName = buildTableName(servicePathForNaming, entityForNaming, attribute);
+            tableName = buildTableName(servicePathForNaming, entityForNaming, entityType, attribute);
         } // initialize
         
         public abstract void aggregate(NGSIEvent cygnusEvent);
@@ -667,7 +670,8 @@ public class NGSIMySQLSink extends NGSISink {
      * @return The MySQL table name
      * @throws CygnusBadConfiguration
      */
-    protected String buildTableName(String servicePath, String entity, String attribute) throws CygnusBadConfiguration {
+    protected String buildTableName(String servicePath, String entity, String entityType, String attribute)
+            throws CygnusBadConfiguration {
         String name;
 
         if (enableEncoding) {
@@ -679,6 +683,11 @@ public class NGSIMySQLSink extends NGSISink {
                     name = NGSICharsets.encodeMySQL(servicePath)
                             + CommonConstants.CONCATENATOR
                             + NGSICharsets.encodeMySQL(entity);
+                    break;
+                case DMBYENTITYTYPE:
+                    name = NGSICharsets.encodeMySQL(servicePath)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodeMySQL(entityType);
                     break;
                 case DMBYATTRIBUTE:
                     name = NGSICharsets.encodeMySQL(servicePath)
@@ -706,6 +715,11 @@ public class NGSIMySQLSink extends NGSISink {
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
                             + NGSIUtils.encode(entity, false, true);
                     break;
+                case DMBYENTITYTYPE:
+                    truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
+                    name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
+                            + NGSIUtils.encode(entityType, false, true);
+                    break;
                 case DMBYATTRIBUTE:
                     truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
@@ -714,7 +728,7 @@ public class NGSIMySQLSink extends NGSISink {
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
+                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY, DMBYENTITYTYPE or DMBYATTRIBUTE");
             } // switch
         } // if else
 

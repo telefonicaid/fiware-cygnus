@@ -17,8 +17,11 @@
  */
 package com.telefonica.iot.cygnus.interceptors;
 
+import com.jcraft.jsch.Logger;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.sinks.NGSIMySQLSink;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import java.util.ArrayList;
@@ -35,6 +38,8 @@ public class NGSIEvent implements Event {
     private byte[] body;
     private ContextElement originalCE;
     private ContextElement mappedCE;
+    
+    private static final CygnusLogger LOGGER = new CygnusLogger(NGSIEvent.class);
     
     /**
      * Constructor.
@@ -163,7 +168,33 @@ public class NGSIEvent implements Event {
             } // if else
         } // if else
     } // getEntityForNaming
-    
+
+    /**
+     * Gets the entity type for naming.
+     * @param enableGrouping
+     * @param enableMappings
+     * @return The entity for naming
+     */
+    public String getEntityTypeForNaming(boolean enableGrouping, boolean enableMappings) {
+        if (enableGrouping) {
+            return headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE);
+        } else if (enableMappings) {
+            if (mappedCE.getType() == null || mappedCE.getType().isEmpty()) {
+             // should never occur since Orion does not allow it
+                LOGGER.error("[NGSIEvent] Entity Type musn´t be empty or null while grouping by entity type. ("
+                        + originalCE.getId() + ")");
+                return "";
+            } else {
+                return mappedCE.getType();
+            } // if else
+        } else {
+            if (originalCE.getType() == null || originalCE.getType().isEmpty()) {
+                return ""; // should never occur since Orion does not allow it
+            } else {
+                return  originalCE.getType();
+            } // if else
+        } // if else
+    } // getEntityTypeForNaming
     /**
      * Gets the attribute for naming.
      * @param enableMappings

@@ -729,6 +729,9 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 case DMBYENTITY:
                     accumulateByEntity(event);
                     break;
+                case DMBYENTITYTYPE:
+                    accumulateByEntityType(event);
+                    break;
                 case DMBYATTRIBUTE:
                     accumulateByAttribute(event);
                     break;
@@ -811,6 +814,37 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
             batch.addEvent(destination, event);
         } // accumulateByEntity
+
+        private void accumulateByEntityType(NGSIEvent event) {
+            Map<String, String> headers = event.getHeaders();
+            ContextElement originalCE = event.getOriginalCE();
+            ContextElement mappedCE = event.getMappedCE();
+            String destination;
+            
+            if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
+                String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
+                
+                if (enableGrouping) {
+                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH)
+                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE);
+                } else {
+                    destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH)
+                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE);
+                } // if else
+            } else {
+                if (enableNameMappings) {
+                    destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
+                            + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH) + "_"
+                            + mappedCE.getType();
+                } else {
+                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
+                            + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
+                            + originalCE.getType();
+                } // if else
+            } // if else
+
+            batch.addEvent(destination, event);
+        } // accumulateByEntityType
 
         private void accumulateByAttribute(NGSIEvent event) {
             Map<String, String> headers = event.getHeaders();
