@@ -1,2 +1,2 @@
 - [cygnus-common] [NMI] Allows th Original values to be omitted in the configuration file. (#1466)
-- [MysqlSink] Adds support for dm-by-entity-type data model. (#687)
+- [cygnus-ngsi] [MysqlSink] Adds support for dm-by-entity-type data model. (#687)
