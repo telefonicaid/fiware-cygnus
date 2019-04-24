@@ -189,7 +189,10 @@ public class NGSIEvent implements Event {
             } // if else
         } else {
             if (originalCE.getType() == null || originalCE.getType().isEmpty()) {
-                return ""; // should never occur since Orion does not allow it
+             // should never occur since Orion does not allow it
+                LOGGER.error("[NGSIEvent] Entity Type musn´t be empty or null while grouping by entity type. ("
+                        + originalCE.getId() + ")");
+                return "";
             } else {
                 return  originalCE.getType();
             } // if else

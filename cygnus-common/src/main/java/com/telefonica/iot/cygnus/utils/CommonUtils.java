@@ -242,6 +242,8 @@ public final class CommonUtils {
                 return "dm-by-service-path";
             case DMBYENTITY:
                 return "dm-by-entity";
+            case DMBYENTITYTYPE:
+                return "dm-by-entity-type";
             case DMBYATTRIBUTE:
                 return "dm-by-attribute";
             default:

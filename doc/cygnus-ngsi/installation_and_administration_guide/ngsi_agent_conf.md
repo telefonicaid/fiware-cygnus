@@ -245,7 +245,7 @@ cygnus-ngsi.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSin
 #cygnus-ngsi.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 #cygnus-ngsi.sinks.mysql-sink.attr_persistence = column
-# select the data_model: dm-by-service-path or dm-by-entity
+# select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type
 #cygnus-ngsi.sinks.mysql-sink.data_model = dm-by-entity
 # number of notifications to be included within a processing batch
 #cygnus-ngsi.sinks.mysql-sink.batch_size = 100

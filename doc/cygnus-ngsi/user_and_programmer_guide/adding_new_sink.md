@@ -45,7 +45,7 @@ All the sinks extending `NGSISink` inherit the following configuration parameter
 | batch_size | no | 1 | Number of events accumulated before persistence. |
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
-| data_model | no | dm-by-entity | Accepted values: <i>dm-by-service</i>, <i>dm-by-service-path</i>, <i>dm-by-entity</i> and <dm-by-attribute</i>. |
+| data_model | no | dm-by-entity | Accepted values: <i>dm-by-service</i>, <i>dm-by-service-path</i>, <i>dm-by-entity</i>, <i>dm-by-entity-type</i> and <dm-by-attribute</i>. |
 | enable_grouping | no | false | Accepted values: <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | Accepted values: <i>true</i> or <i>false</i>. |
 
