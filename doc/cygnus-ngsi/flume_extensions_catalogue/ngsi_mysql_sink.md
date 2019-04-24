@@ -162,7 +162,7 @@ Using the new encoding:
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-entity` |
 |---|---|---|---|
-| `/` | `x002f` | `car1xffffcar` | `x002fxffffcar` |
+| `/` | `x002f` | `x002fxffffcar1xffffcar` | `x002fxffffcar` |
 | `/wheels` | `x002f4wheels` | `x002f4wheelsxffffcar1xffffcar` | `x002f4wheelsxffffcar` |
 
 [Top](#top)
