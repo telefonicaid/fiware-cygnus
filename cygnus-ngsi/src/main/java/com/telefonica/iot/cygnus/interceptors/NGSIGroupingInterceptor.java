@@ -102,14 +102,18 @@ public class NGSIGroupingInterceptor implements Interceptor {
                 + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : CommonConstants.OLD_CONCATENATOR)
                 + originalCE.getType();
         String groupedDestination;
+        String groupedDestinationByType;
         String groupedServicePath;
         
         if (matchingRule == null) {
             groupedDestination = notifiedEntity;
             groupedServicePath = fiwareServicePath;
+            groupedDestinationByType = originalCE.getType();
         } else {
+            LOGGER.debug("[gi] Rule Matched, ruleId = " + matchingRule.getId());
             groupedDestination = matchingRule.getDestination();
             groupedServicePath = matchingRule.getNewFiwareServicePath();
+            groupedDestinationByType = matchingRule.getDestination();
         } // if else
 
         // Set the final header values
@@ -119,6 +123,9 @@ public class NGSIGroupingInterceptor implements Interceptor {
         headers.put(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY, groupedDestination);
         LOGGER.debug("[gi] Adding flume event header (" + NGSIConstants.FLUME_HEADER_GROUPED_ENTITY
                 + ": " + groupedDestination + ")");
+        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE, groupedDestinationByType);
+        LOGGER.debug("[gi] Adding flume event header (" + NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE
+                + ": " + groupedDestinationByType + ")");
         headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH, groupedServicePath);
         LOGGER.debug("[gi] Adding flume event header (" + NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH
                 + ": " + groupedServicePath + ")");
