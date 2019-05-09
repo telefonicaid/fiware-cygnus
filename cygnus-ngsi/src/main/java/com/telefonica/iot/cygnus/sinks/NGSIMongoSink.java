@@ -231,7 +231,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 
                 // check if the attribute value is based on white spaces
-                if (ignoreWhiteSpaces && attrValue && attrValue.trim().length() == 0) {
+                if (ignoreWhiteSpaces && attrValue != null && attrValue.trim().length() == 0) {
                     continue;
                 } // if
                 
@@ -361,7 +361,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                 String attrValue = contextAttribute.getContextValue(false);
                 
                 // check if the attribute value is based on white spaces
-                if (ignoreWhiteSpaces && attrValue && attrValue.trim().length() == 0) {
+                if (ignoreWhiteSpaces && attrValue != null && attrValue.trim().length() == 0) {
                     continue;
                 } // if
                 

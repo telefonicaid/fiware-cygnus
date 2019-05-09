@@ -597,9 +597,9 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             txn.commit();
         } catch (ChannelException ex) {
             LOGGER.info("Rollback transaction by ChannelException  (" + ex.getMessage() + ")");
-            tx.rollback();
+            txn.rollback();
         } finally {
-            tx.close();
+            txn.close();
         }
         setMDCToNA();
         return Status.READY;
