@@ -46,6 +46,7 @@ import org.apache.flume.Event;
 import org.apache.flume.EventDeliveryException;
 import org.apache.flume.Sink.Status;
 import org.apache.flume.Transaction;
+import org.apache.flume.ChannelException;
 import org.apache.flume.conf.Configurable;
 import org.apache.log4j.MDC;
 
