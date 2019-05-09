@@ -95,7 +95,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
                     + attrMetadataStore + ") must be 'true' or 'false'");
         } // if else 
-		
+
         super.configure(context);
     } // configure
 
@@ -231,7 +231,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 
                 // check if the attribute value is based on white spaces
-                if (ignoreWhiteSpaces && attrValue.trim().length() == 0) {
+                if (ignoreWhiteSpaces && attrValue && attrValue.trim().length() == 0) {
                     continue;
                 } // if
                 
@@ -256,7 +256,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                 } else {
                     doc = createDoc(recvTimeTs, entityId, entityType, attrName, attrType, attrValue);
                 } // if else
-		                
+
                 aggregation.add(doc);
             } // for
         } // aggregate
@@ -289,7 +289,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                 return null; // this will never be reached
             } // switch
 
-            return doc;			
+            return doc;
         } // createDocWithMetadata
         
         private Document createDoc(long recvTimeTs, String entityId, String entityType, String attrName,
@@ -361,7 +361,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                 String attrValue = contextAttribute.getContextValue(false);
                 
                 // check if the attribute value is based on white spaces
-                if (ignoreWhiteSpaces && attrValue.trim().length() == 0) {
+                if (ignoreWhiteSpaces && attrValue && attrValue.trim().length() == 0) {
                     continue;
                 } // if
                 
@@ -369,7 +369,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                         + attrType + ")");
                 doc.append(attrName, attrValue);
             } // for
-            
+
             aggregation.add(doc);
         } // aggregate
         

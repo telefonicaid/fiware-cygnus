@@ -322,7 +322,7 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 
                 // Check if the attribute value is based on white spaces
-                if (ignoreWhiteSpaces && attrValue.trim().length() == 0) {
+                if (ignoreWhiteSpaces && attrValue && attrValue.trim().length() == 0) {
                     continue;
                 } // if
                 
@@ -339,7 +339,7 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
                         + attrType + ")");
                 
                 // Get current aggregation for this attribute, or cerate them if not existing
-                if (CommonUtils.isANumber(attrValue)) {
+                if (attrValue && CommonUtils.isANumber(attrValue)) {
                     STHNumericAggregation aggr = numericAggrs.get(attrName + "xffff" + attrType);
                     
                     if (aggr == null) {
