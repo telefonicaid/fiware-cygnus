@@ -114,7 +114,7 @@ public class MongoBackendImpl implements MongoBackend {
             } // if else
         } // try catch
 
-        // ensure the _id.origin index, if possible
+        // check STH indexes documentation at https://github.com/telefonicaid/fiware-sth-comet/blob/master/doc/manuals/db_indexes.md
         try {
             BasicDBObject keys = new BasicDBObject()
                 .append("_id.entityId", 1)
@@ -170,7 +170,7 @@ public class MongoBackendImpl implements MongoBackend {
             } // if else
         } // try catch
 
-        // ensure the recvTime index, if possible
+        // check STH indexes documentation at https://github.com/telefonicaid/fiware-sth-comet/blob/master/doc/manuals/db_indexes.md
         try {
             BasicDBObject keys = new BasicDBObject()
                 .append("entityId", 1)
