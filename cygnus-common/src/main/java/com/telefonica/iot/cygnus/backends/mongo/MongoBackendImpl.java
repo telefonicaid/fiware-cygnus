@@ -124,8 +124,8 @@ public class MongoBackendImpl implements MongoBackend {
             IndexOptions options = new IndexOptions();
             db.getCollection(collectionName).createIndex(keys, options);
             if (dataExpiration != 0) {
-                BasicDBObject keys = new BasicDBObject().append("_id.origin", 1);
-                IndexOptions options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
+                keys = new BasicDBObject().append("_id.origin", 1);
+                options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
                 db.getCollection(collectionName).createIndex(keys, options);
             } // if
         } catch (Exception e) {
@@ -179,8 +179,8 @@ public class MongoBackendImpl implements MongoBackend {
             IndexOptions options = new IndexOptions();
             db.getCollection(collectionName).createIndex(keys, options);
             if (dataExpiration != 0) {
-                BasicDBObject keys = new BasicDBObject().append("recvTime", 1);
-                IndexOptions options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
+                keys = new BasicDBObject().append("recvTime", 1);
+                options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
                 db.getCollection(collectionName).createIndex(keys, options);
             } // if
         } catch (Exception e) {
