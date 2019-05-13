@@ -116,23 +116,18 @@ public class MongoBackendImpl implements MongoBackend {
 
         // ensure the _id.origin index, if possible
         try {
+            BasicDBObject keys = new BasicDBObject()
+                .append("_id.entityId", 1)
+                .append("_id.attrName", 1)
+                .append("_id.resolution", 1)
+                .append("_id.origin", 1);
+            IndexOptions options = new IndexOptions();
+            db.getCollection(collectionName).createIndex(keys, options);
             if (dataExpiration != 0) {
-                BasicDBObject keys = new BasicDBObject()
-                    .append("_id.entityId", 1)
-                    .append("_id.attrName", 1)
-                    .append("_id.resolution", 1)
-                    .append("_id.origin", 1);
+                BasicDBObject keys = new BasicDBObject().append("_id.origin", 1);
                 IndexOptions options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
                 db.getCollection(collectionName).createIndex(keys, options);
-            } else {
-                BasicDBObject keys = new BasicDBObject()
-                    .append("_id.entityId", 1)
-                    .append("_id.attrName", 1)
-                    .append("_id.resolution", 1)
-                    .append("_id.origin", 1);
-                IndexOptions options = new IndexOptions();
-                db.getCollection(collectionName).createIndex(keys, options);
-            } // if else
+            } // if
         } catch (Exception e) {
             throw e;
         } // try catch
@@ -176,23 +171,18 @@ public class MongoBackendImpl implements MongoBackend {
 
         // ensure the recvTime index, if possible
         try {
+            BasicDBObject keys = new BasicDBObject()
+                .append("entityId", 1)
+                .append("entityType", 1)
+                .append("attrName", 1)
+                .append("recvTime", 1);
+            IndexOptions options = new IndexOptions();
+            db.getCollection(collectionName).createIndex(keys, options);
             if (dataExpiration != 0) {
-                BasicDBObject keys = new BasicDBObject()
-                    .append("entityId", 1)
-                    .append("entityType", 1)
-                    .append("attrName", 1)
-                    .append("recvTime", 1);
+                BasicDBObject keys = new BasicDBObject().append("recvTime", 1);
                 IndexOptions options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
                 db.getCollection(collectionName).createIndex(keys, options);
-            } else {
-                BasicDBObject keys = new BasicDBObject()
-                    .append("entityId", 1)
-                    .append("entityType", 1)
-                    .append("attrName", 1)
-                    .append("recvTime", 1);
-                IndexOptions options = new IndexOptions();
-                db.getCollection(collectionName).createIndex(keys, options);
-            } // if else
+            } // if
         } catch (Exception e) {
             throw e;
         } // try catch
