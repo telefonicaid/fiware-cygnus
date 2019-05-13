@@ -118,6 +118,7 @@ public class MongoBackendImpl implements MongoBackend {
         try {
             BasicDBObject keys = new BasicDBObject()
                 .append("_id.entityId", 1)
+                .append("_id.entityType", 1)
                 .append("_id.attrName", 1)
                 .append("_id.resolution", 1)
                 .append("_id.origin", 1);
