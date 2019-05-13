@@ -117,10 +117,22 @@ public class MongoBackendImpl implements MongoBackend {
         // ensure the _id.origin index, if possible
         try {
             if (dataExpiration != 0) {
-                BasicDBObject keys = new BasicDBObject().append("_id.origin", 1);
+                BasicDBObject keys = new BasicDBObject()
+                    .append("_id.entityId", 1)
+                    .append("_id.attrName", 1)
+                    .append("_id.resolution", 1)
+                    .append("_id.origin", 1);
                 IndexOptions options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
                 db.getCollection(collectionName).createIndex(keys, options);
-            } // if
+            } else {
+                BasicDBObject keys = new BasicDBObject()
+                    .append("_id.entityId", 1)
+                    .append("_id.attrName", 1)
+                    .append("_id.resolution", 1)
+                    .append("_id.origin", 1);
+                IndexOptions options = new IndexOptions();
+                db.getCollection(collectionName).createIndex(keys, options);
+            } // if else
         } catch (Exception e) {
             throw e;
         } // try catch
