@@ -177,10 +177,22 @@ public class MongoBackendImpl implements MongoBackend {
         // ensure the recvTime index, if possible
         try {
             if (dataExpiration != 0) {
-                BasicDBObject keys = new BasicDBObject().append("recvTime", 1);
+                BasicDBObject keys = new BasicDBObject()
+                    .append("entityId", 1)
+                    .append("entityType", 1)
+                    .append("attrName", 1)
+                    .append("recvTime", 1);
                 IndexOptions options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
                 db.getCollection(collectionName).createIndex(keys, options);
-            } // if
+            } else {
+                BasicDBObject keys = new BasicDBObject()
+                    .append("entityId", 1)
+                    .append("entityType", 1)
+                    .append("attrName", 1)
+                    .append("recvTime", 1);
+                IndexOptions options = new IndexOptions();
+                db.getCollection(collectionName).createIndex(keys, options);
+            } // if else
         } catch (Exception e) {
             throw e;
         } // try catch
