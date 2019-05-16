@@ -500,7 +500,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 if (event == null) {
                     accumulator.setAccIndex(currentIndex);
                     txn.commit();
-                    txn.close();
                     // to-do: this must be uncomment once multiple transaction and correlation IDs are traced in logs
                     //setMDCToNA();
                     return Status.BACKOFF; // Slow down the sink since no events are available
@@ -563,7 +562,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
                     accumulator.initialize(new Date().getTime());
                     txn.commit();
-                    txn.close();
                     setMDCToNA();
                     return Status.READY;
                 } catch (CygnusPersistenceError e) {
@@ -572,7 +570,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     doRollback(accumulator.clone()); // the global accumulator has to be cloned for rollbacking purposes
                     accumulator.initialize(new Date().getTime());
                     txn.commit();
-                    txn.close();
                     setMDCToNA();
                     return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
                 } // try catch
