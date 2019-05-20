@@ -1,6 +1,6 @@
 site_name: fiware-cygnus
 site_url: https://fiware-cygnus.readthedocs.org
-repo_url: https://github.com/telefonicaid/fiware-cygnus.git
+repo_url: https://github.com/telefonicaid/fiware-cygnus
 site_description: Cygnus Documentation
 docs_dir: doc
 site_dir: html
