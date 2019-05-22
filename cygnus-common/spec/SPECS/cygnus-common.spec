@@ -171,6 +171,9 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed May 22 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.13.0
+- [cygnus-common][NMI] Allows th Original values to be omitted in the configuration file (#1466)
+
 * Wed Apr 10 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.12.0
 - [cygnus-common][PostgreSQL] Add connection pool
 - [cygnus-common][YAFS][bugfix] Fixed issue, missmatching Jetty threads causes Cygnus crash (#1616)
