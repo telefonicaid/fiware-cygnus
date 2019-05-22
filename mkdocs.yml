@@ -4,6 +4,7 @@ repo_url: https://github.com/telefonicaid/fiware-cygnus
 site_description: Cygnus Documentation
 docs_dir: doc
 site_dir: html
+edit_uri: edit/master/doc/
 markdown_extensions: [toc,fenced_code]
 use_directory_urls: false
 theme: readthedocs
