@@ -99,6 +99,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed May 22 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.13.0
+- [cygnus-ngsi][MysqlSink] Adds support for dm-by-entity-type data model (#687)
+- [cygnus-ngsi][NGSIMongoSink][NGSISTHSink][NGSISink] Close flume transaction at exception (#1635)
+- [cygnus-ngsi][STHSink] Adds mongodb indexes management for STH collections (#1637)
+
 * Wed Apr 10 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.12.0
 - [cygnus-ngsi][NGSIHandler] Fix unexpected exception, instead 400 is returned when a non valid API request (#1588)
 - [cygnus-ngsi][PostGIS] Add PostGIS sink based on PostgreSQL backend (#1618)
