@@ -1,0 +1,1 @@
+[cygnus-common][MongoDB] Warn about index creation error instead of throw exception and about create collection (#1649)
