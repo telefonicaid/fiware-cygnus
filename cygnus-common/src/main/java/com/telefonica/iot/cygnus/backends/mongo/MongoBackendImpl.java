@@ -130,7 +130,7 @@ public class MongoBackendImpl implements MongoBackend {
                 db.getCollection(collectionName).createIndex(keys, options);
             } // if
         } catch (Exception e) {
-            throw e;
+            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
         } // try catch
     } // createCollection
 
