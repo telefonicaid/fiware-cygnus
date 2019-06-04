@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 TIS Inc.
+ * Copyright 2018 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FIWARE project).
  *
@@ -14,8 +14,10 @@
  * http://www.gnu.org/licenses/.
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
+ *
+ * Authorship: TIS Inc.
+ *
  */
-
 package com.telefonica.iot.cygnus.backends.elasticsearch;
 
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
