@@ -212,7 +212,7 @@ ENV CYGNUS_ELASTICSEARCH_CACHE_FLASH_INTERVAL_SEC ""
 
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
-ARG GIT_URL_CYGNUS="https://github.com/telefonicaid/fiware-cygnus.git"
+ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
 ENV GIT_REV_CYGNUS "master"
 
