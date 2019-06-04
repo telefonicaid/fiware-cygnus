@@ -23,7 +23,7 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 /**
  * Keystone Authentication Backend.
  * 
- * @author dmartinez - PMO Santander Smart City
+ * @author PMO Santander Smart City – Ayuntamiento de Santander
  */
 public interface KeyStoneUtils {
 

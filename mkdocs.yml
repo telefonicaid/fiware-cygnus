@@ -1,13 +1,14 @@
 site_name: fiware-cygnus
 site_url: https://fiware-cygnus.readthedocs.org
-repo_url: https://github.com/telefonicaid/fiware-cygnus.git
+repo_url: https://github.com/telefonicaid/fiware-cygnus
 site_description: Cygnus Documentation
 docs_dir: doc
 site_dir: html
+edit_uri: edit/master/doc/
 markdown_extensions: [toc,fenced_code]
 use_directory_urls: false
 theme: readthedocs
-extra_css: ["https://fiware.org/style/fiware_readthedocs.css"]
+extra_css: ["https://fiware.org/style/fiware_readthedocs.css", "https://fiware.org/style/fiware_readthedocs_core.css"]
 google_analytics: ['UA-84866051-2', 'fiware-cygnus.readthedocs.io']
 pages:
   - Home: index.md
@@ -83,7 +84,9 @@ pages:
           - 'NGSIMongoSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_mongo_sink.md'
           - 'NGSIMySQLSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_mysql_sink.md'
           - 'NGSIPostgreSQLSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_postgresql_sink.md'
+          - 'NGSIPostGISSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_postgis_sink.md'
           - 'NGSISTHSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_sth_sink.md'
+          - 'NGSIOrionSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_orion_sink.md'
           - 'NGSITestSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_test_sink.md'
           - 'NGSIGroupingInterceptor': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md'
           - 'NGSINameMappingsInterceptor': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md'

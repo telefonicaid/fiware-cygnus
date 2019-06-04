@@ -1,4 +1,4 @@
-# <a name="top"></a>Management interface
+# <a name="top"></a>Management interface: v1.0 API (Beta)
 Content:
 
 * [Apiary version of this document](#section1)
@@ -41,9 +41,18 @@ Content:
     * [GET `/v1/admin/metrics`](#section7.1)
     * [DELETE `/v1/admin/metrics`](#section7.2)
 * [Available aliases](#section8)
+* [Name Mappings](#section9)
+    * [GET `/v1/namemappings`](#section9.1)
+    * [POST `/v1/namemappings`](#section9.2)
+    * [PUT `/v1/namemappings`](#section9.3)
+    * [DELETE `/v1/namemappings`](#section9.4)
+
+
 
 ## <a name="section1"></a>Apiary version of this document
-This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/latests) as well.
+This API specification can be checked at [Apiary](https://telefonicaid.github.io/fiware-cygnus/api/latest) as well.
+
+See also [Original API](./management_interface.md)
 
 [Top](#top)
 
@@ -157,8 +166,11 @@ Response:
 
 [Top](#top)
 
+
+
 ## <a name="section4"></a>Grouping Rules
 ### <a name="section4.1"></a>`GET /v1/groupingrules`
+
 Gets the configured [grouping rules](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md).
 
 ```
@@ -201,10 +213,10 @@ Adds a new rule, passed as a Json in the payload, to the [grouping rules](../../
 ```
 POST http://<cygnus_host>:<management_port>/v1/groupingrules
 {
-	"regex": "Room",
-	"destination": "allrooms",
-	"fiware_service_path": "rooms",
-	"fields": ["entityType"]
+    "regex": "Room",
+    "destination": "allrooms",
+    "fiware_service_path": "rooms",
+    "fields": ["entityType"]
 }
 ```
 
@@ -224,10 +236,10 @@ Updates an already existent [grouping rules](../../cygnus-ngsi/flume_extensions_
 ```
 PUT http://<cygnus_host>:<management_port>/v1/groupingrules=id=2
 {
-	"regex": "Room",
-	"destination": "otherrooms",
-	"fiware_service_path": "rooms",
-	"fields": ["entityType"]
+    "regex": "Room",
+    "destination": "otherrooms",
+    "fiware_service_path": "rooms",
+    "fields": ["entityType"]
 }
 ```
 
@@ -655,14 +667,14 @@ Puts an appender in a running Cygnus given a JSON with the information about the
 ```
 PUT "http://<cygnus_host>:<management_port>/v1/admin/log/appenders?transient=<transient_value>" -d
 '{
-	"appender": {
-		"name":".....",
-		"class":"....."
-	  },
-	  "pattern": {
-		"layout":".....",
-		"ConversionPattern":"....."  
-	  }
+      "appender": {
+        "name":".....",
+        "class":"....."
+      },
+      "pattern": {
+        "layout":".....",
+        "ConversionPattern":"....."
+      }
   }'
 ```
 
@@ -703,14 +715,14 @@ Posts an appender in a running Cygnus given a JSON with the information about th
 ```
 POST "http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=<transient_value>" -d
 '{
-	"appender": {
-		"name":".....",
-		"class":"....."
-	  },
-	  "pattern": {
-		"layout":".....",
-		"ConversionPattern":"....."  
-	 }
+      "appender": {
+        "name":".....",
+        "class":"....."
+      },
+      "pattern": {
+        "layout":".....",
+        "ConversionPattern":"....."
+     }
   }'
 ```
 
@@ -751,10 +763,10 @@ Puts an logger in a running Cygnus given a JSON with the information about the n
 ```
 PUT "http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=false" -d
 '{
-	"logger": {
-		"name":".....",
-		"level":"....."
-	}
+    "logger": {
+        "name":".....",
+        "level":"....."
+    }
 }'
 ```
 
@@ -796,10 +808,10 @@ Posts an logger in a running Cygnus given a JSON with the information about the 
 ```
 POST "http://<cygnus_host>:<management_port>/v1/admin/log/loggers?transient=false" -d
 '{
-	"logger": {
-		"name":".....",
-		"level":"....."
-	}
+    "logger": {
+        "name":".....",
+        "level":"....."
+    }
 }'
 ```
 
@@ -1041,3 +1053,335 @@ Response:
 |DELETE /admin/metrics|DELETE /v1/admin/metrics|
 
 [Top](#top)
+
+## <a name="section9"></a>Name Mappings
+### <a name="section9.1"></a>`GET /v1/namemappings`
+Gets the configured [name mappings](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md).
+
+```
+GET http://<cygnus_host>:<management_port>/v1/namemappings
+```
+
+Response:
+
+```
+{
+    "success":"true",
+    "serviceMapping": [
+        {
+            "originalService":"service1",
+            "newService":"newService1",
+            "servicePathMappings": [
+                {
+                    "originalServicePath":"/servicePath1",
+                    "newServicePath":"/newServicePath1",
+                    "entityMappings": [
+                        {
+                            "originalEntityId":"entityId1",
+                            "originalEntityType":"entityType1",
+                            "newEntityId":"newEntityId1",
+                            "newEntityType":"newEntityType1",
+                            "attributeMappings":[
+                                {
+                                    "originalAttributeName":"attrName1",
+                                    "originalAttributeType":"attrType1",
+                                    "newAttributeName":"newAttrName1",
+                                    "newAttributeType":"newAttrType1"
+                                },{
+                                   ...
+                                }
+                            ]
+                        },{
+                           ...
+                        }
+                    ]
+                },{
+                   ...
+                }
+            ]
+        },{
+           ...
+        }
+    ]
+}
+
+```
+
+[Top](#top)
+
+### <a name="section9.2"></a>`POST /v1/namemappings`
+Adds new [name mappings](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md) to the configured ones. The new mappings are given within the request payload, following the Name Mappings Json format (for instance, if a new entity mapping has to be added, the service and the service path it belongs to must be present in the Json as well). All the mappings within the payload that are not present in the configuration are added. More details in [name mappings sintax](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md#section1.1)
+
+```
+POST http://<cygnus_host>:<management_port>/v1/namemappings
+
+{
+    "serviceMapping": [
+        {
+            "originalService":"service1",
+            "newService":"newService1",
+            "servicePathMappings": [
+                {
+                    "originalServicePath":"/servicePath1",
+                    "newServicePath":"/newServicePath1",
+                    "entityMappings": [
+                        {
+                            "originalEntityId":"entityId1",
+                            "originalEntityType":"entityType1",
+                            "newEntityId":"newEntityId1",
+                            "newEntityType":"newEntityType1",
+                            "attributeMappings":[
+                                {
+                                    "originalAttributeName":"attrName1",
+                                    "originalAttributeType":"attrType1",
+                                    "newAttributeName":"newAttrName1",
+                                    "newAttributeType":"newAttrType1"
+                                },{
+                                   ...
+                                }
+                            ]
+                        },{
+                           ...
+                        }
+                    ]
+                },{
+                   ...
+                }
+            ]
+        },{
+           ...
+        }
+    ]
+}
+```
+
+Response:
+
+```
+{
+    "success":"true",
+    "serviceMapping": [
+        {
+            "originalService":"service1",
+            "newService":"newService1",
+            "servicePathMappings": [
+                {
+                    "originalServicePath":"/servicePath1",
+                    "newServicePath":"/newServicePath1",
+                    "entityMappings": [
+                        {
+                            "originalEntityId":"entityId1",
+                            "originalEntityType":"entityType1",
+                            "newEntityId":"newEntityId1",
+                            "newEntityType":"newEntityType1",
+                            "attributeMappings":[
+                                {
+                                    "originalAttributeName":"attrName1",
+                                    "originalAttributeType":"attrType1",
+                                    "newAttributeName":"newAttrName1",
+                                    "newAttributeType":"newAttrType1"
+                                },{
+                                   ...
+                                }
+                            ]
+                        },{
+                           ...
+                        }
+                    ]
+                },{
+                   ...
+                }
+            ]
+        },{
+           ...
+        }
+    ]
+}
+```
+
+[Top](#top)
+
+### <a name="section9.3"></a>`PUT /v1/namemappings`
+Updates already existent [name mappings](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md). The updated mappings are given within the request payload, following the Name Mappings Json format (for instance, if an already existent entity mapping has to be updated, the service and the service path it belongs to must be present in the Json as well). All the mappings within the payload that are present in the configuration are updated.
+
+```
+PUT http://<cygnus_host>:<management_port>/v1/namemappings
+
+{
+    "serviceMapping": [
+        {
+            "originalService":"service1",
+            "newService":"newService1",
+            "servicePathMappings": [
+                {
+                    "originalServicePath":"/servicePath1",
+                    "newServicePath":"/newServicePath1",
+                    "entityMappings": [
+                        {
+                            "originalEntityId":"entityId1",
+                            "originalEntityType":"entityType1",
+                            "newEntityId":"newEntityId1",
+                            "newEntityType":"newEntityType1",
+                            "attributeMappings":[
+                                {
+                                    "originalAttributeName":"attrName1",
+                                    "originalAttributeType":"attrType1",
+                                    "newAttributeName":"newAttrName1",
+                                    "newAttributeType":"newAttrType1"
+                                },{
+                                   ...
+                                }
+                            ]
+                        },{
+                           ...
+                        }
+                    ]
+                },{
+                   ...
+                }
+            ]
+        },{
+           ...
+        }
+    ]
+}
+```
+
+Response:
+
+```
+{
+    "success":"true",
+    "serviceMapping": [
+        {
+            "originalService":"service1",
+            "newService":"newService1",
+            "servicePathMappings": [
+                {
+                    "originalServicePath":"/servicePath1",
+                    "newServicePath":"/newServicePath1",
+                    "entityMappings": [
+                        {
+                            "originalEntityId":"entityId1",
+                            "originalEntityType":"entityType1",
+                            "newEntityId":"newEntityId1",
+                            "newEntityType":"newEntityType1",
+                            "attributeMappings":[
+                                {
+                                    "originalAttributeName":"attrName1",
+                                    "originalAttributeType":"attrType1",
+                                    "newAttributeName":"newAttrName1",
+                                    "newAttributeType":"newAttrType1"
+                                },{
+                                   ...
+                                }
+                            ]
+                        },{
+                           ...
+                        }
+                    ]
+                },{
+                   ...
+                }
+            ]
+        },{
+           ...
+        }
+    ]
+}
+```
+
+[Top](#top)
+
+### <a name="section9.4"></a>`DELETE /v1/namemappings`
+Deletes already existent [name mappings](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md). The deleted mappings are given within the request payload, following the Name Mappings Json format (for instance, if an already existent entity mapping has to be deleted, the service and the service path it belongs to must be present in the Json as well). All the mappings within the payload that are present in the configuration are deleted.
+
+```
+DELETE http://<cygnus_host>:<management_port>/v1/namemappings
+
+{
+    "serviceMapping": [
+        {
+            "originalService":"service1",
+            "newService":"newService1",
+            "servicePathMappings": [
+                {
+                    "originalServicePath":"/servicePath1",
+                    "newServicePath":"/newServicePath1",
+                    "entityMappings": [
+                        {
+                            "originalEntityId":"entityId1",
+                            "originalEntityType":"entityType1",
+                            "newEntityId":"newEntityId1",
+                            "newEntityType":"newEntityType1",
+                            "attributeMappings":[
+                                {
+                                    "originalAttributeName":"attrName1",
+                                    "originalAttributeType":"attrType1",
+                                    "newAttributeName":"newAttrName1",
+                                    "newAttributeType":"newAttrType1"
+                                },{
+                                   ...
+                                }
+                            ]
+                        },{
+                           ...
+                        }
+                    ]
+                },{
+                   ...
+                }
+            ]
+        },{
+           ...
+        }
+    ]
+}
+```
+
+Response:
+
+```
+{
+    "success":"true",
+    "serviceMapping": [
+        {
+            "originalService":"service1",
+            "newService":"newService1",
+            "servicePathMappings": [
+                {
+                    "originalServicePath":"/servicePath1",
+                    "newServicePath":"/newServicePath1",
+                    "entityMappings": [
+                        {
+                            "originalEntityId":"entityId1",
+                            "originalEntityType":"entityType1",
+                            "newEntityId":"newEntityId1",
+                            "newEntityType":"newEntityType1",
+                            "attributeMappings":[
+                                {
+                                    "originalAttributeName":"attrName1",
+                                    "originalAttributeType":"attrType1",
+                                    "newAttributeName":"newAttrName1",
+                                    "newAttributeType":"newAttrType1"
+                                },{
+                                   ...
+                                }
+                            ]
+                        },{
+                           ...
+                        }
+                    ]
+                },{
+                   ...
+                }
+            ]
+        },{
+           ...
+        }
+    ]
+}
+```
+
+[Top](#top)
+

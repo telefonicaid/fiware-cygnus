@@ -16,22 +16,25 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
-FROM centos:centos7.4.1708
+FROM centos:centos7.6.1810
 
 MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
 
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "1.9.0_SNAPSHOT"
+ENV CYGNUS_VERSION "1.13.0_SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
 ENV CYGNUS_LOG_LEVEL "INFO"
 ENV CYGNUS_LOG_APPENDER "console"
 ENV CYGNUS_SERVICE_PORT "5050"
+ENV CYGNUS_JAVA_OPTS "-Xms2048m -Xmx4096m"
 ENV CYGNUS_API_PORT "5080"
 ENV CYGNUS_MULTIAGENT false
+ENV CYGNUS_MONITORING_TYPE ""
+
 # These variables are optional ENV variables to docker runtime
 
 # MySQL options
@@ -140,19 +143,6 @@ ENV CYGNUS_POSTGRESQL_ENABLE_CACHE ""
 # ENV CYGNUS_CARTO_USER ""
 # ENV CYGNUS_CARTO_KEY ""
 
-# Elasticsearch options
-ENV CYGNUS_ELASTICSEARCH_HOST ""
-ENV CYGNUS_ELASTICSEARCH_PORT ""
-ENV CYGNUS_ELASTICSEARCH_SSL ""
-ENV CYGNUS_ELASTICSEARCH_INDEX_PREFIX ""
-ENV CYGNUS_ELASTICSEARCH_MAPPING_TYPE ""
-ENV CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONNS ""
-ENV CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONSS_PER_ROUTE ""
-ENV CYGNUS_ELASTICSEARCH_IGNORE_WHITE_SPACES ""
-ENV CYGNUS_ELASTICSEARCH_ATTR_PERSISTENCE ""
-ENV CYGNUS_ELASTICSEARCH_TIMEZONE ""
-ENV CYGNUS_ELASTICSEARCH_CAST_VALUE ""
-ENV CYGNUS_ELASTICSEARCH_CACHE_FLASH_INTERVAL_SEC ""
 
 # Docker Secrets Support - The following equivalents to storing clear text usernames and passwords are also available:
 #
@@ -167,17 +157,69 @@ ENV CYGNUS_ELASTICSEARCH_CACHE_FLASH_INTERVAL_SEC ""
 # ENV CYGNUS_CARTO_USER_FILE
 # ENV CYGNUS_CARTO_KEY_FILE
 
+# Orion options
+ENV CYGNUS_ORION_ENABLE_ENCODING ""
+ENV CYGNUS_ORION_ENABLE_GROUPING ""
+ENV CYGNUS_ORION_ENABLE_NAME_MAPPINGS ""
+ENV CYGNUS_ORION_ENABLE_LOWERCASE ""
+ENV CYGNUS_ORION_HOST ""
+ENV CYGNUS_ORION_PORT ""
+ENV CYGNUS_ORION_SSL ""
+ENV CYGNUS_ORION_USER ""
+ENV CYGNUS_ORION_PASS ""
+ENV CYGNUS_ORION_KEYSTONE_HOST ""
+ENV CYGNUS_ORION_KEYSTONE_PORT ""
+ENV CYGNUS_ORION_KEYSTONE_SSL ""
+ENV CYGNUS_ORION_FIWARE ""
+ENV CYGNUS_ORION_FIWARE_PATH ""
+ENV CYGNUS_ORION_BATCH_SIZE ""
+ENV CYGNUS_ORION_BATCH_TIMEOUT ""
+ENV CYGNUS_ORION_BATCH_TTL ""
+ENV CYGNUS_ORION_BATCH_RETRY_INTERVALS ""
+ENV CYGNUS_ORION_ENABLE_CACHE ""
+
+
+
+# PostgreGIS options
+ENV CYGNUS_POSTGIS_HOST ""
+ENV CYGNUS_POSTGIS_PORT ""
+# ENV CYGNUS_POSTGIS_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+# ENV CYGNUS_POSTGIS_PASS "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+ENV CYGNUS_POSTGIS_ENABLE_ENCODING ""
+ENV CYGNUS_POSTGIS_ENABLE_GROUPING ""
+ENV CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS ""
+ENV CYGNUS_POSTGIS_ENABLE_LOWERCASE ""
+ENV CYGNUS_POSTGIS_ATTR_PERSISTENCE ""
+ENV CYGNUS_POSTGIS_BATCH_SIZE ""
+ENV CYGNUS_POSTGIS_BATCH_TIMEOUT ""
+ENV CYGNUS_POSTGIS_BATCH_TTL ""
+ENV CYGNUS_POSTGIS_ENABLE_CACHE ""
+
+
+# Elasticsearch options
+ENV CYGNUS_ELASTICSEARCH_HOST ""
+ENV CYGNUS_ELASTICSEARCH_PORT ""
+ENV CYGNUS_ELASTICSEARCH_SSL ""
+ENV CYGNUS_ELASTICSEARCH_INDEX_PREFIX ""
+ENV CYGNUS_ELASTICSEARCH_MAPPING_TYPE ""
+ENV CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONNS ""
+ENV CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONSS_PER_ROUTE ""
+ENV CYGNUS_ELASTICSEARCH_IGNORE_WHITE_SPACES ""
+ENV CYGNUS_ELASTICSEARCH_ATTR_PERSISTENCE ""
+ENV CYGNUS_ELASTICSEARCH_TIMEZONE ""
+ENV CYGNUS_ELASTICSEARCH_CAST_VALUE ""
+ENV CYGNUS_ELASTICSEARCH_CACHE_FLASH_INTERVAL_SEC ""
+
 
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ARG GIT_URL_CYGNUS="https://github.com/telefonicaid/fiware-cygnus.git"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
-ARG GIT_REV_CYGNUS="master"
-#ENV GIT_REV_CYGNUS "mybranch"
+ENV GIT_REV_CYGNUS "master"
 
 ENV MVN_VER "3.5.4"
 ENV MVN_HOME "/opt/apache-maven"
 
-ENV FLUME_VER "1.4.0"
+ENV FLUME_VER "1.9.0"
 ENV FLUME_HOME "/opt/apache-flume"
 
 ENV JAVA_VERSION "1.8.0"
@@ -188,7 +230,7 @@ RUN \
     adduser ${CYGNUS_USER} && \
     yum -y install nc java-${JAVA_VERSION}-openjdk-devel git && \
     export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk && \
-    export MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1" && \
+    export MAVEN_OPTS="-Xmx4096m -XX:MaxPermSize=256m -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1" && \
     export MAVEN_ARGS="-B -T4" && \
     # For debug Maven
     # export MAVEN_ARGS="${MAVEN_ARGS} -X -e -Dmaven.compiler.verbose=true" && \
@@ -205,9 +247,6 @@ RUN \
     curl --remote-name --location --insecure --silent --show-error "${FLUME_URL}" && \
     tar zxf apache-flume-${FLUME_VER}-bin.tar.gz && \
     mv apache-flume-${FLUME_VER}-bin ${FLUME_HOME} && \
-    mv ${FLUME_HOME}/lib/httpclient-4.2.1.jar ${FLUME_HOME}/lib/httpclient-4.2.1.jar.old && \
-    mv ${FLUME_HOME}/lib/httpcore-4.2.1.jar ${FLUME_HOME}/lib/httpcore-4.2.1.jar.old && \
-    mv ${FLUME_HOME}/lib/libthrift-0.7.0.jar ${FLUME_HOME}/lib/libthrift-0.7.0.jar.old && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/lib && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/libext && \
@@ -232,6 +271,7 @@ RUN \
     echo "INFO: Instantiate some configuration files" && \
     cp ${CYGNUS_HOME}/cygnus-common/conf/log4j.properties.template ${FLUME_HOME}/conf/log4j.properties && \
     cp ${CYGNUS_HOME}/cygnus-ngsi/conf/grouping_rules.conf.template ${FLUME_HOME}/conf/grouping_rules.conf && \
+    cp ${CYGNUS_HOME}/cygnus-ngsi/conf/name_mappings.conf.template ${FLUME_HOME}/conf/name_mappings.conf && \
     echo "INFO: Create Cygnus log folder" && \
     mkdir -p /var/log/cygnus && \
     echo "INFO: Cleanup to thin the final image... doing optimizations..." && \
@@ -248,17 +288,7 @@ RUN \
     find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en_US' ! -name 'locale.alias' | xargs -r rm -r && rm -f /var/log/*log && \
     bash -c 'localedef --list-archive | grep -v -e "en_US" | xargs localedef --delete-from-archive' && \
     /bin/cp -f /usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.tmpl && \
-    build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf && \
-    echo "INFO: Compacting Cygnus jar files..." && \
-    # Some class needs to pass file because bytecode errors of old jar dependencies
-    pack200 -J-Xmx512m -J-XX:MaxPermSize=128m --effort=5 --segment-limit=786432 --modification-time=latest --pass-file=org/apache/hadoop/hive/shims/Hadoop23Shims.class \
-      ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar.pack.gz \
-      ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
-    pack200 -J-Xmx512m -J-XX:MaxPermSize=128m --effort=5 --segment-limit=786432 --modification-time=latest --pass-file=org/apache/hadoop/hive/shims/Hadoop23Shims.class \
-      ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar.pack.gz \
-      ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
-    rm -f ${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar && \
-    rm -f ${FLUME_HOME}/plugins.d/cygnus/lib/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar
+    build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf
 
 
 COPY cygnus-entrypoint.sh / 

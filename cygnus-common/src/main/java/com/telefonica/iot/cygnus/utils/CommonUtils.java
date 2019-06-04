@@ -45,7 +45,7 @@ import kafka.common.OffsetOutOfRangeException;
 import kafka.tools.KafkaMigrationTool;
 import org.I0Itec.zkclient.exception.ZkNoNodeException;
 import org.apache.flume.interceptor.RegexExtractorInterceptorMillisSerializer;
-import org.apache.hadoop.hive.jdbc.HivePreparedStatement;
+import org.apache.hive.jdbc.HivePreparedStatement;
 import org.apache.hadoop.hive.ql.exec.AbstractMapJoinOperator;
 import org.apache.hadoop.metrics.spi.AbstractMetricsContext;
 import org.apache.http.impl.DefaultBHttpServerConnection;
@@ -242,6 +242,8 @@ public final class CommonUtils {
                 return "dm-by-service-path";
             case DMBYENTITY:
                 return "dm-by-entity";
+            case DMBYENTITYTYPE:
+                return "dm-by-entity-type";
             case DMBYATTRIBUTE:
                 return "dm-by-attribute";
             default:

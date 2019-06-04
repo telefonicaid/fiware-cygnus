@@ -1,4 +1,4 @@
-# <a name="top"></a>Management interface
+# <a name="top"></a>Management interface: Original API
 Content:
 
 * [Apiary version of this document](#section1)
@@ -19,6 +19,8 @@ Content:
 
 ## <a name="section1"></a>Apiary version of this document
 This API specification can be checked at [Apiary](http://telefonicaid.github.io/fiware-cygnus/api/latest) as well.
+
+See also [v1 API (beta)](./management_interface_v1.md)
 
 [Top](#top)
 

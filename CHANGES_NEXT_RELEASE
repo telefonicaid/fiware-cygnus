@@ -1,4 +1,1 @@
-[cygnus-ngsi][KafkaSink] Use lower_case option to build topics (#1468)
-[cygnus-ngsi] [NGSIDynamoDBSink] [bug] Southeast regions are bad coded (#1448)
-[cygnus-common][CommonUtils][debug] Modify that CommonUtils#getTimeInstant can accepts the ISO8601 format with offset like 2018-01-02T03:04:05+09:00 (#1517)
-
+[cygnus-common][MongoDB] Warn about index creation error instead of throw exception and abort create collection (#1649)

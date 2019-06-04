@@ -31,7 +31,9 @@ Current stable release is able to persist Orion context data in:
 * [Kafka](http://kafka.apache.org/), the publish-subscribe messaging broker.
 * [DynamoDB](https://aws.amazon.com/dynamodb/), a cloud-based NoSQL database by [Amazon Web Services](https://aws.amazon.com/).
 * [PostgreSQL](http://www.postgresql.org/), the well-know relational database manager.
+* [PostGIS](http://postgis.net), a spatial database extender for PostgreSQL object-relational database.
 * [Carto](https://carto.com/), the database specialized in geolocated data.
+* [Orion](https://github.com/telefonicaid/fiware-orion), the FIWARE Context Broker.
 
 You may consider to visit [Cygnus NGSI Quick Start Guide](../doc/cygnus-ngsi/quick_start_guide.md) before going deep into the details.
 
@@ -45,20 +47,14 @@ You may consider to visit [Cygnus NGSI Quick Start Guide](../doc/cygnus-ngsi/qui
 [Top](#top)
 
 ### <a name="section2.2"></a>Installation (CentOS/RedHat)
-Simply configure the FIWARE repository if not yet configured:
-
-    $ cat > /etc/yum.repos.d/fiware.repo <<EOL
-    [Fiware]
-    name=FIWARE repository
-    baseurl=http://repositories.lab.fiware.org/repo/rpm/x86_64/
-    gpgcheck=0
-    enabled=1
-    EOL
-
+Simply configure the FIWARE release repository if not yet configured:
+```
+sudo wget -P /etc/yum.repos.d/ https://nexus.lab.fiware.org/repository/raw/public/repositories/el/7/x86_64/fiware-release.repo
+```
 And use your applications manager in order to install the latest version of Cygnus NGSI:
-
-    $ yum install cygnus-ngsi
-
+```
+sudo yum install cygnus-ngsi
+```
 The above will install cygus-ngsi in `/usr/cygnus/`.
 
 Please observe, as part of the installation process, cygnus-common is installed too.
@@ -279,11 +275,13 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
   <tr><td>String-based aggregation (occurrences)</td><td>1.0.0</td></tr>
   <tr><td>Ignore white space-based attribute values</td><td>1.0.0</td></tr>
   <tr><td>NGSIPostgreSQLSink</td><td>First implementation</td><td>0.12.0</d></tr>
-  <tr><td rowspan="5">NGSICartoDBSink</td><td>First implementation (raw-historic analysis)</td><td>1.0.0</d></tr>
+  <tr><td>NGSIPostgisLSink</td><td>First implementation</td><td>1.12.0</d></tr>
+  <tr><td rowspan="5">NGSICartoDBSink</td><td>First implementation (raw-historic analysis)</td><td>1.0.0</td></tr>
   <tr><td>Distance-historic analysis</td><td>1.1.0</td></tr>
   <tr><td>Multi tenancy support</td><td>1.1.0</td></tr>
   <tr><td>Orion's geo:json support</td><td>1.6.0</td></tr>
   <tr><td>Raw-snapsot analysis</td><td>1.6.0</td></tr>
+  <tr><td>NGSIOrionSink</td><td>First implementation</td><td>1.10.0</td></tr>
   <tr><td rowspan="2">NGSITestSink</td><td>First implementation</td><td>0.7.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.12.0</td></tr>
   <tr><td rowspan="9">All sinks</td><td>Events TTL</td><td>0.4.1</td></tr>

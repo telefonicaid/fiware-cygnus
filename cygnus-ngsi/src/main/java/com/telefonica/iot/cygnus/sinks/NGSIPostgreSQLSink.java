@@ -22,9 +22,11 @@ import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
 import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -44,12 +46,22 @@ import org.apache.flume.Context;
  */
 public class NGSIPostgreSQLSink extends NGSISink {
 
+    private static final String DEFAULT_ROW_ATTR_PERSISTENCE = "row";
+    private static final String DEFAULT_PASSWORD = "";
+    private static final String DEFAULT_PORT = "5432";
+    private static final String DEFAULT_HOST = "localhost";
+    private static final String DEFAULT_USER_NAME = "postgres";
+    private static final String DEFAULT_DATABASE = "postgres";
+    private static final String DEFAULT_ENABLE_CACHE = "false";
+    private static final int DEFAULT_MAX_POOL_SIZE = 3;
+
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgreSQLSink.class);
     private String postgresqlHost;
     private String postgresqlPort;
     private String postgresqlDatabase;
     private String postgresqlUsername;
     private String postgresqlPassword;
+    private int maxPoolSize;
     private boolean rowAttrPersistence;
     private PostgreSQLBackendImpl persistenceBackend;
     private boolean enableCache;
@@ -142,9 +154,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
         // Impose enable lower case, since PostgreSQL only accepts lower case
         enableLowercase = true;
         
-        postgresqlHost = context.getString("postgresql_host", "localhost");
+        postgresqlHost = context.getString("postgresql_host", DEFAULT_HOST);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_host=" + postgresqlHost + ")");
-        postgresqlPort = context.getString("postgresql_port", "5432");
+        postgresqlPort = context.getString("postgresql_port", DEFAULT_PORT);
         int intPort = Integer.parseInt(postgresqlPort);
 
         if ((intPort <= 0) || (intPort > 65535)) {
@@ -155,15 +167,19 @@ public class NGSIPostgreSQLSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_port=" + postgresqlPort + ")");
         }  // if else
 
-        postgresqlDatabase = context.getString("postgresql_database", "postgres");
+        postgresqlDatabase = context.getString("postgresql_database", DEFAULT_DATABASE);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_database=" + postgresqlDatabase + ")");
-        postgresqlUsername = context.getString("postgresql_username", "postgres");
+        postgresqlUsername = context.getString("postgresql_username", DEFAULT_USER_NAME);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_username=" + postgresqlUsername + ")");
         // FIXME: postgresqlPassword should be read as a SHA1 and decoded here
-        postgresqlPassword = context.getString("postgresql_password", "");
+        postgresqlPassword = context.getString("postgresql_password", DEFAULT_PASSWORD);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_password=" + postgresqlPassword + ")");
-        rowAttrPersistence = context.getString("attr_persistence", "row").equals("row");
-        String persistence = context.getString("attr_persistence", "row");
+
+        maxPoolSize = context.getInteger("postgresql_maxPoolSize", DEFAULT_MAX_POOL_SIZE);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_maxPoolSize=" + maxPoolSize + ")");
+
+        rowAttrPersistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE).equals("row");
+        String persistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE);
 
         if (persistence.equals("row") || persistence.equals("column")) {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
@@ -174,7 +190,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 + persistence + ") -- Must be 'row' or 'column'");
         }  // if else
                 
-        String enableCacheStr = context.getString("backend.enable_cache", "false");
+        String enableCacheStr = context.getString("backend.enable_cache", DEFAULT_ENABLE_CACHE);
         
         if (enableCacheStr.equals("true") || enableCacheStr.equals("false")) {
             enableCache = Boolean.valueOf(enableCacheStr);
@@ -190,8 +206,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     @Override
     public void start() {
         try {
-            persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlDatabase,
-                    postgresqlUsername, postgresqlPassword, enableCache);
+            persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlDatabase, postgresqlUsername, postgresqlPassword, maxPoolSize);
         } catch (Exception e) {
             LOGGER.error("Error while creating the PostgreSQL persistence backend. Details="
                     + e.getMessage());
@@ -202,7 +217,8 @@ public class NGSIPostgreSQLSink extends NGSISink {
     } // start
 
     @Override
-    void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusPersistenceError {
+    void persistBatch(NGSIBatch batch)
+        throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -480,7 +496,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
         } // if else
     } // getAggregator
 
-    private void persistAggregation(PostgreSQLAggregator aggregator) throws CygnusPersistenceError {
+    private void persistAggregation(PostgreSQLAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         String typedFieldNames = aggregator.getTypedFieldNames();
         String fieldNames = aggregator.getFieldNames();
         String fieldValues = aggregator.getAggregation();
@@ -520,9 +536,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
             name = NGSIUtils.encode(service, false, true);
         } // if else
 
-        if (name.length() > NGSIConstants.MYSQL_MAX_NAME_LEN) {
+        if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building schema name '" + name
-                    + "' and its length is greater than " + NGSIConstants.MYSQL_MAX_NAME_LEN);
+                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_NAME_LEN);
         } // if
 
         return name;
@@ -587,9 +603,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
             } // switch
         } // if else
 
-        if (name.length() > NGSIConstants.MYSQL_MAX_NAME_LEN) {
+        if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building table name '" + name
-                    + "' and its length is greater than " + NGSIConstants.MYSQL_MAX_NAME_LEN);
+                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_NAME_LEN);
         } // if
 
         return name;

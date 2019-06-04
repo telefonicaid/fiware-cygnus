@@ -5,7 +5,7 @@
 
     <groupId>com.telefonica.iot</groupId>
     <artifactId>cygnus-twitter</artifactId>
-    <version>1.9.0_SNAPSHOT</version>
+    <version>1.13.0_SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>cygnus-twitter</name>
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>org.apache.flume</groupId>
             <artifactId>flume-ng-node</artifactId>
-            <version>1.4.0</version>
+            <version>1.9.0</version>
         </dependency>
         <!-- Required for logging -->
         <dependency>
@@ -45,7 +45,7 @@
         <dependency>
             <groupId>com.telefonica.iot</groupId>
             <artifactId>cygnus-common</artifactId>
-            <version>1.9.0_SNAPSHOT</version>
+            <version>1.13.0_SNAPSHOT</version>
         </dependency>
         <!-- Required by twitter agent -->
         <dependency>

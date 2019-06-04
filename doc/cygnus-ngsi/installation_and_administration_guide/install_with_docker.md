@@ -166,6 +166,7 @@ As seen above, the default configuration distributed with the image is tied to c
 | hdfs | 5053 | 5083 |
 | postgresql | 5054 | 5084 |
 | cartodb | 5055 | 5085 |
+| orion | 5056 | 5086 |
 
 
 * MySQL:
@@ -178,7 +179,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_MYSQL_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
     * CYGNUS_MYSQL_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
-    * CYGNUS_MYSQL_DATA_MODEL: select the data_model: dm-by-service-path or dm-by-entity.
+    * CYGNUS_MYSQL_DATA_MODEL: select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type.
     * CYGNUS_MYSQL_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
     * CYGNUS_MYSQL_BATCH_SIZE: number of notifications to be included within a processing batch.
     * CYGNUS_MYSQL_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
@@ -280,10 +281,32 @@ As seen above, the default configuration distributed with the image is tied to c
     * The user for Carto is `carto` but can be changed through the CYGNUS_CARTO_USER environment variable.
     * The key for Carto is `carto` but can be changes through the CYGNUS_CARTO_KEY environment variable.
 
+* Orion:
+    * It only works for building historical context data in Orion.
+    * The endpoint for Orion is `iot-orion-ext` but can be changed through the CYGNUS_ORION_HOST environment variable.
+    * The port for Orion is `1026` but can be changed through the CYGNUS_ORION_PORT environment variable.
+    * The user for Orion is empty but can be changed through the CYGNUS_ORION_USER environment variable.
+    * The pass for Orion is empty but can be changed through the CYGNUS_ORION_PASS environment variable.
+    * CYGNUS_ORION_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
+    * CYGNUS_ORION_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
+    * CYGNUS_ORION_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_ORION_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
+    * CYGNUS_ORION_BATCH_SIZE: number of notifications to be included within a processing batch.
+    * CYGNUS_ORION_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
+    * CYGNUS_ORION_BATCH_TTL: number of retries upon persistence error.
+    * CYGNUS_ORION_SSL: SSL flag for connection to use with Orion.
+    * CYGNUS_ORION_KEYSTONE_HOST: Keystone IDM host used by Orion sink to perform authentication.
+    * CYGNUS_ORION_KEYSTONE_PORT: Keystone IDM port used by Orion sink to perform authentication.
+    * CYGNUS_ORION_KEYSTONE_SSL: SSL flag for connection to use with Keystone IDM.
+    * CYGNUS_ORION_FIWARE: Fiware Service header to provide to Orion sink.
+    * CYGNUS_ORION_FIWARE_PATH=: Fiware ServicePath header to provide to Orion sink.
+
 * Log4j configuration file:
     * The logging level is `INFO` but can be changed through the CYGNUS_LOG_LEVEL environment variable.
     * The logging appender is `console` but can be changed through the CYGNUS_LOG_APPENDER environment variable.
 
+* Monitoring:
+    * CYGNUS_MONITORING_TYPE: monitoring type. Choose from `http` or `ganglia`. If it is not specified, it will be disabled.
 
 ### Docker Secrets
 

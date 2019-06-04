@@ -175,22 +175,398 @@ In addition, above mentioned Java-based regular expressions can be also used in 
 
 ```
 {
-	"serviceMappings": [{
-		"originalService": "service",
-		"newService": "new_service",
-		"servicePathMappings": [{
-			"originalServicePath": "/subservice",
-			"newServicePath": "/new_subservice",
-			"entityMappings": [{
-				"originalEntityType": "myentitytype",
-				"originalEntityId": "(myentityid)([0-9]*)",
-				"newEntityId": "new_myentityid$2",
-				"attributeMappings": []
-			}]
-		}]
-	}]
+    "serviceMappings": [{
+        "originalService": "service",
+        "newService": "new_service",
+        "servicePathMappings": [{
+            "originalServicePath": "/subservice",
+            "newServicePath": "/new_subservice",
+            "entityMappings": [{
+                "originalEntityType": "myentitytype",
+                "originalEntityId": "(myentityid)([0-9]*)",
+                "newEntityId": "new_myentityid$2",
+                "attributeMappings": []
+            }]
+        }]
+    }]
 }
 ```
+
+Sumarizing these are some useful examples and their result in a sink like MySQL:
+
+### Case 1: groups matching exactly by service, subservice, entityid and entitytype
+- Service Mapping:
+```
+{
+  "serviceMappings": [
+    {
+      "originalService": "city012",
+      "newService": "database_name",
+      "servicePathMappings": [
+        {
+          "originalServicePath": "/electricidad",
+          "newServicePath": "/tableprefix",
+          "entityMappings": [
+            {
+              "originalEntityType": "luminaria",
+              "newEntityType": "tablesufix",
+              "originalEntityId": "luminaria_1",
+              "newEntityId": "tableid",
+              "attributeMappings": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"luminaria1",
+   "type":"luminaria",
+   ...
+}
+```
+
+This case creates in `citi012` db a table with name `tableprefix_luminaria_tablesufix`
+
+
+### Case 2: groups match exactly by service, subservice and entityid and any entitytype
+- Service Mapping:
+```
+{
+  "serviceMappings": [
+    {
+      "originalService": "city012",
+      "newService": "database_name",
+      "servicePathMappings": [
+        {
+          "originalServicePath": "/electricidad",
+          "newServicePath": "/tableprefix",
+          "entityMappings": [
+            {
+              "originalEntityId": "pro(.+)",
+              "newEntityId": "tablepro",
+              "originalEntityType": ".+",
+              "newEntityType": "tablesufix",
+              "attributeMappings": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"pro1",
+   "type":"luminaria",
+   ...
+}
+```
+This case creates in `citi012` db a table with name `tableprefix_tablepro_tablesufix`
+
+### Case 3: groups maching service by subservice and entitytype all entityid
+- Service Mapping:
+```
+{
+  "serviceMappings": [
+    {
+      "originalService": "city012",
+      "newService": "database_name",
+      "servicePathMappings": [
+        {
+          "originalServicePath": "/(.+)",
+          "newServicePath": "/$1",
+          "entityMappings": [
+            {
+              "originalEntityId": "(.+)",
+              "newEntityId": "any",
+              "originalEntityType": "(.+)",
+              "attributeMappings": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"pro1",
+   "type":"luminaria",
+   ...
+}
+```
+This case creates in `citi012` db a table with name `elecricidad_any_luminaria`
+
+### Case 4: groups maching service by entitytype all subservice and entityid
+- Service Mapping:
+```
+{
+  "serviceMappings": [
+    {
+      "originalService": "city012",
+      "newService": "database_name",
+      "servicePathMappings": [
+        {
+          "originalServicePath": "/(.+)",
+          "newServicePath": "/global",
+          "entityMappings": [
+            {
+              "originalEntityId": "(.+)",
+              "newEntityId": "any",
+              "originalEntityType": "(.+)",
+              "attributeMappings": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"pro1",
+   "type":"luminaria",
+   ...
+}
+```
+This case creates db `citi012` db a table with name `global_any_luminaria`
+
+### Case 5: groups maching service, subservice, entitytype, entityid and attribute name and attribute type
+- Service Mapping:
+```
+{
+  "serviceMappings": [
+    {
+      "originalService": "city012",
+      "newService": "database_name",
+      "servicePathMappings": [
+        {
+          "originalServicePath": "/electricidad",
+          "newServicePath": "/tableprefix",
+          "entityMappings": [
+            {
+              "originalEntityType": "luminaria",
+              "newEntityType": "tablesufix",
+              "originalEntityId": "luminaria_1",
+              "newEntityId": "tableid",
+              "attributeMappings": [
+                {
+                  "originalAttributeName": "temperatura",
+                  "originalAttributeType": "string",
+                  "newAttributeName": "new_myattributename1",
+                  "newAttributeType": "new_myattributetype1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+And agent is configured with option `data_model=dm-by-attribute`
+
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"pro1",
+   "type":"luminaria",
+   "temperatura": {
+       "type": "string",
+       "value": "13"
+   }
+}
+```
+This case creates in `citi012` db a table with name `tableprefix_tableid_tablesufix_new_myattributename1`
+
+### Case 6: groups maching service, entitytype, entityid and attribute name and attribute type in the same tableprefix
+- Service Mapping:
+```
+{
+  "serviceMappings": [
+    {
+      "originalService": "city012",
+      "newService": "database_name",
+      "servicePathMappings": [
+        {
+          "newServicePath": "/tableprefix",
+          "entityMappings": [
+            {
+              "originalEntityType": "luminaria",
+              "newEntityType": "tablesufix",
+              "originalEntityId": "luminaria_1",
+              "newEntityId": "tableid",
+              "attributeMappings": [
+                {
+                  "originalAttributeName": "temperatura",
+                  "originalAttributeType": "string",
+                  "newAttributeName": "new_myattributename1",
+                  "newAttributeType": "new_myattributetype1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+And agent is configured  with option `data_model=dm-by-attribute`
+
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"pro1",
+   "type":"luminaria",
+   "temperatura": {
+       "type": "string",
+       "value": "13"
+   }
+}
+```
+This case creates in `citi012` db a table with name `tableprefix_tableid_tablesufix_new_myattributename1`
+
+### Case 7: groups maching service, entitytype, attribute name and attribute type in the same tableprefix depending on entityid
+- Service Mapping:
+```
+{
+  "serviceMappings": [
+    {
+      "originalService": "city012",
+      "newService": "database_name",
+      "servicePathMappings": [
+        {
+          "originalServicePath": "/electricidad",
+          "newServicePath": "/tableprefix",
+          "entityMappings": [
+             {
+              "originalEntityType": "luminaria",
+              "newEntityType": "tablesufix",
+              "originalEntityId": "([cabeco,isa]+)(.+)",
+              "newEntityId": "$1",
+              "attributeMappings": [
+                {
+                  "originalAttributeName": "temperatura",
+                  "originalAttributeType": "string",
+                  "newAttributeName": "new_myattributename1",
+                  "newAttributeType": "new_myattributetype1"
+                }
+              ]
+            },
+             {
+              "originalEntityType": "(.+)",
+              "originalEntityId": ".+",
+              "newEntityId": "othertype",
+              "attributeMappings": [
+              ]
+             }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+And agent is configured  with option `data_model=dm-by-attribute`
+
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"cabeco_33",
+   "type":"luminaria",
+   "temperatura": {
+       "type": "string",
+       "value": "13"
+   }
+}
+```
+This case creates in `citi012` db a table with name `tableprefix_cabeco_tablesufix_new_myattributename1`
+
+- Headers:
+```
+  Fiware-Service: city012
+  Fiware-ServicePath: /electricidad
+```
+
+- Entity:
+```
+{
+   "id":"otherthing_22",
+   "type":"container",
+   "temperatura": {
+       "type": "string",
+       "value": "13"
+   }
+}
+```
+This case creates in `citi012` db  a table with name `tableprefix_othertype_tablesufix`
+
+
+[Top](#top)
+
+## Name Mappings API
+
+The contents of /path/to/conf/name_mappings.conf provide the name mappings used by Cygnus at startup time. However,
+they can be managed using a REST-based API. Using such API, new name mappings can be defined, modified or deleted.
+
+The name mappings API is described in [this piece of documentation](../../cygnus-common/installation_and_administration_guide/management_interface_v1.md#section9).
 
 [Top](#top)
 

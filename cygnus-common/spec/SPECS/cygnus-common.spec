@@ -171,6 +171,28 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed May 22 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.13.0
+- [cygnus-common][NMI] Allows th Original values to be omitted in the configuration file (#1466)
+
+* Wed Apr 10 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.12.0
+- [cygnus-common][PostgreSQL] Add connection pool
+- [cygnus-common][YAFS][bugfix] Fixed issue, missmatching Jetty threads causes Cygnus crash (#1616)
+- [cygnus-common][YAFS] Fixed issue, stopping Cygnus after config reloading (#1624)
+
+* Wed Apr 03 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.11.0
+- [cygnus-common] Upgrade flume-ng-node version from 1.4.0 to 1.9.0
+- [cygnus-common][mongo] Upgrade mongo driver from 3.0.0 to 3.0.4
+- [cygnus-common][mysql] Upgrade mysql connector from 5.1.31 to 5.1.47
+- [cygnus-common][feature] Add /v1/namemappings route to API (#1277)
+- [cygnus-common][MySQLBackend] Implement connection pooling (#1598, #1597)
+- [cygnus-common][bugfix] Support empty files in mamemappings
+- [cygnus-common][bugfix] Support empty servicenames in mamemappings
+
+* Thu Dec 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.10.0
+- [cygnus-common] Update hive dependence from 0.13.1 to 2.3.4 due to a vulnerability alert
+- [cygnus-common] Update httpclient dependence to 4.3.6 due to a vulnerability
+- [cygnus-common][CommonUtils][debug] Modify that CommonUtils#getTimeInstant can accepts the ISO8601 format with offset like 2018-01-02T03:04:05+09:00 (#1517)
+
 * Wed Jun 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.9.0
 - [cygnus-common][Docker] Upgrade to CentOS 7, Maven 3.5.2 and Java 1.8.0 in Dockerfile
 

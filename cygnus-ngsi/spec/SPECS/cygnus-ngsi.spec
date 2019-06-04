@@ -99,6 +99,32 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed May 22 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.13.0
+- [cygnus-ngsi][MysqlSink] Adds support for dm-by-entity-type data model (#687)
+- [cygnus-ngsi][NGSIMongoSink][NGSISTHSink][NGSISink] Close flume transaction at exception (#1635)
+- [cygnus-ngsi][STHSink] Adds mongodb indexes management for STH collections (#1637)
+
+* Wed Apr 10 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.12.0
+- [cygnus-ngsi][NGSIHandler] Fix unexpected exception, instead 400 is returned when a non valid API request (#1588)
+- [cygnus-ngsi][PostGIS] Add PostGIS sink based on PostgreSQL backend (#1618)
+
+* Wed Apr 03 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.11.0
+- [cygnus-ngsi][Docker] Set default agent file names for "agent_"
+- [cygnus-ngsi][Docker] Set default truncate size to 0.5GB for sth collections
+- [cygnus-ngsi][KafkaSink] Upgrade libthrift dependency from 0.9.1 to 0.12.0 due to github vulnerability report
+- [cygnus-ngsi][NGSIRestHandler]Fix Content Type header validation issue (#1609)
+
+* Thu Dec 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.10.0
+- [cygnus-ngsi][NGSINameMappingsInterceptor] Now namemapping checks sevice, subervice and (type of entity and id entity) of EntityMapping (#1535)
+- [cygnus-ngsi][NGSIEvent] Unable to deliver event: null pointer getAttributeForNaming (#1506)
+- [cygnus-ngsi][NGSIOrionSink] Create NGSIOrionSink (#1447)
+- [cygnus-ngsi][NGSIDynamoDBSink] [bug] Southeast regions are bad coded (#1448)
+- [cygnus-ngsi][KafkaSink] Use lower_case option to build topics (#1468)
+- [cygnus-ngsi][KafkaSink] Using global connection to zookeeper instead of creating one each time an event arrives
+- [cygnus-ngsi][Docker] Add name mappings files for multiagent
+- [cygnus-ngsi][Docker] Add grouping rules files for multiagent (#1533)
+- [cygnus-ngsi][Docker] Add new env var CYGNUS_MONITORING_TYPE
+
 * Wed Jun 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.9.0
 - [cygnus-ngsi][NGSINameMappingsInterceptor] Allow regular expression replacement for EntityIds (#1456)
 - [cygnus-ngsi][HttpBackend] Add support to recover data from response header (#1455)

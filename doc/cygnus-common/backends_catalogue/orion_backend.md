@@ -21,6 +21,11 @@ This class enumerates the methods any [Orion](https://github.com/telefonicaid/fi
     JsonResponse getSubscriptionsByIdV2(String token, String subscriptionId) throws Exception;
 
 > Gets a subscription to Orion given its ID and a token for authentication purposes (NGSIv2).
+    
+    void updateRemoteContext(String bodyJSON, String orionToken, String fiwareService, String fiwareServicePath)
+            throws CygnusRuntimeError, CygnusPersistenceError, UnsupportedEncodingException, CygnusBadAuthorization,JSONException;
+
+> Create or update entities in a remote Orion (NGSIv2).
 
 ## `OrionBackendImpl` class
 This is a convenience backend class for Orion that implements the `OrionBackend` interface described above.
