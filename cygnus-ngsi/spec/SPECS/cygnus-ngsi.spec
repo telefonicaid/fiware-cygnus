@@ -99,6 +99,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Tue 04 Jun 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.14.0
+
 * Wed May 22 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.13.0
 - [cygnus-ngsi][MysqlSink] Adds support for dm-by-entity-type data model (#687)
 - [cygnus-ngsi][NGSIMongoSink][NGSISTHSink][NGSISink] Close flume transaction at exception (#1635)
