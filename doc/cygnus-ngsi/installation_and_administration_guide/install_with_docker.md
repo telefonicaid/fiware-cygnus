@@ -263,8 +263,8 @@ As seen above, the default configuration distributed with the image is tied to c
 
 * PostgreSQL:
     * It only works for building historical context data in PostgreSQL.
-    * The endpoint for POSTGRESQL is `iot-postgresql` but can be changed through the CYGNUS_POSTGRESQL_HOST environment variable.
-    * The port for POSTGRESQL is `3306` but can be changed through the CYGNUS_POSTGRESQL_PORT environment variable.
+    * The endpoint for PostgreSQL is `iot-postgresql` but can be changed through the CYGNUS_POSTGRESQL_HOST environment variable.
+    * The port for PostgreSQL is `3306` but can be changed through the CYGNUS_POSTGRESQL_PORT environment variable.
     * The user for PostgreSQL is `postgresql` but can be changed through the CYGNUS_POSTGRESQL_USER environment variable.
     * The pass for PostgreSQL is `postgresql` but can be changed through the CYGNUS_POSTGRESQL_PASS environment variable.
     * CYGNUS_POSTGRESQL_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
@@ -303,8 +303,8 @@ As seen above, the default configuration distributed with the image is tied to c
 
 * Postgis:
     * It only works for building historical context data in Postgis.
-    * The endpoint for POSTGIS is `iot-postgresql` but can be changed through the CYGNUS_POSTGIS_HOST environment variable.
-    * The port for POSTGIS is `3306` but can be changed through the CYGNUS_POSTGIS_PORT environment variable.
+    * The endpoint for Postgis is `iot-postgresql` but can be changed through the CYGNUS_POSTGIS_HOST environment variable.
+    * The port for Postgis is `3306` but can be changed through the CYGNUS_POSTGIS_PORT environment variable.
     * The user for Postgis is `postgresql` but can be changed through the CYGNUS_POSTGIS_USER environment variable.
     * The pass for Postgis is `postgresql` but can be changed through the CYGNUS_POSTGIS_PASS environment variable.
     * CYGNUS_POSTGIS_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
