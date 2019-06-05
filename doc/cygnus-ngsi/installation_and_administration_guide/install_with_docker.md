@@ -301,6 +301,21 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_ORION_FIWARE: Fiware Service header to provide to Orion sink.
     * CYGNUS_ORION_FIWARE_PATH=: Fiware ServicePath header to provide to Orion sink.
 
+* Postgis:
+    * It only works for building historical context data in Postgis.
+    * The endpoint for POSTGIS is `iot-postgresql` but can be changed through the CYGNUS_POSTGIS_HOST environment variable.
+    * The port for POSTGIS is `3306` but can be changed through the CYGNUS_POSTGIS_PORT environment variable.
+    * The user for Postgis is `postgresql` but can be changed through the CYGNUS_POSTGIS_USER environment variable.
+    * The pass for Postgis is `postgresql` but can be changed through the CYGNUS_POSTGIS_PASS environment variable.
+    * CYGNUS_POSTGIS_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
+    * CYGNUS_POSTGIS_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
+    * CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_POSTGIS_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
+    * CYGNUS_POSTGIS_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
+    * CYGNUS_POSTGIS_BATCH_SIZE: number of notifications to be included within a processing batch.
+    * CYGNUS_POSTGIS_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
+    * CYGNUS_POSTGIS_BATCH_TTL: number of retries upon persistence error.
+
 * Log4j configuration file:
     * The logging level is `INFO` but can be changed through the CYGNUS_LOG_LEVEL environment variable.
     * The logging appender is `console` but can be changed through the CYGNUS_LOG_APPENDER environment variable.
