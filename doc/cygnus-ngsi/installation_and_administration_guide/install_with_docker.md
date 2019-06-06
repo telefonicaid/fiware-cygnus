@@ -307,6 +307,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * The port for Postgis is `3306` but can be changed through the CYGNUS_POSTGIS_PORT environment variable.
     * The user for Postgis is `postgresql` but can be changed through the CYGNUS_POSTGIS_USER environment variable.
     * The pass for Postgis is `postgresql` but can be changed through the CYGNUS_POSTGIS_PASS environment variable.
+    * CYGNUS_POSTGIS_ENABLE_VOLUME_CONFIG: true gets conf files from a volume, false ignores the volume.
     * CYGNUS_POSTGIS_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_POSTGIS_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
