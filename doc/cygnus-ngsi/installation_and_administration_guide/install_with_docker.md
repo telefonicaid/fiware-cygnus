@@ -167,6 +167,7 @@ As seen above, the default configuration distributed with the image is tied to c
 | postgresql | 5054 | 5084 |
 | cartodb | 5055 | 5085 |
 | orion | 5056 | 5086 |
+| postgis | 5057 | 5087 |
 
 
 * MySQL:
