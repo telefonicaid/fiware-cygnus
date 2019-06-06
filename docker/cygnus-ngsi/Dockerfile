@@ -185,6 +185,7 @@ ENV CYGNUS_POSTGIS_HOST ""
 ENV CYGNUS_POSTGIS_PORT ""
 # ENV CYGNUS_POSTGIS_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
 # ENV CYGNUS_POSTGIS_PASS "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+ENV CYGNUS_POSTGIS_SKIP_CONF_GENERATION ""
 ENV CYGNUS_POSTGIS_ENABLE_ENCODING ""
 ENV CYGNUS_POSTGIS_ENABLE_GROUPING ""
 ENV CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS ""
