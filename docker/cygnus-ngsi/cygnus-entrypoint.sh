@@ -582,7 +582,7 @@ if [ "$CYGNUS_ORION_HOST" != "" ]; then
 fi
 
 # Check if POSTGIS ENV vars
-if [ "${CYGNUS_POSTGIS_ENABLE_VOLUME_CONFIG,,}" == "true" ]; then
+if [ "${CYGNUS_POSTGIS_SKIP_CONF_GENERATION,,}" == "true" ]; then
     AGENT_CONF_FILE=agent_postgis.conf
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
