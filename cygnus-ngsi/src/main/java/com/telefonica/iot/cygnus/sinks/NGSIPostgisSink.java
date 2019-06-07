@@ -459,6 +459,9 @@ public class NGSIPostgisSink extends NGSISink {
                                            swapCoordinates).getRight()) {
                     typedFieldNames += "," + attrName + " text," + attrName + "_md text";
                     fieldNames += "," + attrName + "," + attrName + "_md";
+                } else {
+                    typedFieldNames += "," + attrName + " " + DEFAULT_POSTGIS_TYPE + "," + attrName + "_md text";
+                    fieldNames += "," + attrName + "," + attrName + "_md";
                 }
             } // for
 
@@ -505,7 +508,7 @@ public class NGSIPostgisSink extends NGSISink {
 
                 if (location.right) {
                     LOGGER.debug("location=" + location.getLeft());
-                    column += ",'" + location.getLeft() + "','"  + attrMetadata;
+                    column += ",'" + location.getLeft() + "','"  + attrMetadata + "'";
 
                 } else {
                     // create part of the column with the current attribute (a.k.a. a column)
