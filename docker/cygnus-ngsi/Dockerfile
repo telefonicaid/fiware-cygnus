@@ -23,7 +23,7 @@ MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "1.13.0_SNAPSHOT"
+ENV CYGNUS_VERSION "1.14.0_SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
@@ -185,6 +185,7 @@ ENV CYGNUS_POSTGIS_HOST ""
 ENV CYGNUS_POSTGIS_PORT ""
 # ENV CYGNUS_POSTGIS_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
 # ENV CYGNUS_POSTGIS_PASS "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+ENV CYGNUS_POSTGIS_SKIP_CONF_GENERATION ""
 ENV CYGNUS_POSTGIS_ENABLE_ENCODING ""
 ENV CYGNUS_POSTGIS_ENABLE_GROUPING ""
 ENV CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS ""

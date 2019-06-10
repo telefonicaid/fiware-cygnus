@@ -1,1 +1,1 @@
-[cygnus-common][MongoDB] Warn about index creation error instead of throw exception and abort create collection (#1649)
+[cygnus-ngsi][PostGIS] Fix geo location persistence bug in column mode
