@@ -162,7 +162,7 @@ public final class CommonUtils {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         String humanRedable = sdf.format(new Date(ts));
-        humanRedable += "T";
+        humanRedable += (addUTC ? "T" : " ");
         sdf = new SimpleDateFormat("HH:mm:ss.S");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         humanRedable += sdf.format(new Date(ts)) + (addUTC ? "Z" : "");
