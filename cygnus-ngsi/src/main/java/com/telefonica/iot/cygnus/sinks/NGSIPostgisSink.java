@@ -56,6 +56,7 @@ public class NGSIPostgisSink extends NGSISink {
     private static final String DEFAULT_ENABLE_CACHE = "false";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
     private static final String DEFAULT_POSTGIS_TYPE = "geometry";
+    private static final String DEFAULT_NATIVE_ATTR_TYPE = "false";
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgisSink.class);
     private String postgisHost;
@@ -68,6 +69,7 @@ public class NGSIPostgisSink extends NGSISink {
     private PostgreSQLBackendImpl persistenceBackend;
     private boolean enableCache;
     private boolean swapCoordinates;
+    private boolean nativeAttrTypes;
 
     /**
      * Constructor.
@@ -132,6 +134,15 @@ public class NGSIPostgisSink extends NGSISink {
     protected boolean getRowAttrPersistence() {
         return rowAttrPersistence;
     } // getRowAttrPersistence
+
+    /**
+     * Returns if the attribute value will be native or stringfy. It will be stringfy due to backward compatibility
+     * purposes.
+     * @return True if the attribute value will be native, false otherwise
+     */
+    protected boolean getNativeAttrTypes() {
+        return nativeAttrTypes;
+    } // nativeAttrTypes
 
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
@@ -201,11 +212,22 @@ public class NGSIPostgisSink extends NGSISink {
         }  else {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (backend.enable_cache="
-                + enableCache + ") -- Must be 'true' or 'false'");
+                + enableCacheStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
         // TBD: possible option for postgisSink
         swapCoordinates = false;
+
+
+        String nativeAttrTypesStr = context.getString("native_attr_type", DEFAULT_NATIVE_ATTR_TYPE);
+        if (nativeAttrTypesStr.equals("true") || nativeAttrTypesStr.equals("false")) {
+            nativeAttrTypes = Boolean.valueOf(nativeAttrTypesStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (native_attr_type=" + nativeAttrTypes + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (native_attr_types="
+                + nativeAttrTypesStr + ") -- Must be 'true' or 'false'");
+        } // if else
         
     } // configure
 
@@ -407,7 +429,7 @@ public class NGSIPostgisSink extends NGSISink {
                     LOGGER.debug("location=" + location.getLeft());
                     row += DEFAULT_POSTGIS_TYPE + "','" + location.getLeft() + "','"  + attrMetadata + "')";
                 } else {
-                    if (attrType.equals("Number")) {
+                    if (nativeAttrTypes && attrType.equals("Number")) {
                         row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
                     } else {
                         row += attrType + "','" + attrValue + "','"  + attrMetadata + "')";
@@ -516,7 +538,7 @@ public class NGSIPostgisSink extends NGSISink {
 
                 } else {
                     // create part of the column with the current attribute (a.k.a. a column)
-                    if (attrType.equals("Number")) {
+                    if (nativeAttrTypes && attrType.equals("Number")) {
                         column += "," + attrValue + ",'"  + attrMetadata + "'";
                     } else {
                         column += ",'" + attrValue + "','"  + attrMetadata + "'";

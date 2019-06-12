@@ -633,6 +633,9 @@ elif [ "$CYGNUS_POSTGIS_HOST" != "" ]; then
     if [ "$CYGNUS_POSTGIS_ATTR_PERSISTENCE" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.attr_persistence/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.attr_persistence = '${CYGNUS_POSTGIS_ATTR_PERSISTENCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+    if [ "$CYGNUS_POSTGIS_ATTR_NATIVE_TYPE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.attr_native_type/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.attr_native_type = '${CYGNUS_POSTGIS_ATTR_NATIVE_TYPE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
     if [ "$CYGNUS_POSTGIS_BATCH_SIZE" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.batch_size/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.batch_size = '${CYGNUS_POSTGIS_BATCH_SIZE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
