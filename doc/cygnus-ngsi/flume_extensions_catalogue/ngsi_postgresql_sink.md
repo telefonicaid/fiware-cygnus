@@ -120,7 +120,7 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 *  For each notified attribute, a field named as the attribute is considered. This field will store the attribute values along the time.
 *  For each notified attribute, a field named as the concatenation of the attribute name and `_md` is considered. This field will store the attribute's metadata values along the time.
 
-#### <a name="section1.2.5"></a>Native attribute type
+#### <a name="section1.2.6"></a>Native attribute type
 Regarding the specific data stored within the above table, if `attr_native_type` parameter is set to `true` then attribute is inserted using its native type, if `false` then will be strinfy.
 
 [Top](#top)
