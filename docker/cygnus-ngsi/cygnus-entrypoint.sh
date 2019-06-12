@@ -452,6 +452,9 @@ if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     if [ "$CYGNUS_POSTGRESQL_ATTR_PERSISTENCE" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.attr_persistence/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.attr_persistence = '${CYGNUS_POSTGRESQL_ATTR_PERSISTENCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+    if [ "$CYGNUS_POSTGRESQL_ATTR_NATIVE_TYPE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.attr_native_type/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.attr_native_type = '${CYGNUS_POSTGRESQL_ATTR_NATIVE_TYPE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
     if [ "$CYGNUS_POSTGRESQL_BATCH_SIZE" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.batch_size/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.batch_size = '${CYGNUS_POSTGRESQL_BATCH_SIZE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi

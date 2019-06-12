@@ -65,6 +65,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private boolean rowAttrPersistence;
     private PostgreSQLBackendImpl persistenceBackend;
     private boolean enableCache;
+    private boolean nativeAttrTypes;
 
     /**
      * Constructor.
@@ -129,6 +130,15 @@ public class NGSIPostgreSQLSink extends NGSISink {
     protected boolean getRowAttrPersistence() {
         return rowAttrPersistence;
     } // getRowAttrPersistence
+
+    /**
+     * Returns if the attribute value will be native or stringfy. It will be stringfy due to backward compatibility
+     * purposes.
+     * @return True if the attribute value will be native, false otherwise
+     */
+    protected boolean getNativeAttrTypes() {
+        return nativeAttrTypes;
+    } // nativeAttrTypes
 
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
@@ -200,7 +210,17 @@ public class NGSIPostgreSQLSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (backend.enable_cache="
                 + enableCache + ") -- Must be 'true' or 'false'");
         }  // if else
-        
+
+        String nativeAttrTypesStr = context.getString("native_attr_type", DEFAULT_NATIVE_ATTR_TYPE);
+        if (nativeAttrTypesStr.equals("true") || nativeAttrTypesStr.equals("false")) {
+            nativeAttrTypes = Boolean.valueOf(nativeAttrTypesStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (native_attr_type=" + nativeAttrTypes + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (native_attr_types="
+                + nativeAttrTypesStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
     } // configure
 
     @Override
@@ -390,11 +410,13 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     + servicePathForData + "','"
                     + entityId + "','"
                     + entityType + "','"
-                    + attrName + "','"
-                    + attrType + "','"
-                    + attrValue + "','"
-                    + attrMetadata
-                    + "')";
+                    + attrName + "','";
+
+                if (nativeAttrTypes && attrType.equals("Number")) {
+                    row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
+                } else {
+                    row += attrType + "','" + attrValue + "','"  + attrMetadata + "')";
+                }
 
                 if (aggregation.isEmpty()) {
                     aggregation += row;
@@ -475,7 +497,11 @@ public class NGSIPostgreSQLSink extends NGSISink {
                         + attrType + ")");
 
                 // create part of the column with the current attribute (a.k.a. a column)
-                column += ",'" + attrValue + "','"  + attrMetadata + "'";
+                if (nativeAttrTypes && attrType.equals("Number")) {
+                    column += "," + attrValue + ",'"  + attrMetadata + "'";
+                } else {
+                    column += ",'" + attrValue + "','"  + attrMetadata + "'";
+                }
             } // for
 
             // now, aggregate the column
