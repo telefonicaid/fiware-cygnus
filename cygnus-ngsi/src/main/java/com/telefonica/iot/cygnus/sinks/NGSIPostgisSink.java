@@ -407,7 +407,11 @@ public class NGSIPostgisSink extends NGSISink {
                     LOGGER.debug("location=" + location.getLeft());
                     row += DEFAULT_POSTGIS_TYPE + "','" + location.getLeft() + "','"  + attrMetadata + "')";
                 } else {
-                    row += attrType + "','" + attrValue + "','"  + attrMetadata + "')";
+                    if (attrType == "Number") {
+                        row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
+                    } else {
+                        row += attrType + "','" + attrValue + "','"  + attrMetadata + "')";
+                    }
                 }
 
                 if (aggregation.isEmpty()) {
@@ -512,7 +516,11 @@ public class NGSIPostgisSink extends NGSISink {
 
                 } else {
                     // create part of the column with the current attribute (a.k.a. a column)
-                    column += ",'" + attrValue + "','"  + attrMetadata + "'";
+                    if (attrType == "Number") {
+                        column += "," + attrValue + ",'"  + attrMetadata + "'";
+                    } else {
+                        column += ",'" + attrValue + "','"  + attrMetadata + "'";
+                    }
                 }
             } // for
 
