@@ -54,6 +54,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private static final String DEFAULT_DATABASE = "postgres";
     private static final String DEFAULT_ENABLE_CACHE = "false";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
+    private static final String DEFAULT_NATIVE_ATTR_TYPE = "false";
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgreSQLSink.class);
     private String postgresqlHost;
