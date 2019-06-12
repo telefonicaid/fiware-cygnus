@@ -273,6 +273,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
     * CYGNUS_POSTGRESQL_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
     * CYGNUS_POSTGRESQL_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
+    * CYGNUS_POSTGRESQL_ATTR_NATIVE_TYPE: how the attribute are stored, using native type (true) or stringfy (false, by default).
     * CYGNUS_POSTGRESQL_BATCH_SIZE: number of notifications to be included within a processing batch.
     * CYGNUS_POSTGRESQL_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_POSTGRESQL_BATCH_TTL: number of retries upon persistence error.
@@ -314,6 +315,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
     * CYGNUS_POSTGIS_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
     * CYGNUS_POSTGIS_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
+    * CYGNUS_POSTGIS_ATTR_NATIVE_TYPE: how the attribute are stored, using native type (true) or stringfy (false, by default).
     * CYGNUS_POSTGIS_BATCH_SIZE: number of notifications to be included within a processing batch.
     * CYGNUS_POSTGIS_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_POSTGIS_BATCH_TTL: number of retries upon persistence error.
