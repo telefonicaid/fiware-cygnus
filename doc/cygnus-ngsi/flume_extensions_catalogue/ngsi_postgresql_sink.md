@@ -121,7 +121,7 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 *  For each notified attribute, a field named as the concatenation of the attribute name and `_md` is considered. This field will store the attribute's metadata values along the time.
 
 #### <a name="section1.2.6"></a>Native attribute type
-Regarding the specific data stored within the above table, if `attr_native_type` parameter is set to `true` then attribute is inserted using its native type, if `false` then will be strinfy.
+Regarding the specific data stored within the above table, if `attr_native_types` parameter is set to `true` then attribute is inserted using its native type, if `false` then will be strinfy.
 
 [Top](#top)
 
@@ -264,7 +264,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.postgresql-sink.postgresql_username = myuser
     cygnus-ngsi.sinks.postgresql-sink.postgresql_password = mypassword
     cygnus-ngsi.sinks.postgresql-sink.attr_persistence = row
-    cygnus-ngsi.sinks.postgresql-sink.attr_native_type = false
+    cygnus-ngsi.sinks.postgresql-sink.attr_native_types = false
     cygnus-ngsi.sinks.postgresql-sink.batch_size = 100
     cygnus-ngsi.sinks.postgresql-sink.batch_timeout = 30
     cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
