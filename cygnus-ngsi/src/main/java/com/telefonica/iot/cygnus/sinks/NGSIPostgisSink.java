@@ -427,7 +427,7 @@ public class NGSIPostgisSink extends NGSISink {
 
                 if (location.right) {
                     LOGGER.debug("location=" + location.getLeft());
-                    row += DEFAULT_POSTGIS_TYPE + "'," + location.getLeft() + ",'"  + attrMetadata + "')";
+                    row += DEFAULT_POSTGIS_TYPE + "','" + location.getLeft() + "','"  + attrMetadata + "')";
                 } else {
                     if (attrNativeTypes && attrType.equals("Number")) {
                         row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
