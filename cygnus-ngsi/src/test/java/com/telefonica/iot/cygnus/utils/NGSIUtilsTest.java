@@ -147,7 +147,7 @@ public class NGSIUtilsTest {
                 attrValue, attrType, attrMetadataStr, swapCoordinates);
 
         try {
-            assertEquals("ST_GeomFromGeoJSON({\"coordinates\": [-3.7167, 40.3833], \"type\": \"Point\"})", geometry.getLeft());
+            assertEquals("ST_GeomFromGeoJSON('{\"coordinates\": [-3.7167, 40.3833], \"type\": \"Point\"}')", geometry.getLeft());
             System.out.println(getTestTraceHead("[Utils.getLocation]")
                     + "-  OK  - Geometry '" + geometry.getLeft() + "' obtained for an attribute of type '" + attrType
                     + "' and value '" + attrValue + "'");
