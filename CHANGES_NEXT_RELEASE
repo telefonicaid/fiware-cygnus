@@ -1,2 +1,3 @@
+[cygnus-ngsi][PostGIS, PostgreSQL] Insert right SQL types values, non stringify (#1661)
 [cygnus-ngsi][MySQL] Fix datetime format used (#1646)
 [cygnus-ngsi][PostGIS] Fix geo location persistence bug in column mode
