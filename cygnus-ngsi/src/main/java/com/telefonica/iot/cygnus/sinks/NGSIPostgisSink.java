@@ -427,7 +427,7 @@ public class NGSIPostgisSink extends NGSISink {
 
                 if (location.right) {
                     LOGGER.debug("location=" + location.getLeft());
-                    row += DEFAULT_POSTGIS_TYPE + "','" + location.getLeft() + "','"  + attrMetadata + "')";
+                    row += DEFAULT_POSTGIS_TYPE + "'," + location.getLeft() + ",'"  + attrMetadata + "')";
                 } else {
                     if (attrNativeTypes && attrType.equals("Number")) {
                         row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
@@ -534,7 +534,7 @@ public class NGSIPostgisSink extends NGSISink {
 
                 if (location.right) {
                     LOGGER.debug("location=" + location.getLeft());
-                    column += ",'" + location.getLeft() + "','"  + attrMetadata + "'";
+                    column += "," + location.getLeft() + ",'"  + attrMetadata + "'";
 
                 } else {
                     // create part of the column with the current attribute (a.k.a. a column)
