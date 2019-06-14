@@ -240,7 +240,7 @@ Coming soon.
 | postgresql\_username | no | postgres | `postgres` is the default username that is created automatically when install |
 | postgresql\_password | no | N/A | Empty value by default (No password is created when install) |
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
-| attr\_native\_types | no | false | <i>false</i> or <i>true</i>. |
+| attr\_native\_types | no | false | if the attribute value will be native <i>true</i> or stringfy or <i>false</i>. |
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
