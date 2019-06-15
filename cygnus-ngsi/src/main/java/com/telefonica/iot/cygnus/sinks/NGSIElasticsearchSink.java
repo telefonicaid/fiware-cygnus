@@ -36,6 +36,7 @@ import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +51,11 @@ import org.apache.flume.Context;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import javax.xml.bind.DatatypeConverter;
 
 /**
  * Sink for Elasticsearch.
@@ -97,6 +103,7 @@ public class NGSIElasticsearchSink extends NGSISink {
                 synchronized(NGSIElasticsearchSink.this.aggregations) {
                     for (Map.Entry<String, List<Map<String, String>>> aggregation : NGSIElasticsearchSink.this.aggregations.entrySet()) {
                         String idx = aggregation.getKey();
+
                         List<Map<String, String>> data = aggregation.getValue();
                         JsonResponse response = NGSIElasticsearchSink.this.persistenceBackend.bulkInsert(idx,
                                 NGSIElasticsearchSink.this.mappingType, data);
@@ -486,6 +493,30 @@ public class NGSIElasticsearchSink extends NGSISink {
     } // expirateRecords
 
     /**
+     * Gets the index name according to Elasticsearch naming rule.
+     * @return Index name
+     */
+
+
+    /**
+     * gets the index name according to Elasticsearch naming rule.
+     *
+     * @param prefix prefix
+     * @param service fiware servcie
+     * @param servicePath fiware service path
+     * @param entityId entityId
+     * @param entityType entityType
+     * @return index Name
+     */
+    public String getIndexName(String prefix, String service, String servicePath, String entityId, String entityType) {
+        String indexName = (prefix + "-" + service + servicePath + "-" + entityId + "-" + entityType).toLowerCase().replaceAll("[/\\\\*?\"<>\\| ,#:]", "-");
+        if (indexName.matches("^[-_+].*")) {
+            indexName = "idx" + indexName;
+        } // if
+        return indexName;
+    } // getIndexName
+
+    /**
      * An innner Class for aggregating aggregation.
      */
     private class ElasticsearchAggregator {
@@ -518,7 +549,13 @@ public class NGSIElasticsearchSink extends NGSISink {
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             String service = event.getServiceForNaming(enableNameMappings);
             String servicePath = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            this.index = (NGSIElasticsearchSink.this.indexPrefix + "-" + service + servicePath).toLowerCase().replace("/", "-");
+
+            ContextElement contextElement = event.getContextElement();
+            String entityId = contextElement.getId();
+            String entityType = contextElement.getType();
+
+            this.index = NGSIElasticsearchSink.this.getIndexName(NGSIElasticsearchSink.this.indexPrefix,
+                    service, servicePath, entityId, entityType);
             LOGGER.debug("ElasticsearchAggregator initialize (index=" + this.index + ")");
         } // initialize
 
@@ -629,6 +666,7 @@ public class NGSIElasticsearchSink extends NGSISink {
         private void aggregateAsColumn(long notifiedRecvTimeTs, String entityId, String entityType, List<ContextAttribute> contextAttributes) {
             String firstAttrMetadata = contextAttributes.get(0).getContextMetadata();
             TimeRelatedValues v = this.getTimeRelatedValues(notifiedRecvTimeTs, firstAttrMetadata);
+            List<String> alist = new ArrayList<String>();
 
             JSONObject jobj = new JSONObject();
             jobj.put("recvTime", isoDateFormatter.format(v.recvTimeDt));
@@ -651,7 +689,19 @@ public class NGSIElasticsearchSink extends NGSISink {
                 } else {
                     jobj.put(attrName, attrValue);
                 } // if
+
+                alist.add(attrName);
             } // for
+            Collections.sort(alist);
+            StringBuilder b = new StringBuilder();
+            for (String a : alist) {
+                b.append(a).append(":");
+            }
+
+            StringBuilder idxBuilder = new StringBuilder(v.idx);
+            int p = idxBuilder.lastIndexOf("-");
+            idxBuilder.insert(p, "-" + getHash(b.toString()));
+            String idx = idxBuilder.toString();
 
             // create a map object to be add to aggregations
             Map<String, String> elem = new HashMap<>();
@@ -660,10 +710,10 @@ public class NGSIElasticsearchSink extends NGSISink {
 
             // synchronize aggregations because aggregations is read/written by main thread and ScheduledExecutorService thread.
             synchronized(NGSIElasticsearchSink.this.aggregations) {
-                if (!NGSIElasticsearchSink.this.aggregations.containsKey(v.idx)) {
-                    NGSIElasticsearchSink.this.aggregations.put(v.idx, new ArrayList<Map<String, String>>());
+                if (!NGSIElasticsearchSink.this.aggregations.containsKey(idx)) {
+                    NGSIElasticsearchSink.this.aggregations.put(idx, new ArrayList<Map<String, String>>());
                 }
-                NGSIElasticsearchSink.this.aggregations.get(v.idx).add(elem);
+                NGSIElasticsearchSink.this.aggregations.get(idx).add(elem);
             } // synchronized
         } // aggregateAsColumn
 
@@ -728,5 +778,23 @@ public class NGSIElasticsearchSink extends NGSISink {
                 return null;
             } // try
         } // convertValueType
+
+        /**
+         * calculate the MD5 hash value.
+         * return {@code null} if MD5 is not supported
+         *
+         * @param origin the string to be calculated
+         * @return MD5 hash value
+         */
+        private String getHash(String origin) {
+            Charset charset = StandardCharsets.UTF_8;
+            String algorithm = "md5";
+            try {
+                byte[] bytes = MessageDigest.getInstance(algorithm).digest(origin.getBytes(charset));
+                return DatatypeConverter.printHexBinary(bytes).toLowerCase();
+            } catch (NoSuchAlgorithmException e) {
+                return null;
+            }
+        }
     } // ElasticsearchAggregator
 } // NGSIElasticsearchSink
