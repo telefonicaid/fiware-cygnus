@@ -99,15 +99,15 @@ public final class NGSIUtils {
                 
             if (swapCoordinates) {
                 return new ImmutablePair(
-                        "ST_SetSRID(ST_MakePoint(" + split[1].trim() + "," + split[0].trim() + "), 4326)", true);
+                        "ST_SetSRID(ST_MakePoint((double)" + split[1].trim() + ",(double)" + split[0].trim() + "), 4326)", true);
             } else {
                 return new ImmutablePair(
-                        "ST_SetSRID(ST_MakePoint(" + split[0].trim() + "," + split[1].trim() + "), 4326)", true);
+                        "ST_SetSRID(ST_MakePoint((double)" + split[0].trim() + ",(double)" + split[1].trim() + "), 4326)", true);
             } // if else
         } // if
         
         if (attrType.equals("geo:json")) {
-            return new ImmutablePair("ST_GeomFromGeoJSON(" + attrValue + ")", true);
+            return new ImmutablePair("ST_GeomFromGeoJSON('" + attrValue + "')", true);
         } // if
 
         // TBD: What about:  ?
