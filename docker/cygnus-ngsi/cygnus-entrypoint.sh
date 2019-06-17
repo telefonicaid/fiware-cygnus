@@ -55,6 +55,9 @@ file_env 'CYGNUS_POSTGIS_PASS' ''
 file_env 'CYGNUS_CARTO_USER' ''
 file_env 'CYGNUS_CARTO_KEY' ''
 
+PIDS=""
+trap 'kill -TERM $PIDS' TERM INT
+
 # Export JAVA_OPTS
 JAVA_OPTS=${CYGNUS_JAVA_OPTS}
 export JAVA_OPTS
@@ -130,6 +133,7 @@ if [ "$CYGNUS_MYSQL_HOST" != "" ]; then
             # Run the Cygnus command
             ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5080 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
         fi
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -253,6 +257,7 @@ if [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
             # Run the Cygnus command
             ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5081 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
         fi
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -325,6 +330,7 @@ if [ "$CYGNUS_CKAN_HOST" != "" ]; then
             # Run the Cygnus command
             ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5082 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
         fi
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -416,6 +422,7 @@ if [ "$CYGNUS_HDFS_HOST" != "" ]; then
             # Run the Cygnus command
             ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5083 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
         fi
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -486,6 +493,7 @@ if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
             # Run the Cygnus command
             ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5084 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
         fi
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -522,6 +530,7 @@ if [ "$CYGNUS_CARTO_USER" != "" ]; then
             # Run the Cygnus command
             ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5085 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
         fi
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -593,6 +602,7 @@ if [ "$CYGNUS_ORION_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         # Run the Cygnus command
         ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5086 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -674,6 +684,61 @@ elif [ "$CYGNUS_POSTGIS_HOST" != "" ]; then
             # Run the Cygnus command
             ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5087 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
         fi
+        PIDS="$PIDS $!"
+    fi
+fi
+
+# Check if ELASTICSEARCH ENV vars
+if [ "$CYGNUS_ELASTICSEARCH_HOST" != "" ]; then
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        AGENT_CONF_FILE=agent-elasticsearch.conf
+        cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5058 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = elasticsearch-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = elasticsearch-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.elasticsearch_host/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.elasticsearch_host = '${CYGNUS_ELASTICSEARCH_HOST} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.elasticsearch_port/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.elasticsearch_port = '${CYGNUS_ELASTICSEARCH_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.ssl/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.ssl = '${CYGNUS_ELASTICSEARCH_SSL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    # The following are optional and disabled by default
+    if [ "$CYGNUS_ELASTICSEARCH_INDEX_PREFIX" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.index_prefix/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.index_prefix = '${CYGNUS_ELASTICSEARCH_INDEX_PREFIX} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ELASTICSEARCH_MAPPING_TYPE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.mapping_type/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.mapping_type = '${CYGNUS_ELASTICSEARCH_MAPPING_TYPE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONNS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.backend.max_conns/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.backend.max_conns = '${CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONNS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONSS_PER_ROUTE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.backend.max_conns_per_route/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.backend.max_conns_per_route = '${CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONSS_PER_ROUTE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ELASTICSEARCH_IGNORE_WHITE_SPACES" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.ignore_white_spaces/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.ignore_white_spaces = '${CYGNUS_ELASTICSEARCH_IGNORE_WHITE_SPACES} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ELASTICSEARCH_ATTR_PERSISTENCE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.attr_persistence/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.attr_persistence = '${CYGNUS_ELASTICSEARCH_ATTR_PERSISTENCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+
+    if [ "$CYGNUS_ELASTICSEARCH_TIMEZONE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.timezone/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.timezone = '${CYGNUS_ELASTICSEARCH_TIMEZONE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ELASTICSEARCH_CAST_VALUE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.cast_value/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.cast_value = '${CYGNUS_ELASTICSEARCH_CAST_VALUE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ELASTICSEARCH_CACHE_FLASH_INTERVAL_SEC" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.cache_flash_interval_sec/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.cache_flash_interval_sec = '${CYGNUS_ELASTICSEARCH_CACHE_FLASH_INTERVAL_SEC} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5088 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41415 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5088 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
+        PIDS="$PIDS $!"
     fi
 fi
 
@@ -686,7 +751,12 @@ if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
         # Run the Cygnus command
         ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${CYGNUS_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p ${CYGNUS_API_PORT} -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
     fi
+    PIDS="$PIDS $!"
 fi
 
+touch /var/log/cygnus/cygnus.log && tail -f /var/log/cygnus/cygnus.log &
+PIDS="$PIDS $!"
 
-touch /var/log/cygnus/cygnus.log && tail -f /var/log/cygnus/cygnus.log
+wait $PIDS
+trap - TERM INT
+wait $PIDS

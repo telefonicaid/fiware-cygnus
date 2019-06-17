@@ -45,6 +45,7 @@ pages:
           - 'Orion backend': 'cygnus-common/backends_catalogue/orion_backend.md'
           - 'PostgreSQL backend': 'cygnus-common/backends_catalogue/postgresql_backend.md'
           - 'CartoDB backend': 'cygnus-common/backends_catalogue/cartodb_backend.md'
+          - 'Elasticsearch backend': 'cygnus-common/backends_catalogue/elasticsearch_backend.md'
   - 'cygnus-ngsi agent':
       - 'Quick Start Guide': 'cygnus-ngsi/quick_start_guide.md'
       - 'Installation and Administration Guide':
@@ -87,6 +88,7 @@ pages:
           - 'NGSIPostGISSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_postgis_sink.md'
           - 'NGSISTHSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_sth_sink.md'
           - 'NGSIOrionSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_orion_sink.md'
+          - 'NGSIElasticsearchSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_elasticsearch_sink.md'
           - 'NGSITestSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_test_sink.md'
           - 'NGSIGroupingInterceptor': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md'
           - 'NGSINameMappingsInterceptor': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md'

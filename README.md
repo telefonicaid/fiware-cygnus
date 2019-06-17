@@ -49,6 +49,7 @@ Current stable release is able to persist the following sources of data in the f
     * [Carto](https://carto.com/), the database specialized in geolocated data.
     * [PostGIS](http://postgis.net/), a spatial database extender for PostgreSQL object-relational database.
     * [Orion](https://github.com/telefonicaid/fiware-orion), the FIWARE Context Broker.
+    * [Elasticsearch](https://www.elastic.co/products/elasticsearch), the distributed full-text search engine with JSON documents.
 * Twitter data in:
     * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
 
