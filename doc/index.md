@@ -24,9 +24,9 @@ Current stable release is able to persist the following sources of data in the f
     * [DynamoDB](https://aws.amazon.com/dynamodb/), a cloud-based NoSQL database by [Amazon Web Services](https://aws.amazon.com/).
     * [PostgreSQL](http://www.postgresql.org/), the well-know relational database manager.
     * [Carto](https://carto.com/), the database specialized in geolocated data.
+    * [Elasticsearch](https://www.elastic.co/products/elasticsearch), the distributed full-text search engine with JSON documents.
 * Twitter data in:
     * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
-    * [Elasticsearch](https://www.elastic.co/products/elasticsearch), the distributed full-text search engine with JSON documents.
 
 **IMPORTANT NOTE**: for the time being, cygnus-ngsi and cygus-twitter agents cannot be installed in the same base path, because of an incompatibility with the required version of the `httpclient` library. Of course, if you are going to use just one of the agents, there is no problem at all.
 
