@@ -179,6 +179,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_MYSQL_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_MYSQL_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_MYSQL_SKIP_NAME_MAPPINGS_GENERATION: true if name mappings should not be generated empty at start, false otherwise. Default is false.
     * CYGNUS_MYSQL_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
     * CYGNUS_MYSQL_DATA_MODEL: select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type.
     * CYGNUS_MYSQL_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
@@ -195,6 +196,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_MONGO_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_MONGO_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_MONGO_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_MONGO_SKIP_NAME_MAPPINGS_GENERATION: true if name mappings should not be generated empty at start, false otherwise. Default is false.
     * CYGNUS_MONGO_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
     * CYGNUS_MONGO_DATA_MODEL: select the data_model: dm-by-service-path or dm-by-entity.
     * CYGNUS_MONGO_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
@@ -210,6 +212,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_STH_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_STH_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_STH_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_STH_SKIP_NAME_MAPPINGS_GENERATION: true if name mappings should not be generated empty at start, false otherwise. Default is false.
     * CYGNUS_STH_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
     * CYGNUS_STH_DATA_MODEL: select the data_model: dm-by-service-path or dm-by-entity.
     * CYGNUS_STH_DB_PREFIX: prefix for the MongoDB databases
@@ -229,6 +232,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_CKAN_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_CKAN_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_CKAN_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_CKAN_SKIP_NAME_MAPPINGS_GENERATION: true if name mappings should not be generated empty at start, false otherwise. Default is false.
     * CYGNUS_CKAN_DATA_MODEL: select the data_model: dm-by-service-path or dm-by-entity.
     * CYGNUS_CKAN_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
     * CYGNUS_CKAN_ORION_URL: Orion URL used to compose the resource URL with the convenience operation URL to query it
@@ -271,6 +275,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_POSTGRESQL_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_POSTGRESQL_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_POSTGRESQL_SKIP_NAME_MAPPINGS_GENERATION: true if name mappings should not be generated empty at start, false otherwise. Default is false.
     * CYGNUS_POSTGRESQL_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
     * CYGNUS_POSTGRESQL_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
     * CYGNUS_POSTGRESQL_ATTR_NATIVE_TYPES: how the attribute are stored, using native type (true) or stringfy (false, by default).
@@ -292,6 +297,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_ORION_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_ORION_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_ORION_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_ORION_SKIP_NAME_MAPPINGS_GENERATION: true if name mappings should not be generated empty at start, false otherwise. Default is false.
     * CYGNUS_ORION_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
     * CYGNUS_ORION_BATCH_SIZE: number of notifications to be included within a processing batch.
     * CYGNUS_ORION_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
@@ -313,6 +319,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_POSTGIS_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_POSTGIS_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_POSTGIS_SKIP_NAME_MAPPINGS_GENERATION: true if name mappings should not be generated empty at start, false otherwise. Default is false.
     * CYGNUS_POSTGIS_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
     * CYGNUS_POSTGIS_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
     * CYGNUS_POSTGIS_ATTR_NATIVE_TYPES: how the attribute are stored, using native type (true) or stringfy (false, by default).
