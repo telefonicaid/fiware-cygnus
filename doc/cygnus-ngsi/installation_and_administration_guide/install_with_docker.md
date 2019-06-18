@@ -328,6 +328,21 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_POSTGIS_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_POSTGIS_BATCH_TTL: number of retries upon persistence error.
 
+* Elasticsearch:
+    * It only works for building historical context data in Elasticsearch.
+    * CYGNUS_ELASTICSEARCH_HOST: the hostname of Elasticsearch server. Default is `localhost`, but this environment variable is mandatory so you have to set this environment variable explicitly.
+    * CYGNUS_ELASTICSEARCH_PORT: the port number of Elasticsearch server. Default is `9200`, but this environment variable is mandatory so you have to set this environment variable explicitly.
+    * CYGNUS_ELASTICSEARCH_SSL: true if connect to Elasticsearch server using SSL. Default is `false`, but this environment variable is mandatory so you have to set this environment variable explicitly.
+    * CYGNUS_ELASTICSEARCH_INDEX_PREFIX: the prefix of index name. Default is `cygnus`.
+    * CYGNUS_ELASTICSEARCH_MAPPING_TYPE: the mapping type name of Elasticsearch. Default is `cygnus_type`.
+    * CYGNUS_ELASTICSEARCH_IGNORE_WHITE_SPACES: true if exclusively white space-based attribute values must be ignored, false otherwise. Default is `true`.
+    * CYGNUS_ELASTICSEARCH_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column). Default is `row`. (see [the document of NGSIElasticsearchSink](/doc/cygnus-ngsi/flume_extensions_catalogue/ngsi_elasticsearch_sink.md#section1.2.3) because there are some points to consider.)
+    * CYGNUS_ELASTICSEARCH_TIMEZONE: timezone to be used as a document's timestamp. Default is `UTC`.
+    * CYGNUS_ELASTICSEARCH_CAST_VALUE: true if cast the attrValue using attrType. (see [the document of NGSIElasticsearchSink](/doc/cygnus-ngsi/flume_extensions_catalogue/ngsi_elasticsearch_sink.md#section1.2.2).)
+    * CYGNUS_ELASTICSEARCH_CACHE_FLASH_INTERVAL_SEC: 0 if notified data will be persisted to Elasticsearch immediately. positive integer if notified data are cached on container's memory and will be persisted to Elasticsearch periodically every `CYGNUS_ELASTICSEARCH_CACHE_FLASH_INTERVAL_SEC`. Default is `0`. (see [the document of NGSIElasticsearchSink](/doc/cygnus-ngsi/flume_extensions_catalogue/ngsi_elasticsearch_sink.md#section2.3.1) because there are some points to consider.)
+    * CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONNS: Maximum number of connections allowed for a Http-based Elasticsearch backend. Default is `500`.
+    * CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONSS_PER_ROUTE: Maximum number of connections per route allowed for a Http-based Elasticsearch backend. Default is `100`.
+
 * Log4j configuration file:
     * The logging level is `INFO` but can be changed through the CYGNUS_LOG_LEVEL environment variable.
     * The logging appender is `console` but can be changed through the CYGNUS_LOG_APPENDER environment variable.
