@@ -14,6 +14,19 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    
+    <repositories>
+		<repository>
+			<id>arcgis</id>
+			<url>https://esri.bintray.com/arcgis</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>arcgis-plugin</id>
+			<url>https://esri.bintray.com/arcgis</url>
+		</pluginRepository>
+	</pluginRepositories>
 
     <dependencies>
         <!-- Required for testing -->
@@ -58,6 +71,19 @@
             <artifactId>cygnus-common</artifactId>
             <version>1.14.0_SNAPSHOT</version>
         </dependency>
+        <!-- libreria arcgis -->
+		<dependency>
+			<groupId>com.esri.arcgisruntime</groupId>
+			<artifactId>arcgis-java</artifactId>
+			<version>100.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>es.aytosantander.smartcity</groupId>
+			<artifactId>ArcgisUtils</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>system</scope>
+    		<systemPath>${project.basedir}/src/main/resources/ArcgisUtils-0.0.1-SNAPSHOT.jar</systemPath>
+		</dependency>
     </dependencies>
 
     <build>

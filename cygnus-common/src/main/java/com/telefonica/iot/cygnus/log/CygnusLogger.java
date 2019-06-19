@@ -108,6 +108,20 @@ public class CygnusLogger {
         } // try catch
     } // warn
     
+    
+    /**
+     * Traces a message with TRACE level.
+     * @param msg
+     */
+    public void trace(Object msg) {
+        try {
+            logger.log(fqcn, Level.TRACE, msg, null);
+        } catch (Exception e) {
+            traceAndExit(e);
+        } // try catch
+    } // trace
+    
+    
     private void traceAndExit(Exception e) {
         System.err.println("A problem with the logging system was found... shutting down Cygnus right now!"
                 + " Details=" + e.getMessage());
