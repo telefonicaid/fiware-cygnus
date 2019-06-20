@@ -382,7 +382,7 @@ if [ "${CYGNUS_HDFS_SKIP_CONF_GENERATION,,}" == "true" ]; then
         fi
         PIDS="$PIDS $!"
     fi
-if [ "$CYGNUS_HDFS_HOST" != "" ]; then
+elif [ "$CYGNUS_HDFS_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_hdfs.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -789,7 +789,7 @@ if [ "${CYGNUS_ELASTICSEARCH_SKIP_CONF_GENERATION,,}" == "true" ]; then
         fi
         PIDS="$PIDS $!"
     fi
-if [ "$CYGNUS_ELASTICSEARCH_HOST" != "" ]; then
+elif [ "$CYGNUS_ELASTICSEARCH_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-elasticsearch.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
