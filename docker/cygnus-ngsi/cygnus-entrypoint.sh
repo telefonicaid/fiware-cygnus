@@ -71,7 +71,19 @@ if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
 fi
 
 # Check if MYSQL ENV vars
-if [ "$CYGNUS_MYSQL_HOST" != "" ]; then
+if [ "${CYGNUS_MYSQL_SKIP_CONF_GENERATION,,}" == "true" ]; then
+    AGENT_CONF_FILE=agent_mysql.conf
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5080 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41415 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5080 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
+        PIDS="$PIDS $!"
+    fi
+elif [ "$CYGNUS_MYSQL_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_mysql.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -138,7 +150,19 @@ if [ "$CYGNUS_MYSQL_HOST" != "" ]; then
 fi
 
 # Check if MONGO ENV vars
-if [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
+if [ "${CYGNUS_MONGO_SKIP_CONF_GENERATION,,}" == "true" ]; then
+    AGENT_CONF_FILE=agent_mongo.conf
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5081 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41416 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5081 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
+        PIDS="$PIDS $!"
+    fi
+elif [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_mongo.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -262,7 +286,19 @@ if [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
 fi
 
 # Check if CKAN ENV vars
-if [ "$CYGNUS_CKAN_HOST" != "" ]; then
+if [ "${CYGNUS_CKAN_SKIP_CONF_GENERATION,,}" == "true" ]; then
+    AGENT_CONF_FILE=agent_ckan.conf
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5082 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41417 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5082 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
+        PIDS="$PIDS $!"
+    fi
+elif [ "$CYGNUS_CKAN_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_ckan.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -335,6 +371,18 @@ if [ "$CYGNUS_CKAN_HOST" != "" ]; then
 fi
 
 # Check if HDFS ENV vars
+if [ "${CYGNUS_HDFS_SKIP_CONF_GENERATION,,}" == "true" ]; then
+    AGENT_CONF_FILE=agent_hdfs.conf
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5083 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41418 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5083 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
+        PIDS="$PIDS $!"
+    fi
 if [ "$CYGNUS_HDFS_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_hdfs.conf
@@ -427,7 +475,19 @@ if [ "$CYGNUS_HDFS_HOST" != "" ]; then
 fi
 
 # Check if PostgreSQL ENV vars
-if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
+if [ "${CYGNUS_POSTGRESQL_SKIP_CONF_GENERATION,,}" == "true" ]; then
+    AGENT_CONF_FILE=agent_postgresql.conf
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5084 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41419 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5084 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
+        PIDS="$PIDS $!"
+    fi
+elif [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_postgresql.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -498,7 +558,19 @@ if [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
 fi
 
 # Check if CARTODB ENV vars
-if [ "$CYGNUS_CARTO_USER" != "" ]; then
+if [ "${CYGNUS_CARTO_SKIP_CONF_GENERATION,,}" == "true" ]; then
+    AGENT_CONF_FILE=agent_carto.conf
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5085 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41420 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5085 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
+        PIDS="$PIDS $!"
+    fi
+elif [ "$CYGNUS_CARTO_USER" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_carto.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -535,7 +607,14 @@ if [ "$CYGNUS_CARTO_USER" != "" ]; then
 fi
 
 # Check if ORION ENV vars
-if [ "$CYGNUS_ORION_HOST" != "" ]; then
+if [ "${CYGNUS_ORION_SKIP_CONF_GENERATION,,}" == "true" ]; then
+    AGENT_CONF_FILE=agent_orion.conf
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        # Run the Cygnus command
+        ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5086 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        PIDS="$PIDS $!"
+    fi
+elif [ "$CYGNUS_ORION_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_orion.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -617,6 +696,7 @@ if [ "${CYGNUS_POSTGIS_SKIP_CONF_GENERATION,,}" == "true" ]; then
             # Run the Cygnus command
             ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5087 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
         fi
+        PIDS="$PIDS $!"
     fi
 elif [ "$CYGNUS_POSTGIS_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
@@ -689,6 +769,18 @@ elif [ "$CYGNUS_POSTGIS_HOST" != "" ]; then
 fi
 
 # Check if ELASTICSEARCH ENV vars
+if [ "${CYGNUS_ELASTICSEARCH_SKIP_CONF_GENERATION,,}" == "true" ]; then
+    AGENT_CONF_FILE=agent-elasticsearch.conf
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5088 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41415 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5088 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
+        PIDS="$PIDS $!"
+    fi
 if [ "$CYGNUS_ELASTICSEARCH_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-elasticsearch.conf
