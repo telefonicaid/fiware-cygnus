@@ -177,6 +177,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * The port for MYSQL is `3306` but can be changed through the CYGNUS_MYSQL_PORT environment variable.
     * The user for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_USER environment variable.
     * The pass for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_PASS environment variable.
+    * CYGNUS_MYSQL_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_MYSQL_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_MYSQL_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
@@ -194,6 +195,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * The endpoint for Mongo and STH, containing host and port, is `iot-mongo:27017` but can be changed through the CYGNUS_MONGO_HOSTS environment variable.
     * The user for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
     * The pass for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_PASS environment variable.
+    * CYGNUS_MONGO_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_MONGO_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_MONGO_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_MONGO_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
@@ -230,6 +232,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * The port for CKAN is `80` but can be changed through the CYGNUS_CKAN_PORT environment variable.
     * The ssl for CKAN is `false` but can be changed through the CYGNUS_CKAN_SSL environment variable.
     * The api_key for CKAN is blank but can be changed through the CYGNUS_CKAN_API_KEY environment variable.
+    * CYGNUS_CKAN_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_CKAN_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_CKAN_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_CKAN_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
@@ -249,6 +252,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * The port for HDFS is `50070` but can be changed through the CYGNUS_HDFS_PORT environment variable.
     * The user for HDFS is `hdfs` but can be changed through the CYGNUS_HDFS_USER environment variable.
     * The token for HDFS is empty but can be set through the CYGNUS_HDFS_TOKEN environment variable
+    * CYGNUS_HDFS_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_HDFS_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_HDFS_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_HDFS_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
@@ -273,6 +277,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * The port for PostgreSQL is `3306` but can be changed through the CYGNUS_POSTGRESQL_PORT environment variable.
     * The user for PostgreSQL is `postgresql` but can be changed through the CYGNUS_POSTGRESQL_USER environment variable.
     * The pass for PostgreSQL is `postgresql` but can be changed through the CYGNUS_POSTGRESQL_PASS environment variable.
+    * CYGNUS_POSTGRESQL_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_POSTGRESQL_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_POSTGRESQL_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
@@ -295,6 +300,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * The port for Orion is `1026` but can be changed through the CYGNUS_ORION_PORT environment variable.
     * The user for Orion is empty but can be changed through the CYGNUS_ORION_USER environment variable.
     * The pass for Orion is empty but can be changed through the CYGNUS_ORION_PASS environment variable.
+    * CYGNUS_ORION_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_ORION_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_ORION_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_ORION_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
@@ -333,6 +339,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_ELASTICSEARCH_HOST: the hostname of Elasticsearch server. Default is `localhost`, but this environment variable is mandatory so you have to set this environment variable explicitly.
     * CYGNUS_ELASTICSEARCH_PORT: the port number of Elasticsearch server. Default is `9200`, but this environment variable is mandatory so you have to set this environment variable explicitly.
     * CYGNUS_ELASTICSEARCH_SSL: true if connect to Elasticsearch server using SSL. Default is `false`, but this environment variable is mandatory so you have to set this environment variable explicitly.
+    * CYGNUS_ELASTICSEARCH_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_ELASTICSEARCH_INDEX_PREFIX: the prefix of index name. Default is `cygnus`.
     * CYGNUS_ELASTICSEARCH_MAPPING_TYPE: the mapping type name of Elasticsearch. Default is `cygnus_type`.
     * CYGNUS_ELASTICSEARCH_IGNORE_WHITE_SPACES: true if exclusively white space-based attribute values must be ignored, false otherwise. Default is `true`.
