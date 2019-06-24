@@ -156,7 +156,8 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 As seen above, the default configuration distributed with the image is tied to certain values that may not be suitable for you tests. Specifically:
 
 * Multiagent:
-    * Enable multiagent cygnus: CYGNUS_MULTIAGENT environment variable. If enabled, each sink will run in a diferent port:
+    * Enable multiagent cygnus: CYGNUS_MULTIAGENT environment variable. If enabled, each sink will have a different configuration file and will be executed by a differnet cygnus agent (java process).
+    In both cases, multiagent or not, cygnus sinks will run in a diferent port:
 
 | sink   | port   | admin_port |
 |--:|--:|--:|
