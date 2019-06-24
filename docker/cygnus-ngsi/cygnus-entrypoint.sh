@@ -67,7 +67,8 @@ GROUPING_CONF_FILE=grouping_rules.conf
 NAMEMAPPING_CONF_FILE=name_mappings.conf
 
 if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
-    cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    #cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/multisink_agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
 fi
 
 # Check if MYSQL ENV vars
@@ -100,10 +101,15 @@ elif [ "$CYGNUS_MYSQL_HOST" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
+    else
+        sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-mysql /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = mysql-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = mysql-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+
+    # Needed?
     sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5050 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_host/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_host = '${CYGNUS_MYSQL_HOST} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_port/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_port = '${CYGNUS_MYSQL_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_username/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_username = '${CYGNUS_MYSQL_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -180,6 +186,8 @@ elif [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
+    else
+        sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-mongo /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = mongo-sink sth-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = mongo-channel sth-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -315,6 +323,8 @@ elif [ "$CYGNUS_CKAN_HOST" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5052 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    else
+        sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-ckan /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = ckan-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = ckan-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -400,6 +410,8 @@ elif [ "$CYGNUS_HDFS_HOST" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5053 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    else
+        sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-hdfs /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = hdfs-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = hdfs-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -504,6 +516,8 @@ elif [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5054 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    else
+        sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-postgresql /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = postgresql-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = postgresql-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -585,6 +599,8 @@ elif [ "$CYGNUS_CARTO_USER" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5055 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    else
+        sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-cartodb /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = cartodb-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = cartodb-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -635,6 +651,8 @@ elif [ "$CYGNUS_ORION_HOST" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5056 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    else
+        sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-orion /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = orion-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = orion-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -724,6 +742,8 @@ elif [ "$CYGNUS_POSTGIS_HOST" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5057 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    else
+        sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-postgis /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = postgis-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = postgis-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -794,6 +814,8 @@ elif [ "$CYGNUS_ELASTICSEARCH_HOST" != "" ]; then
         AGENT_CONF_FILE=agent-elasticsearch.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5058 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    else
+        sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-elasticsearch /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = elasticsearch-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = elasticsearch-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
