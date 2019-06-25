@@ -66,8 +66,33 @@ AGENT_CONF_FILE=agent.conf
 GROUPING_CONF_FILE=grouping_rules.conf
 NAMEMAPPING_CONF_FILE=name_mappings.conf
 
+
+
+if [ "${CYGNUS_SKIP_CONF_GENERATION,,}" == "true" ]; then
+    # Force to skip all kind of generation
+    CYGNUS_MYSQL_SKIP_CONF_GENERATION="true"
+    CYGNUS_MONGO_SKIP_CONF_GENERATION="true"
+    CYGNUS_CKAN_SKIP_CONF_GENERATION="true"
+    CYGNUS_HDFS_SKIP_CONF_GENERATION="true"
+    CYGNUS_POSTGRESQL_SKIP_CONF_GENERATION="true"
+    CYGNUS_CARTO_SKIP_CONF_GENERATION="true"
+    CYGNUS_ORION_SKIP_CONF_GENERATION="true"
+    CYGNUS_POSTGIS_SKIP_CONF_GENERATION="true"
+    CYGNUS_ELASTICSEARCH_SKIP_CONF_GENERATION="true"
+    CYGNUS_MYSQL_SKIP_NAME_MAPPINGS_GENERATION="true"
+    CYGNUS_MONGO_SKIP_NAME_MAPPINGS_GENERATION="true"
+    CYGNUS_CKAN_SKIP_NAME_MAPPINGS_GENERATION="true"
+    CYGNUS_HDFS_SKIP_NAME_MAPPINGS_GENERATION="true"
+    CYGNUS_ORION_SKIP_NAME_MAPPINGS_GENERATION="true"
+    CYGNUS_POSTGRESQL_SKIP_NAME_MAPPINGS_GENERATION="true"
+    CYGNUS_POSTGIS_SKIP_NAME_MAPPINGS_GENERATION="true"
+fi
+
 if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
-    cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/multisink_agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    # and check if SKIP ALL env var
+    if [ "${CYGNUS_SKIP_CONF_GENERATION,,}" == "false" ]; then
+        cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/multisink_agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
 fi
 
 # Check if MYSQL ENV vars
