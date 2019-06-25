@@ -156,7 +156,7 @@ CONTAINER ID        IMAGE               COMMAND             CREATED             
 As seen above, the default configuration distributed with the image is tied to certain values that may not be suitable for you tests. Specifically:
 
 * Configuration generation:
-    * Enable generation of configuration: CYGNUS_SKIP_CONF_CONFIGURATION. If enabled a confiration will be created for container, if disabled then your should provide a configuration.
+    * Enable generation of configuration: CYGNUS_SKIP_CONF_GENERATION. If enabled a confiration will be created for container, if disabled then your should provide a configuration.
 
 * Multiagent:
     * Enable multiagent cygnus: CYGNUS_MULTIAGENT environment variable. If enabled, each sink will have a different configuration file and will be executed by a different cygnus agent (java process). If disabled, all sinks are configured in the same agent configuration file and are executed by the same agent (java procss).
