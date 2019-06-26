@@ -140,7 +140,7 @@ public class NGSIMySQLSink extends NGSISink {
         
         if ((intPort <= 0) || (intPort > 65535)) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (mysql_port=" + mysqlPort + ") "
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (mysql_port=" + mysqlPort + ") "
                     + "must be between 0 and 65535");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_port=" + mysqlPort + ")");
@@ -163,7 +163,7 @@ public class NGSIMySQLSink extends NGSISink {
                 + persistence + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (attr_persistence="
                 + persistence + ") must be 'row' or 'column'");
         }  // if else
         
