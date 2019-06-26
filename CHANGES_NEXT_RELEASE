@@ -1,3 +1,4 @@
+[cygnus-ngsi][Sinks] Warn about configuration errors
 [cygnus-ngsi][Docker] Add multisink mode with single config agent (non multiagent mode) (#1675)
 [cygnus-ngsi][Docker] Add skip agent sinks conf generation env vars
 [cygnus-ngsi][Docker] Add skip name mappings generation env vars
