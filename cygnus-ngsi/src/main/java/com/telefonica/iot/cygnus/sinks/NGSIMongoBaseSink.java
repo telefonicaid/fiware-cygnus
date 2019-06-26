@@ -127,7 +127,7 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
         
         if (collectionPrefix.equals("system.")) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (collection_prefix="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (collection_prefix="
                 + collectionPrefix + ") -- Cannot be 'system.'");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (collection_prefix=" + collectionPrefix + ")");
@@ -144,7 +144,7 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
                 + ignoreWhiteSpacesStr + ")");
         }  else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (ignore_white_spaces="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (ignore_white_spaces="
                 + ignoreWhiteSpacesStr + ") -- Must be 'true' or 'false'");
         }  // if else
     } // configure

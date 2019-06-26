@@ -293,7 +293,7 @@ public class NGSIOrionSink extends NGSISink {
 
         if ((intPort <= 0) || (intPort > 65535)) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (orion_port=" + orionPort + ") "
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (orion_port=" + orionPort + ") "
                     + "must be between 0 and 65535");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (orion_port=" + orionPort + ")");
@@ -309,7 +309,7 @@ public class NGSIOrionSink extends NGSISink {
 
         if ((intPortKey <= 0) || (intPortKey > 65535)) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (orion_port_key=" + keystonePort + ") "
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (orion_port_key=" + keystonePort + ") "
                     + "must be between 0 and 65535");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (orion_port_key=" + keystonePort + ")");

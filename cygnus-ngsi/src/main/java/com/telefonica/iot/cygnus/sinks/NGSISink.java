@@ -211,7 +211,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     + dataModelStr + ")");
         } catch (Exception e) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (data_model="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (data_model="
                     + dataModelStr + ")");
         } // catch
 
@@ -223,7 +223,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 + enableGroupingStr + ")");
         }  else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (enable_grouping="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (enable_grouping="
                 + enableGroupingStr + ") -- Must be 'true' or 'false'");
         }  // if else
         
@@ -235,7 +235,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 + enableLowercaseStr + ")");
         }  else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (enable_lowercase="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (enable_lowercase="
                 + enableLowercaseStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
@@ -243,7 +243,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
         if (batchSize <= 0) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (batch_size="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (batch_size="
                     + batchSize + ") -- Must be greater than 0");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_size="
@@ -254,7 +254,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
         if (batchTimeout <= 0) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (batch_timeout="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (batch_timeout="
                     + batchTimeout + ") -- Must be greater than 0");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_timeout="
@@ -265,7 +265,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         
         if (batchTTL < -1) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (batch_ttl="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (batch_ttl="
                     + batchTTL + ") -- Must be greater than -2");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (batch_ttl="
@@ -280,7 +280,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 + enableEncodingStr + ")");
         }  else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (enable_encoding="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (enable_encoding="
                 + enableEncodingStr + ") -- Must be 'true' or 'false'");
         }  // if else
         
@@ -292,7 +292,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 + enableNameMappingsStr + ")");
         }  else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (enable_name_mappings="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (enable_name_mappings="
                 + enableNameMappingsStr + ") -- Must be 'true' or 'false'");
         }  // if else
         
@@ -307,7 +307,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             
             if (batchRetryInterval <= 0) {
                 invalidConfiguration = true;
-                LOGGER.debug("[" + this.getName() + "] Invalid configuration (batch_retry_intervals="
+                LOGGER.warn("[" + this.getName() + "] Invalid configuration (batch_retry_intervals="
                         + batchRetryIntervalStr + ") -- Members must be greater than 0");
                 allOK = false;
                 break;
@@ -331,7 +331,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         
         if (persistencePolicyCheckingTime <= 0) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (persistence_policy.checking_time="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (persistence_policy.checking_time="
                     + persistencePolicyCheckingTime + ") -- Must be greater than 0");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (persistence_policy.checking_time="

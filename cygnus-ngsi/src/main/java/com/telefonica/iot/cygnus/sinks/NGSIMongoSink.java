@@ -64,7 +64,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         
         if ((collectionsSize > 0) && (collectionsSize < 4096)) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (collections_size="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (collections_size="
                     + collectionsSize + ") -- Must be greater than or equal to 4096");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (collections_size=" + collectionsSize + ")");
@@ -81,7 +81,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                 + attrPersistenceStr + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (attr_persistence="
                 + attrPersistenceStr + ") must be 'row' or 'column'");
         }  // if else
         
@@ -92,7 +92,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                     + attrMetadataStore + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
                     + attrMetadataStore + ") must be 'true' or 'false'");
         } // if else 
 
