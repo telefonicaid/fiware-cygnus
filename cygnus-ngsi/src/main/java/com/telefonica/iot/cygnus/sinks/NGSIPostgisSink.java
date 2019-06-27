@@ -581,8 +581,11 @@ public class NGSIPostgisSink extends NGSISink {
         } // if
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
-
-        persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
+        if (fieldValues.equals("")) {
+            LOGGER.debug("[" + this.getName() + "] no values for insert");
+        } else {
+            persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
+        }
     } // persistAggregation
     
     /**
