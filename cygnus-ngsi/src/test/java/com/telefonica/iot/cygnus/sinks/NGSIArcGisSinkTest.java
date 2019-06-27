@@ -52,8 +52,7 @@ public class NGSIArcGisSinkTest {
      * Constructor.
      */
     public NGSIArcGisSinkTest() {
-        // LogManager.getRootLogger().setLevel(Level.FATAL);
-    } // NGSIOrionBaseSinkTest
+    } // NGSIArcGisSinkTest
 
     /**
      * @throws Exception
@@ -72,7 +71,7 @@ public class NGSIArcGisSinkTest {
 
     /**
      * [NGSIArcGisSink.insertFeature] -------- When service-path is notified,
-     * NGSIArcGisSink send entities to GIS
+     * NGSIArcGisSink send entities to GIS.
      */
     @Test
     public void testInsertFeature() {
@@ -82,7 +81,8 @@ public class NGSIArcGisSinkTest {
 
         try {
             String bodyJSON = "{\"id\": \"Car1\", \"type\": \"Car\", "
-                    + "\"location\": { \"type\": \"geo:json\" \"value\": {\"type\": \"Point\", \"coordinates\": [-3.79109661, 43.48712556]}}, "
+                    + "\"location\": { \"type\": \"geo:json\" \"value\": "
+                    + "{\"type\": \"Point\", \"coordinates\": [-3.79109661, 43.48712556]}}, "
                     + " \"speed\": { \"type\":\"Float\", \"value\": 98 } }";
             String serviceFiware = "service";
             String servicePathFiware = "/test";
