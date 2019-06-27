@@ -76,8 +76,7 @@ public class NGSIArcGisSinkTest {
     @Test
     public void testInsertFeature() {
         LOGGER.debug(getTestTraceHead("[NGSIArcGISBaseSink.insertFeature]")
-                + "-------- When / service-path is notified/defaulted and data_model=dm-by-entity, the OrionDB"
-                + "collections name is the concatenation of the <prefix>, <service-path>, <entityId> and <entityType>");
+                + "-------- When / service-path is notified/defaulted, NGSIArcGisSink send entities to GIS.");
 
         try {
             String bodyJSON = "{\"id\": \"Car1\", \"type\": \"Car\", "
