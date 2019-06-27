@@ -72,6 +72,13 @@
             <artifactId>cygnus-common</artifactId>
             <version>1.14.0_SNAPSHOT</version>
         </dependency>
+        <!-- libreria arcgis -->
+        <dependency>
+            <groupId>com.esri.arcgisruntime</groupId>
+            <artifactId>arcgis-java</artifactId>
+            <version>100.4.0</version>
+        </dependency>
+        
         <dependency>
             <groupId>es.aytosantander.smartcity</groupId>
             <artifactId>ArcgisUtils</artifactId>
