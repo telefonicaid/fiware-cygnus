@@ -66,6 +66,8 @@ public class NGSIArcGisSink extends NGSISink {
     private String arcGisUsername;
     private String arcGisPassword;
     private String subservice;
+    
+    private Arcgis arcgisUtils;
 
     /**
      * Constructor.
@@ -137,6 +139,22 @@ public class NGSIArcGisSink extends NGSISink {
     public String getUrlFinal() {
         return getArcGisUrl() + "/" + getSubservice() + FEATURE_SERVER_0;
     } //getUrlFinal
+
+    
+    
+    /**
+     * @return the arcgisUtils
+     */
+    public Arcgis getArcgisUtils() {
+        return arcgisUtils;
+    } // getArcgisUtils
+
+    /**
+     * @param arcgisUtils the arcgisUtils to set
+     */
+    public void setArcgisUtils(Arcgis arcgisUtils) {
+        this.arcgisUtils = arcgisUtils;
+    } // setArcgisUtils
 
     /**
      * @return the logger
@@ -525,7 +543,16 @@ public class NGSIArcGisSink extends NGSISink {
                 } // if else
             } // for
             for (String key : map.keySet()) {
-                insertFeature(map.get(key));
+                ArcGISDomain arcGISDomain=map.get(key);
+                try {
+                    setArcgisUtils(ArcgisLog.getInstance(LOGGER,
+                        generateURL(getArcGisUrl(), arcGISDomain.getServicePathFiware(),  FEATURE_SERVER_0),
+                        getArcGisUsername(), getArcGisPassword()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new CygnusRuntimeError("Data insertion error", "Exception", e.getMessage());
+                } // try catch
+                insertFeature(arcGISDomain);
             } // for
 
         } else {
@@ -546,9 +573,6 @@ public class NGSIArcGisSink extends NGSISink {
         try {
             LOGGER.debug("init arcgisUtils");
 
-            Arcgis arcgisUtils = ArcgisLog.getInstance(LOGGER,
-                    generateURL(getArcGisUrl(), arcGisDomain.getServicePathFiware(),  FEATURE_SERVER_0),
-                    getArcGisUsername(), getArcGisPassword());
             
             arcgisUtils.setBatchSize(getBatchSize());
             LOGGER.debug("inited arcgisUtils" + arcgisUtils);

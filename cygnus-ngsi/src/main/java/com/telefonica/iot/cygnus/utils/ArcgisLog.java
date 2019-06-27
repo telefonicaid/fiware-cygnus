@@ -27,7 +27,7 @@ import es.santander.smartcity.arcgisutils.exception.ArcGisException;
  * @author PMO Santander Smart City – Ayuntamiento de Santander
  *
  */
-public final class ArcgisLog extends Arcgis {
+public class ArcgisLog extends Arcgis {
 
     private static CygnusLogger cygnusLogger;
 
