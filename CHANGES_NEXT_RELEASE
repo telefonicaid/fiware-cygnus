@@ -1,4 +1,4 @@
-[cygnus-ngsi][MySQL] Check values for Insert before insert
+[cygnus-ngsi][MySQL,PostGIS,PostgreSQL] Check values for Insert before insert
 [cygnus-ngsi][Sinks] Change log level from DEBUG to WARN for configuration errors
 [cygnus-ngsi][Docker] Add multisink mode with single config agent (non multiagent mode) (#1675)
 [cygnus-ngsi][Docker] Add skip agent sinks conf generation env vars
