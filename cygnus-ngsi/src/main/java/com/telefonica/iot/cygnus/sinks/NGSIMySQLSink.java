@@ -636,7 +636,11 @@ public class NGSIMySQLSink extends NGSISink {
             persistenceBackend.createTable(dbName, tableName, fieldsForCreate);
         } // if
 
-        persistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
+        if (valuesForInsert.equals("")) {
+            LOGGER.debug("[" + this.getName() + "] no values for insert");
+        } else {
+            persistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
+        }
     } // persistAggregation
     
     /**

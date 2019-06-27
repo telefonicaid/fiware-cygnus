@@ -1,3 +1,4 @@
+[cygnus-ngsi][MySQL] Check values for Insert before insert
 [cygnus-ngsi][Docker] Add datamodel option to postgresql and postgis sinks
 [cygnus-ngsi][Sinks] Change log level from DEBUG to WARN for configuration errors
 [cygnus-ngsi][Docker] Add multisink mode with single config agent (non multiagent mode) (#1675)
