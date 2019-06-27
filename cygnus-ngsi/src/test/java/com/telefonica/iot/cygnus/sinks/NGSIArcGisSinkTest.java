@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.sinks;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import static org.junit.Assert.assertTrue;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.Before;
@@ -31,6 +32,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.ArcgisLog;
+import com.telefonica.iot.cygnus.utils.EntityArcGisUtils;
 import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 
 import es.santander.smartcity.arcgisutils.Entity;
@@ -47,6 +49,9 @@ public class NGSIArcGisSinkTest {
 
     @Mock
     private ArcgisLog mockArcgisLog;
+    
+    @Mock
+    private EntityArcGisUtils mockEntityArcGisUtils;
 
     /**
      * Constructor.
@@ -66,6 +71,10 @@ public class NGSIArcGisSinkTest {
         Mockito.when(mockArcgisLog.canAdd()).thenReturn(true);
         Mockito.when(mockArcgisLog.commitEntities()).thenReturn(true);
         Mockito.when(mockArcgisLog.isLoaded()).thenReturn(true);
+        
+        //EntityArcGisUtilsMock
+        Mockito.when(mockEntityArcGisUtils.createEntities(Mockito.any(JSONArray.class), Mockito.anyString(), Mockito.anyString())).thenReturn(null);
+        Mockito.when(mockEntityArcGisUtils.createEntity(Mockito.any(JSONObject.class), Mockito.anyString(), Mockito.anyString())).thenReturn(null);
 
     } // setup
 
@@ -96,7 +105,7 @@ public class NGSIArcGisSinkTest {
 
             JSONParser jsonParser = new JSONParser();
             JSONObject json = (JSONObject) jsonParser.parse(bodyJSON);
-
+            sink.setEntityArcGisUtils(mockEntityArcGisUtils);
             NGSIArcGisSink.ArcGISDomain arcGisDomain = sink.new ArcGISDomain(serviceFiware, servicePathFiware, json);
 
             sink.setArcgisUtils(mockArcgisLog);

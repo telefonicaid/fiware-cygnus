@@ -19,7 +19,6 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,8 +44,7 @@ import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.ArcgisLog;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.DataUtils;
-import com.telefonica.iot.cygnus.utils.JsonUtils;
+import com.telefonica.iot.cygnus.utils.EntityArcGisUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 
 import es.santander.smartcity.arcgisutils.Arcgis;
@@ -61,13 +59,15 @@ public class NGSIArcGisSink extends NGSISink {
     private static final String FEATURE_SERVER_0 = "/FeatureServer/0";
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIArcGisSink.class);
-    
+
     private String arcGisUrl;
     private String arcGisUsername;
     private String arcGisPassword;
     private String subservice;
-    
+
     private Arcgis arcgisUtils;
+
+    private EntityArcGisUtils entityArcGisUtils;
 
     /**
      * Constructor.
@@ -138,10 +138,8 @@ public class NGSIArcGisSink extends NGSISink {
 
     public String getUrlFinal() {
         return getArcGisUrl() + "/" + getSubservice() + FEATURE_SERVER_0;
-    } //getUrlFinal
+    } // getUrlFinal
 
-    
-    
     /**
      * @return the arcgisUtils
      */
@@ -150,11 +148,30 @@ public class NGSIArcGisSink extends NGSISink {
     } // getArcgisUtils
 
     /**
-     * @param arcgisUtils the arcgisUtils to set
+     * @param arcgisUtils
+     *            the arcgisUtils to set
      */
     public void setArcgisUtils(Arcgis arcgisUtils) {
         this.arcgisUtils = arcgisUtils;
     } // setArcgisUtils
+
+    /**
+     * @return the entityArcGisUtils
+     */
+    public EntityArcGisUtils getEntityArcGisUtils() {
+        if(entityArcGisUtils==null) {
+            entityArcGisUtils=new EntityArcGisUtils();
+        }
+        return entityArcGisUtils;
+    }
+
+    /**
+     * @param entityArcGisUtils
+     *            the entityArcGisUtils to set
+     */
+    public void setEntityArcGisUtils(EntityArcGisUtils entityArcGisUtils) {
+        this.entityArcGisUtils = entityArcGisUtils;
+    }
 
     /**
      * @return the logger
@@ -162,7 +179,6 @@ public class NGSIArcGisSink extends NGSISink {
     public static CygnusLogger getLogger() {
         return LOGGER;
     } // getLogger
-
 
     @Override
     public void configure(Context context) {
@@ -240,7 +256,6 @@ public class NGSIArcGisSink extends NGSISink {
         private String subService;
         private JSONObject entityJSON;
 
-    
         /**
          * 
          * @param aggregation
@@ -401,7 +416,7 @@ public class NGSIArcGisSink extends NGSISink {
             LOGGER.debug("[ArcGisSink] MappedCE ->" + event.getMappedCE());
             LOGGER.debug("[ArcGisSink] OriginalCE ->" + event.getOriginalCE());
             LOGGER.debug("[ArcGisSink] enableNameMappings state -> " + enableNameMappings);
-            
+
             // get the getRecvTimeTs body
             ContextElement contextElement = null;
             if (!enableNameMappings) {
@@ -543,11 +558,11 @@ public class NGSIArcGisSink extends NGSISink {
                 } // if else
             } // for
             for (String key : map.keySet()) {
-                ArcGISDomain arcGISDomain=map.get(key);
+                ArcGISDomain arcGISDomain = map.get(key);
                 try {
                     setArcgisUtils(ArcgisLog.getInstance(LOGGER,
-                        generateURL(getArcGisUrl(), arcGISDomain.getServicePathFiware(),  FEATURE_SERVER_0),
-                        getArcGisUsername(), getArcGisPassword()));
+                            generateURL(getArcGisUrl(), arcGISDomain.getServicePathFiware(), FEATURE_SERVER_0),
+                            getArcGisUsername(), getArcGisPassword()));
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new CygnusRuntimeError("Data insertion error", "Exception", e.getMessage());
@@ -573,7 +588,6 @@ public class NGSIArcGisSink extends NGSISink {
         try {
             LOGGER.debug("init arcgisUtils");
 
-            
             arcgisUtils.setBatchSize(getBatchSize());
             LOGGER.debug("inited arcgisUtils" + arcgisUtils);
 
@@ -589,13 +603,12 @@ public class NGSIArcGisSink extends NGSISink {
                             + arcgisUtils.hasError());
 
                     LOGGER.debug("create Entities");
-                    List<Entity> listEntities = createEntities(arcGisDomain.getJsonArray(),
+                    List<Entity> listEntities = getEntityArcGisUtils().createEntities(arcGisDomain.getJsonArray(),
                             arcGisDomain.getServiceFiware(), arcGisDomain.getServicePathFiware());
 
                     LOGGER.debug("addToBatch listEnties --> " + listEntities);
                     arcgisUtils.addToBatch(listEntities);
-                    
-                    
+
                     arcgisUtils.commitEntities();
                     LOGGER.debug("Finished.");
                 } else {
@@ -625,109 +638,6 @@ public class NGSIArcGisSink extends NGSISink {
         }
         return arcGisUrl + servicePathFiware + featureServer0;
     }
-
-    /**
-     * 
-     * @param bodyJSON
-     * @return
-     */
-    public List<Entity> createEntities(JSONArray jsonArray, String service, String servicePath) {
-        LOGGER.debug("init createEntities(jsonArray --> " + jsonArray + ")");
-        List<Entity> listEntity = new ArrayList<Entity>();
-
-        for (int i = 0; i < jsonArray.size(); i++) {
-            JSONObject jsonObject = (JSONObject) jsonArray.get(i);
-            listEntity.add(createEntity(jsonObject, service, servicePath));
-        } // for
-        LOGGER.debug("listEntity--> " + listEntity);
-        return listEntity;
-
-    } // createEntities
-
-    /**
-     * Create Automatic entity.
-     * 
-     * @param jsonObject
-     * @return
-     */
-    public Entity createEntity(JSONObject jsonObject, String service, String servicePath) {
-        try {
-            double latitude = 0, longitude = 0;
-            Map<String, Object> attributes = new HashMap<String, Object>();
-            for (Object keyO : jsonObject.keySet()) {
-                String key = (String) keyO;
-                // Get a id or type of json
-                if (key.equals("type") || key.equals("id")) {
-                    if (key.equals("id")) {
-                        attributes.put(key, jsonObject.get(key).toString());
-                    } else {
-                        attributes.put(key + "Entity", jsonObject.get(key).toString());
-                    }
-                    // Get a coordenates of json
-                } else if (key.equals("location")) {
-                    JSONObject jsonObjectV1 = JsonUtils.parseJsonString(jsonObject.get(key).toString());
-                    String[] a = JsonUtils.parseJsonString(jsonObjectV1.get("value").toString()).get("coordinates")
-                            .toString().replace("[", "").replace("]", "").split(",");
-                    latitude = Double.parseDouble(a[1]);
-                    longitude = Double.parseDouble(a[0]);
-                } else {
-                    try {
-                        JSONObject jsonObjectV1 = JsonUtils.parseJsonString(jsonObject.get(key).toString());
-                        // If this method throws a ParseException, the value
-                        // isn't a json object
-                        getAttribute(key, key, jsonObjectV1, attributes);
-
-                    } catch (ParseException e) {
-                        // Add value which isn't JSON
-                        attributes.put(key, DataUtils.getStringToObject(jsonObject.get(key).toString()));
-                    } catch (Exception e) {
-                        // Add value which isn't JSON
-                        attributes.put(key, DataUtils.getStringToObject(jsonObject.get(key).toString()));
-                    }
-                }
-            } // for
-              // create entity with latitud an longitud
-            Entity e = Entity.createPointEntity(latitude, longitude);
-            // add other attributes
-            attributes.put("service", service);
-            attributes.put("servicePath", servicePath);
-            e.setAttributes(attributes);
-
-            return e;
-        } catch (ParseException e1) {
-            LOGGER.error(e1.getMessage());
-            return null;
-        } // try catch
-
-    } // createEntity
-
-    /**
-     * Get attribute.
-     * 
-     * @param key
-     * @param keyFinal
-     * @param jsonAttribute
-     * @param attributes
-     */
-    private void getAttribute(String key, String keyFinal, JSONObject jsonAttribute, Map<String, Object> attributes) {
-        for (Object key2 : jsonAttribute.keySet()) {
-            if ((!((String) key2).equals("metadata")) && (!((String) key2).equals("type"))) {
-                try {
-                    JSONObject jsonObjectV1 = JsonUtils.parseJsonString(jsonAttribute.get(key2).toString());
-                    keyFinal += "_" + key2;
-                    getAttribute((String) key2, keyFinal, jsonObjectV1, attributes);
-                } catch (ParseException e) {
-                    // Add value which isn't JSON
-                    attributes.put((keyFinal + "_" + key2).replace("_value", ""),
-                            DataUtils.getStringToObject(jsonAttribute.get(key2).toString()));
-                } catch (Exception e) {
-                    // Add value which isn't JSON
-                    attributes.put((keyFinal + "_" + key2).replace("_value", ""),
-                            DataUtils.getStringToObject(jsonAttribute.get(key2).toString()));
-                } // try catch
-            } // if
-        } // for
-    } // getAttribute
 
     /**
      * 
@@ -779,9 +689,6 @@ public class NGSIArcGisSink extends NGSISink {
         } // if
         return salida;
     }
-    
-    
-
 
     /**
      * @author PMO Santander Smart City – Ayuntamiento de Santander
@@ -792,7 +699,7 @@ public class NGSIArcGisSink extends NGSISink {
         private String serviceFiware;
         private String servicePathFiware;
         private JSONArray jsonArray = new JSONArray();
-    
+
         /**
          * @param serviceFiware
          * @param servicePathFiware
@@ -807,10 +714,10 @@ public class NGSIArcGisSink extends NGSISink {
             } else {
                 this.servicePathFiware = "";
             }
-    
+
             this.jsonArray.add(jsonObject);
         }
-    
+
         /**
          * Add JSONObject.
          * 
@@ -820,14 +727,14 @@ public class NGSIArcGisSink extends NGSISink {
         public void addJSONObject(JSONObject jsonObject) {
             this.jsonArray.add(jsonObject);
         }
-    
+
         /**
          * @return the serviceFiware
          */
         public String getServiceFiware() {
             return serviceFiware;
         }
-    
+
         /**
          * @param serviceFiware
          *            the serviceFiware to set
@@ -835,14 +742,14 @@ public class NGSIArcGisSink extends NGSISink {
         public void setServiceFiware(String serviceFiware) {
             this.serviceFiware = serviceFiware;
         }
-    
+
         /**
          * @return the servicePathFiware
          */
         public String getServicePathFiware() {
             return servicePathFiware;
         }
-    
+
         /**
          * @param servicePathFiware
          *            the servicePathFiware to set
@@ -850,14 +757,14 @@ public class NGSIArcGisSink extends NGSISink {
         public void setServicePathFiware(String servicePathFiware) {
             this.servicePathFiware = servicePathFiware;
         }
-    
+
         /**
          * @return the jsonArray
          */
         public JSONArray getJsonArray() {
             return jsonArray;
         }
-    
+
         /**
          * @param jsonArray
          *            the jsonArray to set
