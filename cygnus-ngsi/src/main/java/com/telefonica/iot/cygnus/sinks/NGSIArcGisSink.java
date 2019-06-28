@@ -159,8 +159,8 @@ public class NGSIArcGisSink extends NGSISink {
      * @return the entityArcGisUtils
      */
     public EntityArcGisUtils getEntityArcGisUtils() {
-        if(entityArcGisUtils==null) {
-            entityArcGisUtils=new EntityArcGisUtils();
+        if (entityArcGisUtils == null) {
+            entityArcGisUtils = new EntityArcGisUtils();
         }
         return entityArcGisUtils;
     }
@@ -632,7 +632,7 @@ public class NGSIArcGisSink extends NGSISink {
      * @return
      */
     private String generateURL(String arcGisUrl, String servicePathFiware, String featureServer0) {
-        String arcGisChar = arcGisUrl.substring(arcGisUrl.length() - 2, arcGisUrl.length() - 2);
+        String arcGisChar = arcGisUrl.trim().substring(arcGisUrl.length() - 1, arcGisUrl.length());
         if (!"/".equals(arcGisChar)) {
             arcGisUrl += "/";
         }
