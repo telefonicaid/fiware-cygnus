@@ -285,7 +285,7 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
   <tr><td>Raw-snapsot analysis</td><td>1.6.0</td></tr>
   <tr><td>NGSIOrionSink</td><td>First implementation</td><td>1.10.0</td></tr>
   <tr><td>NGSIElasticsearchSink</td><td>First implementation</td><td>1.15.0</td></tr>
-  <tr><td>NGSIArcGisSink</td><td>First implementation</td><td>1.15.0</td></tr>
+  <tr><td>NGSIArcGisSink</td><td>First implementation</td><td>1.16.0</td></tr>
   <tr><td rowspan="2">NGSITestSink</td><td>First implementation</td><td>0.7.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.12.0</td></tr>
   <tr><td rowspan="9">All sinks</td><td>Events TTL</td><td>0.4.1</td></tr>
