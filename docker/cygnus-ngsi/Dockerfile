@@ -36,7 +36,7 @@ ENV CYGNUS_MULTIAGENT false
 ENV CYGNUS_MONITORING_TYPE ""
 
 # These variables are optional ENV variables to docker runtime
-ENV CYGNUS_SKIP_CONF_GENERATION ""
+ENV CYGNUS_SKIP_CONF_GENERATION false
 
 # MySQL options
 ENV CYGNUS_MYSQL_HOST ""
