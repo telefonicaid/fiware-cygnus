@@ -99,6 +99,19 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Jun 28 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.15.0
+- [cygnus-ngsi][ElasticSearchSink] Add ElasticSearch sink (#1516, #1521)
+- [cygnus-ngsi][PostGISSink, PostgreSQLSink] Insert right SQL types values, non stringify (#1661)
+- [cygnus-ngsi][MySQLSink] Fix datetime format used (#1646)
+- [cygnus-ngsi][PostGISSink] Fix geo location persistence bug in column mode
+- [cygnus-ngsi][MySQLSink,PostGISSink,PostgreSQLSink] Check values for Insert before insert
+- [cygnus-ngsi][*Sink] Change log level from DEBUG to WARN for configuration errors
+- [cygnus-ngsi][CKANSink, Docker] Fix docker entrypoint about namemapping
+- [cygnus-ngsi][Docker] Add datamodel option to postgresql and postgis sinks
+- [cygnus-ngsi][Docker] Add multisink mode with single config agent (non multiagent mode) (#1675)
+- [cygnus-ngsi][Docker] Add skip agent sinks conf generation env vars
+- [cygnus-ngsi][Docker] Add skip name mappings generation env vars
+
 * Tue Jun 04 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.14.0
 
 * Wed May 22 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.13.0
