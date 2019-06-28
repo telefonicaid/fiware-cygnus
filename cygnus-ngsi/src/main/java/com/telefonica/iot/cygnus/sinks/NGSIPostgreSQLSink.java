@@ -172,7 +172,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
 
         if ((intPort <= 0) || (intPort > 65535)) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (postgresql_port=" + postgresqlPort + ")"
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (postgresql_port=" + postgresqlPort + ")"
                     + " -- Must be between 0 and 65535");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_port=" + postgresqlPort + ")");
@@ -197,7 +197,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 + persistence + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (attr_persistence="
                 + persistence + ") -- Must be 'row' or 'column'");
         }  // if else
                 
@@ -208,7 +208,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.enable_cache=" + enableCache + ")");
         }  else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (backend.enable_cache="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (backend.enable_cache="
                 + enableCache + ") -- Must be 'true' or 'false'");
         }  // if else
 
@@ -218,7 +218,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_native_types=" + attrNativeTypes + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_native_types="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (attr_native_types="
                 + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
         } // if else
 
@@ -541,8 +541,11 @@ public class NGSIPostgreSQLSink extends NGSISink {
             } // if
             // creating the database and the table has only sense if working in row mode, in column node
             // everything must be provisioned in advance
-
-            persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
+            if (fieldValues.equals("")) {
+                LOGGER.debug("[" + this.getName() + "] no values for insert");
+            } else {
+                persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
+            }
         } catch (Exception e) {
             throw new CygnusPersistenceError("-, " + e.getMessage());
         } // try catch

@@ -97,7 +97,7 @@ public class NGSIKafkaSink extends NGSISink {
 
         if (partitions <= 0) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (partitions=" + partitions
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (partitions=" + partitions
                     + ") -- Must be greater than 0");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (partitions=" + partitions + ")");
@@ -107,7 +107,7 @@ public class NGSIKafkaSink extends NGSISink {
 
         if (replicationFactor <= 0) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (replication_factor="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (replication_factor="
                     + replicationFactor + ") -- Must be greater than 0");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (replication_factor="

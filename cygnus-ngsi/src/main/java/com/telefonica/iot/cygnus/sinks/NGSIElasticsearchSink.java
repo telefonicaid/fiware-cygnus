@@ -286,12 +286,12 @@ public class NGSIElasticsearchSink extends NGSISink {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (elasticsearch_port=" + this.elasticsearchPort + ")");
             } else {
                 invalidConfiguration = true;
-                LOGGER.debug("[" + this.getName() + "] Invalid configuration (elasticsearch_port=" + this.elasticsearchPort
+                LOGGER.warn("[" + this.getName() + "] Invalid configuration (elasticsearch_port=" + this.elasticsearchPort
                         + ") -- Must be between 0 and 65535.");
             } // if else
         } catch (Exception e) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (elasticsearch_port=" + this.elasticsearchPort
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (elasticsearch_port=" + this.elasticsearchPort
                   + ") -- Must be a valid number between 0 and 65535.");
         } // try catch
 
@@ -301,7 +301,7 @@ public class NGSIElasticsearchSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (ssl=" + sslStr + ")");
         } else  {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (ssl="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (ssl="
                 + sslStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
@@ -325,7 +325,7 @@ public class NGSIElasticsearchSink extends NGSISink {
                 + ignoreWhiteSpacesStr + ")");
         }  else {
             this.invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (ignore_white_spaces="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (ignore_white_spaces="
                 + ignoreWhiteSpacesStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
@@ -336,7 +336,7 @@ public class NGSIElasticsearchSink extends NGSISink {
                 + attrPersistenceStr + ")");
         } else {
             this.invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (attr_persistence="
                 + attrPersistenceStr + ") must be 'row' or 'column'");
         }  // if else
 
@@ -350,7 +350,7 @@ public class NGSIElasticsearchSink extends NGSISink {
                 + castValueStr + ")");
         }  else {
             this.invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (cast_value="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (cast_value="
                 + castValueStr + ") -- Must be 'true' or 'false'");
         }  // if else
 

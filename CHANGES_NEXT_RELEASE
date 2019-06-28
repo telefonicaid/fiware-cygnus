@@ -1,7 +1,1 @@
-[cygnus-ngsi][Docker] Add skip name mappings generation env vars
-[cygnus-ngsi][CKAN, docker] Fix docker entrypoint about namemapping
-[cygnus-ngsi][PostGIS, PostgreSQL] Insert right SQL types values, non stringify (#1661)
-[cygnus-ngsi][MySQL] Fix datetime format used (#1646)
-[cygnus-ngsi][PostGIS] Fix geo location persistence bug in column mode
-[cygnus-ngsi][ElasticSearch] Add ElasticSearch sink (#1516, #1521)
 [cygnus-ngsi][ArcGis] Add ArcGis sink (#1672)

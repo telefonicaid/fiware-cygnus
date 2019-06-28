@@ -17,7 +17,7 @@ any time.
 
 Disclaimer:
 
-* This section has been last updated in January 2019. Please take into account its 
+* This section has been last updated in June 2019. Please take into account its 
   content could be obsolete.
 * Note we develop this software in Agile way, so development plan is continuously 
   under review. Thus, this roadmap has to be understood as rough plan of features 
@@ -33,8 +33,6 @@ The following list of features are planned to be addressed in the short term,
 and incorporated in a next release of the product in the short term:
 
 -   Make this GE compatible with [FIWARE GE requirements](https://docs.google.com/spreadsheets/d/13Pzhbq-xwd8gTCvYqeNkfaoDt-iGCedc1zlb_elxv2M/edit#gid=0)
--   NameMapping API and improvements
--   Upgrade component dependencies (including Flume)
 
 ## Medium term
 
@@ -43,7 +41,9 @@ typically within the subsequent release(s) generated in the next **9 months**
 after next planned release:
 
 -   NGSIv2 notification reception endpoint
--   New sink: ElasticSearch (to be contributed by members of the Community beyond GE owners)
+-   Contribution to the FIWARE tutorials covering NameMapping API functionality
+-   Contribution to the FIWARE tutorials covering PostGIS
+-   Contribution to the FIWARE tutorials covering ElasticSearch (to be contributed by members of the Community beyond GE owners)
 -   New sink: SlicingDice (to be contributed by members of the Community beyond GE owners)
 
 ## Long term
@@ -53,5 +53,4 @@ of the product even though development of these features has not yet been
 scheduled for a release in the near future. Please feel free to contact us if
 you wish to get involved in the implementation or influence the roadmap
 
--   New sink: PostGIS
 -   Binary CB-Cygnus communication (maybe based in Avro). Need to be validated before.
