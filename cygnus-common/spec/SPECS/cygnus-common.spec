@@ -171,6 +171,8 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Fri Jun 28 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.15.0
+
 * Tue Jun 04 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.14.0
 - [cygnus-common][MongoDB] Warn about index creation error instead of throw exception and abort create collection (#1649)
 
