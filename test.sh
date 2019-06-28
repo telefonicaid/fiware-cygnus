@@ -21,12 +21,12 @@
 # Move to cygnus-common
 cd cygnus-common
 # Run cygnus-common tests
-mvn test
+mvn -q test
 # Build and install cygnus-common, this is necessary because it is a dependency for cygnus-ngsi
-mvn clean compile exec:exec assembly:single
+mvn -q clean compile exec:exec assembly:single
 VERSION=$(cat pom.xml | grep version | sed -n '1p' | sed -ne '/<version>/s#\s*<[^>]*>\s*##gp' | sed 's/ //g')
-mvn install:install-file -Dfile=target/cygnus-common-$VERSION-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=$VERSION -Dpackaging=jar -DgeneratePom=true
+mvn -q install:install-file -Dfile=target/cygnus-common-$VERSION-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=$VERSION -Dpackaging=jar -DgeneratePom=true
 # Move to cygnus-ngsi
 cd ../cygnus-ngsi
 # Run cygnus-ngsi tests
-mvn test
+mvn -q test
