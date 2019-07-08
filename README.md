@@ -50,6 +50,7 @@ Current stable release is able to persist the following sources of data in the f
     * [PostGIS](http://postgis.net/), a spatial database extender for PostgreSQL object-relational database.
     * [Orion](https://github.com/telefonicaid/fiware-orion), the FIWARE Context Broker.
     * [Elasticsearch](https://www.elastic.co/products/elasticsearch), the distributed full-text search engine with JSON documents.
+    * [Arcgis](https://www.arcgis.com/home/index.html), the Arcgis is a geographic information system (GIS).
 * Twitter data in:
     * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
 

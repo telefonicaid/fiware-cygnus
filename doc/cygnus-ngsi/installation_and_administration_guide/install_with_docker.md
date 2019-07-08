@@ -354,6 +354,20 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONNS: Maximum number of connections allowed for a Http-based Elasticsearch backend. Default is `500`.
     * CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONSS_PER_ROUTE: Maximum number of connections per route allowed for a Http-based Elasticsearch backend. Default is `100`.
 
+
+* ArcGis:
+    * It only works for building historical context data in ArcGis.
+    * The url for ArcGis is `ArcGis` but can be changed through the CYGNUS_ARCGIS_URL environment variable.
+    * The user for ArcGis is `ArcGis` but can be changed through the CYGNUS_ARCGIS_USER environment variable.
+    * The pass for ArcGis is `ArcGis` but can be changed through the CYGNUS_ARCGIS_PASS environment variable.
+    * CYGNUS_ARCGIS_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
+    * CYGNUS_ARCGIS_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
+    * CYGNUS_ARCGIS_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
+    * CYGNUS_ARCGIS_DATA_MODEL: select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type.
+    * CYGNUS_ARCGIS_BATCH_SIZE: number of notifications to be included within a processing batch.
+    * CYGNUS_ARCGIS_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
+    * CYGNUS_ARCGIS_BATCH_TTL: number of retries upon persistence error.
+
 * Log4j configuration file:
     * The logging level is `INFO` but can be changed through the CYGNUS_LOG_LEVEL environment variable.
     * The logging appender is `console` but can be changed through the CYGNUS_LOG_APPENDER environment variable.

@@ -15,6 +15,20 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>arcgis</id>
+            <url>https://esri.bintray.com/arcgis</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>arcgis-plugin</id>
+            <url>https://esri.bintray.com/arcgis</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+
     <dependencies>
         <!-- Required for testing -->
         <dependency>
@@ -58,6 +72,21 @@
             <artifactId>cygnus-common</artifactId>
             <version>1.15.0_SNAPSHOT</version>
         </dependency>
+        <!-- libreria arcgis -->
+        <dependency>
+            <groupId>com.esri.arcgisruntime</groupId>
+            <artifactId>arcgis-java</artifactId>
+            <version>100.4.0</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>es.aytosantander.smartcity</groupId>
+            <artifactId>ArcgisUtils</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/ArcgisUtils-0.0.1-SNAPSHOT.jar</systemPath>
+        </dependency>
+        
     </dependencies>
 
     <build>
@@ -94,6 +123,25 @@
                         </descriptorRefs>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.6</version>
+                    <configuration>
+                        <descriptors>
+                            <descriptor>src/main/assembly/assemblyCompile.xml</descriptor>
+                        </descriptors>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>jar-with-all-dependencies</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>                
+                </plugin>                
                 <!-- http://www.chrissearle.org/2009/09/05/Using_maven-exec-plugin_to_store_the_current_git_sha_in_a_build/ -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
