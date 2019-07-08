@@ -162,7 +162,7 @@ public class ManagementInterface extends AbstractHandler {
                         NameMappingsHandlers.post(request, response, nameMappingsConfFile);
                     } else {
                         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        response.getWriter().println(method + " " + uri + " not foundd");
+                        response.getWriter().println(method + " " + uri + " not found");
                     } // if else
                     
                     break;
@@ -232,11 +232,11 @@ public class ManagementInterface extends AbstractHandler {
                 } else if (uri.equals("/stats")) { // this is order to avoid CORS access control
                     StatsHandlers.get(response, sources, channels, sinks);
                 } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     response.getWriter().println(method + " " + uri + " not found");
                 } // if else
             } else {
-                response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.getWriter().println(method + " " + uri + " not found");
             } // if else
         } else {
