@@ -976,7 +976,7 @@ if [ "$CYGNUS_ARCGIS_URL" != "" ]; then
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = arcgis-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = arcgis-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5050 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5059 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_url/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_url = '${CYGNUS_ARCGIS_URL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_username/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_username = '${CYGNUS_ARCGIS_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_password/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_password = '${CYGNUS_ARCGIS_PASS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
