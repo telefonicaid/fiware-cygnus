@@ -1749,7 +1749,7 @@ public class NGSICartoDBSinkTest {
             String rows = aggregator.getRows();
             
             try {
-                assertTrue(rows.contains("40.3833,-3.7167"));
+                assertTrue(rows.contains("40.3833::double precision , -3.7167::double precision"));
                 System.out.println(getTestTraceHead("[CartoDBAggregator.aggregate]")
                         + "-  OK  - '" + rows + "' contains the coordinates '-3.7167, 40.3833' swapped");
             } catch (AssertionError e) {
