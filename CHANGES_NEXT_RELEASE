@@ -1,1 +1,2 @@
 [cygnus-ngsi][ArcGis] Add ArcGis sink (#1672)
+[cygnus-ngsi][Postgis, Cartodb] Fix double precision for coordinates

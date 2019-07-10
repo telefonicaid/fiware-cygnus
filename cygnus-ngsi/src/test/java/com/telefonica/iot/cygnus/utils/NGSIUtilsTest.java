@@ -56,7 +56,7 @@ public class NGSIUtilsTest {
                 attrValue, attrType, attrMetadataStr, swapCoordinates);
 
         try {
-            assertEquals("ST_SetSRID(ST_MakePoint((double)-3.7167,(double)40.3833), 4326)", geometry.getLeft());
+            assertEquals("ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326)", geometry.getLeft());
             System.out.println(getTestTraceHead("[Utils.getLocation]")
                     + "-  OK  - Geometry '" + geometry.getLeft() + "' obtained for an attribute of type '" + attrType
                     + "' and value '" + attrValue + "'");
