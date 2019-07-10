@@ -1589,13 +1589,13 @@ public class NGSICartoDBSinkTest {
             } // try catch
             
             try {
-                assertTrue(rows.contains("ST_SetSRID(ST_MakePoint(-3.7167,40.3833), 4326)"));
+                assertTrue(rows.contains("ST_SetSRID(ST_MakePoint((double)-3.7167, (double)40.3833), 4326)"));
                 System.out.println(getTestTraceHead("[CartoDBAggregator.initialize]")
-                        + "-  OK  - 'ST_SetSRID(ST_MakePoint(-3.7167, 40.3833), 4326)' is in the rows '" + rows
+                        + "-  OK  - 'ST_SetSRID(ST_MakePoint((double)-3.7167, (double)40.3833), 4326)' is in the rows '" + rows
                         + "'");
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[CartoDBAggregator.initialize]")
-                        + "- FAIL - 'ST_SetSRID(ST_MakePoint(-3.7167, 40.3833), 4326)' is not in the rows '"
+                        + "- FAIL - 'ST_SetSRID(ST_MakePoint((double)-3.7167, (double)40.3833), 4326)' is not in the rows '"
                         + rows + "'");
                 throw e;
             } // try catch
