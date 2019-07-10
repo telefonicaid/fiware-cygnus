@@ -102,7 +102,7 @@ public final class NGSIUtils {
                         "ST_SetSRID(ST_MakePoint(" + split[1].trim() + "::double precision," + split[0].trim() + "::double precision), 4326)", true);
             } else {
                 return new ImmutablePair(
-                        "ST_SetSRID(ST_MakePoint(" + split[0].trim() + "::double precision," + split[1].trim() + ":double precision), 4326)", true);
+                        "ST_SetSRID(ST_MakePoint(" + split[0].trim() + "::double precision," + split[1].trim() + "::double precision), 4326)", true);
             } // if else
         } // if
         
