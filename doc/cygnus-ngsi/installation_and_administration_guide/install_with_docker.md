@@ -173,6 +173,7 @@ As seen above, the default configuration distributed with the image is tied to c
 | orion | 5056 | 5086 |
 | postgis | 5057 | 5087 |
 | elasticsearch | 5058 | 5088 |
+| arcgis | 5059 | 5089 |
 
 
 * MySQL:
