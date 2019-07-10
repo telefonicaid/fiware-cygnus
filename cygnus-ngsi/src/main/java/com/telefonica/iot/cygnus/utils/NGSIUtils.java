@@ -99,10 +99,10 @@ public final class NGSIUtils {
                 
             if (swapCoordinates) {
                 return new ImmutablePair(
-                        "ST_SetSRID(ST_MakePoint((double)" + Double.valueOf(split[1].trim()).doubleValue() + ",(double)" + Double.valueOf(split[0].trim()).doubleValue() + "), 4326)", true);
+                        "ST_SetSRID(ST_MakePoint((double)" + Double.valueOf(split[1].trim()).doubleValue() + ", (double)" + Double.valueOf(split[0].trim()).doubleValue() + "), 4326)", true);
             } else {
                 return new ImmutablePair(
-                        "ST_SetSRID(ST_MakePoint((double)" + Double.valueOf(split[0].trim()).doubleValue() + ",(double)" + Double.valueOf(split[1].trim()).doubleValue() + "), 4326)", true);
+                        "ST_SetSRID(ST_MakePoint((double)" + Double.valueOf(split[0].trim()).doubleValue() + ", (double)" + Double.valueOf(split[1].trim()).doubleValue() + "), 4326)", true);
             } // if else
         } // if
         
