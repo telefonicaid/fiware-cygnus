@@ -54,6 +54,7 @@ import org.junit.rules.TemporaryFolder;
 @RunWith(MockitoJUnitRunner.class)
 public class ManagementInterfaceTest {
     
+     private ManagementInterface managementInterface;
     /**
      * Constructor.
      */
@@ -147,6 +148,7 @@ public class ManagementInterfaceTest {
     private final HttpServletRequest mockGetLoggingLevel = mock(HttpServletRequest.class);
     private final HttpServletRequest mockPutLoggingLevel = mock(HttpServletRequest.class);
     private final HttpServletRequest mockPutInvalidLoggingLevel = mock(HttpServletRequest.class);
+    private final HttpServletRequest mockInvalidAPI = mock(HttpServletRequest.class);
     
     /**
      * Sets up tests by creating a unique instance of the tested class, and by defining the behaviour of the mocked
@@ -1163,4 +1165,203 @@ public class ManagementInterfaceTest {
         } // try catch
     } // testAgentBadConfigurationFileName
     
+    /**
+     * [ManagementInterface] -------- 'Get method if API is invalid"'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testGetInvalidAPI() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleInvalidAPI]"));
+        managementInterface = new ManagementInterface(null, new File(""), null, null, null, 8083, 8085);
+        when(mockInvalidAPI.getMethod()).thenReturn("GET");
+        when(mockInvalidAPI.getRequestURI()).thenReturn("/vkk");
+        when(mockInvalidAPI.getLocalPort()).thenReturn(8083);
+        try {
+            managementInterface.handle(null, mockInvalidAPI, response, 1);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the request");
+            throw x;
+        }
+        try {
+            verify(response, times(1)).setStatus(HttpServletResponse.SC_NOT_FOUND);
+            System.out.println(
+                    getTestTraceHead("[ManagementInterface.handleInvalidAPI]") + " -  " + "OK  - API not found");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface.handleInvalidAPI]") + " - "
+                    + "FAIL - Problem while handling the request");
+            throw e;
+        }
+    }
+    /**
+     * [ManagementInterface] -------- 'Post method if API is invalid"'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPostInvalidAPI() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleInvalidAPI]"));
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 8083,
+                8085);
+        when(mockInvalidAPI.getMethod()).thenReturn("POST");
+        when(mockInvalidAPI.getRequestURI()).thenReturn("/vkk");
+        when(mockInvalidAPI.getLocalPort()).thenReturn(8083);
+        try {
+            managementInterface.handle(null, mockInvalidAPI, response, 1);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the request");
+            throw x;
+        } // try catch
+        try {
+            verify(response, times(1)).setStatus(HttpServletResponse.SC_NOT_FOUND);
+            System.out.println(
+                    getTestTraceHead("[ManagementInterface.handleInvalidAPI]") + " -  " + "OK  - API not found");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface.handleInvalidAPI]") + " - "
+                    + "FAIL - Problem while handling the request");
+            throw e;
+        } // try catch
+    }
+    /**
+     * [ManagementInterface] -------- 'Put method if API is invalid"'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testPutInvalidAPI() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleInvalidAPI]"));
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 8083,
+                8085);
+        when(mockInvalidAPI.getMethod()).thenReturn("PUT");
+        when(mockInvalidAPI.getRequestURI()).thenReturn("/vkk");
+        when(mockInvalidAPI.getLocalPort()).thenReturn(8083);
+        try {
+            managementInterface.handle(null, mockInvalidAPI, response, 1);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the request");
+            throw x;
+        } // try catch
+        try {
+            verify(response, times(1)).setStatus(HttpServletResponse.SC_NOT_FOUND);
+            System.out.println(
+                    getTestTraceHead("[ManagementInterface.handleInvalidAPI]") + " -  " + "OK  - API not found");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface.handleInvalidAPI]") + " - "
+                    + "FAIL - Problem while handling the request");
+            throw e;
+        } // try catch
+    }
+    
+    /**
+     * [ManagementInterface] -------- 'Delete method if API is invalid"'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testDeleteInvalidAPI() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleInvalidAPI]"));
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 8083,
+                8085);
+        when(mockInvalidAPI.getMethod()).thenReturn("DELETE");
+        when(mockInvalidAPI.getRequestURI()).thenReturn("/vkk");
+        when(mockInvalidAPI.getLocalPort()).thenReturn(8083);
+        try {
+            managementInterface.handle(null, mockInvalidAPI, response, 1);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the request");
+            throw x;
+        } // try catch
+        try {
+            verify(response, times(1)).setStatus(HttpServletResponse.SC_NOT_FOUND);
+            System.out.println(
+                    getTestTraceHead("[ManagementInterface.handleInvalidAPI]") + " -  " + "OK  - API not found");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface.handleInvalidAPI]") + " - "
+                    + "FAIL - Problem while handling the request");
+            throw e;
+        } // try catch
+    }
+
+    /**
+     * [ManagementInterface] -------- 'Default if port is API where API is invalid"'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testDefaultInvalidAPI() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleInvalidAPI]"));
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 8083,
+                8085);
+        when(mockInvalidAPI.getMethod()).thenReturn("");
+        when(mockInvalidAPI.getRequestURI()).thenReturn("/vkk");
+        when(mockInvalidAPI.getLocalPort()).thenReturn(8083);
+        try {
+            managementInterface.handle(null, mockInvalidAPI, response, 1);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the request");
+            throw x;
+        } // try catch
+        try {
+            verify(response, times(1)).setStatus(HttpServletResponse.SC_NOT_FOUND);
+            System.out.println(
+                    getTestTraceHead("[ManagementInterface.handleInvalidAPI]") + " -  " + "OK  - API not found");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface.handleInvalidAPI]") + " - "
+                    + "FAIL - Problem while handling the request");
+            throw e;
+        } // try catch
+    }
+    
+    /**
+     * [ManagementInterface] -------- 'Get method if port is GUI where API is invalid"'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testGetInvalidAPIGuiPort() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleInvalidAPI]"));
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 8083,
+                8085);
+        when(mockInvalidAPI.getMethod()).thenReturn("GET");
+        when(mockInvalidAPI.getRequestURI()).thenReturn("/vkk");
+        when(mockInvalidAPI.getLocalPort()).thenReturn(8085);
+        try {
+            managementInterface.handle(null, mockInvalidAPI, response, 1);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the request");
+            throw x;
+        } // try catch
+        try {
+            verify(response, times(1)).setStatus(HttpServletResponse.SC_NOT_FOUND);
+            System.out.println(
+                    getTestTraceHead("[ManagementInterface.handleInvalidAPI]") + " -  " + "OK  - API not found");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface.handleInvalidAPI]") + " - "
+                    + "FAIL - Problem while handling the request");
+            throw e;
+        } // try catch
+    }
+    
+    /**
+     * [ManagementInterface] -------- 'Default case if port is GUI where API is invalid"'.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testDefaultInvalidAPIGuiPort() throws Exception {
+        System.out.println(getTestTraceHead("[ManagementInterface.handleInvalidAPI]"));
+        ManagementInterface managementInterface = new ManagementInterface(null, new File(""), null, null, null, 8083,
+                8085);
+        when(mockInvalidAPI.getMethod()).thenReturn("");
+        when(mockInvalidAPI.getRequestURI()).thenReturn("/vkk");
+        when(mockInvalidAPI.getLocalPort()).thenReturn(8085);
+        try {
+            managementInterface.handle(null, mockInvalidAPI, response, 1);
+        } catch (Exception x) {
+            System.out.println("There was some problem when handling the request");
+            throw x;
+        } // try catch
+        try {
+            verify(response, times(1)).setStatus(HttpServletResponse.SC_NOT_FOUND);
+            System.out.println(
+                    getTestTraceHead("[ManagementInterface.handleInvalidAPI]") + " -  " + "OK  - API not found");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[ManagementInterface.handleInvalidAPI]") + " - "
+                    + "FAIL - Problem while handling the request");
+            throw e;
+        } // try catch
+    }
 } // ManagementInterfaceTest
