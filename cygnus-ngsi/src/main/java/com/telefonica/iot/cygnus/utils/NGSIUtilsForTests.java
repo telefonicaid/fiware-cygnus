@@ -17,12 +17,14 @@
  */
 package com.telefonica.iot.cygnus.utils;
 
+import java.util.HashMap;
+
+import org.apache.flume.Context;
+
 import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NameMappings;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
-import java.util.HashMap;
-import org.apache.flume.Context;
 
 /**
  *
@@ -94,7 +96,24 @@ public final class NGSIUtilsForTests {
         context.put("orion_fiware_path", orionFiwarePath);
         return context;
     } // createContextForOrion
-    
+
+    /**
+     * Creates a Flume context for Arcgis sinks.
+     * 
+     * @param url
+     * @param username
+     * @param password
+     * @return
+     */
+    public static Context createContextForArcGis(String url, String username,
+            String password) {
+        Context context = new Context();
+        context.put("arcgis_url", url);
+        context.put("arcgis_username", username);
+        context.put("arcgis_password", password);
+        return context;
+    } // createContextForArcGis
+	
     /**
      * Creates a Json-based NotifyContextRequest given the string representation of such Json.
      * @param jsonStr

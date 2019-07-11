@@ -35,6 +35,7 @@ Current stable release is able to persist Orion context data in:
 * [Carto](https://carto.com/), the database specialized in geolocated data.
 * [Orion](https://github.com/telefonicaid/fiware-orion), the FIWARE Context Broker.
 * [Elasticsearch](https://www.elastic.co/products/elasticsearch), the distributed full-text search engine with JSON documents.
+* [Arcgis](https://www.arcgis.com/home/index.html), the Arcgis is a geographic information system (GIS).
 
 You may consider to visit [Cygnus NGSI Quick Start Guide](../doc/cygnus-ngsi/quick_start_guide.md) before going deep into the details.
 
@@ -284,6 +285,7 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
   <tr><td>Raw-snapsot analysis</td><td>1.6.0</td></tr>
   <tr><td>NGSIOrionSink</td><td>First implementation</td><td>1.10.0</td></tr>
   <tr><td>NGSIElasticsearchSink</td><td>First implementation</td><td>1.15.0</td></tr>
+  <tr><td>NGSIArcGisSink</td><td>First implementation</td><td>1.16.0</td></tr>
   <tr><td rowspan="2">NGSITestSink</td><td>First implementation</td><td>0.7.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.12.0</td></tr>
   <tr><td rowspan="9">All sinks</td><td>Events TTL</td><td>0.4.1</td></tr>

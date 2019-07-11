@@ -25,6 +25,7 @@ Current stable release is able to persist the following sources of data in the f
     * [PostgreSQL](http://www.postgresql.org/), the well-know relational database manager.
     * [Carto](https://carto.com/), the database specialized in geolocated data.
     * [Elasticsearch](https://www.elastic.co/products/elasticsearch), the distributed full-text search engine with JSON documents.
+    * [Arcgis](https://www.arcgis.com/home/index.html), the Arcgis is a geographic information system (GIS).
 * Twitter data in:
     * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
 

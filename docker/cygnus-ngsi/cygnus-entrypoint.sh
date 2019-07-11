@@ -953,6 +953,74 @@ elif [ "$CYGNUS_ELASTICSEARCH_HOST" != "" ]; then
 fi
 
 
+
+
+# Check if ARCGIS ENV vars
+if [ "$CYGNUS_ARCGIS_URL" != "" ]; then
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        AGENT_CONF_FILE=agent_arcgis.conf
+        cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        if [ "${CYGNUS_ARCGIS_ENABLE_GROUPING,,}" == "true" ]; then
+            GROUPING_CONF_FILE=grouping_rules_arcgis.conf
+            cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
+            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        fi
+        if [ "${CYGNUS_ARCGIS_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
+            NAMEMAPPING_CONF_FILE=name_mappings_arcgis.conf
+            if [ "${CYGNUS_ARCGIS_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
+                cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
+            fi
+            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        fi
+    fi
+    sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = arcgis-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = arcgis-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5059 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_url/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_url = '${CYGNUS_ARCGIS_URL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_username/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_username = '${CYGNUS_ARCGIS_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_password/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_password = '${CYGNUS_ARCGIS_PASS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    # The following are optional and disabled by default
+    if [ "$CYGNUS_ARCGIS_ENABLE_ENCODING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.enable_encoding = '${CYGNUS_ARCGIS_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ARCGIS_ENABLE_GROUPING" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.enable_grouping = '${CYGNUS_ARCGIS_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ARCGIS_ENABLE_NAME_MAPPINGS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.enable_name_mappings = '${CYGNUS_ARCGIS_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ARCGIS_ENABLE_LOWERCASE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.enable_lowercase/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.enable_lowercase = '${CYGNUS_ARCGIS_ENABLE_LOWERCASE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ARCGIS_DATA_MODEL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.data_model/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.data_model = '${CYGNUS_ARCGIS_DATA_MODEL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ARCGIS_BATCH_SIZE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.batch_size/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.batch_size = '${CYGNUS_ARCGIS_BATCH_SIZE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ARCGIS_BATCH_TIMEOUT" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.batch_timeout/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.batch_timeout = '${CYGNUS_ARCGIS_BATCH_TIMEOUT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_ARCGIS_BATCH_TTL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.batch_ttl = '${CYGNUS_ARCGIS_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+	if [ "$CYGNUS_ARCGIS_BATCH_TTL" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.batch_ttl = '${CYGNUS_ARCGIS_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5080 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41415 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5080 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
+        PIDS="$PIDS $!"
+    fi
+fi
+
+
 if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
     if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
         # Run the Cygnus command with monitoring
