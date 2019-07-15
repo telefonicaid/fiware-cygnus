@@ -79,6 +79,7 @@ if [ "${CYGNUS_SKIP_CONF_GENERATION,,}" == "true" ]; then
     CYGNUS_ORION_SKIP_CONF_GENERATION="true"
     CYGNUS_POSTGIS_SKIP_CONF_GENERATION="true"
     CYGNUS_ELASTICSEARCH_SKIP_CONF_GENERATION="true"
+    CYGNUS_ARCGIS_SKIP_CONF_GENERATION="true"
     CYGNUS_MYSQL_SKIP_NAME_MAPPINGS_GENERATION="true"
     CYGNUS_MONGO_SKIP_NAME_MAPPINGS_GENERATION="true"
     CYGNUS_CKAN_SKIP_NAME_MAPPINGS_GENERATION="true"
@@ -956,7 +957,19 @@ fi
 
 
 # Check if ARCGIS ENV vars
-if [ "$CYGNUS_ARCGIS_URL" != "" ]; then
+if [ "${CYGNUS_ARCGIS_SKIP_CONF_GENERATION,,}" == "true" ]; then
+    if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
+        AGENT_CONF_FILE=agent-arcgis.conf
+        if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
+            # Run the Cygnus command with monitoring
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5089 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41424 &
+        else
+            # Run the Cygnus command
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5089 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+        fi
+        PIDS="$PIDS $!"
+    fi
+elif [ "$CYGNUS_ARCGIS_URL" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_arcgis.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -1005,16 +1018,16 @@ if [ "$CYGNUS_ARCGIS_URL" != "" ]; then
     if [ "$CYGNUS_ARCGIS_BATCH_TTL" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.batch_ttl = '${CYGNUS_ARCGIS_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
-	if [ "$CYGNUS_ARCGIS_BATCH_TTL" != "" ]; then
+        if [ "$CYGNUS_ARCGIS_BATCH_TTL" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.batch_ttl = '${CYGNUS_ARCGIS_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
             # Run the Cygnus command with monitoring
-            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5080 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41415 &
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5089 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type=${CYGNUS_MONITORING_TYPE} -Dflume.monitoring.port=41424 &
         else
             # Run the Cygnus command
-            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5080 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
+            ${FLUME_HOME}/bin/cygnus-flume-ng agent --conf ${CYGNUS_CONF_PATH} -f ${FLUME_HOME}/conf/${AGENT_CONF_FILE} -n ${CYGNUS_AGENT_NAME} -p 5089 -Dflume.root.logger=${CYGNUS_LOG_LEVEL},${CYGNUS_LOG_APPENDER} -Duser.timezone=UTC -Dfile.encoding=UTF-8 &
         fi
         PIDS="$PIDS $!"
     fi
