@@ -2,4 +2,5 @@
 [cygnus-ngsi] Fix error response code from 501 to 404 in case of invalid API (#1630)
 [cygnus-ngsi][ArcGis] Add ArcGis sink (#1672)
 [cygnus-ngsi][Postgis, Cartodb] Fix double precision for coordinates
+[cygnus-ngsi][Docker] Build Cygnus in Dockerhub raises OutOfMemory Java (#1709)
 
