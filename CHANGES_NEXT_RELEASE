@@ -1,6 +1,7 @@
-[doc] Add Install Section in README.md (#1576) 
+[doc] Add Install Section in README.md (#1576)
 [cygnus-ngsi] Fix error response code from 501 to 404 in case of invalid API (#1630)
 [cygnus-ngsi][ArcGis] Add ArcGis sink (#1672)
 [cygnus-ngsi][Postgis, Cartodb] Fix double precision for coordinates
 [cygnus-ngsi][Docker] Build Cygnus in Dockerhub raises OutOfMemory Java (#1709)
+[cygnus-flume] Enable JAVA_OPTS for flume (#1704)
 
