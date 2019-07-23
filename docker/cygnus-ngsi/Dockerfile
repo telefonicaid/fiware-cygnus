@@ -244,7 +244,8 @@ ENV CYGNUS_ARCGIS_BATCH_TTL ""
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
 # ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "master"
+# ENV GIT_REV_CYGNUS "master"
+ENV GIT_REV_CYGNUS "fix/docker_build_image"
 
 ENV MVN_VER "3.5.4"
 ENV MVN_HOME "/opt/apache-maven"
@@ -260,8 +261,8 @@ RUN \
     adduser ${CYGNUS_USER} && \
     yum -y install nc java-${JAVA_VERSION}-openjdk-devel git && \
     export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk && \
-    export MAVEN_OPTS="-Xmx4096m -XX:MaxPermSize=256m -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1" && \
-    export MAVEN_ARGS="-B -T4" && \
+    export MAVEN_OPTS="-Xmx2048M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:+CMSClassUnloadingEnabled" && \
+    export MAVEN_ARGS="-B -T8" && \
     # For debug Maven
     # export MAVEN_ARGS="${MAVEN_ARGS} -X -e -Dmaven.compiler.verbose=true" && \
     echo "INFO: Getting apache preferred site and obtain URLs for Maven and Flume..." && \
