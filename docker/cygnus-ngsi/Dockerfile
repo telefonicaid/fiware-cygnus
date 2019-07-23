@@ -315,11 +315,11 @@ RUN \
     unset JAVA_HOME && \
     yum erase -y git java-${JAVA_VERSION}-openjdk-devel && \
     rpm -qa redhat-logos gtk2 pulseaudio-libs libvorbis jpackage* groff alsa* atk cairo libX* | xargs -r rpm -e --nodeps && \
-    yum clean all && rpm -vv --rebuilddb && (rm -rf /var/lib/yum/yumdb || true) && (rm -rf /var/lib/yum/history || true) && \
+    yum clean all && rpm --rebuilddb && (rm -rf /var/lib/yum/yumdb || true) && (rm -rf /var/lib/yum/history || true) && \
     find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en_US' ! -name 'locale.alias' | xargs -r rm -r && rm -f /var/log/*log && \
     bash -c 'localedef --list-archive | grep -v -e "en_US" | xargs localedef --delete-from-archive' && \
     /bin/cp -f /usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.tmpl && \
-    build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf
+    build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf && echo "INFO: END build"
 
 
 COPY cygnus-entrypoint.sh / 
