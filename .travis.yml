@@ -1,7 +1,14 @@
+# By the time being (19/09/2019) we need to add dist: trusty to make oraclejdk builds to work
+# ref: https://travis-ci.community/t/install-of-oracle-jdk-8-failing/3038/8
+dist: trusty
 language: java
 sudo: false
 jdk:
   - openjdk8
   - oraclejdk8
+  # FIXME: something in the current build (pom.xml?) precludes Java>8 to work
+  #- oraclejdk9
+  #- openjdk10
+  #- openjdk11
 script: ./test.sh
 
