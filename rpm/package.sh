@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
 # 
