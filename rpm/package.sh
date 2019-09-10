@@ -90,6 +90,9 @@ function copy_cygnus_jar_to_flume_directory(){
     if [[ ${component_name} == "cygnus-common" ]]; then
         mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/libext
         cp $BASE_DIR/${component_name}/target/${component_name}-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/libext
+    elif [[ ${component_name} == "cygnus-ngsi" ]]; then
+        mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
+        cp $BASE_DIR/${component_name}/target/${component_name}-${PRODUCT_VERSION}-jar-with-all-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
     else
         mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
         cp $BASE_DIR/${component_name}/target/${component_name}-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
