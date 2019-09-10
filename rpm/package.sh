@@ -252,9 +252,9 @@ do
 
     _log "#### Packaging using: ${SPEC_FILE}... ####"
     # Execute command to create RPM
-    RPM_BUILD_COMMAND="rpmbuild -v -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} --define '_name_suffix '${NAME_SUFFIX}"
+    RPM_BUILD_COMMAND="rpmbuild -v -bb ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} --define '_name_suffix '${NAME_SUFFIX}"
     _log "Rpm construction command: ${RPM_BUILD_COMMAND}"
-    rpmbuild -v -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} --define '_name_suffix '${NAME_SUFFIX}
+    rpmbuild -v -bb ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} --define '_name_suffix '${NAME_SUFFIX}
     _logStage "######## rpmbuild finished! ... ########"
 done
 
