@@ -5,5 +5,5 @@
 [cygnus-ngsi][Docker] Build Cygnus in Dockerhub raises OutOfMemory Java (#1709)
 [cygnus-flume] Enable JAVA_OPTS for flume (#1704)
 [cygnus-ngsi] Build Cygnus with all dependencies using standard RPM (#1716)
-[devops] Adjust build cygnus to use java 1.8
+[devops] Adjust build cygnus to use java 1.8 (#1718)
 
