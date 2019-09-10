@@ -4,4 +4,5 @@
 [cygnus-ngsi][Postgis, Cartodb] Fix double precision for coordinates
 [cygnus-ngsi][Docker] Build Cygnus in Dockerhub raises OutOfMemory Java (#1709)
 [cygnus-flume] Enable JAVA_OPTS for flume (#1704)
+[devops] Adjust build cygnus to use java 1.8
 
