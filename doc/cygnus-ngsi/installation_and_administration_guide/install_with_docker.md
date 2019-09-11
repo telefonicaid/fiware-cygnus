@@ -190,6 +190,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_MYSQL_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
     * CYGNUS_MYSQL_DATA_MODEL: select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type.
     * CYGNUS_MYSQL_ATTR_PERSISTENCE: how the attributes are stored, either per row either per column (row, column).
+    * CYGNUS_MYSQL_ATTR_NATIVE_TYPES: how the attribute are stored, using native type (true) or stringfy (false, by default).
     * CYGNUS_MYSQL_BATCH_SIZE: number of notifications to be included within a processing batch.
     * CYGNUS_MYSQL_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_MYSQL_BATCH_TTL: number of retries upon persistence error.

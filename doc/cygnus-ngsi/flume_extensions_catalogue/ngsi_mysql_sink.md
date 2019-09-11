@@ -220,6 +220,7 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | persistence\_policy.max_records | no | -1 | Maximum number of records allowed for a table before it is capped. `-1` disables this policy. |
 | persistence\_policy.expiration_time | no | -1 | Maximum number of seconds a record is maintained in a table before expiration. `-1` disables this policy. |
 | persistence\_policy.checking_time | no | 3600 | Frequency (in seconds) at which the sink checks for record expiration. |
+| attr\_native\_types | no | false | if the attribute value will be native <i>true</i> or stringfy or <i>false</i>. |
 
 A configuration example could be:
 
@@ -239,6 +240,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.mysql-sink.mysql_password = mypassword
     cygnus-ngsi.sinks.mysql-sink.mysql_maxPoolSize = 3
     cygnus-ngsi.sinks.mysql-sink.attr_persistence = row
+    cygnus-ngsi.sinks.mysql-sink.attr_native_types = false
     cygnus-ngsi.sinks.mysql-sink.batch_size = 100
     cygnus-ngsi.sinks.mysql-sink.batch_timeout = 30
     cygnus-ngsi.sinks.mysql-sink.batch_ttl = 10
