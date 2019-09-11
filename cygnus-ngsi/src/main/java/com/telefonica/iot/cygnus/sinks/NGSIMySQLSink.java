@@ -385,7 +385,7 @@ public class NGSIMySQLSink extends NGSISink {
                 while (it.hasNext()) {
                     ArrayList<String> values = (ArrayList<String>) aggregation.get((String) it.next());
                     String value = values.get(i);
-                    if (!value || value.equals("")) {
+                    if (!value) {
                         value = "NULL";
                     } else {
                         value = "'" + value + "'";
@@ -394,7 +394,7 @@ public class NGSIMySQLSink extends NGSISink {
                         valuesForInsert += value;
                         first = false;
                     } else {
-                        valuesForInsert += "," + value;;
+                        valuesForInsert += "," + value;
                     } // if else
                 } // while
                 
