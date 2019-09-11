@@ -384,11 +384,15 @@ public class NGSIMySQLSink extends NGSISink {
             
                 while (it.hasNext()) {
                     ArrayList<String> values = (ArrayList<String>) aggregation.get((String) it.next());
+                    String value = values.get(i);
+                    if (value.equals("")) {
+                        value = "NULL";
+                    }
                     if (first) {
-                        valuesForInsert += "'" + values.get(i) + "'";
+                        valuesForInsert += "'" + value + "'";
                         first = false;
                     } else {
-                        valuesForInsert += ",'" + values.get(i) + "'";
+                        valuesForInsert += ",'" + value + "'";
                     } // if else
                 } // while
                 
