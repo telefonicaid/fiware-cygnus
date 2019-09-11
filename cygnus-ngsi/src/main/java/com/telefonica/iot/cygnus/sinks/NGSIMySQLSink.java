@@ -57,7 +57,8 @@ public class NGSIMySQLSink extends NGSISink {
     private static final String DEFAULT_HOST = "localhost";
     private static final String DEFAULT_USER_NAME = "root";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
-    
+    private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
+
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIMySQLSink.class);
     private String mysqlHost;
     private String mysqlPort;
@@ -66,7 +67,8 @@ public class NGSIMySQLSink extends NGSISink {
     private int maxPoolSize;
     private boolean rowAttrPersistence;
     private MySQLBackendImpl persistenceBackend;
-    
+    private boolean attrNativeTypes;
+
     /**
      * Constructor.
      */
@@ -130,6 +132,16 @@ public class NGSIMySQLSink extends NGSISink {
     protected void setPersistenceBackend(MySQLBackendImpl persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
+
+
+   /**
+     * Returns if the attribute value will be native or stringfy. It will be stringfy due to backward compatibility
+     * purposes.
+     * @return True if the attribute value will be native, false otherwise
+     */
+    protected boolean getNativeAttrTypes() {
+        return attrNativeTypes;
+    } // attrNativeTypes
     
     @Override
     public void configure(Context context) {
@@ -166,7 +178,17 @@ public class NGSIMySQLSink extends NGSISink {
             LOGGER.warn("[" + this.getName() + "] Invalid configuration (attr_persistence="
                 + persistence + ") must be 'row' or 'column'");
         }  // if else
-        
+
+        String attrNativeTypesStr = context.getString("attr_native_types", DEFAULT_ATTR_NATIVE_TYPES);
+        if (attrNativeTypesStr.equals("true") || attrNativeTypesStr.equals("false")) {
+            attrNativeTypes = Boolean.valueOf(attrNativeTypesStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_native_types=" + attrNativeTypesStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_native_types="
+                + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
         super.configure(context);
     } // configure
 
@@ -388,7 +410,7 @@ public class NGSIMySQLSink extends NGSISink {
                     String value = values.get(i);
                     if (!value) {
                         value = "NULL";
-                    } else if (!valueType.equals("Number")) {
+                    } else if (!(attrNativeTypes && valueType.equals("Number"))) {
                         value = "'" + value + "'";
                     } // if valueType is Number then value is value without ' '
                     if (first) {
