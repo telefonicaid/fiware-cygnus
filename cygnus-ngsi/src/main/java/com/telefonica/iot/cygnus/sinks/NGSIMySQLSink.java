@@ -384,12 +384,13 @@ public class NGSIMySQLSink extends NGSISink {
             
                 while (it.hasNext()) {
                     ArrayList<String> values = (ArrayList<String>) aggregation.get((String) it.next());
+                    String valueType = (String) it.next();
                     String value = values.get(i);
                     if (!value) {
                         value = "NULL";
-                    } else {
+                    } else if (!valueType.equals("Number")) {
                         value = "'" + value + "'";
-                    }
+                    } // if valueType is Number then value is value without ' '
                     if (first) {
                         valuesForInsert += value;
                         first = false;
