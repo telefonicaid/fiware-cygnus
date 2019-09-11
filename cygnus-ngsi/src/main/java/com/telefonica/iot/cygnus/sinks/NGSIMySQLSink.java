@@ -408,7 +408,7 @@ public class NGSIMySQLSink extends NGSISink {
                     ArrayList<String> values = (ArrayList<String>) aggregation.get((String) it.next());
                     String valueType = (String) it.next();
                     String value = values.get(i);
-                    if (!value) {
+                    if (value == null) { // TBD check also if value == "" ?
                         value = "NULL";
                     } else if (!(attrNativeTypes && valueType.equals("Number"))) {
                         value = "'" + value + "'";
