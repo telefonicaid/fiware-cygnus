@@ -408,11 +408,23 @@ public class NGSIMySQLSink extends NGSISink {
                     ArrayList<String> values = (ArrayList<String>) aggregation.get((String) it.next());
                     String valueType = (String) it.next();
                     String value = values.get(i);
-                    if (value == null) { // TBD check also if value == "" ?
-                        value = "NULL";
-                    } else if (!(attrNativeTypes && valueType.equals("Number"))) {
+                    if (attrNativeTypes) {
+                        if (value == null) { // TBD check also if value == "" ?
+                            value = "NULL";
+                        } else {
+                            String valueType = (String) it.next();
+                            if (valueType && !valueType.equals("Number")) {
+                                value = "'" + value + "'";
+                            } else {
+                                value = "" + value + ""; // redundant ?
+                            }
+                        }
+                        LOGGER.debug("[" + this.getName() + "] value type = "  + valueType );
+                        LOGGER.debug("[" + this.getName() + "] native value = "  + value );
+                    } else {
                         value = "'" + value + "'";
-                    } // if valueType is Number then value is value without ' '
+                    }
+
                     if (first) {
                         valuesForInsert += value;
                         first = false;
@@ -420,7 +432,7 @@ public class NGSIMySQLSink extends NGSISink {
                         valuesForInsert += "," + value;
                     } // if else
                 } // while
-                
+
                 valuesForInsert += ")";
             } // for
             
