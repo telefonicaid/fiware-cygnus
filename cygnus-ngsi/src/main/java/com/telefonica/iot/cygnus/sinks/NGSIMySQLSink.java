@@ -405,13 +405,13 @@ public class NGSIMySQLSink extends NGSISink {
                 Iterator<String> it = aggregation.keySet().iterator();
             
                 while (it.hasNext()) {
-                    ArrayList<String> values = (ArrayList<String>) aggregation.get((String) it.next());
+                    String valueType = (String) it.next();
+                    ArrayList<String> values = (ArrayList<String>) aggregation.get(valueType);
                     String value = values.get(i);
                     if (attrNativeTypes) {
                         if (value == null) { // TBD check also if value == "" ?
                             value = "NULL";
                         } else {
-                            String valueType = (String) it.next();
                             if ( (valueType != null) && (!valueType.equals("Number")) ) {
                                 value = "'" + value + "'";
                             } else {
