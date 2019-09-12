@@ -417,9 +417,9 @@ public class NGSIMySQLSink extends NGSISink {
                             } else {
                                 value = "" + value + ""; // redundant ?
                             }
-                            LOGGER.debug("[" + this.getName() + "] value type = "  + valueType );
+                            LOGGER.debug("[" getName() + "] value type = "  + valueType );
                         }
-                        LOGGER.debug("[" + this.getName() + "] native value = "  + value );
+                        LOGGER.debug("[" getName() + "] native value = "  + value );
                     } else {
                         value = "'" + value + "'";
                     }
