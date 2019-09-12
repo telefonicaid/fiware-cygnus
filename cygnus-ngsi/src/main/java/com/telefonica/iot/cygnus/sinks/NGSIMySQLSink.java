@@ -412,13 +412,13 @@ public class NGSIMySQLSink extends NGSISink {
                             value = "NULL";
                         } else {
                             String valueType = (String) it.next();
-                            if (valueType && !valueType.equals("Number")) {
+                            if ( (valueType != null) && (!valueType.equals("Number")) ) {
                                 value = "'" + value + "'";
                             } else {
                                 value = "" + value + ""; // redundant ?
                             }
+                            LOGGER.debug("[" + this.getName() + "] value type = "  + valueType );
                         }
-                        LOGGER.debug("[" + this.getName() + "] value type = "  + valueType );
                         LOGGER.debug("[" + this.getName() + "] native value = "  + value );
                     } else {
                         value = "'" + value + "'";
