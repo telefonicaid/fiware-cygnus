@@ -163,6 +163,9 @@ elif [ "$CYGNUS_MYSQL_HOST" != "" ]; then
     if [ "$CYGNUS_MYSQL_ATTR_PERSISTENCE" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.attr_persistence/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.attr_persistence = '${CYGNUS_MYSQL_ATTR_PERSISTENCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+    if [ "$CYGNUS_MYSQL_ATTR_NATIVE_TYPES" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.attr_native_types/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.attr_native_types = '${CYGNUS_MYSQL_ATTR_NATIVE_TYPES} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
     if [ "$CYGNUS_MYSQL_BATCH_SIZE" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.batch_size/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.batch_size = '${CYGNUS_MYSQL_BATCH_SIZE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
