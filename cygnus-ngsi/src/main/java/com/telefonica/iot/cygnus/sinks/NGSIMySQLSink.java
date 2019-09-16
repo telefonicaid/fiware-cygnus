@@ -409,16 +409,17 @@ public class NGSIMySQLSink extends NGSISink {
                     ArrayList<String> values = (ArrayList<String>) aggregation.get(entry);
                     String value = values.get(i);
                     if (attrNativeTypes) {
+                        LOGGER.debug("[" + getName() + "] aggregation entry = "  + entry );
                         if (value == null || value.equals("")) {
                             value = "NULL";
                         } else {
-                            String valueType = null ;// = entry is a wrong way to get proper valueType
-                            if ( (valueType != null) && (!valueType.equals("Number")) ) {
+                            String attributeType = entry; // TBD: wrong way to get proper valueType ?
+                            if ( (attributeType != null) && (!attributeType.equals("Number")) ) {
                                 value = "'" + value + "'";
                             } else {
                                 value = "" + value + ""; // redundant ?
                             }
-                            LOGGER.debug("[" + getName() + "] value type = "  + valueType );
+                            LOGGER.debug("[" + getName() + "] attribute type = "  + attributeType );
                         }
                         LOGGER.debug("[" + getName() + "] native value = "  + value );
                     } else {
