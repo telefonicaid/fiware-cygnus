@@ -405,13 +405,14 @@ public class NGSIMySQLSink extends NGSISink {
                 Iterator<String> it = aggregation.keySet().iterator();
             
                 while (it.hasNext()) {
-                    String valueType = (String) it.next();
-                    ArrayList<String> values = (ArrayList<String>) aggregation.get(valueType);
+                    String entry = (String) it.next();
+                    ArrayList<String> values = (ArrayList<String>) aggregation.get(entry);
                     String value = values.get(i);
                     if (attrNativeTypes) {
-                        if (value == null) { // TBD check also if value == "" ?
+                        if (value == null || value.equals("")) {
                             value = "NULL";
                         } else {
+                            String valueType = null ;// = entry is a wrong way to get proper valueType
                             if ( (valueType != null) && (!valueType.equals("Number")) ) {
                                 value = "'" + value + "'";
                             } else {
