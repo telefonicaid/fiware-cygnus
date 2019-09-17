@@ -413,13 +413,7 @@ public class NGSIMySQLSink extends NGSISink {
                         if (value == null || value.equals("")) {
                             value = "NULL";
                         } else {
-                            String attributeType = null; // TBD: = entry wrong way to get proper valueType ?
-                            if ( (attributeType != null) && (!attributeType.equals("Number")) ) {
-                                value = "'" + value + "'";
-                            } else {
-                                value = "" + value + ""; // redundant ?
-                            }
-                            LOGGER.debug("[" + getName() + "] attribute type = "  + attributeType );
+                            value = "'" + value + "'";
                         }
                         LOGGER.debug("[" + getName() + "] native value = "  + value );
                     } else {
