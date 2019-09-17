@@ -171,6 +171,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed Sep 17 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.16.0
+- [cygnus-ngsi][doc] Add Install section in README.md (#1576)
+- [cygnus-ngsi] Enable JAVA_OPTS for Flume (#1704)
+- [cygnus-ngsi] Adjust build cygnus to use Java 1.8 (#1718)
+
 * Fri Jun 28 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.15.0
 
 * Tue Jun 04 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.14.0
