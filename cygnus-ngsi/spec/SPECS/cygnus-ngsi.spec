@@ -99,6 +99,18 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed Sep 17 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.16.0
+- [cygnus-ngsi][doc] Add Install section in README.md (#1576)
+- [cygnus-ngsi] Enable JAVA_OPTS for Flume (#1704)
+- [cygnus-ngsi] Adjust build cygnus to use Java 1.8 (#1718)
+- [cygnus-ngsi][MySQL] Insert right SQL types values (Number, Null), non stringify (#1661)
+- [cygnus-ngsi] Fix error response code from 501 to 404 in case of invalid API (#1630)
+- [cygnus-ngsi][ArcGis] Add ArcGis sink (#1672)
+- [cygnus-ngsi][Postgis, Cartodb] Fix double precision for coordinates
+- [cygnus-ngsi][Docker] Build Cygnus in Dockerhub raises OutOfMemory Java (#1709)
+- [cygnus-ngsi] Build Cygnus with all dependencies using standard RPM (#1716)
+- [cygnus-ngsi] Fix for Index Creation of Data Expiration (#1714)
+
 * Fri Jun 28 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.15.0
 - [cygnus-ngsi][ElasticSearchSink] Add ElasticSearch sink (#1516, #1521)
 - [cygnus-ngsi][PostGISSink, PostgreSQLSink] Insert right SQL types values, non stringify (#1661)
