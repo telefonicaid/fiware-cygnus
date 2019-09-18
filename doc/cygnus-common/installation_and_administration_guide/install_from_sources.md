@@ -151,7 +151,7 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 | hadoop-core | 1.2.1 | `HDFSBackendImplBinary` |
 | hive-exec | 0.13.0 | `HiveBackendImpl` at runtime |
 | hive-jdbc | 0.13.0 | `HiveBackendImpl` at runtime |
-| mongodb-driver | 3.0.0 | `MongoBackendImpl` |
+| mongodb-driver | 3.11.0 | `MongoBackendImpl` |
 | kafka-clients | 0.8.2.0 | `KafkaBackendImpl` |
 | zkclient | 0.5 | `KafkaBackendImpl` |
 | kafka_2.11 | 0.8.2.1 | `KafkaBackendImpl` |
