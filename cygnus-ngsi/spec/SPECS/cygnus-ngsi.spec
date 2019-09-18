@@ -103,7 +103,7 @@ rm -rf $RPM_BUILD_ROOT
 - [cygnus-ngsi][doc] Add Install section in README.md (#1576)
 - [cygnus-ngsi] Enable JAVA_OPTS for Flume (#1704)
 - [cygnus-ngsi] Adjust build cygnus to use Java 1.8 (#1718)
-- [cygnus-ngsi][MySQL] Insert right SQL types values (Number, Null), non stringify (#1661)
+- [cygnus-ngsi][MySQL] Insert right SQL types values (Null), non stringify (#1661)
 - [cygnus-ngsi] Fix error response code from 501 to 404 in case of invalid API (#1630)
 - [cygnus-ngsi][ArcGis] Add ArcGis sink (#1672)
 - [cygnus-ngsi][Postgis, Cartodb] Fix double precision for coordinates
