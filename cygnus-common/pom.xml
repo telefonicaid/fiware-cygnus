@@ -105,7 +105,7 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver</artifactId>
-            <version>3.0.4</version>
+            <version>3.11.0</version>
         </dependency>
         <!-- Required by KafkaBackendImpl -->
         <dependency>
