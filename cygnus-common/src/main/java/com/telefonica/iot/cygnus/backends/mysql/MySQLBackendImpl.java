@@ -459,7 +459,11 @@ public class MySQLBackendImpl implements MySQLBackend {
                 if (connection == null || !connection.isValid(0)) {
                     if (connection != null) {
                         LOGGER.debug("Closing invalid mysql connection for db " + dbName);
-                        connection.close();
+                        try{
+                            connection.close();
+                        } catch (SQLException e) {
+                            LOGGER.warn("error closing connection: " + e.getMessage());
+                        }
                     } // if
 
                     DataSource datasource = createConnectionPool(dbName);
