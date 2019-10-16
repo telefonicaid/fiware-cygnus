@@ -284,7 +284,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
                         try {
                             connection.close();
                         } catch (SQLException e) {
-                            LOGGER.warn("error closing connection: " + e.getMessage());
+                            LOGGER.warn("error closing invalid connection: " + e.getMessage());
                         }
                     } // if
 

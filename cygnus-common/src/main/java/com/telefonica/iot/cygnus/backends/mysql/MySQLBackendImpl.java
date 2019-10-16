@@ -462,7 +462,7 @@ public class MySQLBackendImpl implements MySQLBackend {
                         try {
                             connection.close();
                         } catch (SQLException e) {
-                            LOGGER.warn("error closing connection: " + e.getMessage());
+                            LOGGER.warn("error closing invalid connection: " + e.getMessage());
                         }
                     } // if
 
