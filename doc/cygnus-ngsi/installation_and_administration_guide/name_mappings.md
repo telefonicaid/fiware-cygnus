@@ -237,7 +237,7 @@ Sumarizing these are some useful examples and their result in a sink like MySQL:
 }
 ```
 
-This case creates in `database_name` db a table with name `tableprefix_luminaria_tablesufix`
+This case creates in `database_name` db a table with name `tableprefix_tableid_tablesufix`
 
 
 ### Case 2: groups match exactly by service, subservice and entityid and any entitytype
