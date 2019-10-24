@@ -1,3 +1,4 @@
+[cygnus-common][HDFSSink] Check attribute value before use it
 [cygnus-ngsi][NGSISink] Catch generic exception and rollback in transacation
 [cygnus-common][PostgreSQL][MySQL] catch exception close invalid connection
 [cygnus-common] Upgrade MongoDB driver from 3.0.4 to 3.11.0
