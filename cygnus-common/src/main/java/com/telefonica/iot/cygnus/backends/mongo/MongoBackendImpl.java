@@ -124,7 +124,7 @@ public class MongoBackendImpl implements MongoBackend {
                 .append("_id.attrName", 1)
                 .append("_id.resolution", 1)
                 .append("_id.origin", 1);
-            options = new IndexOptions();
+            options = new IndexOptions().name("cyg_agg_opt");
             db.getCollection(collectionName).createIndex(keys, options);
         } catch (Exception e) {
             LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
@@ -132,7 +132,7 @@ public class MongoBackendImpl implements MongoBackend {
         try {
             if (dataExpiration != 0) {
                 keys = new BasicDBObject().append("_id.origin", 1);
-                options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
+                options = new IndexOptions().name("cyg_agg_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
                 db.getCollection(collectionName).createIndex(keys, options);
             } // if
         } catch (Exception e) {
@@ -185,7 +185,7 @@ public class MongoBackendImpl implements MongoBackend {
                 .append("entityType", 1)
                 .append("attrName", 1)
                 .append("recvTime", 1);
-            options = new IndexOptions();
+            options = new IndexOptions().name("cyg_raw_opt");
             db.getCollection(collectionName).createIndex(keys, options);
         } catch (Exception e) {
             LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
@@ -193,7 +193,7 @@ public class MongoBackendImpl implements MongoBackend {
         try {
             if (dataExpiration != 0) {
                 keys = new BasicDBObject().append("recvTime", 1);
-                options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
+                options = new IndexOptions().name("cyg_raw_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
                 db.getCollection(collectionName).createIndex(keys, options);
             } // if
         } catch (Exception e) {
