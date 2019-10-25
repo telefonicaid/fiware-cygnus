@@ -1,3 +1,3 @@
 [cygnus-common][PostgreSQL][MySQL] catch exception close invalid connection
 [cygnus-common] Upgrade MongoDB driver from 3.0.4 to 3.11.0
-[cygnus-common] Fix for index name creation in Mongo Sink (#1714)
+[cygnus-common] Fix for index name creation in Mongo and STH Sinks (#1714)
