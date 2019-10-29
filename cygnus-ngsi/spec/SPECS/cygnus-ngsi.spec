@@ -99,6 +99,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Tue Oct 29 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.17.0
+- [cygnus-ngsi][NGSISink] Catch generic exception and rollback in transacation
+
 * Wed Sep 17 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.16.0
 - [cygnus-ngsi][doc] Add Install section in README.md (#1576)
 - [cygnus-ngsi] Enable JAVA_OPTS for Flume (#1704)
