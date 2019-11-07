@@ -99,6 +99,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Thu Nov 07 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.17.1
+
 * Tue Oct 29 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.17.0
 - [cygnus-ngsi][NGSISink] Catch generic exception and rollback in transacation
 
