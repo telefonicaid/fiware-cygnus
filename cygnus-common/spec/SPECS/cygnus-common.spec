@@ -171,6 +171,9 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Thu Nov 07 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.17.1
+- Hotfix: downgrade mongodb driver back to 3.0.4 as we suspects that the upgrade raised the problem described in #1756
+
 * Tue Oct 29 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.17.0
 - [cygnus-common][HDFSSink] Check attribute value before use it
 - [cygnus-common][PostgreSQL][MySQL] catch exception close invalid connection

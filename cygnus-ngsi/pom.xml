@@ -5,7 +5,7 @@
 
     <groupId>com.telefonica.iot</groupId>
     <artifactId>cygnus-ngsi</artifactId>
-    <version>1.17.0</version>
+    <version>1.17.1</version>
     <packaging>jar</packaging>
 
     <name>cygnus-ngsi</name>
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>com.telefonica.iot</groupId>
             <artifactId>cygnus-common</artifactId>
-            <version>1.17.0</version>
+            <version>1.17.1</version>
         </dependency>
         <!-- libreria arcgis -->
         <dependency>
