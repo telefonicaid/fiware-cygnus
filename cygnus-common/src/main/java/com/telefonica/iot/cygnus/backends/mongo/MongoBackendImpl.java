@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.hadoop.hbase.util.HBaseFsck;
 import org.bson.Document;
 
 /**
