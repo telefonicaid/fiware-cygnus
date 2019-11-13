@@ -17,11 +17,7 @@
  */
 package com.telefonica.iot.cygnus.backends.mongo;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
+import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
@@ -42,6 +38,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.hadoop.hbase.util.HBaseFsck;
 import org.bson.Document;
 
 /**
@@ -99,15 +97,16 @@ public class MongoBackendImpl implements MongoBackend {
      * @throws Exception
      */
     @Override
-    public void createCollection(String dbName, String collectionName, long dataExpiration) throws Exception {
+    public void createCollection(String dbName, String collectionName, long dataExpiration) throws MongoException {
         LOGGER.debug("Creating Mongo collection=" + collectionName + " at database=" + dbName);
         MongoDatabase db = getDatabase(dbName);
 
         // create the collection
         try {
             db.createCollection(collectionName);
-        } catch (Exception e) {
-            if (e.getMessage().contains("\"code\" : 48")) {
+        } catch (MongoException e) {
+            ErrorCategory errorCategory = ErrorCategory.fromErrorCode( e.getCode() );
+            if (errorCategory == ErrorCategory.fromErrorCode(48)){
                 LOGGER.debug("Collection already exists, nothing to create");
             } else {
                 throw e;
@@ -145,7 +144,7 @@ public class MongoBackendImpl implements MongoBackend {
      */
     @Override
     public void createCollection(String dbName, String collectionName, long collectionsSize, long maxDocuments,
-            long dataExpiration) throws Exception {
+            long dataExpiration) throws MongoException {
         MongoDatabase db = getDatabase(dbName);
 
         // create the collection, with size-based limits if possible
@@ -162,8 +161,9 @@ public class MongoBackendImpl implements MongoBackend {
                 LOGGER.debug("Creating Mongo collection=" + collectionName + " at database=" + dbName);
                 db.createCollection(collectionName);
             } // if else
-        } catch (Exception e) {
-            if (e.getMessage().contains("\"code\" : 48")) {
+        } catch (MongoException e) {
+            ErrorCategory errorCategory = ErrorCategory.fromErrorCode( e.getCode() );
+            if (errorCategory == ErrorCategory.fromErrorCode(48)){
                 LOGGER.debug("Collection already exists, nothing to create");
             } else {
                 throw e;
