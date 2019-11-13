@@ -533,7 +533,7 @@ Once sent, we must receive a positive answer from Orion with a 200 OK status adv
 We can easily check that the creation is correct entering in MongoDB. As we explain in [Orion section](#section2) MongoDB creates a database with the name `orion-<service>`. For instance, our database name will be `orion-library` and will be empty at the moment. Checking in mongo:
 ```
 $ mongo
-MongoDB shell version: 2.6.10
+MongoDB shell version: 3.6.14
 connecting to: test
 > show databases
 admin               (empty)

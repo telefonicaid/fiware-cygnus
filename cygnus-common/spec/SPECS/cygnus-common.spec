@@ -171,6 +171,17 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Tue Oct 29 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.17.0
+- [cygnus-common][HDFSSink] Check attribute value before use it
+- [cygnus-common][PostgreSQL][MySQL] catch exception close invalid connection
+- [cygnus-common] Upgrade MongoDB driver from 3.0.4 to 3.11.0
+- [cygnus-common] Fix for index name creation in Mongo and STH Sinks (#1714)
+
+* Wed Sep 17 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.16.0
+- [cygnus-common][doc] Add Install section in README.md (#1576)
+- [cygnus-common] Enable JAVA_OPTS for Flume (#1704)
+- [cygnus-common] Adjust build cygnus to use Java 1.8 (#1718)
+
 * Fri Jun 28 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.15.0
 
 * Tue Jun 04 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.14.0

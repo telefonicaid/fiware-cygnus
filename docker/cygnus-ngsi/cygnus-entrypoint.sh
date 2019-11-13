@@ -17,9 +17,6 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
-# Change parameters in the agent configuration file
-rm -f ${FLUME_HOME}/conf/agent*.conf
-
 # usage: file_env VAR [DEFAULT]
 #    ie: file_env 'XYZ_DB_PASSWORD' 'example'
 # (will allow for "$XYZ_DB_PASSWORD_FILE" to fill in the value of
@@ -126,8 +123,10 @@ elif [ "$CYGNUS_MYSQL_HOST" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '${CYGNUS_MYSQL_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     else
         sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-mysql /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source-mysql.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source-mysql.port = '${CYGNUS_MYSQL_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_mysql.conf
             if [ "${CYGNUS_MYSQL_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -139,7 +138,6 @@ elif [ "$CYGNUS_MYSQL_HOST" != "" ]; then
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = mysql-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = mysql-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5050 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_host/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_host = '${CYGNUS_MYSQL_HOST} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_port/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_port = '${CYGNUS_MYSQL_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_username/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_username = '${CYGNUS_MYSQL_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -205,7 +203,7 @@ elif [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_mongo.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5051 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '${CYGNUS_MONGO_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_MONGOL_ENABLE_GROUPING,,}" == "true" ]; then
             GROUPING_CONF_FILE=grouping_rules_mongo.conf
             cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
@@ -221,6 +219,7 @@ elif [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
         fi
     else
         sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-mongo /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source-mongo.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source-mongo.port = '${CYGNUS_MONGO_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_MONGO_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_mongo.conf
             if [ "${CYGNUS_MONGO_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -363,9 +362,10 @@ elif [ "$CYGNUS_CKAN_HOST" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
-        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5052 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '${CYGNUS_CKAN_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     else
         sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-ckan /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source-ckan.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source-ckan.port = '${CYGNUS_CKAN_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_CKAN_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_ckan.conf
             if [ "${CYGNUS_CKAN_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -458,9 +458,10 @@ elif [ "$CYGNUS_HDFS_HOST" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
-        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5053 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '${CYGNUS_HDFS_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     else
         sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-hdfs /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source-hdfs.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source-hdfs.port = '${CYGNUS_HDFS_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_HDFS_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_hdfs.conf
             if [ "${CYGNUS_HDFS_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -572,9 +573,10 @@ elif [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
-        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5054 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '${CYGNUS_POSTGRESQL_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     else
         sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-postgresql /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source-postgresql.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source-postgresql.port = '${CYGNUS_POSTGRESQL_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_postgresql.conf
             if [ "${CYGNUS_POSTGRESQL_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -666,9 +668,10 @@ elif [ "$CYGNUS_CARTO_USER" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
-        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5055 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '${CYGNUS_CARTO_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     else
         sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-cartodb /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source-cartodb.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source-cartodb.port = '${CYGNUS_CARTO_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_CARTO_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_carto.conf
             cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
@@ -724,9 +727,10 @@ elif [ "$CYGNUS_ORION_HOST" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
-        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5056 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '${CYGNUS_ORION_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     else
         sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-orion /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source-orion.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source-orion.port = '${CYGNUS_ORION_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_ORION_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_orion.conf
             if [ "${CYGNUS_ORION_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -823,9 +827,10 @@ elif [ "$CYGNUS_POSTGIS_HOST" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
-        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5057 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '${CYGNUS_POSTGIS_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     else
         sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-postgis /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source-postgis.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source-postgis.port = '${CYGNUS_POSTGIS_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         if [ "${CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_postgis.conf
             if [ "${CYGNUS_POSTGIS_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -906,9 +911,10 @@ elif [ "$CYGNUS_ELASTICSEARCH_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent-elasticsearch.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5058 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '${CYGNUS_ELASTICSEARCH_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     else
         sed -i 's/'${CYGNUS_AGENT_NAME}'.sources =/'${CYGNUS_AGENT_NAME}'.sources = http-source-elasticsearch /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source-elasticsearch.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source-elasticsearch.port = '${CYGNUS_ELASTICSEARCH_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = elasticsearch-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = elasticsearch-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -989,10 +995,11 @@ elif [ "$CYGNUS_ARCGIS_URL" != "" ]; then
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.nmi.name_mappings_conf_file = '${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors =/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors = ts nmi' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         fi
+        sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '${CYGNUS_ARCGIS_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source-arcgis.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source-arcgis.port = '${CYGNUS_ARCGIS_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.sinks =/'${CYGNUS_AGENT_NAME}'.sinks = arcgis-sink /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i 's/'${CYGNUS_AGENT_NAME}'.channels =/'${CYGNUS_AGENT_NAME}'.channels = arcgis-channel /g' ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '5059 ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_url/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_url = '${CYGNUS_ARCGIS_URL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_username/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_username = '${CYGNUS_ARCGIS_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_password/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.arcgis_password = '${CYGNUS_ARCGIS_PASS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}

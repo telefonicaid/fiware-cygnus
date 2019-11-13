@@ -820,9 +820,13 @@ public class NGSIHDFSSink extends NGSISink {
                     + entityId + csvSeparator
                     + entityType + csvSeparator
                     + attrName + csvSeparator
-                    + attrType + csvSeparator
-                    + attrValue.replaceAll("\"", "") + csvSeparator
-                    + printableAttrMdFileName;
+                    + attrType + csvSeparator;
+                if (attrValue != null) {
+                    line += attrValue.replaceAll("\"", "") + csvSeparator;
+                } else {
+                    line += attrValue + csvSeparator;
+                }
+                line += printableAttrMdFileName;
                 if (aggregation.isEmpty()) {
                     aggregation = line;
                 } else {
@@ -953,7 +957,11 @@ public class NGSIHDFSSink extends NGSISink {
                 mdAggregations.put(attrMdFileName, concatMdAggregation);
 
                 // create part of the line with the current attribute (a.k.a. a column)
-                line += csvSeparator + attrValue.replaceAll("\"", "") + csvSeparator + printableAttrMdFileName;
+                if (attrValue != null) {
+                    line += csvSeparator + attrValue.replaceAll("\"", "") + csvSeparator + printableAttrMdFileName;
+                } else {
+                    line += csvSeparator + attrValue + csvSeparator + printableAttrMdFileName;
+                }
             } // for
 
             // now, aggregate the line

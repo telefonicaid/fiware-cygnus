@@ -114,18 +114,24 @@ public class MongoBackendImpl implements MongoBackend {
         } // try catch
 
         // check STH indexes documentation at https://github.com/telefonicaid/fiware-sth-comet/blob/master/doc/manuals/db_indexes.md
+        BasicDBObject keys;
+        IndexOptions options;
         try {
-            BasicDBObject keys = new BasicDBObject()
+            keys = new BasicDBObject()
                 .append("_id.entityId", 1)
                 .append("_id.entityType", 1)
                 .append("_id.attrName", 1)
                 .append("_id.resolution", 1)
                 .append("_id.origin", 1);
-            IndexOptions options = new IndexOptions();
+            options = new IndexOptions().name("cyg_agg_opt");
             db.getCollection(collectionName).createIndex(keys, options);
+        } catch (Exception e) {
+            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
+        } // try catch
+        try {
             if (dataExpiration != 0) {
                 keys = new BasicDBObject().append("_id.origin", 1);
-                options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
+                options = new IndexOptions().name("cyg_agg_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
                 db.getCollection(collectionName).createIndex(keys, options);
             } // if
         } catch (Exception e) {
@@ -171,17 +177,23 @@ public class MongoBackendImpl implements MongoBackend {
         } // try catch
 
         // check STH indexes documentation at https://github.com/telefonicaid/fiware-sth-comet/blob/master/doc/manuals/db_indexes.md
+        BasicDBObject keys;
+        IndexOptions options;
         try {
-            BasicDBObject keys = new BasicDBObject()
+            keys = new BasicDBObject()
                 .append("entityId", 1)
                 .append("entityType", 1)
                 .append("attrName", 1)
                 .append("recvTime", 1);
-            IndexOptions options = new IndexOptions();
+            options = new IndexOptions().name("cyg_raw_opt");
             db.getCollection(collectionName).createIndex(keys, options);
+        } catch (Exception e) {
+            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
+        } // try catch
+        try {
             if (dataExpiration != 0) {
                 keys = new BasicDBObject().append("recvTime", 1);
-                options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
+                options = new IndexOptions().name("cyg_raw_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
                 db.getCollection(collectionName).createIndex(keys, options);
             } // if
         } catch (Exception e) {
