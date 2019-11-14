@@ -178,6 +178,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         String contentType = null;
         String service = defaultService;
         String servicePath = defaultServicePath;
+        String ngsiVersion = null;
         
         while (headerNames.hasMoreElements()) {
             String headerName = ((String) headerNames.nextElement()).toLowerCase(Locale.ENGLISH);
@@ -238,6 +239,9 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                     
                     servicePath = headerValue;
                     
+                    break;
+                case CommonConstants.HEADER_NGSI_VERSION:
+                    ngsiVersion = headerValue;
                     break;
                 default:
                     LOGGER.debug("[NGSIRestHandler] Unnecessary header");
@@ -316,12 +320,28 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         LOGGER.info("[NGSIRestHandler] Received data (" + data + ")");
         
         // Parse the original data into a NotifyContextRequest object
-        NotifyContextRequest ncr;
+        NotifyContextRequest ncr = null;
         Gson gson = new Gson();
 
         try {
-            ncr = gson.fromJson(data, NotifyContextRequest.class);
-            LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest: " + ncr.toString());
+            if (ngsiVersion != null) {
+                switch (ngsiVersion) {
+                    case "legacy":
+                        ncr = gson.fromJson(data, NotifyContextRequest.class);
+                        LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest on legacy NGSI: " + ncr.toString());
+                        break;
+                    case "normalized":
+                        LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest on normalized NGSIv2: ");
+                        break;
+                    default:
+                        LOGGER.warn("Unknown value: " + ngsiVersion + " for NGSI format");
+                        throw new HTTPBadRequestException(ngsiVersion
+                                + " format not supported");
+                }
+            } else {
+                ncr = gson.fromJson(data, NotifyContextRequest.class);
+                LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest on legacy NGSI: " + ncr.toString());
+            }
         } catch (JsonSyntaxException e) {
             serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
             LOGGER.error("[NGSIRestHandler] Runtime error (" + e.getMessage() + ")");
