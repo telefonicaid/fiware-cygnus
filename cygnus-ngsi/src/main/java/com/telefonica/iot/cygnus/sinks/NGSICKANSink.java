@@ -162,7 +162,7 @@ public class NGSICKANSink extends NGSISink {
 
         if ((intPort <= 0) || (intPort > 65535)) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (ckan_port=" + ckanPort + ")"
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (ckan_port=" + ckanPort + ")"
                     + " -- Must be between 0 and 65535");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (ckan_port=" + ckanPort + ")");
@@ -178,7 +178,7 @@ public class NGSICKANSink extends NGSISink {
                 + attrPersistenceStr + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_persistence="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (attr_persistence="
                 + attrPersistenceStr + ") -- Must be 'row' or 'column'");
         }  // if else
 
@@ -190,7 +190,7 @@ public class NGSICKANSink extends NGSISink {
                 + sslStr + ")");
         } else  {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (ssl="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (ssl="
                 + sslStr + ") -- Must be 'true' or 'false'");
         }  // if else
         

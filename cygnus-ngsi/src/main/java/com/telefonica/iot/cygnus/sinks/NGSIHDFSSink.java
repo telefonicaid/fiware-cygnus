@@ -260,12 +260,12 @@ public class NGSIHDFSSink extends NGSISink {
             if ((intPort >= 0) && (intPort <= 65535)) {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (hdfs_port=" + port + ")");
             } else {
-                LOGGER.debug("[" + this.getName() + "] Invalid configuration (hdfs_port=" + port
+                LOGGER.warn("[" + this.getName() + "] Invalid configuration (hdfs_port=" + port
                         + ") -- Must be between 0 and 65535.");
             } // if else
         } catch (Exception e) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (hdfs_port=" + port
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (hdfs_port=" + port
                   + ") -- Must be a valid number between 0 and 65535.");
         } // try catch
 
@@ -303,7 +303,7 @@ public class NGSIHDFSSink extends NGSISink {
                    + fileFormatStr + ")");
         } catch (Exception e) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (file_format="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (file_format="
                     + fileFormatStr + ") -- Must be 'json-row', 'json-column', 'csv-row' or 'csv-column'");
         } // catch
 
@@ -316,7 +316,7 @@ public class NGSIHDFSSink extends NGSISink {
                 + enableHiveStr + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (enableHive="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (enableHive="
                 + enableHiveStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
@@ -332,13 +332,13 @@ public class NGSIHDFSSink extends NGSISink {
                 LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.port=" + hivePort + ")");
             } else {
                 invalidConfiguration = true;
-                LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.port=" + hivePort
+                LOGGER.warn("[" + this.getName() + "] Invalid configuration (hive.port=" + hivePort
                     + ") -- Must be between 0 and 65535");
             }
             
         } catch (Exception e) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.port=" + hivePort
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (hive.port=" + hivePort
                     + ") -- Must be a valid number between 0 and 65535");
         } // try catch
 
@@ -346,7 +346,7 @@ public class NGSIHDFSSink extends NGSISink {
         
         if ((!((hiveServerVersion.equals("1"))) && (!(hiveServerVersion.equals("2"))))) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.server_version=" + hiveServerVersion
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (hive.server_version=" + hiveServerVersion
                 + ") -- Must be a valid number: '1' for HiveServer1 or '2' for HiveServer2");
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (hive.server_version="
@@ -361,7 +361,7 @@ public class NGSIHDFSSink extends NGSISink {
                     + hiveDBType + ")");
         } catch (Exception e) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (hive.db_type="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (hive.db_type="
                 + hiveDBTypeStr + ") -- Must be 'default-db' or 'namespace-db'");
         }  // try catch
 
@@ -374,7 +374,7 @@ public class NGSIHDFSSink extends NGSISink {
                 + enableKrb5Str + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (krb5_auth="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (krb5_auth="
                 + enableKrb5Str + ") -- Must be 'true' or 'false'");
         }  // if else
         
@@ -396,7 +396,7 @@ public class NGSIHDFSSink extends NGSISink {
                 + serviceAsNamespaceStr + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (service_as_namespace="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (service_as_namespace="
                 + serviceAsNamespaceStr + ") -- Must be 'true' or 'false'");
         }  // if else
         
@@ -408,7 +408,7 @@ public class NGSIHDFSSink extends NGSISink {
                         + backendImplStr + ")");
         } catch (Exception e) {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (backend.impl="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (backend.impl="
                 + backendImplStr + ") -- Must be 'rest' or 'binary'");
         }  // try catch
         
@@ -820,9 +820,13 @@ public class NGSIHDFSSink extends NGSISink {
                     + entityId + csvSeparator
                     + entityType + csvSeparator
                     + attrName + csvSeparator
-                    + attrType + csvSeparator
-                    + attrValue.replaceAll("\"", "") + csvSeparator
-                    + printableAttrMdFileName;
+                    + attrType + csvSeparator;
+                if (attrValue != null) {
+                    line += attrValue.replaceAll("\"", "") + csvSeparator;
+                } else {
+                    line += attrValue + csvSeparator;
+                }
+                line += printableAttrMdFileName;
                 if (aggregation.isEmpty()) {
                     aggregation = line;
                 } else {
@@ -953,7 +957,11 @@ public class NGSIHDFSSink extends NGSISink {
                 mdAggregations.put(attrMdFileName, concatMdAggregation);
 
                 // create part of the line with the current attribute (a.k.a. a column)
-                line += csvSeparator + attrValue.replaceAll("\"", "") + csvSeparator + printableAttrMdFileName;
+                if (attrValue != null) {
+                    line += csvSeparator + attrValue.replaceAll("\"", "") + csvSeparator + printableAttrMdFileName;
+                } else {
+                    line += csvSeparator + attrValue + csvSeparator + printableAttrMdFileName;
+                }
             } // for
 
             // now, aggregate the line

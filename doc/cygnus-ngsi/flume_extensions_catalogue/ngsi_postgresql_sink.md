@@ -9,6 +9,7 @@ Content:
         * [PostgreSQL tables naming conventions](#section1.2.3)
         * [Row-like storing](#section1.2.4)
         * [Column-like storing](#section1.2.5)
+        * [Native attribute type](#section1.2.6)
     * [Example](#section1.3)
         * [`NGSIEvent`](#section1.3.1)
         * [Database, schema and table names](#section1.3.2)
@@ -119,6 +120,9 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 *  For each notified attribute, a field named as the attribute is considered. This field will store the attribute values along the time.
 *  For each notified attribute, a field named as the concatenation of the attribute name and `_md` is considered. This field will store the attribute's metadata values along the time.
 
+#### <a name="section1.2.6"></a>Native attribute type
+Regarding the specific data stored within the above table, if `attr_native_types` parameter is set to `true` then attribute is inserted using its native type, if `false` then will be strinfy.
+
 [Top](#top)
 
 ### <a name="section1.3"></a>Example
@@ -127,31 +131,31 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
     ngsi-event={
         headers={
-	         content-type=application/json,
-	         timestamp=1429535775,
-	         transactionId=1429535775-308-0000000000,
-	         correlationId=1429535775-308-0000000000,
-	         fiware-service=vehicles,
-	         fiware-servicepath=/4wheels,
-	         <grouping_rules_interceptor_headers>,
-	         <name_mappings_interceptor_headers>
+             content-type=application/json,
+             timestamp=1429535775,
+             transactionId=1429535775-308-0000000000,
+             correlationId=1429535775-308-0000000000,
+             fiware-service=vehicles,
+             fiware-servicepath=/4wheels,
+             <grouping_rules_interceptor_headers>,
+             <name_mappings_interceptor_headers>
         },
         body={
-	        entityId=car1,
-	        entityType=car,
-	        attributes=[
-	            {
-	                attrName=speed,
-	                attrType=float,
-	                attrValue=112.9
-	            },
-	            {
-	                attrName=oil_level,
-	                attrType=float,
-	                attrValue=74.6
-	            }
-	        ]
-	    }
+            entityId=car1,
+            entityType=car,
+            attributes=[
+                {
+                    attrName=speed,
+                    attrType=float,
+                    attrValue=112.9
+                },
+                {
+                    attrName=oil_level,
+                    attrType=float,
+                    attrValue=74.6
+                }
+            ]
+        }
     }
 
 
@@ -236,6 +240,7 @@ Coming soon.
 | postgresql\_username | no | postgres | `postgres` is the default username that is created automatically when install |
 | postgresql\_password | no | N/A | Empty value by default (No password is created when install) |
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
+| attr\_native\_types | no | false | if the attribute value will be native <i>true</i> or stringfy or <i>false</i>. |
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
@@ -260,6 +265,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.postgresql-sink.postgresql_username = myuser
     cygnus-ngsi.sinks.postgresql-sink.postgresql_password = mypassword
     cygnus-ngsi.sinks.postgresql-sink.attr_persistence = row
+    cygnus-ngsi.sinks.postgresql-sink.attr_native_types = false
     cygnus-ngsi.sinks.postgresql-sink.batch_size = 100
     cygnus-ngsi.sinks.postgresql-sink.batch_timeout = 30
     cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10

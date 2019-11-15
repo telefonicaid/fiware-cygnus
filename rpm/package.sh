@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
 # 
@@ -90,6 +90,9 @@ function copy_cygnus_jar_to_flume_directory(){
     if [[ ${component_name} == "cygnus-common" ]]; then
         mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/libext
         cp $BASE_DIR/${component_name}/target/${component_name}-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/libext
+    elif [[ ${component_name} == "cygnus-ngsi" ]]; then
+        mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
+        cp $BASE_DIR/${component_name}/target/${component_name}-${PRODUCT_VERSION}-jar-with-all-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
     else
         mkdir ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
         cp $BASE_DIR/${component_name}/target/${component_name}-${PRODUCT_VERSION}-jar-with-dependencies.jar ${RPM_PRODUCT_SOURCE_DIR}/plugins.d/cygnus/lib
@@ -249,9 +252,9 @@ do
 
     _log "#### Packaging using: ${SPEC_FILE}... ####"
     # Execute command to create RPM
-    RPM_BUILD_COMMAND="rpmbuild -v -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} --define '_name_suffix '${NAME_SUFFIX}"
+    RPM_BUILD_COMMAND="rpmbuild -v -bb ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} --define '_name_suffix '${NAME_SUFFIX}"
     _log "Rpm construction command: ${RPM_BUILD_COMMAND}"
-    rpmbuild -v -ba ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} --define '_name_suffix '${NAME_SUFFIX}
+    rpmbuild -v -bb ${SPEC_FILE} --define '_topdir '${RPM_BASE_DIR} --define '_product_version '${PRODUCT_VERSION} --define '_product_release '${PRODUCT_RELEASE} --define '_name_suffix '${NAME_SUFFIX}
     _logStage "######## rpmbuild finished! ... ########"
 done
 

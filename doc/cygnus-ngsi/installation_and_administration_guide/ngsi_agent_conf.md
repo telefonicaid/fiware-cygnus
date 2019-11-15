@@ -17,13 +17,13 @@ The file `agent_<id>.conf` can be instantiated from a template given in the Cygn
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
 cygnus-ngsi.sources = http-source
-cygnus-ngsi.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink dynamo-sink postgresql-sink cartodb-sink
-cygnus-ngsi.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel postgresql-channel cartodb-channel
+cygnus-ngsi.sinks = hdfs-sink mysql-sink ckan-sink mongo-sink sth-sink kafka-sink dynamo-sink postgresql-sink postgis-sink cartodb-sink
+cygnus-ngsi.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel postgresql-channel postgis-channel cartodb-channel
 
 #=============================================
 # source configuration
 # channel name where to write the notification events
-cygnus-ngsi.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel postgresql-channel
+cygnus-ngsi.sources.http-source.channels = hdfs-channel mysql-channel ckan-channel mongo-channel sth-channel kafka-channel dynamo-channel postgresql-channel postgis-channel
 # source class, must not be changed
 cygnus-ngsi.sources.http-source.type = org.apache.flume.source.http.HTTPSource
 # listening port the Flume source will use for receiving incoming notifications
@@ -185,6 +185,43 @@ cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
 #cygnus-ngsi.sinks.postgresql-sink.backend.enable_cache = false
 
 # ============================================
+# NGSIPostgisSink configuration
+# channel name from where to read notification events
+cygnus-ngsi.sinks.postgis-sink.channel = postgis-channel
+# sink class, must not be changed
+cygnus-ngsi.sinks.postgis-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgisSink
+# true applies the new encoding, false applies the old encoding.
+#cygnus-ngsi.sinks.postgis-sink.enable_encoding = false
+# true if the grouping feature is enabled for this sink, false otherwise
+#cygnus-ngsi.sinks.postgis-sink.enable_grouping = false
+# true if name mappings are enabled for this sink, false otherwise
+#cygnus-ngsi.sinks.postgis-sink.enable_name_mappings = false
+# true if lower case is wanted to forced in all the element names, false otherwise
+#cygnus-ngsi.sinks.postgis-sink.enable_lowercase = false
+# the FQDN/IP address where the Postgis server runs
+#cygnus-ngsi.sinks.postgis-sink.postgis_host = x.y.z.w
+# the port where the Postgis server listens for incomming connections
+#cygnus-ngsi.sinks.postgis-sink.postgis_port = 5432
+# the name of the postgis database
+#cygnus-ngsi.sinks.postgis-sink.postgis_database = postgres
+# a valid user in the Postgis server
+#cygnus-ngsi.sinks.postgis-sink.postgis_username = root
+# password for the user above
+#cygnus-ngsi.sinks.postgis-sink.postgis_password = xxxxxxxxxxxxx
+# how the attributes are stored, either per row either per column (row, column)
+#cygnus-ngsi.sinks.postgis-sink.attr_persistence = column
+# select the data_model: dm-by-service-path or dm-by-entity
+#cygnus-ngsi.sinks.postgis-sink.data_model = by-service-path
+# number of notifications to be included within a processing batch
+#cygnus-ngsi.sinks.postgis-sink.batch_size = 100
+# timeout for batch accumulation
+#cygnus-ngsi.sinks.postgis-sink.batch_timeout = 30
+# number of retries upon persistence error
+cygnus-ngsi.sinks.postgis-sink.batch_ttl = 10
+# true enables cache, false disables cache
+#cygnus-ngsi.sinks.postgis-sink.backend.enable_cache = false
+
+# ============================================
 # NGSIMySQLSink configuration
 # channel name from where to read notification events
 cygnus-ngsi.sinks.mysql-sink.channel = mysql-channel
@@ -208,7 +245,7 @@ cygnus-ngsi.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSin
 #cygnus-ngsi.sinks.mysql-sink.mysql_password = xxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 #cygnus-ngsi.sinks.mysql-sink.attr_persistence = column
-# select the data_model: dm-by-service-path or dm-by-entity
+# select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type
 #cygnus-ngsi.sinks.mysql-sink.data_model = dm-by-entity
 # number of notifications to be included within a processing batch
 #cygnus-ngsi.sinks.mysql-sink.batch_size = 100
@@ -352,7 +389,7 @@ cygnus-ngsi.sinks.dynamo-sink.secret_access_key = xxxxxxxxx
 #cygnus-ngsi.sinks.dynamo-sink.enable_lowercase = false
 # how the attributes are stored, either per row either per column (row, column)
 #cygnus-ngsi.sinks.dynamo-sink.attr_persistence = column
-# select the data_model: dm-by-entity 	dm-by-entity or dm-by-service-path
+# select the data_model: dm-by-entity   dm-by-entity or dm-by-service-path
 #cygnus-ngsi.sinks.dynamo-sink.data_model = dm-by-entity
 # number of notifications to be included within a processing batch
 #cygnus-ngsi.sinks.dynamo-sink.batch_size = 100
@@ -429,6 +466,15 @@ cygnus-ngsi.channels.postgresql-channel.type = memory
 cygnus-ngsi.channels.postgresql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnus-ngsi.channels.postgresql-channel.transactionCapacity = 100
+
+# =============================================
+# postgis-channel configuration
+# channel type (must not be changed)
+cygnus-ngsi.channels.postgis-channel.type = memory
+# capacity of the channel
+cygnus-ngsi.channels.postgis-channel.capacity = 1000
+# amount of bytes that can be sent per transaction
+cygnus-ngsi.channels.postgis-channel.transactionCapacity = 100
 
 # =============================================
 # mongo-channel configuration

@@ -31,7 +31,11 @@ Current stable release is able to persist Orion context data in:
 * [Kafka](http://kafka.apache.org/), the publish-subscribe messaging broker.
 * [DynamoDB](https://aws.amazon.com/dynamodb/), a cloud-based NoSQL database by [Amazon Web Services](https://aws.amazon.com/).
 * [PostgreSQL](http://www.postgresql.org/), the well-know relational database manager.
+* [PostGIS](http://postgis.net), a spatial database extender for PostgreSQL object-relational database.
 * [Carto](https://carto.com/), the database specialized in geolocated data.
+* [Orion](https://github.com/telefonicaid/fiware-orion), the FIWARE Context Broker.
+* [Elasticsearch](https://www.elastic.co/products/elasticsearch), the distributed full-text search engine with JSON documents.
+* [Arcgis](https://www.arcgis.com/home/index.html), the Arcgis is a geographic information system (GIS).
 
 You may consider to visit [Cygnus NGSI Quick Start Guide](../doc/cygnus-ngsi/quick_start_guide.md) before going deep into the details.
 
@@ -273,11 +277,15 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
   <tr><td>String-based aggregation (occurrences)</td><td>1.0.0</td></tr>
   <tr><td>Ignore white space-based attribute values</td><td>1.0.0</td></tr>
   <tr><td>NGSIPostgreSQLSink</td><td>First implementation</td><td>0.12.0</d></tr>
-  <tr><td rowspan="5">NGSICartoDBSink</td><td>First implementation (raw-historic analysis)</td><td>1.0.0</d></tr>
+  <tr><td>NGSIPostgisLSink</td><td>First implementation</td><td>1.12.0</d></tr>
+  <tr><td rowspan="5">NGSICartoDBSink</td><td>First implementation (raw-historic analysis)</td><td>1.0.0</td></tr>
   <tr><td>Distance-historic analysis</td><td>1.1.0</td></tr>
   <tr><td>Multi tenancy support</td><td>1.1.0</td></tr>
   <tr><td>Orion's geo:json support</td><td>1.6.0</td></tr>
   <tr><td>Raw-snapsot analysis</td><td>1.6.0</td></tr>
+  <tr><td>NGSIOrionSink</td><td>First implementation</td><td>1.10.0</td></tr>
+  <tr><td>NGSIElasticsearchSink</td><td>First implementation</td><td>1.15.0</td></tr>
+  <tr><td>NGSIArcGisSink</td><td>First implementation</td><td>1.16.0</td></tr>
   <tr><td rowspan="2">NGSITestSink</td><td>First implementation</td><td>0.7.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.12.0</td></tr>
   <tr><td rowspan="9">All sinks</td><td>Events TTL</td><td>0.4.1</td></tr>

@@ -162,7 +162,7 @@ public final class CommonUtils {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         String humanRedable = sdf.format(new Date(ts));
-        humanRedable += "T";
+        humanRedable += (addUTC ? "T" : " ");
         sdf = new SimpleDateFormat("HH:mm:ss.S");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         humanRedable += sdf.format(new Date(ts)) + (addUTC ? "Z" : "");
@@ -242,6 +242,8 @@ public final class CommonUtils {
                 return "dm-by-service-path";
             case DMBYENTITY:
                 return "dm-by-entity";
+            case DMBYENTITYTYPE:
+                return "dm-by-entity-type";
             case DMBYATTRIBUTE:
                 return "dm-by-attribute";
             default:

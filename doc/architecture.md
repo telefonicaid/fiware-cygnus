@@ -28,6 +28,7 @@ Finally, the sinks are custom ones, one per each persistence element covered by 
     * `NGSIMongoSink`.
     * `NGSISTHSink`.
     * `NGSIPostgreSQLSink`.
+    * `NGSIPostgisSink`.
     * `NSGICartoDBSink`.
     * `NGSIDynamoDBSink`.
     * `NGSIKafkaSink`.

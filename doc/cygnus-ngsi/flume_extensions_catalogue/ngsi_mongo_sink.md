@@ -190,7 +190,7 @@ Using the new encoding:
 Assuming `data_model=dm-by-service-path` and `attr_persistence=row` as configuration parameters, then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
-    MongoDB shell version: 2.6.9
+    MongoDB shell version: 3.6.14
     connecting to: test
     > show databases
     admin              (empty)
@@ -209,7 +209,7 @@ Assuming `data_model=dm-by-service-path` and `attr_persistence=row` as configura
 If `data_model=dm-by-entity` and `attr_persistence=row` then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
-    MongoDB shell version: 2.6.9
+    MongoDB shell version: 3.6.14
     connecting to: test
     > show databases
     admin              (empty)
@@ -228,7 +228,7 @@ If `data_model=dm-by-entity` and `attr_persistence=row` then `NGSIMongoSink` wil
 If `data_model=dm-by-attribute` and `attr_persistence=row` then `NGSIMongoSink` will persist the data as:
 
     $ mongo -u myuser -p
-    MongoDB shell version: 2.6.9
+    MongoDB shell version: 3.6.14
     connecting to: test
     > show databases
     admin              (empty)
@@ -252,7 +252,7 @@ If `data_model=dm-by-attribute` and `attr_persistence=row` then `NGSIMongoSink` 
 If `data_model=dm-by-service-path` and `attr_persistence=column` then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
-    MongoDB shell version: 2.6.9
+    MongoDB shell version: 3.6.14
     connecting to: test
     > show databases
     admin              (empty)
@@ -270,7 +270,7 @@ If `data_model=dm-by-service-path` and `attr_persistence=column` then `NGSIMongo
 If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
-    MongoDB shell version: 2.6.9
+    MongoDB shell version: 3.6.14
     connecting to: test
     > show databases
     admin              (empty)
@@ -392,8 +392,9 @@ Despite the old encoding will be deprecated in the future, it is possible to swi
 #### <a name="section2.3.4"></a>About supported versions of MongoDB
 This sink has been tested with the following versions of Mongo:
 
-* 3.2.6
 * 3.4
+* 3.6
+* 4.2
 
 [Top](#top)
 

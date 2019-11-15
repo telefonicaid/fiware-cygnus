@@ -17,24 +17,22 @@ any time.
 
 Disclaimer:
 
-* This section has been last updated in January 2019. Please take into account its 
+* This section has been last updated in June 2019. Please take into account its 
   content could be obsolete.
 * Note we develop this software in Agile way, so development plan is continuously 
   under review. Thus, this roadmap has to be understood as rough plan of features 
   to be done along time which is fully valid only at the time of writing it. This
   roadmap has not be understood as a commitment on features and/or dates.
 * Some of the roadmap items may be implemented by external community developers, 
-  out of the scope of GEi owners. Thus, the moment in which these features will be
+  out of the scope of GE owners. Thus, the moment in which these features will be
   finalized cannot be assured.
 
 ## Short term
 
 The following list of features are planned to be addressed in the short term,
-and incorporated in the next release of the product:
+and incorporated in a next release of the product in the short term:
 
--   Make this GEi compatible with [FIWARE GE requirements](https://docs.google.com/spreadsheets/d/13Pzhbq-xwd8gTCvYqeNkfaoDt-iGCedc1zlb_elxv2M/edit#gid=0)
--   NameMapping API and improvements
--   Upgrade component dependencies (including Flume)
+-   Make this GE compatible with [FIWARE GE requirements](https://docs.google.com/spreadsheets/d/13Pzhbq-xwd8gTCvYqeNkfaoDt-iGCedc1zlb_elxv2M/edit#gid=0)
 
 ## Medium term
 
@@ -43,8 +41,10 @@ typically within the subsequent release(s) generated in the next **9 months**
 after next planned release:
 
 -   NGSIv2 notification reception endpoint
--   New sink: ElasticSearch (community)
--   New sink: SlicingDice (community)
+-   Contribution to the FIWARE tutorials covering NameMapping API functionality
+-   Contribution to the FIWARE tutorials covering PostGIS
+-   Contribution to the FIWARE tutorials covering ElasticSearch (to be contributed by members of the Community beyond GE owners)
+-   New sink: SlicingDice (to be contributed by members of the Community beyond GE owners)
 
 ## Long term
 
@@ -53,5 +53,4 @@ of the product even though development of these features has not yet been
 scheduled for a release in the near future. Please feel free to contact us if
 you wish to get involved in the implementation or influence the roadmap
 
--   New sink: PostGIS
 -   Binary CB-Cygnus communication (maybe based in Avro). Need to be validated before.

@@ -99,6 +99,51 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Tue Oct 29 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.17.0
+- [cygnus-ngsi][NGSISink] Catch generic exception and rollback in transacation
+
+* Wed Sep 17 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.16.0
+- [cygnus-ngsi][doc] Add Install section in README.md (#1576)
+- [cygnus-ngsi] Enable JAVA_OPTS for Flume (#1704)
+- [cygnus-ngsi] Adjust build cygnus to use Java 1.8 (#1718)
+- [cygnus-ngsi][MySQL] Insert right SQL types values (Null), non stringify (#1661)
+- [cygnus-ngsi] Fix error response code from 501 to 404 in case of invalid API (#1630)
+- [cygnus-ngsi][ArcGis] Add ArcGis sink (#1672)
+- [cygnus-ngsi][Postgis, Cartodb] Fix double precision for coordinates
+- [cygnus-ngsi][Docker] Build Cygnus in Dockerhub raises OutOfMemory Java (#1709)
+- [cygnus-ngsi] Build Cygnus with all dependencies using standard RPM (#1716)
+- [cygnus-ngsi] Fix for Index Creation of Data Expiration (#1714)
+
+* Fri Jun 28 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.15.0
+- [cygnus-ngsi][ElasticSearchSink] Add ElasticSearch sink (#1516, #1521)
+- [cygnus-ngsi][PostGISSink, PostgreSQLSink] Insert right SQL types values, non stringify (#1661)
+- [cygnus-ngsi][MySQLSink] Fix datetime format used (#1646)
+- [cygnus-ngsi][PostGISSink] Fix geo location persistence bug in column mode
+- [cygnus-ngsi][MySQLSink,PostGISSink,PostgreSQLSink] Check values for Insert before insert
+- [cygnus-ngsi][*Sink] Change log level from DEBUG to WARN for configuration errors
+- [cygnus-ngsi][CKANSink, Docker] Fix docker entrypoint about namemapping
+- [cygnus-ngsi][Docker] Add datamodel option to postgresql and postgis sinks
+- [cygnus-ngsi][Docker] Add multisink mode with single config agent (non multiagent mode) (#1675)
+- [cygnus-ngsi][Docker] Add skip agent sinks conf generation env vars
+- [cygnus-ngsi][Docker] Add skip name mappings generation env vars
+
+* Tue Jun 04 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.14.0
+
+* Wed May 22 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.13.0
+- [cygnus-ngsi][MysqlSink] Adds support for dm-by-entity-type data model (#687)
+- [cygnus-ngsi][NGSIMongoSink][NGSISTHSink][NGSISink] Close flume transaction at exception (#1635)
+- [cygnus-ngsi][STHSink] Adds mongodb indexes management for STH collections (#1637)
+
+* Wed Apr 10 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.12.0
+- [cygnus-ngsi][NGSIHandler] Fix unexpected exception, instead 400 is returned when a non valid API request (#1588)
+- [cygnus-ngsi][PostGIS] Add PostGIS sink based on PostgreSQL backend (#1618)
+
+* Wed Apr 03 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.11.0
+- [cygnus-ngsi][Docker] Set default agent file names for "agent_"
+- [cygnus-ngsi][Docker] Set default truncate size to 0.5GB for sth collections
+- [cygnus-ngsi][KafkaSink] Upgrade libthrift dependency from 0.9.1 to 0.12.0 due to github vulnerability report
+- [cygnus-ngsi][NGSIRestHandler]Fix Content Type header validation issue (#1609)
+
 * Thu Dec 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.10.0
 - [cygnus-ngsi][NGSINameMappingsInterceptor] Now namemapping checks sevice, subervice and (type of entity and id entity) of EntityMapping (#1535)
 - [cygnus-ngsi][NGSIEvent] Unable to deliver event: null pointer getAttributeForNaming (#1506)

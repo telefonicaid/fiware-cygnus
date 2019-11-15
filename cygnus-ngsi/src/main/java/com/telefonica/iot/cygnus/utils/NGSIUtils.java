@@ -89,7 +89,7 @@ public final class NGSIUtils {
      * @param attrType
      * @param metadata
      * @param swapCoordinates
-     * @return The geometry value, ready for insertion in CartoDB, or the value as it is
+     * @return The geometry value, ready for insertion in CartoDB/PostGIS, or the value as it is
      */
     public static ImmutablePair<String, Boolean> getGeometry(String attrValue, String attrType, String metadata,
             boolean swapCoordinates) {
@@ -99,16 +99,25 @@ public final class NGSIUtils {
                 
             if (swapCoordinates) {
                 return new ImmutablePair(
-                        "ST_SetSRID(ST_MakePoint(" + split[1].trim() + "," + split[0].trim() + "), 4326)", true);
+                        "ST_SetSRID(ST_MakePoint(" + split[1].trim() + "::double precision , " + split[0].trim() + "::double precision ), 4326)", true);
             } else {
                 return new ImmutablePair(
-                        "ST_SetSRID(ST_MakePoint(" + split[0].trim() + "," + split[1].trim() + "), 4326)", true);
+                        "ST_SetSRID(ST_MakePoint(" + split[0].trim() + "::double precision , " + split[1].trim() + "::double precision ), 4326)", true);
             } // if else
         } // if
         
         if (attrType.equals("geo:json")) {
             return new ImmutablePair("ST_GeomFromGeoJSON('" + attrValue + "')", true);
         } // if
+
+        // TBD: What about:  ?
+          // 'geo:line'
+          // 'geo:box'
+          // 'geo:polygon'
+          // 'geo:multipoint'
+          // 'geo:multiline'
+          // 'geo:multipolygon'
+
         
         // The type was not 'geo:point' nor 'geo:json', thus try the metadata
         JSONParser parser = new JSONParser();
@@ -132,10 +141,10 @@ public final class NGSIUtils {
                 
                 if (swapCoordinates) {
                     return new ImmutablePair(
-                            "ST_SetSRID(ST_MakePoint(" + split[1].trim() + "," + split[0].trim() + "), 4326)", true);
+                            "ST_SetSRID(ST_MakePoint(" + split[1].trim() + "::double precision , " + split[0].trim() + "::double precision ), 4326)", true);
                 } else {
                     return new ImmutablePair(
-                            "ST_SetSRID(ST_MakePoint(" + split[0].trim() + "," + split[1].trim() + "), 4326)", true);
+                            "ST_SetSRID(ST_MakePoint(" + split[0].trim() + "::double precision , " + split[1].trim() + "::double precision ), 4326)", true);
                 } // if else
             } // if
         } // for

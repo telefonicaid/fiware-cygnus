@@ -11,3 +11,4 @@
 * [Orion backend](./orion_backend.md)
 * [PostgreSQL backend](./postgresql_backend.md)
 * [CartoDB backend](./cartodb_backend.md)
+* [Elasticsearch backend](./elasticsearch_backend.md)

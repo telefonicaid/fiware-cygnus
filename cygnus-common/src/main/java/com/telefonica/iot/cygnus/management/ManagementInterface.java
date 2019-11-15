@@ -136,8 +136,8 @@ public class ManagementInterface extends AbstractHandler {
                     } else if (uri.startsWith("/v1/namemappings")) {
                         NameMappingsHandlers.get(request, response, nameMappingsConfFile);
                     } else {
-                        response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                        response.getWriter().println(method + " " + uri + " not implemented");
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        response.getWriter().println(method + " " + uri + " not found");
                     } // if else
                     
                     break;
@@ -161,8 +161,8 @@ public class ManagementInterface extends AbstractHandler {
                     } else if (uri.startsWith("/v1/namemappings")) {
                         NameMappingsHandlers.post(request, response, nameMappingsConfFile);
                     } else {
-                        response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                        response.getWriter().println(method + " " + uri + " not implemented");
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        response.getWriter().println(method + " " + uri + " not found");
                     } // if else
                     
                     break;
@@ -186,8 +186,8 @@ public class ManagementInterface extends AbstractHandler {
                     } else if (uri.startsWith("/v1/admin/log/appenders")) {
                         LogHandlers.putAppenders(request, response, configurationPath);
                     } else {
-                        response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                        response.getWriter().println(method + " " + uri + " not implemented");
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        response.getWriter().println(method + " " + uri + " not found");
                     } // if else
                     
                     break;
@@ -213,14 +213,14 @@ public class ManagementInterface extends AbstractHandler {
                     } else if (uri.startsWith("/v1/namemappings")) {
                         NameMappingsHandlers.delete(request, response, nameMappingsConfFile);
                     } else {
-                        response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                        response.getWriter().println(method + " " + uri + " not implemented");
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        response.getWriter().println(method + " " + uri + " not found");
                     } // if else
                     
                     break;
                 default:
-                    response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                    response.getWriter().println(method + " " + uri + " not implemented");
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.getWriter().println(method + " " + uri + " not found");
                     break; // if else
             }
         } else if (port == guiPort) {
@@ -232,12 +232,12 @@ public class ManagementInterface extends AbstractHandler {
                 } else if (uri.equals("/stats")) { // this is order to avoid CORS access control
                     StatsHandlers.get(response, sources, channels, sinks);
                 } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                    response.getWriter().println(method + " " + uri + " not implemented");
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.getWriter().println(method + " " + uri + " not found");
                 } // if else
             } else {
-                response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-                response.getWriter().println(method + " " + uri + " not implemented");
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.getWriter().println(method + " " + uri + " not found");
             } // if else
         } else {
             LOGGER.info("Attending a request in a non expected port: " + port);

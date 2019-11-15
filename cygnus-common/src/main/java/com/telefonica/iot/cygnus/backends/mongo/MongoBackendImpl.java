@@ -17,11 +17,7 @@
  */
 package com.telefonica.iot.cygnus.backends.mongo;
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
+import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
@@ -99,30 +95,45 @@ public class MongoBackendImpl implements MongoBackend {
      * @throws Exception
      */
     @Override
-    public void createCollection(String dbName, String collectionName, long dataExpiration) throws Exception {
+    public void createCollection(String dbName, String collectionName, long dataExpiration) throws MongoException {
         LOGGER.debug("Creating Mongo collection=" + collectionName + " at database=" + dbName);
         MongoDatabase db = getDatabase(dbName);
 
         // create the collection
         try {
             db.createCollection(collectionName);
-        } catch (Exception e) {
-            if (e.getMessage().contains("\"code\" : 48")) {
+        } catch (MongoException e) {
+            ErrorCategory errorCategory = ErrorCategory.fromErrorCode( e.getCode() );
+            if (errorCategory == ErrorCategory.fromErrorCode(48)){
                 LOGGER.debug("Collection already exists, nothing to create");
             } else {
                 throw e;
             } // if else
         } // try catch
 
-        // ensure the _id.origin index, if possible
+        // check STH indexes documentation at https://github.com/telefonicaid/fiware-sth-comet/blob/master/doc/manuals/db_indexes.md
+        BasicDBObject keys;
+        IndexOptions options;
+        try {
+            keys = new BasicDBObject()
+                .append("_id.entityId", 1)
+                .append("_id.entityType", 1)
+                .append("_id.attrName", 1)
+                .append("_id.resolution", 1)
+                .append("_id.origin", 1);
+            options = new IndexOptions().name("cyg_agg_opt");
+            db.getCollection(collectionName).createIndex(keys, options);
+        } catch (Exception e) {
+            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
+        } // try catch
         try {
             if (dataExpiration != 0) {
-                BasicDBObject keys = new BasicDBObject().append("_id.origin", 1);
-                IndexOptions options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
+                keys = new BasicDBObject().append("_id.origin", 1);
+                options = new IndexOptions().name("cyg_agg_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
                 db.getCollection(collectionName).createIndex(keys, options);
             } // if
         } catch (Exception e) {
-            throw e;
+            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
         } // try catch
     } // createCollection
 
@@ -137,7 +148,7 @@ public class MongoBackendImpl implements MongoBackend {
      */
     @Override
     public void createCollection(String dbName, String collectionName, long collectionsSize, long maxDocuments,
-            long dataExpiration) throws Exception {
+            long dataExpiration) throws MongoException {
         MongoDatabase db = getDatabase(dbName);
 
         // create the collection, with size-based limits if possible
@@ -154,23 +165,37 @@ public class MongoBackendImpl implements MongoBackend {
                 LOGGER.debug("Creating Mongo collection=" + collectionName + " at database=" + dbName);
                 db.createCollection(collectionName);
             } // if else
-        } catch (Exception e) {
-            if (e.getMessage().contains("\"code\" : 48")) {
+        } catch (MongoException e) {
+            ErrorCategory errorCategory = ErrorCategory.fromErrorCode( e.getCode() );
+            if (errorCategory == ErrorCategory.fromErrorCode(48)){
                 LOGGER.debug("Collection already exists, nothing to create");
             } else {
                 throw e;
             } // if else
         } // try catch
 
-        // ensure the recvTime index, if possible
+        // check STH indexes documentation at https://github.com/telefonicaid/fiware-sth-comet/blob/master/doc/manuals/db_indexes.md
+        BasicDBObject keys;
+        IndexOptions options;
+        try {
+            keys = new BasicDBObject()
+                .append("entityId", 1)
+                .append("entityType", 1)
+                .append("attrName", 1)
+                .append("recvTime", 1);
+            options = new IndexOptions().name("cyg_raw_opt");
+            db.getCollection(collectionName).createIndex(keys, options);
+        } catch (Exception e) {
+            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
+        } // try catch
         try {
             if (dataExpiration != 0) {
-                BasicDBObject keys = new BasicDBObject().append("recvTime", 1);
-                IndexOptions options = new IndexOptions().expireAfter(dataExpiration, TimeUnit.SECONDS);
+                keys = new BasicDBObject().append("recvTime", 1);
+                options = new IndexOptions().name("cyg_raw_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
                 db.getCollection(collectionName).createIndex(keys, options);
             } // if
         } catch (Exception e) {
-            throw e;
+            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
         } // try catch
     } // createCollection
 

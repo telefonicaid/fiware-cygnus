@@ -1,4 +1,4 @@
-# <a name="top"></a>Management interface
+# <a name="top"></a>Management interface: v1.0 API (Beta)
 Content:
 
 * [Apiary version of this document](#section1)
@@ -47,8 +47,12 @@ Content:
     * [PUT `/v1/namemappings`](#section9.3)
     * [DELETE `/v1/namemappings`](#section9.4)
 
+
+
 ## <a name="section1"></a>Apiary version of this document
 This API specification can be checked at [Apiary](https://telefonicaid.github.io/fiware-cygnus/api/latest) as well.
+
+See also [Original API](./management_interface.md)
 
 [Top](#top)
 

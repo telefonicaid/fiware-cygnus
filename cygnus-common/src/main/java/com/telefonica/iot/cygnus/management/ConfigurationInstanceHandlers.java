@@ -206,7 +206,7 @@ public final class ConfigurationInstanceHandlers {
      * @throws IOException
      */
     public static void put(HttpServletRequest request, HttpServletResponse response, boolean v1) throws IOException {
-        response.setContentType("json;charset=utf-8");
+        response.setContentType("application/json; charset=utf-8");
         
         String param = request.getParameter("param");
         String newValue = request.getParameter("value");

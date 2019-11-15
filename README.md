@@ -25,6 +25,7 @@ check the FIWARE Catalogue entry for the
 ## Contents
 
 -   [Background](#background)
+-   [Install](#install)
 -   [Roadmap](#roadmap)
 -   [Further Documentation](#further-documentation)
 -   [License](#license)
@@ -42,11 +43,15 @@ Current stable release is able to persist the following sources of data in the f
     * [MySQL](https://www.mysql.com/), the well-known relational database manager.
     * [CKAN](http://ckan.org/), an Open Data platform.
     * [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
-    * [STH Comet](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
+    * [STH Comet](https://github.com/telefonicaid/fiware-sth-comet), a Short-Term Historic database built on top of MongoDB.
     * [Kafka](http://kafka.apache.org/), the publish-subscribe messaging broker.
     * [DynamoDB](https://aws.amazon.com/dynamodb/), a cloud-based NoSQL database by [Amazon Web Services](https://aws.amazon.com/).
     * [PostgreSQL](http://www.postgresql.org/), the well-known relational database manager.
     * [Carto](https://carto.com/), the database specialized in geolocated data.
+    * [PostGIS](http://postgis.net/), a spatial database extender for PostgreSQL object-relational database.
+    * [Orion](https://github.com/telefonicaid/fiware-orion), the FIWARE Context Broker.
+    * [Elasticsearch](https://www.elastic.co/products/elasticsearch), the distributed full-text search engine with JSON documents.
+    * [Arcgis](https://www.arcgis.com/home/index.html), the Arcgis is a geographic information system (GIS).
 * Twitter data in:
     * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
 
@@ -60,6 +65,22 @@ Cygnus (more specifically, cygnus-ngsi agent) plays the role of a connector betw
 
 ![FIWARE architecture](doc/images/fiware_architecture.png)
 
+## Install
+Fiware/Cygnus has three sub-modules [cygnus-common](cygnus-common#welcome-to-cygnus-common), [cygnus-ngsi](cygnus-ngsi#welcome-to-cygnus-ngsi) and [cygnus-twitter](cygnus-twitter#welcome-to-cygnus-twitter). Information about how to install these modules can be found at the corresponding section of Installation.
+
+Following are the links of install section of Fiware/Cygnus sub-modules:
+* cygnus-common:
+  - [Install from sources](doc/cygnus-common/installation_and_administration_guide/install_from_sources.md)
+  - [Install with docker](doc/cygnus-common/installation_and_administration_guide/install_with_docker.md)
+  - [Install with rpm](doc/cygnus-common/installation_and_administration_guide/install_with_rpm.md)
+* cygnus-ngsi:
+  - [Install from sources](doc/cygnus-ngsi/installation_and_administration_guide/install_from_sources.md)
+  - [Install with docker](doc/cygnus-ngsi/installation_and_administration_guide/install_with_docker.md)
+  - [Install with rpm](doc/cygnus-ngsi/installation_and_administration_guide/install_with_rpm.md)
+* cygnus-twitter:
+  - [Install from sources](doc/cygnus-twitter/installation_and_administration_guide/install_from_sources.md)
+  - [Install with docker](doc/cygnus-twitter/installation_and_administration_guide/install_with_docker.md)
+  
 ## Roadmap
 
 The roadmap of this FIWARE GE is described [here](doc/roadmap.md).
@@ -83,7 +104,7 @@ Any doubt you may have, please refer to the [Cygnus Core Team](./reporting_issue
 
 ---
 
-## Licence
+## License
 
 Cygnus is licensed under Affero General Public License (GPL)
 version 3. You can find a [copy of this license in the repository](./LICENSE).

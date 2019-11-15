@@ -171,6 +171,39 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Tue Oct 29 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.17.0
+- [cygnus-common][HDFSSink] Check attribute value before use it
+- [cygnus-common][PostgreSQL][MySQL] catch exception close invalid connection
+- [cygnus-common] Upgrade MongoDB driver from 3.0.4 to 3.11.0
+- [cygnus-common] Fix for index name creation in Mongo and STH Sinks (#1714)
+
+* Wed Sep 17 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.16.0
+- [cygnus-common][doc] Add Install section in README.md (#1576)
+- [cygnus-common] Enable JAVA_OPTS for Flume (#1704)
+- [cygnus-common] Adjust build cygnus to use Java 1.8 (#1718)
+
+* Fri Jun 28 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.15.0
+
+* Tue Jun 04 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.14.0
+- [cygnus-common][MongoDB] Warn about index creation error instead of throw exception and abort create collection (#1649)
+
+* Wed May 22 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.13.0
+- [cygnus-common][NMI] Allows th Original values to be omitted in the configuration file (#1466)
+
+* Wed Apr 10 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.12.0
+- [cygnus-common][PostgreSQL] Add connection pool
+- [cygnus-common][YAFS][bugfix] Fixed issue, missmatching Jetty threads causes Cygnus crash (#1616)
+- [cygnus-common][YAFS] Fixed issue, stopping Cygnus after config reloading (#1624)
+
+* Wed Apr 03 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.11.0
+- [cygnus-common] Upgrade flume-ng-node version from 1.4.0 to 1.9.0
+- [cygnus-common][mongo] Upgrade mongo driver from 3.0.0 to 3.0.4
+- [cygnus-common][mysql] Upgrade mysql connector from 5.1.31 to 5.1.47
+- [cygnus-common][feature] Add /v1/namemappings route to API (#1277)
+- [cygnus-common][MySQLBackend] Implement connection pooling (#1598, #1597)
+- [cygnus-common][bugfix] Support empty files in mamemappings
+- [cygnus-common][bugfix] Support empty servicenames in mamemappings
+
 * Thu Dec 13 2018 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.10.0
 - [cygnus-common] Update hive dependence from 0.13.1 to 2.3.4 due to a vulnerability alert
 - [cygnus-common] Update httpclient dependence to 4.3.6 due to a vulnerability
