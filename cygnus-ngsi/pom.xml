@@ -20,6 +20,10 @@
             <id>arcgis</id>
             <url>https://esri.bintray.com/arcgis</url>
         </repository>
+        <repository>
+            <id>mvnrepository</id>
+            <url>https://repo1.maven.org/maven2</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -54,6 +58,7 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>2.11.2</version>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

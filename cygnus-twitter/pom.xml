@@ -15,6 +15,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>mvnrepository</id>
+            <url>https://repo1.maven.org/maven2</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- Required for testing -->
         <dependency>
@@ -40,6 +47,7 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>2.11.2</version>
+            <type>pom</type>
         </dependency>
         <!-- Required by any agent -->
         <dependency>
