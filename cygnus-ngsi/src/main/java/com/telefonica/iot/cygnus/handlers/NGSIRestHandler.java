@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequestNGSIv2;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -321,6 +322,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         // Parse the original data into a NotifyContextRequest object
         NotifyContextRequest ncr = null;
+        NotifyContextRequestNGSIv2 notifyContextRequestNGSIv2 = null;
         Gson gson = new Gson();
 
         try {
@@ -331,7 +333,9 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                         LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest on legacy NGSI: " + ncr.toString());
                         break;
                     case "normalized":
-                        LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest on normalized NGSIv2: ");
+                        notifyContextRequestNGSIv2 = gson.fromJson(data, NotifyContextRequestNGSIv2.class);
+                        ncr = notifyContextRequestNGSIv2.toNotifyContextRequest();
+                        LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest on normalized NGSIv2: " + notifyContextRequestNGSIv2.toString());
                         break;
                     default:
                         LOGGER.warn("Unknown value: " + ngsiVersion + " for NGSI format");
@@ -382,7 +386,9 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transId);
             LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
                     + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + ": " + transId + ")");
-            
+            headers.put(CommonConstants.HEADER_NGSI_VERSION, ngsiVersion);
+            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
+                    + CommonConstants.HEADER_NGSI_VERSION + ": " + ngsiVersion+ ")");
             // Create the NGSI event and add it to the list
             NGSIEvent ngsiEvent = new NGSIEvent(
                     // Headers
