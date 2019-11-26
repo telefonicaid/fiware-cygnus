@@ -19,6 +19,7 @@
 package com.telefonica.iot.cygnus.handlers;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
@@ -34,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import com.telefonica.iot.cygnus.utils.NotifyContextRequestNGSIv2Deserializer;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.source.http.HTTPBadRequestException;
@@ -333,14 +336,14 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                         LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest on legacy NGSI: " + ncr.toString());
                         break;
                     case "normalized":
+                        gson = new GsonBuilder().registerTypeAdapter(NotifyContextRequestNGSIv2.class, new NotifyContextRequestNGSIv2Deserializer()).create();
                         notifyContextRequestNGSIv2 = gson.fromJson(data, NotifyContextRequestNGSIv2.class);
                         ncr = notifyContextRequestNGSIv2.toNotifyContextRequest();
-                        LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest on normalized NGSIv2: " + notifyContextRequestNGSIv2.toString());
+                        LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest on normalized NGSIv2: " + ncr.toString());
                         break;
                     default:
                         LOGGER.warn("Unknown value: " + ngsiVersion + " for NGSI format");
-                        throw new HTTPBadRequestException(ngsiVersion
-                                + " format not supported");
+                        throw new HTTPBadRequestException(ngsiVersion + " format not supported");
                 }
             } else {
                 ncr = gson.fromJson(data, NotifyContextRequest.class);

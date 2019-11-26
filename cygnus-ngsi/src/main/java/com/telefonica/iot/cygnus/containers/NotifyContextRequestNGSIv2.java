@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class NotifyContextRequestNGSIv2 {
 
@@ -31,7 +30,7 @@ public class NotifyContextRequestNGSIv2 {
     public NotifyContextRequest toNotifyContextRequest() {
         NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
         notifyContextRequest.setSubscriptionId(this.subscriptionId);
-        ArrayList<NotifyContextRequest.ContextElementResponse> contextElementResponses = null;
+        ArrayList<NotifyContextRequest.ContextElementResponse> contextElementResponses = new ArrayList<NotifyContextRequest.ContextElementResponse>();
         for (Data dataElement : data) {
             NotifyContextRequest.ContextElementResponse contextElementResponse = new NotifyContextRequest.ContextElementResponse();
             contextElementResponse.setContextElement(dataElement.dataToContextElement());
@@ -41,11 +40,11 @@ public class NotifyContextRequestNGSIv2 {
         return notifyContextRequest;
     }
 
-    public class Data {
+    public static class Data {
 
         private String id;
         private String type;
-        private TreeMap<String, Attribute> attributes;
+        private Map<String, Attribute> attributes;
 
         public String getId() {
             return id;
@@ -67,7 +66,7 @@ public class NotifyContextRequestNGSIv2 {
             return attributes;
         }
 
-        public void setAtributes(TreeMap<String, Attribute> atributes) {
+        public void setAtributes(Map<String, Attribute> atributes) {
             this.attributes = atributes;
         }
 
@@ -75,15 +74,16 @@ public class NotifyContextRequestNGSIv2 {
             NotifyContextRequest.ContextElement contextElement = new NotifyContextRequest.ContextElement();
             contextElement.setId(this.id);
             contextElement.setType(this.type);
-            ArrayList<NotifyContextRequest.ContextAttribute> attributes = null;
+            ArrayList<NotifyContextRequest.ContextAttribute> attributes = new ArrayList<NotifyContextRequest.ContextAttribute>();
             for(Map.Entry<String, Attribute> map : this.attributes.entrySet()) {
                 attributes.add(map.getValue().attributeToContextAttribute(map.getKey()));
             }
+            contextElement.setAttributes(attributes);
                 return contextElement;
         }
     }
 
-    public class Attribute {
+    public static class Attribute {
         private JsonElement value;
         private String type;
         private Map<String, Metadata> metadata;
@@ -108,7 +108,7 @@ public class NotifyContextRequestNGSIv2 {
             return metadata;
         }
 
-        public void setMetadata(TreeMap<String, Metadata> metadata) {
+        public void setMetadata(Map<String, Metadata> metadata) {
             this.metadata = metadata;
         }
 
@@ -117,15 +117,16 @@ public class NotifyContextRequestNGSIv2 {
             contextAttribute.setName(name);
             contextAttribute.setType(this.type);
             contextAttribute.setContextValue(this.value);
-            ArrayList<NotifyContextRequest.ContextMetadata> metadatas = null;
+            ArrayList<NotifyContextRequest.ContextMetadata> metadatas = new ArrayList<NotifyContextRequest.ContextMetadata>();
             for(Map.Entry<String, Metadata> map : this.metadata.entrySet()) {
                 metadatas.add(map.getValue().metadataToContextMetadata(map.getKey()));
             }
+            contextAttribute.setContextMetadata(metadatas);
             return contextAttribute;
         }
     }
 
-    public class Metadata {
+    public static class Metadata {
 
         private JsonElement value;
         private String type;
