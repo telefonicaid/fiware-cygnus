@@ -163,6 +163,8 @@ $ ./notification-json-simple.sh http://localhost:5050/notify myservice myservice
 
 Or you can connect a real NGSI source such as [Orion Context Broker](https://github.com/telefonicaid/fiware-orion). Please, check the [User and Programmer Guide](../doc/cygnus-ngsi/user_and_programmer_guide/connecting_orion.md) for further details.
 
+Support for NGSIv2 notifications it's added from version above 1.17.0. For this pourpose it's been added a new dir [/NGSIv2](./resources/ngsi-examples/NGSIv2) wich contans script files in order to emulate som NGSIv2 notification types. 
+
 [Top](#top)
 
 ### <a name="section2.7"></a>Management API overview
