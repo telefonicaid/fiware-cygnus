@@ -29,7 +29,6 @@ ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
 ENV CYGNUS_LOG_LEVEL "INFO"
 ENV CYGNUS_LOG_APPENDER "console"
-ENV CYGNUS_SERVICE_PORT "5050"
 ENV CYGNUS_JAVA_OPTS "-Xms2048m -Xmx4096m"
 ENV CYGNUS_API_PORT "5080"
 ENV CYGNUS_MULTIAGENT false
@@ -341,6 +340,4 @@ COPY cartodb_keys.conf ${FLUME_HOME}/conf/
 # Define the entry point
 ENTRYPOINT ["/cygnus-entrypoint.sh"]
 
-# Ports used by cygnus-ngsi
-EXPOSE ${CYGNUS_SERVICE_PORT} ${CYGNUS_API_PORT}
 
