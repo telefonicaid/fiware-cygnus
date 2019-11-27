@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * The type Notify context request ngs iv 2.
+ * The type Notify context request NGSIv2.
  */
 public class NotifyContextRequestNGSIv2 {
 
