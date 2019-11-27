@@ -160,7 +160,7 @@ As seen above, the default configuration distributed with the image is tied to c
 
 * Multiagent:
     * Enable multiagent cygnus: CYGNUS_MULTIAGENT environment variable. If enabled, each sink will have a different configuration file and will be executed by a different cygnus agent (java process). If disabled, all sinks are configured in the same agent configuration file and are executed by the same agent (java procss).
-    In both cases, multiagent or not, each cygnus sinks will always run in a diferent port (multisink):
+    In both cases, multiagent or not, each cygnus sink will always run in a diferent port (multisink):
 
 | sink   | port   | admin_port |
 |--:|--:|--:|
