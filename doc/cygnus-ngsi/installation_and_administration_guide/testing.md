@@ -330,6 +330,6 @@ You will see the server (Cygnus) is sending back a `200 OK` response.
 
 Of course, this is just a e2e test. For real e2e integration with a real NGSI-like source, such as [Orion Context Broker](https://github.com/telefonicaid/fiware-orion), please refer to the [User and Programmer Guide](../user_and_programmer_guide/connecting_orion.md).
 
-Support for NGSIv2 notifications it's added from version above 1.17.0. For this pourpose it's been added a new dir [/NGSIv2](../../../cygnus-ngsi/resources/ngsi-examples/NGSIv2) wich contans script files in order to emulate som NGSIv2 notification types. 
+Support for NGSIv2 notifications has been added from version above 1.17.1. For this purpose, it's been added a new dir [/NGSIv2](./resources/ngsi-examples/NGSIv2) which contains script files in order to emulate some NGSIv2 notification types. 
 
 [Top](#top)

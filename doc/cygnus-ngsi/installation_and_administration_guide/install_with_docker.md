@@ -150,7 +150,7 @@ $ docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 ```
 
-Support for NGSIv2 notifications it's added from version above 1.17.0. For this pourpose it's been added a new dir [/NGSIv2](cygnus-ngsi/resources/ngsi-examples/NGSIv2) wich contans script files in order to emulate som NGSIv2 notification types. 
+Support for NGSIv2 notifications has been added from version above 1.17.1. For this purpose, it's been added a new dir [/NGSIv2](./resources/ngsi-examples/NGSIv2) which contains script files in order to emulate some NGSIv2 notification types. 
 
 [Top](#top)
 
