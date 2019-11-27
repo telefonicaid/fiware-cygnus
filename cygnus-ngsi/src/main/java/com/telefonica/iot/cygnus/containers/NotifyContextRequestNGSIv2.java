@@ -31,7 +31,7 @@ public class NotifyContextRequestNGSIv2 {
     private ArrayList <Data> data;
 
     /**
-     * Gets subscription id.
+     * Gets subscription id from NGSIv2 Object.
      *
      * @return the subscription id
      */
@@ -40,7 +40,7 @@ public class NotifyContextRequestNGSIv2 {
     }
 
     /**
-     * Sets subscription id.
+     * Sets subscription id for NGSIv2 Object.
      *
      * @param subscriptionId the subscription id
      */
@@ -49,7 +49,7 @@ public class NotifyContextRequestNGSIv2 {
     }
 
     /**
-     * Gets data.
+     * Gets data object from NGSIv2 Object.
      *
      * @return the data
      */
@@ -58,7 +58,7 @@ public class NotifyContextRequestNGSIv2 {
     }
 
     /**
-     * Sets data.
+     * Sets data object for NGSIv2 Object.
      *
      * @param data the data
      */
@@ -68,10 +68,10 @@ public class NotifyContextRequestNGSIv2 {
 
 
     /**
-     * To notify context request notify context request.
-     * This casts NotifyContextRequestNGSIv2 to NotifyContextRequest
+     * notifycontextrequestNGSIv2 object to notifycontextrequest object.
+     * This function casts NotifyContextRequestNGSIv2 object to NotifyContextRequest object
      *
-     * @return the notify context request
+     * @return the notifycontextrequest
      */
     public NotifyContextRequest toNotifyContextRequest() {
         NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
@@ -87,7 +87,7 @@ public class NotifyContextRequestNGSIv2 {
     }
 
     /**
-     * The type Data.
+     * Class that contains data objects from NGSIv2 object
      */
     public static class Data {
 
@@ -96,7 +96,7 @@ public class NotifyContextRequestNGSIv2 {
         private Map<String, Attribute> attributes;
 
         /**
-         * Gets id.
+         * Gets id from NGSIv2.Data object.
          *
          * @return the id
          */
@@ -105,7 +105,7 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Sets id.
+         * Sets id for NGSIv2.Data object.
          *
          * @param id the id
          */
@@ -114,7 +114,7 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Gets type.
+         * Gets type from NGSIv2.Data object.
          *
          * @return the type
          */
@@ -123,7 +123,7 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Sets type.
+         * Sets type for NGSIv2.Data object.
          *
          * @param type the type
          */
@@ -132,7 +132,7 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Gets atributes.
+         * Gets atributes from NGSIv2.Data object.
          *
          * @return the atributes
          */
@@ -141,7 +141,7 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Sets atributes.
+         * Sets atributes for NGSIv2.Data object.
          *
          * @param atributes the atributes
          */
@@ -150,9 +150,10 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Data to context element notify context request . context element.
+         * dataToContextElement Data object to NotifyContextRequest.ContextElement object.
+         * This function casts NotifyContextRequestNGSIv2.Data object to NotifyContextRequest.ContextElement object
          *
-         * @return the notify context request . context element
+         * @return the NotifyContextRequest.ContextElement object
          */
         public NotifyContextRequest.ContextElement dataToContextElement () {
             NotifyContextRequest.ContextElement contextElement = new NotifyContextRequest.ContextElement();
@@ -168,7 +169,7 @@ public class NotifyContextRequestNGSIv2 {
     }
 
     /**
-     * The type Attribute.
+     * Class that contains attribute objects from NGSIv2.Data object
      */
     public static class Attribute {
         private JsonElement value;
@@ -176,7 +177,7 @@ public class NotifyContextRequestNGSIv2 {
         private Map<String, Metadata> metadata;
 
         /**
-         * Gets value.
+         * Gets value from NGSIv2.Attribute object.
          *
          * @return the value
          */
@@ -185,7 +186,7 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Sets value.
+         * Sets value for data NGSIv2.Attribute object.
          *
          * @param value the value
          */
@@ -194,7 +195,7 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Gets type.
+         * Gets type from NGSIv2.Attribute object.
          *
          * @return the type
          */
@@ -203,7 +204,7 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Sets type.
+         * Sets type for NGSIv2.Attribute object.
          *
          * @param type the type
          */
@@ -212,7 +213,7 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Gets metadata.
+         * Gets metadata from NGSIv2.Attribute object.
          *
          * @return the metadata
          */
@@ -221,7 +222,7 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Sets metadata.
+         * Sets metadata for NGSIv2.Attribute object.
          *
          * @param metadata the metadata
          */
@@ -230,10 +231,11 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Attribute to context attribute notify context request . context attribute.
+         * dataToContextAttribute Attribute object to NotifyContextRequest.ContextAttribute object.
+         * This function casts NotifyContextRequestNGSIv2.Attribute object to NotifyContextRequest.ContextAttribute object
          *
-         * @param name the name
-         * @return the notify context request . context attribute
+         * @param name the name of the attribute
+         * @return the NotifyContextRequest.ContextAttribute object
          */
         public NotifyContextRequest.ContextAttribute attributeToContextAttribute (String name) {
             NotifyContextRequest.ContextAttribute contextAttribute = new NotifyContextRequest.ContextAttribute();
@@ -250,7 +252,7 @@ public class NotifyContextRequestNGSIv2 {
     }
 
     /**
-     * The type Metadata.
+     * Class that contains metadata objects from NGSIv2.Attribute object
      */
     public static class Metadata {
 
@@ -258,7 +260,7 @@ public class NotifyContextRequestNGSIv2 {
         private String type;
 
         /**
-         * Gets value.
+         * Gets value from NGSIv2.Metadata object.
          *
          * @return the value
          */
@@ -267,7 +269,7 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Sets value.
+         * Sets value for NGSIv2.Metadata object.
          *
          * @param value the value
          */
@@ -276,7 +278,7 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Gets type.
+         * Gets type from NGSIv2.Metadata object.
          *
          * @return the type
          */
@@ -285,7 +287,7 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Sets type.
+         * Sets type for NGSIv2.Metadata object.
          *
          * @param type the type
          */
@@ -294,10 +296,11 @@ public class NotifyContextRequestNGSIv2 {
         }
 
         /**
-         * Metadata to context metadata notify context request . context metadata.
+         * dataToContextMetadata Metadata object to NotifyContextRequest.ContextMetadata object.
+         * This function casts NotifyContextRequestNGSIv2.Metadata object to NotifyContextRequest.ContextMetadata object
          *
-         * @param name the name
-         * @return the notify context request . context metadata
+         * @param name the name of the metadata
+         * @return the NotifyContextRequest.ContextMetadata object.
          */
         public NotifyContextRequest.ContextMetadata metadataToContextMetadata (String name) {
             NotifyContextRequest.ContextMetadata contextMetadata = new NotifyContextRequest.ContextMetadata();
