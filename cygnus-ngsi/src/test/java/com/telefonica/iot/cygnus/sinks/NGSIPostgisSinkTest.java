@@ -1021,18 +1021,18 @@ public class NGSIPostgisSinkTest {
 
     private ContextElement createContextElement() {
         NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
-        ContextMetadata contextMetadata = notifyContextRequest.new ContextMetadata();
+        ContextMetadata contextMetadata = new ContextMetadata();
         contextMetadata.setName("location");
         contextMetadata.setType("string");
         contextMetadata.setContextMetadata(new JsonPrimitive("WGS84"));
         ArrayList<ContextMetadata> metadata = new ArrayList<>();
         metadata.add(contextMetadata);
-        ContextAttribute contextAttribute1 = notifyContextRequest.new ContextAttribute();
+        ContextAttribute contextAttribute1 = new ContextAttribute();
         contextAttribute1.setName("someName1");
         contextAttribute1.setType("someType1");
         contextAttribute1.setContextValue(new JsonPrimitive("-3.7167, 40.3833"));
         contextAttribute1.setContextMetadata(metadata);
-        ContextAttribute contextAttribute2 = notifyContextRequest.new ContextAttribute();
+        ContextAttribute contextAttribute2 = new ContextAttribute();
         contextAttribute2.setName("someName2");
         contextAttribute2.setType("someType2");
         contextAttribute2.setContextValue(new JsonPrimitive("someValue2"));
@@ -1040,7 +1040,7 @@ public class NGSIPostgisSinkTest {
         ArrayList<ContextAttribute> attributes = new ArrayList<>();
         attributes.add(contextAttribute1);
         attributes.add(contextAttribute2);
-        ContextElement contextElement = notifyContextRequest.new ContextElement();
+        ContextElement contextElement = new ContextElement();
         contextElement.setId("someId");
         contextElement.setType("someType");
         contextElement.setIsPattern("false");

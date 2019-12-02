@@ -112,7 +112,7 @@ public class NotifyContextRequest {
     /**
      * Class for storing contextElementResponse information from a notifyContextRequest.
      */
-    public class ContextElementResponse {
+    public static class ContextElementResponse {
         
         private ContextElement contextElement;
         private StatusCode statusCode;
@@ -163,7 +163,7 @@ public class NotifyContextRequest {
     /**
      * Class for storing contextElement information from a notifyContextRequest.
      */
-    public class ContextElement {
+    public static class ContextElement {
         
         private ArrayList<ContextAttribute> attributes;
         private String type;
@@ -295,7 +295,7 @@ public class NotifyContextRequest {
     /**
      * Class for storing contextAttribute information from a notifyContextRequest.
      */
-    public class ContextAttribute {
+    public static class ContextAttribute {
     
         private String name;
         private String type;
@@ -445,7 +445,7 @@ public class NotifyContextRequest {
     /**
      * Class for storing contextMetadata information from a contestAttribute.
      */
-    public class ContextMetadata {
+    public static class ContextMetadata {
         
         private String name;
         private String type;
@@ -513,7 +513,7 @@ public class NotifyContextRequest {
     /**
      * Class for storing statusCode information from a notifyContextRequest.
      */
-    public class StatusCode {
+    public static class StatusCode {
         
         private String code;
         private String reasonPhrase;
