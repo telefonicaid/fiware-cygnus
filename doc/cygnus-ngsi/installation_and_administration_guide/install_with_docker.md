@@ -150,6 +150,8 @@ $ docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 ```
 
+Support for NGSIv2 notifications has been added from version above 1.17.1. For this purpose, it's been added a new dir [/NGSIv2](./resources/ngsi-examples/NGSIv2) which contains script files in order to emulate some NGSIv2 notification types. 
+
 [Top](#top)
 
 ### <a name="section3.2"></a>Using a specific configuration
@@ -160,7 +162,7 @@ As seen above, the default configuration distributed with the image is tied to c
 
 * Multiagent:
     * Enable multiagent cygnus: CYGNUS_MULTIAGENT environment variable. If enabled, each sink will have a different configuration file and will be executed by a different cygnus agent (java process). If disabled, all sinks are configured in the same agent configuration file and are executed by the same agent (java procss).
-    In both cases, multiagent or not, each cygnus sinks will run in a diferent port:
+    In both cases, multiagent or not, each cygnus sink will always run in a diferent port (multisink):
 
 | sink   | port   | admin_port |
 |--:|--:|--:|

@@ -19,9 +19,11 @@
 package com.telefonica.iot.cygnus.handlers;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequestNGSIv2;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -33,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import com.telefonica.iot.cygnus.utils.NotifyContextRequestNGSIv2Deserializer;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.source.http.HTTPBadRequestException;
@@ -178,6 +182,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         String contentType = null;
         String service = defaultService;
         String servicePath = defaultServicePath;
+        String ngsiVersion = null;
         
         while (headerNames.hasMoreElements()) {
             String headerName = ((String) headerNames.nextElement()).toLowerCase(Locale.ENGLISH);
@@ -238,6 +243,9 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                     
                     servicePath = headerValue;
                     
+                    break;
+                case CommonConstants.HEADER_NGSI_VERSION:
+                    ngsiVersion = headerValue;
                     break;
                 default:
                     LOGGER.debug("[NGSIRestHandler] Unnecessary header");
@@ -316,12 +324,31 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         LOGGER.info("[NGSIRestHandler] Received data (" + data + ")");
         
         // Parse the original data into a NotifyContextRequest object
-        NotifyContextRequest ncr;
+        NotifyContextRequest ncr = null;
+        NotifyContextRequestNGSIv2 notifyContextRequestNGSIv2 = null;
         Gson gson = new Gson();
 
         try {
-            ncr = gson.fromJson(data, NotifyContextRequest.class);
-            LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest: " + ncr.toString());
+            if (ngsiVersion != null) {
+                switch (ngsiVersion) {
+                    case "legacy":
+                        ncr = gson.fromJson(data, NotifyContextRequest.class);
+                        LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest on legacy NGSI: " + ncr.toString());
+                        break;
+                    case "normalized":
+                        gson = new GsonBuilder().registerTypeAdapter(NotifyContextRequestNGSIv2.class, new NotifyContextRequestNGSIv2Deserializer()).create();
+                        notifyContextRequestNGSIv2 = gson.fromJson(data, NotifyContextRequestNGSIv2.class);
+                        ncr = notifyContextRequestNGSIv2.toNotifyContextRequest();
+                        LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest on normalized NGSIv2: " + ncr.toString());
+                        break;
+                    default:
+                        LOGGER.warn("Unknown value: " + ngsiVersion + " for NGSI format");
+                        throw new HTTPBadRequestException(ngsiVersion + " format not supported");
+                }
+            } else {
+                ncr = gson.fromJson(data, NotifyContextRequest.class);
+                LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest on legacy NGSI: " + ncr.toString());
+            }
         } catch (JsonSyntaxException e) {
             serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
             LOGGER.error("[NGSIRestHandler] Runtime error (" + e.getMessage() + ")");
@@ -362,7 +389,9 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transId);
             LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
                     + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + ": " + transId + ")");
-            
+            headers.put(CommonConstants.HEADER_NGSI_VERSION, ngsiVersion);
+            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
+                    + CommonConstants.HEADER_NGSI_VERSION + ": " + ngsiVersion+ ")");
             // Create the NGSI event and add it to the list
             NGSIEvent ngsiEvent = new NGSIEvent(
                     // Headers

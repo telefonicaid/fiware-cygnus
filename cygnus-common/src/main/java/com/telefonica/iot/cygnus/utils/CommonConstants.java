@@ -40,6 +40,7 @@ public final class CommonConstants {
     public static final String HEADER_FIWARE_SERVICE      = "fiware-service";
     public static final String HEADER_FIWARE_SERVICE_PATH = "fiware-servicepath";
     public static final String HEADER_CORRELATOR_ID       = "fiware-correlator";
+    public static final String HEADER_NGSI_VERSION        = "ngsiv2-attrsformat";
     
     // Used by CKANBackendImpl... TBD: should not be here!!
     public static final String RECV_TIME_TS        = "recvTimeTs";

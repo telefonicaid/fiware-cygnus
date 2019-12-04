@@ -56,7 +56,13 @@ public class NGSIRestHandlerTest {
     private HttpServletRequest mockHttpServletRequest;
     @Mock
     private HttpServletRequest mockHttpServletRequest2;
-    
+    @Mock
+    private HttpServletRequest mockHttpServletRequest3;
+    @Mock
+    private HttpServletRequest mockHttpServletRequest4;
+    @Mock
+    private HttpServletRequest mockHttpServletRequest5;
+
     // Other variables
     private final String notification = ""
             + "{"
@@ -126,7 +132,92 @@ public class NGSIRestHandlerTest {
             + "    }"
             + "  ]"
             + "}";
-    
+
+    private final String notification3 = ""
+            + "{"
+            + "  \"subscriptionId\": \"51c0ac9ed714fb3b37d7d5a8\","
+            + "  \"data\": ["
+            + "    {"
+            + "      \"id\": \"E1\","
+            + "      \"type\": \"T\","
+            + "      \"A\": {"
+            + "        \"value\": \"Aval\","
+            + "        \"type\": \"AT\","
+            + "        \"metadata\": {"
+            + "          \"MD1\": {"
+            + "            \"value\": \"MD1val\","
+            + "            \"type\": \"MD1type\""
+            + "          },"
+            + "          \"MD2\": {"
+            + "            \"value\": \"MD2val\","
+            + "            \"type\": \"MD2type\""
+            + "          }"
+            + "        }"
+            + "      },"
+            + "      \"B\": {"
+            + "        \"value\": \"Bval\","
+            + "        \"type\": \"BT\","
+            + "        \"metadata\": {}"
+            + "      }"
+            + "    }"
+            + "  ]"
+            + "}";
+
+    private final String notification4 = ""
+            + "{"
+            + "  \"subscriptionId\": \"51c0ac9ed714fb3b37d7d5a8\","
+            + "  \"data\": ["
+            + "    {"
+            + "      \"id\": \"E1\","
+            + "      \"type\": \"T\","
+            + "      \"A\": {"
+            + "        \"value\": \"Aval\","
+            + "        \"type\": \"AT\","
+            + "        \"metadata\": {"
+            + "          \"MD1\": {"
+            + "            \"value\": \"MD1val\","
+            + "            \"type\": \"MD1type\""
+            + "          },"
+            + "          \"MD2\": {"
+            + "            \"value\": \"MD2val\","
+            + "            \"type\": \"MD2type\""
+            + "          }"
+            + "        }"
+            + "      },"
+            + "      \"B\": {"
+            + "        \"value\": \"Bval\","
+            + "        \"type\": \"BT\","
+            + "        \"metadata\": {}"
+            + "      }"
+            + "    },"
+            + "    {"
+            + "      \"id\": \"E2\","
+            + "      \"type\": \"T2\","
+            + "      \"A\": {"
+            + "        \"value\": \"Aval2\","
+            + "        \"type\": \"AT2\","
+            + "        \"metadata\": {"
+            + "          \"MD1\": {"
+            + "            \"value\": \"MD1val2\","
+            + "            \"type\": \"MD1type2\""
+            + "          },"
+            + "          \"MD2\": {"
+            + "            \"value\": \"MD2val2\","
+            + "            \"type\": \"MD2type2\""
+            + "          }"
+            + "        }"
+            + "      },"
+            + "      \"B2\": {"
+            + "        \"value\": \"Bval\","
+            + "        \"type\": \"BT\","
+            + "        \"metadata\": {}"
+            + "      }"
+            + "    }"
+            + "  ]"
+            + "}";
+
+
+
     /**
      * Constructor.
      */
@@ -162,6 +253,39 @@ public class NGSIRestHandlerTest {
         when(mockHttpServletRequest2.getHeader("fiware-servicepath")).thenReturn("/a,/b");
         when(mockHttpServletRequest2.getReader()).thenReturn(
                 new BufferedReader(new InputStreamReader(new ByteArrayInputStream(notification2.getBytes()))));
+        when(mockHttpServletRequest3.getMethod()).thenReturn("POST");
+        when(mockHttpServletRequest3.getRequestURI()).thenReturn("/notify");
+        String[] headerNames3 = {"Content-Type", "fiware-service", "fiware-servicePath", "ngsiv2-attrsformat"};
+        when(mockHttpServletRequest3.getHeaderNames()).thenReturn(
+                Collections.enumeration(new ArrayList(Arrays.asList(headerNames3))));
+        when(mockHttpServletRequest3.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
+        when(mockHttpServletRequest3.getHeader("fiware-service")).thenReturn("myservice");
+        when(mockHttpServletRequest3.getHeader("fiware-servicepath")).thenReturn("/myservicepath");
+        when(mockHttpServletRequest3.getHeader("ngsiv2-attrsformat")).thenReturn("normalized");
+        when(mockHttpServletRequest3.getReader()).thenReturn(
+                new BufferedReader(new InputStreamReader(new ByteArrayInputStream(notification3.getBytes()))));
+        when(mockHttpServletRequest4.getMethod()).thenReturn("POST");
+        when(mockHttpServletRequest4.getRequestURI()).thenReturn("/notify");
+        String[] headerNames4 = {"Content-Type", "fiware-service", "fiware-servicePath", "ngsiv2-attrsformat"};
+        when(mockHttpServletRequest4.getHeaderNames()).thenReturn(
+                Collections.enumeration(new ArrayList(Arrays.asList(headerNames4))));
+        when(mockHttpServletRequest4.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
+        when(mockHttpServletRequest4.getHeader("fiware-service")).thenReturn("myservice");
+        when(mockHttpServletRequest4.getHeader("fiware-servicepath")).thenReturn("/myservicepath");
+        when(mockHttpServletRequest4.getHeader("ngsiv2-attrsformat")).thenReturn("legacy");
+        when(mockHttpServletRequest4.getReader()).thenReturn(
+                new BufferedReader(new InputStreamReader(new ByteArrayInputStream(notification.getBytes()))));
+        when(mockHttpServletRequest5.getMethod()).thenReturn("POST");
+        when(mockHttpServletRequest5.getRequestURI()).thenReturn("/notify");
+        String[] headerNames5 = {"Content-Type", "fiware-service", "fiware-servicePath", "ngsiv2-attrsformat"};
+        when(mockHttpServletRequest5.getHeaderNames()).thenReturn(
+                Collections.enumeration(new ArrayList(Arrays.asList(headerNames5))));
+        when(mockHttpServletRequest5.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
+        when(mockHttpServletRequest5.getHeader("fiware-service")).thenReturn("myservice");
+        when(mockHttpServletRequest5.getHeader("fiware-servicepath")).thenReturn("/a,/b");
+        when(mockHttpServletRequest5.getHeader("ngsiv2-attrsformat")).thenReturn("normalized");
+        when(mockHttpServletRequest5.getReader()).thenReturn(
+                new BufferedReader(new InputStreamReader(new ByteArrayInputStream(notification4.getBytes()))));
     } // setUp
     
     /**
@@ -352,6 +476,55 @@ public class NGSIRestHandlerTest {
             assertTrue(false);
         } // try catch // try catch
     } // testGetEventsContentTypeHeader
+
+    /**
+     * [NGSIRestHandler.getEvents] -------- When a notification is sent, the headers are valid. This test considers also attrsFormat new header
+     */
+    @Test
+    public void testGetEventsContentTypeHeaderFormat() {
+        System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                + "-------- When a notification is sent, the headers are valid");
+        NGSIRestHandler handler = new NGSIRestHandler();
+        handler.configure(createContext(null, null, null)); // default configuration
+
+        try {
+            handler.getEvents(mockHttpServletRequest4);
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "-  OK  - The value for 'Content-Type' header is 'application/json; charset=utf-83'");
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "-  OK  - The value for 'fiware-servicePath' header starts with '/'");
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "-  OK  - The length of 'fiware-service' header value is "
+                    + " less or equal than '" + NGSIConstants.SERVICE_HEADER_MAX_LEN + "'");
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "-  OK  - The length of 'fiware-servicePath' header value "
+                    + "is less or equal than '" + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + "'");
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "-  OK  - The value for 'attrsFormat' header value is valid");
+        } catch (Exception e) {
+            if (e.getMessage().contains("content type not supported")) {
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                        + "- FAIL - The value for 'Content-Type' is not 'application/json; charset=utf-8'");
+            } else if (e.getMessage().contains("header value must start with '/'")) {
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                        + "- FAIL - The value for 'fiware-servicePath' does not start with '/'");
+            } else if (e.getMessage().contains("'fiware-service' header length greater than")) {
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                        + "- FAIL - The length of 'fiware-service' header value "
+                        + "is greater than '" + NGSIConstants.SERVICE_HEADER_MAX_LEN + "'");
+            } else if (e.getMessage().contains("'fiware-servicePath' header length greater than")) {
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                        + "- FAIL - The length of 'fiware-servicePath' header "
+                        + "value is greater than '" + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + "'");
+            } else if (e.getMessage().contains("format not supported")) {
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                        + "- FAIL - The value for 'attrsFormat' is not valid");
+            } // if else
+
+            assertTrue(false);
+        } // try catch // try catch
+    } // testGetEventsContentTypeHeader
     
     /**
      * [NGSIRestHandler.getEvents] -------- When a the configuration is wrong, no events are obtained.
@@ -400,7 +573,7 @@ public class NGSIRestHandlerTest {
         List<Event> events;
         
         try {
-            events = handler.getEvents(mockHttpServletRequest);
+            events = handler.getEvents(mockHttpServletRequest3);
             
             try {
                 assertEquals(1, events.size());
@@ -432,7 +605,7 @@ public class NGSIRestHandlerTest {
         Map<String, String> headers;
         
         try {
-            headers = handler.getEvents(mockHttpServletRequest).get(0).getHeaders();
+            headers = handler.getEvents(mockHttpServletRequest3).get(0).getHeaders();
             
             try {
                 assertTrue(headers.containsKey("fiware-service"));
@@ -473,6 +646,17 @@ public class NGSIRestHandlerTest {
                         + "- FAIL - The generated Flume event does not contain 'transaction-id'");
                 throw e4;
             } // try catch
+
+            try {
+                assertTrue(headers.containsKey("ngsiv2-attrsformat"));
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                        + "-  OK  - The generated Flume event contains 'ngsiv2-attrsformat'");
+            } catch (AssertionError e4) {
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                        + "- FAIL - The generated Flume event does not contain 'ngsiv2-attrsformat'");
+                throw e4;
+            } // try catch
+
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                     + "- FAIL - There was some problem while processing the events");
@@ -526,7 +710,54 @@ public class NGSIRestHandlerTest {
             throw e1;
         } // try catch
     } // testGetEventsMultiValuedServicePath
-    
+
+    /**
+     * [NGSIRestHandler.getEvents] -------- When a notification contains multiple ContextElementResponses, a NGSIEvent
+     * is generated for each one of them; the notified service path is split as well.
+     */
+    @Test
+    public void testGetEventsMultiValuedServicePathNgsiv2() {
+        System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                + "-------- When a notification contains multiple ContextElementResponses, a NGSIEvent is generated "
+                + "for each one of them; the notified service path is split as well this tests considers NGSIv2 format");
+        NGSIRestHandler handler = new NGSIRestHandler();
+        handler.configure(createContext(null, null, null)); // default configuration
+        List<Event> events;
+
+        try {
+            events = handler.getEvents(mockHttpServletRequest5);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "- FAIL - There was some problem when intercepting the event NGSIv2 format");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+
+        try {
+            assertEquals(2, events.size());
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "-  OK  - The generated events are 2 for NGSIv2 format");
+        } catch (AssertionError e1) {
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "- FAIL - The generated events are not 2 on NGSIv2 format");
+            throw e1;
+        } // try catch
+
+        try {
+            String event1ServicePath = events.get(0).getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
+            String event2ServicePath = events.get(1).getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
+            assertTrue((event1ServicePath.equals("/a") && event2ServicePath.equals("/b"))
+                    || (event1ServicePath.equals("/b") && event2ServicePath.equals("/a")));
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "-  OK  - The generated events have a service path equals to a split of the notified service for NGSIv2 format "
+                    + "path");
+        } catch (AssertionError e1) {
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "- FAIL - The generated events have not a service path equals to a split of the notified service on NGSIv2 format "
+                    + "path");
+            throw e1;
+        } // try catch
+    } // testGetEventsMultiValuedServicePath
+
     /**
      * [NGSIRestHandler.generateUniqueId] -------- An internal transaction ID is generated.
      */

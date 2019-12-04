@@ -204,7 +204,7 @@ elif [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
         AGENT_CONF_FILE=agent_mongo.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '${CYGNUS_MONGO_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        if [ "${CYGNUS_MONGOL_ENABLE_GROUPING,,}" == "true" ]; then
+        if [ "${CYGNUS_MONGO_ENABLE_GROUPING,,}" == "true" ]; then
             GROUPING_CONF_FILE=grouping_rules_mongo.conf
             cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
             sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}

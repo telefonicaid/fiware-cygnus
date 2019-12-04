@@ -1,3 +1,3 @@
 Fix: Changing cygnus port does not work (#1698)
 [cygnus-commons][MongoBackend] Proper processing of mongo errors in create index operations (#1756)
-[cygnus-common][cygnus-ngsi][cygnus-twitter] Upgrade log4j from 1.2.17 to 2.11.2
+[cygnus-ngsi] Support for NGSIv2 notifications (#953)
