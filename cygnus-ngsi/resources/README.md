@@ -25,7 +25,7 @@ These clients can be used as the base for a custom Hive remote client (interacti
 
 ##<a name="section2"></a>NGSI notifications
 
-A set of scripts that can be use to simulate Orion NGSI10 notifications. Its main purpose is Cygnus debugging.
+A set of scripts that can be use to simulate Orion NGSI notifications. Its main purpose is Cygnus debugging.
 
 * notification-json-compound.sh
 * notification-json-md.sh

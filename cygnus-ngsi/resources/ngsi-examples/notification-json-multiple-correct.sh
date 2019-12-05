@@ -37,18 +37,34 @@ else
    SERVICE_PATH=/
 fi
 
-curl $URL -v -s -S --header 'Content-Type: application/json; charset=utf-8' --header 'Accept: application/json' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: $SERVICE" --header "Fiware-ServicePath: $SERVICE_PATH" --header "ngsiv2-attrsformat: normalized" -d @- <<EOF
+if [ "$4" != "" ]
+then
+   SERVICE_PATH2=$4
+else
+   SERVICE_PATH2=/
+fi
+
+curl $URL -v -s -S --header 'Content-Type: application/json; charset=utf-8' --header 'Accept: application/json' --header 'User-Agent: orion/2.2.0' --header "Fiware-Service: $SERVICE" --header "Fiware-ServicePath: $SERVICE_PATH,$SERVICE_PATH2" --header "ngsiv2-attrsformat: normalized" -d @- <<EOF
 {
-  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a1",
+  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
   "data" : [
     {
       "temperature" : {
-        "type" : "centigrade",
-        "value" : "26.5",
-        "metadata": {}
-      },
+          "type" : "centigrade",
+          "value" : "26.5",
+          "metadata": {}
+        },
       "type" : "Room",
-      "id" : "Room1"
+      "id" : "Room.1"
+    },
+    {
+      "temperature" : {
+          "type" : "centigrade",
+          "value" : "19.3",
+          "metadata": {}
+        },
+      "type" : "Room",
+      "id" : "Room.suite"
     }
   ]
 }

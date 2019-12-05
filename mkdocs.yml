@@ -63,7 +63,6 @@ pages:
           - 'Multitenancy': 'cygnus-ngsi/installation_and_administration_guide/multitenancy.md'
           - 'Reliability': 'cygnus-ngsi/installation_and_administration_guide/reliability.md'
           - 'Performance tips': 'cygnus-ngsi/installation_and_administration_guide/performance_tips.md'
-          - 'NGSIv2 support': 'cygnus-ngsi/installation_and_administration_guide/ngsiv2_support.md'
           - 'IPv6 support': 'cygnus-ngsi/installation_and_administration_guide/ipv6_support.md'
           - 'Deprecated and removed functionality': 'cygnus-ngsi/installation_and_administration_guide/deprecated_and_removed.md'
           - 'Sanity checks': 'cygnus-ngsi/installation_and_administration_guide/sanity_checks.md'
