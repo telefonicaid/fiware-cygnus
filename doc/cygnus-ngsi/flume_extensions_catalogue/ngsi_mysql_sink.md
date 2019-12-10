@@ -220,7 +220,7 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | persistence\_policy.max_records | no | -1 | Maximum number of records allowed for a table before it is capped. `-1` disables this policy. |
 | persistence\_policy.expiration_time | no | -1 | Maximum number of seconds a record is maintained in a table before expiration. `-1` disables this policy. |
 | persistence\_policy.checking_time | no | 3600 | Frequency (in seconds) at which the sink checks for record expiration. |
-| attr\_native\_types | no | false | if the attribute value will be native <i>true</i> or stringfy or <i>false</i>. |
+| attr\_native\_types | no | false | if the attribute value will be native <i>true</i> or stringfy or <i>false</i>. When set to true, in case batch option is activated, insert null values for those attributes that doesn't exist in some of the entities to be inserted. If set to false, '' value is inserted for missing attributes. |
 
 A configuration example could be:
 
