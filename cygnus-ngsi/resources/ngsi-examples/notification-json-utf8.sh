@@ -37,28 +37,19 @@ else
    SERVICE_PATH=/
 fi
 
-curl $URL -v -s -S --header 'Content-Type: application/json; charset=utf-8' --header 'Accept: application/json' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: $SERVICE" --header "Fiware-ServicePath: $SERVICE_PATH" -d @- <<EOF
+curl $URL -v -s -S --header 'Content-Type: application/json; charset=utf-8' --header 'Accept: application/json' --header 'User-Agent: orion/2.2.0' --header "Fiware-Service: $SERVICE" --header "Fiware-ServicePath: $SERVICE_PATH" --header "ngsiv2-attrsformat: normalized" -d @- <<EOF
 {
   "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
-  "originator" : "localhost",
-  "contextResponses" : [
+  "data" : [
     {
-      "contextElement" : {
-        "attributes" : [
-          {
-            "name" : "owner",
-            "type" : "string",
-            "value" : "Íñigo"
-          }
-        ],
-        "type" : "Room",
-        "isPattern" : "false",
-        "id" : "Room1"
-      },
-      "statusCode" : {
-        "code" : "200",
-        "reasonPhrase" : "OK"
-      }
+      "owner" : 
+        {
+          "type" : "string",
+          "value" : "Íñigo",
+          "metadata": {}
+        },
+      "type" : "Room",
+      "id" : "Room1"
     }
   ]
 }

@@ -37,27 +37,33 @@ else
    SERVICE_PATH=/
 fi
 
-curl $URL -v -s -S --header 'Content-Type: application/json; charset=utf-8' --header 'Accept: application/json' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: $SERVICE" --header "Fiware-ServicePath: $SERVICE_PATH" --header "ngsiv2-attrsformat: normalized" -d @- <<EOF
+curl $URL -v -s -S --header 'Content-Type: application/json; charset=utf-8' --header 'Accept: application/json' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: $SERVICE" --header "Fiware-ServicePath: $SERVICE_PATH" -d @- <<EOF
 {
   "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
-  "data" : [
+  "originator" : "localhost",
+  "contextResponses" : [
     {
-      "temperature" : {
-          "type" : "centigrade",
-          "value" : "26.5",
-          "metadata": {}
-        },
-      "type" : "Room",
-      "id" : "Room.1"
-    },
-    {
-      "temperature" : {
-          "type" : "centigrade",
-          "value" : "19.3",
-          "metadata": {}
-        },
-      "type" : "Room",
-      "id" : "Room.suite"
+      "contextElement" : {
+        "attributes" : [
+          {
+            "name" : "field1",
+            "type" : "type1",
+            "value" : { "a": "1", "b": "2" }
+          },
+          {
+            "name" : "field2",
+            "type" : "type2",
+            "value" : [ "v1", "v2" ]
+          }
+        ],
+        "type" : "Room",
+        "isPattern" : "false",
+        "id" : "Room2"
+      },
+      "statusCode" : {
+        "code" : "200",
+        "reasonPhrase" : "OK"
+      }
     }
   ]
 }

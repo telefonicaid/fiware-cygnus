@@ -37,24 +37,30 @@ else
    SERVICE_PATH=/
 fi
 
-curl $URL -v -s -S --header 'Content-Type: application/json; charset=utf-8' --header 'Accept: application/json' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: $SERVICE" --header "Fiware-ServicePath: $SERVICE_PATH" --header "ngsiv2-attrsformat: normalized" -d @- <<EOF
+curl $URL -v -s -S --header 'Content-Type: application/json; charset=utf-8' --header 'Accept: application/json' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: $SERVICE" --header "Fiware-ServicePath: $SERVICE_PATH" -d @- <<EOF
 {
-  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
-  "data" : [
-    {
-      "field1" :  {
-          "type" : "type1",
-          "value" : { "a": "1", "b": "2" },
-          "metadata": {}
-        },
-      "field2" : {
-          "type" : "type2",
-          "value" : [ "v1", "v2" ],
-          "metadata": {}
-        },
-      "type" : "Room",
-      "id" : "Room2"
-    }
-  ]
+	"subscriptionId": "56e2ad4e8001ff5e0a5260ec",
+	"originator": "localhost",
+	"contextResponses": [{
+		"contextElement": {
+			"type": "Car",
+			"isPattern": "false",
+			"id": "Car1",
+			"attributes": [{
+				"name": "temperature",
+				"type": "centigrade",
+				"value": "26.5",
+				"metadatas": [{
+					"name": "TimeInstant",
+					"type": "recvTime",
+					"value": "2015-12-12 11:11:11.123"
+				}]
+			}]
+		},
+		"statusCode": {
+			"code": "200",
+			"reasonPhrase": "OK"
+		}
+	}]
 }
 EOF

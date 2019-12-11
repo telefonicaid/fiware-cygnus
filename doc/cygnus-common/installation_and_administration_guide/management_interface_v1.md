@@ -169,6 +169,9 @@ Response:
 
 
 ## <a name="section4"></a>Grouping Rules
+
+**Note that grouping rules functionality is deprecated. You should not use this API**
+
 ### <a name="section4.1"></a>`GET /v1/groupingrules`
 
 Gets the configured [grouping rules](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md).
@@ -269,6 +272,9 @@ Response:
 ## <a name="section5"></a>Subscriptions
 ### <a name="section5.1"></a>`POST /v1/subscriptions`
 #### <a name="section5.1.1"></a>`NGSI Version 1`
+
+**Note that NGSIv1 is deprecated. You should not use this API**
+
 Creates a new subscription to Orion given the version of NGSI (`ngsi_version=1` in this case). The Json passed in the payload contains the Json subscription itself and Orion's endpoint details.
 
 ```

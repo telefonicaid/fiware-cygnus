@@ -37,95 +37,85 @@ else
    SERVICE_PATH=/
 fi
 
-curl $URL -v -s -S --header 'Content-Type: application/json; charset=utf-8' --header 'Accept: application/json' --header 'User-Agent: orion/0.10.0' --header "Fiware-Service: $SERVICE" --header "Fiware-ServicePath: $SERVICE_PATH" -d @- <<EOF
+curl $URL -v -s -S --header 'Content-Type: application/json; charset=utf-8' --header 'Accept: application/json' --header 'User-Agent: orion/2.2.0' --header "Fiware-Service: $SERVICE" --header "Fiware-ServicePath: $SERVICE_PATH" --header "ngsiv2-attrsformat: normalized" -d @- <<EOF
 {
   "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
-  "originator" : "localhost",
-  "contextResponses" : [
+  "data" : [
     {
-      "contextElement" : {
-        "id": "netrisModel",
-        "isPattern": "false",
-        "type": "model",
-        "attributes": [
+      "id": "netrisModel",
+      "type": "model",
+      "TimeInstant": {
+          "type": "ISO8601",
+          "value": "2014-03-20T14:21:14Z",
+          "metadata": {}
+        },
+      "ModelProp1": {
+        "type": "String",
+        "value": "abc",
+        "metadata": {}
+      },
+      "ModelProp2": {
+        "type": "String",
+        "value": "def",
+        "metadata": {}
+      },
+      "et": {
+        "type": "compound",
+        "value":
           {
-            "name": "TimeInstant",
-            "type": "ISO8601",
-            "value": "2014-03-20T14:21:14Z"
+            "name": "external temperature",
+            "phenomenon": "temperature",
+            "type": "Quantity",
+            "uom": "Cel",
+            "persistence": [ "sth", "ckan" ]
           },
-          {
-            "name": "ModelProp1",
-            "type": "String",
-            "value": "abc"
-          },
-          {
-            "name": "ModelProp2",
-            "type": "String",
-            "value": "def"
-          },
-          {
-            "name": "et",
-            "type": "compound",
-            "value":
-              {
-                "name": "external temperature",
-                "phenomenon": "temperature",
-      	        "type": "Quantity",
-                "uom": "Cel",
-                "persistence": [ "sth", "ckan" ]
-              }
-          },
+        "metadata": {}
+      },
+      "internal temperature": {
+        "type": "compound",
+        "value": [
           {
             "name": "internal temperature",
-            "type": "compound",
-            "value": [
-              {
-                "name": "internal temperature",
-                "phenomenon": "temperature",
-                "type": "Quantity",
-                "uom": "Cel"
-              }
-            ]
-          },
-          {
-            "name": "h",
-            "type": "compound",
-            "value": [
-              {
-                "name": "house humidity",
-                "phenomenon": "humidity",
-      	        "type": "Quantity",
-                "uom": "%"
-              }
-            ]
-          },
-          {
-            "name": "reset",
-            "type": "compound",
-            "value": [
-              {
-                "type": "action",
-                "input_params": "reqTimeInstant,correlatorID,param_a,param_b",
-                "output_params": "result,resTimeIntant,param_c,param_d"
-              }
-            ]
-          },
-          {
-            "name": "color",
-            "type": "compound",
-            "value": [
-              {
-                "type": "action",
-                "input_params": "reqTimeInstant,correlatorID",
-                "output_params": "result,resTimeInstant"
-              }
-            ]
+            "phenomenon": "temperature",
+            "type": "Quantity",
+            "uom": "Cel"
           }
-        ]
+        ],
+        "metadata": {}
       },
-      "statusCode" : {
-        "code" : "200",
-        "reasonPhrase" : "OK"
+      "h": {
+        "type": "compound",
+        "value": [
+          {
+            "name": "house humidity",
+            "phenomenon": "humidity",
+            "type": "Quantity",
+            "uom": "%"
+          }
+        ],
+        "metadata": {}
+      },
+      "reset": {
+        "type": "compound",
+        "value": [
+          {
+            "type": "action",
+            "input_params": "reqTimeInstant,correlatorID,param_a,param_b",
+            "output_params": "result,resTimeIntant,param_c,param_d"
+          }
+        ],
+        "metadata": {}
+      },
+      "color": {
+        "type": "compound",
+        "value": [
+          {
+            "type": "action",
+            "input_params": "reqTimeInstant,correlatorID",
+            "output_params": "result,resTimeInstant"
+          }
+        ],
+        "metadata": {}
       }
     }
   ]

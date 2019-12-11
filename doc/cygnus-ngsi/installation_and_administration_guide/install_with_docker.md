@@ -114,9 +114,10 @@ $ ./notification.sh http://172.17.0.13:5050/notify
 > Host: 172.17.0.13:5050
 > Content-Type: application/json
 > Accept: application/json
-> User-Agent: orion/0.10.0
+> User-Agent: orion/2.2.0
 > Fiware-Service: default
 > Fiware-ServicePath: /
+> ngsiv2-attrsformat: normalized
 > Content-Length: 460
 >
 < HTTP/1.1 200 OK
@@ -149,8 +150,6 @@ $ docker stop 9ce0f09f5676
 $ docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 ```
-
-Support for NGSIv2 notifications has been added from version above 1.17.1. For this purpose, it's been added a new dir [/NGSIv2](./resources/ngsi-examples/NGSIv2) which contains script files in order to emulate some NGSIv2 notification types. 
 
 [Top](#top)
 

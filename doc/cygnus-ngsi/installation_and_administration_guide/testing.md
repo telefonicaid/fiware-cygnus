@@ -301,7 +301,7 @@ Tests run: 85, Failures: 0, Errors: 0, Skipped: 0
 [Top](#top)
 
 ## <a name="section2"></a>e2e testing
-Cygnus can be tested form a e2e point of view by using any of the scripts, [given with this repo](../../../cygnus-ngsi/resources/ngsi-examples), emulating a NGSI-like notification. You can find both Json and XML examples of simple and compound notifications, with or without metadata, even model entities and loops of continuous notifiers.
+Cygnus can be tested form a e2e point of view by using any of the scripts, [given with this repo](../../../cygnus-ngsi/resources/ngsi-examples), emulating a NGSI-like notification. You can find examples of simple and compound notifications, with or without metadata, even model entities and loops of continuous notifiers.
 
 For instance, if running the `notification-json-simple.sh`:
 
@@ -313,9 +313,10 @@ $ ./notification-json-simple.sh http://localhost:5050/notify myservice myservice
 > Host: localhost:5050
 > Content-Type: application/json
 > Accept: application/json
-> User-Agent: orion/0.10.0
+> User-Agent: orion/2.2.0
 > Fiware-Service: myservice
 > Fiware-ServicePath: myservicepath
+> ngsiv2-attrsformat: normalized
 > Content-Length: 460
 >
 * upload completely sent off: 460 out of 460 bytes
@@ -329,7 +330,5 @@ $ ./notification-json-simple.sh http://localhost:5050/notify myservice myservice
 You will see the server (Cygnus) is sending back a `200 OK` response.
 
 Of course, this is just a e2e test. For real e2e integration with a real NGSI-like source, such as [Orion Context Broker](https://github.com/telefonicaid/fiware-orion), please refer to the [User and Programmer Guide](../user_and_programmer_guide/connecting_orion.md).
-
-Support for NGSIv2 notifications has been added from version above 1.17.1. For this purpose, it's been added a new dir [/NGSIv2](./resources/ngsi-examples/NGSIv2) which contains script files in order to emulate some NGSIv2 notification types. 
 
 [Top](#top)
