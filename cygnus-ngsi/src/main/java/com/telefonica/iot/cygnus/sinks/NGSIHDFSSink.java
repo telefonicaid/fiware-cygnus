@@ -1114,7 +1114,7 @@ public class NGSIHDFSSink extends NGSISink {
                     
                     break;
                 } catch (CygnusPersistenceError | CygnusRuntimeError e) {
-                    LOGGER.info("[" + this.getName() + "] There was some problem with the current endpoint, "
+                    LOGGER.error("[" + this.getName() + "] There was some problem with the current endpoint, "
                             + "trying other one. Details: " + e.getMessage());
                 } // try catch
             } // for
