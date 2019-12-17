@@ -574,18 +574,22 @@ public class NGSIPostgisSink extends NGSISink {
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgisSink. Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
                 + fieldValues + ")");
-        
-        if (aggregator instanceof RowAggregator) {
-            persistenceBackend.createSchema(schemaName);
-            persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
-        } // if
-        // creating the database and the table has only sense if working in row mode, in column node
-        // everything must be provisioned in advance
-        if (fieldValues.equals("")) {
-            LOGGER.debug("[" + this.getName() + "] no values for insert");
-        } else {
-            persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
-        }
+
+        try {
+            if (aggregator instanceof RowAggregator) {
+                persistenceBackend.createSchema(schemaName);
+                persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+            } // if
+            // creating the database and the table has only sense if working in row mode, in column node
+            // everything must be provisioned in advance
+            if (fieldValues.equals("")) {
+                LOGGER.debug("[" + this.getName() + "] no values for insert");
+            } else {
+                persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
+            }
+        } catch (Exception e) {
+            throw new CygnusPersistenceError("-, " + e.getMessage());
+        } // try catch
     } // persistAggregation
     
     /**
