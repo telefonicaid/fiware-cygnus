@@ -429,8 +429,17 @@ public class NGSIPostgisSink extends NGSISink {
                     LOGGER.debug("location=" + location.getLeft());
                     row += DEFAULT_POSTGIS_TYPE + "','" + location.getLeft() + "','"  + attrMetadata + "')";
                 } else {
-                    if (attrNativeTypes && attrType.equals("Number")) {
-                        row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
+                    if (attrNativeTypes) {
+                        if (attrType.equals("Number")) {
+                            row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
+                        }  else {
+                            if (attrValue == null || attrsValue.equals("")) {
+                                attrsValue = "NULL";
+                                row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
+                            } else {
+                                // FIXME: next step: if attrNativeTypes then all will be without ' '
+                                row += attrType + "','" + attrValue + "','"  + attrMetadata + "')";
+                            }
                     } else {
                         row += attrType + "','" + attrValue + "','"  + attrMetadata + "')";
                     }
@@ -538,8 +547,18 @@ public class NGSIPostgisSink extends NGSISink {
 
                 } else {
                     // create part of the column with the current attribute (a.k.a. a column)
-                    if (attrNativeTypes && attrType.equals("Number")) {
-                        column += "," + attrValue + ",'"  + attrMetadata + "'";
+                    if (attrNativeTypes) {
+                        if (attrType.equals("Number")) {
+                            column += "," + attrValue + ",'"  + attrMetadata + "'";
+                        } else {
+                            if (attrValue == null || attrsValue.equals("")) {
+                                attrsValue = "NULL";
+                                column += "," + attrValue + ",'"  + attrMetadata + "'";
+                            } else {
+                                // FIXME: next step: if attrNativeTypes then all will be without ' '
+                                column += ",'" + attrValue + "','"  + attrMetadata + "'";
+                            }
+                        }
                     } else {
                         column += ",'" + attrValue + "','"  + attrMetadata + "'";
                     }
