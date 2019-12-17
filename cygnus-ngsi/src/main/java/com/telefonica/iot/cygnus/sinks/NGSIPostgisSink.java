@@ -432,7 +432,7 @@ public class NGSIPostgisSink extends NGSISink {
                     if (attrNativeTypes) {
                         if (attrType.equals("Number")) {
                             row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
-                        }  else {
+                        } else {
                             if (attrValue == null || attrsValue.equals("")) {
                                 attrsValue = "NULL";
                                 row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
@@ -440,6 +440,7 @@ public class NGSIPostgisSink extends NGSISink {
                                 // FIXME: next step: if attrNativeTypes then all will be without ' '
                                 row += attrType + "','" + attrValue + "','"  + attrMetadata + "')";
                             }
+                        }
                     } else {
                         row += attrType + "','" + attrValue + "','"  + attrMetadata + "')";
                     }
