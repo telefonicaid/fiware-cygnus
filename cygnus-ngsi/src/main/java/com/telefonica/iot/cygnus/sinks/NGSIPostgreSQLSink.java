@@ -417,8 +417,8 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     if (attrType.equals("Number")) {
                         row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
                     } else {
-                        if (attrValue == null || attrsValue.equals("")) {
-                            attrsValue = "NULL";
+                        if (attrValue == null || attrValue.equals("")) {
+                            attrValue = "NULL";
                             row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
                         } else {
                             // FIXME: next step: if attrNativeTypes then all will be without ' '
@@ -512,8 +512,8 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     if (attrType.equals("Number")) {
                         column += "," + attrValue + ",'"  + attrMetadata + "'";
                     } else {
-                        if (attrValue == null || attrsValue.equals("")) {
-                            attrsValue = "NULL";
+                        if (attrValue == null || attrValue.equals("")) {
+                            attrValue = "NULL";
                             column += "," + attrValue + ",'"  + attrMetadata + "'";
                         } else {
                             // FIXME: next step: if attrNativeTypes then all will be without ' '
