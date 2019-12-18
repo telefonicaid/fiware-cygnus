@@ -307,6 +307,7 @@ RUN \
     cd ${CYGNUS_HOME}/cygnus-ngsi && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean compile exec:exec assembly:single && \
     cp target/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar ${FLUME_HOME}/plugins.d/cygnus/lib/ && \
+    cp ${CYGNUS_HOME}/cygnus-ngsi/src/main/resources/ArcgisUtils-0.0.1-SNAPSHOT.jar ${FLUME_HOME}/plugins.d/cygnus/lib/ && \
     echo "INFO: Install Cygnus Application script" && \
     cp ${CYGNUS_HOME}/cygnus-common/target/classes/cygnus-flume-ng ${FLUME_HOME}/bin/ && \
     chmod +x ${FLUME_HOME}/bin/cygnus-flume-ng && \

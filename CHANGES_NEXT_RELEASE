@@ -1,3 +1,4 @@
+[cygnus-ngsi][ArcGIS] Fix classpath for instantation of arcgis sink (#1741)
 [cygnus-ngsi][PostGIS, PostGRESQL] Insert right SQL types values (Null), non stringify (#1661)
 [cygnus-ngsi][PostgisSink] Alignement with PostgresqlSink: add try catch for row aggregator
 Fix: Changing cygnus port does not work (#1698)
