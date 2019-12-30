@@ -32,7 +32,7 @@ import org.junit.Test;
  * @author frb
  */
 public class NGSIMySQLSinkTest {
-    
+
     /**
      * Constructor.
      */
@@ -62,7 +62,7 @@ public class NGSIMySQLSinkTest {
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username));
-        
+
         try {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
@@ -73,7 +73,7 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testConfigureEnableEncoding
-    
+
     /**
      * [NGSIMySQLSink.configure] -------- enable_lowercase can only be 'true' or 'false'.
      */
@@ -96,7 +96,7 @@ public class NGSIMySQLSinkTest {
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username));
-        
+
         try {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
@@ -107,7 +107,7 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testConfigureEnableLowercase
-    
+
     /**
      * [NGSIMySQLSink.configure] -------- enable_grouping can only be 'true' or 'false'.
      */
@@ -130,7 +130,7 @@ public class NGSIMySQLSinkTest {
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username));
-        
+
         try {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
@@ -141,7 +141,7 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testConfigureEnableGrouping
-    
+
     /**
      * [NGSIMySQLSink.configure] -------- data_model can only be 'dm-by-service-path' or 'dm-by-entity'.
      */
@@ -165,7 +165,7 @@ public class NGSIMySQLSinkTest {
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username));
-        
+
         try {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
@@ -176,7 +176,7 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testConfigureDataModel
-    
+
     /**
      * [NGSIMySQLSink.configure] -------- attr_persistence can only be 'row' or 'column'.
      */
@@ -199,7 +199,7 @@ public class NGSIMySQLSinkTest {
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username));
-        
+
         try {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
@@ -210,7 +210,7 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testConfigureAttrPersistence
-    
+
     /**
      * [NGSIMySQLSink.buildDBName] -------- When no encoding, the DB name is equals to the encoding of the
      * notified/defaulted service.
@@ -236,11 +236,11 @@ public class NGSIMySQLSinkTest {
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username));
         String service = "someService";
-        
+
         try {
             String builtSchemaName = sink.buildDbName(service);
             String expectedDBName = "someService";
-        
+
             try {
                 assertEquals(expectedDBName, builtSchemaName);
                 System.out.println(getTestTraceHead("[NGSIMySQLSink.buildDBName]")
@@ -256,7 +256,7 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testBuildDBNameNoEncoding
-    
+
     /**
      * [NGSIMySQLSink.buildDBName] -------- When encoding, the DB name is equals to the encoding of the
      * notified/defaulted service.
@@ -282,11 +282,11 @@ public class NGSIMySQLSinkTest {
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username));
         String service = "someService";
-        
+
         try {
             String builtSchemaName = sink.buildDbName(service);
             String expectedDBName = "someService";
-        
+
             try {
                 assertEquals(expectedDBName, builtSchemaName);
                 System.out.println(getTestTraceHead("[NGSIMySQLSink.buildDBName]")
@@ -302,7 +302,7 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testBuildDBNameEncoding
-    
+
     /**
      * [NGSIMySQLSink.buildTableName] -------- When no encoding and when a non root service-path is notified/defaulted
      * and data_model is 'dm-by-service-path' the MySQL table name is the encoding of <service-path>.
@@ -332,11 +332,11 @@ public class NGSIMySQLSinkTest {
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "somePath";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -352,7 +352,7 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameNonRootServicePathDataModelByServicePathNoEncoding
-    
+
     /**
      * [NGSIMySQLSink.buildTableName] -------- When encoding and when a non root service-path is notified/defaulted and
      * data_model is 'dm-by-service-path' the MySQL table name is the encoding of <service-path>.
@@ -382,11 +382,11 @@ public class NGSIMySQLSinkTest {
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "x002fsomePath";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -402,7 +402,7 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameNonRootServicePathDataModelByServicePathEncoding
-    
+
     /**
      * [NGSIMySQLSink.buildTableName] -------- When no encoding and when a non root service-path is notified/defaulted
      * and data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
@@ -434,11 +434,11 @@ public class NGSIMySQLSinkTest {
         String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "somePath_someId_someType";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -487,11 +487,11 @@ public class NGSIMySQLSinkTest {
         String entity = "someId";
         String attribute = null; // irrelevant for this test
         String entityType = "someType"; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "somePath_someType";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -509,7 +509,7 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameNonRootServicePathDataModelByEntityTypeNoEncoding
-    
+
     /**
      * [NGSIMySQLSink.buildTableName] -------- When encoding and when a non root service-path is notified/defaulted and
      * data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
@@ -541,11 +541,11 @@ public class NGSIMySQLSinkTest {
         String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "x002fsomePathxffffsomeIdxffffsomeType";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -594,11 +594,11 @@ public class NGSIMySQLSinkTest {
         String entity = "someId";
         String attribute = null; // irrelevant for this test
         String entityType = "someType"; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "x002fsomePathxffffsomeType";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -616,7 +616,7 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameNonRootServicePathDataModelByEntityTypeEncoding
-    
+
     /**
      * [NGSIMySQLSink.buildTableName] -------- When no encoding and when a root service-path is notified/defaulted and
      * data_model is 'dm-by-service-path' the MySQL table name is the encoding of \<service-path\>.
@@ -646,7 +646,7 @@ public class NGSIMySQLSinkTest {
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        
+
         try {
             sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -658,7 +658,7 @@ public class NGSIMySQLSinkTest {
                     + "service path");
         } // try catch
     } // testBuildTableNameRootServicePathDataModelByServicePathNoEncoding
-    
+
     /**
      * [NGSIMySQLSink.buildTableName] -------- When encoding and when a root service-path is notified/defaulted and
      * data_model is 'dm-by-service-path' the MySQL table name is the encoding of \<service-path\>.
@@ -688,11 +688,11 @@ public class NGSIMySQLSinkTest {
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "x002f";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -708,7 +708,7 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameRootServicePathDataModelByServicePathEncoding
-    
+
     /**
      * [NGSIMySQLSink.buildTableName] -------- When no encoding and when a root service-path is notified/defaulted and
      * data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
@@ -740,11 +740,11 @@ public class NGSIMySQLSinkTest {
         String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "someId_someType";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -792,11 +792,11 @@ public class NGSIMySQLSinkTest {
         String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "x002fxffffsomeIdxffffsomeType";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -844,11 +844,11 @@ public class NGSIMySQLSinkTest {
         String entity = "someId";
         String entityType = "someType";
         String attribute = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "x002fxffffsomeType";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -896,11 +896,11 @@ public class NGSIMySQLSinkTest {
         String entity = "someId";
         String entityType = "someType";
         String attribute = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "someType";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -916,7 +916,7 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameRootServicePathModelByEntityTypeNoEncoding
-    
+
     /**
      * [NGSIMySQLSink.buildDbName] -------- A database name length greater than 64 characters is detected.
      * @throws java.lang.Exception
@@ -941,7 +941,7 @@ public class NGSIMySQLSinkTest {
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username));
         String service = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongService";
-        
+
         try {
             sink.buildDbName(service);
             System.out.println(getTestTraceHead("[NGSIMySQLSink.buildDbName]")
@@ -953,7 +953,7 @@ public class NGSIMySQLSinkTest {
                     + "-  OK  - A database name length greater than 64 characters has been detected");
         } // try catch
     } // testBuildDbNameLength
-    
+
     /**
      * [NGSIMySQLSink.buildTableName] -------- When data model is by service path, a table name length greater than 64
      * characters is detected.
@@ -983,7 +983,7 @@ public class NGSIMySQLSinkTest {
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        
+
         try {
             sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -995,7 +995,7 @@ public class NGSIMySQLSinkTest {
                     + "-  OK  - A table name length greater than 64 characters has been detected");
         } // try catch
     } // testBuildTableNameLengthDataModelByServicePath
-    
+
     /**
      * [NGSICartoDBSink.buildTableName] -------- When data model is by entity, a table name length greater than 64
      * characters is detected.
@@ -1024,7 +1024,7 @@ public class NGSIMySQLSinkTest {
         String entity = "tooLooooooooooooooooooooooooooongEntity";
         String attribute = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
-        
+
         try {
             sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -1036,7 +1036,7 @@ public class NGSIMySQLSinkTest {
                     + "-  OK  - A table name length greater than 64 characters has been detected");
         } // try catch
     } // testBuildTableNameLengthDataModelByEntity
-    
+
     /**
      * [NGSICartoDBSink.buildTableName] -------- When data model is by attribute, a table name length greater than 63
      * characters is detected.
@@ -1066,7 +1066,7 @@ public class NGSIMySQLSinkTest {
         String entity = "tooLooooooooooooooooooongEntity";
         String attribute = "tooLooooooooooooongAttribute";
         String entityType = null; // irrelevant for this test
-        
+
         try {
             sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
@@ -1080,8 +1080,8 @@ public class NGSIMySQLSinkTest {
     } // testBuildTableNameLengthDataModelByAttribute
 
     private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
-            String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
-            String password, String port, String username) {
+                                  String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
+                                  String password, String port, String username) {
         Context context = new Context();
         context.put("attr_persistence", attrPersistence);
         context.put("batch_size", batchSize);
@@ -1097,5 +1097,5 @@ public class NGSIMySQLSinkTest {
         context.put("mysql_username", username);
         return context;
     } // createContext
-    
+
 } // NGSIMySQLSinkTest

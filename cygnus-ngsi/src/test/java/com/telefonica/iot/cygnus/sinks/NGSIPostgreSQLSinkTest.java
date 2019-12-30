@@ -19,14 +19,24 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import static org.junit.Assert.*; // this is required by "fail" like assertions
+
+import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -911,7 +921,89 @@ public class NGSIPostgreSQLSinkTest {
             throw e;
         } // try catch
     } // testConfigureEnableEncoding
-    
+
+    @Test
+    public void testNativeTypeColumn() {
+        String attr_native_types = "true"; // default
+        NGSIPostgreSQLSink ngsiPostgreSQLSink = new NGSIPostgreSQLSink();
+        ngsiPostgreSQLSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        // Create a NGSIEvent
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+
+        NGSIPostgreSQLSink.ColumnAggregator columnAggregator = ngsiPostgreSQLSink.new ColumnAggregator();
+        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
+        columnAggregator.aggregation = "";
+        columnAggregator.aggregate(ngsiEvent);
+        if (columnAggregator.getAggregation().contains("2,'[]'")  &&
+                columnAggregator.getAggregation().contains("TRUE,'[]'")  &&
+                columnAggregator.getAggregation().contains("'2016-09-21T01:23:00.00Z'")  &&
+                columnAggregator.getAggregation().contains("{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}")  &&
+                columnAggregator.getAggregation().contains("{\"String\": \"string\"}")  &&
+                columnAggregator.getAggregation().contains("foo")) {
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testNativeTypesColumn]")
+                    + "-  OK  - NativeTypesOK");
+            assertTrue(true);
+        } else {
+            System.out.println(columnAggregator.getAggregation());
+            assertFalse(true);
+        }
+    }
+
+    @Test
+    public void testNativeTypeRow() {
+        String attr_native_types = "true"; // default
+        NGSIPostgreSQLSink ngsiPostgreSQLSink = new NGSIPostgreSQLSink();
+        ngsiPostgreSQLSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        // Create a NGSIEvent
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        NGSIPostgreSQLSink.RowAggregator rowAggregator = ngsiPostgreSQLSink.new RowAggregator();
+        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
+        rowAggregator.aggregation = "";
+        rowAggregator.aggregate(ngsiEvent);
+        if (rowAggregator.getAggregation().contains("'2','[]'")  &&
+                rowAggregator.getAggregation().contains("'true','[]'")  &&
+                rowAggregator.getAggregation().contains("'2016-09-21T01:23:00.00Z'")  &&
+                rowAggregator.getAggregation().contains("{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}")  &&
+                rowAggregator.getAggregation().contains("{\"String\": \"string\"}")  &&
+                rowAggregator.getAggregation().contains("foo")) {
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testNativeTypesRow]")
+                    + "-  OK  - NativeTypesOK");
+            assertTrue(true);
+        } else {
+            assertFalse(true);
+        }
+    }
+
     private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
             String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
             String password, String port, String username, String cache) {
@@ -931,5 +1023,84 @@ public class NGSIPostgreSQLSinkTest {
         context.put("backend.enable_cache", cache);
         return context;
     } // createContext
+
+    private Context createContextforNativeTypes(String attrPersistence, String batchSize, String batchTime, String batchTTL,
+                                                String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
+                                                String password, String port, String username, String cache, String attrNativeTypes) {
+        Context context = new Context();
+        context.put("attr_persistence", attrPersistence);
+        context.put("batch_size", batchSize);
+        context.put("batch_time", batchTime);
+        context.put("batch_ttl", batchTTL);
+        context.put("data_model", dataModel);
+        context.put("enable_encoding", enableEncoding);
+        context.put("enable_grouping", enableGrouping);
+        context.put("enable_lowercase", enableLowercase);
+        context.put("mysql_host", host);
+        context.put("mysql_password", password);
+        context.put("mysql_port", port);
+        context.put("mysql_username", username);
+        context.put("backend.enable_cache", cache);
+        context.put("attr_native_types", attrNativeTypes);
+        return context;
+    } // createContextforNativeTypes
+
+    private NotifyContextRequest.ContextElement createContextElementForNativeTypes() {
+        NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
+        NotifyContextRequest.ContextMetadata contextMetadata = new NotifyContextRequest.ContextMetadata();
+        contextMetadata.setName("someString");
+        contextMetadata.setType("string");
+        ArrayList<NotifyContextRequest.ContextMetadata> metadata = new ArrayList<>();
+        metadata.add(contextMetadata);
+        NotifyContextRequest.ContextAttribute contextAttribute1 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute1.setName("someNumber");
+        contextAttribute1.setType("number");
+        contextAttribute1.setContextValue(new JsonPrimitive(2));
+        contextAttribute1.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute2 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute2.setName("somneBoolean");
+        contextAttribute2.setType("Boolean");
+        contextAttribute2.setContextValue(new JsonPrimitive(true));
+        contextAttribute2.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute3 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute3.setName("someDate");
+        contextAttribute3.setType("DateTime");
+        contextAttribute3.setContextValue(new JsonPrimitive("2016-09-21T01:23:00.00Z"));
+        contextAttribute3.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute4 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute4.setName("someGeoJson");
+        contextAttribute4.setType("geo:json");
+        contextAttribute4.setContextValue(new JsonPrimitive("{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}"));
+        contextAttribute4.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute5 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute5.setName("someJson");
+        contextAttribute5.setType("json");
+        contextAttribute5.setContextValue(new JsonPrimitive("{\"String\": \"string\"}"));
+        contextAttribute5.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute6 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute6.setName("someString");
+        contextAttribute6.setType("string");
+        contextAttribute6.setContextValue(new JsonPrimitive("foo"));
+        contextAttribute6.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute7 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute7.setName("someString2");
+        contextAttribute7.setType("string");
+        contextAttribute7.setContextValue(new JsonPrimitive(""));
+        contextAttribute7.setContextMetadata(null);
+        ArrayList<NotifyContextRequest.ContextAttribute> attributes = new ArrayList<>();
+        attributes.add(contextAttribute1);
+        attributes.add(contextAttribute2);
+        attributes.add(contextAttribute3);
+        attributes.add(contextAttribute4);
+        attributes.add(contextAttribute5);
+        attributes.add(contextAttribute6);
+        attributes.add(contextAttribute7);
+        NotifyContextRequest.ContextElement contextElement = new NotifyContextRequest.ContextElement();
+        contextElement.setId("someId");
+        contextElement.setType("someType");
+        contextElement.setIsPattern("false");
+        contextElement.setAttributes(attributes);
+        return contextElement;
+    } // createContextElementForNativeTypes
 
 } // NGSIPostgreSQLSinkTest
