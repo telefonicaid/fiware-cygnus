@@ -345,7 +345,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     /**
      * Class for aggregating batches in row mode.
      */
-    private class RowAggregator extends PostgreSQLAggregator {
+    protected class RowAggregator extends PostgreSQLAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -442,7 +442,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     /**
      * Class for aggregating batches in column mode.
      */
-    private class ColumnAggregator extends PostgreSQLAggregator {
+    protected class ColumnAggregator extends PostgreSQLAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -507,18 +507,19 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
 
-                // create part of the column with the current attribute (a.k.a. a column)
                 if (attrNativeTypes) {
-                    if (attrType.equals("Number")) {
-                        column += "," + attrValue + ",'"  + attrMetadata + "'";
-                    } else {
-                        if (attrValue == null || attrValue.equals("")) {
-                            attrValue = "NULL";
+                    if (contextAttribute.getValue().isJsonNull()) {
+                        column += ",NULL,'" + attrMetadata + "'";
+                    } else if (contextAttribute.getValue().isJsonPrimitive()) {
+                        if (contextAttribute.getValue().getAsJsonPrimitive().isBoolean()) {
+                            column += "," + attrValue.toUpperCase() + ",'"  + attrMetadata + "'";
+                        } else if (contextAttribute.getValue().getAsJsonPrimitive().isNumber()) {
                             column += "," + attrValue + ",'"  + attrMetadata + "'";
-                        } else {
-                            // FIXME: next step: if attrNativeTypes then all will be without ' '
+                        }else {
                             column += ",'" + attrValue + "','"  + attrMetadata + "'";
                         }
+                    } else {
+                        column += ",'" + attrValue + "','"  + attrMetadata + "'";
                     }
                 } else {
                     column += ",'" + attrValue + "','"  + attrMetadata + "'";
