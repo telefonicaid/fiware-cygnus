@@ -549,16 +549,18 @@ public class NGSIPostgisSink extends NGSISink {
                 } else {
                     // create part of the column with the current attribute (a.k.a. a column)
                     if (attrNativeTypes) {
-                        if (attrType.equals("Number")) {
-                            column += "," + attrValue + ",'"  + attrMetadata + "'";
-                        } else {
-                            if (attrValue == null || attrValue.equals("")) {
-                                attrValue = "NULL";
+                        if (contextAttribute.getValue().isJsonNull()) {
+                            column += ",NULL,'" + attrMetadata + "'";
+                        } else if (contextAttribute.getValue().isJsonPrimitive()) {
+                            if (contextAttribute.getValue().getAsJsonPrimitive().isBoolean()) {
+                                column += "," + attrValue.toUpperCase() + ",'"  + attrMetadata + "'";
+                            } else if (contextAttribute.getValue().getAsJsonPrimitive().isNumber()) {
                                 column += "," + attrValue + ",'"  + attrMetadata + "'";
-                            } else {
-                                // FIXME: next step: if attrNativeTypes then all will be without ' '
+                            }else {
                                 column += ",'" + attrValue + "','"  + attrMetadata + "'";
                             }
+                        } else {
+                            column += ",'" + attrValue + "','"  + attrMetadata + "'";
                         }
                     } else {
                         column += ",'" + attrValue + "','"  + attrMetadata + "'";
