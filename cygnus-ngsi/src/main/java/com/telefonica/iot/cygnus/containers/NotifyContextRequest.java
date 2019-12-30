@@ -352,7 +352,11 @@ public class NotifyContextRequest {
                 return  "" + value;
             }  // if then else if
         } // getContextValue
-        
+
+        public JsonElement getValue() {
+            return value;
+        }
+
         /**
          * Gets the context metadata.
          * @return The context metadata for this context attribute in String format.
