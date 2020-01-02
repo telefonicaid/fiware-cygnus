@@ -121,7 +121,16 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 *  For each notified attribute, a field named as the concatenation of the attribute name and `_md` is considered. This field will store the attribute's metadata values along the time.
 
 #### <a name="section1.2.6"></a>Native attribute type
-Regarding the specific data stored within the above table, if `attr_native_types` parameter is set to `true` then attribute is inserted using its native type, if `false` then will be strinfy.
+Regarding the specific data stored within the above table, if `attr_native_types` parameter is set to `true` then attribute is inserted using its native type (according with the following table), if `false` then will be stringify.
+
+Type json     | Type PostGreSQL/POSTGIS
+------------- | --------------------------------------- 
+string        | text
+number        | double, precision, real, others (numeric, decimal)
+boolean       | boolean (TRUE, FALSE, NULL)
+DateTime      | timestamp, timestamp with time zone, timestamp without time zone
+json          | text o json - it`s treated as String
+null          | NULL
 
 [Top](#top)
 
