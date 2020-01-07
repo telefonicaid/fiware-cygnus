@@ -353,6 +353,11 @@ public class NotifyContextRequest {
             }  // if then else if
         } // getContextValue
 
+        /**
+         * Gets value.
+         *
+         * @return the value on JsonElement Object.
+         */
         public JsonElement getValue() {
             return value;
         }
