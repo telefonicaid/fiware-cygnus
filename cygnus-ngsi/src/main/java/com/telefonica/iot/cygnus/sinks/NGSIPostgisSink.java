@@ -550,7 +550,7 @@ public class NGSIPostgisSink extends NGSISink {
                     // create part of the column with the current attribute (a.k.a. a column)
                     if (attrNativeTypes) {
                         if (contextAttribute.getValue().isJsonNull()) {
-                            column += ",NULL,'" + attrMetadata + "'";
+                            column += ",NULL";
                         } else if (contextAttribute.getValue().isJsonPrimitive()) {
                             if (contextAttribute.getValue().getAsJsonPrimitive().isBoolean()) {
                                 //https://www.postgresql.org/docs/8.1/datatype-boolean.html TRUE&FALSE are natively conssidered as boolean on POSTGRESQL
