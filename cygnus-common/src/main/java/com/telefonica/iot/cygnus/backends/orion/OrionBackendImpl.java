@@ -56,6 +56,7 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
 
     } // StatsBackendImpl
 
+    @Deprecated
     @Override
     public JsonResponse subscribeContextV1(String subscription, String token, String fiwareService,
             String fiwareServicePath) throws Exception {
@@ -96,6 +97,7 @@ public class OrionBackendImpl extends HttpBackend implements OrionBackend {
         return response;
     } // subscribeContext
 
+    @Deprecated
     @Override
     public JsonResponse deleteSubscriptionV1(String subscriptionId, String token, String fiwareService,
             String fiwareServicePath) throws Exception {
