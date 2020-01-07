@@ -512,6 +512,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
                         column += ",NULL,'" + attrMetadata + "'";
                     } else if (contextAttribute.getValue().isJsonPrimitive()) {
                         if (contextAttribute.getValue().getAsJsonPrimitive().isBoolean()) {
+                            //https://www.postgresql.org/docs/8.1/datatype-boolean.html TRUE&FALSE are natively conssidered as boolean on POSTGRESQL
                             column += "," + attrValue.toUpperCase() + ",'"  + attrMetadata + "'";
                         } else if (contextAttribute.getValue().getAsJsonPrimitive().isNumber()) {
                             column += "," + attrValue + ",'"  + attrMetadata + "'";
