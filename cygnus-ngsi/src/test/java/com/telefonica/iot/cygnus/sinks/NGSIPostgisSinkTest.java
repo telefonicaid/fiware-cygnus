@@ -1000,7 +1000,7 @@ public class NGSIPostgisSinkTest {
 
 
     @Test
-    public void testNativeTypeColumn() {
+    public void testNativeTypeColumn() throws CygnusBadConfiguration {
         String attr_native_types = "true"; // default
         NGSIPostgisSink ngsiPostgisSink = new NGSIPostgisSink();
         ngsiPostgisSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
@@ -1020,29 +1020,29 @@ public class NGSIPostgisSinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-
         NGSIPostgisSink.ColumnAggregator columnAggregator = ngsiPostgisSink.new ColumnAggregator();
         ContextElement contextElement = createContextElementForNativeTypes();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
-        columnAggregator.aggregation = "";
+        columnAggregator.initialize(ngsiEvent);
         columnAggregator.aggregate(ngsiEvent);
-        if (columnAggregator.getAggregation().contains("2,'[]'")  &&
-                columnAggregator.getAggregation().contains("TRUE,'[]'")  &&
-                columnAggregator.getAggregation().contains("'2016-09-21T01:23:00.00Z'")  &&
-                columnAggregator.getAggregation().contains("{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}")  &&
-                columnAggregator.getAggregation().contains("{\"String\": \"string\"}")  &&
-                columnAggregator.getAggregation().contains("foo")) {
+        System.out.println(columnAggregator.getValuesForInsert());
+        if (columnAggregator.getValuesForInsert().contains("2,'[]'")  &&
+                columnAggregator.getValuesForInsert().contains("TRUE,'[]'")  &&
+                columnAggregator.getValuesForInsert().contains("'2016-09-21T01:23:00.00Z'")  &&
+                columnAggregator.getValuesForInsert().contains("{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}")  &&
+                columnAggregator.getValuesForInsert().contains("{\"String\": \"string\"}")  &&
+                columnAggregator.getValuesForInsert().contains("foo")) {
             System.out.println(getTestTraceHead("[NGSIPostgisSink.testNativeTypesColumn]")
                     + "-  OK  - NativeTypesOK");
             assertTrue(true);
         } else {
-            System.out.println(columnAggregator.getAggregation());
+            System.out.println(columnAggregator.getValuesForInsert());
             assertFalse(true);
         }
     }
 
     @Test
-    public void testNativeTypeRow() {
+    public void testNativeTypeRow() throws CygnusBadConfiguration {
         String attr_native_types = "true"; // default
         NGSIPostgisSink ngsiPostgisSink = new NGSIPostgisSink();
         ngsiPostgisSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
@@ -1065,14 +1065,14 @@ public class NGSIPostgisSinkTest {
         NGSIPostgisSink.RowAggregator rowAggregator = ngsiPostgisSink.new RowAggregator();
         ContextElement contextElement = createContextElementForNativeTypes();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
-        rowAggregator.aggregation = "";
+        rowAggregator.initialize(ngsiEvent);
         rowAggregator.aggregate(ngsiEvent);
-        if (rowAggregator.getAggregation().contains("'2','[]'")  &&
-                rowAggregator.getAggregation().contains("'true','[]'")  &&
-                rowAggregator.getAggregation().contains("'2016-09-21T01:23:00.00Z'")  &&
-                rowAggregator.getAggregation().contains("{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}")  &&
-                rowAggregator.getAggregation().contains("{\"String\": \"string\"}")  &&
-                rowAggregator.getAggregation().contains("foo")) {
+        if (rowAggregator.getValuesForInsert().contains("'2','[]'")  &&
+                rowAggregator.getValuesForInsert().contains("'true','[]'")  &&
+                rowAggregator.getValuesForInsert().contains("'2016-09-21T01:23:00.00Z'")  &&
+                rowAggregator.getValuesForInsert().contains("{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}")  &&
+                rowAggregator.getValuesForInsert().contains("{\"String\": \"string\"}")  &&
+                rowAggregator.getValuesForInsert().contains("foo")) {
             System.out.println(getTestTraceHead("[NGSIPostgisSink.testNativeTypesRow]")
                     + "-  OK  - NativeTypesOK");
             assertTrue(true);
