@@ -23,6 +23,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonPrimitive;
+import kafka.utils.Json;
 import org.apache.flume.Context;
 
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
@@ -303,7 +307,7 @@ public class NGSIMySQLSink extends NGSISink {
     private abstract class MySQLAggregator {
         
         // object containing the aggregted data
-        private LinkedHashMap<String, ArrayList<String>> aggregation;
+        protected LinkedHashMap<String, ArrayList<JsonElement>> aggregation;
 
         private String service;
         private String servicePathForData;
@@ -318,12 +322,12 @@ public class NGSIMySQLSink extends NGSISink {
             aggregation = new LinkedHashMap<>();
         } // MySQLAggregator
         
-        protected LinkedHashMap<String, ArrayList<String>> getAggregation() {
+        protected LinkedHashMap<String, ArrayList<JsonElement>> getAggregation() {
             return aggregation;
         } //getAggregation
 
         @SuppressWarnings("unused")
-        protected void setAggregation(LinkedHashMap<String, ArrayList<String>> aggregation) {
+        protected void setAggregation(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
             this.aggregation = aggregation;
         } //setAggregation
 
@@ -406,25 +410,32 @@ public class NGSIMySQLSink extends NGSISink {
             
                 while (it.hasNext()) {
                     String entry = (String) it.next();
-                    ArrayList<String> values = (ArrayList<String>) aggregation.get(entry);
-                    String value = values.get(i);
-                    if (attrNativeTypes) {
+                    ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
+                    JsonElement value = values.get(i);
+                    String stringValue = null;
+                    if (attrNativeTypes && this instanceof ColumnAggregator) {
                         LOGGER.debug("[" + getName() + "] aggregation entry = "  + entry );
-                        if (value == null || value.equals("")) {
-                            value = "NULL";
+                        if (value.isJsonNull()) {
+                            stringValue = "NULL";
+                        } else if (value.isJsonPrimitive()) {
+                            if (value.getAsJsonPrimitive().isBoolean()) {
+                                stringValue = value.getAsString().toUpperCase();
+                            } else if (value.getAsJsonPrimitive().isNumber()) {
+                                stringValue = value.getAsString();
+                            }else {
+                                stringValue = "'" + value.getAsString() + "'";
+                            }
                         } else {
-                            value = "'" + value + "'";
+                            stringValue = "'" + value.getAsString() + "'";
                         }
-                        LOGGER.debug("[" + getName() + "] native value = "  + value );
                     } else {
-                        value = "'" + value + "'";
+                        stringValue = "'" + value.getAsString() + "'";
                     }
-
                     if (first) {
-                        valuesForInsert += value;
+                        valuesForInsert += stringValue;
                         first = false;
                     } else {
-                        valuesForInsert += "," + value;
+                        valuesForInsert += "," + stringValue;
                     } // if else
                 } // while
 
@@ -455,7 +466,6 @@ public class NGSIMySQLSink extends NGSISink {
             String fieldsForInsert = "(";
             boolean first = true;
             Iterator<String> it = aggregation.keySet().iterator();
-            
             while (it.hasNext()) {
                 if (first) {
                     fieldsForInsert += (String) it.next();
@@ -464,7 +474,6 @@ public class NGSIMySQLSink extends NGSISink {
                     fieldsForInsert += "," + (String) it.next();
                 } // if else
             } // while
-            
             return fieldsForInsert + ")";
         } // getFieldsForInsert
         
@@ -491,16 +500,16 @@ public class NGSIMySQLSink extends NGSISink {
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
-            LinkedHashMap<String, ArrayList<String>> aggregation = getAggregation();
-            aggregation.put(NGSIConstants.RECV_TIME_TS, new ArrayList<String>());
-            aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<String>());
-            aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ATTR_NAME, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ATTR_TYPE, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ATTR_VALUE, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ATTR_MD, new ArrayList<String>());
+            LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
+            aggregation.put(NGSIConstants.RECV_TIME_TS, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ATTR_NAME, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ATTR_TYPE, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ATTR_VALUE, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ATTR_MD, new ArrayList<JsonElement>());
         } // initialize
         
         @Override
@@ -528,22 +537,22 @@ public class NGSIMySQLSink extends NGSISink {
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
+                JsonElement attrValue = contextAttribute.getValue();
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
                 
                 // aggregate the attribute information
-                LinkedHashMap<String, ArrayList<String>> aggregation = getAggregation();
-                aggregation.get(NGSIConstants.RECV_TIME_TS).add(Long.toString(recvTimeTs));
-                aggregation.get(NGSIConstants.RECV_TIME).add(recvTime);
-                aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(getServicePathForData());
-                aggregation.get(NGSIConstants.ENTITY_ID).add(entityId);
-                aggregation.get(NGSIConstants.ENTITY_TYPE).add(entityType);
-                aggregation.get(NGSIConstants.ATTR_NAME).add(attrName);
-                aggregation.get(NGSIConstants.ATTR_TYPE).add(attrType);
+                LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
+                aggregation.get(NGSIConstants.RECV_TIME_TS).add(new JsonPrimitive(Long.toString(recvTimeTs)));
+                aggregation.get(NGSIConstants.RECV_TIME).add(new JsonPrimitive(recvTime));
+                aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(new JsonPrimitive(getServicePathForData()));
+                aggregation.get(NGSIConstants.ENTITY_ID).add(new JsonPrimitive(entityId));
+                aggregation.get(NGSIConstants.ENTITY_TYPE).add(new JsonPrimitive(entityType));
+                aggregation.get(NGSIConstants.ATTR_NAME).add(new JsonPrimitive(attrName));
+                aggregation.get(NGSIConstants.ATTR_TYPE).add(new JsonPrimitive(attrType));
                 aggregation.get(NGSIConstants.ATTR_VALUE).add(attrValue);
-                aggregation.get(NGSIConstants.ATTR_MD).add(attrMetadata);
+                aggregation.get(NGSIConstants.ATTR_MD).add(new JsonPrimitive(attrMetadata));
             } // for
         } // aggregate
 
@@ -552,18 +561,18 @@ public class NGSIMySQLSink extends NGSISink {
     /**
      * Class for aggregating batches in column mode.
      */
-    private class ColumnAggregator extends MySQLAggregator {
+    protected class ColumnAggregator extends MySQLAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
             
             // particular initialization
-            LinkedHashMap<String, ArrayList<String>> aggregation = getAggregation();
-            aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<String>());
-            aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<String>());
+            LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
+            aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<JsonElement>());
             
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
@@ -574,8 +583,8 @@ public class NGSIMySQLSink extends NGSISink {
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
-                aggregation.put(attrName, new ArrayList<String>());
-                aggregation.put(attrName + "_md", new ArrayList<String>());
+                aggregation.put(attrName, new ArrayList<JsonElement>());
+                aggregation.put(attrName + "_md", new ArrayList<JsonElement>());
             } // for
         } // initialize
         
@@ -604,16 +613,16 @@ public class NGSIMySQLSink extends NGSISink {
                 return;
             } // if
 
-            LinkedHashMap<String, ArrayList<String>> aggregation = getAggregation();
-            aggregation.get(NGSIConstants.RECV_TIME).add(recvTime);
-            aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(getServicePathForData());
-            aggregation.get(NGSIConstants.ENTITY_ID).add(entityId);
-            aggregation.get(NGSIConstants.ENTITY_TYPE).add(entityType);
+            LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
+            aggregation.get(NGSIConstants.RECV_TIME).add(new JsonPrimitive(recvTime));
+            aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(new JsonPrimitive(getServicePathForData()));
+            aggregation.get(NGSIConstants.ENTITY_ID).add(new JsonPrimitive(entityId));
+            aggregation.get(NGSIConstants.ENTITY_TYPE).add(new JsonPrimitive(entityType));
             
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
+                JsonElement attrValue = contextAttribute.getValue();
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
@@ -622,23 +631,23 @@ public class NGSIMySQLSink extends NGSISink {
                 // add an empty value for all previous rows
                 if (aggregation.containsKey(attrName)) {
                     aggregation.get(attrName).add(attrValue);
-                    aggregation.get(attrName + "_md").add(attrMetadata);
+                    aggregation.get(attrName + "_md").add(new JsonPrimitive(attrMetadata));
                 } else {
-                    ArrayList<String> values = new ArrayList<>(Collections.nCopies(numPreviousValues, ""));
+                    ArrayList<JsonElement> values = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, JsonNull.INSTANCE));
                     values.add(attrValue);
                     aggregation.put(attrName, values);
-                    ArrayList<String> valuesMd = new ArrayList<>(Collections.nCopies(numPreviousValues, ""));
-                    valuesMd.add(attrMetadata);
+                    ArrayList<JsonElement> valuesMd = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, JsonNull.INSTANCE));
+                    valuesMd.add(new JsonPrimitive(attrMetadata));
                     aggregation.put(attrName + "_md", valuesMd);
                 } // if else
             } // for
             
             // Iterate on all the aggregations, checking for not updated attributes; add an empty value if missing
             for (String key : aggregation.keySet()) {
-                ArrayList<String> values = aggregation.get(key);
+                ArrayList<JsonElement> values = aggregation.get(key);
                 
                 if (values.size() == numPreviousValues) {
-                    values.add("");
+                    values.add(JsonNull.INSTANCE);
                 } // if
             } // for
         } // aggregate
