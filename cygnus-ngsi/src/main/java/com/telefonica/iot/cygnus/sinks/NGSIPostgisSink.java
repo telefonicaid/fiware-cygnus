@@ -365,8 +365,11 @@ public class NGSIPostgisSink extends NGSISink {
                     ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
                     JsonElement value = values.get(i);
                     String stringValue = null;
+                    LOGGER.debug("[" + getName() + "] aggregation entry = "  + entry );
+
+
+
                     if (attrNativeTypes && this instanceof ColumnAggregator) {
-                        LOGGER.debug("[" + getName() + "] aggregation entry = "  + entry );
                         if (value.isJsonNull()) {
                             stringValue = "NULL";
                         } else if (value.isJsonPrimitive()) {
@@ -577,8 +580,14 @@ public class NGSIPostgisSink extends NGSISink {
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                // Check if the attribute already exists in the form of 2 columns (one for metadata); if not existing,
-                // add an empty value for all previous rows
+
+                //Process geometry if applyes
+                ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(attrValue.getAsString(), attrType, attrMetadata, swapCoordinates);
+                if (location.right) {
+                    LOGGER.debug("location=" + location.getLeft());
+                    attrValue = new JsonPrimitive(location.getLeft());
+                }
+
                 if (aggregation.containsKey(attrName)) {
                     aggregation.get(attrName).add(attrValue);
                     aggregation.get(attrName + "_md").add(new JsonPrimitive(attrMetadata));
