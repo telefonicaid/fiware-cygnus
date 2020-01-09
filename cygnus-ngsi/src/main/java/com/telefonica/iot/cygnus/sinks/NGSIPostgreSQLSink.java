@@ -290,7 +290,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
      */
     private abstract class PostgreSQLAggregator {
 
-        // object containing the aggregted data
+        // object containing the aggregated data
         protected LinkedHashMap<String, ArrayList<JsonElement>> aggregation;
 
         protected String service;

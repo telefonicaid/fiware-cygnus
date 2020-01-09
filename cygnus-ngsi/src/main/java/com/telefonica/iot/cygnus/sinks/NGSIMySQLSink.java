@@ -305,7 +305,7 @@ public class NGSIMySQLSink extends NGSISink {
      */
     private abstract class MySQLAggregator {
         
-        // object containing the aggregted data
+        // object containing the aggregated data
         protected LinkedHashMap<String, ArrayList<JsonElement>> aggregation;
 
         private String service;
