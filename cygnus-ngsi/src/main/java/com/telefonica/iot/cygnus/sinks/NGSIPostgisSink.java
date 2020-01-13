@@ -239,6 +239,12 @@ public class NGSIPostgisSink extends NGSISink {
     } // configure
 
     @Override
+    public void stop() {
+        super.stop();
+        if (persistenceBackend != null) persistenceBackend.close();
+    } // stop
+
+    @Override
     public void start() {
         try {
             persistenceBackend = new PostgreSQLBackendImpl(postgisHost, postgisPort, postgisDatabase, postgisUsername, postgisPassword, maxPoolSize);
