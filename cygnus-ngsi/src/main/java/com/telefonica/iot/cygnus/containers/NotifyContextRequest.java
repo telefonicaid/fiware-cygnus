@@ -360,7 +360,7 @@ public class NotifyContextRequest {
          */
         public JsonElement getValue() {
             return value;
-        }
+        } // getValue
 
         /**
          * Gets the context metadata.
