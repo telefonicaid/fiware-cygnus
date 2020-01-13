@@ -373,10 +373,6 @@ public class NGSIPostgisSink extends NGSISink {
                     ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
                     JsonElement value = values.get(i);
                     String stringValue = null;
-                    LOGGER.debug("[" + getName() + "] aggregation entry = "  + entry );
-
-
-
                     if (attrNativeTypes && this instanceof ColumnAggregator) {
                         if (value.isJsonNull() || value == null) {
                             stringValue = "NULL";
@@ -644,7 +640,6 @@ public class NGSIPostgisSink extends NGSISink {
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
                 + valuesForInsert + ")");
 
-        try {
             if (aggregator instanceof RowAggregator) {
                 persistenceBackend.createSchema(schemaName);
                 persistenceBackend.createTable(schemaName, tableName, fieldsForCreate);
@@ -656,9 +651,6 @@ public class NGSIPostgisSink extends NGSISink {
             } else {
                 persistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
             }
-        } catch (Exception e) {
-            throw new CygnusPersistenceError("-, " + e.getMessage());
-        } // try catch
     } // persistAggregation
     
     /**
