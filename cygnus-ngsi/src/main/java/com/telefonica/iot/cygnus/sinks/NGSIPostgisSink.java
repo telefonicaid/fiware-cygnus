@@ -586,7 +586,7 @@ public class NGSIPostgisSink extends NGSISink {
                         + attrType + ")");
 
                 //Process geometry if applyes
-                ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(attrValue.getAsString(), attrType, attrMetadata, swapCoordinates);
+                ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(attrValue.toString(), attrType, attrMetadata, swapCoordinates);
                 if (location.right) {
                     LOGGER.debug("location=" + location.getLeft());
                     attrValue = new JsonPrimitive(location.getLeft());
