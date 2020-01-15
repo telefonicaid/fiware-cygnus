@@ -1029,7 +1029,7 @@ public class NGSIPostgisSinkTest {
         if (columnAggregator.getValuesForInsert().contains("2,'[]'")  &&
                 columnAggregator.getValuesForInsert().contains("TRUE,'[]'")  &&
                 columnAggregator.getValuesForInsert().contains("'2016-09-21T01:23:00.00Z'")  &&
-                columnAggregator.getValuesForInsert().contains("{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}")  &&
+                columnAggregator.getValuesForInsert().contains("'ST_GeomFromGeoJSON('\"{\\\"type\\\": \\\"Point\\\",\\\"coordinates\\\": [-0.036177,39.986159]}\"')'")  &&
                 columnAggregator.getValuesForInsert().contains("{\"String\": \"string\"}")  &&
                 columnAggregator.getValuesForInsert().contains("foo")) {
             System.out.println(getTestTraceHead("[NGSIPostgisSink.testNativeTypesColumn]")
