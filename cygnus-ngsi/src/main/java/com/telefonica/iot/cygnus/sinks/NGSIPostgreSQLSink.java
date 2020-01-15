@@ -360,7 +360,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     String stringValue = null;
                     if (attrNativeTypes && this instanceof ColumnAggregator) {
                         LOGGER.debug("[" + getName() + "] aggregation entry = "  + entry );
-                        if (value.isJsonNull()) {
+                        if (value.isJsonNull() || value == null) {
                             stringValue = "NULL";
                         } else if (value.isJsonPrimitive()) {
                             if (value.getAsJsonPrimitive().isBoolean()) {
@@ -578,10 +578,10 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     aggregation.get(attrName).add(attrValue);
                     aggregation.get(attrName + "_md").add(new JsonPrimitive(attrMetadata));
                 } else {
-                    ArrayList<JsonElement> values = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, JsonNull.INSTANCE));
+                    ArrayList<JsonElement> values = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
                     values.add(attrValue);
                     aggregation.put(attrName, values);
-                    ArrayList<JsonElement> valuesMd = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, JsonNull.INSTANCE));
+                    ArrayList<JsonElement> valuesMd = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
                     valuesMd.add(new JsonPrimitive(attrMetadata));
                     aggregation.put(attrName + "_md", valuesMd);
                 } // if else
@@ -592,7 +592,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 ArrayList<JsonElement> values = aggregation.get(key);
 
                 if (values.size() == numPreviousValues) {
-                    values.add(JsonNull.INSTANCE);
+                    values.add(null);
                 } // if
             } // for
         } // aggregate

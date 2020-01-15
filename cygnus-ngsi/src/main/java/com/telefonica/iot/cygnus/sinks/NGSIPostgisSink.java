@@ -283,6 +283,8 @@ public class NGSIPostgisSink extends NGSISink {
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
+            LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" + aggregator.getFieldsForInsert()+ ", values="
+                    + aggregator.getValuesForInsert() + ")");
 
             // persist the fieldValues
             persistAggregation(aggregator);
@@ -376,7 +378,7 @@ public class NGSIPostgisSink extends NGSISink {
 
 
                     if (attrNativeTypes && this instanceof ColumnAggregator) {
-                        if (value.isJsonNull()) {
+                        if (value.isJsonNull() || value == null) {
                             stringValue = "NULL";
                         } else if (value.isJsonPrimitive()) {
                             if (value.getAsJsonPrimitive().isBoolean()) {
@@ -597,13 +599,17 @@ public class NGSIPostgisSink extends NGSISink {
                 if (aggregation.containsKey(attrName)) {
                     aggregation.get(attrName).add(attrValue);
                     aggregation.get(attrName + "_md").add(new JsonPrimitive(attrMetadata));
+                    LOGGER.debug("[" + getName() + "] adding context attribute (name=" + attrName + ", type="
+                            + attrValue.getAsString() + ")");
                 } else {
-                    ArrayList<JsonElement> values = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, JsonNull.INSTANCE));
+                    ArrayList<JsonElement> values = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
                     values.add(attrValue);
                     aggregation.put(attrName, values);
-                    ArrayList<JsonElement> valuesMd = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, JsonNull.INSTANCE));
+                    ArrayList<JsonElement> valuesMd = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
                     valuesMd.add(new JsonPrimitive(attrMetadata));
                     aggregation.put(attrName + "_md", valuesMd);
+                    LOGGER.debug("[" + getName() + "] adding new context attribute (name=" + attrName + ", type="
+                            + attrValue.getAsString() + ")");
                 } // if else
             } // for
 
@@ -612,7 +618,7 @@ public class NGSIPostgisSink extends NGSISink {
                 ArrayList<JsonElement> values = aggregation.get(key);
 
                 if (values.size() == numPreviousValues) {
-                    values.add(JsonNull.INSTANCE);
+                    values.add(null);
                 } // if
             } // for
         } // aggregate
