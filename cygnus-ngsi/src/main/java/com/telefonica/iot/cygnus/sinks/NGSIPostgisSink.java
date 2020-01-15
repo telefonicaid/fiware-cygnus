@@ -374,7 +374,7 @@ public class NGSIPostgisSink extends NGSISink {
                     JsonElement value = values.get(i);
                     String stringValue = null;
                     if (attrNativeTypes && this instanceof ColumnAggregator) {
-                        if (value.isJsonNull() || value == null) {
+                        if (value == null || value.isJsonNull()) {
                             stringValue = "NULL";
                         } else if (value.isJsonPrimitive()) {
                             if (value.getAsJsonPrimitive().isBoolean()) {

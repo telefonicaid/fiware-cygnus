@@ -360,7 +360,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     String stringValue = null;
                     if (attrNativeTypes && this instanceof ColumnAggregator) {
                         LOGGER.debug("[" + getName() + "] aggregation entry = "  + entry );
-                        if (value.isJsonNull() || value == null) {
+                        if (value == null || value.isJsonNull()) {
                             stringValue = "NULL";
                         } else if (value.isJsonPrimitive()) {
                             if (value.getAsJsonPrimitive().isBoolean()) {
