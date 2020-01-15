@@ -374,6 +374,7 @@ public class NGSIPostgisSink extends NGSISink {
                     JsonElement value = values.get(i);
                     String stringValue = null;
                     if (attrNativeTypes && this instanceof ColumnAggregator) {
+                        LOGGER.debug("[" + getName() + "] aggregation entry = "  + entry );
                         if (value == null || value.isJsonNull()) {
                             stringValue = "NULL";
                         } else if (value.isJsonPrimitive()) {
@@ -385,10 +386,14 @@ public class NGSIPostgisSink extends NGSISink {
                                 stringValue = "'" + value.getAsString() + "'";
                             }
                         } else {
-                            stringValue = "'" + value.getAsString() + "'";
+                            stringValue = "'" + value.toString() + "'";
                         }
                     } else {
-                        stringValue = "'" + value.getAsString() + "'";
+                        if (value.isJsonPrimitive()) {
+                            stringValue = "'" + value.getAsString() + "'";
+                        } else {
+                            stringValue = "'" + value.toString() + "'";
+                        }
                     }
                     if (first) {
                         valuesForInsert += stringValue;

@@ -371,10 +371,14 @@ public class NGSIPostgreSQLSink extends NGSISink {
                                 stringValue = "'" + value.getAsString() + "'";
                             }
                         } else {
-                            stringValue = "'" + value.getAsString() + "'";
+                            stringValue = "'" + value.toString() + "'";
                         }
                     } else {
-                        stringValue = "'" + value.getAsString() + "'";
+                        if (value.isJsonPrimitive()) {
+                            stringValue = "'" + value.getAsString() + "'";
+                        } else {
+                            stringValue = "'" + value.toString() + "'";
+                        }
                     }
                     if (first) {
                         valuesForInsert += stringValue;
