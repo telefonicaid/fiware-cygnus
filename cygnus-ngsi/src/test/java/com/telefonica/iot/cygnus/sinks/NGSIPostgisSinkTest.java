@@ -1209,6 +1209,58 @@ public class NGSIPostgisSinkTest {
         return contextElement;
     } // createContextElementForNativeTypes
 
-
+    @Test
+    public void testNativeTypeColumnBatch() throws CygnusBadConfiguration{
+        String attr_native_types = "true"; // default
+        NGSIPostgisSink ngsiPostgisSink = new NGSIPostgisSink();
+        ngsiPostgisSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        // Create a NGSIEvent
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        String destination = "someDestination";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
+        NotifyContextRequest.ContextElement contextElement2 = createContextElement();
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
+        NGSIEvent ngsiEvent2 = new NGSIEvent(headers, contextElement2.toString().getBytes(), contextElement2, null);
+        NGSIBatch batch = new NGSIBatch();
+        batch.addEvent(destination, ngsiEvent);
+        batch.addEvent(destination, ngsiEvent2);
+        try {
+            batch.startIterator();
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                NGSIPostgisSink.PostgisAggregator aggregator = ngsiPostgisSink.getAggregator(false);
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                } // for
+                String correctBatch = "('2016-04-20T07:19:55.801Z','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]','ST_GeomFromGeoJSON('\"{\\\"type\\\": \\\"Point\\\",\\\"coordinates\\\": [-0.036177,39.986159]}\"')','[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20T07:19:55.801Z','somePath','someId','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'ST_SetSRID(ST_MakePoint(\"-3.7167::double precision , 40.3833\"::double precision ), 4326)','[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
+                if (aggregator.getValuesForInsert().equals(correctBatch)) {
+                    System.out.println(getTestTraceHead("[NGSIPostgisSink.testNativeTypesColumnBatch]")
+                            + "-  OK  - NativeTypesOK");
+                    assertTrue(true);
+                } else {
+                    assertFalse(true);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            assertFalse(true);
+        }
+    }
 
 } // NGSIPostgisSinkTest

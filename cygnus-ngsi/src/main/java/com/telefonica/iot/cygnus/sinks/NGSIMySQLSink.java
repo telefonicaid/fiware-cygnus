@@ -303,7 +303,7 @@ public class NGSIMySQLSink extends NGSISink {
     /**
      * Class for aggregating.
      */
-    private abstract class MySQLAggregator {
+    protected abstract class MySQLAggregator {
         
         // object containing the aggregated data
         protected LinkedHashMap<String, ArrayList<JsonElement>> aggregation;
@@ -657,7 +657,7 @@ public class NGSIMySQLSink extends NGSISink {
         
     } // ColumnAggregator
     
-    private MySQLAggregator getAggregator(boolean rowAttrPersistence) {
+    protected MySQLAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
             return new RowAggregator();
         } else {

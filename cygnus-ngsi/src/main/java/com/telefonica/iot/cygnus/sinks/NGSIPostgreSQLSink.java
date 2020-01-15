@@ -288,7 +288,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     /**
      * Class for aggregating fieldValues.
      */
-    private abstract class PostgreSQLAggregator {
+    protected abstract class PostgreSQLAggregator {
 
         // object containing the aggregated data
         protected LinkedHashMap<String, ArrayList<JsonElement>> aggregation;
@@ -603,7 +603,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
 
     } // ColumnAggregator
 
-    private PostgreSQLAggregator getAggregator(boolean rowAttrPersistence) {
+    protected PostgreSQLAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
             return new RowAggregator();
         } else {
