@@ -15,7 +15,7 @@ import java.util.LinkedHashMap;
 /**
  * The type Ngsi generic aggregator.
  */
-abstract class NGSIGenericAggregator {
+public abstract class NGSIGenericAggregator {
 
     // Logger
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIGenericAggregator.class);
@@ -94,7 +94,7 @@ abstract class NGSIGenericAggregator {
      *
      * @return the aggregation
      */
-    protected LinkedHashMap<String, ArrayList<JsonElement>> getAggregation() {
+    public LinkedHashMap<String, ArrayList<JsonElement>> getAggregation() {
         return aggregation;
     } //getAggregation
 
