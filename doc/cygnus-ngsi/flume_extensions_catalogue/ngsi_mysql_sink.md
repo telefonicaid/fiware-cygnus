@@ -8,6 +8,7 @@ Content:
         * [MySQL tables naming conventions](#section1.2.2)
         * [Row-like storing](#section1.2.3)
         * [Column-like storing](#section1.2.4)
+        * [Native attribute type](#section1.2.5)
     * [Example](#section1.3)
         * [`NGSIEvent`](#section1.3.1)
         * [Database and table names](#section1.3.2)
@@ -110,6 +111,25 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 * `entityType`: Notified entity type.
 *  For each notified attribute, a field named as the attribute is considered. This field will store the attribute values along the time.
 *  For each notified attribute, a field named as the concatenation of the attribute name and `_md` is considered. This field will store the attribute's metadata values along the time.
+
+[Top](#top)
+
+
+
+#### <a name="section1.2.5">Native types
+
+Regarding the specific data stored within the above table, if `attr_native_types` parameter is set to `true` then attribute is inserted using its native type (according with the following table), if `false` then will be stringify.
+
+Type json     | Type
+------------- | --------------------------------------- 
+string        | text
+number        | double, precision, real, others (numeric, decimal)
+boolean       | boolean (TRUE, FALSE, NULL)
+DateTime      | timestamp, timestamp with time zone, timestamp without time zone
+json          | text o json - it`s treated as String
+null          | NULL
+
+This only applies to Column mode.
 
 [Top](#top)
 
@@ -349,20 +369,5 @@ A complete configuration as the described above is read from the given `Context`
 
 ### <a name="section3.2"></a>Authentication and authorization
 Current implementation of `NGSIMySQLSink` relies on the username and password credentials created at the MySQL endpoint.
-
-[Top](#top)
-
-## Native types
-
-Regarding the specific data stored within the above table, if `attr_native_types` parameter is set to `true` then attribute is inserted using its native type (according with the following table), if `false` then will be stringify.
-
-Type json     | Type
-------------- | --------------------------------------- 
-string        | text
-number        | double, precision, real, others (numeric, decimal)
-boolean       | boolean (TRUE, FALSE, NULL)
-DateTime      | timestamp, timestamp with time zone, timestamp without time zone
-json          | text o json - it`s treated as String
-null          | NULL
 
 [Top](#top)
