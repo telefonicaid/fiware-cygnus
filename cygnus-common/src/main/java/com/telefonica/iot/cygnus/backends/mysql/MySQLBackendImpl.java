@@ -181,9 +181,9 @@ public class MySQLBackendImpl implements MySQLBackend {
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
-            throw new CygnusPersistenceError("Data insertion error", "SQLTimeoutException", e.getMessage());
+            throw new CygnusPersistenceError("Data insertion error. Query insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
-            throw new CygnusBadContextData("Data insertion error", "SQLException", e.getMessage());
+            throw new CygnusBadContextData("Data insertion error. Query: insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLException", e.getMessage());
         } finally {
             closeMySQLObjects(con, stmt);
         } // try catch

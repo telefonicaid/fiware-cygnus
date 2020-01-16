@@ -673,7 +673,7 @@ public class NGSIMySQLSink extends NGSISink {
         String dbName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
         
-        LOGGER.error("[" + this.getName() + "] Persisting data at NGSIMySQLSink. Database ("
+        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIMySQLSink. Database ("
                 + dbName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
                 + valuesForInsert + ")");
         
