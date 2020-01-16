@@ -9,4 +9,4 @@ $ cp agent_ngsi.conf.template [APACHE_FLUME_HOME]/conf/
 
 ```
 $ cp grouping_rules.conf.template [APACHE_FLUME_HOME]/conf/
-``
+```

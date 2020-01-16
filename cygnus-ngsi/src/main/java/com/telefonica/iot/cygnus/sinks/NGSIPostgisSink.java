@@ -18,6 +18,9 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
@@ -35,6 +38,10 @@ import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
 
@@ -232,6 +239,12 @@ public class NGSIPostgisSink extends NGSISink {
     } // configure
 
     @Override
+    public void stop() {
+        super.stop();
+        if (persistenceBackend != null) persistenceBackend.close();
+    } // stop
+
+    @Override
     public void start() {
         try {
             persistenceBackend = new PostgreSQLBackendImpl(postgisHost, postgisPort, postgisDatabase, postgisUsername, postgisPassword, maxPoolSize);
@@ -270,6 +283,8 @@ public class NGSIPostgisSink extends NGSISink {
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
+            LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" + aggregator.getFieldsForInsert()+ ", values="
+                    + aggregator.getValuesForInsert() + ")");
 
             // persist the fieldValues
             persistAggregation(aggregator);
@@ -288,10 +303,10 @@ public class NGSIPostgisSink extends NGSISink {
     /**
      * Class for aggregating fieldValues.
      */
-    private abstract class PostgisAggregator {
+    protected abstract class PostgisAggregator {
 
-        // string containing the data fieldValues
-        protected String aggregation;
+        // object containing the aggregated data
+        protected LinkedHashMap<String, ArrayList<JsonElement>> aggregation;
 
         protected String service;
         protected String servicePathForData;
@@ -304,10 +319,10 @@ public class NGSIPostgisSink extends NGSISink {
         protected String fieldNames;
 
         public PostgisAggregator() {
-            aggregation = "";
+            aggregation = new LinkedHashMap<>();
         } // PostgisAggregator
 
-        public String getAggregation() {
+        public LinkedHashMap<String, ArrayList<JsonElement>> getAggregation() {
             return aggregation;
         } // getAggregation
 
@@ -335,6 +350,101 @@ public class NGSIPostgisSink extends NGSISink {
             return fieldNames;
         } // getFieldNames
 
+        protected String getServicePathForData() {
+            return servicePathForData;
+        } //getServicePathForData
+
+        public String getValuesForInsert() {
+            String valuesForInsert = "";
+            int numEvents = aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).size();
+
+            for (int i = 0; i < numEvents; i++) {
+                if (i == 0) {
+                    valuesForInsert += "(";
+                } else {
+                    valuesForInsert += ",(";
+                } // if else
+
+                boolean first = true;
+                Iterator<String> it = aggregation.keySet().iterator();
+
+                while (it.hasNext()) {
+                    String entry = (String) it.next();
+                    ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
+                    JsonElement value = values.get(i);
+                    String stringValue = null;
+                    if (attrNativeTypes && this instanceof ColumnAggregator) {
+                        LOGGER.debug("[" + getName() + "] aggregation entry = "  + entry );
+                        if (value == null || value.isJsonNull()) {
+                            stringValue = "NULL";
+                        } else if (value.isJsonPrimitive()) {
+                            if (value.getAsJsonPrimitive().isBoolean()) {
+                                stringValue = value.getAsString().toUpperCase();
+                            } else if (value.getAsJsonPrimitive().isNumber()) {
+                                stringValue = value.getAsString();
+                            }else {
+                                if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
+                                    stringValue = value.getAsString().replace("\\", "");
+                                } else {
+                                    stringValue = "'" + value.getAsString() + "'";
+                                }
+                            }
+                        } else {
+                            stringValue = "'" + value.toString() + "'";
+                        }
+                    } else {
+                        if (value.isJsonPrimitive()) {
+                            stringValue = "'" + value.getAsString() + "'";
+                        } else {
+                            stringValue = "'" + value.toString() + "'";
+                        }
+                    }
+                    if (first) {
+                        valuesForInsert += stringValue;
+                        first = false;
+                    } else {
+                        valuesForInsert += "," + stringValue;
+                    } // if else
+                } // while
+
+                valuesForInsert += ")";
+            } // for
+
+            return valuesForInsert;
+        } // getValuesForInsert
+
+        public String getFieldsForCreate() {
+            String fieldsForCreate = "(";
+            boolean first = true;
+            Iterator<String> it = aggregation.keySet().iterator();
+
+            while (it.hasNext()) {
+                if (first) {
+                    fieldsForCreate += (String) it.next() + " text";
+                    first = false;
+                } else {
+                    fieldsForCreate += "," + (String) it.next() + " text";
+                } // if else
+            } // while
+
+            return fieldsForCreate + ")";
+        } // getFieldsForCreate
+
+        public String getFieldsForInsert() {
+            String fieldsForInsert = "(";
+            boolean first = true;
+            Iterator<String> it = aggregation.keySet().iterator();
+            while (it.hasNext()) {
+                if (first) {
+                    fieldsForInsert += (String) it.next();
+                    first = false;
+                } else {
+                    fieldsForInsert += "," + (String) it.next();
+                } // if else
+            } // while
+            return fieldsForInsert + ")";
+        } // getFieldsForInsert
+
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
@@ -357,28 +467,16 @@ public class NGSIPostgisSink extends NGSISink {
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
-            typedFieldNames = "("
-                    + NGSIConstants.RECV_TIME_TS + " bigint,"
-                    + NGSIConstants.RECV_TIME + " text,"
-                    + NGSIConstants.FIWARE_SERVICE_PATH + " text,"
-                    + NGSIConstants.ENTITY_ID + " text,"
-                    + NGSIConstants.ENTITY_TYPE + " text,"
-                    + NGSIConstants.ATTR_NAME + " text,"
-                    + NGSIConstants.ATTR_TYPE + " text,"
-                    + NGSIConstants.ATTR_VALUE + " text,"
-                    + NGSIConstants.ATTR_MD + " text"
-                    + ")";
-            fieldNames = "("
-                    + NGSIConstants.RECV_TIME_TS + ","
-                    + NGSIConstants.RECV_TIME + ","
-                    + NGSIConstants.FIWARE_SERVICE_PATH + ","
-                    + NGSIConstants.ENTITY_ID + ","
-                    + NGSIConstants.ENTITY_TYPE + ","
-                    + NGSIConstants.ATTR_NAME + ","
-                    + NGSIConstants.ATTR_TYPE + ","
-                    + NGSIConstants.ATTR_VALUE + ","
-                    + NGSIConstants.ATTR_MD
-                    + ")";
+            LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
+            aggregation.put(NGSIConstants.RECV_TIME_TS, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ATTR_NAME, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ATTR_TYPE, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ATTR_VALUE, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ATTR_MD, new ArrayList<JsonElement>());
         } // initialize
 
         @Override
@@ -406,51 +504,22 @@ public class NGSIPostgisSink extends NGSISink {
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
+                JsonElement attrValue = contextAttribute.getValue();
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                ImmutablePair<String, Boolean> location =
-                    NGSIUtils.getGeometry(attrValue,
-                                          attrType,
-                                          attrMetadata,
-                                          swapCoordinates);
 
-                // create a column and aggregate it
-                String row = "('"
-                    + recvTimeTs + "','"
-                    + recvTime + "','"
-                    + servicePathForData + "','"
-                    + entityId + "','"
-                    + entityType + "','"
-                    + attrName + "','";
-
-                if (location.right) {
-                    LOGGER.debug("location=" + location.getLeft());
-                    row += DEFAULT_POSTGIS_TYPE + "','" + location.getLeft() + "','"  + attrMetadata + "')";
-                } else {
-                    if (attrNativeTypes) {
-                        if (attrType.equals("Number")) {
-                            row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
-                        } else {
-                            if (attrValue == null || attrValue.equals("")) {
-                                attrValue = "NULL";
-                                row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
-                            } else {
-                                // FIXME: next step: if attrNativeTypes then all will be without ' '
-                                row += attrType + "','" + attrValue + "','"  + attrMetadata + "')";
-                            }
-                        }
-                    } else {
-                        row += attrType + "','" + attrValue + "','"  + attrMetadata + "')";
-                    }
-                }
-
-                if (aggregation.isEmpty()) {
-                    aggregation += row;
-                } else {
-                    aggregation += "," + row;
-                } // if else
+                // aggregate the attribute information
+                LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
+                aggregation.get(NGSIConstants.RECV_TIME_TS).add(new JsonPrimitive(Long.toString(recvTimeTs)));
+                aggregation.get(NGSIConstants.RECV_TIME).add(new JsonPrimitive(recvTime));
+                aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(new JsonPrimitive(getServicePathForData()));
+                aggregation.get(NGSIConstants.ENTITY_ID).add(new JsonPrimitive(entityId));
+                aggregation.get(NGSIConstants.ENTITY_TYPE).add(new JsonPrimitive(entityType));
+                aggregation.get(NGSIConstants.ATTR_NAME).add(new JsonPrimitive(attrName));
+                aggregation.get(NGSIConstants.ATTR_TYPE).add(new JsonPrimitive(attrType));
+                aggregation.get(NGSIConstants.ATTR_VALUE).add(attrValue);
+                aggregation.get(NGSIConstants.ATTR_MD).add(new JsonPrimitive(attrMetadata));
             } // for
         } // aggregate
 
@@ -465,15 +534,12 @@ public class NGSIPostgisSink extends NGSISink {
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
             super.initialize(cygnusEvent);
 
-            // particulat initialization
-            typedFieldNames = "(" + NGSIConstants.RECV_TIME + " text,"
-                    + NGSIConstants.FIWARE_SERVICE_PATH + " text,"
-                    + NGSIConstants.ENTITY_ID + " text,"
-                    + NGSIConstants.ENTITY_TYPE + " text";
-            fieldNames = "(" + NGSIConstants.RECV_TIME + ","
-                    + NGSIConstants.FIWARE_SERVICE_PATH + ","
-                    + NGSIConstants.ENTITY_ID + ","
-                    + NGSIConstants.ENTITY_TYPE;
+            // particular initialization
+            LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
+            aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<JsonElement>());
+            aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<JsonElement>());
 
             // iterate on all this context element attributes, if there are attributes
             ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
@@ -484,29 +550,16 @@ public class NGSIPostgisSink extends NGSISink {
 
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
-                
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
-                String attrMetadata = contextAttribute.getContextMetadata();
-
-                if (!NGSIUtils.getGeometry(attrValue,
-                                           attrType,
-                                           attrMetadata,
-                                           swapCoordinates).getRight()) {
-                    typedFieldNames += "," + attrName + " text," + attrName + "_md text";
-                    fieldNames += "," + attrName + "," + attrName + "_md";
-                } else {
-                    typedFieldNames += "," + attrName + " " + DEFAULT_POSTGIS_TYPE + "," + attrName + "_md text";
-                    fieldNames += "," + attrName + "," + attrName + "_md";
-                }
+                aggregation.put(attrName, new ArrayList<JsonElement>());
+                aggregation.put(attrName + "_md", new ArrayList<JsonElement>());
             } // for
-
-            typedFieldNames += ")";
-            fieldNames += ")";
         } // initialize
 
         @Override
         public void aggregate(NGSIEvent cygnusEvent) {
+            // Number of previous values
+            int numPreviousValues = getAggregation().get(NGSIConstants.FIWARE_SERVICE_PATH).size();
+
             // get the getRecvTimeTs headers
             long recvTimeTs = cygnusEvent.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
@@ -527,56 +580,57 @@ public class NGSIPostgisSink extends NGSISink {
                 return;
             } // if
 
-            String column = "('" + recvTime + "','" + servicePathForData + "','" + entityId + "','" + entityType + "'";
+            LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
+            aggregation.get(NGSIConstants.RECV_TIME).add(new JsonPrimitive(recvTime));
+            aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(new JsonPrimitive(getServicePathForData()));
+            aggregation.get(NGSIConstants.ENTITY_ID).add(new JsonPrimitive(entityId));
+            aggregation.get(NGSIConstants.ENTITY_TYPE).add(new JsonPrimitive(entityType));
 
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
+                JsonElement attrValue = contextAttribute.getValue();
                 String attrMetadata = contextAttribute.getContextMetadata();
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
-                ImmutablePair<String, Boolean> location =
-                    NGSIUtils.getGeometry(attrValue,
-                                          attrType,
-                                          attrMetadata,
-                                          swapCoordinates);
 
+                //Process geometry if applyes
+                ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(attrValue.toString(), attrType, attrMetadata, swapCoordinates);
                 if (location.right) {
                     LOGGER.debug("location=" + location.getLeft());
-                    column += "," + location.getLeft() + ",'"  + attrMetadata + "'";
-
-                } else {
-                    // create part of the column with the current attribute (a.k.a. a column)
-                    if (attrNativeTypes) {
-                        if (attrType.equals("Number")) {
-                            column += "," + attrValue + ",'"  + attrMetadata + "'";
-                        } else {
-                            if (attrValue == null || attrValue.equals("")) {
-                                attrValue = "NULL";
-                                column += "," + attrValue + ",'"  + attrMetadata + "'";
-                            } else {
-                                // FIXME: next step: if attrNativeTypes then all will be without ' '
-                                column += ",'" + attrValue + "','"  + attrMetadata + "'";
-                            }
-                        }
-                    } else {
-                        column += ",'" + attrValue + "','"  + attrMetadata + "'";
-                    }
+                    attrValue = new JsonPrimitive(location.getLeft());
                 }
+
+                if (aggregation.containsKey(attrName)) {
+                    aggregation.get(attrName).add(attrValue);
+                    aggregation.get(attrName + "_md").add(new JsonPrimitive(attrMetadata));
+                    LOGGER.debug("[" + getName() + "] adding context attribute (name=" + attrName + ", type="
+                            + attrValue.getAsString() + ")");
+                } else {
+                    ArrayList<JsonElement> values = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
+                    values.add(attrValue);
+                    aggregation.put(attrName, values);
+                    ArrayList<JsonElement> valuesMd = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
+                    valuesMd.add(new JsonPrimitive(attrMetadata));
+                    aggregation.put(attrName + "_md", valuesMd);
+                    LOGGER.debug("[" + getName() + "] adding new context attribute (name=" + attrName + ", type="
+                            + attrValue.getAsString() + ")");
+                } // if else
             } // for
 
-            // now, aggregate the column
-            if (aggregation.isEmpty()) {
-                aggregation += column + ")";
-            } else {
-                aggregation += "," + column + ")";
-            } // if else
+            // Iterate on all the aggregations, checking for not updated attributes; add an empty value if missing
+            for (String key : aggregation.keySet()) {
+                ArrayList<JsonElement> values = aggregation.get(key);
+
+                if (values.size() == numPreviousValues) {
+                    values.add(null);
+                } // if
+            } // for
         } // aggregate
 
     } // ColumnAggregator
 
-    private PostgisAggregator getAggregator(boolean rowAttrPersistence) {
+    protected PostgisAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
             return new RowAggregator();
         } else {
@@ -585,31 +639,27 @@ public class NGSIPostgisSink extends NGSISink {
     } // getAggregator
 
     private void persistAggregation(PostgisAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
-        String typedFieldNames = aggregator.getTypedFieldNames();
-        String fieldNames = aggregator.getFieldNames();
-        String fieldValues = aggregator.getAggregation();
+        String fieldsForCreate = aggregator.getFieldsForCreate();
+        String fieldsForInsert = aggregator.getFieldsForInsert();
+        String valuesForInsert = aggregator.getValuesForInsert();
         String schemaName = aggregator.getSchemaName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgisSink. Schema ("
-                + schemaName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
-                + fieldValues + ")");
+                + schemaName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
+                + valuesForInsert + ")");
 
-        try {
             if (aggregator instanceof RowAggregator) {
                 persistenceBackend.createSchema(schemaName);
-                persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+                persistenceBackend.createTable(schemaName, tableName, fieldsForCreate);
             } // if
             // creating the database and the table has only sense if working in row mode, in column node
             // everything must be provisioned in advance
-            if (fieldValues.equals("")) {
+            if (valuesForInsert.equals("")) {
                 LOGGER.debug("[" + this.getName() + "] no values for insert");
             } else {
-                persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
+                persistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
             }
-        } catch (Exception e) {
-            throw new CygnusPersistenceError("-, " + e.getMessage());
-        } // try catch
     } // persistAggregation
     
     /**

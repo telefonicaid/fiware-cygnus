@@ -351,3 +351,18 @@ A complete configuration as the described above is read from the given `Context`
 Current implementation of `NGSIMySQLSink` relies on the username and password credentials created at the MySQL endpoint.
 
 [Top](#top)
+
+## Native types
+
+Regarding the specific data stored within the above table, if `attr_native_types` parameter is set to `true` then attribute is inserted using its native type (according with the following table), if `false` then will be stringify.
+
+Type json     | Type
+------------- | --------------------------------------- 
+string        | text
+number        | double, precision, real, others (numeric, decimal)
+boolean       | boolean (TRUE, FALSE, NULL)
+DateTime      | timestamp, timestamp with time zone, timestamp without time zone
+json          | text o json - it`s treated as String
+null          | NULL
+
+[Top](#top)

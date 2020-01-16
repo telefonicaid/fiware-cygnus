@@ -29,3 +29,17 @@ Please refear to [`NGSIPostgreSQLSink`](/ngsi_postgresql_sink.md) since all admi
 
 ## <a name="section3"></a>Programmers guide
 Please refear to [`NGSIPostgreSQLSink`](/ngsi_postgresql_sink.md) since all programing details about PostgreSQLSink applies to PostGISSink.
+
+
+## Native types
+
+Regarding the specific data stored within the above table, if `attr_native_types` parameter is set to `true` then attribute is inserted using its native type (according with the following table), if `false` then will be stringify.
+
+Type json     | Type PostGreSQL/POSTGIS
+------------- | --------------------------------------- 
+string        | text
+number        | double, precision, real, others (numeric, decimal)
+boolean       | boolean (TRUE, FALSE, NULL)
+DateTime      | timestamp, timestamp with time zone, timestamp without time zone
+json          | text o json - it`s treated as String
+null          | NULL
