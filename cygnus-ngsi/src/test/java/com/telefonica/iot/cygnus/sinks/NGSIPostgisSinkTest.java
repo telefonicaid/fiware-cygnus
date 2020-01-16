@@ -1029,7 +1029,7 @@ public class NGSIPostgisSinkTest {
         if (columnAggregator.getValuesForInsert().contains("2,'[]'")  &&
                 columnAggregator.getValuesForInsert().contains("TRUE,'[]'")  &&
                 columnAggregator.getValuesForInsert().contains("'2016-09-21T01:23:00.00Z'")  &&
-                columnAggregator.getValuesForInsert().contains("'ST_GeomFromGeoJSON('\"{\\\"type\\\": \\\"Point\\\",\\\"coordinates\\\": [-0.036177,39.986159]}\"')'")  &&
+                columnAggregator.getValuesForInsert().contains("ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"')")  &&
                 columnAggregator.getValuesForInsert().contains("{\"String\": \"string\"}")  &&
                 columnAggregator.getValuesForInsert().contains("foo")) {
             System.out.println(getTestTraceHead("[NGSIPostgisSink.testNativeTypesColumn]")
@@ -1248,7 +1248,8 @@ public class NGSIPostgisSinkTest {
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
                 } // for
-                String correctBatch = "('2016-04-20T07:19:55.801Z','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]','ST_GeomFromGeoJSON('\"{\\\"type\\\": \\\"Point\\\",\\\"coordinates\\\": [-0.036177,39.986159]}\"')','[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20T07:19:55.801Z','somePath','someId','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'ST_SetSRID(ST_MakePoint(\"-3.7167::double precision , 40.3833\"::double precision ), 4326)','[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
+                String correctBatch = "('2016-04-20T07:19:55.801Z','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20T07:19:55.801Z','somePath','someId','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(\"-3.7167::double precision , 40.3833\"::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
+                System.out.println(aggregator.getValuesForInsert());
                 if (aggregator.getValuesForInsert().equals(correctBatch)) {
                     System.out.println(getTestTraceHead("[NGSIPostgisSink.testNativeTypesColumnBatch]")
                             + "-  OK  - NativeTypesOK");

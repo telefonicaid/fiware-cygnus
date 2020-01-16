@@ -383,7 +383,11 @@ public class NGSIPostgisSink extends NGSISink {
                             } else if (value.getAsJsonPrimitive().isNumber()) {
                                 stringValue = value.getAsString();
                             }else {
-                                stringValue = "'" + value.getAsString() + "'";
+                                if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
+                                    stringValue = value.getAsString().replace("\\", "");
+                                } else {
+                                    stringValue = "'" + value.getAsString() + "'";
+                                }
                             }
                         } else {
                             stringValue = "'" + value.toString() + "'";
