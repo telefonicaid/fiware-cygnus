@@ -65,7 +65,6 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
      * @param postgresqlPort
      * @param postgresqlUsername
      * @param postgresqlPassword
-     * @param enableCache
      */
     public PostgreSQLBackendImpl(String postgresqlHost, String postgresqlPort, String postgresqlDatabase, String postgresqlUsername, String postgresqlPassword, int maxPoolSize) {
 
@@ -192,9 +191,9 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
             LOGGER.debug("Executing SQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
-            throw new CygnusPersistenceError("Data insertion error", "SQLTimeoutException", e.getMessage());
+            throw new CygnusPersistenceError("Data insertion error. Query: INSERT INTO " + schemaName + "." + tableName + " " + fieldNames + " VALUES " + fieldValues, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
-            throw new CygnusBadContextData("Data insertion error", "SQLException", e.getMessage());
+            throw new CygnusBadContextData("Data insertion error. Query: INSERT INTO " + schemaName + "." + tableName + " " + fieldNames + " VALUES " + fieldValues, "SQLException", e.getMessage());
         } finally {
             closePostgreSQLObjects(con, stmt);
         } // try catch
