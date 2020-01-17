@@ -266,6 +266,12 @@ ENV FLUME_HOME "/opt/apache-flume"
 
 ENV JAVA_VERSION "1.8.0"
 
+COPY / {CYGNUS_HOME}
+
+WORKDIR {CYGNUS_HOME}
+
+RUN ls -lsrt
+
 # Install
 RUN \
     # Add Cygnus user
@@ -295,9 +301,7 @@ RUN \
     chown -R cygnus:cygnus ${FLUME_HOME} && \
     # Make a shallow clone to help reduce final image size
     echo "INFO: Cloning Cygnus using <${GIT_URL_CYGNUS}> and <${GIT_REV_CYGNUS}>" && \
-    git clone ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
     cd ${CYGNUS_HOME} && \
-    git checkout ${GIT_REV_CYGNUS} && \
     echo "INFO: Build and install cygnus-common" && \
     cd ${CYGNUS_HOME}/cygnus-common && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean compile exec:exec assembly:single && \
