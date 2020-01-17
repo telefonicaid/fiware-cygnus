@@ -1,4 +1,4 @@
-package com.telefonica.iot.cygnus.utils;
+package com.telefonica.iot.cygnus.aggregation;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -6,6 +6,9 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.ArrayList;
@@ -33,8 +36,8 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
      * @param enableEncoding     the enable encoding
      * @param enableGeoParse     the enable geo parse
      */
-    public NGSIGenericColumnAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse) {
-        super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse);
+    public NGSIGenericColumnAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse, boolean attrNativeTypes) {
+        super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse, attrNativeTypes);
         this.enableGeoParse = enableGeoParse;
     }
 

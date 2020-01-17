@@ -1,4 +1,4 @@
-package com.telefonica.iot.cygnus.utils;
+package com.telefonica.iot.cygnus.aggregation;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -6,6 +6,8 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -26,8 +28,8 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
      * @param enableEncoding     the enable encoding flag for initialization
      * @param enableGeoParse     the enable geo parse flag for initialization
      */
-    protected NGSIGenericRowAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse) {
-        super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse);
+    protected NGSIGenericRowAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse, boolean attrNativeTypes) {
+        super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse, attrNativeTypes);
     }
 
     @Override

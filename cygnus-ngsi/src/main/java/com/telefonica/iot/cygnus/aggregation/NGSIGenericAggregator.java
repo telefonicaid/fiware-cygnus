@@ -1,12 +1,10 @@
-package com.telefonica.iot.cygnus.utils;
+package com.telefonica.iot.cygnus.aggregation;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.flume.Context;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -42,22 +40,6 @@ public abstract class NGSIGenericAggregator {
     // Default value for attrNativeTypes
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
 
-
-    /**
-     * Configure.
-     *
-     * @param context the context
-     */
-    public void configure(Context context) {
-        String attrNativeTypesStr = context.getString("attr_native_types", DEFAULT_ATTR_NATIVE_TYPES);
-        if (attrNativeTypesStr.equals("true") || attrNativeTypesStr.equals("false")) {
-            attrNativeTypes = Boolean.valueOf(attrNativeTypesStr);
-            LOGGER.debug("[" + getName() + "] Reading configuration (attr_native_types=" + attrNativeTypesStr + ")");
-        } else {
-            LOGGER.debug("[" + getName() + "] Invalid configuration (attr_native_types=" + attrNativeTypesStr + ") -- Must be 'true' or 'false' taking default false");
-        }
-    }
-
     /**
      * The Aggregation.
      */
@@ -80,12 +62,14 @@ public abstract class NGSIGenericAggregator {
      * @param enableNameMappings the enable name mappings
      * @param enableEncoding     the enable encoding
      * @param enableGeoParse     the enable geo parse
+     * @param attrNativeTypes    the attr native types
      */
-    NGSIGenericAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse) {
+    NGSIGenericAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse, boolean attrNativeTypes) {
         this.enableEncoding = enableEncoding;
         this.enableNameMappings = enableNameMappings;
         this.enableEncoding = enableEncoding;
         this.enableGeoParse = enableGeoParse;
+        this.attrNativeTypes = attrNativeTypes;
         aggregation = new LinkedHashMap<>();
     } // MySQLAggregator
 
@@ -135,6 +119,25 @@ public abstract class NGSIGenericAggregator {
         } // if else
     } // getTableName
 
+
+    /**
+     * Sets db name.
+     *
+     * @param dbName the db name
+     */
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
+    }
+
+    /**
+     * Sets table name.
+     *
+     * @param tableName the table name
+     */
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
     /**
      * Gets string value for json element.
      *
@@ -144,7 +147,6 @@ public abstract class NGSIGenericAggregator {
     public String getStringValueForJsonElement(JsonElement value) {
         String stringValue;
         if (attrNativeTypes) {
-            LOGGER.debug("[" + getName() + "] aggregation entry = "  + value.toString() );
             if (value == null || value.isJsonNull()) {
                 stringValue = "NULL";
             } else if (value.isJsonPrimitive()) {
@@ -153,7 +155,11 @@ public abstract class NGSIGenericAggregator {
                 } else if (value.getAsJsonPrimitive().isNumber()) {
                     stringValue = value.getAsString();
                 }else {
-                    stringValue = "'" + value.getAsString() + "'";
+                    if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
+                        stringValue = value.getAsString().replace("\\", "");
+                    } else {
+                        stringValue = "'" + value.getAsString() + "'";
+                    }
                 }
             } else {
                 stringValue = "'" + value.toString() + "'";
@@ -165,6 +171,7 @@ public abstract class NGSIGenericAggregator {
                 stringValue = "'" + value.toString() + "'";
             }
         }
+        LOGGER.debug("[" + getName() + "] aggregation entry = "  + stringValue);
         return stringValue;
     }
 

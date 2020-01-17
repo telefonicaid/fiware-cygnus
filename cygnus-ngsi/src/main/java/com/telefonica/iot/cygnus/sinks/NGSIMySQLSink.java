@@ -19,19 +19,14 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonPrimitive;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
 import com.telefonica.iot.cygnus.utils.*;
 import org.apache.flume.Context;
 
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
@@ -305,8 +300,6 @@ public class NGSIMySQLSink extends NGSISink {
         private String entityForNaming;
         private String entityType;
         private String attribute;
-        private String dbName;
-        private String tableName;
 
         /**
          * Instantiates a new Ngsi generic row aggregator.
@@ -317,18 +310,18 @@ public class NGSIMySQLSink extends NGSISink {
          * @param enableGeoParse     the enable geo parse flag for initialization
          */
         protected RowAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse) {
-            super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse);
+            super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse, false);
         }
 
         @Override
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             super.initialize(event);
-            dbName = buildDbName(event.getServiceForNaming(enableNameMappings));
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
             entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
             entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
             attribute = event.getAttributeForNaming(enableNameMappings);
-            tableName = buildTableName(servicePathForNaming, entityForNaming, entityType, attribute);
+            setDbName(buildDbName(event.getServiceForNaming(enableNameMappings)));
+            setTableName(buildTableName(servicePathForNaming, entityForNaming, entityType, attribute));
         } // initialize
 
     } // RowAggregator
@@ -342,8 +335,6 @@ public class NGSIMySQLSink extends NGSISink {
         private String entityForNaming;
         private String entityType;
         private String attribute;
-        private String dbName;
-        private String tableName;
 
         /**
          * Instantiates a new Ngsi generic column aggregator.
@@ -354,18 +345,18 @@ public class NGSIMySQLSink extends NGSISink {
          * @param enableGeoParse     the enable geo parse
          */
         public ColumnAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse) {
-            super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse);
+            super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse, attrNativeTypes);
         }
 
         @Override
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             super.initialize(event);
-            dbName = buildDbName(event.getServiceForNaming(enableNameMappings));
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
             entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
             entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
             attribute = event.getAttributeForNaming(enableNameMappings);
-            tableName = buildTableName(servicePathForNaming, entityForNaming, entityType, attribute);
+            setDbName(buildDbName(event.getServiceForNaming(enableNameMappings)));
+            setTableName(buildTableName(servicePathForNaming, entityForNaming, entityType, attribute));
         } // initialize
 
         
