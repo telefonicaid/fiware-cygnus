@@ -1,6 +1,6 @@
 /**
  * Copyright 2014-2017 Telefonica Investigación y Desarrollo, S.A.U
- *
+ *purposes
  * This file is part of fiware-cygnus (FIWARE project).
  *
  * fiware-cygnus is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
@@ -68,7 +68,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Available file-format implementation.
      */
-    private enum FileFormat { JSONROW, JSONCOLUMN, CSVROW, CSVCOLUMN }
+    protected enum FileFormat { JSONROW, JSONCOLUMN, CSVROW, CSVCOLUMN }
     
     /**
      * Available Hive database types.
@@ -528,7 +528,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating aggregation.
      */
-    private abstract class HDFSAggregator {
+    protected abstract class HDFSAggregator {
 
         // string containing the data aggregation
         protected String aggregation;
@@ -595,7 +595,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating batches in JSON row mode.
      */
-    private class JSONRowAggregator extends HDFSAggregator {
+    protected class JSONRowAggregator extends HDFSAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -668,7 +668,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating batches in JSON column mode.
      */
-    private class JSONColumnAggregator extends HDFSAggregator {
+    protected class JSONColumnAggregator extends HDFSAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -746,7 +746,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating batches in CSV row mode.
      */
-    private class CSVRowAggregator extends HDFSAggregator {
+    protected class CSVRowAggregator extends HDFSAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -822,7 +822,11 @@ public class NGSIHDFSSink extends NGSISink {
                     + attrName + csvSeparator
                     + attrType + csvSeparator;
                 if (attrValue != null) {
-                    line += attrValue.replaceAll("\"", "") + csvSeparator;
+                    if (attrValue.contains(",")) {
+                        line += "\"" + attrValue.replaceAll("\"", "") + "\"" + csvSeparator;
+                    } else {
+                        line += attrValue.replaceAll("\"", "") + csvSeparator;
+                    }
                 } else {
                     line += attrValue + csvSeparator;
                 }
@@ -871,7 +875,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating aggregation in CSV column mode.
      */
-    private class CSVColumnAggregator extends HDFSAggregator {
+    protected class CSVColumnAggregator extends HDFSAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -958,7 +962,11 @@ public class NGSIHDFSSink extends NGSISink {
 
                 // create part of the line with the current attribute (a.k.a. a column)
                 if (attrValue != null) {
-                    line += csvSeparator + attrValue.replaceAll("\"", "") + csvSeparator + printableAttrMdFileName;
+                    if (attrValue.contains(",")) {
+                        line += csvSeparator + "\"" + attrValue.replaceAll("\"", "") + "\"" + csvSeparator + printableAttrMdFileName;
+                    } else {
+                        line += csvSeparator + attrValue.replaceAll("\"", "") + csvSeparator + printableAttrMdFileName;
+                    }
                 } else {
                     line += csvSeparator + attrValue + csvSeparator + printableAttrMdFileName;
                 }
@@ -1005,7 +1013,7 @@ public class NGSIHDFSSink extends NGSISink {
 
     } // CSVColumnAggregator
 
-    private HDFSAggregator getAggregator(FileFormat fileFormat) {
+    protected HDFSAggregator getAggregator(FileFormat fileFormat) {
         switch (fileFormat) {
             case JSONROW:
                 return new JSONRowAggregator();

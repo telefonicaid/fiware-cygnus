@@ -18,15 +18,31 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
+import com.google.gson.JsonPrimitive;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.sinks.NGSIHDFSSink.BackendImpl;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+
+import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.junit.Assert;
+
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -1196,5 +1212,352 @@ public class NGSIHDFSSinkTest {
         context.put("service_as_namespace", serviceAsNamespace);
         return context;
     } // createContext
-    
+
+    private NotifyContextRequest.ContextElement createContextElement() {
+        NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
+        NotifyContextRequest.ContextMetadata contextMetadata = new NotifyContextRequest.ContextMetadata();
+        contextMetadata.setName("location");
+        contextMetadata.setType("string");
+        contextMetadata.setContextMetadata(new JsonPrimitive("WGS84"));
+        ArrayList<NotifyContextRequest.ContextMetadata> metadata = new ArrayList<>();
+        metadata.add(contextMetadata);
+        NotifyContextRequest.ContextAttribute contextAttribute1 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute1.setName("someName1");
+        contextAttribute1.setType("someType1");
+        contextAttribute1.setContextValue(new JsonPrimitive("-3.7167, 40.3833"));
+        contextAttribute1.setContextMetadata(metadata);
+        NotifyContextRequest.ContextAttribute contextAttribute2 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute2.setName("someName2");
+        contextAttribute2.setType("someType2");
+        contextAttribute2.setContextValue(new JsonPrimitive("someValue2"));
+        contextAttribute2.setContextMetadata(null);
+        ArrayList<NotifyContextRequest.ContextAttribute> attributes = new ArrayList<>();
+        attributes.add(contextAttribute1);
+        attributes.add(contextAttribute2);
+        NotifyContextRequest.ContextElement contextElement = new NotifyContextRequest.ContextElement();
+        contextElement.setId("someId");
+        contextElement.setType("someType");
+        contextElement.setIsPattern("false");
+        contextElement.setAttributes(attributes);
+        return contextElement;
+    } // createContextElement
+
+    private Context createContextforNativeTypes(String backendImpl, String backendMaxConns, String backendMaxConnsPerRoute,
+                                                String batchSize, String batchTime, String batchTTL, String csvSeparator, String dataModel,
+                                                String enableEncoding, String enableGrouping, String enableLowercase, String fileFormat, String host,
+                                                String password, String port, String username, String hive, String krb5, String token,
+                                                String serviceAsNamespace, String attrNativeTypes) {
+        Context context = new Context();
+        context.put("backend.impl", backendImpl);
+        context.put("backend.max_conns", backendMaxConns);
+        context.put("backend.max_conns_per_route", backendMaxConnsPerRoute);
+        context.put("batchSize", batchSize);
+        context.put("batchTime", batchTime);
+        context.put("batchTTL", batchTTL);
+        context.put("csv_separator", csvSeparator);
+        context.put("data_model", dataModel);
+        context.put("enable_encoding", enableEncoding);
+        context.put("enable_grouping", enableGrouping);
+        context.put("enable_grouping", enableLowercase);
+        context.put("file_format", fileFormat);
+        context.put("hdfs_host", host);
+        context.put("hdfs_password", password);
+        context.put("hdfs_port", port);
+        context.put("hdfs_username", username);
+        context.put("hive", hive);
+        context.put("krb5_auth", krb5);
+        context.put("oauth2_token", token);
+        context.put("service_as_namespace", serviceAsNamespace);
+        context.put("attr_native_types", attrNativeTypes);
+        return context;
+    } // createContext
+
+    private NotifyContextRequest.ContextElement createContextElementForNativeTypes() {
+        NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
+        NotifyContextRequest.ContextMetadata contextMetadata = new NotifyContextRequest.ContextMetadata();
+        contextMetadata.setName("someString");
+        contextMetadata.setType("string");
+        ArrayList<NotifyContextRequest.ContextMetadata> metadata = new ArrayList<>();
+        metadata.add(contextMetadata);
+        NotifyContextRequest.ContextAttribute contextAttribute1 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute1.setName("someNumber");
+        contextAttribute1.setType("number");
+        contextAttribute1.setContextValue(new JsonPrimitive(2));
+        contextAttribute1.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute2 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute2.setName("somneBoolean");
+        contextAttribute2.setType("Boolean");
+        contextAttribute2.setContextValue(new JsonPrimitive(true));
+        contextAttribute2.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute3 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute3.setName("someDate");
+        contextAttribute3.setType("DateTime");
+        contextAttribute3.setContextValue(new JsonPrimitive("2016-09-21T01:23:00.00Z"));
+        contextAttribute3.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute4 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute4.setName("someGeoJson");
+        contextAttribute4.setType("geo:json");
+        contextAttribute4.setContextValue(new JsonPrimitive("{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}"));
+        contextAttribute4.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute5 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute5.setName("someJson");
+        contextAttribute5.setType("json");
+        contextAttribute5.setContextValue(new JsonPrimitive("{\"String\": \"string\"}"));
+        contextAttribute5.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute6 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute6.setName("someString");
+        contextAttribute6.setType("string");
+        contextAttribute6.setContextValue(new JsonPrimitive("foo"));
+        contextAttribute6.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute7 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute7.setName("someString2");
+        contextAttribute7.setType("string");
+        contextAttribute7.setContextValue(new JsonPrimitive(""));
+        contextAttribute7.setContextMetadata(null);
+        ArrayList<NotifyContextRequest.ContextAttribute> attributes = new ArrayList<>();
+        attributes.add(contextAttribute1);
+        attributes.add(contextAttribute2);
+        attributes.add(contextAttribute3);
+        attributes.add(contextAttribute4);
+        attributes.add(contextAttribute5);
+        attributes.add(contextAttribute6);
+        attributes.add(contextAttribute7);
+        NotifyContextRequest.ContextElement contextElement = new NotifyContextRequest.ContextElement();
+        contextElement.setId("someId");
+        contextElement.setType("someType");
+        contextElement.setIsPattern("false");
+        contextElement.setAttributes(attributes);
+        return contextElement;
+    } // createContextElementForNativeTypes
+
+    @Test
+    public void testNativeTypeColumnJson() throws CygnusBadConfiguration {
+        String attr_native_types = "true"; // default
+        NGSIHDFSSink ngsihdfsSink= new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        // Create a NGSIEvent
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        //NGSICKANSink.ColumnAggregator columnAggregator = ngsickanSink.new ColumnAggregator(false, false, false, false);
+        NGSIHDFSSink.JSONColumnAggregator columnAggregator = ngsihdfsSink.new JSONColumnAggregator();
+        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
+        columnAggregator.initialize(ngsiEvent);
+        columnAggregator.aggregate(ngsiEvent);
+        System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnJson]")
+                + "-  OK");
+        String correctAggregation = "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\", \"someNumber\":\"2\", \"someNumber_md\":[], \"somneBoolean\":\"true\", \"somneBoolean_md\":[], \"someDate\":\"2016-09-21T01:23:00.00Z\", \"someDate_md\":[], \"someGeoJson\":\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\", \"someGeoJson_md\":[], \"someJson\":\"{\"String\": \"string\"}\", \"someJson_md\":[], \"someString\":\"foo\", \"someString_md\":[], \"someString2\":\"\", \"someString2_md\":[]}";
+        if (columnAggregator.getAggregation().equals(correctAggregation)) {
+            assertTrue(true);
+        } else {
+            fail();
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnJson]")
+                    + "-  FAIL");
+        }
+
+    }//testNativeTypeColumnJson
+
+    @Test
+    public void testNativeTypeColumnCsv() throws CygnusBadConfiguration, CygnusBadContextData {
+        String attr_native_types = "true"; // default
+        NGSIHDFSSink ngsihdfsSink= new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        // Create a NGSIEvent
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        //NGSICKANSink.ColumnAggregator columnAggregator = ngsickanSink.new ColumnAggregator(false, false, false, false);
+        NGSIHDFSSink.CSVColumnAggregator columnAggregator = ngsihdfsSink.new CSVColumnAggregator();
+        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
+        columnAggregator.initialize(ngsiEvent);
+        columnAggregator.aggregate(ngsiEvent);
+        System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnCsv]")
+                + "-  OK");
+        String correctAggregation = "2016-04-20T07:19:55.801Z,somePath,someId,someType,2,hdfs:///user/null/someServicesomePath/someId_someTypexffffsomeNumberxffffnumber/someId_someTypexffffsomeNumberxffffnumber.txt,true,hdfs:///user/null/someServicesomePath/someId_someTypexffffsomneBooleanxffffBoolean/someId_someTypexffffsomneBooleanxffffBoolean.txt,2016-09-21T01:23:00.00Z,hdfs:///user/null/someServicesomePath/someId_someTypexffffsomeDatexffffDateTime/someId_someTypexffffsomeDatexffffDateTime.txt,\"{type: Point,coordinates: [-0.036177,39.986159]}\",hdfs:///user/null/someServicesomePath/someId_someTypexffffsomeGeoJsonxffffgeo:json/someId_someTypexffffsomeGeoJsonxffffgeo:json.txt,{String: string},hdfs:///user/null/someServicesomePath/someId_someTypexffffsomeJsonxffffjson/someId_someTypexffffsomeJsonxffffjson.txt,foo,hdfs:///user/null/someServicesomePath/someId_someTypexffffsomeStringxffffstring/someId_someTypexffffsomeStringxffffstring.txt,,hdfs:///user/null/someServicesomePath/someId_someTypexffffsomeString2xffffstring/someId_someTypexffffsomeString2xffffstring.txt";
+        if (columnAggregator.getAggregation().equals(correctAggregation)) {
+            assertTrue(true);
+        } else {
+            fail();
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnCsv]")
+                    + "-  FAIL");
+        }
+
+    }//testNativeTypeColumnCsv
+
+    @Test
+    public void testNativeTypeRowJson() throws CygnusBadConfiguration, CygnusBadContextData {
+        String attr_native_types = "true"; // default
+        NGSIHDFSSink ngsihdfsSink= new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        // Create a NGSIEvent
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        //NGSICKANSink.ColumnAggregator columnAggregator = ngsickanSink.new ColumnAggregator(false, false, false, false);
+        NGSIHDFSSink.JSONRowAggregator rowAggregator = ngsihdfsSink.new JSONRowAggregator();
+        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
+        rowAggregator.initialize(ngsiEvent);
+        rowAggregator.aggregate(ngsiEvent);
+        System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeRowJson]")
+                + "-  OK");
+        String correctAggregation = "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someNumber\",\"attrType\":\"number\",\"attrValue\":\"2\",\"attrMd\":[]}\n" +
+                "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"somneBoolean\",\"attrType\":\"Boolean\",\"attrValue\":\"true\",\"attrMd\":[]}\n" +
+                "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someDate\",\"attrType\":\"DateTime\",\"attrValue\":\"2016-09-21T01:23:00.00Z\",\"attrMd\":[]}\n" +
+                "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someGeoJson\",\"attrType\":\"geo:json\",\"attrValue\":\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\",\"attrMd\":[]}\n" +
+                "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someJson\",\"attrType\":\"json\",\"attrValue\":\"{\"String\": \"string\"}\",\"attrMd\":[]}\n" +
+                "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString\",\"attrType\":\"string\",\"attrValue\":\"foo\",\"attrMd\":[]}\n" +
+                "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString2\",\"attrType\":\"string\",\"attrValue\":\"\",\"attrMd\":[]}";
+        if (rowAggregator.getAggregation().equals(correctAggregation)) {
+            assertTrue(true);
+        } else {
+            fail();
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeRowJson]")
+                    + "-  FAIL");
+        }
+
+    }//testNativeTypeRowCsv
+
+    @Test
+    public void testNativeTypeRowCsv() throws CygnusBadConfiguration, CygnusBadContextData {
+        String attr_native_types = "true"; // default
+        NGSIHDFSSink ngsihdfsSink= new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        // Create a NGSIEvent
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        //NGSICKANSink.ColumnAggregator columnAggregator = ngsickanSink.new ColumnAggregator(false, false, false, false);
+        NGSIHDFSSink.CSVRowAggregator rowAggregator = ngsihdfsSink.new CSVRowAggregator();
+        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
+        rowAggregator.initialize(ngsiEvent);
+        rowAggregator.aggregate(ngsiEvent);
+        System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeRowCsv]")
+                + "-  OK");
+        String correctAggregation = "1461136795,2016-04-20T07:19:55.801Z,somePath,someId,someType,someNumber,number,2,hdfs:///user/null/someServicesomePath/someId_someTypexffffsomeNumberxffffnumber/someId_someTypexffffsomeNumberxffffnumber.txt\n" +
+                "1461136795,2016-04-20T07:19:55.801Z,somePath,someId,someType,somneBoolean,Boolean,true,hdfs:///user/null/someServicesomePath/someId_someTypexffffsomneBooleanxffffBoolean/someId_someTypexffffsomneBooleanxffffBoolean.txt\n" +
+                "1461136795,2016-04-20T07:19:55.801Z,somePath,someId,someType,someDate,DateTime,2016-09-21T01:23:00.00Z,hdfs:///user/null/someServicesomePath/someId_someTypexffffsomeDatexffffDateTime/someId_someTypexffffsomeDatexffffDateTime.txt\n" +
+                "1461136795,2016-04-20T07:19:55.801Z,somePath,someId,someType,someGeoJson,geo:json,\"{type: Point,coordinates: [-0.036177,39.986159]}\",hdfs:///user/null/someServicesomePath/someId_someTypexffffsomeGeoJsonxffffgeo:json/someId_someTypexffffsomeGeoJsonxffffgeo:json.txt\n" +
+                "1461136795,2016-04-20T07:19:55.801Z,somePath,someId,someType,someJson,json,{String: string},hdfs:///user/null/someServicesomePath/someId_someTypexffffsomeJsonxffffjson/someId_someTypexffffsomeJsonxffffjson.txt\n" +
+                "1461136795,2016-04-20T07:19:55.801Z,somePath,someId,someType,someString,string,foo,hdfs:///user/null/someServicesomePath/someId_someTypexffffsomeStringxffffstring/someId_someTypexffffsomeStringxffffstring.txt\n" +
+                "1461136795,2016-04-20T07:19:55.801Z,somePath,someId,someType,someString2,string,,hdfs:///user/null/someServicesomePath/someId_someTypexffffsomeString2xffffstring/someId_someTypexffffsomeString2xffffstring.txt";
+        if (rowAggregator.getAggregation().equals(correctAggregation)) {
+            assertTrue(true);
+        } else {
+            fail();
+            System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeRowCsv]")
+                    + "-  FAIL");
+        }
+
+    }//testNativeTypeRowCsv
+
+    @Test
+    public void testNativeTypeColumnBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        String attr_native_types = "true"; // default
+        NGSIHDFSSink ngsihdfsSink= new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes("json-column", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        // Create a NGSIEvent
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        String destination = "someDestination";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
+        NotifyContextRequest.ContextElement contextElement2 = createContextElement();
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
+        NGSIEvent ngsiEvent2 = new NGSIEvent(headers, contextElement2.toString().getBytes(), contextElement2, null);
+        NGSIBatch batch = new NGSIBatch();
+        batch.addEvent(destination, ngsiEvent);
+        batch.addEvent(destination, ngsiEvent2);
+        try {
+            batch.startIterator();
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                NGSIHDFSSink.HDFSAggregator aggregator = ngsihdfsSink.getAggregator(NGSIHDFSSink.FileFormat.JSONCOLUMN);
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                } // for
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnBatch]")
+                        + "-  OK");
+                String correctAggregation = "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\", \"someNumber\":\"2\", \"someNumber_md\":[], \"somneBoolean\":\"true\", \"somneBoolean_md\":[], \"someDate\":\"2016-09-21T01:23:00.00Z\", \"someDate_md\":[], \"someGeoJson\":\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\", \"someGeoJson_md\":[], \"someJson\":\"{\"String\": \"string\"}\", \"someJson_md\":[], \"someString\":\"foo\", \"someString_md\":[], \"someString2\":\"\", \"someString2_md\":[]}\n" +
+                        "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\", \"someName1\":\"-3.7167, 40.3833\", \"someName1_md\":[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}], \"someName2\":\"someValue2\", \"someName2_md\":[]}";
+                if (aggregator.getAggregation().equals(correctAggregation)) {
+                    assertTrue(true);
+                } else {
+                    fail();
+                    System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnBatch]")
+                            + "-  FAIL");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            fail();
+        }
+    }
+
+
 } // NGSIHDFSSinkTest
