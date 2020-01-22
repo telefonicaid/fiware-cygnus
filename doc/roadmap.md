@@ -17,7 +17,7 @@ any time.
 
 Disclaimer:
 
-* This section has been last updated in June 2019. Please take into account its 
+* This section has been last updated in January 2020. Please take into account its 
   content could be obsolete.
 * Note we develop this software in Agile way, so development plan is continuously 
   under review. Thus, this roadmap has to be understood as rough plan of features 
@@ -32,7 +32,13 @@ Disclaimer:
 The following list of features are planned to be addressed in the short term,
 and incorporated in a next release of the product in the short term:
 
--   Make this GE compatible with [FIWARE GE requirements](https://docs.google.com/spreadsheets/d/13Pzhbq-xwd8gTCvYqeNkfaoDt-iGCedc1zlb_elxv2M/edit#gid=0)
+- JSON native types persistence (MySQL, PostGIS and PostgreSQL sinks)
+  - https://github.com/telefonicaid/fiware-cygnus/issues/1782
+  - https://github.com/telefonicaid/fiware-cygnus/issues/1780
+- Refactor and improvements in batch support (MySQL, PostGIS, PostgreSQL, CKAN sinks)
+  - https://github.com/telefonicaid/fiware-cygnus/issues/1787 
+- Ability to disable metadata (all sinks)
+  - https://github.com/telefonicaid/fiware-cygnus/issues/1706 
 
 ## Medium term
 
@@ -40,11 +46,14 @@ The following list of features are planned to be addressed in the medium term,
 typically within the subsequent release(s) generated in the next **9 months**
 after next planned release:
 
--   NGSIv2 notification reception endpoint
--   Contribution to the FIWARE tutorials covering NameMapping API functionality
--   Contribution to the FIWARE tutorials covering PostGIS
--   Contribution to the FIWARE tutorials covering ElasticSearch (to be contributed by members of the Community beyond GE owners)
--   New sink: SlicingDice (to be contributed by members of the Community beyond GE owners)
+- New mode dm-by-entity-shifted (CKAN sink)
+  - https://github.com/telefonicaid/fiware-cygnus/issues/1792
+- dm-by-entitytype in additional sinks (PostGIS and PostgreSQL sinks)
+  - https://github.com/telefonicaid/fiware-cygnus/issues/1684
+- Improve the error feedback provided to users (all sinks)
+  - https://github.com/telefonicaid/fiware-cygnus/issues/1791
+- Operational requirements (logs, correlation id, etc.) (all sinks)
+  - https://github.com/telefonicaid/fiware-cygnus/issues/1770 
 
 ## Long term
 
