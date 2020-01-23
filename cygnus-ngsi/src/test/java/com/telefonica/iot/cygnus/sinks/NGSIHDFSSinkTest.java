@@ -1351,7 +1351,6 @@ public class NGSIHDFSSinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        //NGSICKANSink.ColumnAggregator columnAggregator = ngsickanSink.new ColumnAggregator(false, false, false, false);
         NGSIHDFSSink.JSONColumnAggregator columnAggregator = ngsihdfsSink.new JSONColumnAggregator();
         NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
@@ -1368,7 +1367,7 @@ public class NGSIHDFSSinkTest {
                     + "-  FAIL");
         }
 
-    }//testNativeTypeColumnJson
+    } // testNativeTypeColumnJson
 
     @Test
     public void testNativeTypeColumnCsv() throws CygnusBadConfiguration, CygnusBadContextData {
@@ -1391,7 +1390,6 @@ public class NGSIHDFSSinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        //NGSICKANSink.ColumnAggregator columnAggregator = ngsickanSink.new ColumnAggregator(false, false, false, false);
         NGSIHDFSSink.CSVColumnAggregator columnAggregator = ngsihdfsSink.new CSVColumnAggregator();
         NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
@@ -1408,7 +1406,7 @@ public class NGSIHDFSSinkTest {
                     + "-  FAIL");
         }
 
-    }//testNativeTypeColumnCsv
+    } // testNativeTypeColumnCsv
 
     @Test
     public void testNativeTypeRowJson() throws CygnusBadConfiguration, CygnusBadContextData {
@@ -1431,7 +1429,6 @@ public class NGSIHDFSSinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        //NGSICKANSink.ColumnAggregator columnAggregator = ngsickanSink.new ColumnAggregator(false, false, false, false);
         NGSIHDFSSink.JSONRowAggregator rowAggregator = ngsihdfsSink.new JSONRowAggregator();
         NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
@@ -1454,7 +1451,7 @@ public class NGSIHDFSSinkTest {
                     + "-  FAIL");
         }
 
-    }//testNativeTypeRowCsv
+    } // testNativeTypeRowCsv
 
     @Test
     public void testNativeTypeRowCsv() throws CygnusBadConfiguration, CygnusBadContextData {
@@ -1477,7 +1474,6 @@ public class NGSIHDFSSinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        //NGSICKANSink.ColumnAggregator columnAggregator = ngsickanSink.new ColumnAggregator(false, false, false, false);
         NGSIHDFSSink.CSVRowAggregator rowAggregator = ngsihdfsSink.new CSVRowAggregator();
         NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
@@ -1500,7 +1496,7 @@ public class NGSIHDFSSinkTest {
                     + "-  FAIL");
         }
 
-    }//testNativeTypeRowCsv
+    } // testNativeTypeRowCsv
 
     @Test
     public void testNativeTypeColumnBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
@@ -1557,7 +1553,7 @@ public class NGSIHDFSSinkTest {
             System.out.println(e);
             fail();
         }
-    }
+    } // testNativeTypeColumnBatch
 
 
 } // NGSIHDFSSinkTest
