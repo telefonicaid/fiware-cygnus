@@ -253,11 +253,6 @@ ENV CYGNUS_ARCGIS_BATCH_SIZE ""
 ENV CYGNUS_ARCGIS_BATCH_TIMEOUT ""
 ENV CYGNUS_ARCGIS_BATCH_TTL ""
 
-# NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
-ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
-# ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "master"
-
 ENV MVN_VER "3.5.4"
 ENV MVN_HOME "/opt/apache-maven"
 
@@ -299,8 +294,6 @@ RUN \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/lib && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/libext && \
     chown -R cygnus:cygnus ${FLUME_HOME} && \
-    # Make a shallow clone to help reduce final image size
-    echo "INFO: Cloning Cygnus using <${GIT_URL_CYGNUS}> and <${GIT_REV_CYGNUS}>" && \
     cd ${CYGNUS_HOME} && \
     echo "INFO: Build and install cygnus-common" && \
     cd ${CYGNUS_HOME}/cygnus-common && \
