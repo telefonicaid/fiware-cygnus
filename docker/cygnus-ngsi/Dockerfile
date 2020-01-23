@@ -338,10 +338,10 @@ RUN \
     build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf && echo "INFO: END build"
 
 
-COPY cygnus-entrypoint.sh / 
-COPY agent.conf ${FLUME_HOME}/conf/ 
-COPY agent.conf ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf
-COPY cartodb_keys.conf ${FLUME_HOME}/conf/
+COPY docker/cygnus-ngsi/cygnus-entrypoint.sh / 
+COPY docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/ 
+COPY docker/cygnus-ngsi/agent.conf ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf
+COPY docker/cygnus-ngsi/cartodb_keys.conf ${FLUME_HOME}/conf/
 
 # Define the entry point
 ENTRYPOINT ["/cygnus-entrypoint.sh"]
