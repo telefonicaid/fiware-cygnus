@@ -253,11 +253,6 @@ ENV CYGNUS_ARCGIS_BATCH_SIZE ""
 ENV CYGNUS_ARCGIS_BATCH_TIMEOUT ""
 ENV CYGNUS_ARCGIS_BATCH_TTL ""
 
-# NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
-ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
-# ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "master"
-
 ENV MVN_VER "3.5.4"
 ENV MVN_HOME "/opt/apache-maven"
 
@@ -266,11 +261,17 @@ ENV FLUME_HOME "/opt/apache-flume"
 
 ENV JAVA_VERSION "1.8.0"
 
+COPY / ${CYGNUS_HOME}
+
+WORKDIR ${CYGNUS_HOME}
+
+RUN ls -lsrt
+
 # Install
 RUN \
     # Add Cygnus user
     adduser ${CYGNUS_USER} && \
-    yum -y install nc java-${JAVA_VERSION}-openjdk-devel git && \
+    yum -y install nc java-${JAVA_VERSION}-openjdk-devel && \
     export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk && \
     export MAVEN_OPTS="-Xmx2048M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:+CMSClassUnloadingEnabled" && \
     export MAVEN_ARGS="-B -T8" && \
@@ -293,11 +294,7 @@ RUN \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/lib && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/libext && \
     chown -R cygnus:cygnus ${FLUME_HOME} && \
-    # Make a shallow clone to help reduce final image size
-    echo "INFO: Cloning Cygnus using <${GIT_URL_CYGNUS}> and <${GIT_REV_CYGNUS}>" && \
-    git clone ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
     cd ${CYGNUS_HOME} && \
-    git checkout ${GIT_REV_CYGNUS} && \
     echo "INFO: Build and install cygnus-common" && \
     cd ${CYGNUS_HOME}/cygnus-common && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean compile exec:exec assembly:single && \
@@ -325,7 +322,7 @@ RUN \
     rm -rf /root/.m2 && rm -rf ${MVN_HOME} && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz && \
     echo "INFO: Java runtime not needs JAVA_HOME... Unsetting..." && \
     unset JAVA_HOME && \
-    yum erase -y git java-${JAVA_VERSION}-openjdk-devel && \
+    yum erase -y java-${JAVA_VERSION}-openjdk-devel && \
     rpm -qa redhat-logos gtk2 pulseaudio-libs libvorbis jpackage* groff alsa* atk cairo libX* | xargs -r rpm -e --nodeps && \
     yum clean all && rpm --rebuilddb && rm -rf /var/lib/yum/yumdb && rm -rf /var/lib/yum/history && \
     find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en_US' ! -name 'locale.alias' | xargs -r rm -r && rm -f /var/log/*log && \
@@ -334,10 +331,10 @@ RUN \
     build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf && echo "INFO: END build"
 
 
-COPY cygnus-entrypoint.sh / 
-COPY agent.conf ${FLUME_HOME}/conf/ 
-COPY agent.conf ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf
-COPY cartodb_keys.conf ${FLUME_HOME}/conf/
+COPY docker/cygnus-ngsi/cygnus-entrypoint.sh / 
+COPY docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/ 
+COPY docker/cygnus-ngsi/agent.conf ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf
+COPY docker/cygnus-ngsi/cartodb_keys.conf ${FLUME_HOME}/conf/
 
 # Define the entry point
 ENTRYPOINT ["/cygnus-entrypoint.sh"]

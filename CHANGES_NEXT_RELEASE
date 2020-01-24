@@ -8,3 +8,4 @@ Fix: Changing cygnus port does not work (#1698)
 [cygnus-ngsi] Changed log level for some events (#1769)
 [cygnus-ngsi][PostgisSink, PostGRESQLSink] Support for native Postgres and Postgis types (#1780)
 [cygnus-ngsi][MySQL] Support for native MySQL types (#1780)
+[cygnus-ngsi] Unattach dockerfile from git PR #1801
