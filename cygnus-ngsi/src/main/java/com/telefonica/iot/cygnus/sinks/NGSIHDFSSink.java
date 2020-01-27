@@ -893,11 +893,14 @@ public class NGSIHDFSSink extends NGSISink {
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
+                String attrMetadata = contextAttribute.getContextMetadata();
                 String attrMdFileName = buildAttrMdFilePath(service, servicePathForNaming, entityForNaming, attrName,
                         attrType);
-                mdAggregations.put(attrMdFileName, new String());
-                hiveFields += ",`" + NGSICharsets.encodeHive(attrName) + "` string,"
-                        + "`" + NGSICharsets.encodeHive(attrName) + "_md_file` string";
+                if (attrMetadata!= null && !attrMetadata.isEmpty() && !attrMetadata.equals("[]")) {
+                    mdAggregations.put(attrMdFileName, new String());
+                    hiveFields += ",`" + NGSICharsets.encodeHive(attrName) + "` string,"
+                            + "`" + NGSICharsets.encodeHive(attrName) + "_md_file` string";
+                }
             } // for
         } // initialize
 
@@ -940,28 +943,37 @@ public class NGSIHDFSSink extends NGSISink {
                         attrType);
                 String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
                 String mdAggregation = mdAggregations.get(attrMdFileName);
+                if (attrMetadata!= null && !attrMetadata.isEmpty() && !attrMetadata.equals("[]")) {
+                    if (mdAggregation == null) {
+                        mdAggregation = new String();
+                    } // if
 
-                if (mdAggregation == null) {
-                    mdAggregation = new String();
-                } // if
+                    // agregate the metadata
+                    String concatMdAggregation;
 
-                // agregate the metadata
-                String concatMdAggregation;
+                    if (mdAggregation.isEmpty()) {
+                        concatMdAggregation = getCSVMetadata(attrMetadata, recvTimeTs);
+                    } else {
+                        concatMdAggregation = mdAggregation.concat("\n" + getCSVMetadata(attrMetadata, recvTimeTs));
+                    } // if else
 
-                if (mdAggregation.isEmpty()) {
-                    concatMdAggregation = getCSVMetadata(attrMetadata, recvTimeTs);
+                    mdAggregations.put(attrMdFileName, concatMdAggregation);
+
+                    // create part of the line with the current attribute (a.k.a. a column)
+                    if (attrValue != null) {
+                        line += csvSeparator + attrValue.replaceAll("\"", "") + csvSeparator + printableAttrMdFileName;
+                    } else {
+                        line += csvSeparator + attrValue + csvSeparator + printableAttrMdFileName;
+                    }
                 } else {
-                    concatMdAggregation = mdAggregation.concat("\n" + getCSVMetadata(attrMetadata, recvTimeTs));
-                } // if else
-
-                mdAggregations.put(attrMdFileName, concatMdAggregation);
-
-                // create part of the line with the current attribute (a.k.a. a column)
-                if (attrValue != null) {
-                    line += csvSeparator + attrValue.replaceAll("\"", "") + csvSeparator + printableAttrMdFileName;
-                } else {
-                    line += csvSeparator + attrValue + csvSeparator + printableAttrMdFileName;
+                    if (attrValue != null) {
+                        line += csvSeparator + attrValue.replaceAll("\"", "") + csvSeparator + "NULL";
+                    } else {
+                        line += csvSeparator + attrValue + csvSeparator + "NULL";
+                    }
                 }
+
+
             } // for
 
             // now, aggregate the line
