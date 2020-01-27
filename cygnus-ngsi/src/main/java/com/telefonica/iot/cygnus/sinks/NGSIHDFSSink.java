@@ -68,7 +68,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Available file-format implementation.
      */
-    private enum FileFormat { JSONROW, JSONCOLUMN, CSVROW, CSVCOLUMN }
+    protected enum FileFormat { JSONROW, JSONCOLUMN, CSVROW, CSVCOLUMN }
     
     /**
      * Available Hive database types.
@@ -528,7 +528,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating aggregation.
      */
-    private abstract class HDFSAggregator {
+    protected abstract class HDFSAggregator {
 
         // string containing the data aggregation
         protected String aggregation;
@@ -595,7 +595,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating batches in JSON row mode.
      */
-    private class JSONRowAggregator extends HDFSAggregator {
+    protected class JSONRowAggregator extends HDFSAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -668,7 +668,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating batches in JSON column mode.
      */
-    private class JSONColumnAggregator extends HDFSAggregator {
+    protected class JSONColumnAggregator extends HDFSAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -746,7 +746,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating batches in CSV row mode.
      */
-    private class CSVRowAggregator extends HDFSAggregator {
+    protected class CSVRowAggregator extends HDFSAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -871,7 +871,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating aggregation in CSV column mode.
      */
-    private class CSVColumnAggregator extends HDFSAggregator {
+    protected class CSVColumnAggregator extends HDFSAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -1005,7 +1005,7 @@ public class NGSIHDFSSink extends NGSISink {
 
     } // CSVColumnAggregator
 
-    private HDFSAggregator getAggregator(FileFormat fileFormat) {
+    protected HDFSAggregator getAggregator(FileFormat fileFormat) {
         switch (fileFormat) {
             case JSONROW:
                 return new JSONRowAggregator();
@@ -1086,7 +1086,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // if
     } // persistAggregation
 
-    private void persistMDAggregations(HDFSAggregator aggregator) throws CygnusPersistenceError {
+    protected void persistMDAggregations(HDFSAggregator aggregator) throws CygnusPersistenceError {
         Set<String> attrMDFiles = aggregator.getAggregatedAttrMDFiles();
 
         for (String hdfsMDFile : attrMDFiles) {
