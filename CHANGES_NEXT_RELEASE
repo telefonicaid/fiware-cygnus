@@ -9,4 +9,4 @@ Fix: Changing cygnus port does not work (#1698)
 [cygnus-ngsi][PostgisSink, PostGRESQLSink] Support for native Postgres and Postgis types (#1780)
 [cygnus-ngsi][MySQL] Support for native MySQL types (#1780)
 [cygnus-ngsi] Unattach dockerfile from git PR #1801
-[cygnus-ngsi][HDFS] Dissable metadata files creation when they are empty
+[cygnus-ngsi][HDFS] Dissable metadata files creation when they are empty (#1805)
