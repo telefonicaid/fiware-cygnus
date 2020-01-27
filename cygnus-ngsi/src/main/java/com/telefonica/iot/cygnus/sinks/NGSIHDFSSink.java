@@ -937,13 +937,13 @@ public class NGSIHDFSSink extends NGSISink {
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
 
-                // this has to be done notification by notification and not at initialization since in row mode not all
-                // the notifications contain all the attributes
-                String attrMdFileName = buildAttrMdFilePath(service, servicePathForNaming, entityForNaming, attrName,
-                        attrType);
-                String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
-                String mdAggregation = mdAggregations.get(attrMdFileName);
                 if (attrMetadata!= null && !attrMetadata.isEmpty() && !attrMetadata.equals("[]")) {
+                    // this has to be done notification by notification and not at initialization since in row mode not all
+                    // the notifications contain all the attributes
+                    String attrMdFileName = buildAttrMdFilePath(service, servicePathForNaming, entityForNaming, attrName,
+                            attrType);
+                    String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
+                    String mdAggregation = mdAggregations.get(attrMdFileName);
                     if (mdAggregation == null) {
                         mdAggregation = new String();
                     } // if
