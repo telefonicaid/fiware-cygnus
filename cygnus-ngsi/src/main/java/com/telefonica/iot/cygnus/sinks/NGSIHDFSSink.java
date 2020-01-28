@@ -68,7 +68,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Available file-format implementation.
      */
-    private enum FileFormat { JSONROW, JSONCOLUMN, CSVROW, CSVCOLUMN }
+    protected enum FileFormat { JSONROW, JSONCOLUMN, CSVROW, CSVCOLUMN }
     
     /**
      * Available Hive database types.
@@ -528,7 +528,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating aggregation.
      */
-    private abstract class HDFSAggregator {
+    protected abstract class HDFSAggregator {
 
         // string containing the data aggregation
         protected String aggregation;
@@ -595,7 +595,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating batches in JSON row mode.
      */
-    private class JSONRowAggregator extends HDFSAggregator {
+    protected class JSONRowAggregator extends HDFSAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -668,7 +668,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating batches in JSON column mode.
      */
-    private class JSONColumnAggregator extends HDFSAggregator {
+    protected class JSONColumnAggregator extends HDFSAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -746,7 +746,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating batches in CSV row mode.
      */
-    private class CSVRowAggregator extends HDFSAggregator {
+    protected class CSVRowAggregator extends HDFSAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -871,7 +871,7 @@ public class NGSIHDFSSink extends NGSISink {
     /**
      * Class for aggregating aggregation in CSV column mode.
      */
-    private class CSVColumnAggregator extends HDFSAggregator {
+    protected class CSVColumnAggregator extends HDFSAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -893,11 +893,14 @@ public class NGSIHDFSSink extends NGSISink {
             for (ContextAttribute contextAttribute : contextAttributes) {
                 String attrName = contextAttribute.getName();
                 String attrType = contextAttribute.getType();
+                String attrMetadata = contextAttribute.getContextMetadata();
                 String attrMdFileName = buildAttrMdFilePath(service, servicePathForNaming, entityForNaming, attrName,
                         attrType);
-                mdAggregations.put(attrMdFileName, new String());
-                hiveFields += ",`" + NGSICharsets.encodeHive(attrName) + "` string,"
-                        + "`" + NGSICharsets.encodeHive(attrName) + "_md_file` string";
+                if (attrMetadata!= null && !attrMetadata.isEmpty() && !attrMetadata.equals("[]")) {
+                    mdAggregations.put(attrMdFileName, new String());
+                    hiveFields += ",`" + NGSICharsets.encodeHive(attrName) + "` string,"
+                            + "`" + NGSICharsets.encodeHive(attrName) + "_md_file` string";
+                }
             } // for
         } // initialize
 
@@ -934,34 +937,43 @@ public class NGSIHDFSSink extends NGSISink {
                 LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                         + attrType + ")");
 
-                // this has to be done notification by notification and not at initialization since in row mode not all
-                // the notifications contain all the attributes
-                String attrMdFileName = buildAttrMdFilePath(service, servicePathForNaming, entityForNaming, attrName,
-                        attrType);
-                String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
-                String mdAggregation = mdAggregations.get(attrMdFileName);
+                if (attrMetadata!= null && !attrMetadata.isEmpty() && !attrMetadata.equals("[]")) {
+                    // this has to be done notification by notification and not at initialization since in row mode not all
+                    // the notifications contain all the attributes
+                    String attrMdFileName = buildAttrMdFilePath(service, servicePathForNaming, entityForNaming, attrName,
+                            attrType);
+                    String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
+                    String mdAggregation = mdAggregations.get(attrMdFileName);
+                    if (mdAggregation == null) {
+                        mdAggregation = new String();
+                    } // if
 
-                if (mdAggregation == null) {
-                    mdAggregation = new String();
-                } // if
+                    // agregate the metadata
+                    String concatMdAggregation;
 
-                // agregate the metadata
-                String concatMdAggregation;
+                    if (mdAggregation.isEmpty()) {
+                        concatMdAggregation = getCSVMetadata(attrMetadata, recvTimeTs);
+                    } else {
+                        concatMdAggregation = mdAggregation.concat("\n" + getCSVMetadata(attrMetadata, recvTimeTs));
+                    } // if else
 
-                if (mdAggregation.isEmpty()) {
-                    concatMdAggregation = getCSVMetadata(attrMetadata, recvTimeTs);
+                    mdAggregations.put(attrMdFileName, concatMdAggregation);
+
+                    // create part of the line with the current attribute (a.k.a. a column)
+                    if (attrValue != null) {
+                        line += csvSeparator + attrValue.replaceAll("\"", "") + csvSeparator + printableAttrMdFileName;
+                    } else {
+                        line += csvSeparator + attrValue + csvSeparator + printableAttrMdFileName;
+                    }
                 } else {
-                    concatMdAggregation = mdAggregation.concat("\n" + getCSVMetadata(attrMetadata, recvTimeTs));
-                } // if else
-
-                mdAggregations.put(attrMdFileName, concatMdAggregation);
-
-                // create part of the line with the current attribute (a.k.a. a column)
-                if (attrValue != null) {
-                    line += csvSeparator + attrValue.replaceAll("\"", "") + csvSeparator + printableAttrMdFileName;
-                } else {
-                    line += csvSeparator + attrValue + csvSeparator + printableAttrMdFileName;
+                    if (attrValue != null) {
+                        line += csvSeparator + attrValue.replaceAll("\"", "") + csvSeparator + "NULL";
+                    } else {
+                        line += csvSeparator + attrValue + csvSeparator + "NULL";
+                    }
                 }
+
+
             } // for
 
             // now, aggregate the line
@@ -1005,7 +1017,7 @@ public class NGSIHDFSSink extends NGSISink {
 
     } // CSVColumnAggregator
 
-    private HDFSAggregator getAggregator(FileFormat fileFormat) {
+    protected HDFSAggregator getAggregator(FileFormat fileFormat) {
         switch (fileFormat) {
             case JSONROW:
                 return new JSONRowAggregator();
@@ -1086,7 +1098,7 @@ public class NGSIHDFSSink extends NGSISink {
         } // if
     } // persistAggregation
 
-    private void persistMDAggregations(HDFSAggregator aggregator) throws CygnusPersistenceError {
+    protected void persistMDAggregations(HDFSAggregator aggregator) throws CygnusPersistenceError {
         Set<String> attrMDFiles = aggregator.getAggregatedAttrMDFiles();
 
         for (String hdfsMDFile : attrMDFiles) {

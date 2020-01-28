@@ -222,7 +222,7 @@ A single CSV record is appended to the above file, containing all the attributes
 2015-04-20T12:13:22.41.124Z,112.9,4wheels,car1,car,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt}
 ```
 
-Please observe despite the metadata for the example above is empty, the metadata files are created anyway.
+Regardless of in previous Cygnus versions metadata files were created even if there was no metadata on every attribute. In this version metadata files are generated only if they exist on the incoming attributes.
 
 In the case the metadata for the `speed` attribute was, for instance:
 
