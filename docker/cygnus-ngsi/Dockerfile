@@ -253,11 +253,6 @@ ENV CYGNUS_ARCGIS_BATCH_SIZE ""
 ENV CYGNUS_ARCGIS_BATCH_TIMEOUT ""
 ENV CYGNUS_ARCGIS_BATCH_TTL ""
 
-# NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
-ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
-# ENV GIT_URL_CYGNUS "https://github.com/myuser/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "master"
-
 ENV MVN_VER "3.5.4"
 ENV MVN_HOME "/opt/apache-maven"
 
@@ -265,6 +260,12 @@ ENV FLUME_VER "1.9.0"
 ENV FLUME_HOME "/opt/apache-flume"
 
 ENV JAVA_VERSION "1.8.0"
+
+COPY / ${CYGNUS_HOME}
+
+WORKDIR ${CYGNUS_HOME}
+
+RUN ls -lsrt
 
 # Install
 RUN \
@@ -293,11 +294,7 @@ RUN \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/lib && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/libext && \
     chown -R cygnus:cygnus ${FLUME_HOME} && \
-    # Make a shallow clone to help reduce final image size
-    echo "INFO: Cloning Cygnus using <${GIT_URL_CYGNUS}> and <${GIT_REV_CYGNUS}>" && \
-    git clone ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
     cd ${CYGNUS_HOME} && \
-    git checkout ${GIT_REV_CYGNUS} && \
     echo "INFO: Build and install cygnus-common" && \
     cd ${CYGNUS_HOME}/cygnus-common && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean compile exec:exec assembly:single && \
@@ -334,10 +331,10 @@ RUN \
     build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf && echo "INFO: END build"
 
 
-COPY cygnus-entrypoint.sh / 
-COPY agent.conf ${FLUME_HOME}/conf/ 
-COPY agent.conf ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf
-COPY cartodb_keys.conf ${FLUME_HOME}/conf/
+COPY docker/cygnus-ngsi/cygnus-entrypoint.sh / 
+COPY docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/ 
+COPY docker/cygnus-ngsi/agent.conf ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf
+COPY docker/cygnus-ngsi/cartodb_keys.conf ${FLUME_HOME}/conf/
 
 # Define the entry point
 ENTRYPOINT ["/cygnus-entrypoint.sh"]
