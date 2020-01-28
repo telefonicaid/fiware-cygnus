@@ -18,13 +18,20 @@
 
 package com.telefonica.iot.cygnus.utils;
 
+import com.google.gson.JsonElement;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import static java.io.File.separator;
 
 /**
  *
@@ -152,5 +159,145 @@ public final class NGSIUtils {
         // The attribute was not related to a geolocation
         return new ImmutablePair(attrValue, false);
     } // getGeometry
-        
+
+    public static String getStringValueFromJsonElement(JsonElement value, String quotationMark, boolean attrNativeTypes) {
+        String stringValue;
+        if (attrNativeTypes) {
+            if (value == null || value.isJsonNull()) {
+                stringValue = "NULL";
+            } else if (value.isJsonPrimitive()) {
+                if (value.getAsJsonPrimitive().isBoolean()) {
+                    stringValue = value.getAsString().toUpperCase();
+                } else if (value.getAsJsonPrimitive().isNumber()) {
+                    stringValue = value.getAsString();
+                }else {
+                    if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
+                        stringValue = value.getAsString().replace("\\", "");
+                    } else {
+                        stringValue = quotationMark + value.getAsString() + quotationMark;
+                    }
+                }
+            } else {
+                stringValue = quotationMark + value.toString() + quotationMark;
+            }
+        } else {
+            if (value != null && value.isJsonPrimitive()) {
+                stringValue = quotationMark + value.getAsString() + quotationMark;
+            } else {
+                if (value == null){
+                    stringValue = quotationMark + "NULL" + quotationMark;
+                } else {
+                    stringValue = quotationMark + value.toString() + quotationMark;
+                }
+            }
+        }
+        return stringValue;
+    }
+
+    /**
+     * Gets values for insert.
+     *
+     * @return the values for insert
+     */
+    public static String getValuesForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, boolean attrNativeTypes) {
+        String valuesForInsert = "";
+        int numEvents = aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).size();
+
+        for (int i = 0; i < numEvents; i++) {
+            if (i == 0) {
+                valuesForInsert += "(";
+            } else {
+                valuesForInsert +=  ",(";
+            } // if else
+            boolean first = true;
+            Iterator<String> it = aggregation.keySet().iterator();
+            while (it.hasNext()) {
+                String entry = (String) it.next();
+                ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
+                JsonElement value = values.get(i);
+                String stringValue = getStringValueFromJsonElement(value, "'", attrNativeTypes);
+                if (first) {
+                    valuesForInsert += stringValue;
+                    first = false;
+                } else {
+                    valuesForInsert += "," + stringValue;
+                } // if else
+            } // while
+            valuesForInsert += ")";
+        } // for
+        return valuesForInsert;
+    } // getValuesForInsert
+
+    public static String aggregationToJson(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, boolean attrNativeTypes) {
+        String json = "";
+        int numEvents = aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).size();
+        for (int i = 0; i < numEvents; i++) {
+            String record = "";
+            if (json.isEmpty()) {
+                record = "{";
+            } else {
+                record += "," + record + "{";
+            } // if else
+            Iterator<String> it = aggregation.keySet().iterator();
+            while (it.hasNext()) {
+                String entry = (String) it.next();
+                ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
+                JsonElement value = values.get(i);
+                String stringValue = getStringValueFromJsonElement(value, "\"", attrNativeTypes);
+                if (!record.equals("{")) {
+                    record += ",";
+                }
+                record += entry + " : " + stringValue;
+            }
+            if (json.isEmpty()) {
+                json += record + "}";
+            } else {
+                json += "," + record + "}";
+            } // if else
+        }
+        return json;
+    }
+
+    /**
+     * Gets fields for create.
+     *
+     * @return the fields for create
+     */
+    public static String getFieldsForCreate(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        String fieldsForCreate = "(";
+        boolean first = true;
+        Iterator<String> it = aggregation.keySet().iterator();
+
+        while (it.hasNext()) {
+            if (first) {
+                fieldsForCreate += (String) it.next() + " text";
+                first = false;
+            } else {
+                fieldsForCreate += "," + (String) it.next() + " text";
+            } // if else
+        } // while
+
+        return fieldsForCreate + ")";
+    } // getFieldsForCreate
+
+    /**
+     * Gets fields for insert.
+     *
+     * @return the fields for insert
+     */
+    public static String getFieldsForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        String fieldsForInsert = "(";
+        boolean first = true;
+        Iterator<String> it = aggregation.keySet().iterator();
+        while (it.hasNext()) {
+            if (first) {
+                fieldsForInsert += (String) it.next();
+                first = false;
+            } else {
+                fieldsForInsert += "," + (String) it.next();
+            } // if else
+        } // while
+        return fieldsForInsert + ")";
+    } // getFieldsForInsert
+
 } // NGSIUtils
