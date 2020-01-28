@@ -142,7 +142,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
     /**
      * Class for aggregating batches.
      */
-    private abstract class MongoDBAggregator {
+    protected abstract class MongoDBAggregator {
         
         // string containing the data fieldValues
         protected ArrayList<Document> aggregation;
@@ -196,7 +196,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
     /**
      * Class for aggregating batches in row mode.
      */
-    private class RowAggregator extends MongoDBAggregator {
+    protected class RowAggregator extends MongoDBAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -325,7 +325,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
     /**
      * Class for aggregating batches in column mode.
      */
-    private class ColumnAggregator extends MongoDBAggregator {
+    protected class ColumnAggregator extends MongoDBAggregator {
 
         @Override
         public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
@@ -393,7 +393,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         
     } // ColumnAggregator
     
-    private MongoDBAggregator getAggregator(boolean rowAttrPersistence) {
+    protected MongoDBAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
             return new RowAggregator();
         } else {
