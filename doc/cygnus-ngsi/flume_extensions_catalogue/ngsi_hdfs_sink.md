@@ -282,7 +282,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | hdfs\_password | yes | N/A | Password for the above `hdfs_username`; this is only required for Hive authentication. |
 | oauth2\_token | yes | N/A | OAuth2 token required for the HDFS authentication. |
 | service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`, which in this case must be a HDFS superuser. |
-| csv\_separator | no | ; | It is recommended to use ; as csv separator. It will help to parse json compound values|
+| csv\_separator | no | , | It is recommended to use ; as csv separator. It will help to parse json compound values|
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
