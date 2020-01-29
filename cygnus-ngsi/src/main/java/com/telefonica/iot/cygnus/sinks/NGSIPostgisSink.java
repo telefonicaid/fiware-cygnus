@@ -21,6 +21,9 @@ package com.telefonica.iot.cygnus.sinks;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonPrimitive;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
 import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
@@ -277,7 +280,7 @@ public class NGSIPostgisSink extends NGSISink {
             ArrayList<NGSIEvent> events = batch.getNextEvents();
 
             // get an aggregator for this destination and initialize it
-            PostgisAggregator aggregator = getAggregator(rowAttrPersistence);
+            NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
             aggregator.initialize(events.get(0));
 
             for (NGSIEvent event : events) {
@@ -301,348 +304,88 @@ public class NGSIPostgisSink extends NGSISink {
     } // expirateRecords
 
     /**
-     * Class for aggregating fieldValues.
-     */
-    protected abstract class PostgisAggregator {
-
-        // object containing the aggregated data
-        protected LinkedHashMap<String, ArrayList<JsonElement>> aggregation;
-
-        protected String service;
-        protected String servicePathForData;
-        protected String servicePathForNaming;
-        protected String entityForNaming;
-        protected String attributeForNaming;
-        protected String schemaName;
-        protected String tableName;
-        protected String typedFieldNames;
-        protected String fieldNames;
-
-        public PostgisAggregator() {
-            aggregation = new LinkedHashMap<>();
-        } // PostgisAggregator
-
-        public LinkedHashMap<String, ArrayList<JsonElement>> getAggregation() {
-            return aggregation;
-        } // getAggregation
-
-        public String getSchemaName(boolean enableLowercase) {
-            if (enableLowercase) {
-                return schemaName.toLowerCase();
-            } else {
-                return schemaName;
-            } // if else
-        } // getSchemaDbName
-
-        public String getTableName(boolean enableLowercase) {
-            if (enableLowercase) {
-                return tableName.toLowerCase();
-            } else {
-                return tableName;
-            } // if else
-        } // getTableName
-
-        public String getTypedFieldNames() {
-            return typedFieldNames;
-        } // getTypedFieldNames
-
-        public String getFieldNames() {
-            return fieldNames;
-        } // getFieldNames
-
-        protected String getServicePathForData() {
-            return servicePathForData;
-        } //getServicePathForData
-
-        public String getValuesForInsert() {
-            String valuesForInsert = "";
-            int numEvents = aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).size();
-
-            for (int i = 0; i < numEvents; i++) {
-                if (i == 0) {
-                    valuesForInsert += "(";
-                } else {
-                    valuesForInsert += ",(";
-                } // if else
-
-                boolean first = true;
-                Iterator<String> it = aggregation.keySet().iterator();
-
-                while (it.hasNext()) {
-                    String entry = (String) it.next();
-                    ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
-                    JsonElement value = values.get(i);
-                    String stringValue = null;
-                    if (attrNativeTypes && this instanceof ColumnAggregator) {
-                        LOGGER.debug("[" + getName() + "] aggregation entry = "  + entry );
-                        if (value == null || value.isJsonNull()) {
-                            stringValue = "NULL";
-                        } else if (value.isJsonPrimitive()) {
-                            if (value.getAsJsonPrimitive().isBoolean()) {
-                                stringValue = value.getAsString().toUpperCase();
-                            } else if (value.getAsJsonPrimitive().isNumber()) {
-                                stringValue = value.getAsString();
-                            }else {
-                                if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
-                                    stringValue = value.getAsString().replace("\\", "");
-                                } else {
-                                    stringValue = "'" + value.getAsString() + "'";
-                                }
-                            }
-                        } else {
-                            stringValue = "'" + value.toString() + "'";
-                        }
-                    } else {
-                        if (value.isJsonPrimitive()) {
-                            stringValue = "'" + value.getAsString() + "'";
-                        } else {
-                            stringValue = "'" + value.toString() + "'";
-                        }
-                    }
-                    if (first) {
-                        valuesForInsert += stringValue;
-                        first = false;
-                    } else {
-                        valuesForInsert += "," + stringValue;
-                    } // if else
-                } // while
-
-                valuesForInsert += ")";
-            } // for
-
-            return valuesForInsert;
-        } // getValuesForInsert
-
-        public String getFieldsForCreate() {
-            String fieldsForCreate = "(";
-            boolean first = true;
-            Iterator<String> it = aggregation.keySet().iterator();
-
-            while (it.hasNext()) {
-                if (first) {
-                    fieldsForCreate += (String) it.next() + " text";
-                    first = false;
-                } else {
-                    fieldsForCreate += "," + (String) it.next() + " text";
-                } // if else
-            } // while
-
-            return fieldsForCreate + ")";
-        } // getFieldsForCreate
-
-        public String getFieldsForInsert() {
-            String fieldsForInsert = "(";
-            boolean first = true;
-            Iterator<String> it = aggregation.keySet().iterator();
-            while (it.hasNext()) {
-                if (first) {
-                    fieldsForInsert += (String) it.next();
-                    first = false;
-                } else {
-                    fieldsForInsert += "," + (String) it.next();
-                } // if else
-            } // while
-            return fieldsForInsert + ")";
-        } // getFieldsForInsert
-
-        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
-            service = event.getServiceForNaming(enableNameMappings);
-            servicePathForData = event.getServicePathForData();
-            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            attributeForNaming = event.getAttributeForNaming(enableNameMappings);
-            schemaName = buildSchemaName(service);
-            tableName = buildTableName(servicePathForNaming, entityForNaming, attributeForNaming);
-        } // initialize
-
-        public abstract void aggregate(NGSIEvent cygnusEvent);
-
-    } // PostgisAggregator
-
-    /**
      * Class for aggregating batches in row mode.
      */
-    protected class RowAggregator extends PostgisAggregator {
+    protected class RowAggregator extends NGSIGenericRowAggregator {
+
+        private String servicePathForNaming;
+        private String entityForNaming;
+        private String entityType;
+        private String attribute;
+
+        /**
+         * Instantiates a new Ngsi generic row aggregator.
+         *
+         * @param enableGrouping     the enable grouping flag for initialization
+         * @param enableNameMappings the enable name mappings flag for initialization
+         * @param enableEncoding     the enable encoding flag for initialization
+         * @param enableGeoParse     the enable geo parse flag for initialization
+         */
+        protected RowAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse) {
+            super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse, false);
+        }
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
-            super.initialize(cygnusEvent);
-            LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
-            aggregation.put(NGSIConstants.RECV_TIME_TS, new ArrayList<JsonElement>());
-            aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<JsonElement>());
-            aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<JsonElement>());
-            aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<JsonElement>());
-            aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<JsonElement>());
-            aggregation.put(NGSIConstants.ATTR_NAME, new ArrayList<JsonElement>());
-            aggregation.put(NGSIConstants.ATTR_TYPE, new ArrayList<JsonElement>());
-            aggregation.put(NGSIConstants.ATTR_VALUE, new ArrayList<JsonElement>());
-            aggregation.put(NGSIConstants.ATTR_MD, new ArrayList<JsonElement>());
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
+            super.initialize(event);
+            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
+            attribute = event.getAttributeForNaming(enableNameMappings);
+            setDbName(buildSchemaName(event.getServiceForNaming(enableNameMappings)));
+            setTableName(buildTableName(servicePathForNaming, entityForNaming, attribute));
         } // initialize
-
-        @Override
-        public void aggregate(NGSIEvent event) {
-            // get the getRecvTimeTs headers
-            long recvTimeTs = event.getRecvTimeTs();
-            String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
-
-            // get the getRecvTimeTs body
-            ContextElement contextElement = event.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
-            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
-                    + entityType + ")");
-
-            // iterate on all this context element attributes, if there are attributes
-            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-                        + ", type=" + entityType + ")");
-                return;
-            } // if
-
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                JsonElement attrValue = contextAttribute.getValue();
-                String attrMetadata = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
-                        + attrType + ")");
-
-                // aggregate the attribute information
-                LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
-                aggregation.get(NGSIConstants.RECV_TIME_TS).add(new JsonPrimitive(Long.toString(recvTimeTs)));
-                aggregation.get(NGSIConstants.RECV_TIME).add(new JsonPrimitive(recvTime));
-                aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(new JsonPrimitive(getServicePathForData()));
-                aggregation.get(NGSIConstants.ENTITY_ID).add(new JsonPrimitive(entityId));
-                aggregation.get(NGSIConstants.ENTITY_TYPE).add(new JsonPrimitive(entityType));
-                aggregation.get(NGSIConstants.ATTR_NAME).add(new JsonPrimitive(attrName));
-                aggregation.get(NGSIConstants.ATTR_TYPE).add(new JsonPrimitive(attrType));
-                aggregation.get(NGSIConstants.ATTR_VALUE).add(attrValue);
-                aggregation.get(NGSIConstants.ATTR_MD).add(new JsonPrimitive(attrMetadata));
-            } // for
-        } // aggregate
 
     } // RowAggregator
 
     /**
      * Class for aggregating batches in column mode.
      */
-    protected class ColumnAggregator extends PostgisAggregator {
+    protected class ColumnAggregator extends NGSIGenericColumnAggregator {
+
+        private String servicePathForNaming;
+        private String entityForNaming;
+        private String entityType;
+        private String attribute;
+
+        /**
+         * Instantiates a new Ngsi generic column aggregator.
+         *
+         * @param enableGrouping     the enable grouping
+         * @param enableNameMappings the enable name mappings
+         * @param enableEncoding     the enable encoding
+         * @param enableGeoParse     the enable geo parse
+         */
+        public ColumnAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse) {
+            super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse, attrNativeTypes);
+        }
 
         @Override
-        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
-            super.initialize(cygnusEvent);
-
-            // particular initialization
-            LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
-            aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<JsonElement>());
-            aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<JsonElement>());
-            aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<JsonElement>());
-            aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<JsonElement>());
-
-            // iterate on all this context element attributes, if there are attributes
-            ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                return;
-            } // if
-
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                aggregation.put(attrName, new ArrayList<JsonElement>());
-                aggregation.put(attrName + "_md", new ArrayList<JsonElement>());
-            } // for
+        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
+            super.initialize(event);
+            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
+            attribute = event.getAttributeForNaming(enableNameMappings);
+            setDbName(buildSchemaName(event.getServiceForNaming(enableNameMappings)));
+            setTableName(buildTableName(servicePathForNaming, entityForNaming, attribute));
         } // initialize
-
-        @Override
-        public void aggregate(NGSIEvent cygnusEvent) {
-            // Number of previous values
-            int numPreviousValues = getAggregation().get(NGSIConstants.FIWARE_SERVICE_PATH).size();
-
-            // get the getRecvTimeTs headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
-            String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
-
-            // get the getRecvTimeTs body
-            ContextElement contextElement = cygnusEvent.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
-            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
-                    + entityType + ")");
-
-            // iterate on all this context element attributes, if there are attributes
-            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-                        + ", type=" + entityType + ")");
-                return;
-            } // if
-
-            LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
-            aggregation.get(NGSIConstants.RECV_TIME).add(new JsonPrimitive(recvTime));
-            aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(new JsonPrimitive(getServicePathForData()));
-            aggregation.get(NGSIConstants.ENTITY_ID).add(new JsonPrimitive(entityId));
-            aggregation.get(NGSIConstants.ENTITY_TYPE).add(new JsonPrimitive(entityType));
-
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                JsonElement attrValue = contextAttribute.getValue();
-                String attrMetadata = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
-                        + attrType + ")");
-
-                //Process geometry if applyes
-                ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(attrValue.toString(), attrType, attrMetadata, swapCoordinates);
-                if (location.right) {
-                    LOGGER.debug("location=" + location.getLeft());
-                    attrValue = new JsonPrimitive(location.getLeft());
-                }
-
-                if (aggregation.containsKey(attrName)) {
-                    aggregation.get(attrName).add(attrValue);
-                    aggregation.get(attrName + "_md").add(new JsonPrimitive(attrMetadata));
-                    LOGGER.debug("[" + getName() + "] adding context attribute (name=" + attrName + ", type="
-                            + attrValue.getAsString() + ")");
-                } else {
-                    ArrayList<JsonElement> values = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
-                    values.add(attrValue);
-                    aggregation.put(attrName, values);
-                    ArrayList<JsonElement> valuesMd = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
-                    valuesMd.add(new JsonPrimitive(attrMetadata));
-                    aggregation.put(attrName + "_md", valuesMd);
-                    LOGGER.debug("[" + getName() + "] adding new context attribute (name=" + attrName + ", type="
-                            + attrValue.getAsString() + ")");
-                } // if else
-            } // for
-
-            // Iterate on all the aggregations, checking for not updated attributes; add an empty value if missing
-            for (String key : aggregation.keySet()) {
-                ArrayList<JsonElement> values = aggregation.get(key);
-
-                if (values.size() == numPreviousValues) {
-                    values.add(null);
-                } // if
-            } // for
-        } // aggregate
 
     } // ColumnAggregator
 
-    protected PostgisAggregator getAggregator(boolean rowAttrPersistence) {
+    protected NGSIGenericAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
-            return new RowAggregator();
+            return new RowAggregator(enableGrouping, enableNameMappings, enableEncoding, true);
         } else {
-            return new ColumnAggregator();
+            return new ColumnAggregator(enableGrouping, enableNameMappings, enableEncoding, true);
         } // if else
     } // getAggregator
 
-    private void persistAggregation(PostgisAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
+    private void persistAggregation(NGSIGenericAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         String fieldsForCreate = aggregator.getFieldsForCreate();
         String fieldsForInsert = aggregator.getFieldsForInsert();
         String valuesForInsert = aggregator.getValuesForInsert();
-        String schemaName = aggregator.getSchemaName(enableLowercase);
+        String schemaName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgisSink. Schema ("

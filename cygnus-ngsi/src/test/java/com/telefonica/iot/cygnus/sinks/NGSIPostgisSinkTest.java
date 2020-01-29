@@ -20,6 +20,8 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.google.gson.JsonPrimitive;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
+
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
@@ -955,7 +957,7 @@ public class NGSIPostgisSinkTest {
 
 
         // Create a PostgisAggregator
-        RowAggregator aggregator = sink.new RowAggregator();
+        RowAggregator aggregator = sink.new RowAggregator(false, false,false,false);
 
         // Create a NGSIEvent
         String timestamp = "1461136795801";
@@ -1020,7 +1022,7 @@ public class NGSIPostgisSinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NGSIPostgisSink.ColumnAggregator columnAggregator = ngsiPostgisSink.new ColumnAggregator();
+        NGSIPostgisSink.ColumnAggregator columnAggregator = ngsiPostgisSink.new ColumnAggregator(false, false,false,true);
         ContextElement contextElement = createContextElementForNativeTypes();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
         columnAggregator.initialize(ngsiEvent);
@@ -1062,7 +1064,7 @@ public class NGSIPostgisSinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NGSIPostgisSink.RowAggregator rowAggregator = ngsiPostgisSink.new RowAggregator();
+        NGSIPostgisSink.RowAggregator rowAggregator = ngsiPostgisSink.new RowAggregator(false, false,false,true);
         ContextElement contextElement = createContextElementForNativeTypes();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
         rowAggregator.initialize(ngsiEvent);
@@ -1132,7 +1134,7 @@ public class NGSIPostgisSinkTest {
         metadata.add(contextMetadata);
         ContextAttribute contextAttribute1 = new ContextAttribute();
         contextAttribute1.setName("someName1");
-        contextAttribute1.setType("someType1");
+        contextAttribute1.setType("geo:point");
         contextAttribute1.setContextValue(new JsonPrimitive("-3.7167, 40.3833"));
         contextAttribute1.setContextMetadata(metadata);
         ContextAttribute contextAttribute2 = new ContextAttribute();
@@ -1243,12 +1245,12 @@ public class NGSIPostgisSinkTest {
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
-                NGSIPostgisSink.PostgisAggregator aggregator = ngsiPostgisSink.getAggregator(false);
+                NGSIGenericAggregator aggregator = ngsiPostgisSink.getAggregator(false);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
                 } // for
-                String correctBatch = "('2016-04-20T07:19:55.801Z','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20T07:19:55.801Z','somePath','someId','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(\"-3.7167::double precision , 40.3833\"::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
+                String correctBatch = "('2016-04-20 07:19:55.801','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20 07:19:55.801','somePath','someId','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(\"-3.7167::double precision , 40.3833\"::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
                 System.out.println(aggregator.getValuesForInsert());
                 if (aggregator.getValuesForInsert().equals(correctBatch)) {
                     System.out.println(getTestTraceHead("[NGSIPostgisSink.testNativeTypesColumnBatch]")
