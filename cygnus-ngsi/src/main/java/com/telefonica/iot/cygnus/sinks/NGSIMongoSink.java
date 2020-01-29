@@ -30,6 +30,8 @@ import static com.telefonica.iot.cygnus.sinks.NGSIMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.util.ArrayList;
 import java.util.Date;
+
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import org.bson.Document;
 import org.apache.flume.Context;
 
@@ -400,6 +402,44 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             return new ColumnAggregator();
         } // if else
     } // getAggregator
+
+    protected ArrayList<String> getKeysToCrop (boolean rowAttrPersistence){
+        ArrayList<String> keysToCrop = new ArrayList<>();
+
+        switch (dataModel) {
+            case DMBYSERVICEPATH:
+                if (rowAttrPersistence) {
+                    keysToCrop.add(NGSIConstants.RECV_TIME_TS);
+                    keysToCrop.add(NGSIConstants.FIWARE_SERVICE_PATH);
+                } else {
+                    keysToCrop.add(NGSIConstants.FIWARE_SERVICE_PATH);
+                }
+                break;
+            case DMBYENTITY:
+                if (rowAttrPersistence) {
+                    keysToCrop.add(NGSIConstants.RECV_TIME_TS);
+                    keysToCrop.add(NGSIConstants.FIWARE_SERVICE_PATH);
+                    keysToCrop.add(NGSIConstants.ENTITY_ID);
+                    keysToCrop.add(NGSIConstants.ENTITY_TYPE);
+                } else {
+                    keysToCrop.add(NGSIConstants.FIWARE_SERVICE_PATH);
+                    keysToCrop.add(NGSIConstants.ENTITY_ID);
+                    keysToCrop.add(NGSIConstants.ENTITY_TYPE);
+                }
+                break;
+            case DMBYATTRIBUTE:
+                if (rowAttrPersistence) {
+                    keysToCrop.add(NGSIConstants.RECV_TIME_TS);
+                    keysToCrop.add(NGSIConstants.FIWARE_SERVICE_PATH);
+                    keysToCrop.add(NGSIConstants.ENTITY_ID);
+                    keysToCrop.add(NGSIConstants.ENTITY_TYPE);
+                    keysToCrop.add(NGSIConstants.ATTR_NAME);
+                }
+                break;
+            default:
+        }
+        return keysToCrop;
+    }
     
     private void persistAggregation(MongoDBAggregator aggregator) throws CygnusPersistenceError {
         ArrayList<Document> aggregation = aggregator.getAggregation();

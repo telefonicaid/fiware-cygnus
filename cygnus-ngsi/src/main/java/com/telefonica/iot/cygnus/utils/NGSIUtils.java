@@ -19,6 +19,7 @@
 package com.telefonica.iot.cygnus.utils;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
 import java.util.ArrayList;
@@ -267,7 +268,6 @@ public final class NGSIUtils {
         String fieldsForCreate = "(";
         boolean first = true;
         Iterator<String> it = aggregation.keySet().iterator();
-
         while (it.hasNext()) {
             if (first) {
                 fieldsForCreate += (String) it.next() + " text";
@@ -299,5 +299,30 @@ public final class NGSIUtils {
         } // while
         return fieldsForInsert + ")";
     } // getFieldsForInsert
+
+    public static ArrayList<JsonObject> linkedHashMapToJsonList(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        ArrayList<JsonObject> jsonStrings = new ArrayList<>();
+        int numEvents = aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).size();
+        for (int i = 0; i < numEvents; i++) {
+            Iterator<String> it = aggregation.keySet().iterator();
+            JsonObject jsonObject = new JsonObject();
+            while (it.hasNext()) {
+                String entry = (String) it.next();
+                ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
+                if (values.get(i) != null)
+                    jsonObject.add(entry, values.get(i));
+            }
+            jsonStrings.add(jsonObject);
+        }
+        return jsonStrings;
+    }
+
+    public LinkedHashMap<String, ArrayList<JsonElement>> cropLinkedHashMap (LinkedHashMap<String, ArrayList<JsonElement>> aggregation, ArrayList<String> keysToCrop) {
+        LinkedHashMap<String, ArrayList<JsonElement>> cropedLinkedHashMap = aggregation;
+        for (String key : keysToCrop) {
+            cropedLinkedHashMap.remove(key);
+        }
+        return cropedLinkedHashMap;
+    }
 
 } // NGSIUtils

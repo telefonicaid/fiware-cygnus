@@ -48,6 +48,7 @@ public abstract class NGSIGenericAggregator {
     private String attribute;
     private String dbName;
     private String tableName;
+    private String collectionName;
     private String orgName;
     private String pkgName;
     private String resName;
@@ -75,6 +76,14 @@ public abstract class NGSIGenericAggregator {
 
     public void setAggregation(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
         this.aggregation = aggregation;
+    }
+
+    public String getCollectionName() {
+        return collectionName;
+    }
+
+    public void setCollectionName(String collectionName) {
+        this.collectionName = collectionName;
     }
 
     public String getService() {
