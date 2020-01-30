@@ -1269,7 +1269,7 @@ public class NGSIHDFSSinkTest {
         context.put("oauth2_token", token);
         context.put("service_as_namespace", serviceAsNamespace);
         context.put("attr_native_types", attrNativeTypes);
-        context.put("metadata", metadata);
+        context.put("attr_metadata_store", metadata);
         return context;
     } // createContext
 

@@ -420,7 +420,7 @@ public class NGSIHDFSSink extends NGSISink {
                 + ")");
 
         // metadata configuration
-        String enableMetadata = context.getString("metadata", "true");
+        String enableMetadata = context.getString("attr_metadata_store", "true");
 
         if (enableMetadata.equals("true") || enableMetadata.equals("false")) {
             enableMetadataPersistance = Boolean.valueOf(enableMetadata);

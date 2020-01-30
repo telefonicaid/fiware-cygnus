@@ -63,7 +63,7 @@ Then, for each notified entity a file named `<destination>.txt` is created (if n
 
 Please observe HDFS folders and files follow the [Unix rules](https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words) about allowed character set and path max length (255 characters). This leads to certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
 
-Metadata storage is controlled by the flag `metadata` regardless of the file format storage. If it's set to `false` it will never store metadata objects contained on the `NGSIEvent`
+Metadata storage is controlled by the flag `attr_metadata_store` regardless of the file format storage. If it's set to `false` it will never store metadata objects contained on the `NGSIEvent`
 
 [Top](#top)
 
@@ -299,7 +299,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | krb5\_password | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise. |
 | krb5\_login\_conf\_file | no | /usr/cygnus/conf/krb5_login.conf | Ignored if `krb5_auth=false`. |
 | krb5\_conf\_file | no | /usr/cygnus/conf/krb5.conf | Ignored if `krb5_auth=false`. |
-| metadata | no | true | If true, it will store metadata as usual. If false it will not store metadata regardless of the `file_format` type  |
+| attr_metadata_store | no | true | If true, it will store metadata as usual. If false it will not store metadata regardless of the `file_format` type  |
 
 A configuration example could be:
 
