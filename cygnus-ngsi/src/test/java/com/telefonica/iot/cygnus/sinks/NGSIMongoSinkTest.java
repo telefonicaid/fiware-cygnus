@@ -1,5 +1,7 @@
 package com.telefonica.iot.cygnus.sinks;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
@@ -28,6 +30,7 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class NGSIMongoSinkTest {
@@ -150,12 +153,7 @@ public class NGSIMongoSinkTest {
         return contextElement;
     } // createContextElementForNativeTypes
 
-    @Test
-    public void testNativeTypeColumnBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
-        String attr_native_types = "true"; // default
-        NGSIMongoSink ngsiMongoSink = new NGSIMongoSink();
-        ngsiMongoSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
-        // Create a NGSIEvent
+    public NGSIBatch setUpBatch() {
         String timestamp = "1461136795801";
         String correlatorId = "123456789";
         String transactionId = "123456789";
@@ -179,12 +177,20 @@ public class NGSIMongoSinkTest {
         NGSIBatch batch = new NGSIBatch();
         batch.addEvent(destination, ngsiEvent);
         batch.addEvent(destination, ngsiEvent2);
+        return batch;
+    }
+
+    @Test
+    public void testNativeTypeColumnBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        NGSIBatch batch = setUpBatch();
+        String destination = "someDestination";NGSIMongoSink ngsiMongoSink = new NGSIMongoSink();
+        ngsiMongoSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
+            NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
-                NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
                 aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
@@ -193,12 +199,19 @@ public class NGSIMongoSinkTest {
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setDbName(ngsiMongoSink.buildDbName(aggregator.getService()));
                 aggregator.setCollectionName(ngsiMongoSink.buildCollectionName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
-                aggregator.setAttrNativeTypes(true);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
                 }
             }
+            ArrayList<String> keysToCrop = ngsiMongoSink.getKeysToCrop(false);
+            LinkedHashMap<String, ArrayList<JsonElement>> cropedAggregation = NGSIUtils.cropLinkedHashMap(aggregator.getAggregationToPersist(), keysToCrop);
+            ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonList(cropedAggregation);
+            ArrayList<Document> documents = new ArrayList<>();
+            for (JsonObject jsonObject : jsonObjects) {
+                documents.add(Document.parse(jsonObject.toString()));
+            }
+            System.out.println(documents);
         } catch (Exception e) {
             System.out.println(e);
             assertFalse(true);
@@ -207,33 +220,9 @@ public class NGSIMongoSinkTest {
 
     @Test
     public void testNativeTypeRowBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
-        String attr_native_types = "true"; // default
-        NGSIMongoSink ngsiMongoSink = new NGSIMongoSink();
-        ngsiMongoSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
-        // Create a NGSIEvent
-        String timestamp = "1461136795801";
-        String correlatorId = "123456789";
-        String transactionId = "123456789";
-        String originalService = "someService";
-        String originalServicePath = "somePath";
-        String mappedService = "newService";
-        String mappedServicePath = "newPath";
-        String destination = "someDestination";
-        Map<String, String> headers = new HashMap<>();
-        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
-        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
-        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
-        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
-        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
-        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
-        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
-        NotifyContextRequest.ContextElement contextElement2 = createContextElement();
-        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
-        NGSIEvent ngsiEvent2 = new NGSIEvent(headers, contextElement2.toString().getBytes(), contextElement2, null);
-        NGSIBatch batch = new NGSIBatch();
-        batch.addEvent(destination, ngsiEvent);
-        batch.addEvent(destination, ngsiEvent2);
+        NGSIBatch batch = setUpBatch();
+        String destination = "someDestination";NGSIMongoSink ngsiMongoSink = new NGSIMongoSink();
+        ngsiMongoSink.configure(createContextforNativeTypes("row", null, null, null, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
             while (batch.hasNext()) {
@@ -248,11 +237,18 @@ public class NGSIMongoSinkTest {
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setDbName(ngsiMongoSink.buildDbName(aggregator.getService()));
                 aggregator.setCollectionName(ngsiMongoSink.buildCollectionName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
-                aggregator.setAttrNativeTypes(true);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
                 }
+                ArrayList<String> keysToCrop = ngsiMongoSink.getKeysToCrop(true);
+                LinkedHashMap<String, ArrayList<JsonElement>> cropedAggregation = NGSIUtils.cropLinkedHashMap(aggregator.getAggregationToPersist(), keysToCrop);
+                ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonList(cropedAggregation);
+                ArrayList<Document> documents = new ArrayList<>();
+                for (JsonObject jsonObject : jsonObjects) {
+                    documents.add(Document.parse(jsonObject.toString()));
+                }
+                System.out.println(documents);
             }
         } catch (Exception e) {
             System.out.println(e);

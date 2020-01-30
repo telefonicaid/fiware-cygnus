@@ -307,7 +307,7 @@ public final class NGSIUtils {
         Iterator<String> it = aggregation.keySet().iterator();
         while (it.hasNext()) {
             String entry = (String) it.next();
-            if (entry.contains("_md") || entry.contains("_MD")) {
+            if (entry.contains("_md") || entry.contains("_MD") || entry.equals(NGSIConstants.ATTR_MD)) {
                 keysToCrop.add(entry);
             }
         }
