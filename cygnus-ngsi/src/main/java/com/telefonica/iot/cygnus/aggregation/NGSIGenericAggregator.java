@@ -23,6 +23,7 @@ import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -53,10 +54,15 @@ public abstract class NGSIGenericAggregator {
     private String pkgName;
     private String resName;
     private boolean attrNativeTypes;
-    protected boolean enableGrouping;
-    protected boolean enableEncoding;
-    protected boolean enableNameMappings;
+    private boolean enableGrouping;
+    private boolean enableEncoding;
+    private boolean enableNameMappings;
     private boolean enableGeoParse;
+    private boolean attrMetadataStore;
+
+    public void setAttrMetadataStore(boolean attrMetadataStore) {
+        this.attrMetadataStore = attrMetadataStore;
+    }
 
     public boolean isEnableGeoParse() {
         return enableGeoParse;
@@ -74,12 +80,28 @@ public abstract class NGSIGenericAggregator {
         }
     }
 
+    public LinkedHashMap<String, ArrayList<JsonElement>> getAggregationToPersist() {
+        if (aggregation == null) {
+            return new LinkedHashMap<>();
+        } else {
+            if (attrMetadataStore) {
+                return aggregation;
+            } else {
+                return NGSIUtils.linkedHashMapWithoutMetadata(aggregation);
+            }
+        }
+    }
+
     public void setAggregation(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
         this.aggregation = aggregation;
     }
 
-    public String getCollectionName() {
-        return collectionName;
+    public String getCollectionName(boolean enableLowercase) {
+        if (enableLowercase) {
+            return collectionName.toLowerCase();
+        } else {
+            return collectionName;
+        }
     }
 
     public void setCollectionName(String collectionName) {

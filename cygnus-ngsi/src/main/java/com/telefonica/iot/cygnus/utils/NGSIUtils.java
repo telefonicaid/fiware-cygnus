@@ -22,9 +22,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.simple.JSONArray;
@@ -202,7 +204,7 @@ public final class NGSIUtils {
      */
     public static String getValuesForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, boolean attrNativeTypes) {
         String valuesForInsert = "";
-        int numEvents = aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).size();
+        int numEvents = collectionSizeOnLinkedHashMap(aggregation);
 
         for (int i = 0; i < numEvents; i++) {
             if (i == 0) {
@@ -228,36 +230,6 @@ public final class NGSIUtils {
         } // for
         return valuesForInsert;
     } // getValuesForInsert
-
-    public static String aggregationToJson(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, boolean attrNativeTypes) {
-        String json = "";
-        int numEvents = aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).size();
-        for (int i = 0; i < numEvents; i++) {
-            String record = "";
-            if (json.isEmpty()) {
-                record = "{";
-            } else {
-                record += "," + record + "{";
-            } // if else
-            Iterator<String> it = aggregation.keySet().iterator();
-            while (it.hasNext()) {
-                String entry = (String) it.next();
-                ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
-                JsonElement value = values.get(i);
-                String stringValue = getStringValueFromJsonElement(value, "\"", attrNativeTypes);
-                if (!record.equals("{")) {
-                    record += ",";
-                }
-                record += entry + " : " + stringValue;
-            }
-            if (json.isEmpty()) {
-                json += record + "}";
-            } else {
-                json += "," + record + "}";
-            } // if else
-        }
-        return json;
-    }
 
     /**
      * Gets fields for create.
@@ -302,7 +274,7 @@ public final class NGSIUtils {
 
     public static ArrayList<JsonObject> linkedHashMapToJsonList(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
         ArrayList<JsonObject> jsonStrings = new ArrayList<>();
-        int numEvents = aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).size();
+        int numEvents = collectionSizeOnLinkedHashMap(aggregation);
         for (int i = 0; i < numEvents; i++) {
             Iterator<String> it = aggregation.keySet().iterator();
             JsonObject jsonObject = new JsonObject();
@@ -317,12 +289,29 @@ public final class NGSIUtils {
         return jsonStrings;
     }
 
-    public LinkedHashMap<String, ArrayList<JsonElement>> cropLinkedHashMap (LinkedHashMap<String, ArrayList<JsonElement>> aggregation, ArrayList<String> keysToCrop) {
+    public static LinkedHashMap<String, ArrayList<JsonElement>> cropLinkedHashMap(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, ArrayList<String> keysToCrop) {
         LinkedHashMap<String, ArrayList<JsonElement>> cropedLinkedHashMap = aggregation;
         for (String key : keysToCrop) {
             cropedLinkedHashMap.remove(key);
         }
         return cropedLinkedHashMap;
+    }
+
+    public static int collectionSizeOnLinkedHashMap(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        ArrayList<ArrayList<JsonElement>> list = new ArrayList<>(aggregation.values());
+        return list.get(0).size();
+    }
+
+    public static LinkedHashMap<String, ArrayList<JsonElement>> linkedHashMapWithoutMetadata(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        ArrayList<String> keysToCrop = new ArrayList<>();
+        Iterator<String> it = aggregation.keySet().iterator();
+        while (it.hasNext()) {
+            String entry = (String) it.next();
+            if (entry.contains("_md") || entry.contains("_MD")) {
+                keysToCrop.add(entry);
+            }
+        }
+        return cropLinkedHashMap(aggregation, keysToCrop);
     }
 
 } // NGSIUtils

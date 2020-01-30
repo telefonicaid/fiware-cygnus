@@ -17,8 +17,13 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -30,8 +35,10 @@ import static com.telefonica.iot.cygnus.sinks.NGSIMongoBaseSink.LOGGER;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.bson.Document;
 import org.apache.flume.Context;
 
@@ -120,7 +127,15 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             ArrayList<NGSIEvent> events = batch.getNextEvents();
             
             // get an aggregator for this destination and initialize it
-            MongoDBAggregator aggregator = getAggregator(rowAttrPersistence);
+            NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
+            aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
+            aggregator.setServicePathForData(events.get(0).getServicePathForData());
+            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
+            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
+            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
+            aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
+            aggregator.setDbName(buildDbName(aggregator.getService()));
+            aggregator.setTableName(buildCollectionName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
             aggregator.initialize(events.get(0));
 
             for (NGSIEvent event : events) {
@@ -141,265 +156,11 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
     public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
     } // expirateRecords
     
-    /**
-     * Class for aggregating batches.
-     */
-    protected abstract class MongoDBAggregator {
-        
-        // string containing the data fieldValues
-        protected ArrayList<Document> aggregation;
-
-        protected String service;
-        protected String servicePathForData;
-        protected String servicePathForNaming;
-        protected String entityForNaming;
-        protected String attributeForNaming;
-        protected String dbName;
-        protected String collectionName;
-        
-        public MongoDBAggregator() {
-            aggregation = new ArrayList<>();
-        } // MongoDBAggregator
-        
-        public ArrayList<Document> getAggregation() {
-            return aggregation;
-        } // getAggregation
-        
-        public String getDbName(boolean enableLowercase) {
-            if (enableLowercase) {
-                return dbName.toLowerCase();
-            } else {
-                return dbName;
-            } // if else
-        } // getDbName
-        
-        public String getCollectionName(boolean enableLowercase) {
-            if (enableLowercase) {
-                return collectionName.toLowerCase();
-            } else {
-                return collectionName;
-            } // if else
-        } // getCollectionName
-        
-        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
-            service = event.getServiceForNaming(enableNameMappings);
-            servicePathForData = event.getServicePathForData();
-            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            attributeForNaming = event.getAttributeForNaming(enableNameMappings);
-            dbName = buildDbName(service);
-            collectionName = buildCollectionName(servicePathForNaming, entityForNaming, attributeForNaming);
-        } // initialize
-        
-        public abstract void aggregate(NGSIEvent cygnusEvent);
-        
-    } // MongoDBAggregator
-    
-    /**
-     * Class for aggregating batches in row mode.
-     */
-    protected class RowAggregator extends MongoDBAggregator {
-
-        @Override
-        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
-            super.initialize(cygnusEvent);
-        } // initialize
-        
-        @Override
-        public void aggregate(NGSIEvent cygnusEvent) {
-            // get the event headers
-            long notifiedRecvTimeTs = cygnusEvent.getRecvTimeTs();
-
-            // get the event body
-            ContextElement contextElement = cygnusEvent.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
-            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
-                    + entityType + ")");
-            
-            // iterate on all this context element attributes, if there are attributes
-            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-                        + ", type=" + entityType + ")");
-                return;
-            } // if
-            
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
-                String attrMetadata = contextAttribute.getContextMetadata();
-                
-                // check if the attribute value is based on white spaces
-                if (ignoreWhiteSpaces && attrValue != null && attrValue.trim().length() == 0) {
-                    continue;
-                } // if
-                
-                // check if the metadata contains a TimeInstant value; use the notified reception time instead
-                Long recvTimeTs;
-
-                Long timeInstant = CommonUtils.getTimeInstant(attrMetadata);
-
-                if (timeInstant != null) {
-                    recvTimeTs = timeInstant;
-                } else {
-                    recvTimeTs = notifiedRecvTimeTs;
-                } // if else
-                
-                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
-                        + attrType + ")");
-                
-                Document doc;
-
-                if(attrMetadataStore.equals("true")){
-                    doc = createDocWithMetadata(recvTimeTs, entityId, entityType, attrName, attrType, attrValue, attrMetadata);
-                } else {
-                    doc = createDoc(recvTimeTs, entityId, entityType, attrName, attrType, attrValue);
-                } // if else
-
-                aggregation.add(doc);
-            } // for
-        } // aggregate
-        
-        private Document createDocWithMetadata(Long recvTimeTs, String entityId, String entityType, String attrName,
-                String attrType, String attrValue, String attrMetadata) {
-            Document doc = new Document("recvTime", new Date(recvTimeTs));
-
-            switch (dataModel) {
-            case DMBYSERVICEPATH:
-                doc.append("entityId", entityId)
-                        .append("entityType", entityType)
-                        .append("attrName", attrName)
-                        .append("attrType", attrType)
-                        .append("attrValue", attrValue)
-                        .append("attrMetadata", (DBObject)JSON.parse(attrMetadata));
-                break;
-            case DMBYENTITY:
-                doc.append("attrName", attrName)
-                        .append("attrType", attrType)
-                        .append("attrValue", attrValue)
-                        .append("attrMetadata", (DBObject)JSON.parse(attrMetadata));
-                break;
-            case DMBYATTRIBUTE:
-                doc.append("attrType", attrType)
-                        .append("attrValue", attrValue)
-                        .append("attrMetadata", (DBObject)JSON.parse(attrMetadata));
-                break;
-            default:
-                return null; // this will never be reached
-            } // switch
-
-            return doc;
-        } // createDocWithMetadata
-        
-        private Document createDoc(long recvTimeTs, String entityId, String entityType, String attrName,
-                String attrType, String attrValue) {
-            Document doc = new Document("recvTime", new Date(recvTimeTs));
-        
-            switch (dataModel) {
-                case DMBYSERVICEPATH:
-                    doc.append("entityId", entityId)
-                            .append("entityType", entityType)
-                            .append("attrName", attrName)
-                            .append("attrType", attrType)
-                            .append("attrValue", attrValue);
-                    break;
-                case DMBYENTITY:
-                    doc.append("attrName", attrName)
-                            .append("attrType", attrType)
-                            .append("attrValue", attrValue);
-                    break;
-                case DMBYATTRIBUTE:
-                    doc.append("attrType", attrType)
-                            .append("attrValue", attrValue);
-                    break;
-                default:
-                    return null; // this will never be reached
-            } // switch
-            
-            return doc;
-        } // createDoc
-
-    } // RowAggregator
-    
-    /**
-     * Class for aggregating batches in column mode.
-     */
-    protected class ColumnAggregator extends MongoDBAggregator {
-
-        @Override
-        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
-            super.initialize(cygnusEvent);
-        } // initialize
-        
-        @Override
-        public void aggregate(NGSIEvent cygnusEvent) {
-            // get the event headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
-
-            // get the event body
-            ContextElement contextElement = cygnusEvent.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
-            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
-                    + entityType + ")");
-            
-            // iterate on all this context element attributes, if there are attributes
-            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-                        + ", type=" + entityType + ")");
-                return;
-            } // if
-            
-            Document doc = createDoc(recvTimeTs, entityId, entityType);
-            
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
-                
-                // check if the attribute value is based on white spaces
-                if (ignoreWhiteSpaces && attrValue != null && attrValue.trim().length() == 0) {
-                    continue;
-                } // if
-                
-                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
-                        + attrType + ")");
-                doc.append(attrName, attrValue);
-            } // for
-
-            aggregation.add(doc);
-        } // aggregate
-        
-        private Document createDoc(long recvTimeTs, String entityId, String entityType) {
-            Document doc = new Document("recvTime", new Date(recvTimeTs));
-
-            switch (dataModel) {
-                case DMBYSERVICEPATH:
-                    doc.append("entityId", entityId).append("entityType", entityType);
-                    break;
-                case DMBYENTITY:
-                    break;
-                case DMBYATTRIBUTE:
-                    return null; // this will never be reached
-                default:
-                    return null; // this will never be reached
-            } // switch
-            
-            return doc;
-        } // createDoc
-        
-    } // ColumnAggregator
-    
-    protected MongoDBAggregator getAggregator(boolean rowAttrPersistence) {
+    protected NGSIGenericAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
-            return new RowAggregator();
+            return new NGSIGenericRowAggregator();
         } else {
-            return new ColumnAggregator();
+            return new NGSIGenericColumnAggregator();
         } // if else
     } // getAggregator
 
@@ -441,8 +202,14 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         return keysToCrop;
     }
     
-    private void persistAggregation(MongoDBAggregator aggregator) throws CygnusPersistenceError {
-        ArrayList<Document> aggregation = aggregator.getAggregation();
+    private void persistAggregation(NGSIGenericAggregator aggregator) throws CygnusPersistenceError {
+        ArrayList<String> keysToCrop = getKeysToCrop(rowAttrPersistence);
+        LinkedHashMap<String, ArrayList<JsonElement>> cropedAggregation = NGSIUtils.cropLinkedHashMap(aggregator.getAggregationToPersist(), keysToCrop);
+        ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonList(cropedAggregation);
+        ArrayList<Document> aggregation = new ArrayList<>();
+        for (JsonObject jsonObject : jsonObjects) {
+            aggregation.add(Document.parse(jsonObject.toString()));
+        }
         
         if (aggregation.isEmpty()) {
             return;
