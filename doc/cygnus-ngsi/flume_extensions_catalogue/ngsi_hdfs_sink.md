@@ -63,6 +63,8 @@ Then, for each notified entity a file named `<destination>.txt` is created (if n
 
 Please observe HDFS folders and files follow the [Unix rules](https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words) about allowed character set and path max length (255 characters). This leads to certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
 
+Metadata storage is controlled by the flag `attr_metadata_store` regardless of the file format storage. If it's set to `false` it will never store metadata objects contained on the `NGSIEvent`
+
 [Top](#top)
 
 #### <a name="section1.2.2"></a>Json row-like storing
@@ -222,7 +224,7 @@ A single CSV record is appended to the above file, containing all the attributes
 2015-04-20T12:13:22.41.124Z,112.9,4wheels,car1,car,hdfs:///user/myuser/vehicles/4wheels/car1_car_speed_float/car1_car_speed_float.txt,74.6,hdfs:///user/myuser/vehicles/4wheels/car1_car_oil_level_float/car1_car_oil_level_float.txt}
 ```
 
-Please observe despite the metadata for the example above is empty, the metadata files are created anyway.
+Regardless of in previous Cygnus versions metadata files were created even if there was no metadata on every attribute. In this version metadata files are generated only if they exist on the incoming attributes.
 
 In the case the metadata for the `speed` attribute was, for instance:
 
@@ -282,7 +284,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | hdfs\_password | yes | N/A | Password for the above `hdfs_username`; this is only required for Hive authentication. |
 | oauth2\_token | yes | N/A | OAuth2 token required for the HDFS authentication. |
 | service\_as\_namespace | no | false | If configured as <i>true</i> then the `fiware-service` (or the default one) is used as the HDFS namespace instead of `hdfs_username`, which in this case must be a HDFS superuser. |
-| csv\_separator | no | , ||
+| csv\_separator | no | , | It is recommended to use ; as csv separator. It will help to parse json compound values|
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
@@ -297,6 +299,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | krb5\_password | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise. |
 | krb5\_login\_conf\_file | no | /usr/cygnus/conf/krb5_login.conf | Ignored if `krb5_auth=false`. |
 | krb5\_conf\_file | no | /usr/cygnus/conf/krb5.conf | Ignored if `krb5_auth=false`. |
+| attr_metadata_store | no | true | If true, it will store metadata as usual. If false it will not store metadata regardless of the `file_format` type  |
 
 A configuration example could be:
 

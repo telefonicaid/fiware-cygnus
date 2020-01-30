@@ -19,9 +19,6 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -32,8 +29,6 @@ import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
 import org.apache.flume.Context;
 
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
@@ -42,11 +37,6 @@ import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.CommonUtils;
-import com.telefonica.iot.cygnus.utils.NGSICharsets;
-import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.NGSIUtils;
 
 /**
  *

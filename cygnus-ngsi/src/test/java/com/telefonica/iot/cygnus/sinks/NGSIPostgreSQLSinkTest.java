@@ -21,6 +21,7 @@ package com.telefonica.iot.cygnus.sinks;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 
 import com.google.gson.JsonPrimitive;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 
@@ -945,7 +946,7 @@ public class NGSIPostgreSQLSinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
 
-        NGSIPostgreSQLSink.ColumnAggregator columnAggregator = ngsiPostgreSQLSink.new ColumnAggregator();
+        NGSIPostgreSQLSink.ColumnAggregator columnAggregator = ngsiPostgreSQLSink.new ColumnAggregator(false, false,false,false);
         NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
         columnAggregator.initialize(ngsiEvent);
@@ -986,7 +987,7 @@ public class NGSIPostgreSQLSinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NGSIPostgreSQLSink.RowAggregator rowAggregator = ngsiPostgreSQLSink.new RowAggregator();
+        NGSIPostgreSQLSink.RowAggregator rowAggregator = ngsiPostgreSQLSink.new RowAggregator(false, false,false,false);
         NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
         rowAggregator.initialize(ngsiEvent);
@@ -1138,12 +1139,12 @@ public class NGSIPostgreSQLSinkTest {
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
-                NGSIPostgreSQLSink.PostgreSQLAggregator aggregator = ngsiPostgreSQLSink.getAggregator(false);
+                NGSIGenericAggregator aggregator = ngsiPostgreSQLSink.getAggregator(false);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
                 } // for
-                String correctBatch = "('2016-04-20T07:19:55.801Z','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]','{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}','[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20T07:19:55.801Z','somePath','someId','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'-3.7167, 40.3833','[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
+                String correctBatch = "('2016-04-20 07:19:55.801','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20 07:19:55.801','somePath','someId','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(\"-3.7167::double precision , 40.3833\"::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
                 if (aggregator.getValuesForInsert().equals(correctBatch)) {
                     System.out.println(getTestTraceHead("[NGSIPostgreSQL.testNativeTypesColumnBatch]")
                             + "-  OK  - NativeTypesOK");
@@ -1168,7 +1169,7 @@ public class NGSIPostgreSQLSinkTest {
         metadata.add(contextMetadata);
         NotifyContextRequest.ContextAttribute contextAttribute1 = new NotifyContextRequest.ContextAttribute();
         contextAttribute1.setName("someName1");
-        contextAttribute1.setType("someType1");
+        contextAttribute1.setType("geo:point");
         contextAttribute1.setContextValue(new JsonPrimitive("-3.7167, 40.3833"));
         contextAttribute1.setContextMetadata(metadata);
         NotifyContextRequest.ContextAttribute contextAttribute2 = new NotifyContextRequest.ContextAttribute();
