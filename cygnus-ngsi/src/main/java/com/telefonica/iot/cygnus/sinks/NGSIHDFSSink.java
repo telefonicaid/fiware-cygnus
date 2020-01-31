@@ -18,6 +18,7 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
+import com.google.gson.JsonElement;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplBinary;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplREST;
@@ -39,12 +40,9 @@ import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
 import org.json.simple.JSONArray;
@@ -80,7 +78,7 @@ public class NGSIHDFSSink extends NGSISink {
     private String port;
     private String username;
     private String password;
-    private FileFormat fileFormat;
+    protected FileFormat fileFormat;
     private String oauth2Token;
     private boolean enableHive;
     private String hiveServerVersion;
@@ -1060,6 +1058,91 @@ public class NGSIHDFSSink extends NGSISink {
                 return null;
         } // switch
     } // getAggregator
+
+    protected String getHiveFields(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        Iterator<String> it = aggregation.keySet().iterator();
+        String hiveFields = "";
+        while (it.hasNext()) {
+            String field = "";
+            String entry = (String) it.next();
+            if (entry.equals(NGSIConstants.RECV_TIME_TS)) {
+                field = NGSICharsets.encodeHive(entry) + " bigint";
+            } else {
+                if (fileFormat == FileFormat.CSVCOLUMN) {
+                    if (entry.equals(NGSIConstants.RECV_TIME) || entry.equals(NGSIConstants.FIWARE_SERVICE_PATH) || entry.equals(NGSIConstants.ENTITY_ID) || entry.equals(NGSIConstants.ENTITY_TYPE)) {
+                        field += NGSICharsets.encodeHive(entry) + " string";
+                    } else if (entry.contains("_md")) {
+                        field = "`" + NGSICharsets.encodeHive(entry.substring(0, entry.length() - 3)) + "_md_file` string";
+                    } else {
+                        field = "`" + NGSICharsets.encodeHive(entry) + "` string";
+                    }
+                } else {
+                    if (entry.contains("_md") || entry.contains("_MD") || entry.equals(NGSIConstants.ATTR_MD)) {
+                        switch (fileFormat) {
+                            case JSONROW:
+                                field = NGSICharsets.encodeHive(entry) + " array<struct<name:string,type:string,value:string>>";
+                                break;
+                            case JSONCOLUMN:
+                                field = NGSICharsets.encodeHive(entry.substring(0, entry.length() - 3)) + " array<struct<name:string,type:string,value:string>>";
+                                break;
+                            case CSVROW:
+                                field = NGSICharsets.encodeHive(entry) + " string";
+                                break;
+                        } // switch
+                    } else {
+                        field = NGSICharsets.encodeHive(entry) + " string";
+                    }
+                }
+            }
+            if (hiveFields.isEmpty()) {
+                hiveFields = field;
+            } else {
+                hiveFields += "," + field;
+            }
+        }
+        return hiveFields;
+    }
+
+    protected ArrayList<String> getKeysToCrop (){
+        ArrayList<String> keysToCrop = new ArrayList<>();
+        switch (fileFormat) {
+            case CSVCOLUMN:
+                keysToCrop.add(NGSIConstants.RECV_TIME_TS);
+                break;
+            case JSONCOLUMN:
+                keysToCrop.add(NGSIConstants.RECV_TIME_TS);
+                break;
+            case CSVROW:
+                break;
+            case JSONROW:
+                break;
+            default:
+        }
+        return keysToCrop;
+    }
+
+    protected ArrayList<String> linkedHashMapToCSVStrings (LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        ArrayList<String> strings = new ArrayList<>();
+        int numEvents = NGSIUtils.collectionSizeOnLinkedHashMap(aggregation);
+        for (int i = 0; i < numEvents; i++) {
+            Iterator<String> it = aggregation.keySet().iterator();
+            String string = "";
+            while (it.hasNext()) {
+                String entry = (String) it.next();
+                ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
+                if (string.isEmpty()) {
+                    string = values.get(i).toString();
+                } else {
+                    if (values.get(i) == null)
+                        string += ",NULL";
+                    else
+                        string += "," + values.get(i).toString();
+                }
+            }
+            strings.add(string);
+        }
+        return strings;
+    }
 
     private void persistAggregation(HDFSAggregator aggregator, String service, String servicePath)
         throws CygnusPersistenceError {

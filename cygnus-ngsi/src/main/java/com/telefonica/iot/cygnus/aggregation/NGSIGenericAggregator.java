@@ -53,6 +53,9 @@ public abstract class NGSIGenericAggregator {
     private String orgName;
     private String pkgName;
     private String resName;
+    private String hdfsFolder;
+    private String hdfsFile;
+    private String hiveFields;
     private boolean attrNativeTypes;
     private boolean enableGrouping;
     private boolean enableEncoding;
@@ -110,6 +113,30 @@ public abstract class NGSIGenericAggregator {
 
     public String getService() {
         return service;
+    }
+
+    public String getHdfsFolder() {
+        return hdfsFolder;
+    }
+
+    public void setHdfsFolder(String hdfsFolder) {
+        this.hdfsFolder = hdfsFolder;
+    }
+
+    public String getHdfsFile() {
+        return hdfsFile;
+    }
+
+    public void setHdfsFile(String hdfsFile) {
+        this.hdfsFile = hdfsFile;
+    }
+
+    public String getHiveFields() {
+        return hiveFields;
+    }
+
+    public void setHiveFields(String hiveFields) {
+        this.hiveFields = hiveFields;
     }
 
     public void setService(String service) {
