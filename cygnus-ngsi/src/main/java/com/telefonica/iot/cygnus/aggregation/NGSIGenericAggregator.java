@@ -25,9 +25,7 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 /**
  * The type Ngsi generic aggregator.
@@ -40,6 +38,8 @@ public abstract class NGSIGenericAggregator {
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
 
     protected LinkedHashMap<String, ArrayList<JsonElement>> aggregation;
+
+    protected Map<String, String> mdAggregations;
 
     private String service;
     private String servicePathForData;
@@ -56,6 +56,7 @@ public abstract class NGSIGenericAggregator {
     private String hdfsFolder;
     private String hdfsFile;
     private String hiveFields;
+    private String csvString;
     private boolean attrNativeTypes;
     private boolean enableGrouping;
     private boolean enableEncoding;
@@ -91,8 +92,32 @@ public abstract class NGSIGenericAggregator {
         }
     }
 
+    public Map<String, String> getMdAggregations() {
+        if (mdAggregations == null) {
+            return new HashMap<>();
+        } else {
+            return mdAggregations;
+        }
+    }
+
+    public String getCsvString() {
+        return csvString;
+    }
+
+    public void setCsvString(String csvString) {
+        this.csvString = csvString;
+    }
+
+    public void setMdAggregations(Map<String, String> mdAggregations) {
+        this.mdAggregations = mdAggregations;
+    }
+
     public void setAttrMetadataStore(boolean attrMetadataStore) {
         this.attrMetadataStore = attrMetadataStore;
+    }
+
+    public boolean isAttrMetadataStore() {
+        return attrMetadataStore;
     }
 
     public boolean isEnableGeoParse() {

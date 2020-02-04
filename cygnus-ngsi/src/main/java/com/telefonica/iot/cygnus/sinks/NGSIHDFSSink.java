@@ -18,7 +18,10 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
+import com.amazonaws.services.dynamodbv2.xspec.S;
 import com.google.gson.JsonElement;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackend;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplBinary;
 import com.telefonica.iot.cygnus.backends.hdfs.HDFSBackendImplREST;
@@ -1082,8 +1085,7 @@ public class NGSIHDFSSink extends NGSISink {
                             case JSONROW:
                                 field = NGSICharsets.encodeHive(entry) + " array<struct<name:string,type:string,value:string>>";
                                 break;
-                            case JSONCOLUMN:
-                                field = NGSICharsets.encodeHive(entry.substring(0, entry.length() - 3)) + " array<struct<name:string,type:string,value:string>>";
+                            case JSONCOLUMN: field = NGSICharsets.encodeHive(entry.substring(0, entry.length() - 3)) + " array<struct<name:string,type:string,value:string>>";
                                 break;
                             case CSVROW:
                                 field = NGSICharsets.encodeHive(entry) + " string";
@@ -1121,28 +1123,110 @@ public class NGSIHDFSSink extends NGSISink {
         return keysToCrop;
     }
 
-    protected ArrayList<String> linkedHashMapToCSVStrings (LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
-        ArrayList<String> strings = new ArrayList<>();
-        int numEvents = NGSIUtils.collectionSizeOnLinkedHashMap(aggregation);
+    protected NGSIGenericAggregator linkedHashMapToCSVString (NGSIGenericAggregator genericAggregator) throws CygnusBadContextData {
+        String aggregation = "";
+        ArrayList<String> attributeNames = NGSIUtils.attributeNames(genericAggregator.getAggregation());
+        int numEvents = NGSIUtils.collectionSizeOnLinkedHashMap(genericAggregator.getAggregation());
         for (int i = 0; i < numEvents; i++) {
-            Iterator<String> it = aggregation.keySet().iterator();
-            String string = "";
-            while (it.hasNext()) {
-                String entry = (String) it.next();
-                ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
-                if (string.isEmpty()) {
-                    string = values.get(i).toString();
-                } else {
-                    if (values.get(i) == null)
-                        string += ",NULL";
-                    else
-                        string += "," + values.get(i).toString();
+            String line = "";
+            long recvTimeTs;
+            if (genericAggregator instanceof NGSIGenericRowAggregator) {
+                line = genericAggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS).get(i).toString() + csvSeparator;
+                recvTimeTs = Long.parseLong(genericAggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS).get(i).toString());
+            } else {
+                recvTimeTs = Long.parseLong(genericAggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS+"C").get(i).getAsString());
+            }
+            line += genericAggregator.getAggregation().get(NGSIConstants.RECV_TIME).get(i).toString();
+            line += csvSeparator + genericAggregator.getAggregation().get(NGSIConstants.FIWARE_SERVICE_PATH).get(i).toString();
+            line += csvSeparator + genericAggregator.getAggregation().get(NGSIConstants.ENTITY_ID).get(i).toString();
+            line += csvSeparator + genericAggregator.getAggregation().get(NGSIConstants.ENTITY_TYPE).get(i).toString();
+            if (genericAggregator instanceof NGSIGenericRowAggregator) {
+                line += csvSeparator + genericAggregator.getAggregation().get(NGSIConstants.ATTR_NAME).get(i).toString();
+                line += csvSeparator + genericAggregator.getAggregation().get(NGSIConstants.ATTR_TYPE).get(i).toString();
+                line += csvSeparator + genericAggregator.getAggregation().get(NGSIConstants.ATTR_VALUE).get(i).toString();
+                String attrMdFileName = buildAttrMdFilePath(genericAggregator.getService(), genericAggregator.getServicePathForNaming(), genericAggregator.getEntityForNaming(), genericAggregator.getAggregation().get(NGSIConstants.ATTR_NAME).get(i).toString(),
+                        genericAggregator.getAggregation().get(NGSIConstants.ATTR_TYPE).get(i).toString());
+                String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
+                line += csvSeparator + printableAttrMdFileName;
+                genericAggregator.setMdAggregations(persistMetadata(attrMdFileName, genericAggregator.getMdAggregations(), genericAggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).toString(), recvTimeTs));
+            } else {
+                for (String attributeName : attributeNames) {
+                    JsonElement value = genericAggregator.getAggregation().get(attributeName).get(i);
+                    if (value == null) {
+                        line += csvSeparator + "NULL";
+                    } else {
+                        line += csvSeparator + value.toString();
+                    }
+                    if (genericAggregator.isAttrMetadataStore()) {
+                        JsonElement metadata = genericAggregator.getAggregation().get(attributeName + "_md").get(i);
+                        if (metadata != null && !metadata.toString().isEmpty() && !metadata.toString().contains("[]")) {
+                            String attrMdFileName = buildAttrMdFilePath(genericAggregator.getService(), genericAggregator.getServicePathForNaming(), genericAggregator.getEntityForNaming(), attributeName,
+                                    genericAggregator.getAggregation().get(attributeName + "_type").get(i).toString());
+                            String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
+                            line += csvSeparator + printableAttrMdFileName;
+                            genericAggregator.setMdAggregations(persistMetadata(attrMdFileName, genericAggregator.getMdAggregations(), metadata.getAsString(), recvTimeTs));
+                        } else {
+                            line += csvSeparator + "NULL";
+                        }
+                    }
                 }
             }
-            strings.add(string);
+            if (aggregation.isEmpty()) {
+                aggregation = line;
+            } else {
+                aggregation += "\n" + line;
+            }
         }
-        return strings;
+        genericAggregator.setCsvString(aggregation.replaceAll("\"", "").replace("\\", ""));
+        return genericAggregator;
     }
+
+    protected Map<String, String> persistMetadata(String attrMdFileName, Map<String, String> mdAggregations, String attrMetadata, long recvTimeTs) throws CygnusBadContextData {
+        Map<String, String> mdAggregationMap = mdAggregations;
+        String mdAggregation = mdAggregationMap.get(attrMdFileName);
+        if (mdAggregation == null) {
+            mdAggregation = new String();
+        }
+        String concatMdAggregation;
+        if (mdAggregation.isEmpty()) {
+            concatMdAggregation = getCSVMetadata(attrMetadata, recvTimeTs);
+        } else {
+            concatMdAggregation = mdAggregation.concat("\n" + getCSVMetadata(attrMetadata, recvTimeTs));
+        }
+        mdAggregationMap.put(attrMdFileName, concatMdAggregation);
+        return mdAggregationMap;
+    }
+
+    protected String getCSVMetadata(String attrMetadata, long recvTimeTs) throws CygnusBadContextData {
+        String csvMd = "";
+
+        // metadata is in JSON format, decode it
+        JSONParser jsonParser = new JSONParser();
+        JSONArray attrMetadataJSON;
+
+        try {
+            attrMetadataJSON = (JSONArray) jsonParser.parse(attrMetadata);
+        } catch (ParseException e) {
+            throw new CygnusBadContextData("Metadata parsing error", "ParseException", e.getMessage());
+        } // try catch
+
+        // iterate on the metadata
+        for (Object mdObject : attrMetadataJSON) {
+            JSONObject mdJSONObject = (JSONObject) mdObject;
+            String line = recvTimeTs + ","
+                    + mdJSONObject.get("name") + ","
+                    + mdJSONObject.get("type") + ","
+                    + mdJSONObject.get("value");
+
+            if (csvMd.isEmpty()) {
+                csvMd = line;
+            } else {
+                csvMd += "\n" + line;
+            } // if else
+        } // for
+
+        return csvMd;
+    } // getCSVMetadata
 
     private void persistAggregation(HDFSAggregator aggregator, String service, String servicePath)
         throws CygnusPersistenceError {

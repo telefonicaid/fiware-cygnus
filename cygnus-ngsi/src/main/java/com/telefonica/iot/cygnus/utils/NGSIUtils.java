@@ -23,10 +23,7 @@ import com.google.gson.JsonObject;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.simple.JSONArray;
@@ -312,6 +309,24 @@ public final class NGSIUtils {
             }
         }
         return cropLinkedHashMap(aggregation, keysToCrop);
+    }
+
+    public static ArrayList<String> attributeNames(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        String [] keys= aggregation.keySet().toArray(new String[aggregation.size()]);
+        ArrayList <String> attributeNames = new ArrayList<>(Arrays.asList(keys));
+        attributeNames.remove(NGSIConstants.RECV_TIME_TS);
+        attributeNames.remove(NGSIConstants.RECV_TIME_TS+"C");
+        attributeNames.remove(NGSIConstants.RECV_TIME);
+        attributeNames.remove(NGSIConstants.FIWARE_SERVICE_PATH);
+        attributeNames.remove(NGSIConstants.ENTITY_ID);
+        attributeNames.remove(NGSIConstants.ENTITY_TYPE);
+        ArrayList <String> cropedList = (ArrayList<String>) attributeNames.clone();
+        for (String key : cropedList) {
+            if (key.contains("_md") || key.contains("_type")) {
+                attributeNames.remove(key);
+            }
+        }
+        return attributeNames;
     }
 
 } // NGSIUtils

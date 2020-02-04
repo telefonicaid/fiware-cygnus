@@ -18,7 +18,11 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
@@ -30,6 +34,7 @@ import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHe
 
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -42,6 +47,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -1356,6 +1362,39 @@ public class NGSIHDFSSinkTest {
         batch.addEvent(destination, ngsiEvent);
         batch.addEvent(destination, ngsiEvent2);
         return batch;
+    }
+
+    @Test
+    public void testNativeTypeColumnBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        NGSIBatch batch = prepaireBatch();
+        String destination = "someDestination";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+        try {
+            batch.startIterator();
+            NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setAttrMetadataStore(true);
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                }
+            }
+            aggregator = ngsihdfsSink.linkedHashMapToCSVString(aggregator);
+            System.out.println(aggregator.getCsvString());
+            System.out.println(aggregator.getMdAggregations().keySet().size());
+        } catch (Exception e) {
+            System.out.println(e);
+            fail();
+        }
     }
 
     @Test
