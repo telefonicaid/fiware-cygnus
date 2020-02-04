@@ -77,6 +77,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private PostgreSQLBackendImpl persistenceBackend;
     private boolean enableCache;
     private boolean attrNativeTypes;
+    private boolean attrMetadataStore;
 
     /**
      * Constructor.
@@ -232,6 +233,20 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
         } // if else
 
+
+
+        String attrMetadataStoreSrt = context.getString("attr_metadata_store", "true");
+
+        if (attrMetadataStoreSrt.equals("true") || attrMetadataStoreSrt.equals("false")) {
+            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreSrt);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_metadata_store="
+                    + attrMetadataStore + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
+                    + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
+        }
+
     } // configure
 
     @Override
@@ -277,6 +292,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             aggregator.setDbName(buildSchemaName(aggregator.getService()));
             aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
             aggregator.setAttrNativeTypes(attrNativeTypes);
+            aggregator.setAttrMetadataStore(attrMetadataStore);
             aggregator.initialize(events.get(0));
 
             for (NGSIEvent event : events) {
@@ -306,9 +322,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
     } // getAggregator
 
     private void persistAggregation(NGSIGenericAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
-        String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregation());
-        String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregation());
-        String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes);
+        String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+        String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist());
+        String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
         String schemaName = aggregator.getTableName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 

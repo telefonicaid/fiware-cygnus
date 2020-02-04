@@ -49,6 +49,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         swapCoordinates = false;
         // particular initialization
         LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
+        aggregation.put(NGSIConstants.RECV_TIME_TS+"C", new ArrayList<JsonElement>());
         aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<JsonElement>());
         aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<JsonElement>());
         aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<JsonElement>());
@@ -62,6 +63,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             String attrName = contextAttribute.getName();
             aggregation.put(attrName, new ArrayList<JsonElement>());
             aggregation.put(attrName + "_md", new ArrayList<JsonElement>());
+            aggregation.put(attrName + "_type", new ArrayList<JsonElement>());
         } // for
         setAggregation(aggregation);
     } // initialize
@@ -86,6 +88,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             return;
         } // if
         LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
+        aggregation.get(NGSIConstants.RECV_TIME_TS+"C").add(new JsonPrimitive(Long.toString(recvTimeTs)));
         aggregation.get(NGSIConstants.RECV_TIME).add(new JsonPrimitive(recvTime));
         aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(new JsonPrimitive(getServicePathForData()));
         aggregation.get(NGSIConstants.ENTITY_ID).add(new JsonPrimitive(entityId));
@@ -113,6 +116,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             if (aggregation.containsKey(attrName)) {
                 aggregation.get(attrName).add(attrValue);
                 aggregation.get(attrName + "_md").add(new JsonPrimitive(attrMetadata));
+                aggregation.get(attrName + "_type").add(new JsonPrimitive(attrType));
             } else {
                 ArrayList<JsonElement> values = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
                 values.add(attrValue);
@@ -120,6 +124,9 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                 ArrayList<JsonElement> valuesMd = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
                 valuesMd.add(new JsonPrimitive(attrMetadata));
                 aggregation.put(attrName + "_md", valuesMd);
+                ArrayList<JsonElement> valuesType = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
+                valuesType.add(new JsonPrimitive(attrType));
+                aggregation.put(attrName + "_type", valuesType);
             } // if else
         } // for
         // Iterate on all the aggregations, checking for not updated attributes; add an empty value if missing

@@ -302,12 +302,12 @@ public final class NGSIUtils {
         return list.get(0).size();
     }
 
-    public static LinkedHashMap<String, ArrayList<JsonElement>> linkedHashMapWithoutMetadata(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+    public static LinkedHashMap<String, ArrayList<JsonElement>> linkedHashMapWithoutDefaultFields(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, boolean attrMetadataStore) {
         ArrayList<String> keysToCrop = new ArrayList<>();
         Iterator<String> it = aggregation.keySet().iterator();
         while (it.hasNext()) {
             String entry = (String) it.next();
-            if (entry.contains("_md") || entry.contains("_MD") || entry.equals(NGSIConstants.ATTR_MD)) {
+            if ((!attrMetadataStore && (entry.contains("_md") || entry.contains("_MD") || entry.equals(NGSIConstants.ATTR_MD)) || entry.contains("_type")) || (entry.equals(NGSIConstants.RECV_TIME_TS+"C"))) {
                 keysToCrop.add(entry);
             }
         }

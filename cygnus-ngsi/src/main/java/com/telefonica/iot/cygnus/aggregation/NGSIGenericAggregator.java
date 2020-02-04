@@ -63,18 +63,6 @@ public abstract class NGSIGenericAggregator {
     private boolean enableGeoParse;
     private boolean attrMetadataStore;
 
-    public void setAttrMetadataStore(boolean attrMetadataStore) {
-        this.attrMetadataStore = attrMetadataStore;
-    }
-
-    public boolean isEnableGeoParse() {
-        return enableGeoParse;
-    }
-
-    public void setEnableGeoParse(boolean enableGeoParse) {
-        this.enableGeoParse = enableGeoParse;
-    }
-
     public LinkedHashMap<String, ArrayList<JsonElement>> getAggregation() {
         if (aggregation == null) {
             return new LinkedHashMap<>();
@@ -87,11 +75,7 @@ public abstract class NGSIGenericAggregator {
         if (aggregation == null) {
             return new LinkedHashMap<>();
         } else {
-            if (attrMetadataStore) {
-                return aggregation;
-            } else {
-                return NGSIUtils.linkedHashMapWithoutMetadata(aggregation);
-            }
+            return NGSIUtils.linkedHashMapWithoutDefaultFields(aggregation, attrMetadataStore);
         }
     }
 
@@ -105,6 +89,18 @@ public abstract class NGSIGenericAggregator {
         } else {
             return collectionName;
         }
+    }
+
+    public void setAttrMetadataStore(boolean attrMetadataStore) {
+        this.attrMetadataStore = attrMetadataStore;
+    }
+
+    public boolean isEnableGeoParse() {
+        return enableGeoParse;
+    }
+
+    public void setEnableGeoParse(boolean enableGeoParse) {
+        this.enableGeoParse = enableGeoParse;
     }
 
     public void setCollectionName(String collectionName) {
