@@ -1105,24 +1105,6 @@ public class NGSIHDFSSink extends NGSISink {
         return hiveFields;
     }
 
-    protected ArrayList<String> getKeysToCrop (){
-        ArrayList<String> keysToCrop = new ArrayList<>();
-        switch (fileFormat) {
-            case CSVCOLUMN:
-                keysToCrop.add(NGSIConstants.RECV_TIME_TS);
-                break;
-            case JSONCOLUMN:
-                keysToCrop.add(NGSIConstants.RECV_TIME_TS);
-                break;
-            case CSVROW:
-                break;
-            case JSONROW:
-                break;
-            default:
-        }
-        return keysToCrop;
-    }
-
     protected NGSIGenericAggregator linkedHashMapToCSVString (NGSIGenericAggregator genericAggregator) throws CygnusBadContextData {
         String aggregation = "";
         ArrayList<String> attributeNames = NGSIUtils.attributeNames(genericAggregator.getAggregation());
@@ -1132,7 +1114,7 @@ public class NGSIHDFSSink extends NGSISink {
             long recvTimeTs;
             if (genericAggregator instanceof NGSIGenericRowAggregator) {
                 line = genericAggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS).get(i).toString() + csvSeparator;
-                recvTimeTs = Long.parseLong(genericAggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS).get(i).toString());
+                recvTimeTs = Long.parseLong(genericAggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS).get(i).getAsString());
             } else {
                 recvTimeTs = Long.parseLong(genericAggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS+"C").get(i).getAsString());
             }
@@ -1144,11 +1126,16 @@ public class NGSIHDFSSink extends NGSISink {
                 line += csvSeparator + genericAggregator.getAggregation().get(NGSIConstants.ATTR_NAME).get(i).toString();
                 line += csvSeparator + genericAggregator.getAggregation().get(NGSIConstants.ATTR_TYPE).get(i).toString();
                 line += csvSeparator + genericAggregator.getAggregation().get(NGSIConstants.ATTR_VALUE).get(i).toString();
-                String attrMdFileName = buildAttrMdFilePath(genericAggregator.getService(), genericAggregator.getServicePathForNaming(), genericAggregator.getEntityForNaming(), genericAggregator.getAggregation().get(NGSIConstants.ATTR_NAME).get(i).toString(),
-                        genericAggregator.getAggregation().get(NGSIConstants.ATTR_TYPE).get(i).toString());
-                String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
-                line += csvSeparator + printableAttrMdFileName;
-                genericAggregator.setMdAggregations(persistMetadata(attrMdFileName, genericAggregator.getMdAggregations(), genericAggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).toString(), recvTimeTs));
+                JsonElement metadata = genericAggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i);
+                if (metadata != null && !metadata.toString().isEmpty() && !metadata.toString().contains("[]")) {
+                    String attrMdFileName = buildAttrMdFilePath(genericAggregator.getService(), genericAggregator.getServicePathForNaming(), genericAggregator.getEntityForNaming(), genericAggregator.getAggregation().get(NGSIConstants.ATTR_NAME).get(i).toString(),
+                            genericAggregator.getAggregation().get(NGSIConstants.ATTR_TYPE).get(i).toString());
+                    String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
+                    line += csvSeparator + printableAttrMdFileName;
+                    genericAggregator.setMdAggregations(persistMetadata(attrMdFileName, genericAggregator.getMdAggregations(),metadata.getAsString(), recvTimeTs));
+                }else {
+                    line += csvSeparator + "NULL";
+                }
             } else {
                 for (String attributeName : attributeNames) {
                     JsonElement value = genericAggregator.getAggregation().get(attributeName).get(i);
