@@ -23,6 +23,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
@@ -1365,13 +1366,15 @@ public class NGSIHDFSSinkTest {
     }
 
     @Test
-    public void testNativeTypeColumnBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+    public void testNativeTypeColumnBatchCsv() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
         NGSIBatch batch = prepaireBatch();
         String destination = "someDestination";
+        String file_format = "csv-column";
         NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
+            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
@@ -1382,43 +1385,21 @@ public class NGSIHDFSSinkTest {
                 aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
                 aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
                 aggregator.setAttrMetadataStore(true);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
                 }
             }
-            aggregator = ngsihdfsSink.linkedHashMapToCSVString(aggregator);
-            System.out.println(aggregator.getCsvString());
-            System.out.println(aggregator.getMdAggregations().keySet().size());
-        } catch (Exception e) {
-            System.out.println(e);
-            fail();
-        }
-    }
-
-    @Test
-    public void testNativeTypeColumnBatchCsv() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
-        String attr_native_types = "true";
-        NGSIHDFSSink ngsihdfsSink= new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes("csv-column", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types, "true"));
-        NGSIBatch batch = prepaireBatch();
-        String destination = "someDestination";
-        try {
-            batch.startIterator();
-            while (batch.hasNext()) {
-                destination = batch.getNextDestination();
-                ArrayList<NGSIEvent> events = batch.getNextEvents();
-                NGSIHDFSSink.HDFSAggregator aggregator = ngsihdfsSink.getAggregator(NGSIHDFSSink.FileFormat.CSVCOLUMN);
-                aggregator.initialize(events.get(0));
-                for (NGSIEvent event : events) {
-                    aggregator.aggregate(event);
-                } // for
-                System.out.println(aggregator.getAggregation());
-                if (aggregator.getAggregatedAttrMDFiles().size() == 1)
-                    assertTrue(true);
-                else
-                    fail();
+            aggregator = ngsihdfsSink.processCSVFields(aggregator);
+            aggregator.setHiveFields(ngsihdfsSink.getHiveFields(aggregator.getAggregationToPersist()));
+            if (aggregator.getMdAggregations().keySet().size() == 1) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnBatchCsv]") + "-  OK ");
+            } else {
+                fail();
             }
         } catch (Exception e) {
             fail();
@@ -1427,26 +1408,39 @@ public class NGSIHDFSSinkTest {
 
     @Test
     public void testNativeTypeColumnBatchCsvNotMetadata() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
-        String attr_native_types = "true";
-        NGSIHDFSSink ngsihdfsSink= new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes("csv-column", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types, "false"));
         NGSIBatch batch = prepaireBatch();
         String destination = "someDestination";
+        String file_format = "csv-column";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
+            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
+            NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
-                NGSIHDFSSink.HDFSAggregator aggregator = ngsihdfsSink.getAggregator(NGSIHDFSSink.FileFormat.CSVCOLUMN);
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setAttrMetadataStore(false);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
-                } // for
-                System.out.println(aggregator.getAggregation());
-                if (aggregator.getAggregatedAttrMDFiles().size() == 0)
-                    assertTrue(true);
-                else
-                    fail();
+                }
+            }
+            aggregator = ngsihdfsSink.processCSVFields(aggregator);
+            aggregator.setHiveFields(ngsihdfsSink.getHiveFields(aggregator.getAggregationToPersist()));
+            if (aggregator.getMdAggregations().keySet().size() == 0) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnBatchCsvNotMetadata]") + "-  OK ");
+            } else {
+                fail();
             }
         } catch (Exception e) {
             fail();
@@ -1455,28 +1449,40 @@ public class NGSIHDFSSinkTest {
 
     @Test
     public void testNativeTypeColumnBatchJson() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
-        String attr_native_types = "true";
-        NGSIHDFSSink ngsihdfsSink= new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes("json-column", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types, "true"));
         NGSIBatch batch = prepaireBatch();
         String destination = "someDestination";
+        String file_format = "json-column";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
+            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
+            NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
-                NGSIHDFSSink.HDFSAggregator aggregator = ngsihdfsSink.getAggregator(NGSIHDFSSink.FileFormat.JSONCOLUMN);
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setAttrMetadataStore(true);
+                aggregator.setEnableUTCRecvTime(true);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
-                } // for
-                System.out.println(aggregator.getAggregation());
-                String correctBatch = "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\", \"someNumber\":\"2\", \"someNumber_md\":[], \"somneBoolean\":\"true\", \"somneBoolean_md\":[], \"someDate\":\"2016-09-21T01:23:00.00Z\", \"someDate_md\":[], \"someGeoJson\":\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\", \"someGeoJson_md\":[], \"someJson\":\"{\"String\": \"string\"}\", \"someJson_md\":[], \"someString\":\"foo\", \"someString_md\":[], \"someString2\":\"\", \"someString2_md\":[]}\n" +
-                        "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\", \"someName1\":\"-3.7167, 40.3833\", \"someName1_md\":[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}], \"someName2\":\"someValue2\", \"someName2_md\":[]}";
-                if (aggregator.getAggregation().equals(correctBatch))
-                    assertTrue(true);
-                else
-                    fail();
+                }
+            }
+            String correctBatch = "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"someNumber\":2,\"someNumber_md\":[],\"somneBoolean\":true,\"somneBoolean_md\":[],\"someDate\":\"2016-09-21T01:23:00.00Z\",\"someDate_md\":[],\"someGeoJson\":\"{\"type\":\"Point\",\"coordinates\":[-0.036177,39.986159]}\",\"someGeoJson_md\":[],\"someJson\":\"{\"String\":\"string\"}\",\"someJson_md\":[],\"someString\":\"foo\",\"someString_md\":[],\"someString2\":\"\",\"someString2_md\":[]}\n" +
+                    "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"someName1\":\"-3.7167,40.3833\",\"someName1_md\":\"[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]\",\"someName2\":\"someValue2\",\"someName2_md\":[]}";
+            if (ngsihdfsSink.jsonToPersist(aggregator.getAggregationToPersist()).replace(" ", "").equals(correctBatch.replace(" ", ""))) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnBatchJson]") + "-  OK ");
+            } else {
+                fail();
             }
         } catch (Exception e) {
             fail();
@@ -1485,29 +1491,40 @@ public class NGSIHDFSSinkTest {
 
     @Test
     public void testNativeTypeColumnBatchJsonNotMetadata() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
-        String attr_native_types = "true";
-        NGSIHDFSSink ngsihdfsSink= new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes("json-column", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types, "false"));
         NGSIBatch batch = prepaireBatch();
         String destination = "someDestination";
+        String file_format = "json-column";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
+            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
+            NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
-                NGSIHDFSSink.HDFSAggregator aggregator = ngsihdfsSink.getAggregator(NGSIHDFSSink.FileFormat.JSONCOLUMN);
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setAttrMetadataStore(false);
+                aggregator.setEnableUTCRecvTime(true);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
-                } // for
-                System.out.println(aggregator.getAggregation());
-                String correctBatch = "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\", \"someNumber\":\"2\", \"somneBoolean\":\"true\", \"someDate\":\"2016-09-21T01:23:00.00Z\", \"someGeoJson\":\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\", \"someJson\":\"{\"String\": \"string\"}\", \"someString\":\"foo\", \"someString2\":\"\"}\n" +
-                        "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\", \"someName1\":\"-3.7167, 40.3833\", \"someName2\":\"someValue2\"}";
-                if (aggregator.getAggregation().equals(correctBatch))
-                if (aggregator.getAggregatedAttrMDFiles().size() == 0)
-                    assertTrue(true);
-                else
-                    fail();
+                }
+            }
+            String correctBatch = "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\", \"someNumber\":2, \"somneBoolean\":true, \"someDate\":\"2016-09-21T01:23:00.00Z\", \"someGeoJson\":\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\", \"someJson\":\"{\"String\": \"string\"}\", \"someString\":\"foo\", \"someString2\":\"\"}\n" +
+                    "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\", \"someName1\":\"-3.7167, 40.3833\", \"someName2\":\"someValue2\"}";
+            if (ngsihdfsSink.jsonToPersist(aggregator.getAggregationToPersist()).replace(" ", "").equals(correctBatch.replace(" ", ""))) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnBatchJsonNotMetadata]") + "-  OK ");
+            } else {
+                fail();
             }
         } catch (Exception e) {
             fail();
@@ -1516,26 +1533,39 @@ public class NGSIHDFSSinkTest {
 
     @Test
     public void testNativeTypeRowBatchCsv() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
-        String attr_native_types = "true";
-        NGSIHDFSSink ngsihdfsSink= new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes("csv-row", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types, "true"));
         NGSIBatch batch = prepaireBatch();
         String destination = "someDestination";
+        String file_format = "csv-row";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
+            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
+            NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
-                NGSIHDFSSink.HDFSAggregator aggregator = ngsihdfsSink.getAggregator(NGSIHDFSSink.FileFormat.CSVROW);
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setAttrMetadataStore(true);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
-                } // for
-                System.out.println(aggregator.getAggregation());
-                if (aggregator.getAggregatedAttrMDFiles().size() == 9)
-                    assertTrue(true);
-                else
-                    fail();
+                }
+            }
+            aggregator = ngsihdfsSink.processCSVFields(aggregator);
+            aggregator.setHiveFields(ngsihdfsSink.getHiveFields(aggregator.getAggregationToPersist()));
+            if (aggregator.getMdAggregations().keySet().size() == 1) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeRowBatchCsv]") + "-  OK ");
+            } else {
+                fail();
             }
         } catch (Exception e) {
             fail();
@@ -1544,26 +1574,39 @@ public class NGSIHDFSSinkTest {
 
     @Test
     public void testNativeTypeRowBatchCsvNotMetadata() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
-        String attr_native_types = "true";
-        NGSIHDFSSink ngsihdfsSink= new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes("csv-row", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types, "false"));
         NGSIBatch batch = prepaireBatch();
         String destination = "someDestination";
+        String file_format = "csv-row";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
+            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
+            NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
-                NGSIHDFSSink.HDFSAggregator aggregator = ngsihdfsSink.getAggregator(NGSIHDFSSink.FileFormat.CSVROW);
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setAttrMetadataStore(false);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
-                } // for
-                System.out.println(aggregator.getAggregation());
-                if (aggregator.getAggregatedAttrMDFiles().size() == 0)
-                    assertTrue(true);
-                else
-                    fail();
+                }
+            }
+            aggregator = ngsihdfsSink.processCSVFields(aggregator);
+            aggregator.setHiveFields(ngsihdfsSink.getHiveFields(aggregator.getAggregationToPersist()));
+            if (aggregator.getMdAggregations().keySet().size() == 0) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeRowBatchCsvNotMetadata]") + "-  OK ");
+            } else {
+                fail();
             }
         } catch (Exception e) {
             fail();
@@ -1572,76 +1615,101 @@ public class NGSIHDFSSinkTest {
 
     @Test
     public void testNativeTypeRowBatchJson() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
-        String attr_native_types = "true";
-        NGSIHDFSSink ngsihdfsSink= new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes("json-row", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types, "true"));
         NGSIBatch batch = prepaireBatch();
         String destination = "someDestination";
+        String file_format = "json-row";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
+            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
+            NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
-                NGSIHDFSSink.HDFSAggregator aggregator = ngsihdfsSink.getAggregator(NGSIHDFSSink.FileFormat.JSONROW);
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setAttrMetadataStore(true);
+                aggregator.setEnableUTCRecvTime(true);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
-                } // for
-                System.out.println(aggregator.getAggregation());
-                String correctBatch = "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someNumber\",\"attrType\":\"number\",\"attrValue\":\"2\",\"attrMd\":[]}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"somneBoolean\",\"attrType\":\"Boolean\",\"attrValue\":\"true\",\"attrMd\":[]}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someDate\",\"attrType\":\"DateTime\",\"attrValue\":\"2016-09-21T01:23:00.00Z\",\"attrMd\":[]}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someGeoJson\",\"attrType\":\"geo:json\",\"attrValue\":\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\",\"attrMd\":[]}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someJson\",\"attrType\":\"json\",\"attrValue\":\"{\"String\": \"string\"}\",\"attrMd\":[]}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString\",\"attrType\":\"string\",\"attrValue\":\"foo\",\"attrMd\":[]}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString2\",\"attrType\":\"string\",\"attrValue\":\"\",\"attrMd\":[]}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someName1\",\"attrType\":\"someType1\",\"attrValue\":\"-3.7167, 40.3833\",\"attrMd\":[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someName2\",\"attrType\":\"someType2\",\"attrValue\":\"someValue2\",\"attrMd\":[]}";
-                if (aggregator.getAggregation().equals(correctBatch))
-                    assertTrue(true);
-                else
-                    fail();
+                }
+            }
+            String correctBatch = "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someNumber\",\"attrType\":\"number\",\"attrValue\":2,\"attrMd\":[]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"somneBoolean\",\"attrType\":\"Boolean\",\"attrValue\":true,\"attrMd\":[]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someDate\",\"attrType\":\"DateTime\",\"attrValue\":\"2016-09-21T01:23:00.00Z\",\"attrMd\":[]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someGeoJson\",\"attrType\":\"geo:json\",\"attrValue\":\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\",\"attrMd\":[]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someJson\",\"attrType\":\"json\",\"attrValue\":\"{\"String\": \"string\"}\",\"attrMd\":[]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString\",\"attrType\":\"string\",\"attrValue\":\"foo\",\"attrMd\":[]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString2\",\"attrType\":\"string\",\"attrValue\":\"\",\"attrMd\":[]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someName1\",\"attrType\":\"someType1\",\"attrValue\":\"-3.7167, 40.3833\",\"attrMd\":\"[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]\"}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someName2\",\"attrType\":\"someType2\",\"attrValue\":\"someValue2\",\"attrMd\":[]}";
+            if (ngsihdfsSink.jsonToPersist(aggregator.getAggregationToPersist()).equals(correctBatch)) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeRowBatchJson]") + "-  OK ");
+            } else {
+                fail();
             }
         } catch (Exception e) {
             fail();
         }
     } // testNativeTypeRowBatchJson
 
+
+
     @Test
     public void testNativeTypeRowBatchJsonNotMetadata() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
-        String attr_native_types = "true";
-        NGSIHDFSSink ngsihdfsSink= new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes("json-row", null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types, "false"));
         NGSIBatch batch = prepaireBatch();
         String destination = "someDestination";
+        String file_format = "json-row";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
+            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
+            NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
-                NGSIHDFSSink.HDFSAggregator aggregator = ngsihdfsSink.getAggregator(NGSIHDFSSink.FileFormat.JSONROW);
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setAttrMetadataStore(false);
+                aggregator.setEnableUTCRecvTime(true);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
-                } // for
-                System.out.println(aggregator.getAggregation());
-                String correctBatch = "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someNumber\",\"attrType\":\"number\",\"attrValue\":\"2\"}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"somneBoolean\",\"attrType\":\"Boolean\",\"attrValue\":\"true\"}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someDate\",\"attrType\":\"DateTime\",\"attrValue\":\"2016-09-21T01:23:00.00Z\"}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someGeoJson\",\"attrType\":\"geo:json\",\"attrValue\":\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someJson\",\"attrType\":\"json\",\"attrValue\":\"{\"String\": \"string\"}\"}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString\",\"attrType\":\"string\",\"attrValue\":\"foo\"}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString2\",\"attrType\":\"string\",\"attrValue\":\"\"}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someName1\",\"attrType\":\"someType1\",\"attrValue\":\"-3.7167, 40.3833\"}\n" +
-                        "{\"recvTimeTs\":\"1461136795\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someName2\",\"attrType\":\"someType2\",\"attrValue\":\"someValue2\"}";
-                if (aggregator.getAggregation().equals(correctBatch))
-                    assertTrue(true);
-                else
-                    fail();
+                }
+            }
+            String correctBatch = "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someNumber\",\"attrType\":\"number\",\"attrValue\":2}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"somneBoolean\",\"attrType\":\"Boolean\",\"attrValue\":true}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someDate\",\"attrType\":\"DateTime\",\"attrValue\":\"2016-09-21T01:23:00.00Z\"}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someGeoJson\",\"attrType\":\"geo:json\",\"attrValue\":\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someJson\",\"attrType\":\"json\",\"attrValue\":\"{\"String\": \"string\"}\"}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString\",\"attrType\":\"string\",\"attrValue\":\"foo\"}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString2\",\"attrType\":\"string\",\"attrValue\":\"\"}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someName1\",\"attrType\":\"someType1\",\"attrValue\":\"-3.7167, 40.3833\"}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someName2\",\"attrType\":\"someType2\",\"attrValue\":\"someValue2\"}";
+            if (ngsihdfsSink.jsonToPersist(aggregator.getAggregationToPersist()).equals(correctBatch)) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeRowBatchJsonNotMetadata]") + "-  OK ");
+            } else {
+                fail();
             }
         } catch (Exception e) {
             fail();
         }
     } // testNativeTypeRowBatchJsonNotMetadata
-
 } // NGSIHDFSSinkTest
