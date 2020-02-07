@@ -287,7 +287,7 @@ public final class NGSIUtils {
     }
 
     public static LinkedHashMap<String, ArrayList<JsonElement>> cropLinkedHashMap(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, ArrayList<String> keysToCrop) {
-        LinkedHashMap<String, ArrayList<JsonElement>> cropedLinkedHashMap = aggregation;
+        LinkedHashMap<String, ArrayList<JsonElement>> cropedLinkedHashMap = (LinkedHashMap<String, ArrayList<JsonElement>>) aggregation.clone();
         for (String key : keysToCrop) {
             cropedLinkedHashMap.remove(key);
         }

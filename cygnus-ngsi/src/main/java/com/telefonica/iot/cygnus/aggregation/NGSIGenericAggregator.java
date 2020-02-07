@@ -108,6 +108,30 @@ public abstract class NGSIGenericAggregator {
         this.csvString = csvString;
     }
 
+    public String getHdfsFolder(boolean enableLowercase) {
+        if (enableLowercase) {
+            return hdfsFolder.toLowerCase();
+        } else {
+            return hdfsFolder;
+        }
+    }
+
+    public void setHdfsFolder(String hdfsFolder) {
+        this.hdfsFolder = hdfsFolder;
+    }
+
+    public String getHdfsFile(boolean enableLowercase) {
+        if (enableLowercase) {
+            return hdfsFile.toLowerCase();
+        } else {
+            return hdfsFile;
+        }
+    }
+
+    public void setHdfsFile(String hdfsFile) {
+        this.hdfsFile = hdfsFile;
+    }
+
     public void setMdAggregations(Map<String, String> mdAggregations) {
         this.mdAggregations = mdAggregations;
     }
@@ -134,22 +158,6 @@ public abstract class NGSIGenericAggregator {
 
     public String getService() {
         return service;
-    }
-
-    public String getHdfsFolder() {
-        return hdfsFolder;
-    }
-
-    public void setHdfsFolder(String hdfsFolder) {
-        this.hdfsFolder = hdfsFolder;
-    }
-
-    public String getHdfsFile() {
-        return hdfsFile;
-    }
-
-    public void setHdfsFile(String hdfsFile) {
-        this.hdfsFile = hdfsFile;
     }
 
     public String getHiveFields() {
