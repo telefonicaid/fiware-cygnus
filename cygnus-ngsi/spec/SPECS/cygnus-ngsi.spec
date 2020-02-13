@@ -99,6 +99,20 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Feb 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.0
+- [cygnus-ngsi] Support for NGSIv2 notifications (#953)
+- [cygnus-ngsi][ArcGIS] Fix classpath for instantation of arcgis sink (#1741)
+- [cygnus-ngsi][PostGIS, PostGRESQL] Insert right SQL types values (Null), non stringify (#1661)
+- [cygnus-ngsi][PostgisSink] Alignement with PostgresqlSink: add try catch for row aggregator
+- [cygnus-ngsi][PostgisSink, PostGRESQLSink] Support for native Postgres and Postgis types (#1780)
+- [cygnus-ngsi][PostgisSink, PostGRESQLSink, MySQL] Add generic aggregation for SQL sinks. This generic aggregation also handles null empty columns for batch purposes (#1787)
+- [cygnus-ngsi][MySQL] Support for native MySQL types (#1780)
+- [cygnus-ngsi][HDFS] Dissable metadata files creation when they are empty (#1805)
+- [cygnus-ngsi][HDFS] Dissable metadata persistance (empty or not empty) by flag (#1706)
+- [cygnus-ngsi] Make CygnusPersistenceError more descriptive (#1768)
+- [cygnus-ngsi] Changed log level for some events (#1769)
+- [cygnus-ngsi] Unattach dockerfile from git 
+
 * Tue Oct 29 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.17.0
 - [cygnus-ngsi][NGSISink] Catch generic exception and rollback in transacation
 

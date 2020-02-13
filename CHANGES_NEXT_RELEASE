@@ -1,11 +1,1 @@
-[cygnus-ngsi][ArcGIS] Fix classpath for instantation of arcgis sink (#1741)
-[cygnus-ngsi][PostGIS, PostGRESQL] Insert right SQL types values (Null), non stringify (#1661)
-[cygnus-ngsi][PostgisSink] Alignement with PostgresqlSink: add try catch for row aggregator
-Fix: Changing cygnus port does not work (#1698)
-[cygnus-commons][MongoBackend] Proper processing of mongo errors in create index operations (#1756)
-[cygnus-ngsi] Support for NGSIv2 notifications (#953)
-[cygnus-ngsi] Make CygnusPersistenceError more descriptive (#1768)
-[cygnus-ngsi] Changed log level for some events (#1769)
-[cygnus-ngsi][PostgisSink, PostGRESQLSink] Support for native Postgres and Postgis types (#1780)
-[cygnus-ngsi][MySQL] Support for native MySQL types (#1780)
 [cygnus-ngsi] Add correlatorId rollbacked transactions (#1770)
