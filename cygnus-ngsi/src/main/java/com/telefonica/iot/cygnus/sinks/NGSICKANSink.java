@@ -36,6 +36,8 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Map;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
 
@@ -59,6 +61,7 @@ public class NGSICKANSink extends NGSISink {
     private int backendMaxConnsPerRoute;
     private String ckanViewer;
     private CKANBackend persistenceBackend;
+    private boolean pkgByEntity;
 
     /**
      * Constructor.
@@ -91,7 +94,15 @@ public class NGSICKANSink extends NGSISink {
         return apiKey;
     } // getAPIKey
 
-    /**
+    public boolean getpkgByEntity() {
+		return pkgByEntity;
+	}
+
+	public void setpkgByEntity(boolean pkgByEntity) {
+		this.pkgByEntity = pkgByEntity;
+	}
+
+	/**
      * Returns if the attribute persistence is row-based. It is protected due to it is only required for testing
      * purposes.
      * @return True if the attribute persistence is row-based, false otherwise
@@ -194,6 +205,20 @@ public class NGSICKANSink extends NGSISink {
                 + sslStr + ") -- Must be 'true' or 'false'");
         }  // if else
         
+        String confOrg = context.getString("pkg_by_entity", "false");
+        
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (pkg_by_entity=" + pkgByEntity + ")");
+        if(confOrg.equals("true") || confOrg.equals("false")) {
+        	pkgByEntity=Boolean.valueOf(confOrg);
+        	 LOGGER.debug("[" + this.getName() + "] Reading configuration (pkg_by_entity="
+                     + pkgByEntity + ")");  	
+        }
+        else  {
+            invalidConfiguration = true;
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (confOrg="
+                + confOrg + ") -- Must be 'true' or 'false'");
+        }  // if else
+        
         backendMaxConns = context.getInteger("backend.max_conns", 500);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.max_conns=" + backendMaxConns + ")");
         backendMaxConnsPerRoute = context.getInteger("backend.max_conns_per_route", 100);
@@ -206,6 +231,7 @@ public class NGSICKANSink extends NGSISink {
         
         // Techdebt: allow this sink to work with all the data models
         dataModel = DataModel.DMBYENTITY;
+        //dataModel = DataModel.DMBYSERVICEPATH;
     
         // CKAN requires all the names written in lower case
         enableLowercase = true;
@@ -227,7 +253,7 @@ public class NGSICKANSink extends NGSISink {
 
     @Override
     void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
-        if (batch == null) {
+    	if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
         } // if
@@ -285,9 +311,23 @@ public class NGSICKANSink extends NGSISink {
             String entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
 
             try {
-                String orgName = buildOrgName(service);
-                String pkgName = buildPkgName(service, servicePathForNaming);
-                String resName = buildResName(entityForNaming);
+            	String orgName="";
+                String pkgName="";
+                String resName="";
+            	 if(!pkgByEntity) {
+                 	orgName = buildOrgName(service);
+                 	pkgName = buildPkgName(service, servicePathForNaming);
+                 	resName = buildResName(entityForNaming);
+                 }
+                 else if(pkgByEntity) {
+                 	NotifyContextRequest.ContextElement contextElement = event.getContextElement();
+                    String entityId = contextElement.getId();
+                    Map<String, String> headers = event.getHeaders();                     
+                    orgName = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE);
+                 	pkgName = entityId;
+                 	resName = entityId;
+                 		 
+                 }
                 LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",orgName="
                         + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
                 persistenceBackend.capRecords(orgName, pkgName, resName, maxRecords);
@@ -319,9 +359,9 @@ public class NGSICKANSink extends NGSISink {
      */
     private abstract class CKANAggregator {
 
-        // string containing the data records
+      
+		// string containing the data records
         protected String records;
-
         protected String service;
         protected String servicePathForData;
         protected String servicePathForNaming;
@@ -330,7 +370,7 @@ public class NGSICKANSink extends NGSISink {
         protected String pkgName;
         protected String resName;
         protected String resId;
-
+		
         public CKANAggregator() {
             records = "";
         } // CKANAggregator
@@ -364,13 +404,26 @@ public class NGSICKANSink extends NGSISink {
         } // getResName
 
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
+        	LOGGER.debug("[" + this.getClass() + "] INITIALIZE");
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
             entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            orgName = buildOrgName(service);
-            pkgName = buildPkgName(service, servicePathForNaming);
-            resName = buildResName(entityForNaming);
+            if(!pkgByEntity) {
+            	orgName = buildOrgName(service);
+            	pkgName = buildPkgName(service, servicePathForNaming);
+            	resName = buildResName(entityForNaming);
+            }
+            else if(pkgByEntity) {
+            	NotifyContextRequest.ContextElement contextElement = event.getContextElement();
+                String entityId = contextElement.getId();
+                Map<String, String> headers = event.getHeaders();                
+                orgName = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE);
+            	pkgName = entityId;
+            	resName = entityId;	 
+            }
+            
+            LOGGER.debug("[" + this.getClass() + "] INITIALIZE (OrgName=" + orgName + ",pkgName="+pkgName+",resName="+resName+")");
         } // initialize
 
         public abstract void aggregate(NGSIEvent cygnusEvent);
@@ -392,8 +445,8 @@ public class NGSICKANSink extends NGSISink {
             // get the getRecvTimeTs headers
             long recvTimeTs = event.getRecvTimeTs();
             String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
-
-            // get the getRecvTimeTs body
+            
+            //get the getRecvTimeTs body
             NotifyContextRequest.ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
@@ -443,7 +496,7 @@ public class NGSICKANSink extends NGSISink {
      * Class for aggregating batches in column mode.
      */
     private class ColumnAggregator extends CKANAggregator {
-
+    	
         @Override
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             super.initialize(event);
@@ -459,6 +512,11 @@ public class NGSICKANSink extends NGSISink {
             NotifyContextRequest.ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
+            //LOGGER.debug("$$$$$$$$$$$$ "+entityId+"$$$$$$$$$$$$$");
+            //setEntityId(entityId);
+            //Map<String, String> headers = event.getHeaders();
+            //setMappedService(headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE));
+           
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
 
