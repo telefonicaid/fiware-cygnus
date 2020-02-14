@@ -587,9 +587,9 @@ public class NGSIHDFSSink extends NGSISink {
         ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonList(aggregation);
         for (JsonObject jsonObject : jsonObjects) {
             if (json.isEmpty()) {
-                json = jsonObject.toString().replace("\\", "");
+                json = jsonObject.toString().replace("\\", "").replace("\"[]\"", "[]");
             } else {
-                json += "\n" + jsonObject.toString().replace("\\", "");
+                json += "\n" + jsonObject.toString().replace("\\", "").replace("\"[]\"", "[]");
             }
         }
         return json;

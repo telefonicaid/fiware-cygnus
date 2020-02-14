@@ -63,6 +63,7 @@ public abstract class NGSIGenericAggregator {
     private boolean enableNameMappings;
     private boolean enableGeoParse;
     private boolean attrMetadataStore;
+    private boolean enableUTCRecvTime;
 
     public LinkedHashMap<String, ArrayList<JsonElement>> getAggregation() {
         if (aggregation == null) {
@@ -126,6 +127,14 @@ public abstract class NGSIGenericAggregator {
         } else {
             return hdfsFile;
         }
+    }
+
+    public boolean isEnableUTCRecvTime() {
+        return enableUTCRecvTime;
+    }
+
+    public void setEnableUTCRecvTime(boolean enableUTCRecvTime) {
+        this.enableUTCRecvTime = enableUTCRecvTime;
     }
 
     public void setHdfsFile(String hdfsFile) {

@@ -74,7 +74,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         int numPreviousValues = getAggregation().get(NGSIConstants.FIWARE_SERVICE_PATH).size();
         // Get the event headers
         long recvTimeTs = event.getRecvTimeTs();
-        String recvTime = CommonUtils.getHumanReadable(recvTimeTs, false);
+        String recvTime = CommonUtils.getHumanReadable(recvTimeTs, isEnableUTCRecvTime());
         // get the event body
         NotifyContextRequest.ContextElement contextElement = event.getContextElement();
         String entityId = contextElement.getId();
