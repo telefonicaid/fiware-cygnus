@@ -388,6 +388,10 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         NGSIBatch batch = rollbackedAccumulation.getBatch();
         
         try {
+            if (MDC.get(CommonConstants.LOG4J_CORR).equals(CommonConstants.NA)) {
+                String correlatorIdArray[] = rollbackedAccumulation.getAccTransactionIds().split(",");
+                MDC.put(CommonConstants.LOG4J_CORR, correlatorIdArray[correlatorIdArray.length - 1]);
+            }
             persistBatch(batch);
         } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
             updateServiceMetrics(batch, true);
