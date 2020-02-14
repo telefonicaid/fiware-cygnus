@@ -62,6 +62,7 @@ public class NGSICKANSink extends NGSISink {
     private String ckanViewer;
     private CKANBackend persistenceBackend;
     private boolean pkgByEntity;
+    private String entityId;
 
     /**
      * Constructor.
@@ -162,7 +163,19 @@ public class NGSICKANSink extends NGSISink {
         return ckanViewer;
     } // getCKANViewer
 
-    @Override
+    /**
+     * Gets entityId from NGSIEvent
+     * @return The entityId
+     */
+    public String getEntityId() {
+		return entityId;
+	}
+
+	public void setEntityId(String entityId) {
+		this.entityId = entityId;
+	}
+
+	@Override
     public void configure(Context context) {
         apiKey = context.getString("api_key", "nokey");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (api_key=" + apiKey + ")");
@@ -231,7 +244,6 @@ public class NGSICKANSink extends NGSISink {
         
         // Techdebt: allow this sink to work with all the data models
         dataModel = DataModel.DMBYENTITY;
-        //dataModel = DataModel.DMBYSERVICEPATH;
     
         // CKAN requires all the names written in lower case
         enableLowercase = true;
@@ -310,34 +322,20 @@ public class NGSICKANSink extends NGSISink {
             String servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
             String entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
 
-            try {
-            	String orgName="";
-                String pkgName="";
-                String resName="";
-            	 if(!pkgByEntity) {
-                 	orgName = buildOrgName(service);
-                 	pkgName = buildPkgName(service, servicePathForNaming);
-                 	resName = buildResName(entityForNaming);
-                 }
-                 else if(pkgByEntity) {
-                 	NotifyContextRequest.ContextElement contextElement = event.getContextElement();
-                    String entityId = contextElement.getId();
-                    Map<String, String> headers = event.getHeaders();                     
-                    orgName = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE);
-                 	pkgName = entityId;
-                 	resName = entityId;
-                 		 
-                 }
-                LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",orgName="
-                        + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
-                persistenceBackend.capRecords(orgName, pkgName, resName, maxRecords);
-            } catch (CygnusBadConfiguration e) {
-                throw new CygnusCappingError("Data capping error", "CygnusBadConfiguration", e.getMessage());
-            } catch (CygnusRuntimeError e) {
-                throw new CygnusCappingError("Data capping error", "CygnusRuntimeError", e.getMessage());
-            } catch (CygnusPersistenceError e) {
-                throw new CygnusCappingError("Data capping error", "CygnusPersistenceError", e.getMessage());
-            } // try catch
+			try {
+				String orgName = buildOrgName(service);
+				String pkgName = buildPkgName(service, servicePathForNaming);
+				String resName = buildResName(entityForNaming);
+				LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",orgName="
+						+ orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
+				persistenceBackend.capRecords(orgName, pkgName, resName, maxRecords);
+			} catch (CygnusBadConfiguration e) {
+				throw new CygnusCappingError("Data capping error", "CygnusBadConfiguration", e.getMessage());
+			} catch (CygnusRuntimeError e) {
+				throw new CygnusCappingError("Data capping error", "CygnusRuntimeError", e.getMessage());
+			} catch (CygnusPersistenceError e) {
+				throw new CygnusCappingError("Data capping error", "CygnusPersistenceError", e.getMessage());
+			} // try catch
         } // while
     } // capRecords
 
@@ -403,28 +401,15 @@ public class NGSICKANSink extends NGSISink {
             } // if else
         } // getResName
 
-        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
-        	LOGGER.debug("[" + this.getClass() + "] INITIALIZE");
-            service = event.getServiceForNaming(enableNameMappings);
-            servicePathForData = event.getServicePathForData();
-            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            if(!pkgByEntity) {
-            	orgName = buildOrgName(service);
-            	pkgName = buildPkgName(service, servicePathForNaming);
-            	resName = buildResName(entityForNaming);
-            }
-            else if(pkgByEntity) {
-            	NotifyContextRequest.ContextElement contextElement = event.getContextElement();
-                String entityId = contextElement.getId();
-                Map<String, String> headers = event.getHeaders();                
-                orgName = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE);
-            	pkgName = entityId;
-            	resName = entityId;	 
-            }
-            
-            LOGGER.debug("[" + this.getClass() + "] INITIALIZE (OrgName=" + orgName + ",pkgName="+pkgName+",resName="+resName+")");
-        } // initialize
+		public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
+			service = event.getServiceForNaming(enableNameMappings);
+			servicePathForData = event.getServicePathForData();
+			servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+			entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+			orgName = buildOrgName(service);
+			pkgName = buildPkgName(service, servicePathForNaming);
+			resName = buildResName(entityForNaming);
+		} // initialize
 
         public abstract void aggregate(NGSIEvent cygnusEvent);
 
@@ -511,11 +496,8 @@ public class NGSICKANSink extends NGSISink {
             // get the getRecvTimeTs body
             NotifyContextRequest.ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();
+            setEntityId(entityId);
             String entityType = contextElement.getType();
-            //LOGGER.debug("$$$$$$$$$$$$ "+entityId+"$$$$$$$$$$$$$");
-            //setEntityId(entityId);
-            //Map<String, String> headers = event.getHeaders();
-            //setMappedService(headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE));
            
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
@@ -602,20 +584,24 @@ public class NGSICKANSink extends NGSISink {
      */
     public String buildOrgName(String fiwareService) throws CygnusBadConfiguration {
         String orgName;
-        
-        if (enableEncoding) {
-            orgName = NGSICharsets.encodeCKAN(fiwareService);
-        } else {
-            orgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);
-        } // if else
+        if(!pkgByEntity) {
+        	if (enableEncoding) {
+        		orgName = NGSICharsets.encodeCKAN(fiwareService);
+        	} else {
+        		orgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);
+        	} // if else
 
-        if (orgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building organization name '" + orgName + "' and its length is "
-                    + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
-        } else if (orgName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building organization name '" + orgName + "' and its length is "
-                    + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
-        } // if else if
+        	if (orgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
+        		throw new CygnusBadConfiguration("Building organization name '" + orgName + "' and its length is "
+        				+ "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
+        	} else if (orgName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
+        		throw new CygnusBadConfiguration("Building organization name '" + orgName + "' and its length is "
+        				+ "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
+        	} // if else if
+        }
+        else {
+        	orgName=fiwareService;
+        }
             
         return orgName;
     } // buildOrgName
@@ -630,28 +616,31 @@ public class NGSICKANSink extends NGSISink {
      */
     public String buildPkgName(String fiwareService, String fiwareServicePath) throws CygnusBadConfiguration {
         String pkgName;
-        
-        if (enableEncoding) {
-            pkgName = NGSICharsets.encodeCKAN(fiwareService)
-                    + CommonConstants.CONCATENATOR
-                    + NGSICharsets.encodeCKAN(fiwareServicePath);
-        } else {
-            if (fiwareServicePath.equals("/")) {
-                pkgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);
-            } else {
-                pkgName = (NGSIUtils.encode(fiwareService, false, true)
-                        + NGSIUtils.encode(fiwareServicePath, false, true)).toLowerCase(Locale.ENGLISH);
-            } // if else
-        } // if else
-
-        if (pkgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
-                    + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
-        } else if (pkgName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
-                    + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
-        } // if else if
-
+        if(!pkgByEntity) {
+			if (enableEncoding) {
+	            pkgName = NGSICharsets.encodeCKAN(fiwareService)
+	                    + CommonConstants.CONCATENATOR
+	                    + NGSICharsets.encodeCKAN(fiwareServicePath);
+	        } else {
+	            if (fiwareServicePath.equals("/")) {
+	                pkgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);
+	            } else {
+	                pkgName = (NGSIUtils.encode(fiwareService, false, true)
+	                        + NGSIUtils.encode(fiwareServicePath, false, true)).toLowerCase(Locale.ENGLISH);
+	            } // if else
+	        } // if else
+	
+	        if (pkgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
+	            throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
+	                    + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
+	        } else if (pkgName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
+	            throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
+	                    + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
+	        } // if else if
+        }
+        else {
+        	pkgName=getEntityId();
+        }
         return pkgName;
     } // buildPkgName
 
@@ -663,20 +652,24 @@ public class NGSICKANSink extends NGSISink {
      */
     public String buildResName(String entity) throws CygnusBadConfiguration {
         String resName;
-        
-        if (enableEncoding) {
-            resName = NGSICharsets.encodeCKAN(entity);
-        } else {
-            resName = NGSIUtils.encode(entity, false, true).toLowerCase(Locale.ENGLISH);
-        } // if else
+		if (!pkgByEntity) {
+			if (enableEncoding) {
+				resName = NGSICharsets.encodeCKAN(entity);
+			} else {
+				resName = NGSIUtils.encode(entity, false, true).toLowerCase(Locale.ENGLISH);
+			} // if else
 
-        if (resName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
-                    + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
-        } else if (resName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
-                    + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
-        } // if else if
+			if (resName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
+				throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
+						+ "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
+			} else if (resName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
+				throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
+						+ "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
+			} // if else if
+		}
+		else {
+			resName=getEntityId();
+		}
 
         return resName;
     } // buildResName

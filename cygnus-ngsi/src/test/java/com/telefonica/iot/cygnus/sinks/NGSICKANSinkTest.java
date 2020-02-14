@@ -19,6 +19,9 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import static org.junit.Assert.*; // this is required by "fail" like assertions
+
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
+import com.telefonica.iot.cygnus.interceptors.NGSIEventTest;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import org.junit.runner.RunWith;
@@ -221,7 +224,7 @@ public class NGSICKANSinkTest {
         } // try catch
         
         try {
-            assertTrue(!sink.getConfOrganization());
+            assertTrue(!sink.getpkgByEntity());
             System.out.println(getTestTraceHead("[NGSICKANSink.configure]")
                     + "-  OK  - 'confOrganization=false' configured by default");
         } catch (AssertionError e) {
@@ -1093,6 +1096,165 @@ public class NGSICKANSinkTest {
         } // try catch
     } // testConfigureEnableEncoding
     
+    /**
+     * [NGSICKANSink.buildOrgName] -------- When encoding, the org name is equals to the encoding of the
+     * notified/defaulted service.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildOrgNamePkgByEntity() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                + "-------- When confOrganization, the org name is equals to subservice/fiwareServicePath");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; //default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        String viewer = null; // default
+        String confOrganization = "true"; //default
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer,confOrganization));
+        String subService = "someSubService";
+        
+        try {
+            String builtOrgName = sink.buildOrgName(subService); 
+            String expectedOrgName = "someSubService";
+        
+            try {
+                assertEquals(expectedOrgName, builtOrgName);
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                        + "-  OK  - '" + expectedOrgName + "' is equals to the subservice");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                        + "- FAIL - '" + expectedOrgName + "' is not equals to the subservice");
+                throw e;
+            } // try catch // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildOrgNamePkgByEntity
+    
+    /**
+     * [NGSICKANSink.buildPkgName] -------- When confOrganization, the pkgName is equals to entityId
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildPkgNamePkgByEntity() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                + "-------- When confOrganization, the pkgName is equals to entityId");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        String viewer = null; // default
+        String confOrganization = "true";
+        String entityId = "entityId";
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer,confOrganization));
+        
+        String service = "someService";
+        String servicePath = "/someServicePath";
+        sink.setEntityId(entityId);
+        
+        try {
+            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String expectedPkgName = "entityId";
+        
+            try {
+                assertEquals(expectedPkgName, builtPkgName);
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                        + "-  OK  - '" + expectedPkgName + "' is equals to the entityId");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                        + "- FAIL - '" + expectedPkgName + "' is not equals to the entityId");
+                throw e;
+            } // try catch // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildPkgNamePkgByEntity
+    
+    /**
+     * [NGSICKANSink.buildPkgName] -------- When confOrganization, the resource name is equals to entityId
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildResourceNamePkgByEntity() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                + "-------- When confOrganization, the resourceName is equals to entityId");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        String viewer = null; // default
+        String confOrganization = "true";
+        String entityId = "entityId";
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer,confOrganization));
+        
+        String service = "someService";
+        String servicePath = "/someServicePath";
+        sink.setEntityId(entityId);
+        
+        try {
+            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String expectedPkgName = "entityId";
+        
+            try {
+                assertEquals(expectedPkgName, builtPkgName);
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                        + "-  OK  - '" + expectedPkgName + "' is equals to the entityId");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                        + "- FAIL - '" + expectedPkgName + "' is not equals to the entityId");
+                throw e;
+            } // try catch // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildResourceNamePkgByEntity
+    
     
     private Context createContext(String apiKey, String attrPersistence, String backendMaxConns,
             String backendMaxConnsPerRoute, String batchSize, String batchTime, String batchTTL, String dataModel,
@@ -1115,7 +1277,9 @@ public class NGSICKANSinkTest {
         context.put("enable_lowercase", enableLowercase);
         context.put("ssl", ssl);
         context.put("pkg_by_entity",confOrganization);
+    
         return context;
     } // createContext
+    
     
 } // NGSICKANSinkTest
