@@ -19,14 +19,29 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import static org.junit.Assert.*; // this is required by "fail" like assertions
+
+import com.google.gson.JsonPrimitive;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+
+import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -1048,5 +1063,197 @@ public class NGSICKANSinkTest {
         context.put("ssl", ssl);
         return context;
     } // createContext
-    
+
+    private NotifyContextRequest.ContextElement createContextElement() {
+        NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
+        NotifyContextRequest.ContextMetadata contextMetadata = new NotifyContextRequest.ContextMetadata();
+        contextMetadata.setName("location");
+        contextMetadata.setType("string");
+        contextMetadata.setContextMetadata(new JsonPrimitive("WGS84"));
+        ArrayList<NotifyContextRequest.ContextMetadata> metadata = new ArrayList<>();
+        metadata.add(contextMetadata);
+        NotifyContextRequest.ContextAttribute contextAttribute1 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute1.setName("someName1");
+        contextAttribute1.setType("someType1");
+        contextAttribute1.setContextValue(new JsonPrimitive("-3.7167, 40.3833"));
+        contextAttribute1.setContextMetadata(metadata);
+        NotifyContextRequest.ContextAttribute contextAttribute2 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute2.setName("someName2");
+        contextAttribute2.setType("someType2");
+        contextAttribute2.setContextValue(new JsonPrimitive("someValue2"));
+        contextAttribute2.setContextMetadata(null);
+        ArrayList<NotifyContextRequest.ContextAttribute> attributes = new ArrayList<>();
+        attributes.add(contextAttribute1);
+        attributes.add(contextAttribute2);
+        NotifyContextRequest.ContextElement contextElement = new NotifyContextRequest.ContextElement();
+        contextElement.setId("someId");
+        contextElement.setType("someType");
+        contextElement.setIsPattern("false");
+        contextElement.setAttributes(attributes);
+        return contextElement;
+    } // createContextElement
+
+    private Context createContextforNativeTypes(String backendImpl, String backendMaxConns, String backendMaxConnsPerRoute,
+                                                String batchSize, String batchTime, String batchTTL, String csvSeparator, String dataModel,
+                                                String enableEncoding, String enableGrouping, String enableLowercase, String fileFormat, String host,
+                                                String password, String port, String username, String hive, String krb5, String token,
+                                                String serviceAsNamespace, String attrNativeTypes, String metadata) {
+        Context context = new Context();
+        context.put("backend.impl", backendImpl);
+        context.put("backend.max_conns", backendMaxConns);
+        context.put("backend.max_conns_per_route", backendMaxConnsPerRoute);
+        context.put("batchSize", batchSize);
+        context.put("batchTime", batchTime);
+        context.put("batchTTL", batchTTL);
+        context.put("csv_separator", csvSeparator);
+        context.put("data_model", dataModel);
+        context.put("enable_encoding", enableEncoding);
+        context.put("enable_grouping", enableGrouping);
+        context.put("enable_grouping", enableLowercase);
+        context.put("file_format", fileFormat);
+        context.put("hdfs_host", host);
+        context.put("hdfs_password", password);
+        context.put("hdfs_port", port);
+        context.put("hdfs_username", username);
+        context.put("hive", hive);
+        context.put("krb5_auth", krb5);
+        context.put("oauth2_token", token);
+        context.put("service_as_namespace", serviceAsNamespace);
+        context.put("attr_native_types", attrNativeTypes);
+        context.put("attr_metadata_store", metadata);
+        return context;
+    } // createContext
+
+    private NotifyContextRequest.ContextElement createContextElementForNativeTypes() {
+        NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
+        NotifyContextRequest.ContextMetadata contextMetadata = new NotifyContextRequest.ContextMetadata();
+        contextMetadata.setName("someString");
+        contextMetadata.setType("string");
+        ArrayList<NotifyContextRequest.ContextMetadata> metadata = new ArrayList<>();
+        metadata.add(contextMetadata);
+        NotifyContextRequest.ContextAttribute contextAttribute1 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute1.setName("someNumber");
+        contextAttribute1.setType("number");
+        contextAttribute1.setContextValue(new JsonPrimitive(2));
+        contextAttribute1.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute2 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute2.setName("somneBoolean");
+        contextAttribute2.setType("Boolean");
+        contextAttribute2.setContextValue(new JsonPrimitive(true));
+        contextAttribute2.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute3 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute3.setName("someDate");
+        contextAttribute3.setType("DateTime");
+        contextAttribute3.setContextValue(new JsonPrimitive("2016-09-21T01:23:00.00Z"));
+        contextAttribute3.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute4 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute4.setName("someGeoJson");
+        contextAttribute4.setType("geo:json");
+        contextAttribute4.setContextValue(new JsonPrimitive("{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}"));
+        contextAttribute4.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute5 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute5.setName("someJson");
+        contextAttribute5.setType("json");
+        contextAttribute5.setContextValue(new JsonPrimitive("{\"String\": \"string\"}"));
+        contextAttribute5.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute6 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute6.setName("someString");
+        contextAttribute6.setType("string");
+        contextAttribute6.setContextValue(new JsonPrimitive("foo"));
+        contextAttribute6.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute7 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute7.setName("someString2");
+        contextAttribute7.setType("string");
+        contextAttribute7.setContextValue(new JsonPrimitive(""));
+        contextAttribute7.setContextMetadata(null);
+        ArrayList<NotifyContextRequest.ContextAttribute> attributes = new ArrayList<>();
+        attributes.add(contextAttribute1);
+        attributes.add(contextAttribute2);
+        attributes.add(contextAttribute3);
+        attributes.add(contextAttribute4);
+        attributes.add(contextAttribute5);
+        attributes.add(contextAttribute6);
+        attributes.add(contextAttribute7);
+        NotifyContextRequest.ContextElement contextElement = new NotifyContextRequest.ContextElement();
+        contextElement.setId("someId");
+        contextElement.setType("someType");
+        contextElement.setIsPattern("false");
+        contextElement.setAttributes(attributes);
+        return contextElement;
+    } // createContextElementForNativeTypes
+
+    public NGSIBatch prepaireBatch() {
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        String destination = "someDestination";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
+        NotifyContextRequest.ContextElement contextElement2 = createContextElement();
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
+        NGSIEvent ngsiEvent2 = new NGSIEvent(headers, contextElement2.toString().getBytes(), contextElement2, null);
+        NGSIBatch batch = new NGSIBatch();
+        batch.addEvent(destination, ngsiEvent);
+        batch.addEvent(destination, ngsiEvent2);
+        return batch;
+    }
+
+    @Test
+    public void testNativeTypeColumnBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        NGSICKANSink ngsickanSink= new NGSICKANSink();
+        ngsickanSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+        NGSIBatch batch = prepaireBatch();
+        String destination = "someDestination";
+        try {
+            batch.startIterator();
+            NGSICKANSink.CKANAggregator aggregator = ngsickanSink.getAggregator(false);
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                } // for
+            }
+            System.out.println(aggregator.getAggregation());
+        } catch (Exception e) {
+            fail();
+        }
+    } // testNativeTypeColumnBatch
+
+    @Test
+    public void testNativeTypeRowBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        NGSICKANSink ngsickanSink= new NGSICKANSink();
+        ngsickanSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+        NGSIBatch batch = prepaireBatch();
+        String destination = "someDestination";
+        try {
+            batch.startIterator();
+            NGSICKANSink.CKANAggregator aggregator = ngsickanSink.getAggregator(true);
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                } // for
+            }
+            System.out.println(aggregator.getAggregation());
+        } catch (Exception e) {
+            fail();
+        }
+    } // testNativeTypeRowBatch
+
+
 } // NGSICKANSinkTest

@@ -317,7 +317,7 @@ public class NGSICKANSink extends NGSISink {
     /**
      * Class for aggregating fieldValues.
      */
-    private abstract class CKANAggregator {
+    protected abstract class CKANAggregator {
 
         // string containing the data records
         protected String records;
@@ -380,7 +380,7 @@ public class NGSICKANSink extends NGSISink {
     /**
      * Class for aggregating batches in row mode.
      */
-    private class RowAggregator extends CKANAggregator {
+    protected class RowAggregator extends CKANAggregator {
 
         @Override
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
@@ -442,7 +442,7 @@ public class NGSICKANSink extends NGSISink {
     /**
      * Class for aggregating batches in column mode.
      */
-    private class ColumnAggregator extends CKANAggregator {
+    protected class ColumnAggregator extends CKANAggregator {
 
         @Override
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
@@ -499,7 +499,7 @@ public class NGSICKANSink extends NGSISink {
 
     } // ColumnAggregator
 
-    private CKANAggregator getAggregator(boolean rowAttrPersistence) {
+    protected CKANAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
             return new RowAggregator();
         } else {
