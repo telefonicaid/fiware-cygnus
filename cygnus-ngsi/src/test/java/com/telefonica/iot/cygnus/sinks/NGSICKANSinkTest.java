@@ -20,7 +20,11 @@ package com.telefonica.iot.cygnus.sinks;
 
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
@@ -32,6 +36,7 @@ import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHe
 
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.apache.flume.Context;
@@ -1217,16 +1222,36 @@ public class NGSICKANSinkTest {
         String destination = "someDestination";
         try {
             batch.startIterator();
-            NGSICKANSink.CKANAggregator aggregator = ngsickanSink.getAggregator(false);
+            NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setEnableUTCRecvTime(true);
+                aggregator.setOrgName(ngsickanSink.buildOrgName(aggregator.getService()));
+                aggregator.setPkgName(ngsickanSink.buildPkgName(aggregator.getService(), aggregator.getServicePathForNaming()));
+                aggregator.setResName(ngsickanSink.buildResName(aggregator.getEntityForNaming()));
                 aggregator.initialize(events.get(0));
+                aggregator.setAttrMetadataStore(true);
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
                 } // for
             }
-            System.out.println(aggregator.getAggregation());
+            ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonListWithOutEmptyMD(aggregator.getAggregationToPersist());
+            String aggregation = "";
+            for (JsonObject jsonObject : jsonObjects) {
+                if (aggregation.isEmpty()) {
+                    aggregation = jsonObject.toString();
+                } else {
+                    aggregation += "," + jsonObject;
+                }
+            }
+            System.out.println(aggregation);
         } catch (Exception e) {
             fail();
         }
@@ -1240,16 +1265,36 @@ public class NGSICKANSinkTest {
         String destination = "someDestination";
         try {
             batch.startIterator();
-            NGSICKANSink.CKANAggregator aggregator = ngsickanSink.getAggregator(true);
+            NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setEnableUTCRecvTime(true);
+                aggregator.setOrgName(ngsickanSink.buildOrgName(aggregator.getService()));
+                aggregator.setPkgName(ngsickanSink.buildPkgName(aggregator.getService(), aggregator.getServicePathForNaming()));
+                aggregator.setResName(ngsickanSink.buildResName(aggregator.getEntityForNaming()));
                 aggregator.initialize(events.get(0));
+                aggregator.setAttrMetadataStore(true);
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
                 } // for
             }
-            System.out.println(aggregator.getAggregation());
+            ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonListWithOutEmptyMD(aggregator.getAggregationToPersist());
+            String aggregation = "";
+            for (JsonObject jsonObject : jsonObjects) {
+                if (aggregation.isEmpty()) {
+                    aggregation = jsonObject.toString();
+                } else {
+                    aggregation += "," + jsonObject;
+                }
+            }
+            System.out.println(aggregation);
         } catch (Exception e) {
             fail();
         }
