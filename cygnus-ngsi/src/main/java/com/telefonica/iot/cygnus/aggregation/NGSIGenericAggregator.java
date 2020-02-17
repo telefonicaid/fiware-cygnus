@@ -245,24 +245,36 @@ public abstract class NGSIGenericAggregator {
         this.tableName = tableName;
     }
 
-    public String getOrgName() {
-        return orgName;
+    public String getOrgName(boolean enableLowercase) {
+        if (enableLowercase) {
+            return orgName.toLowerCase();
+        } else {
+            return orgName;
+        }
     }
 
     public void setOrgName(String orgName) {
         this.orgName = orgName;
     }
 
-    public String getPkgName() {
-        return pkgName;
+    public String getPkgName(boolean enableLowercase) {
+        if (enableLowercase) {
+            return pkgName.toLowerCase();
+        } else {
+            return pkgName;
+        }
     }
 
     public void setPkgName(String pkgName) {
         this.pkgName = pkgName;
     }
 
-    public String getResName() {
-        return resName;
+    public String getResName(boolean enableLowercase) {
+        if (enableLowercase) {
+            return resName.toLowerCase();
+        } else {
+            return resName;
+        }
     }
 
     public void setResName(String resName) {

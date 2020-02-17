@@ -286,6 +286,29 @@ public final class NGSIUtils {
         return jsonStrings;
     }
 
+    public static ArrayList<JsonObject> linkedHashMapToJsonListWithOutEmptyMD(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        ArrayList<JsonObject> jsonStrings = new ArrayList<>();
+        int numEvents = collectionSizeOnLinkedHashMap(aggregation);
+        for (int i = 0; i < numEvents; i++) {
+            Iterator<String> it = aggregation.keySet().iterator();
+            JsonObject jsonObject = new JsonObject();
+            while (it.hasNext()) {
+                String entry = (String) it.next();
+                ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
+                if (values.get(i) != null) {
+                    if (entry.contains("_md") || entry.contains("Md")) {
+                        if (!values.get(i).toString().contains("[]"))
+                            jsonObject.add(entry, values.get(i));
+                    } else {
+                        jsonObject.add(entry, values.get(i));
+                    }
+                }
+            }
+            jsonStrings.add(jsonObject);
+        }
+        return jsonStrings;
+    }
+
     public static LinkedHashMap<String, ArrayList<JsonElement>> cropLinkedHashMap(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, ArrayList<String> keysToCrop) {
         LinkedHashMap<String, ArrayList<JsonElement>> cropedLinkedHashMap = (LinkedHashMap<String, ArrayList<JsonElement>>) aggregation.clone();
         for (String key : keysToCrop) {
