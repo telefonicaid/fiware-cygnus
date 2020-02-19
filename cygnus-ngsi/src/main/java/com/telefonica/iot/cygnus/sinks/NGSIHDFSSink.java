@@ -524,6 +524,12 @@ public class NGSIHDFSSink extends NGSISink {
     public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
     } // expirateRecords
 
+    /**
+     * Gets aggregator (Row or Column) where all events will be allocated.
+     *
+     * @param fileFormat the file format
+     * @return an object NGSIGenericAggregator.
+     */
     protected NGSIGenericAggregator getAggregator(FileFormat fileFormat) {
         switch (fileFormat) {
             case JSONROW:
@@ -539,6 +545,12 @@ public class NGSIHDFSSink extends NGSISink {
         } // switch
     } // getAggregator
 
+    /**
+     * Gets hive fields.
+     *
+     * @param aggregation the aggregation
+     * @return the hive fields to be stored.
+     */
     protected String getHiveFields(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
         Iterator<String> it = aggregation.keySet().iterator();
         String hiveFields = "";
@@ -580,8 +592,14 @@ public class NGSIHDFSSink extends NGSISink {
             }
         }
         return hiveFields;
-    }
+    } //getHiveFields
 
+    /**
+     * Json to persist string. Stores all objects on a LinkedHashMap into a json String. Every attribute will be a Json Object inside the output String.
+     *
+     * @param aggregation the aggregation
+     * @return a Json String.
+     */
     protected String jsonToPersist(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
         String json = "";
         ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonList(aggregation);
@@ -593,8 +611,15 @@ public class NGSIHDFSSink extends NGSISink {
             }
         }
         return json;
-    }
+    } //jsonToPersist
 
+    /**
+     * Process csv fields ngsi generic aggregator. This function also stores all attributes on a CSV String into the aggregtator output object.
+     *
+     * @param genericAggregator the generic aggregator
+     * @return the ngsi generic aggregator.
+     * @throws CygnusBadContextData the cygnus bad context data
+     */
     protected NGSIGenericAggregator processCSVFields (NGSIGenericAggregator genericAggregator) throws CygnusBadContextData {
         String aggregation = "";
         ArrayList<String> attributeNames = NGSIUtils.attributeNames(genericAggregator.getAggregation());
@@ -658,8 +683,18 @@ public class NGSIHDFSSink extends NGSISink {
         }
         genericAggregator.setCsvString(aggregation.replaceAll("\"", "").replace("\\", ""));
         return genericAggregator;
-    }
+    } //processCSVFields
 
+    /**
+     * Persist metadata map.
+     *
+     * @param attrMdFileName the attr md file name
+     * @param mdAggregations the md aggregations
+     * @param attrMetadata   the attr metadata
+     * @param recvTimeTs     the recv time ts
+     * @return the map
+     * @throws CygnusBadContextData the cygnus bad context data
+     */
     protected Map<String, String> persistMetadata(String attrMdFileName, Map<String, String> mdAggregations, String attrMetadata, long recvTimeTs) throws CygnusBadContextData {
         Map<String, String> mdAggregationMap = mdAggregations;
         String mdAggregation = mdAggregationMap.get(attrMdFileName);
@@ -674,8 +709,16 @@ public class NGSIHDFSSink extends NGSISink {
         }
         mdAggregationMap.put(attrMdFileName, concatMdAggregation);
         return mdAggregationMap;
-    }
+    } //persistMetadata
 
+    /**
+     * Gets csv metadata.
+     *
+     * @param attrMetadata the attr metadata
+     * @param recvTimeTs   the recv time ts
+     * @return the csv metadata String.
+     * @throws CygnusBadContextData the cygnus bad context data
+     */
     protected String getCSVMetadata(String attrMetadata, long recvTimeTs) throws CygnusBadContextData {
         String csvMd = "";
 
