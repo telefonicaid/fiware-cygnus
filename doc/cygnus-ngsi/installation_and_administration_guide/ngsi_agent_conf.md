@@ -173,7 +173,7 @@ cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPos
 #cygnus-ngsi.sinks.postgresql-sink.postgresql_password = xxxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 #cygnus-ngsi.sinks.postgresql-sink.attr_persistence = column
-# select the data_model: dm-by-service-path or dm-by-entity
+# select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type
 #cygnus-ngsi.sinks.postgresql-sink.data_model = by-service-path
 # number of notifications to be included within a processing batch
 #cygnus-ngsi.sinks.postgresql-sink.batch_size = 100
@@ -210,7 +210,7 @@ cygnus-ngsi.sinks.postgis-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgi
 #cygnus-ngsi.sinks.postgis-sink.postgis_password = xxxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
 #cygnus-ngsi.sinks.postgis-sink.attr_persistence = column
-# select the data_model: dm-by-service-path or dm-by-entity
+# select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type
 #cygnus-ngsi.sinks.postgis-sink.data_model = by-service-path
 # number of notifications to be included within a processing batch
 #cygnus-ngsi.sinks.postgis-sink.batch_size = 100

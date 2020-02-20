@@ -301,7 +301,7 @@ public class NGSIPostgisSink extends NGSISink {
             aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
             aggregator.setDbName(buildSchemaName(aggregator.getService()));
-            aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
+            aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
             aggregator.setAttrNativeTypes(attrNativeTypes);
             aggregator.setAttrMetadataStore(attrMetadataStore);
             aggregator.setEnableGeoParse(true);
@@ -390,7 +390,7 @@ public class NGSIPostgisSink extends NGSISink {
      * @return The Postgis table name
      * @throws CygnusBadConfiguration
      */
-    public String buildTableName(String servicePath, String entity, String attribute) throws CygnusBadConfiguration {
+    public String buildTableName(String servicePath, String entity, String entityType, String attribute) throws CygnusBadConfiguration {
         String name;
 
         if (enableEncoding) {
@@ -402,6 +402,11 @@ public class NGSIPostgisSink extends NGSISink {
                     name = NGSICharsets.encodePostgreSQL(servicePath)
                             + CommonConstants.CONCATENATOR
                             + NGSICharsets.encodePostgreSQL(entity);
+                    break;
+                case DMBYENTITYTYPE:
+                    name = NGSICharsets.encodeMySQL(servicePath)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodeMySQL(entityType);
                     break;
                 case DMBYATTRIBUTE:
                     name = NGSICharsets.encodePostgreSQL(servicePath)
@@ -429,6 +434,11 @@ public class NGSIPostgisSink extends NGSISink {
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
                             + NGSIUtils.encode(entity, false, true);
                     break;
+                case DMBYENTITYTYPE:
+                    truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
+                    name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
+                            + NGSIUtils.encode(entityType, false, true);
+                    break;
                 case DMBYATTRIBUTE:
                     truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
@@ -437,7 +447,7 @@ public class NGSIPostgisSink extends NGSISink {
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
+                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY, DMBYENTITYTYPE or DMBYATTRIBUTE");
             } // switch
         } // if else
 
