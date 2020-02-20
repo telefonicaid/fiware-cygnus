@@ -103,6 +103,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
         // get a connection to an empty database
         Connection con = driver.getConnection("");
+        String query = "create database if not exists `" + dbName + "`";
 
         try {
             stmt = con.createStatement();
@@ -112,7 +113,6 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
 
         try {
-            String query = "create database if not exists `" + dbName + "`";
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLException e) {
@@ -138,6 +138,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
         // get a connection to the given database
         Connection con = driver.getConnection(dbName);
+        String query = "create table if not exists `" + tableName + "`" + typedFieldNames;
 
         try {
             stmt = con.createStatement();
@@ -147,7 +148,6 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
 
         try {
-            String query = "create table if not exists `" + tableName + "`" + typedFieldNames;
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLException e) {
@@ -168,6 +168,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
         // get a connection to the given database
         Connection con = driver.getConnection(dbName);
+        String query = "insert into `" + tableName + "` " + fieldNames + " values " + fieldValues;
 
         try {
             stmt = con.createStatement();
@@ -177,7 +178,6 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
 
         try {
-            String query = "insert into `" + tableName + "` " + fieldNames + " values " + fieldValues;
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
@@ -199,6 +199,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
         // get a connection to the given database
         Connection con = driver.getConnection(dbName);
+        String query = "select " + selection + " from `" + tableName + "` order by recvTime";
 
         try {
             stmt = con.createStatement();
@@ -210,7 +211,6 @@ public class MySQLBackendImpl implements MySQLBackend {
         try {
             // to-do: refactor after implementing
             // https://github.com/telefonicaid/fiware-cygnus/issues/1371
-            String query = "select " + selection + " from `" + tableName + "` order by recvTime";
             LOGGER.debug("Executing MySQL query '" + query + "'");
             ResultSet rs = stmt.executeQuery(query);
             // A CachedRowSet is "disconnected" from the source, thus can be
@@ -233,6 +233,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
         // get a connection to the given database
         Connection con = driver.getConnection(dbName);
+        String query = "delete from `" + tableName + "` where " + filters;
 
         try {
             stmt = con.createStatement();
@@ -242,7 +243,6 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
 
         try {
-            String query = "delete from `" + tableName + "` where " + filters;
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLException e) {
