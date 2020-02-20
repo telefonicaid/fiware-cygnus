@@ -1374,7 +1374,6 @@ public class NGSIHDFSSinkTest {
         ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
-            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
@@ -1415,7 +1414,6 @@ public class NGSIHDFSSinkTest {
         ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
-            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
@@ -1456,7 +1454,6 @@ public class NGSIHDFSSinkTest {
         ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
-            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
@@ -1498,7 +1495,6 @@ public class NGSIHDFSSinkTest {
         ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
-            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
@@ -1540,7 +1536,6 @@ public class NGSIHDFSSinkTest {
         ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
-            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
@@ -1581,7 +1576,6 @@ public class NGSIHDFSSinkTest {
         ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
-            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
@@ -1622,7 +1616,6 @@ public class NGSIHDFSSinkTest {
         ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
-            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
@@ -1673,7 +1666,6 @@ public class NGSIHDFSSinkTest {
         ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
-            //NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
             NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();

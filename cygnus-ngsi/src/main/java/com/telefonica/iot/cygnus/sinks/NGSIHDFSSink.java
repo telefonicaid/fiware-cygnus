@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.amazonaws.services.dynamodbv2.xspec.S;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
