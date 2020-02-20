@@ -1250,7 +1250,7 @@ public class NGSIPostgisSinkTest {
         aggregator.setEntityForNaming(event.getEntityForNaming(false, false, false));
         aggregator.setEntityType(event.getEntityTypeForNaming(false, false));
         aggregator.setAttribute(event.getAttributeForNaming(false));
-        aggregator.setTableName(sink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
+        aggregator.setTableName(sink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
 
         try {
             assertTrue(aggregator.getTableName(false) != null);
@@ -1440,7 +1440,7 @@ public class NGSIPostgisSinkTest {
                 aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setDbName(ngsiPostgisSink.buildSchemaName(aggregator.getService()));
-                aggregator.setTableName(ngsiPostgisSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
+                aggregator.setTableName(ngsiPostgisSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
                 aggregator.setAttrNativeTypes(true);
                 aggregator.setEnableGeoParse(true);
                 aggregator.setAttrMetadataStore(true);

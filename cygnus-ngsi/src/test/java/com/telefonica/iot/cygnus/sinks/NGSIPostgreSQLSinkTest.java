@@ -1328,7 +1328,7 @@ public class NGSIPostgreSQLSinkTest {
                 aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setDbName(ngsiPostgreSQLSink.buildSchemaName(aggregator.getService()));
-                aggregator.setTableName(ngsiPostgreSQLSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
+                aggregator.setTableName(ngsiPostgreSQLSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
                 aggregator.setAttrNativeTypes(true);
                 aggregator.setAttrMetadataStore(true);
                 aggregator.initialize(events.get(0));
