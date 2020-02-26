@@ -370,7 +370,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
         String fieldsForCreate = aggregator.getFieldsForCreate();
         String fieldsForInsert = aggregator.getFieldsForInsert();
         String valuesForInsert = aggregator.getValuesForInsert();
-        String schemaName = aggregator.getTableName(enableLowercase);
+        String schemaName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgreSQLSink. Schema ("
