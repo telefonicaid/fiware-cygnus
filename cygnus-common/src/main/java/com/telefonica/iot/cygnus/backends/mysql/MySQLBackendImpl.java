@@ -146,8 +146,11 @@ public class MySQLBackendImpl implements MySQLBackend {
         try {
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
+        } catch (SQLTimeoutException e) {
+            throw new CygnusPersistenceError("Table creation error. Query " + query, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
             closeMySQLObjects(con, stmt);
+            persistError(dbName, query, e);
             throw new CygnusPersistenceError("Table creation error", "SQLException", e.getMessage());
         } // try catch
 
@@ -179,6 +182,7 @@ public class MySQLBackendImpl implements MySQLBackend {
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError("Data insertion error. Query insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
+            persistError(dbName, query, e);
             throw new CygnusBadContextData("Data insertion error. Query: insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLException", e.getMessage());
         } finally {
             closeMySQLObjects(con, stmt);
@@ -217,8 +221,11 @@ public class MySQLBackendImpl implements MySQLBackend {
             crs.populate(rs); // FIXME: close Resultset Objects??
             closeMySQLObjects(con, stmt);
             return crs;
+        } catch (SQLTimeoutException e) {
+            throw new CygnusPersistenceError("Data select error. Query " + query, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
             closeMySQLObjects(con, stmt);
+            persistError(dbName, query, e);
             throw new CygnusPersistenceError("Querying error", "SQLException", e.getMessage());
         } // try catch
     } // select
@@ -241,8 +248,11 @@ public class MySQLBackendImpl implements MySQLBackend {
         try {
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
-        } catch (SQLException e) {
+        } catch (SQLTimeoutException e) {
+            throw new CygnusPersistenceError("Data delete error. Query " + query, "SQLTimeoutException", e.getMessage());
+        }catch (SQLException e) {
             closeMySQLObjects(con, stmt);
+            persistError(dbName, query, e);
             throw new CygnusPersistenceError("Deleting error", "SQLException", e.getMessage());
         } // try catch
 
