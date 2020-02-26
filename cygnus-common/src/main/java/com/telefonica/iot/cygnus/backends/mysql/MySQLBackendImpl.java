@@ -483,6 +483,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
     public void persistError(String bd, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {
         try {
+            createErrorTable(bd);
             insertErrorLog(bd, query, exception);
             return;
         } catch (CygnusBadContextData cygnusBadContextData) {
@@ -490,12 +491,6 @@ public class MySQLBackendImpl implements MySQLBackend {
             createErrorTable(bd);
         } catch (Exception e) {
             LOGGER.debug("failed to persist error on db " + bd + "_error_log" + e);
-        }
-        try {
-            insertErrorLog(bd, query, exception);
-            return;
-        } catch (Exception e) {
-            createErrorTable(bd);
         }
     }
 
