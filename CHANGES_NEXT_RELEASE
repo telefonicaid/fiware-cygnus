@@ -1,2 +1,3 @@
 [cygnus-ngsi][PostgisSink, PostGRESQLSink] Enable datamodel by entity type (dm-by-entity-type) (#1684)
 [cygnus-ngsi] Add correlatorId rollbacked transactions (#1770)
+[cygnus-ngsi][PostGRESQLSink] Fix schemaName when inserting data into DB
