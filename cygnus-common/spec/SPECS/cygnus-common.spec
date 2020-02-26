@@ -171,6 +171,8 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed Feb 26 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.1
+
 * Fri Feb 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.0
 - [cygnus-common][MongoBackend] Proper processing of mongo errors in create index operations (#1756)
 - [cygnus-common] Fix: Changing cygnus port does not work (#1698)
