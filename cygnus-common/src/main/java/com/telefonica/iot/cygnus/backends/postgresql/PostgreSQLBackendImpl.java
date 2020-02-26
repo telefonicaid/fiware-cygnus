@@ -18,12 +18,9 @@
 
 package com.telefonica.iot.cygnus.backends.postgresql;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLTimeoutException;
-import java.sql.Statement;
+import java.sql.*;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -42,7 +39,6 @@ import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
-import java.sql.DriverManager;
 import java.util.Properties;
 
 /**
@@ -109,6 +105,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
 
         // get a connection to an empty database
         Connection con = driver.getConnection("");
+        String query = "CREATE SCHEMA IF NOT EXISTS " + schemaName;
 
         try {
             stmt = con.createStatement();
@@ -118,7 +115,6 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         } // try catch
 
         try {
-            String query = "CREATE SCHEMA IF NOT EXISTS " + schemaName;
             LOGGER.debug("Executing SQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLException e) {
@@ -149,6 +145,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
 
         // get a connection to the given schema
         Connection con = driver.getConnection(schemaName);
+        String query = "CREATE TABLE IF NOT EXISTS " + schemaName + "." + tableName + " " + typedFieldNames;
 
         try {
             stmt = con.createStatement();
@@ -158,11 +155,13 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         } // try catch
 
         try {
-            String query = "CREATE TABLE IF NOT EXISTS " + schemaName + "." + tableName + " " + typedFieldNames;
             LOGGER.debug("Executing SQL query '" + query + "'");
             stmt.executeUpdate(query);
+        } catch (SQLTimeoutException e) {
+            throw new CygnusPersistenceError("Table creation error. Query " + query, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
             closePostgreSQLObjects(con, stmt);
+            persistError(schemaName, query, e);
             throw new CygnusPersistenceError("Table creation error", "SQLException", e.getMessage());
         } // try catch
 
@@ -178,6 +177,7 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
 
         // get a connection to the given database
         Connection con = driver.getConnection(schemaName);
+        String query = "INSERT INTO " + schemaName + "." + tableName + " " + fieldNames + " VALUES " + fieldValues;
 
         try {
             stmt = con.createStatement();
@@ -187,12 +187,12 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         } // try catch
 
         try {
-            String query = "INSERT INTO " + schemaName + "." + tableName + " " + fieldNames + " VALUES " + fieldValues;
             LOGGER.debug("Executing SQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError("Data insertion error. Query: INSERT INTO " + schemaName + "." + tableName + " " + fieldNames + " VALUES " + fieldValues, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
+            persistError(schemaName, query, e);
             throw new CygnusBadContextData("Data insertion error. Query: INSERT INTO " + schemaName + "." + tableName + " " + fieldNames + " VALUES " + fieldValues, "SQLException", e.getMessage());
         } finally {
             closePostgreSQLObjects(con, stmt);
@@ -201,6 +201,109 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         cache.persistSchemaInCache(schemaName);
         cache.persistTableInCache(schemaName, tableName);
     } // insertContextData
+
+    public void createErrorTable(String dbName)
+            throws CygnusRuntimeError, CygnusPersistenceError {
+        // the defaul table for error log will be called the same as the db name
+        String errorTable = dbName + "_error_log";
+        if (cache.isTableInCachedSchema(dbName, errorTable)) {
+            LOGGER.debug("'" + errorTable + "' is cached, thus it is not created");
+            return;
+        } // if
+        String typedFieldNames = "(" +
+                "timestamp TIMESTAMP" +
+                ", error text" +
+                ", query text)";
+
+        Statement stmt = null;
+        // get a connection to the given database
+        Connection con = driver.getConnection(dbName);
+        String query = "create table if not exists " + dbName + "." + errorTable + " " + typedFieldNames;
+
+        try {
+            stmt = con.createStatement();
+        } catch (SQLException e) {
+            closePostgreSQLObjects(con, stmt);
+            throw new CygnusRuntimeError("Table creation error", "SQLException", e.getMessage());
+        } // try catch
+
+        try {
+            LOGGER.debug("Executing SQL query '" + query + "'");
+            stmt.executeUpdate(query);
+        } catch (SQLException e) {
+            closePostgreSQLObjects(con, stmt);
+            throw new CygnusPersistenceError("Table creation error", "SQLException", e.getMessage());
+        } // try catch
+
+        closePostgreSQLObjects(con, stmt);
+
+        LOGGER.debug("Trying to add '" + errorTable + "' to the cache after table creation");
+        cache.persistTableInCache(dbName, errorTable);
+    } // createErrorTable
+
+    public void insertErrorLog(String dbName, String errorQuery, Exception exception)
+            throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError {
+        Statement stmt = null;
+        String errorTable = dbName + "_error_log";
+        String fieldNames  = "(" +
+                "timestamp" +
+                ", error" +
+                ", query)";
+        String fieldValues = "(" +
+                "'" + java.sql.Timestamp.from(Instant.now()) + "'" +
+                ", '" + escapeStringForSQL(exception.toString())+ "'" +
+                ", '" + escapeStringForSQL(errorQuery )+ "')";
+        // get a connection to the given database
+        Connection con = driver.getConnection(dbName);
+        String query = "INSERT INTO " + dbName + "." + errorTable + " " + fieldNames + " VALUES " + fieldValues;
+
+        try {
+            stmt = con.createStatement();
+        } catch (SQLException e) {
+            closePostgreSQLObjects(con, stmt);
+            throw new CygnusRuntimeError("Data insertion error", "SQLException", e.getMessage());
+        } // try catch
+
+        try {
+            LOGGER.debug("Executing SQL query '" + query + "'");
+            stmt.executeUpdate(query);
+        } catch (SQLTimeoutException e) {
+            throw new CygnusPersistenceError("Data insertion error. Query insert into `" + errorTable + "` " + fieldNames + " values " + fieldValues, "SQLTimeoutException", e.getMessage());
+        } catch (SQLException e) {
+            throw new CygnusBadContextData("Data insertion error. Query: insert into `" + errorTable + "` " + fieldNames + " values " + fieldValues, "SQLException", e.getMessage());
+        } finally {
+            closePostgreSQLObjects(con, stmt);
+        } // try catch
+
+        LOGGER.debug("Trying to add '" + dbName + "' and '" + errorTable + "' to the cache after insertion");
+        cache.persistSchemaInCache(dbName);
+        cache.persistTableInCache(dbName, errorTable);
+    } // insertErrorLog
+
+    public void persistError(String bd, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {
+        try {
+            createErrorTable(bd);
+            insertErrorLog(bd, query, exception);
+            return;
+        } catch (CygnusBadContextData cygnusBadContextData) {
+            LOGGER.debug("failed to persist error on db " + bd + "_error_log" + cygnusBadContextData);
+            createErrorTable(bd);
+        } catch (Exception e) {
+            LOGGER.debug("failed to persist error on db " + bd + "_error_log" + e);
+        }
+    }
+
+    private String escapeStringForSQL(String query) {
+        return query.replace("\\", "\\\\")
+                .replace("\b","\\b")
+                .replace("\n","\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t")
+                .replace("\\x1A", "\\Z")
+                .replace("\\x00", "\\0")
+                .replace("'", "\\'")
+                .replace("\"", "\\\"");
+    }
 
     /**
      * Close all the PostgreSQL objects previously opened by createSchema and createTable.
