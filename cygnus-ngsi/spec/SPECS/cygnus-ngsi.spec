@@ -99,6 +99,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed Feb 26 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.1
+- [cygnus-ngsi][PostGRESQLSink] Fix schemaName when inserting data into DB
+
 * Fri Feb 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.0
 - [cygnus-ngsi] Support for NGSIv2 notifications (#953)
 - [cygnus-ngsi][ArcGIS] Fix classpath for instantation of arcgis sink (#1741)
