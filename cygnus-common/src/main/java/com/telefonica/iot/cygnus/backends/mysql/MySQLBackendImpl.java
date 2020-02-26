@@ -461,9 +461,9 @@ public class MySQLBackendImpl implements MySQLBackend {
                 ", error" +
                 ", query)";
         String fieldValues = "(" +
-                timestamp +
-                ", '" + exception + "'" +
-                ", '" + errorQuery + "')";
+                "'" + timestamp + "'" +
+                ", '" + escapeStringForMySQL(exception.toString())+ "'" +
+                ", '" + escapeStringForMySQL(errorQuery )+ "')";
         // get a connection to the given database
         Connection con = driver.getConnection(dbName);
         String query = "insert into `" + errorTable + "` " + fieldNames + " values " + fieldValues;
@@ -502,6 +502,18 @@ public class MySQLBackendImpl implements MySQLBackend {
         } catch (Exception e) {
             LOGGER.debug("failed to persist error on db " + bd + "_error_log" + e);
         }
+    }
+
+    private String escapeStringForMySQL(String query) {
+        return query.replace("\\", "\\\\")
+                .replace("\b","\\b")
+                .replace("\n","\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t")
+                .replace("\\x1A", "\\Z")
+                .replace("\\x00", "\\0")
+                .replace("'", "\\'")
+                .replace("\"", "\\\"");
     }
 
     /**
