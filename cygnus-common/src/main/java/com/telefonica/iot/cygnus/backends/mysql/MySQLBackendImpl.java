@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.backends.mysql;
 
 import java.sql.*;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -451,7 +452,7 @@ public class MySQLBackendImpl implements MySQLBackend {
     } // createErrorTable
 
     public void insertErrorLog(String dbName, String errorQuery, Exception exception)
-            throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError {
+            throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError, SQLException {
         Statement stmt = null;
         Date date = new Date();
         Timestamp timestamp = new Timestamp(date.getTime());
@@ -460,30 +461,23 @@ public class MySQLBackendImpl implements MySQLBackend {
                 "timestamp" +
                 ", error" +
                 ", query)";
-        String fieldValues = "(" +
-                "'" + timestamp + "'" +
-                ", '" + escapeStringForMySQL(exception.toString())+ "'" +
-                ", '" + escapeStringForMySQL(errorQuery )+ "')";
+
         // get a connection to the given database
         Connection con = driver.getConnection(dbName);
-        String query = "insert into `" + errorTable + "` " + fieldNames + " values " + fieldValues;
-
+        String query = "INSERT INTO " + dbName + "." + errorTable + " " + fieldNames + " VALUES (?, ?, ?)";
+        PreparedStatement preparedStatement = con.prepareStatement(query);
         try {
-            stmt = con.createStatement();
-        } catch (SQLException e) {
-            closeMySQLObjects(con, stmt);
-            throw new CygnusRuntimeError("Data insertion error", "SQLException", e.getMessage());
-        } // try catch
-
-        try {
-            LOGGER.debug("Executing MySQL query '" + query + "'");
-            stmt.executeUpdate(query);
+            preparedStatement.setObject(1, java.sql.Timestamp.from(Instant.now()));
+            preparedStatement.setString(2, exception.getMessage());
+            preparedStatement.setString(3, errorQuery);
+            LOGGER.debug("Executing SQL query '" + query + "'");
+            preparedStatement.executeUpdate();
         } catch (SQLTimeoutException e) {
-            throw new CygnusPersistenceError("Data insertion error. Query insert into `" + errorTable + "` " + fieldNames + " values " + fieldValues, "SQLTimeoutException", e.getMessage());
+            throw new CygnusPersistenceError("Data insertion error. Query: `" + preparedStatement, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
-            throw new CygnusBadContextData("Data insertion error. Query: insert into `" + errorTable + "` " + fieldNames + " values " + fieldValues, "SQLException", e.getMessage());
+            throw new CygnusBadContextData("Data insertion error. Query: `" + preparedStatement, "SQLException", e.getMessage());
         } finally {
-            closeMySQLObjects(con, stmt);
+            closeMySQLObjects(con, preparedStatement);
         } // try catch
 
         LOGGER.debug("Trying to add '" + dbName + "' and '" + errorTable + "' to the cache after insertion");
@@ -502,18 +496,6 @@ public class MySQLBackendImpl implements MySQLBackend {
         } catch (Exception e) {
             LOGGER.debug("failed to persist error on db " + bd + "_error_log" + e);
         }
-    }
-
-    private String escapeStringForMySQL(String query) {
-        return query.replace("\\", "\\\\")
-                .replace("\b","\\b")
-                .replace("\n","\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t")
-                .replace("\\x1A", "\\Z")
-                .replace("\\x00", "\\0")
-                .replace("'", "\\'")
-                .replace("\"", "\\\"");
     }
 
     /**

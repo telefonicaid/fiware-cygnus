@@ -242,37 +242,28 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
     } // createErrorTable
 
     public void insertErrorLog(String dbName, String errorQuery, Exception exception)
-            throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError {
-        Statement stmt = null;
+            throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError, SQLException {
         String errorTable = dbName + "_error_log";
         String fieldNames  = "(" +
                 "timestamp" +
                 ", error" +
                 ", query)";
-        String fieldValues = "(" +
-                "'" + java.sql.Timestamp.from(Instant.now()) + "'" +
-                ", '" + escapeStringForSQL(exception.toString())+ "'" +
-                ", '" + escapeStringForSQL(errorQuery )+ "')";
         // get a connection to the given database
         Connection con = driver.getConnection(dbName);
-        String query = "INSERT INTO " + dbName + "." + errorTable + " " + fieldNames + " VALUES " + fieldValues;
-
+        String query = "INSERT INTO " + dbName + "." + errorTable + " " + fieldNames + " VALUES (?, ?, ?)";
+        PreparedStatement preparedStatement = con.prepareStatement(query);
         try {
-            stmt = con.createStatement();
-        } catch (SQLException e) {
-            closePostgreSQLObjects(con, stmt);
-            throw new CygnusRuntimeError("Data insertion error", "SQLException", e.getMessage());
-        } // try catch
-
-        try {
+            preparedStatement.setObject(1, java.sql.Timestamp.from(Instant.now()));
+            preparedStatement.setString(2, exception.getMessage());
+            preparedStatement.setString(3, errorQuery);
             LOGGER.debug("Executing SQL query '" + query + "'");
-            stmt.executeUpdate(query);
+            preparedStatement.executeUpdate();
         } catch (SQLTimeoutException e) {
-            throw new CygnusPersistenceError("Data insertion error. Query insert into `" + errorTable + "` " + fieldNames + " values " + fieldValues, "SQLTimeoutException", e.getMessage());
+            throw new CygnusPersistenceError("Data insertion error. Query: `" + preparedStatement, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
-            throw new CygnusBadContextData("Data insertion error. Query: insert into `" + errorTable + "` " + fieldNames + " values " + fieldValues, "SQLException", e.getMessage());
+            throw new CygnusBadContextData("Data insertion error. Query: `" + preparedStatement, "SQLException", e.getMessage());
         } finally {
-            closePostgreSQLObjects(con, stmt);
+            closePostgreSQLObjects(con, preparedStatement);
         } // try catch
 
         LOGGER.debug("Trying to add '" + dbName + "' and '" + errorTable + "' to the cache after insertion");
@@ -291,18 +282,6 @@ public class PostgreSQLBackendImpl implements PostgreSQLBackend {
         } catch (Exception e) {
             LOGGER.debug("failed to persist error on db " + bd + "_error_log" + e);
         }
-    }
-
-    private String escapeStringForSQL(String query) {
-        return query.replace("\\", "\\\\")
-                .replace("\b","\\b")
-                .replace("\n","\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t")
-                .replace("\\x1A", "\\Z")
-                .replace("\\x00", "\\0")
-                .replace("'", "\\'")
-                .replace("\"", "\\\"");
     }
 
     /**
