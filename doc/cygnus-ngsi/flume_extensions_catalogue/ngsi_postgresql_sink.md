@@ -72,6 +72,7 @@ The name of these tables depends on the configured data model (see the [Configur
 
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
 * Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
+* Data model by entity type (`data_model=dm-by-entity-type`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity type in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity type is concatenated.
 
 It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
 
@@ -79,17 +80,17 @@ PostgreSQL [tables name length](http://www.postgresql.org/docs/current/static/sq
 
 The following table summarizes the table name composition (old encoding):
 
-| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
-|---|---|---|
-| `/` | N/A | `<entityId>_<entityType>` |
-| `/<svcPath>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` |
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-entity-type` |
+|---|---|---|---|
+| `/` | N/A | `<entityId>_<entityType>` | `<entityType>` |
+| `/<svcPath>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` | `<svcPath>_<entityType>` |
 
 Using the new encoding:
 
-| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
-|---|---|---|
-| `/` | `x002f` | `x002fxffff<entityId>xffff<entityType>` |
-| `/<svcPath>` | `x002f<svcPath>` | `x002f<svcPath>xffff<entityId>xffff<entityType>` |
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-entity-type` |
+|---|---|---|---|
+| `/` | `x002f` | `x002fxffff<entityId>xffff<entityType>` | `x002fxffff<entityType>` |
+| `/<svcPath>` | `x002f<svcPath>` | `x002f<svcPath>xffff<entityId>xffff<entityType>` |`x002f<svcPath>xffff<entityType>` |
 
 Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
 
@@ -179,17 +180,17 @@ The PostgreSQL schema will always be `vehicles`.
 
 The PostgreSQL table names will be, depending on the configured data model, the following ones (old encoding):
 
-| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
-|---|---|---|
-| `/` | N/A | `car1_car` |
-| `/4wheels` | `4wheels` | `4wheels_car1_car` |
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-entity-type` |
+|---|---|---|---|
+| `/` | N/A | `car1_car` | `car` |
+| `/4wheels` | `4wheels` | `4wheels_car1_car` | `4wheels_car` |
 
 Using the new encoding:
 
-| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
-|---|---|---|
-| `/` | x002f | `x002fxffffcar1xffffcar` |
-| `/4wheels` | `x002f4wheels` | `x002f4wheelsxffffcar1xffffcar` |
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-entity` |
+|---|---|---|---|
+| `/` | `x002f` | `x002fxffffcar1xffffcar` | `x002fxffffcar` |
+| `/wheels` | `x002f4wheels` | `x002f4wheelsxffffcar1xffffcar` | `x002f4wheelsxffffcar` |
 
 [Top](#top)
 
@@ -244,7 +245,7 @@ Coming soon.
 | enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
-| data\_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
+| data\_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i> or <i>dm-by-entity-type</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | postgresql\_host | no | localhost | FQDN/IP address where the PostgreSQL server runs. |
 | postgresql\_port | no | 5432 ||
 | postgresql\_database | no | postgres | `postgres` is the default database that is created automatically when install |
