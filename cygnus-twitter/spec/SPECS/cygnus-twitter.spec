@@ -99,6 +99,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Feb 28 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.2
+
 * Wed Feb 26 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.1
 
 * Fri Feb 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.0
