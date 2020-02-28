@@ -2,3 +2,4 @@
 [cygnus-ngsi] Add correlatorId rollbacked transactions (#1770)
 [cygnus-ngsi][PostGRESQLSink] Fix schemaName when inserting data into DB
 [cygnus-common][PostgreSQL, MySQL] SQL error persistance (#1791)
+[cygnus-ngsi][PostgisSink] Enable postgis functions without native types flag on.
