@@ -190,7 +190,11 @@ public final class NGSIUtils {
             }
         } else {
             if (value != null && value.isJsonPrimitive()) {
-                stringValue = quotationMark + value.getAsString() + quotationMark;
+                if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
+                    stringValue = value.getAsString().replace("\\", "");
+                } else {
+                    stringValue = quotationMark + value.getAsString() + quotationMark;
+                }
             } else {
                 if (value == null){
                     stringValue = quotationMark + "NULL" + quotationMark;
