@@ -32,6 +32,7 @@ pages:
           - 'Sanity checks': 'cygnus-common/installation_and_administration_guide/sanity_checks.md'
           - 'Diagnosis procedures': 'cygnus-common/installation_and_administration_guide/diagnosis_procedures.md'
           - 'Reporting issues and contact information': 'cygnus-common/installation_and_administration_guide/issues_and_contact.md'
+          - 'Error persistence': 'cygnus-common/installation_and_administration_guide/error_persistance.md'
       - 'Backends catalogue':
           - 'Introduction': 'cygnus-common/backends_catalogue/introduction.md'
           - 'CKAN backend': 'cygnus-common/backends_catalogue/ckan_backend.md'
