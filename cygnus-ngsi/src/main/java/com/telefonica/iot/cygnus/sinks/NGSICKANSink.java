@@ -584,7 +584,11 @@ public class NGSICKANSink extends NGSISink {
      */
     public String buildOrgName(String fiwareService) throws CygnusBadConfiguration {
         String orgName;
-        if(!pkgByEntity) {
+        if(pkgByEntity) {
+            orgName=fiwareService;
+        }
+        else {
+            
             if (enableEncoding) {
                 orgName = NGSICharsets.encodeCKAN(fiwareService);
             } else {
@@ -598,9 +602,6 @@ public class NGSICKANSink extends NGSISink {
                 throw new CygnusBadConfiguration("Building organization name '" + orgName + "' and its length is "
                         + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
             } // if else if
-        }
-        else {
-            orgName=fiwareService;
         }
             
         return orgName;
@@ -616,7 +617,9 @@ public class NGSICKANSink extends NGSISink {
      */
     public String buildPkgName(String fiwareService, String fiwareServicePath) throws CygnusBadConfiguration {
         String pkgName;
-        if(!pkgByEntity) {
+        if(pkgByEntity) {
+        	pkgName=getEntityId();
+        } else {
             if (enableEncoding) {
                 pkgName = NGSICharsets.encodeCKAN(fiwareService)
                         + CommonConstants.CONCATENATOR
@@ -637,8 +640,6 @@ public class NGSICKANSink extends NGSISink {
                 throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
                         + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
             } // if else if
-        } else {
-            pkgName=getEntityId();
         }
 
         return pkgName;
@@ -652,7 +653,10 @@ public class NGSICKANSink extends NGSISink {
      */
     public String buildResName(String entity) throws CygnusBadConfiguration {
         String resName;
-        if (!pkgByEntity) {
+        if (pkgByEntity) {
+            resName=getEntityId();
+        }
+        else {
             if (enableEncoding) {
                 resName = NGSICharsets.encodeCKAN(entity);
             } else {
@@ -666,9 +670,6 @@ public class NGSICKANSink extends NGSISink {
                 throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
                            + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
             } // if else if
-        }
-        else {
-            resName=getEntityId();
         }
 
         return resName;
