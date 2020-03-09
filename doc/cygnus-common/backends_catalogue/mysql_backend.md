@@ -20,3 +20,5 @@ This is a convenience backend class for MySQL that implements the `MySQLBackend`
 `MySQLBackendImpl` really wraps the [MySQL JDBC driver](https://dev.mysql.com/downloads/connector/j/).
 
 It must be said this backend implementation enforces UTF-8 encoding through the usage of `useUnicode=true` and  `characterEncoding=UTF-8` properties when getting a connection via the JDBC driver.
+
+Also, this class persists into persistence manager any error regarding to any attempt to persist information. For further reference read [Error persistence](../installation_and_administration_guide/error_persistance.md).

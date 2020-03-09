@@ -19,8 +19,8 @@ check the FIWARE Catalogue entry for the
 [Core Context Management](https://github.com/Fiware/catalogue/tree/master/core).
 
 
-| :books: [Documentation](https://fiware-cygnus.rtfd.io)  | :mortar_board: [Academy](https://fiware-academy.readthedocs.io/en/latest/core/cygnus) | :whale: [Docker Hub](https://hub.docker.com/r/fiware/cygnus-ngsi/) |
-|---|---|---|
+| :books: [Documentation](https://fiware-cygnus.rtfd.io)  | :mortar_board: [Academy](https://fiware-academy.readthedocs.io/en/latest/core/cygnus) | :whale: [Docker Hub](https://hub.docker.com/r/fiware/cygnus-ngsi/) |  :dart: [Roadmap](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/roadmap.md) |
+|---|---|---|---|
 
 ## Contents
 

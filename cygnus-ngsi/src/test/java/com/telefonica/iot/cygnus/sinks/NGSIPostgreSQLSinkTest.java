@@ -21,6 +21,7 @@ package com.telefonica.iot.cygnus.sinks;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 
 import com.google.gson.JsonPrimitive;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 
@@ -351,10 +352,11 @@ public class NGSIPostgreSQLSinkTest {
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = null; // irrelevant for this test
+        String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
         
         try {
-            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "somePath";
         
             try {
@@ -401,10 +403,11 @@ public class NGSIPostgreSQLSinkTest {
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = null; // irrelevant for this test
+        String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
         
         try {
-            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "x002fsomex0050ath";
         
             try {
@@ -452,11 +455,12 @@ public class NGSIPostgreSQLSinkTest {
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
+        String entityType = null; // irrelevant for this test
         String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
         
         try {
-            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "somePath_someId_someType";
         
             try {
@@ -507,10 +511,11 @@ public class NGSIPostgreSQLSinkTest {
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = "someId=someType";
+        String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
         
         try {
-            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "x002fsomex0050athxffffsomex0049dxffffsomex0054ype";
         
             try {
@@ -530,7 +535,117 @@ public class NGSIPostgreSQLSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameNonRootServicePathDataModelByEntityNewEncoding
-    
+
+    /**
+     * [NGSIPostgreSQLSink.buildTableName] -------- When a non root service-path is notified/defaulted and
+     * data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
+     * \<entity_id\> and \<entity_type\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameNonRootServicePathDataModelByEntityTypeOldEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                + "-------- When a non root service-path is notified/defaulted and data_model is "
+                + "'dm-by-entity-type' the PostgreSQL table name is the encoding of the concatenation of <service-path>, "
+                + "<entityId> and <entityType>");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-entity-type";
+        String enableEncoding = "false";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+        String servicePath = "/somePath";
+        String entity = "someId=someType";
+        String entityType = "someType"; // irrelevant for this test
+        String attribute = null; // irrelevant for this test
+
+        try {
+            String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
+            String expecetedTableName = "somePath_someType";
+
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <service-path>, <entityId> "
+                        + "and <entityType>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <service-path>, "
+                        + "<entityId> and <entityType>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildTableNameNonRootServicePathDataModelByEntityTypeOldEncoding
+
+    /**
+     * [NGSIPostgreSQLSink.buildTableName] -------- When a non root service-path is notified/defaulted and
+     * data_model is 'dm-by-entity-type' the PostgreSQL table name is the encoding of the concatenation of \<service-path\>,
+     * \<entity_id\> and \<entity_type\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameNonRootServicePathDataModelByEntityTypeNewEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                + "-------- When a non root service-path is notified/defaulted and data_model is "
+                + "'dm-by-entity-type' the PostgreSQL table name is the encoding of the concatenation of <service-path>, "
+                + "<entityId> and <entityType>");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-entity-type";
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+        String servicePath = "/somePath";
+        String entity = "someId=someType";
+        String entityType = "someType"; // irrelevant for this test
+        String attribute = null; // irrelevant for this test
+
+        try {
+            String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
+            String expecetedTableName = "x002fsomePathxffffsomeType";
+
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <service-path>, <entityId> "
+                        + "and <entityType>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <service-path>, "
+                        + "<entityId> and <entityType>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildTableNameNonRootServicePathDataModelByEntityTypeNewEncoding
+
     /**
      * [NGSIPostgreSQLSink.buildTableName] -------- When a root service-path is notified/defaulted and
      * data_model is 'dm-by-service-path' the MySQL table name cannot be built.
@@ -559,10 +674,11 @@ public class NGSIPostgreSQLSinkTest {
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
         String entity = null; // irrelevant for this test
+        String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
         
         try {
-            sink.buildTableName(servicePath, entity, attribute);
+            sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
                     + "- FAIL - The root service path was not detected as not valid");
         } catch (Exception e) {
@@ -599,10 +715,11 @@ public class NGSIPostgreSQLSinkTest {
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
         String entity = null; // irrelevant for this test
+        String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
         
         try {
-            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "x002f";
         
             try {
@@ -651,10 +768,11 @@ public class NGSIPostgreSQLSinkTest {
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
         String entity = "someId=someType";
+        String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
         
         try {
-            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "someId_someType";
         
             try {
@@ -703,10 +821,11 @@ public class NGSIPostgreSQLSinkTest {
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
         String entity = "someId=someType";
+        String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
         
         try {
-            String builtTableName = sink.buildTableName(servicePath, entity, attribute);
+            String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "x002fxffffsomex0049dxffffsomex0054ype";
         
             try {
@@ -724,7 +843,106 @@ public class NGSIPostgreSQLSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameRootServicePathDataModelByEntityNewEncoding
-    
+
+    @Test
+    public void testBuildTableNameRootServicePathDataModelByEntityTypeOldEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                + "-------- When a root service-path is notified/defaulted and data_model is "
+                + "'dm-by-entity-type' the MySQL table name is the encoding of the concatenation of <service-path>, "
+                + "<entityId> and <entityType>");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-entity-type";
+        String enableEncoding = "false";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+        String servicePath = "/";
+        String entity = "someId=someType";
+        String entityType = "someType"; // irrelevant for this test
+        String attribute = null; // irrelevant for this test
+
+        try {
+            String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
+            String expecetedTableName = "someType";
+
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <service-path>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <service-path>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildTableNameRootServicePathDataModelByEntityTypeOldEncoding
+
+    /**
+     * [NGSIPostgreSQLSink.buildTableName] -------- When a root service-path is notified/defaulted and
+     * data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
+     * \<entityId\> and \<entityType\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameRootServicePathDataModelByEntityTypeNewEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                + "-------- When a root service-path is notified/defaulted and data_model is "
+                + "'dm-by-entity-type' the MySQL table name is the encoding of the concatenation of <service-path>, "
+                + "<entityId> and <entityType>");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-entity-type";
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+        String servicePath = "/";
+        String entity = "someId=someType";
+        String entityType = "someType"; // irrelevant for this test
+        String attribute = null; // irrelevant for this test
+
+        try {
+            String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
+            String expecetedTableName = "x002fxffffsomeType";
+
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <service-path>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <service-path>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildTableNameRootServicePathDataModelByEntityTypeNewEncoding
     /**
      * [NGSIPostgreSQLSink.buildSchemaName] -------- A schema name length greater than 63 characters is detected.
      * @throws java.lang.Exception
@@ -791,10 +1009,11 @@ public class NGSIPostgreSQLSinkTest {
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
         String entity = null; // irrelevant for this test
+        String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
         
         try {
-            sink.buildTableName(servicePath, entity, attribute);
+            sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
                     + "- FAIL - A table name length greater than 63 characters has not been detected");
             assertTrue(false);
@@ -832,10 +1051,11 @@ public class NGSIPostgreSQLSinkTest {
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/tooLooooooooooooooooooooongServicePath";
         String entity = "tooLooooooooooooooooooooooooooongEntity";
+        String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
         
         try {
-            sink.buildTableName(servicePath, entity, attribute);
+            sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
                     + "- FAIL - A table name length greater than 63 characters has not been detected");
             assertTrue(false);
@@ -845,6 +1065,48 @@ public class NGSIPostgreSQLSinkTest {
                     + "-  OK  - A table name length greater than 63 characters has been detected");
         } // try catch
     } // testBuildTableNameLengthDataModelByEntity
+
+    /**
+     * [NGSIPostgreSQLSink.buildTableName] -------- When data model is by entity, a table name length greater than 63
+     * characters is detected.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameLengthDataModelByEntityType() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                + "-------- When data model is by entity, a table name length greater than 63 characters is detected");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-entity-type";
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+        String servicePath = "/tooLooooooooooooooooooooongServicePath";
+        String entity = "tooLooooooooooooooooooooooooooongEntity";
+        String entityType = "tooLooooooooooooooooooooooooooongEntityType"; // irrelevant for this test
+        String attribute = null; // irrelevant for this test
+
+        try {
+            sink.buildTableName(servicePath, entity, entityType, attribute);
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                    + "- FAIL - A table name length greater than 63 characters has not been detected");
+            assertTrue(false);
+        } catch (Exception e) {
+            assertTrue(true);
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
+                    + "-  OK  - A table name length greater than 63 characters has been detected");
+        } // try catch
+    } // testBuildTableNameLengthDataModelByEntityType
     
     /**
      * [NGSICartoDBSink.buildTableName] -------- When data model is by attribute, a table name length greater than 63
@@ -874,10 +1136,11 @@ public class NGSIPostgreSQLSinkTest {
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String servicePath = "/tooLooooooooooooooongServicePath";
         String entity = "tooLooooooooooooooooooongEntity";
+        String entityType = null; // irrelevant for this test
         String attribute = "tooLooooooooooooongAttribute";
         
         try {
-            sink.buildTableName(servicePath, entity, attribute);
+            sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildTableName]")
                     + "- FAIL - A table name length greater than 63 characters has not been detected");
             assertTrue(false);
@@ -945,7 +1208,7 @@ public class NGSIPostgreSQLSinkTest {
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
 
-        NGSIPostgreSQLSink.ColumnAggregator columnAggregator = ngsiPostgreSQLSink.new ColumnAggregator();
+        NGSIPostgreSQLSink.ColumnAggregator columnAggregator = ngsiPostgreSQLSink.new ColumnAggregator(false, false,false,false);
         NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
         columnAggregator.initialize(ngsiEvent);
@@ -986,7 +1249,7 @@ public class NGSIPostgreSQLSinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NGSIPostgreSQLSink.RowAggregator rowAggregator = ngsiPostgreSQLSink.new RowAggregator();
+        NGSIPostgreSQLSink.RowAggregator rowAggregator = ngsiPostgreSQLSink.new RowAggregator(false, false,false,false);
         NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
         rowAggregator.initialize(ngsiEvent);
@@ -1138,12 +1401,12 @@ public class NGSIPostgreSQLSinkTest {
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
-                NGSIPostgreSQLSink.PostgreSQLAggregator aggregator = ngsiPostgreSQLSink.getAggregator(false);
+                NGSIGenericAggregator aggregator = ngsiPostgreSQLSink.getAggregator(false);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
                 } // for
-                String correctBatch = "('2016-04-20T07:19:55.801Z','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]','{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}','[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20T07:19:55.801Z','somePath','someId','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'-3.7167, 40.3833','[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
+                String correctBatch = "('2016-04-20 07:19:55.801','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20 07:19:55.801','somePath','someId','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(\"-3.7167::double precision , 40.3833\"::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
                 if (aggregator.getValuesForInsert().equals(correctBatch)) {
                     System.out.println(getTestTraceHead("[NGSIPostgreSQL.testNativeTypesColumnBatch]")
                             + "-  OK  - NativeTypesOK");
@@ -1168,7 +1431,7 @@ public class NGSIPostgreSQLSinkTest {
         metadata.add(contextMetadata);
         NotifyContextRequest.ContextAttribute contextAttribute1 = new NotifyContextRequest.ContextAttribute();
         contextAttribute1.setName("someName1");
-        contextAttribute1.setType("someType1");
+        contextAttribute1.setType("geo:point");
         contextAttribute1.setContextValue(new JsonPrimitive("-3.7167, 40.3833"));
         contextAttribute1.setContextMetadata(metadata);
         NotifyContextRequest.ContextAttribute contextAttribute2 = new NotifyContextRequest.ContextAttribute();

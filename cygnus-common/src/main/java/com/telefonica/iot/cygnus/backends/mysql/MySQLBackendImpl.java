@@ -18,12 +18,9 @@
 
 package com.telefonica.iot.cygnus.backends.mysql;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLTimeoutException;
-import java.sql.Statement;
+import java.sql.*;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -103,6 +100,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
         // get a connection to an empty database
         Connection con = driver.getConnection("");
+        String query = "create database if not exists `" + dbName + "`";
 
         try {
             stmt = con.createStatement();
@@ -112,7 +110,6 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
 
         try {
-            String query = "create database if not exists `" + dbName + "`";
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLException e) {
@@ -138,6 +135,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
         // get a connection to the given database
         Connection con = driver.getConnection(dbName);
+        String query = "create table if not exists `" + tableName + "`" + typedFieldNames;
 
         try {
             stmt = con.createStatement();
@@ -147,11 +145,13 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
 
         try {
-            String query = "create table if not exists `" + tableName + "`" + typedFieldNames;
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
+        } catch (SQLTimeoutException e) {
+            throw new CygnusPersistenceError("Table creation error. Query " + query, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
             closeMySQLObjects(con, stmt);
+            persistError(dbName, query, e);
             throw new CygnusPersistenceError("Table creation error", "SQLException", e.getMessage());
         } // try catch
 
@@ -168,6 +168,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
         // get a connection to the given database
         Connection con = driver.getConnection(dbName);
+        String query = "insert into `" + tableName + "` " + fieldNames + " values " + fieldValues;
 
         try {
             stmt = con.createStatement();
@@ -177,12 +178,12 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
 
         try {
-            String query = "insert into `" + tableName + "` " + fieldNames + " values " + fieldValues;
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError("Data insertion error. Query insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
+            persistError(dbName, query, e);
             throw new CygnusBadContextData("Data insertion error. Query: insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLException", e.getMessage());
         } finally {
             closeMySQLObjects(con, stmt);
@@ -199,6 +200,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
         // get a connection to the given database
         Connection con = driver.getConnection(dbName);
+        String query = "select " + selection + " from `" + tableName + "` order by recvTime";
 
         try {
             stmt = con.createStatement();
@@ -210,7 +212,6 @@ public class MySQLBackendImpl implements MySQLBackend {
         try {
             // to-do: refactor after implementing
             // https://github.com/telefonicaid/fiware-cygnus/issues/1371
-            String query = "select " + selection + " from `" + tableName + "` order by recvTime";
             LOGGER.debug("Executing MySQL query '" + query + "'");
             ResultSet rs = stmt.executeQuery(query);
             // A CachedRowSet is "disconnected" from the source, thus can be
@@ -221,8 +222,11 @@ public class MySQLBackendImpl implements MySQLBackend {
             crs.populate(rs); // FIXME: close Resultset Objects??
             closeMySQLObjects(con, stmt);
             return crs;
+        } catch (SQLTimeoutException e) {
+            throw new CygnusPersistenceError("Data select error. Query " + query, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
             closeMySQLObjects(con, stmt);
+            persistError(dbName, query, e);
             throw new CygnusPersistenceError("Querying error", "SQLException", e.getMessage());
         } // try catch
     } // select
@@ -233,6 +237,7 @@ public class MySQLBackendImpl implements MySQLBackend {
 
         // get a connection to the given database
         Connection con = driver.getConnection(dbName);
+        String query = "delete from `" + tableName + "` where " + filters;
 
         try {
             stmt = con.createStatement();
@@ -242,11 +247,13 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // try catch
 
         try {
-            String query = "delete from `" + tableName + "` where " + filters;
             LOGGER.debug("Executing MySQL query '" + query + "'");
             stmt.executeUpdate(query);
-        } catch (SQLException e) {
+        } catch (SQLTimeoutException e) {
+            throw new CygnusPersistenceError("Data delete error. Query " + query, "SQLTimeoutException", e.getMessage());
+        }catch (SQLException e) {
             closeMySQLObjects(con, stmt);
+            persistError(dbName, query, e);
             throw new CygnusPersistenceError("Deleting error", "SQLException", e.getMessage());
         } // try catch
 
@@ -403,6 +410,93 @@ public class MySQLBackendImpl implements MySQLBackend {
         } // if
 
     } // closeMySQLObjects
+
+
+    public void createErrorTable(String dbName)
+            throws CygnusRuntimeError, CygnusPersistenceError {
+        // the defaul table for error log will be called the same as the db name
+        String errorTable = dbName + "_error_log";
+        if (cache.isCachedTable(dbName, errorTable)) {
+            LOGGER.debug("'" + errorTable + "' is cached, thus it is not created");
+            return;
+        } // if
+        String typedFieldNames = "(" +
+                "timestamp TIMESTAMP" +
+                ", error text" +
+                ", query text)";
+
+        Statement stmt = null;
+        // get a connection to the given database
+        Connection con = driver.getConnection(dbName);
+        String query = "create table if not exists `" + errorTable + "`" + typedFieldNames;
+
+        try {
+            stmt = con.createStatement();
+        } catch (SQLException e) {
+            closeMySQLObjects(con, stmt);
+            throw new CygnusRuntimeError("Table creation error", "SQLException", e.getMessage());
+        } // try catch
+
+        try {
+            LOGGER.debug("Executing MySQL query '" + query + "'");
+            stmt.executeUpdate(query);
+        } catch (SQLException e) {
+            closeMySQLObjects(con, stmt);
+            throw new CygnusPersistenceError("Table creation error", "SQLException", e.getMessage());
+        } // try catch
+
+        closeMySQLObjects(con, stmt);
+
+        LOGGER.debug("Trying to add '" + errorTable + "' to the cache after table creation");
+        cache.addTable(dbName, errorTable);
+    } // createErrorTable
+
+    public void insertErrorLog(String dbName, String errorQuery, Exception exception)
+            throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError, SQLException {
+        Statement stmt = null;
+        Date date = new Date();
+        Timestamp timestamp = new Timestamp(date.getTime());
+        String errorTable = dbName + "_error_log";
+        String fieldNames  = "(" +
+                "timestamp" +
+                ", error" +
+                ", query)";
+
+        // get a connection to the given database
+        Connection con = driver.getConnection(dbName);
+        String query = "INSERT INTO " + dbName + "." + errorTable + " " + fieldNames + " VALUES (?, ?, ?)";
+        PreparedStatement preparedStatement = con.prepareStatement(query);
+        try {
+            preparedStatement.setObject(1, java.sql.Timestamp.from(Instant.now()));
+            preparedStatement.setString(2, exception.getMessage());
+            preparedStatement.setString(3, errorQuery);
+            LOGGER.debug("Executing SQL query '" + query + "'");
+            preparedStatement.executeUpdate();
+        } catch (SQLTimeoutException e) {
+            throw new CygnusPersistenceError("Data insertion error. Query: `" + preparedStatement, "SQLTimeoutException", e.getMessage());
+        } catch (SQLException e) {
+            throw new CygnusBadContextData("Data insertion error. Query: `" + preparedStatement, "SQLException", e.getMessage());
+        } finally {
+            closeMySQLObjects(con, preparedStatement);
+        } // try catch
+
+        LOGGER.debug("Trying to add '" + dbName + "' and '" + errorTable + "' to the cache after insertion");
+        cache.addDb(dbName);
+        cache.addTable(dbName, errorTable);
+    } // insertErrorLog
+
+    public void persistError(String bd, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {
+        try {
+            createErrorTable(bd);
+            insertErrorLog(bd, query, exception);
+            return;
+        } catch (CygnusBadContextData cygnusBadContextData) {
+            LOGGER.debug("failed to persist error on db " + bd + "_error_log" + cygnusBadContextData);
+            createErrorTable(bd);
+        } catch (Exception e) {
+            LOGGER.debug("failed to persist error on db " + bd + "_error_log" + e);
+        }
+    }
 
     /**
      * This code has been extracted from MySQLBackendImpl.getConnection() for

@@ -10,3 +10,7 @@ Fix: Changing cygnus port does not work (#1698)
 [cygnus-ngsi][MySQL] Support for native MySQL types (#1780)
 [cygnus-ngsi] Unattach dockerfile from git PR #1801
 [cygnus-ngsi] New datamodel for CKAN (subservice -> org, entityId -> dataset, entityId -> resource) (#1792)
+[cygnus-ngsi][PostgisSink, PostGRESQLSink] Enable datamodel by entity type (dm-by-entity-type) (#1684)
+[cygnus-ngsi] Add correlatorId rollbacked transactions (#1770)
+[cygnus-ngsi][PostGRESQLSink] Fix schemaName when inserting data into DB
+[cygnus-common][PostgreSQL, MySQL] SQL error persistance (#1791)

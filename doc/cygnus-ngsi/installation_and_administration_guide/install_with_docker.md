@@ -295,6 +295,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_POSTGRESQL_BATCH_SIZE: number of notifications to be included within a processing batch.
     * CYGNUS_POSTGRESQL_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_POSTGRESQL_BATCH_TTL: number of retries upon persistence error.
+    * CYGNUS_POSTGRESQL_DATA_MODEL: select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type.
 
 * Carto:
     * It only works for building historical context data in Carto.
@@ -340,6 +341,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_POSTGIS_BATCH_SIZE: number of notifications to be included within a processing batch.
     * CYGNUS_POSTGIS_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_POSTGIS_BATCH_TTL: number of retries upon persistence error.
+    * CYGNUS_POSTGIS_DATA_MODEL: select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type.
 
 * Elasticsearch:
     * It only works for building historical context data in Elasticsearch.

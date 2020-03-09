@@ -171,6 +171,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Fri Feb 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.0
+- [cygnus-common][MongoBackend] Proper processing of mongo errors in create index operations (#1756)
+- [cygnus-common] Fix: Changing cygnus port does not work (#1698)
+
 * Tue Oct 29 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.17.0
 - [cygnus-common][HDFSSink] Check attribute value before use it
 - [cygnus-common][PostgreSQL][MySQL] catch exception close invalid connection

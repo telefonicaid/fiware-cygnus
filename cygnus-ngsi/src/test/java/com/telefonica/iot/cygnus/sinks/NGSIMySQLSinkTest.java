@@ -29,6 +29,7 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -1212,7 +1213,7 @@ public class NGSIMySQLSinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NGSIMySQLSink.ColumnAggregator columnAggregator = ngsiMySQLSink.new ColumnAggregator();
+        NGSIMySQLSink.ColumnAggregator columnAggregator = ngsiMySQLSink.new ColumnAggregator(false, false,false,false);
         NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
         columnAggregator.initialize(ngsiEvent);
@@ -1254,7 +1255,7 @@ public class NGSIMySQLSinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NGSIMySQLSink.ColumnAggregator columnAggregator = ngsiMySQLSink.new ColumnAggregator();
+        NGSIMySQLSink.ColumnAggregator columnAggregator = ngsiMySQLSink.new ColumnAggregator(false, false,false,false);
         NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
         columnAggregator.initialize(ngsiEvent);
@@ -1309,7 +1310,7 @@ public class NGSIMySQLSinkTest {
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
-                NGSIMySQLSink.MySQLAggregator aggregator = ngsiMySQLSink.getAggregator(false);
+                NGSIGenericAggregator aggregator = ngsiMySQLSink.getAggregator(false);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);

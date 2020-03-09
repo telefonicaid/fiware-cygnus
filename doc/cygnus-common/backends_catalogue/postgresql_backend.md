@@ -20,3 +20,5 @@ This is a convenience backend class for PostgreSQL that implements the `PostgreS
 `PostgreSQLBackendImpl` really wraps the [PostgreSQL JDBC driver](https://jdbc.postgresql.org/).
 
 It must be said this backend implementation enforces UTF-8 encoding through the usage of `charSet=UTF-8` property when getting a connection via the JDBC driver.
+
+Also, this class persists into persistence manager any error regarding to any attempt to persist information. For further reference read [Error persistence](../installation_and_administration_guide/error_persistance.md).
