@@ -318,7 +318,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
             attribute = event.getAttributeForNaming(enableNameMappings);
             setDbName(buildSchemaName(event.getServiceForNaming(enableNameMappings)));
-            setTableName(buildTableName(servicePathForNaming, entityForNaming, attribute));
+            setTableName(buildTableName(servicePathForNaming, entityForNaming, entityType, attribute));
         } // initialize
 
     } // RowAggregator
@@ -353,7 +353,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
             attribute = event.getAttributeForNaming(enableNameMappings);
             setDbName(buildSchemaName(event.getServiceForNaming(enableNameMappings)));
-            setTableName(buildTableName(servicePathForNaming, entityForNaming, attribute));
+            setTableName(buildTableName(servicePathForNaming, entityForNaming, entityType, attribute));
         } // initialize
 
     } // ColumnAggregator
@@ -370,7 +370,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
         String fieldsForCreate = aggregator.getFieldsForCreate();
         String fieldsForInsert = aggregator.getFieldsForInsert();
         String valuesForInsert = aggregator.getValuesForInsert();
-        String schemaName = aggregator.getTableName(enableLowercase);
+        String schemaName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgreSQLSink. Schema ("
@@ -426,7 +426,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
      * @return The PostgreSQL table name
      * @throws CygnusBadConfiguration
      */
-    public String buildTableName(String servicePath, String entity, String attribute) throws CygnusBadConfiguration {
+    public String buildTableName(String servicePath, String entity, String entityType, String attribute) throws CygnusBadConfiguration {
         String name;
 
         if (enableEncoding) {
@@ -438,6 +438,11 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     name = NGSICharsets.encodePostgreSQL(servicePath)
                             + CommonConstants.CONCATENATOR
                             + NGSICharsets.encodePostgreSQL(entity);
+                    break;
+                case DMBYENTITYTYPE:
+                    name = NGSICharsets.encodeMySQL(servicePath)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodeMySQL(entityType);
                     break;
                 case DMBYATTRIBUTE:
                     name = NGSICharsets.encodePostgreSQL(servicePath)
@@ -465,6 +470,11 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
                             + NGSIUtils.encode(entity, false, true);
                     break;
+                case DMBYENTITYTYPE:
+                    truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
+                    name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
+                            + NGSIUtils.encode(entityType, false, true);
+                    break;
                 case DMBYATTRIBUTE:
                     truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
@@ -473,7 +483,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
+                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY, DMBYENTITYTYPE or DMBYATTRIBUTE");
             } // switch
         } // if else
 

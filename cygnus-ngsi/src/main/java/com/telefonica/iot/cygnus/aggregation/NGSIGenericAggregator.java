@@ -184,10 +184,18 @@ public abstract class NGSIGenericAggregator {
                 stringValue = "'" + value.toString() + "'";
             }
         } else {
-            if (value.isJsonPrimitive()) {
-                stringValue = "'" + value.getAsString() + "'";
+            if (value!= null && value.isJsonPrimitive()) {
+                if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
+                    stringValue = value.getAsString().replace("\\", "");
+                } else {
+                    stringValue = "'" + value.getAsString() + "'";
+                }
             } else {
-                stringValue = "'" + value.toString() + "'";
+                if (value == null || value.isJsonNull()) {
+                    stringValue = "NULL";
+                } else {
+                    stringValue = "'" + value.toString() + "'";
+                }
             }
         }
         LOGGER.debug("[" + getName() + "] aggregation entry = "  + stringValue);
