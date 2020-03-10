@@ -389,9 +389,11 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transId);
             LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
                     + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + ": " + transId + ")");
-            headers.put(CommonConstants.HEADER_NGSI_VERSION, ngsiVersion);
-            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                    + CommonConstants.HEADER_NGSI_VERSION + ": " + ngsiVersion+ ")");
+            if (ngsiVersion != null) {
+                headers.put(CommonConstants.HEADER_NGSI_VERSION, ngsiVersion);
+                LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
+                        + CommonConstants.HEADER_NGSI_VERSION + ": " + ngsiVersion + ")");
+            }
             // Create the NGSI event and add it to the list
             NGSIEvent ngsiEvent = new NGSIEvent(
                     // Headers
