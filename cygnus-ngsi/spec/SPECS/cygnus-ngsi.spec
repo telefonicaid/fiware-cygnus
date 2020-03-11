@@ -99,6 +99,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed Mar 11 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.3
+- [cygnus-ngsi][RestHandler] Add a not null validation for ngsiVersion header of request
+
 * Fri Feb 28 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.2
 - [cygnus-ngsi][PostgisSink] Enable postgis functions without native types flag on
 

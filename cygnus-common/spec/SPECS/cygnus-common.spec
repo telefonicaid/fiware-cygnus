@@ -171,6 +171,8 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed Mar 11 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.3
+
 * Fri Feb 28 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.2
 
 * Wed Feb 26 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.1
