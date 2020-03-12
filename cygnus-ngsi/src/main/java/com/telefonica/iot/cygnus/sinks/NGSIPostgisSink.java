@@ -80,6 +80,7 @@ public class NGSIPostgisSink extends NGSISink {
     private boolean enableCache;
     private boolean swapCoordinates;
     private boolean attrNativeTypes;
+    private boolean attrMetadataStore;
 
     /**
      * Constructor.
@@ -238,6 +239,18 @@ public class NGSIPostgisSink extends NGSISink {
             LOGGER.warn("[" + this.getName() + "] Invalid configuration (attr_native_types="
                 + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
         } // if else
+
+        String attrMetadataStoreSrt = context.getString("attr_metadata_store", "true");
+
+        if (attrMetadataStoreSrt.equals("true") || attrMetadataStoreSrt.equals("false")) {
+            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreSrt);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_metadata_store="
+                    + attrMetadataStore + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
+                    + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
+        } // if else
         
     } // configure
 
@@ -281,13 +294,24 @@ public class NGSIPostgisSink extends NGSISink {
 
             // get an aggregator for this destination and initialize it
             NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
+            aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
+            aggregator.setServicePathForData(events.get(0).getServicePathForData());
+            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
+            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
+            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
+            aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
+            aggregator.setDbName(buildSchemaName(aggregator.getService()));
+            aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
+            aggregator.setAttrNativeTypes(attrNativeTypes);
+            aggregator.setAttrMetadataStore(attrMetadataStore);
+            aggregator.setEnableGeoParse(true);
             aggregator.initialize(events.get(0));
 
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
-            LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" + aggregator.getFieldsForInsert()+ ", values="
-                    + aggregator.getValuesForInsert() + ")");
+            LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" + NGSIUtils.getFieldsForInsert(aggregator.getAggregation())+ ", values="
+                    + NGSIUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes) + ")");
 
             // persist the fieldValues
             persistAggregation(aggregator);
@@ -303,88 +327,18 @@ public class NGSIPostgisSink extends NGSISink {
     public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
     } // expirateRecords
 
-    /**
-     * Class for aggregating batches in row mode.
-     */
-    protected class RowAggregator extends NGSIGenericRowAggregator {
-
-        private String servicePathForNaming;
-        private String entityForNaming;
-        private String entityType;
-        private String attribute;
-
-        /**
-         * Instantiates a new Ngsi generic row aggregator.
-         *
-         * @param enableGrouping     the enable grouping flag for initialization
-         * @param enableNameMappings the enable name mappings flag for initialization
-         * @param enableEncoding     the enable encoding flag for initialization
-         * @param enableGeoParse     the enable geo parse flag for initialization
-         */
-        protected RowAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse) {
-            super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse, false);
-        }
-
-        @Override
-        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
-            super.initialize(event);
-            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
-            attribute = event.getAttributeForNaming(enableNameMappings);
-            setDbName(buildSchemaName(event.getServiceForNaming(enableNameMappings)));
-            setTableName(buildTableName(servicePathForNaming, entityForNaming, entityType, attribute));
-        } // initialize
-
-    } // RowAggregator
-
-    /**
-     * Class for aggregating batches in column mode.
-     */
-    protected class ColumnAggregator extends NGSIGenericColumnAggregator {
-
-        private String servicePathForNaming;
-        private String entityForNaming;
-        private String entityType;
-        private String attribute;
-
-        /**
-         * Instantiates a new Ngsi generic column aggregator.
-         *
-         * @param enableGrouping     the enable grouping
-         * @param enableNameMappings the enable name mappings
-         * @param enableEncoding     the enable encoding
-         * @param enableGeoParse     the enable geo parse
-         */
-        public ColumnAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse) {
-            super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse, attrNativeTypes);
-        }
-
-        @Override
-        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
-            super.initialize(event);
-            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
-            attribute = event.getAttributeForNaming(enableNameMappings);
-            setDbName(buildSchemaName(event.getServiceForNaming(enableNameMappings)));
-            setTableName(buildTableName(servicePathForNaming, entityForNaming, entityType, attribute));
-        } // initialize
-
-    } // ColumnAggregator
-
     protected NGSIGenericAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
-            return new RowAggregator(enableGrouping, enableNameMappings, enableEncoding, true);
+            return new NGSIGenericRowAggregator();
         } else {
-            return new ColumnAggregator(enableGrouping, enableNameMappings, enableEncoding, true);
+            return new NGSIGenericColumnAggregator();
         } // if else
     } // getAggregator
 
     private void persistAggregation(NGSIGenericAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
-        String fieldsForCreate = aggregator.getFieldsForCreate();
-        String fieldsForInsert = aggregator.getFieldsForInsert();
-        String valuesForInsert = aggregator.getValuesForInsert();
+        String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+        String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist());
+        String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
         String schemaName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 
@@ -392,7 +346,7 @@ public class NGSIPostgisSink extends NGSISink {
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
                 + valuesForInsert + ")");
 
-            if (aggregator instanceof RowAggregator) {
+            if (aggregator instanceof NGSIGenericRowAggregator) {
                 persistenceBackend.createSchema(schemaName);
                 persistenceBackend.createTable(schemaName, tableName, fieldsForCreate);
             } // if

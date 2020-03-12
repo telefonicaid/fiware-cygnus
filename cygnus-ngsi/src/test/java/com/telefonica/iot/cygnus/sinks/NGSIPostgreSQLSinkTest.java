@@ -29,6 +29,7 @@ import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -1186,88 +1187,6 @@ public class NGSIPostgreSQLSinkTest {
         } // try catch
     } // testConfigureEnableEncoding
 
-    @Test
-    public void testNativeTypeColumn() throws CygnusBadConfiguration {
-        String attr_native_types = "true"; // default
-        NGSIPostgreSQLSink ngsiPostgreSQLSink = new NGSIPostgreSQLSink();
-        ngsiPostgreSQLSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
-        // Create a NGSIEvent
-        String timestamp = "1461136795801";
-        String correlatorId = "123456789";
-        String transactionId = "123456789";
-        String originalService = "someService";
-        String originalServicePath = "somePath";
-        String mappedService = "newService";
-        String mappedServicePath = "newPath";
-        Map<String, String> headers = new HashMap<>();
-        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
-        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
-        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
-        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
-        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
-        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
-        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-
-        NGSIPostgreSQLSink.ColumnAggregator columnAggregator = ngsiPostgreSQLSink.new ColumnAggregator(false, false,false,false);
-        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
-        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
-        columnAggregator.initialize(ngsiEvent);
-        columnAggregator.aggregate(ngsiEvent);
-        if (columnAggregator.getValuesForInsert().contains("2,'[]'")  &&
-                columnAggregator.getValuesForInsert().contains("TRUE,'[]'")  &&
-                columnAggregator.getValuesForInsert().contains("'2016-09-21T01:23:00.00Z'")  &&
-                columnAggregator.getValuesForInsert().contains("{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}")  &&
-                columnAggregator.getValuesForInsert().contains("{\"String\": \"string\"}")  &&
-                columnAggregator.getValuesForInsert().contains("foo")) {
-            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testNativeTypesColumn]")
-                    + "-  OK  - NativeTypesOK");
-            assertTrue(true);
-        } else {
-            System.out.println(columnAggregator.getValuesForInsert());
-            assertFalse(true);
-        }
-    }
-
-    @Test
-    public void testNativeTypeRow() throws CygnusBadConfiguration {
-        String attr_native_types = "true"; // default
-        NGSIPostgreSQLSink ngsiPostgreSQLSink = new NGSIPostgreSQLSink();
-        ngsiPostgreSQLSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
-        // Create a NGSIEvent
-        String timestamp = "1461136795801";
-        String correlatorId = "123456789";
-        String transactionId = "123456789";
-        String originalService = "someService";
-        String originalServicePath = "somePath";
-        String mappedService = "newService";
-        String mappedServicePath = "newPath";
-        Map<String, String> headers = new HashMap<>();
-        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
-        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
-        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
-        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
-        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
-        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
-        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NGSIPostgreSQLSink.RowAggregator rowAggregator = ngsiPostgreSQLSink.new RowAggregator(false, false,false,false);
-        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
-        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
-        rowAggregator.initialize(ngsiEvent);
-        rowAggregator.aggregate(ngsiEvent);
-        if (rowAggregator.getValuesForInsert().contains("'2','[]'")  &&
-                rowAggregator.getValuesForInsert().contains("'true','[]'")  &&
-                rowAggregator.getValuesForInsert().contains("'2016-09-21T01:23:00.00Z'")  &&
-                rowAggregator.getValuesForInsert().contains("{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}")  &&
-                rowAggregator.getValuesForInsert().contains("{\"String\": \"string\"}")  &&
-                rowAggregator.getValuesForInsert().contains("foo")) {
-            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testNativeTypesRow]")
-                    + "-  OK  - NativeTypesOK");
-            assertTrue(true);
-        } else {
-            assertFalse(true);
-        }
-    }
-
     private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
             String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
             String password, String port, String username, String cache) {
@@ -1402,13 +1321,24 @@ public class NGSIPostgreSQLSinkTest {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
                 NGSIGenericAggregator aggregator = ngsiPostgreSQLSink.getAggregator(false);
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setDbName(ngsiPostgreSQLSink.buildSchemaName(aggregator.getService()));
+                aggregator.setTableName(ngsiPostgreSQLSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
+                aggregator.setAttrNativeTypes(true);
+                aggregator.setAttrMetadataStore(true);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
-                } // for
-                String correctBatch = "('2016-04-20 07:19:55.801','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20 07:19:55.801','somePath','someId','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(\"-3.7167::double precision , 40.3833\"::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
-                if (aggregator.getValuesForInsert().equals(correctBatch)) {
-                    System.out.println(getTestTraceHead("[NGSIPostgreSQL.testNativeTypesColumnBatch]")
+                }
+                String correctBatch = "('2016-04-20 07:19:55.801','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]','{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}','[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20 07:19:55.801','somePath','someId','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'-3.7167, 40.3833','[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
+                String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
+                if (valuesForInsert.equals(correctBatch)) {
+                    System.out.println(getTestTraceHead("[NGSIMySQKSink.testNativeTypesColumnBatch]")
                             + "-  OK  - NativeTypesOK");
                     assertTrue(true);
                 } else {

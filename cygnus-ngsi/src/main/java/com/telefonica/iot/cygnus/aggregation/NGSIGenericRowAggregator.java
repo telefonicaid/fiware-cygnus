@@ -38,21 +38,8 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
     // Logger
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIGenericAggregator.class);
 
-    /**
-     * Instantiates a new Ngsi generic row aggregator.
-     *
-     * @param enableGrouping     the enable grouping flag for initialization
-     * @param enableNameMappings the enable name mappings flag for initialization
-     * @param enableEncoding     the enable encoding flag for initialization
-     * @param enableGeoParse     the enable geo parse flag for initialization
-     */
-    protected NGSIGenericRowAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse, boolean attrNativeTypes) {
-        super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse, attrNativeTypes);
-    }
-
     @Override
-    public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
-        super.initialize(cygnusEvent);
+    public void initialize(NGSIEvent cygnusEvent) {
         LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
         aggregation.put(NGSIConstants.RECV_TIME_TS, new ArrayList<JsonElement>());
         aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<JsonElement>());
@@ -63,13 +50,15 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
         aggregation.put(NGSIConstants.ATTR_TYPE, new ArrayList<JsonElement>());
         aggregation.put(NGSIConstants.ATTR_VALUE, new ArrayList<JsonElement>());
         aggregation.put(NGSIConstants.ATTR_MD, new ArrayList<JsonElement>());
+        setAggregation(aggregation);
     } // initialize
 
     @Override
     public void aggregate(NGSIEvent event) {
+        LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
         // get the getRecvTimeTs headers
         long recvTimeTs = event.getRecvTimeTs();
-        String recvTime = CommonUtils.getHumanReadable(recvTimeTs, false);
+        String recvTime = CommonUtils.getHumanReadable(recvTimeTs, isEnableUTCRecvTime());
         // get the getRecvTimeTs body
         NotifyContextRequest.ContextElement contextElement = event.getContextElement();
         String entityId = contextElement.getId();
@@ -91,7 +80,6 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
             LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                     + attrType + ")");
             // aggregate the attribute information
-            LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
             aggregation.get(NGSIConstants.RECV_TIME_TS).add(new JsonPrimitive(Long.toString(recvTimeTs)));
             aggregation.get(NGSIConstants.RECV_TIME).add(new JsonPrimitive(recvTime));
             aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(new JsonPrimitive(getServicePathForData()));
@@ -102,6 +90,7 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
             aggregation.get(NGSIConstants.ATTR_VALUE).add(attrValue);
             aggregation.get(NGSIConstants.ATTR_MD).add(new JsonPrimitive(attrMetadata));
         } // for
+        setAggregation(aggregation);
     } // aggregate
 
     private String getName() {

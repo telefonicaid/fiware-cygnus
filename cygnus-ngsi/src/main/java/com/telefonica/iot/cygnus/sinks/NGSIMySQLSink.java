@@ -20,10 +20,16 @@ package com.telefonica.iot.cygnus.sinks;
 
 import java.util.ArrayList;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
-import com.telefonica.iot.cygnus.utils.*;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.NGSICharsets;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.flume.Context;
 
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
@@ -62,6 +68,7 @@ public class NGSIMySQLSink extends NGSISink {
     private boolean rowAttrPersistence;
     private MySQLBackendImpl persistenceBackend;
     private boolean attrNativeTypes;
+    private boolean attrMetadataStore;
 
     /**
      * Constructor.
@@ -183,6 +190,18 @@ public class NGSIMySQLSink extends NGSISink {
                 + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
         } // if else
 
+        String attrMetadataStoreSrt = context.getString("attr_metadata_store", "true");
+
+        if (attrMetadataStoreSrt.equals("true") || attrMetadataStoreSrt.equals("false")) {
+            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreSrt);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_metadata_store="
+                    + attrMetadataStore + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
+                    + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
         super.configure(context);
     } // configure
 
@@ -226,8 +245,17 @@ public class NGSIMySQLSink extends NGSISink {
             
             // Get an aggregator for this destination and initialize it
             NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
+            aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
+            aggregator.setServicePathForData(events.get(0).getServicePathForData());
+            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
+            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
+            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
+            aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
+            aggregator.setDbName(buildDbName(aggregator.getService()));
+            aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
+            aggregator.setAttrNativeTypes(attrNativeTypes);
+            aggregator.setAttrMetadataStore(attrMetadataStore);
             aggregator.initialize(events.get(0));
-
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
@@ -291,90 +319,19 @@ public class NGSIMySQLSink extends NGSISink {
         } // try catch
     } // expirateRecords
     
-    /**
-     * Class for aggregating batches in row mode.
-     */
-    private class RowAggregator extends NGSIGenericRowAggregator {
-
-        private String servicePathForNaming;
-        private String entityForNaming;
-        private String entityType;
-        private String attribute;
-
-        /**
-         * Instantiates a new Ngsi generic row aggregator.
-         *
-         * @param enableGrouping     the enable grouping flag for initialization
-         * @param enableNameMappings the enable name mappings flag for initialization
-         * @param enableEncoding     the enable encoding flag for initialization
-         * @param enableGeoParse     the enable geo parse flag for initialization
-         */
-        protected RowAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse) {
-            super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse, false);
-        }
-
-        @Override
-        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
-            super.initialize(event);
-            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
-            attribute = event.getAttributeForNaming(enableNameMappings);
-            setDbName(buildDbName(event.getServiceForNaming(enableNameMappings)));
-            setTableName(buildTableName(servicePathForNaming, entityForNaming, entityType, attribute));
-        } // initialize
-
-    } // RowAggregator
-    
-    /**
-     * Class for aggregating batches in column mode.
-     */
-    protected class ColumnAggregator extends NGSIGenericColumnAggregator {
-
-        private String servicePathForNaming;
-        private String entityForNaming;
-        private String entityType;
-        private String attribute;
-
-        /**
-         * Instantiates a new Ngsi generic column aggregator.
-         *
-         * @param enableGrouping     the enable grouping
-         * @param enableNameMappings the enable name mappings
-         * @param enableEncoding     the enable encoding
-         * @param enableGeoParse     the enable geo parse
-         */
-        public ColumnAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse) {
-            super(enableGrouping, enableNameMappings, enableEncoding, enableGeoParse, attrNativeTypes);
-        }
-
-        @Override
-        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
-            super.initialize(event);
-            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
-            attribute = event.getAttributeForNaming(enableNameMappings);
-            setDbName(buildDbName(event.getServiceForNaming(enableNameMappings)));
-            setTableName(buildTableName(servicePathForNaming, entityForNaming, entityType, attribute));
-        } // initialize
-
-        
-    } // ColumnAggregator
-    
     protected NGSIGenericAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
-            return new RowAggregator(enableGrouping, enableNameMappings, enableEncoding, false);
+            return new NGSIGenericRowAggregator();
         } else {
-            return new ColumnAggregator(enableGrouping, enableNameMappings, enableEncoding, false);
+            return new NGSIGenericColumnAggregator();
         } // if else
     } // getAggregator
     
     private void persistAggregation(NGSIGenericAggregator aggregator)
         throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
-        String fieldsForCreate = aggregator.getFieldsForCreate();
-        String fieldsForInsert = aggregator.getFieldsForInsert();
-        String valuesForInsert = aggregator.getValuesForInsert();
+        String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+        String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist());
+        String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
         String dbName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
         
@@ -384,7 +341,7 @@ public class NGSIMySQLSink extends NGSISink {
         
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
-        if (aggregator instanceof RowAggregator) {
+        if (aggregator instanceof NGSIGenericRowAggregator) {
             persistenceBackend.createDatabase(dbName);
             persistenceBackend.createTable(dbName, tableName, fieldsForCreate);
         } // if

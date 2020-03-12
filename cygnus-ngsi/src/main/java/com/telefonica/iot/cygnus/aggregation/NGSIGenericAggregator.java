@@ -16,7 +16,6 @@
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
-
 package com.telefonica.iot.cygnus.aggregation;
 
 import com.google.gson.JsonElement;
@@ -24,46 +23,24 @@ import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 /**
  * The type Ngsi generic aggregator.
  */
 public abstract class NGSIGenericAggregator {
 
-    // Logger
-    private static final CygnusLogger LOGGER = new CygnusLogger(NGSIGenericAggregator.class);
-
-    // Setup for casting to native persistance types
-    private boolean attrNativeTypes;
     /**
-     * The Enable grouping.
+     * The Aggregation of processed entityes.
      */
-    protected boolean enableGrouping;
-    /**
-     * The Enable encoding.
-     */
-    protected boolean enableEncoding;
-    /**
-     * The Enable name mappings.
-     */
-    protected boolean enableNameMappings;
-    /**
-     * The Enable geo parse.
-     */
-    protected boolean enableGeoParse;
-
-    // Default value for attrNativeTypes
-    private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
-
-    /**
-     * The Aggregation.
-     */
-// object containing the aggregated data
     protected LinkedHashMap<String, ArrayList<JsonElement>> aggregation;
+
+    /**
+     * The Md aggregations for sinks who store on a diferent destination metadata.
+     */
+    protected Map<String, String> mdAggregations;
 
     private String service;
     private String servicePathForData;
@@ -73,24 +50,21 @@ public abstract class NGSIGenericAggregator {
     private String attribute;
     private String dbName;
     private String tableName;
-
-    /**
-     * Instantiates a new Ngsi generic aggregator.
-     *
-     * @param enableGrouping     the enable grouping
-     * @param enableNameMappings the enable name mappings
-     * @param enableEncoding     the enable encoding
-     * @param enableGeoParse     the enable geo parse
-     * @param attrNativeTypes    the attr native types
-     */
-    NGSIGenericAggregator(boolean enableGrouping, boolean enableNameMappings, boolean enableEncoding, boolean enableGeoParse, boolean attrNativeTypes) {
-        this.enableEncoding = enableEncoding;
-        this.enableNameMappings = enableNameMappings;
-        this.enableEncoding = enableEncoding;
-        this.enableGeoParse = enableGeoParse;
-        this.attrNativeTypes = attrNativeTypes;
-        aggregation = new LinkedHashMap<>();
-    } // MySQLAggregator
+    private String collectionName;
+    private String orgName;
+    private String pkgName;
+    private String resName;
+    private String hdfsFolder;
+    private String hdfsFile;
+    private String hiveFields;
+    private String csvString;
+    private boolean attrNativeTypes;
+    private boolean enableGrouping;
+    private boolean enableEncoding;
+    private boolean enableNameMappings;
+    private boolean enableGeoParse;
+    private boolean attrMetadataStore;
+    private boolean enableUTCRecvTime;
 
     /**
      * Gets aggregation.
@@ -98,22 +72,329 @@ public abstract class NGSIGenericAggregator {
      * @return the aggregation
      */
     public LinkedHashMap<String, ArrayList<JsonElement>> getAggregation() {
-        return aggregation;
+        if (aggregation == null) {
+            return new LinkedHashMap<>();
+        } else {
+            return aggregation;
+        }
     } //getAggregation
+
+    /**
+     * Gets aggregation to persist. This means that the returned aggregation will not have metadata
+     * in case that attrMetadataStore is set to false. Also, added fields for processing purposes
+     * will be removed from the aggregation (like attrType on Column mode).
+     *
+     * @return the aggregation to persist
+     */
+    public LinkedHashMap<String, ArrayList<JsonElement>> getAggregationToPersist() {
+        if (aggregation == null) {
+            return new LinkedHashMap<>();
+        } else {
+            return NGSIUtils.linkedHashMapWithoutDefaultFields(aggregation, attrMetadataStore);
+        }
+    } //getAggregationToPersist
+
+    /**
+     * Sets aggregation.
+     *
+     * @param aggregation the aggregation
+     */
+    public void setAggregation(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        this.aggregation = aggregation;
+    } //setAggregation
+
+    /**
+     * Gets collection name.
+     *
+     * @param enableLowercase the enable lowercase
+     * @return the collection name
+     */
+    public String getCollectionName(boolean enableLowercase) {
+        if (enableLowercase) {
+            return collectionName.toLowerCase();
+        } else {
+            return collectionName;
+        }
+    } //getCollectionName
+
+    /**
+     * Gets md aggregations.
+     *
+     * @return the md aggregations
+     */
+    public Map<String, String> getMdAggregations() {
+        if (mdAggregations == null) {
+            return new HashMap<>();
+        } else {
+            return mdAggregations;
+        }
+    } //getMdAggregations
+
+    /**
+     * Gets csv string. For HDFS sink.
+     *
+     * @return the csv string
+     */
+    public String getCsvString() {
+        return csvString;
+    } //getCsvString
+
+    /**
+     * Sets csv string.
+     *
+     * @param csvString the csv string
+     */
+    public void setCsvString(String csvString) {
+        this.csvString = csvString;
+    } //setCsvString
+
+    /**
+     * Gets hdfs folder. For HDFS sink.
+     *
+     * @param enableLowercase the enable lowercase
+     * @return the hdfs folder
+     */
+    public String getHdfsFolder(boolean enableLowercase) {
+        if (enableLowercase) {
+            return hdfsFolder.toLowerCase();
+        } else {
+            return hdfsFolder;
+        }
+    } //getHdfsFolder
+
+    /**
+     * Sets hdfs folder.
+     *
+     * @param hdfsFolder the hdfs folder
+     */
+    public void setHdfsFolder(String hdfsFolder) {
+        this.hdfsFolder = hdfsFolder;
+    } //setHdfsFolder
+
+    /**
+     * Gets hdfs file.
+     *
+     * @param enableLowercase the enable lowercase
+     * @return the hdfs file as it was stored. if enableLowercase is true, then the returned String is on lowerCase.
+     */
+    public String getHdfsFile(boolean enableLowercase) {
+        if (enableLowercase) {
+            return hdfsFile.toLowerCase();
+        } else {
+            return hdfsFile;
+        }
+    } //getHdfsFile
+
+    /**
+     * Is enable utc recv time boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isEnableUTCRecvTime() {
+        return enableUTCRecvTime;
+    } //isEnableUTCRecvTime
+
+    /**
+     * Sets enable utc recv time. This is used to add UTC format to RECV_TIME field on aggregation.
+     *
+     * @param enableUTCRecvTime the enable utc recv time.
+     */
+    public void setEnableUTCRecvTime(boolean enableUTCRecvTime) {
+        this.enableUTCRecvTime = enableUTCRecvTime;
+    } //setEnableUTCRecvTime
+
+    /**
+     * Sets hdfs file.
+     *
+     * @param hdfsFile the hdfs file
+     */
+    public void setHdfsFile(String hdfsFile) {
+        this.hdfsFile = hdfsFile;
+    } //setHdfsFile
+
+    /**
+     * Sets md aggregations.
+     *
+     * @param mdAggregations the md aggregations
+     */
+    public void setMdAggregations(Map<String, String> mdAggregations) { this.mdAggregations = mdAggregations; } //setMdAggregations
+
+    /**
+     * Sets attr metadata store. This is used to remove metadata for aggregation. If true, then the method
+     * getAggregationToPersist will crop metadata fields.
+     *
+     * @param attrMetadataStore the attr metadata store
+     */
+    public void setAttrMetadataStore(boolean attrMetadataStore) {
+        this.attrMetadataStore = attrMetadataStore;
+    } //setAttrMetadataStore
+
+    /**
+     * Is attr metadata store boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isAttrMetadataStore() {
+        return attrMetadataStore;
+    } //isAttrMetadataStore
+
+    /**
+     * Is enable geo parse boolean. Postgis flag to process geometry types.
+     *
+     * @return the boolean
+     */
+    public boolean isEnableGeoParse() {
+        return enableGeoParse;
+    } //isEnableGeoParse
+
+    /**
+     * Sets enable geo parse.
+     *
+     * @param enableGeoParse the enable geo parse
+     */
+    public void setEnableGeoParse(boolean enableGeoParse) {
+        this.enableGeoParse = enableGeoParse;
+    } //setEnableGeoParse
+
+    /**
+     * Sets collection name.
+     *
+     * @param collectionName the collection name
+     */
+    public void setCollectionName(String collectionName) {
+        this.collectionName = collectionName;
+    } //setCollectionName
+
+    /**
+     * Gets service.
+     *
+     * @return the service
+     */
+    public String getService() {
+        return service;
+    } //getService
+
+    /**
+     * Gets hive fields.
+     *
+     * @return the hive fields
+     */
+    public String getHiveFields() {
+        return hiveFields;
+    } //getHiveFields
+
+    /**
+     * Sets hive fields.
+     *
+     * @param hiveFields the hive fields
+     */
+    public void setHiveFields(String hiveFields) {
+        this.hiveFields = hiveFields;
+    } //setHiveFields
+
+    /**
+     * Sets service.
+     *
+     * @param service the service
+     */
+    public void setService(String service) {
+        this.service = service;
+    } //setService
 
     /**
      * Gets service path for data.
      *
      * @return the service path for data
      */
-    protected String getServicePathForData() {
+    public String getServicePathForData() {
         return servicePathForData;
     } //getServicePathForData
 
     /**
+     * Sets service path for data.
+     *
+     * @param servicePathForData the service path for data
+     */
+    public void setServicePathForData(String servicePathForData) {
+        this.servicePathForData = servicePathForData;
+    } //setServicePathForData
+
+    /**
+     * Gets service path for naming.
+     *
+     * @return the service path for naming
+     */
+    public String getServicePathForNaming() {
+        return servicePathForNaming;
+    } //getServicePathForNaming
+
+    /**
+     * Sets service path for naming.
+     *
+     * @param servicePathForNaming the service path for naming
+     */
+    public void setServicePathForNaming(String servicePathForNaming) {
+        this.servicePathForNaming = servicePathForNaming;
+    } //setServicePathForNaming
+
+    /**
+     * Gets entity for naming.
+     *
+     * @return the entity for naming
+     */
+    public String getEntityForNaming() {
+        return entityForNaming;
+    } //getEntityForNaming
+
+    /**
+     * Sets entity for naming.
+     *
+     * @param entityForNaming the entity for naming
+     */
+    public void setEntityForNaming(String entityForNaming) {
+        this.entityForNaming = entityForNaming;
+    } //setEntityForNaming
+
+    /**
+     * Gets entity type.
+     *
+     * @return the entity type
+     */
+    public String getEntityType() {
+        return entityType;
+    } //getEntityType
+
+    /**
+     * Sets entity type.
+     *
+     * @param entityType the entity type
+     */
+    public void setEntityType(String entityType) {
+        this.entityType = entityType;
+    } //setEntityType
+
+    /**
+     * Gets attribute.
+     *
+     * @return the attribute
+     */
+    public String getAttribute() {
+        return attribute;
+    } //getAttribute
+
+    /**
+     * Sets attribute.
+     *
+     * @param attribute the attribute
+     */
+    public void setAttribute(String attribute) {
+        this.attribute = attribute;
+    } //setAttribute
+
+    /**
      * Gets db name.
      *
-     * @param enableLowercase the enable lowercase
+     * @param enableLowercase the enable lowercase. If enableLowercase is true, then the returned String is on lowerCase.
      * @return the db name
      */
     public String getDbName(boolean enableLowercase) {
@@ -121,23 +402,8 @@ public abstract class NGSIGenericAggregator {
             return dbName.toLowerCase();
         } else {
             return dbName;
-        } // if else
-    } // getDbName
-
-    /**
-     * Gets table name.
-     *
-     * @param enableLowercase the enable lowercase
-     * @return the table name
-     */
-    public String getTableName(boolean enableLowercase) {
-        if (enableLowercase) {
-            return tableName.toLowerCase();
-        } else {
-            return tableName;
-        } // if else
-    } // getTableName
-
+        }
+    } //getDbName
 
     /**
      * Sets db name.
@@ -146,7 +412,21 @@ public abstract class NGSIGenericAggregator {
      */
     public void setDbName(String dbName) {
         this.dbName = dbName;
-    }
+    } //setDbName
+
+    /**
+     * Gets table name.
+     *
+     * @param enableLowercase the enable lowercase. If enableLowercase is true, then the returned String is on lowerCase.
+     * @return the table name
+     */
+    public String getTableName(boolean enableLowercase) {
+        if (enableLowercase) {
+            return tableName.toLowerCase();
+        } else {
+            return tableName;
+        }
+    } //getTableName
 
     /**
      * Sets table name.
@@ -155,151 +435,161 @@ public abstract class NGSIGenericAggregator {
      */
     public void setTableName(String tableName) {
         this.tableName = tableName;
-    }
+    } //setTableName
 
     /**
-     * Gets string value for json element.
+     * Gets org name.
      *
-     * @param value the value
-     * @return the string value for json element
+     * @param enableLowercase the enable lowercase. If enableLowercase is true, then the returned String is on lowerCase.
+     * @return the org name
      */
-    public String getStringValueForJsonElement(JsonElement value) {
-        String stringValue;
-        if (attrNativeTypes) {
-            if (value == null || value.isJsonNull()) {
-                stringValue = "NULL";
-            } else if (value.isJsonPrimitive()) {
-                if (value.getAsJsonPrimitive().isBoolean()) {
-                    stringValue = value.getAsString().toUpperCase();
-                } else if (value.getAsJsonPrimitive().isNumber()) {
-                    stringValue = value.getAsString();
-                }else {
-                    if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
-                        stringValue = value.getAsString().replace("\\", "");
-                    } else {
-                        stringValue = "'" + value.getAsString() + "'";
-                    }
-                }
-            } else {
-                stringValue = "'" + value.toString() + "'";
-            }
+    public String getOrgName(boolean enableLowercase) {
+        if (enableLowercase) {
+            return orgName.toLowerCase();
         } else {
-            if (value!= null && value.isJsonPrimitive()) {
-                if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
-                    stringValue = value.getAsString().replace("\\", "");
-                } else {
-                    stringValue = "'" + value.getAsString() + "'";
-                }
-            } else {
-                if (value == null || value.isJsonNull()) {
-                    stringValue = "NULL";
-                } else {
-                    stringValue = "'" + value.toString() + "'";
-                }
-            }
+            return orgName;
         }
-        LOGGER.debug("[" + getName() + "] aggregation entry = "  + stringValue);
-        return stringValue;
-    }
+    } //getOrgName
 
     /**
-     * Gets values for insert.
+     * Sets org name.
      *
-     * @return the values for insert
+     * @param orgName the org name
      */
-    public String getValuesForInsert() {
-        String valuesForInsert = "";
-        int numEvents = aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).size();
-
-        for (int i = 0; i < numEvents; i++) {
-            if (i == 0) {
-                valuesForInsert += "(";
-            } else {
-                valuesForInsert += ",(";
-            } // if else
-            boolean first = true;
-            Iterator<String> it = aggregation.keySet().iterator();
-            while (it.hasNext()) {
-                String entry = (String) it.next();
-                ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
-                JsonElement value = values.get(i);
-                String stringValue = getStringValueForJsonElement(value);
-                if (first) {
-                    valuesForInsert += stringValue;
-                    first = false;
-                } else {
-                    valuesForInsert += "," + stringValue;
-                } // if else
-            } // while
-            valuesForInsert += ")";
-        } // for
-        return valuesForInsert;
-    } // getValuesForInsert
-
-    private String getName() {
-        return "NGSIUtils.GenericAggregator";
-    }
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
+    } //setOrgName
 
     /**
-     * Gets fields for create.
+     * Gets pkg name.
      *
-     * @return the fields for create
+     * @param enableLowercase the enable lowercase. If enableLowercase is true, then the returned String is on lowerCase.
+     * @return the pkg name
      */
-    public String getFieldsForCreate() {
-        String fieldsForCreate = "(";
-        boolean first = true;
-        Iterator<String> it = aggregation.keySet().iterator();
-
-        while (it.hasNext()) {
-            if (first) {
-                fieldsForCreate += (String) it.next() + " text";
-                first = false;
-            } else {
-                fieldsForCreate += "," + (String) it.next() + " text";
-            } // if else
-        } // while
-
-        return fieldsForCreate + ")";
-    } // getFieldsForCreate
+    public String getPkgName(boolean enableLowercase) {
+        if (enableLowercase) {
+            return pkgName.toLowerCase();
+        } else {
+            return pkgName;
+        }
+    } //getPkgName
 
     /**
-     * Gets fields for insert.
+     * Sets pkg name.
      *
-     * @return the fields for insert
+     * @param pkgName the pkg name
      */
-    public String getFieldsForInsert() {
-        String fieldsForInsert = "(";
-        boolean first = true;
-        Iterator<String> it = aggregation.keySet().iterator();
-        while (it.hasNext()) {
-            if (first) {
-                fieldsForInsert += (String) it.next();
-                first = false;
-            } else {
-                fieldsForInsert += "," + (String) it.next();
-            } // if else
-        } // while
-        return fieldsForInsert + ")";
-    } // getFieldsForInsert
+    public void setPkgName(String pkgName) {
+        this.pkgName = pkgName;
+    } //setPkgName
 
     /**
-     * Initialize.
+     * Gets res name.
      *
-     * @param event the event
-     * @throws CygnusBadConfiguration the cygnus bad configuration
+     * @param enableLowercase the enable lowercase. If enableLowercase is true, then the returned String is on lowerCase.
+     * @return the res name
      */
-    public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
-        service = event.getServiceForNaming(enableNameMappings);
-        servicePathForData = event.getServicePathForData();
-        servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-        entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-    } // initialize
+    public String getResName(boolean enableLowercase) {
+        if (enableLowercase) {
+            return resName.toLowerCase();
+        } else {
+            return resName;
+        }
+    } //getResName
 
     /**
-     * Aggregate.
+     * Sets res name.
+     *
+     * @param resName the res name
+     */
+    public void setResName(String resName) {
+        this.resName = resName;
+    } //setResName
+
+    /**
+     * Is attr native types boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isAttrNativeTypes() {
+        return attrNativeTypes;
+    } //isAttrNativeTypes
+
+    /**
+     * Sets attr native types.
+     *
+     * @param attrNativeTypes the attr native types
+     */
+    public void setAttrNativeTypes(boolean attrNativeTypes) {
+        this.attrNativeTypes = attrNativeTypes;
+    } //setAttrNativeTypes
+
+    /**
+     * Is enable grouping boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isEnableGrouping() {
+        return enableGrouping;
+    } //isEnableGrouping
+
+    /**
+     * Sets enable grouping.
+     *
+     * @param enableGrouping the enable grouping
+     */
+    public void setEnableGrouping(boolean enableGrouping) {
+        this.enableGrouping = enableGrouping;
+    } //setEnableGrouping
+
+    /**
+     * Is enable encoding boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isEnableEncoding() {
+        return enableEncoding;
+    } //isEnableEncoding
+
+    /**
+     * Sets enable encoding.
+     *
+     * @param enableEncoding the enable encoding
+     */
+    public void setEnableEncoding(boolean enableEncoding) {
+        this.enableEncoding = enableEncoding;
+    } //setEnableEncoding
+
+    /**
+     * Is enable name mappings boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isEnableNameMappings() {
+        return enableNameMappings;
+    } //isEnableNameMappings
+
+    /**
+     * Sets enable name mappings.
+     *
+     * @param enableNameMappings the enable name mappings
+     */
+    public void setEnableNameMappings(boolean enableNameMappings) {
+        this.enableNameMappings = enableNameMappings;
+    } //setEnableNameMappings
+
+    /**
+     * Aggregate declaration for child classes.
      *
      * @param cygnusEvent the cygnus event
      */
     public abstract void aggregate(NGSIEvent cygnusEvent);
+
+    /**
+     * Initialize declaration for child classes.
+     *
+     * @param cygnusEvent the cygnus event
+     */
+    public abstract void initialize(NGSIEvent cygnusEvent);
 
 }
