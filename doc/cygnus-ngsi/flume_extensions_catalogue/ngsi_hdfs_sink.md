@@ -268,6 +268,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIHDFSSink</i> |
+| attr_metadata_store | no | true | If true, it will store metadata as usual. If false it will not store metadata regardless of the `file_format` type  |
 | channel | yes | N/A ||
 | enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
 | enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
@@ -299,7 +300,8 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | krb5\_password | yes | <i>empty</i> | Ignored if `krb5_auth=false`, mandatory otherwise. |
 | krb5\_login\_conf\_file | no | /usr/cygnus/conf/krb5_login.conf | Ignored if `krb5_auth=false`. |
 | krb5\_conf\_file | no | /usr/cygnus/conf/krb5.conf | Ignored if `krb5_auth=false`. |
-| attr_metadata_store | no | true | If true, it will store metadata as usual. If false it will not store metadata regardless of the `file_format` type  |
+| periodicity\_of\_file\_separation | no | none |   This flag defines when the data is going to be stored into separated files for lighter stora purposes. Possible values are: none, hourly, daily, monthly and yearly. the format would be file`_hhddmmyyyy`.txt|
+
 
 A configuration example could be:
 
@@ -329,6 +331,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.hdfs-sink.batch_retry_intervals = 5000
     cygnus-ngsi.sinks.hdfs-sink.hive = false
     cygnus-ngsi.sinks.hdfs-sink.krb5_auth = false
+    cygnus-ngsi.sinks.hdfs-sink.periodicity_of_file_separation = daily
 
 [Top](#top)
 
