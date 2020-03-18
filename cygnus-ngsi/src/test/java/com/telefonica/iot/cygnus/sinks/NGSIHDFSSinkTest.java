@@ -89,10 +89,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         
         try {
             assertEquals(BackendImpl.REST, sink.getBackendImpl());
@@ -294,10 +295,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String periodicity = null;
         String serviceAsNamespace  = null; // default value
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         
         try {
             assertEquals(25, sink.getBackendMaxConns());
@@ -338,10 +340,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         
         try {
             assertEquals(3, sink.getBackendMaxConnsPerRoute());
@@ -382,10 +385,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -426,10 +430,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -471,10 +476,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -515,10 +521,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -560,10 +567,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -605,10 +613,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -652,10 +661,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         String service = "someService";
         String servicePath = "/somePath";
         String entity = "someId=someType";
@@ -681,6 +691,254 @@ public class NGSIHDFSSinkTest {
             throw e;
         } // try catch
     } // testBuildFolderPathNonRootServicePathNoEncoding
+
+    /**
+     * [NGSIHDFSSinkTest.buildFolderPath] -------- When no encoding and when a non root service-path is
+     * notified/defaulted the HDFS folder path is the encoding of \<service\>/\<service-path\>/\<entity\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildFolderPathWithSubFolderNonRootServicePathNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                + "-------- When no encoding and when a non root service-path is notified/defaulted the HDFS folder "
+                + "path is the encoding of <service>/<service-path>/<entity>");
+        String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "false";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        String periodicity = null;
+        String subFolderCreation = "true";
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
+        String service = "someService";
+        String servicePath = "/somePath/path";
+        String entity = "someId=someType";
+
+        try {
+            String buildFolderPath = sink.buildFolderPath(service, servicePath, entity);
+            String expectedFolderPath = "someService/somePath/path/someId_someType";
+
+            try {
+                assertEquals(expectedFolderPath, buildFolderPath);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "-  OK  - '" + buildFolderPath + "' is equals to "
+                        + "<service>/<service-path>/<entity>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "- FAIL - '" + buildFolderPath + "' is not equals to "
+                        + "<service>/<service-path>/<entity>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildFolderPathWithSubFolderNonRootServicePathNoEncoding
+
+    /**
+     * [NGSIHDFSSinkTest.buildFolderPath] -------- When no encoding and when a non root service-path is
+     * notified/defaulted the HDFS folder path is the encoding of \<service\>/\<service-path\>/\<entity\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildFolderPathWithSubFolderNonRootServicePathEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                + "-------- When no encoding and when a non root service-path is notified/defaulted the HDFS folder "
+                + "path is the encoding of <service>/<service-path>/<entity>");
+        String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "true";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        String periodicity = null;
+        String subFolderCreation = "true";
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
+        String service = "someService";
+        String servicePath = "/somePath/path";
+        String entity = "someId=someType";
+
+        try {
+            String buildFolderPath = sink.buildFolderPath(service, servicePath, entity);
+            String expectedFolderPath = "someService/somePath/path/someIdxffffsomeType";
+
+            try {
+                assertEquals(expectedFolderPath, buildFolderPath);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "-  OK  - '" + buildFolderPath + "' is equals to "
+                        + "<service>/<service-path>/<entity>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "- FAIL - '" + buildFolderPath + "' is not equals to "
+                        + "<service>/<service-path>/<entity>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildFolderPathWithSubFolderNonRootServicePathNoEncoding
+
+    /**
+     * [NGSIHDFSSinkTest.buildFolderPath] -------- When no encoding and when a non root service-path is
+     * notified/defaulted the HDFS folder path is the encoding of \<service\>/\<service-path\>/\<entity\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildFolderPathWithNoSubFolderNonRootServicePathNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                + "-------- When no encoding and when a non root service-path is notified/defaulted the HDFS folder "
+                + "path is the encoding of <service>/<service-path>/<entity>");
+        String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "false";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        String periodicity = null;
+        String subFolderCreation = "false";
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
+        String service = "someService";
+        String servicePath = "/somePath/path";
+        String entity = "someId=someType";
+
+        try {
+            String buildFolderPath = sink.buildFolderPath(service, servicePath, entity);
+            String expectedFolderPath = "someService/somePath_path/someId_someType";
+
+            try {
+                assertEquals(expectedFolderPath, buildFolderPath);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "-  OK  - '" + buildFolderPath + "' is equals to "
+                        + "<service>/<service-path>/<entity>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "- FAIL - '" + buildFolderPath + "' is not equals to "
+                        + "<service>/<service-path>/<entity>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildFolderPathWithSubFolderNonRootServicePathNoEncoding
+
+    /**
+     * [NGSIHDFSSinkTest.buildFolderPath] -------- When no encoding and when a non root service-path is
+     * notified/defaulted the HDFS folder path is the encoding of \<service\>/\<service-path\>/\<entity\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildFolderPathWithNoSubFolderNonRootServicePathEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                + "-------- When no encoding and when a non root service-path is notified/defaulted the HDFS folder "
+                + "path is the encoding of <service>/<service-path>/<entity>");
+        String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "true";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        String periodicity = null;
+        String subFolderCreation = "false";
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
+        String service = "someService";
+        String servicePath = "/somePath/path";
+        String entity = "someId=someType";
+
+        try {
+            String buildFolderPath = sink.buildFolderPath(service, servicePath, entity);
+            String expectedFolderPath = "someService/somePathx002fpath/someIdxffffsomeType";
+
+            try {
+                assertEquals(expectedFolderPath, buildFolderPath);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "-  OK  - '" + buildFolderPath + "' is equals to "
+                        + "<service>/<service-path>/<entity>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                        + "- FAIL - '" + buildFolderPath + "' is not equals to "
+                        + "<service>/<service-path>/<entity>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFolderPath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildFolderPathWithSubFolderNonRootServicePathNoEncoding
     
     /**
      * [NGSIHDFSSinkTest.buildFolderPath] -------- When encoding and when a non root service-path is notified/defaulted
@@ -713,10 +971,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         String service = "someService";
         String servicePath = "/somePath";
         String entity = "someId=someType";
@@ -774,10 +1033,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         String service = "someService";
         String servicePath = "/";
         String entity = "someId=someType";
@@ -835,10 +1095,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         String service = "someService";
         String servicePath = "/";
         String entity = "someId=someType";
@@ -896,10 +1157,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         String service = "someService";
         String servicePath = "/somePath";
         String entity = "someId=someType";
@@ -958,10 +1220,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String periodicity = "hourly";
         String serviceAsNamespace  = null; // default value
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         String service = "someService";
         String servicePath = "/somePath";
         String entity = "someId=someType";
@@ -1025,10 +1288,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         String service = "someService";
         String servicePath = "/somePath";
         String entity = "someId=someType";
@@ -1087,10 +1351,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = "daily";
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         String service = "someService";
         String servicePath = "/somePath";
         String entity = "someId=someType";
@@ -1153,10 +1418,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         String service = "someService";
         String servicePath = "/";
         String entity = "someId=someType";
@@ -1215,10 +1481,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = "monthly";
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         String service = "someService";
         String servicePath = "/";
         String entity = "someId=someType";
@@ -1280,10 +1547,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         String service = "someService";
         String servicePath = "/";
         String entity = "someId=someType";
@@ -1342,10 +1610,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = "yearly";
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         String service = "someService";
         String servicePath = "/";
         String entity = "someId=someType";
@@ -1404,10 +1673,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         String service = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogService";
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
         String destination = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogDestination";
@@ -1453,10 +1723,11 @@ public class NGSIHDFSSinkTest {
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
         String periodicity = null;
+        String subFolderCreation = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity, subFolderCreation));
         String service = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogService";
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
         String destination = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogDestination";
@@ -1478,7 +1749,7 @@ public class NGSIHDFSSinkTest {
                                   String batchSize, String batchTime, String batchTTL, String csvSeparator, String dataModel,
                                   String enableEncoding, String enableGrouping, String enableLowercase, String fileFormat, String host,
                                   String password, String port, String username, String hive, String krb5, String token,
-                                  String serviceAsNamespace, String periodicity) {
+                                  String serviceAsNamespace, String periodicity, String subFolderCreation) {
         Context context = new Context();
         context.put("backend.impl", backendImpl);
         context.put("backend.max_conns", backendMaxConns);
@@ -1501,6 +1772,7 @@ public class NGSIHDFSSinkTest {
         context.put("oauth2_token", token);
         context.put("service_as_namespace", serviceAsNamespace);
         context.put("periodicity_of_file_separation", periodicity);
+        context.put("enable_folder_creation_on_subservices", subFolderCreation);
         return context;
     } // createContext
 
