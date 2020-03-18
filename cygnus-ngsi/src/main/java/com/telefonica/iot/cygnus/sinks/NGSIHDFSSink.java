@@ -1048,13 +1048,24 @@ public class NGSIHDFSSink extends NGSISink {
                 break;
         }
         if (enableEncoding) {
-            filePath = NGSICharsets.encodeHDFS(service, false) + NGSICharsets.encodeHDFS(servicePath, enableFolderCreation)
-                    + (servicePath.equals("/") ? "" : "/") + NGSICharsets.encodeHDFS(destination, false)
+            filePath = NGSICharsets.encodeHDFS(service, false);
+            if (servicePath.charAt(0) == '/') {
+                filePath += "/" + NGSICharsets.encodeHDFS(servicePath.substring(1, servicePath.length()), enableFolderCreation);
+            } else {
+                filePath += NGSICharsets.encodeHDFS(servicePath,  enableFolderCreation);
+            }
+            filePath += (servicePath.equals("/") ? "" : "/") + NGSICharsets.encodeHDFS(destination,  true)
                     + "/" + NGSICharsets.encodeHDFS(destination + separationPrefix, false) + ".txt";
         } else {
-            filePath = NGSIUtils.encode(service, false, true) + NGSIUtils.encode(servicePath, false, !enableFolderCreation)
-                    + (servicePath.equals("/") ? "" : "/") + NGSIUtils.encode(destination, false, true)
+            filePath = NGSIUtils.encode(service, false, true);
+            if (servicePath.charAt(0) == '/') {
+                filePath += "/" + NGSIUtils.encode(servicePath.substring(1, servicePath.length()), false, !enableFolderCreation);
+            } else {
+                filePath += NGSIUtils.encode(servicePath, false, !enableFolderCreation);
+            }
+            filePath += (servicePath.equals("/") ? "" : "/") + NGSIUtils.encode(destination, false, true)
                     + "/" + NGSIUtils.encode(destination + separationPrefix, false, true) + ".txt";
+
         } // if else
         
         if (filePath.length() > NGSIConstants.HDFS_MAX_NAME_LEN) {
