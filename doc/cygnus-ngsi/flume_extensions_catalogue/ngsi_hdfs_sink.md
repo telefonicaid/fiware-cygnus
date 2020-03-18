@@ -26,6 +26,7 @@ Content:
         * [About the binary backend](#section2.3.2)
         * [About batching](#section2.3.3)
         * [About the encoding](#section2.3.4)
+        * [About the sub service folder creation](#section2.3.5)
 * [Programmers guide](#section3)
     * [`NGSIHDFSSink` class](#section3.1)
     * [OAuth2 authentication](#section3.2)
@@ -271,6 +272,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | attr_metadata_store | no | true | If true, it will store metadata as usual. If false it will not store metadata regardless of the `file_format` type  |
 | channel | yes | N/A ||
 | enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
+| enable\_folder\_creation\_on\_subservices | no | true |   This flag defines when if the applications allows slashes on subservice name `/`. This is because if HDFS has a slash on filePath then, it creates a new path considering que slash. For more info go to  [sub service folder creation section](#section2.3.5)|
 | enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
@@ -301,6 +303,7 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | krb5\_login\_conf\_file | no | /usr/cygnus/conf/krb5_login.conf | Ignored if `krb5_auth=false`. |
 | krb5\_conf\_file | no | /usr/cygnus/conf/krb5.conf | Ignored if `krb5_auth=false`. |
 | periodicity\_of\_file\_separation | no | none |   This flag defines when the data is going to be stored into separated files for lighter stora purposes. Possible values are: none, hourly, daily, monthly and yearly. the format would be file`_hhddmmyyyy`.txt|
+enable_folder_creation_on_subservices
 
 
 A configuration example could be:
@@ -311,6 +314,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
     cygnus-ngsi.sinks.hdfs-sink.channel = hdfs-channel
     cygnus-ngsi.sinks.hdfs-sink.enable_encoding = false
+    cygnus-ngsi.sinks.hdfs-sink.enable_folder_creation_on_subservices = true
     cygnus-ngsi.sinks.hdfs-sink.enable_grouping = false
     cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
     cygnus-ngsi.sinks.hdfs-sink.enable_name_mappings = false
@@ -392,6 +396,28 @@ From version 1.3.0 (included), Cygnus applies this specific encoding tailored to
 * `xffff` is used as concatenator character.
 
 Despite the old encoding will be deprecated in the future, it is possible to switch the encoding type through the `enable_encoding` parameter as explained in the [configuration](#section2.1) section.
+
+[Top](#top)
+
+#### <a name="section2.3.5"></a>About the sub service folder creation
+HDFS works with files and paths to store data. This means that all info used to create files or directories is sensitive to Unix file administration manager. By default this Sink uses the following structure to name this paths and files.
+
+`<service>/<service-path>/<entity>`
+
+This means that if the header `service-path` contains more than one slash `/` this will be considered as a new folder by HDFS. In some cases this could be useful to handle large amounts of data when it's not enough to segment info with the mentioned structure. For instance
+
+Consider the falg `enable_folder_creation_on_subservices` set to `true`
+
+Then Cygnus receives a request with the header `service-path = /trashCollection/Madrid`.
+
+All data contained on the body of the request will be stored under the path `service/trashCollection/Madrid/entity`.
+
+This flag only works for `service-path` header and only for enity info. Metadata in case is stored will be stored under the usual path naming.
+
+In case this falg `enable_folder_creation_on_subservices` is set to `false`, all slashes contained on `service-path` header will be encoded the usual way. Following the past example.
+
+If `enable_encoding` is set to `true` then the path would be `service/trashCollectionx002fMadrid/entity`. So if `enable_encoding` is set to `false` then the path would be `service/trashCollection_Madrid/entity`.
+
 
 [Top](#top)
 
