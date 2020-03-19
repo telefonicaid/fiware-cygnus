@@ -20,9 +20,6 @@ package com.telefonica.iot.cygnus.sinks;
 
 import java.util.ArrayList;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
@@ -33,6 +30,7 @@ import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.flume.Context;
 
 import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
+import com.telefonica.iot.cygnus.backends.sql.SQLBackend;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
@@ -58,6 +56,8 @@ public class NGSIMySQLSink extends NGSISink {
     private static final String DEFAULT_USER_NAME = "root";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
+    private static final String MYSQL_DRIVER_NAME = "com.mysql.jdbc.Driver";
+    private static final String MYSQL_INSTANCE_NAME = "mysql";
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIMySQLSink.class);
     private String mysqlHost;
@@ -66,7 +66,7 @@ public class NGSIMySQLSink extends NGSISink {
     private String mysqlPassword;
     private int maxPoolSize;
     private boolean rowAttrPersistence;
-    private MySQLBackendImpl persistenceBackend;
+    private SQLBackend persistenceBackend;
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
 
@@ -122,7 +122,7 @@ public class NGSIMySQLSink extends NGSISink {
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
-    protected MySQLBackendImpl getPersistenceBackend() {
+    protected SQLBackend getPersistenceBackend() {
         return persistenceBackend;
     } // getPersistenceBackend
     
@@ -130,7 +130,7 @@ public class NGSIMySQLSink extends NGSISink {
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
      * @param persistenceBackend
      */
-    protected void setPersistenceBackend(MySQLBackendImpl persistenceBackend) {
+    protected void setPersistenceBackend(SQLBackend persistenceBackend) {
         this.persistenceBackend = persistenceBackend;
     } // setPersistenceBackend
 
@@ -208,7 +208,8 @@ public class NGSIMySQLSink extends NGSISink {
     @Override
     public void start() {
         try {
-            persistenceBackend = new MySQLBackendImpl(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize);
+            //persistenceBackend = new MySQLBackendImpl(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize);
+            persistenceBackend = new SQLBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME);
             LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the MySQL persistence backend. Details="
