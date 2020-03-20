@@ -146,8 +146,8 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 | gson | 2.2.4 | Management Interface |
 | json-simple | 1.1 | Management Interface and Grouping Rules |
 | log4j | 1.2.17 | Logging |
-| mysql-connector-java | 5.1.31 | `MySQLBackendImpl` at runtime |
-| postgresql | 9.4-1202-jdbc41 | `PostgreSQLBackendImpl` at runtime |
+| mysql-connector-java | 5.1.31 | `SQLBackend` at runtime |
+| postgresql | 9.4-1202-jdbc41 | `SQLBackend` at runtime |
 | hadoop-core | 1.2.1 | `HDFSBackendImplBinary` |
 | hive-exec | 0.13.0 | `HiveBackendImpl` at runtime |
 | hive-jdbc | 0.13.0 | `HiveBackendImpl` at runtime |
