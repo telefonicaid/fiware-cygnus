@@ -82,7 +82,7 @@ public class SQLBackendTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new SQLBackend(host, port, user, password, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME);
+        backend = new SQLBackend(host, port, user, password, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null);
         
         // set up the behaviour of the mocked classes
         when(mockDriverDbCreate.getConnection(Mockito.anyString())).thenReturn(mockConnection);
@@ -104,7 +104,7 @@ public class SQLBackendTest {
         try {
             if (!runRealTest) backend.setDriver(mockDriverDbCreate);
             
-            backend.createDatabase(dbName1);
+            backend.createDestination(dbName1);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -118,7 +118,7 @@ public class SQLBackendTest {
             // once created a database, the empty database name must be within the connections map; this empty
             // database name has associated a default connection that will be used for new database creations
             assertTrue(backend.getDriver().isConnectionCreated(""));
-            backend.createDatabase(dbName2);
+            backend.createDestination(dbName2);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -148,7 +148,7 @@ public class SQLBackendTest {
         System.out.println("Testing SQLBackend.createTable (within second database");
         
         try {
-            backend.createDatabase(dbName2);
+            backend.createDestination(dbName2);
             backend.createTable(dbName2, tableName2, fieldNames2);
         } catch (Exception e) {
             fail(e.getMessage());
@@ -179,7 +179,7 @@ public class SQLBackendTest {
         System.out.println("Testing SQLBackend.createTable (within second database");
         
         try {
-            backend.createDatabase(dbName2);
+            backend.createDestination(dbName2);
             backend.createTable(dbName2, tableName2, fieldNames2);
         } catch (Exception e) {
             fail(e.getMessage());

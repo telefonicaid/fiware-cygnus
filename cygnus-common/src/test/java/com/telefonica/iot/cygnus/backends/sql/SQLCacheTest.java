@@ -38,49 +38,49 @@ public class SQLCacheTest {
     } // SQLCacheTest
     
     /**
-     * [SQLCache.addDb] -------- A database is added if not existing in the cache.
+     * [SQLCache.addDestination] -------- A destination is added if not existing in the cache.
      */
     @Test
-    public void testAddDbNotExisting() {
-        System.out.println(getTestTraceHead("[SQLCache.addDb]")
-                + "-------- A database is added if not existing in the cache");
+    public void testAdddestinationNotExisting() {
+        System.out.println(getTestTraceHead("[SQLCache.addDestination]")
+                + "-------- A destination is added if not existing in the cache");
         SQLCache cache = new SQLCache();
-        String dbName = "dbname";
-        boolean added = cache.addDb(dbName);
+        String destination = "destination";
+        boolean added = cache.addDestination(destination);
         
         try {
             assertTrue(added);
-            System.out.println(getTestTraceHead("[SQLCache.addDb]")
-                    + "-  OK  - The database was added");
+            System.out.println(getTestTraceHead("[SQLCache.addDestination]")
+                    + "-  OK  - The destination was added");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[SQLCache.addDb]")
-                    + "- FAIL - The database was not added");
+            System.out.println(getTestTraceHead("[SQLCache.addDestination]")
+                    + "- FAIL - The destination was not added");
             throw e;
         } // try catch
-    } // testAddDbNotExisting
+    } // testAdddestinationNotExisting
     
     /**
-     * [SQLCache.addDb] -------- A database is not added if already existing in the cacbe.
+     * [SQLCache.addDestination] -------- A destination is not added if already existing in the cacbe.
      */
     @Test
-    public void testAddDbExisting() {
-        System.out.println(getTestTraceHead("[SQLCache.addDb]")
-                + "-------- A database is not added if already existing in the cache");
+    public void testAdddestinationExisting() {
+        System.out.println(getTestTraceHead("[SQLCache.addDestination]")
+                + "-------- A destination is not added if already existing in the cache");
         SQLCache cache = new SQLCache();
-        String dbName = "dbname";
-        boolean added1 = cache.addDb(dbName);
-        boolean added2 = cache.addDb(dbName);
+        String destination = "destination";
+        boolean added1 = cache.addDestination(destination);
+        boolean added2 = cache.addDestination(destination);
         
         try {
             assertTrue(added1 && !added2);
-            System.out.println(getTestTraceHead("[SQLCache.addDb]")
-                    + "-  OK  - The database was not added");
+            System.out.println(getTestTraceHead("[SQLCache.addDestination]")
+                    + "-  OK  - The destination was not added");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[SQLCache.addDb]")
-                    + "- FAIL - The database was added");
+            System.out.println(getTestTraceHead("[SQLCache.addDestination]")
+                    + "- FAIL - The destination was added");
             throw e;
         } // try catch
-    } // testAddDbExisting
+    } // testAdddestinationExisting
     
     /**
      * [SQLCache.addTable] -------- A table is added if not existing in the cache.
@@ -90,10 +90,10 @@ public class SQLCacheTest {
         System.out.println(getTestTraceHead("[SQLCache.addTable]")
                 + "-------- A table is added if not existing in the cache");
         SQLCache cache = new SQLCache();
-        String dbName = "dbname";
+        String destination = "destination";
         String tableName = "tablename";
-        boolean added1 = cache.addDb(dbName);
-        boolean added2 = cache.addTable(dbName, tableName);
+        boolean added1 = cache.addDestination(destination);
+        boolean added2 = cache.addTable(destination, tableName);
         
         try {
             assertTrue(added1 && added2);
@@ -112,13 +112,13 @@ public class SQLCacheTest {
     @Test
     public void testAddTableExisting() {
         System.out.println(getTestTraceHead("[SQLCache.addTable]")
-                + "-------- A database is not added if already existing in the cache");
+                + "-------- A destination is not added if already existing in the cache");
         SQLCache cache = new SQLCache();
-        String dbName = "dbname";
+        String destination = "destination";
         String tableName = "tablename";
-        boolean added1 = cache.addDb(dbName);
-        boolean added2 = cache.addTable(dbName, tableName);
-        boolean added3 = cache.addTable(dbName, tableName);
+        boolean added1 = cache.addDestination(destination);
+        boolean added2 = cache.addTable(destination, tableName);
+        boolean added3 = cache.addTable(destination, tableName);
         
         try {
             assertTrue(added1 && added2 && !added3);
@@ -132,16 +132,16 @@ public class SQLCacheTest {
     } // testAddTableExisting
     
     /**
-     * [SQLCache.addTable] -------- A table is not added if the database does not exist in the cache.
+     * [SQLCache.addTable] -------- A table is not added if the destination does not exist in the cache.
      */
     @Test
-    public void testAddTableNotExistingDb() {
+    public void testAddTableNotExistingdestination() {
         System.out.println(getTestTraceHead("[SQLCache.addTable]")
-                + "-------- A table is not added if the database does not exist in the cache");
+                + "-------- A table is not added if the destination does not exist in the cache");
         SQLCache cache = new SQLCache();
-        String dbName = "dbname";
+        String destination = "destination";
         String tableName = "tablename";
-        boolean added1 = cache.addTable(dbName, tableName);
+        boolean added1 = cache.addTable(destination, tableName);
         
         try {
             assertTrue(!added1);
@@ -152,50 +152,50 @@ public class SQLCacheTest {
                     + "- FAIL - The table was added");
             throw e;
         } // try catch
-    } // testAddTableNotExistingDb
+    } // testAddTableNotExistingdestination
     
     /**
-     * [SQLCache.isCachedDb] -------- A cached database is checked.
+     * [SQLCache.isCachedDestination] -------- A cached destination is checked.
      */
     @Test
-    public void testIsCachedDbExists() {
-        System.out.println(getTestTraceHead("[SQLCache.isCachedDb]")
-                + "-------- A cached database is checked");
+    public void testIsCacheddestinationExists() {
+        System.out.println(getTestTraceHead("[SQLCache.isCachedDestination]")
+                + "-------- A cached destination is checked");
         SQLCache cache = new SQLCache();
-        String dbName = "dbname";
-        cache.addDb(dbName);
+        String destination = "destination";
+        cache.addDestination(destination);
         
         try {
-            assertTrue(cache.isCachedDb(dbName));
-            System.out.println(getTestTraceHead("[SQLCache.isCachedDb]")
-                    + "-  OK  - The database was cached");
+            assertTrue(cache.isCachedDestination(destination));
+            System.out.println(getTestTraceHead("[SQLCache.isCachedDestination]")
+                    + "-  OK  - The destination was cached");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[SQLCache.isCachedDb]")
-                    + "- FAIL - The database was not cached");
+            System.out.println(getTestTraceHead("[SQLCache.isCachedDestination]")
+                    + "- FAIL - The destination was not cached");
             throw e;
         } // try catch
-    } // testIsCachedDbExists
+    } // testIsCacheddestinationExists
     
     /**
-     * [SQLCache.isCachedDb] -------- A not cached database is checked.
+     * [SQLCache.isCachedDestination] -------- A not cached destination is checked.
      */
     @Test
-    public void testIsCachedDbNotExists() {
-        System.out.println(getTestTraceHead("[SQLCache.isCachedDb]")
-                + "-------- A not cached database is checked");
+    public void testIsCacheddestinationNotExists() {
+        System.out.println(getTestTraceHead("[SQLCache.isCachedDestination]")
+                + "-------- A not cached destination is checked");
         SQLCache cache = new SQLCache();
-        String dbName = "dbname";
+        String destination = "destination";
         
         try {
-            assertTrue(!cache.isCachedDb(dbName));
-            System.out.println(getTestTraceHead("[SQLCache.isCachedDb]")
-                    + "-  OK  - The database was not cached");
+            assertTrue(!cache.isCachedDestination(destination));
+            System.out.println(getTestTraceHead("[SQLCache.isCachedDestination]")
+                    + "-  OK  - The destination was not cached");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[SQLCache.isCachedDb]")
-                    + "- FAIL - The database was cached");
+            System.out.println(getTestTraceHead("[SQLCache.isCachedDestination]")
+                    + "- FAIL - The destination was cached");
             throw e;
         } // try catch
-    } // testIsCachedDbNotExists
+    } // testIsCacheddestinationNotExists
     
     /**
      * [SQLCache.isCachedTable] -------- A cached table is checked.
@@ -205,13 +205,13 @@ public class SQLCacheTest {
         System.out.println(getTestTraceHead("[SQLCache.isCachedTable]")
                 + "-------- A cached table is checked");
         SQLCache cache = new SQLCache();
-        String dbName = "dbname";
+        String destination = "destination";
         String tableName = "tablename";
-        cache.addDb(dbName);
-        cache.addTable(dbName, tableName);
+        cache.addDestination(destination);
+        cache.addTable(destination, tableName);
         
         try {
-            assertTrue(cache.isCachedTable(dbName, tableName));
+            assertTrue(cache.isCachedTable(destination, tableName));
             System.out.println(getTestTraceHead("[SQLCache.isCachedTable]")
                     + "-  OK  - The table was cached");
         } catch (AssertionError e) {
@@ -229,12 +229,12 @@ public class SQLCacheTest {
         System.out.println(getTestTraceHead("[SQLCache.isCachedTable]")
                 + "-------- A not cached table is checked");
         SQLCache cache = new SQLCache();
-        String dbName = "dbname";
+        String destination = "destination";
         String tableName = "tablename";
-        cache.addDb(dbName);
+        cache.addDestination(destination);
         
         try {
-            assertTrue(!cache.isCachedTable(dbName, tableName));
+            assertTrue(!cache.isCachedTable(destination, tableName));
             System.out.println(getTestTraceHead("[SQLCache.isCachedTable]")
                     + "-  OK  - The table was not cached");
         } catch (AssertionError e) {
@@ -245,43 +245,43 @@ public class SQLCacheTest {
     } // testIsCachedTableNotExists
     
     /**
-     * [SQLCache.db_iteration_methods] -------- Database iteration methods work.
+     * [SQLCache.destination_iteration_methods] -------- destination iteration methods work.
      */
     @Test
-    public void testDbIterationMethods() {
-        System.out.println(getTestTraceHead("[SQLCache.db_iteration_methods]")
-                + "-------- Database iteration methods work");
+    public void testdestinationIterationMethods() {
+        System.out.println(getTestTraceHead("[SQLCache.destination_iteration_methods]")
+                + "-------- Destination iteration methods work");
         SQLCache cache = new SQLCache();
-        String dbName1 = "dbname1";
+        String destination1 = "destinationName1";
         String tableName11 = "tablename11";
         String tableName12 = "tablename12";
-        String dbName2 = "dbname2";
+        String destination2 = "destinationName2";
         String tableName21 = "tablename21";
         String tableName22 = "tablename22";
-        cache.addDb(dbName1);
-        cache.addTable(dbName1, tableName11);
-        cache.addTable(dbName1, tableName12);
-        cache.addDb(dbName2);
-        cache.addTable(dbName2, tableName21);
-        cache.addTable(dbName2, tableName22);
+        cache.addDestination(destination1);
+        cache.addTable(destination1, tableName11);
+        cache.addTable(destination1, tableName12);
+        cache.addDestination(destination2);
+        cache.addTable(destination2, tableName21);
+        cache.addTable(destination2, tableName22);
         
         try {
-            cache.startDbIterator();
-            assertTrue(cache.hasNextDb());
-            String db1 = cache.nextDb();
-            assertTrue(cache.hasNextDb());
-            String db2 = cache.nextDb();
-            assertTrue(!cache.hasNextDb());
-            assertTrue(!db1.equals(db2) && (db1.equals("dbname1") || db1.equals("dbname2"))
-                    && (db2.equals("dbname1") || db2.equals("dbname2")));
-            System.out.println(getTestTraceHead("[SQLCache.db_iteration_methods]")
-                    + "-  OK  - Database iteration methods work");
+            cache.startDestinationIterator();
+            assertTrue(cache.hasNextDestination());
+            String nextDestination1 = cache.nextDestination();
+            assertTrue(cache.hasNextDestination());
+            String nextDestination2 = cache.nextDestination();
+            assertTrue(!cache.hasNextDestination());
+            assertTrue(!nextDestination1.equals(nextDestination2) && (destination1.equals("destinationName1") || destination1.equals("destinationName2"))
+                    && (destination2.equals("destinationName1") || destination2.equals("destinationName2")));
+            System.out.println(getTestTraceHead("[SQLCache.destination_iteration_methods]")
+                    + "-  OK  - destination iteration methods work");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[SQLCache.db_iteration_methods]")
-                    + "- FAIL - Database iteration methods don't work");
+            System.out.println(getTestTraceHead("[SQLCache.destination_iteration_methods]")
+                    + "- FAIL - destination iteration methods don't work");
             throw e;
         } // try catch
-    } // testDbIterationMethods
+    } // testdestinationIterationMethods
     
     /**
      * [SQLCache.table_iteration_methods] -------- Table iteration methods work.
@@ -291,22 +291,22 @@ public class SQLCacheTest {
         System.out.println(getTestTraceHead("[SQLCache.table_iteration_methods]")
                 + "-------- Table iteration methods work");
         SQLCache cache = new SQLCache();
-        String dbName1 = "dbname";
+        String destination1 = "destination";
         String tableName11 = "tablename1";
         String tableName12 = "tablename2";
-        cache.addDb(dbName1);
-        cache.addTable(dbName1, tableName11);
-        cache.addTable(dbName1, tableName12);
+        cache.addDestination(destination1);
+        cache.addTable(destination1, tableName11);
+        cache.addTable(destination1, tableName12);
         
         try {
-            cache.startDbIterator();
-            cache.hasNextDb();
-            String dbName = cache.nextDb();
-            cache.startTableIterator(dbName);
-            cache.hasNextTable(dbName);
-            String table1 = cache.nextTable(dbName);
-            cache.hasNextTable(dbName);
-            String table2 = cache.nextTable(dbName);
+            cache.startDestinationIterator();
+            cache.hasNextDestination();
+            String destination = cache.nextDestination();
+            cache.startTableIterator(destination);
+            cache.hasNextTable(destination);
+            String table1 = cache.nextTable(destination);
+            cache.hasNextTable(destination);
+            String table2 = cache.nextTable(destination);
             
             assertTrue(!table1.equals(table2) && (table1.equals("tablename1") || table1.equals("tablename2"))
                     && (table2.equals("tablename1") || table2.equals("tablename2")));

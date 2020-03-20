@@ -226,7 +226,7 @@ public class NGSIMySQLSink extends NGSISink {
 
     private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize) {
         if (mySQLPersistenceBackend == null) {
-            mySQLPersistenceBackend = new SQLBackend(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME);
+            mySQLPersistenceBackend = new SQLBackend(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null);
         }
     }
 
@@ -348,7 +348,7 @@ public class NGSIMySQLSink extends NGSISink {
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
         if (aggregator instanceof NGSIGenericRowAggregator) {
-            mySQLPersistenceBackend.createDatabase(dbName);
+            mySQLPersistenceBackend.createDestination(dbName);
             mySQLPersistenceBackend.createTable(dbName, tableName, fieldsForCreate);
         } // if
 

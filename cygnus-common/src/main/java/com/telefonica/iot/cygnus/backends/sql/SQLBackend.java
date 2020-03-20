@@ -35,8 +35,8 @@ public class SQLBackend {
      * @param sqlUsername
      * @param sqlPassword
      */
-    public SQLBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName) {
-        driver = new SQLBackend.SQLDriver(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName);
+    public SQLBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase) {
+        driver = new SQLBackend.SQLDriver(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase);
         cache = new SQLCache();
         this.sqlInstance = sqlInstance;
     } // SQLBackendImpl
@@ -62,29 +62,29 @@ public class SQLBackend {
         return driver;
     } // getDriver
 
-    public void createDatabase(String dbName) throws CygnusRuntimeError, CygnusPersistenceError {
-        if (cache.isCachedDb(dbName)) {
-            LOGGER.debug("'" + dbName + "' is cached, thus it is not created");
+    public void createDestination(String destination) throws CygnusRuntimeError, CygnusPersistenceError {
+        if (cache.isCachedDestination(destination)) {
+            LOGGER.debug("'" + destination + "' is cached, thus it is not created");
             return;
         } // if
 
         Statement stmt = null;
 
-        // get a connection to an empty database
+        // get a connection to an empty destination
         Connection con = driver.getConnection("");
 
         String query = "";
         if (sqlInstance.equals("mysql")) {
-            query = "create database if not exists `" + dbName + "`";
+            query = "create database if not exists `" + destination + "`";
         } else {
-            query = "CREATE SCHEMA IF NOT EXISTS " + dbName;
+            query = "CREATE SCHEMA IF NOT EXISTS " + destination;
         }
 
         try {
             stmt = con.createStatement();
         } catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            throw new CygnusRuntimeError("Database creation error", "SQLException", e.getMessage());
+            throw new CygnusRuntimeError("Database/scheme creation error", "SQLException", e.getMessage());
         } // try catch
 
         try {
@@ -92,31 +92,31 @@ public class SQLBackend {
             stmt.executeUpdate(query);
         } catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            throw new CygnusPersistenceError("Database creation error", "SQLException", e.getMessage());
+            throw new CygnusPersistenceError("Database/scheme creation error", "SQLException", e.getMessage());
         } // try catch
 
         closeSQLObjects(con, stmt);
 
-        LOGGER.debug("Trying to add '" + dbName + "' to the cache after database creation");
-        cache.addDb(dbName);
-    } // createDatabase
+        LOGGER.debug("Trying to add '" + destination + "' to the cache after database/scheme creation");
+        cache.addDestination(destination);
+    } // createDestination
 
-    public void createTable(String dbName, String tableName, String typedFieldNames)
+    public void createTable(String destination, String tableName, String typedFieldNames)
             throws CygnusRuntimeError, CygnusPersistenceError {
-        if (cache.isCachedTable(dbName, tableName)) {
+        if (cache.isCachedTable(destination, tableName)) {
             LOGGER.debug("'" + tableName + "' is cached, thus it is not created");
             return;
         } // if
 
         Statement stmt = null;
 
-        // get a connection to the given database
-        Connection con = driver.getConnection(dbName);
+        // get a connection to the given destination
+        Connection con = driver.getConnection(destination);
         String query = "";
         if (sqlInstance.equals("mysql")) {
             query = "create table if not exists `" + tableName + "`" + typedFieldNames;
         } else {
-            query = "CREATE TABLE IF NOT EXISTS " + dbName + "." + tableName + " " + typedFieldNames;
+            query = "CREATE TABLE IF NOT EXISTS " + destination + "." + tableName + " " + typedFieldNames;
         }
 
         try {
@@ -133,27 +133,27 @@ public class SQLBackend {
             throw new CygnusPersistenceError("Table creation error. Query " + query, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            persistError(dbName, query, e);
+            persistError(destination, query, e);
             throw new CygnusPersistenceError("Table creation error", "SQLException", e.getMessage());
         } // try catch
 
         closeSQLObjects(con, stmt);
 
         LOGGER.debug("Trying to add '" + tableName + "' to the cache after table creation");
-        cache.addTable(dbName, tableName);
+        cache.addTable(destination, tableName);
     } // createTable
 
-    public void insertContextData(String dbName, String tableName, String fieldNames, String fieldValues)
+    public void insertContextData(String destination, String tableName, String fieldNames, String fieldValues)
             throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError {
         Statement stmt = null;
 
-        // get a connection to the given database
-        Connection con = driver.getConnection(dbName);
+        // get a connection to the given destination
+        Connection con = driver.getConnection(destination);
         String query = "";
         if (sqlInstance.equals("mysql")) {
             query = "insert into `" + tableName + "` " + fieldNames + " values " + fieldValues;
         } else {
-            query = "INSERT INTO " + dbName + "." + tableName + " " + fieldNames + " VALUES " + fieldValues;
+            query = "INSERT INTO " + destination + "." + tableName + " " + fieldNames + " VALUES " + fieldValues;
         }
 
         try {
@@ -169,23 +169,23 @@ public class SQLBackend {
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError("Data insertion error. Query insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
-            persistError(dbName, query, e);
+            persistError(destination, query, e);
             throw new CygnusBadContextData("Data insertion error. Query: insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLException", e.getMessage());
         } finally {
             closeSQLObjects(con, stmt);
         } // try catch
 
-        LOGGER.debug("Trying to add '" + dbName + "' and '" + tableName + "' to the cache after insertion");
-        cache.addDb(dbName);
-        cache.addTable(dbName, tableName);
+        LOGGER.debug("Trying to add '" + destination + "' and '" + tableName + "' to the cache after insertion");
+        cache.addDestination(destination);
+        cache.addTable(destination, tableName);
     } // insertContextData
 
-    private CachedRowSet select(String dbName, String tableName, String selection)
+    private CachedRowSet select(String destination, String tableName, String selection)
             throws CygnusRuntimeError, CygnusPersistenceError {
         Statement stmt = null;
 
-        // get a connection to the given database
-        Connection con = driver.getConnection(dbName);
+        // get a connection to the given destination
+        Connection con = driver.getConnection(destination);
         String query = "select " + selection + " from `" + tableName + "` order by recvTime";
 
         try {
@@ -212,17 +212,17 @@ public class SQLBackend {
             throw new CygnusPersistenceError("Data select error. Query " + query, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            persistError(dbName, query, e);
+            persistError(destination, query, e);
             throw new CygnusPersistenceError("Querying error", "SQLException", e.getMessage());
         } // try catch
     } // select
 
-    private void delete(String dbName, String tableName, String filters)
+    private void delete(String destination, String tableName, String filters)
             throws CygnusRuntimeError, CygnusPersistenceError {
         Statement stmt = null;
 
-        // get a connection to the given database
-        Connection con = driver.getConnection(dbName);
+        // get a connection to the given destination
+        Connection con = driver.getConnection(destination);
         String query = "delete from `" + tableName + "` where " + filters;
 
         try {
@@ -239,17 +239,17 @@ public class SQLBackend {
             throw new CygnusPersistenceError("Data delete error. Query " + query, "SQLTimeoutException", e.getMessage());
         }catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            persistError(dbName, query, e);
+            persistError(destination, query, e);
             throw new CygnusPersistenceError("Deleting error", "SQLException", e.getMessage());
         } // try catch
 
         closeSQLObjects(con, stmt);
     } // delete
 
-    public void capRecords(String dbName, String tableName, long maxRecords)
+    public void capRecords(String destination, String tableName, long maxRecords)
             throws CygnusRuntimeError, CygnusPersistenceError {
         // Get the records within the table
-        CachedRowSet records = select(dbName, tableName, "*");
+        CachedRowSet records = select(destination, tableName, "*");
 
         // Get the number of records
         int numRecords = 0;
@@ -290,25 +290,25 @@ public class SQLBackend {
         if (filters.isEmpty()) {
             LOGGER.debug("No records to be deleted");
         } else {
-            LOGGER.debug("Records must be deleted (dbName=" + dbName + ",tableName=" + tableName + ", filters="
+            LOGGER.debug("Records must be deleted (destination=" + destination + ",tableName=" + tableName + ", filters="
                     + filters + ")");
-            delete(dbName, tableName, filters);
+            delete(destination, tableName, filters);
         } // if else
     } // capRecords
 
     public void expirateRecordsCache(long expirationTime) throws CygnusRuntimeError, CygnusPersistenceError {
         // Iterate on the cached resource IDs
-        cache.startDbIterator();
+        cache.startDestinationIterator();
 
-        while (cache.hasNextDb()) {
-            String dbName = cache.nextDb();
-            cache.startTableIterator(dbName);
+        while (cache.hasNextDestination()) {
+            String destination = cache.nextDestination();
+            cache.startTableIterator(destination);
 
-            while (cache.hasNextTable(dbName)) {
-                String tableName = cache.nextTable(dbName);
+            while (cache.hasNextTable(destination)) {
+                String tableName = cache.nextTable(destination);
 
                 // Get the records within the table
-                CachedRowSet records = select(dbName, tableName, "*");
+                CachedRowSet records = select(destination, tableName, "*");
 
                 // Get the number of records
                 int numRecords = 0;
@@ -359,9 +359,9 @@ public class SQLBackend {
                 if (filters.isEmpty()) {
                     LOGGER.debug("No records to be deleted");
                 } else {
-                    LOGGER.debug("Records must be deleted (dbName=" + dbName + ",tableName=" + tableName + ", filters="
+                    LOGGER.debug("Records must be deleted (destination=" + destination + ",tableName=" + tableName + ", filters="
                             + filters + ")");
-                    delete(dbName, tableName, filters);
+                    delete(destination, tableName, filters);
                 } // if else
             } // while
         } // while
@@ -396,11 +396,11 @@ public class SQLBackend {
     } // closeSQLObjects
 
 
-    public void createErrorTable(String dbName)
+    public void createErrorTable(String destination)
             throws CygnusRuntimeError, CygnusPersistenceError {
-        // the defaul table for error log will be called the same as the db name
-        String errorTable = dbName + "_error_log";
-        if (cache.isCachedTable(dbName, errorTable)) {
+        // the defaul table for error log will be called the same as the destination name
+        String errorTable = destination + "_error_log";
+        if (cache.isCachedTable(destination, errorTable)) {
             LOGGER.debug("'" + errorTable + "' is cached, thus it is not created");
             return;
         } // if
@@ -410,14 +410,14 @@ public class SQLBackend {
                 ", query text)";
 
         Statement stmt = null;
-        // get a connection to the given database
-        Connection con = driver.getConnection(dbName);
+        // get a connection to the given destination
+        Connection con = driver.getConnection(destination);
 
         String query = "";
         if (sqlInstance.equals("mysql")) {
             query = "create table if not exists `" + errorTable + "`" + typedFieldNames;
         } else {
-            query = "create table if not exists " + dbName + "." + errorTable + " " + typedFieldNames;
+            query = "create table if not exists " + destination + "." + errorTable + " " + typedFieldNames;
         }
 
         try {
@@ -438,28 +438,28 @@ public class SQLBackend {
         closeSQLObjects(con, stmt);
 
         LOGGER.debug("Trying to add '" + errorTable + "' to the cache after table creation");
-        cache.addTable(dbName, errorTable);
+        cache.addTable(destination, errorTable);
     } // createErrorTable
 
-    public void insertErrorLog(String dbName, String errorQuery, Exception exception)
+    public void insertErrorLog(String destination, String errorQuery, Exception exception)
             throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError, SQLException {
         Statement stmt = null;
         java.util.Date date = new Date();
         Timestamp timestamp = new Timestamp(date.getTime());
-        String errorTable = dbName + "_error_log";
+        String errorTable = destination + "_error_log";
         String fieldNames  = "(" +
                 "timestamp" +
                 ", error" +
                 ", query)";
 
-        // get a connection to the given database
-        Connection con = driver.getConnection(dbName);
+        // get a connection to the given destination
+        Connection con = driver.getConnection(destination);
 
         String query = "";
         if (sqlInstance.equals("mysql")) {
             query = "insert into `" + errorTable + "` " + fieldNames + " values (?, ?, ?)";
         } else {
-            query = "INSERT INTO " + dbName + "." + errorTable + " " + fieldNames + " VALUES (?, ?, ?)";
+            query = "INSERT INTO " + destination + "." + errorTable + " " + fieldNames + " VALUES (?, ?, ?)";
         }
 
         PreparedStatement preparedStatement = con.prepareStatement(query);
@@ -477,21 +477,21 @@ public class SQLBackend {
             closeSQLObjects(con, preparedStatement);
         } // try catch
 
-        LOGGER.debug("Trying to add '" + dbName + "' and '" + errorTable + "' to the cache after insertion");
-        cache.addDb(dbName);
-        cache.addTable(dbName, errorTable);
+        LOGGER.debug("Trying to add '" + destination + "' and '" + errorTable + "' to the cache after insertion");
+        cache.addDestination(destination);
+        cache.addTable(destination, errorTable);
     } // insertErrorLog
 
-    public void persistError(String bd, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {
+    public void persistError(String destination, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {
         try {
-            createErrorTable(bd);
-            insertErrorLog(bd, query, exception);
+            createErrorTable(destination);
+            insertErrorLog(destination, query, exception);
             return;
         } catch (CygnusBadContextData cygnusBadContextData) {
-            LOGGER.debug("failed to persist error on db " + bd + "_error_log" + cygnusBadContextData);
-            createErrorTable(bd);
+            LOGGER.debug("failed to persist error on database/scheme " + destination + "_error_log" + cygnusBadContextData);
+            createErrorTable(destination);
         } catch (Exception e) {
-            LOGGER.debug("failed to persist error on db " + bd + "_error_log" + e);
+            LOGGER.debug("failed to persist error on database/scheme " + destination + "_error_log" + e);
         }
     }
 
@@ -505,6 +505,7 @@ public class SQLBackend {
         private final String sqlPassword;
         private final String sqlInstance;
         private final String sqlDriverName;
+        private final String defaultSQLDataBase;
         private final int maxPoolSize;
 
         /**
@@ -518,7 +519,7 @@ public class SQLBackend {
          * @param sqlInstance
          * @param sqlDriverName
          */
-        public SQLDriver(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName) {
+        public SQLDriver(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlInstance, String sqlDriverName) {
             datasources = new HashMap<>();
             pools = new HashMap<>();
             this.sqlHost = sqlHost;
@@ -528,31 +529,32 @@ public class SQLBackend {
             this.maxPoolSize = maxPoolSize;
             this.sqlInstance = sqlInstance;
             this.sqlDriverName = sqlDriverName;
+            this.defaultSQLDataBase = defaultSQLDataBase;
         } // SQLDriver
 
         /**
          * Gets a connection to the SQL server.
          *
-         * @param dbName
+         * @param destination
          * @return
          * @throws CygnusRuntimeError
          * @throws CygnusPersistenceError
          */
-        public Connection getConnection(String dbName) throws CygnusRuntimeError, CygnusPersistenceError {
+        public Connection getConnection(String destination) throws CygnusRuntimeError, CygnusPersistenceError {
             try {
                 // FIXME: the number of cached connections should be limited to
                 // a certain number; with such a limit
                 // number, if a new connection is needed, the oldest one is closed
                 Connection connection = null;
 
-                if (datasources.containsKey(dbName)) {
-                    connection = datasources.get(dbName).getConnection();
-                    LOGGER.debug("Recovered database connection from cache (" + dbName + ")");
+                if (datasources.containsKey(destination)) {
+                    connection = datasources.get(destination).getConnection();
+                    LOGGER.debug("Recovered destination connection from cache (" + destination + ")");
                 }
 
                 if (connection == null || !connection.isValid(0)) {
                     if (connection != null) {
-                        LOGGER.debug("Closing invalid sql connection for db " + dbName);
+                        LOGGER.debug("Closing invalid sql connection for destination " + destination);
                         try {
                             connection.close();
                         } catch (SQLException e) {
@@ -560,18 +562,18 @@ public class SQLBackend {
                         }
                     } // if
 
-                    DataSource datasource = createConnectionPool(dbName);
-                    datasources.put(dbName, datasource);
+                    DataSource datasource = createConnectionPool(destination);
+                    datasources.put(destination, datasource);
                     connection = datasource.getConnection();
                 } // if
 
                 // Check Pool cache and log status
-                if (pools.containsKey(dbName)){
-                    GenericObjectPool pool = pools.get(dbName);
-                    LOGGER.debug("Pool status (" + dbName + ") Max.: " + pool.getMaxActive() + "; Active: "
+                if (pools.containsKey(destination)){
+                    GenericObjectPool pool = pools.get(destination);
+                    LOGGER.debug("Pool status (" + destination + ") Max.: " + pool.getMaxActive() + "; Active: "
                             + pool.getNumActive() + "; Idle: " + pool.getNumIdle());
                 }else{
-                    LOGGER.error("Can't find dabase in pool cache (" + dbName + ")");
+                    LOGGER.error("Can't find dabase in pool cache (" + destination + ")");
                 }
 
                 return connection;
@@ -585,14 +587,14 @@ public class SQLBackend {
         } // getConnection
 
         /**
-         * Gets if a connection is created for the given database. It is
+         * Gets if a connection is created for the given destination. It is
          * protected since it is only used in the tests.
          *
-         * @param dbName
+         * @param destination
          * @return True if the connection exists, false other wise
          */
-        protected boolean isConnectionCreated(String dbName) {
-            return datasources.containsKey(dbName);
+        protected boolean isConnectionCreated(String destination) {
+            return datasources.containsKey(destination);
         } // isConnectionCreated
 
         /**
@@ -601,10 +603,10 @@ public class SQLBackend {
          */
         protected int activePoolConnections() {
             int connectionCount = 0;
-            for ( String dbName : pools.keySet()){
-                GenericObjectPool pool = pools.get(dbName);
+            for ( String destination : pools.keySet()){
+                GenericObjectPool pool = pools.get(destination);
                 connectionCount += pool.getNumActive();
-                LOGGER.debug("Pool status (" + dbName + ") Max.: " + pool.getMaxActive() + "; Active: "
+                LOGGER.debug("Pool status (" + destination + ") Max.: " + pool.getMaxActive() + "; Active: "
                         + pool.getNumActive() + "; Idle: " + pool.getNumIdle());
             }
             LOGGER.debug("Total pool's active connections: " + connectionCount);
@@ -617,10 +619,10 @@ public class SQLBackend {
          */
         protected int maxPoolConnections() {
             int connectionCount = 0;
-            for ( String dbName : pools.keySet()){
-                GenericObjectPool pool = pools.get(dbName);
+            for ( String destination : pools.keySet()){
+                GenericObjectPool pool = pools.get(destination);
                 connectionCount += pool.getMaxActive();
-                LOGGER.debug("Pool status (" + dbName + ") Max.: " + pool.getMaxActive() + "; Active: "
+                LOGGER.debug("Pool status (" + destination + ") Max.: " + pool.getMaxActive() + "; Active: "
                         + pool.getNumActive() + "; Idle: " + pool.getNumIdle());
             }
             LOGGER.debug("Max pool connections: " + connectionCount);
@@ -637,29 +639,34 @@ public class SQLBackend {
         } // numConnectionsCreated
 
         /**
-         * Create a connection pool for dbName.
+         * Create a connection pool for destination.
          *
-         * @param dbName
+         * @param destination
          * @return PoolingDataSource
          * @throws Exception
          */
         @SuppressWarnings("unused")
-        private DataSource createConnectionPool(String dbName) throws Exception {
+        private DataSource createConnectionPool(String destination) throws Exception {
             GenericObjectPool gPool = null;
-            if (pools.containsKey(dbName)){
-                LOGGER.debug("Pool recovered from Cache (" + dbName + ")");
-                gPool = pools.get(dbName);
+            if (pools.containsKey(destination)){
+                LOGGER.debug("Pool recovered from Cache (" + destination + ")");
+                gPool = pools.get(destination);
             }else{
-                String jdbcUrl = "jdbc:" + sqlInstance + "://" + sqlHost + ":" + sqlPort + "/" + dbName;
+                String jdbcUrl = "";
+                if (sqlInstance.equals("mysql")) {
+                    jdbcUrl = "jdbc:" + sqlInstance + "://" + sqlHost + ":" + sqlPort + "/" + destination;
+                } else {
+                    jdbcUrl = "jdbc:" + sqlInstance + "://" + sqlHost + ":" + sqlPort + "/" + defaultSQLDataBase;
+                }
                 Class.forName(sqlDriverName);
 
                 // Creates an Instance of GenericObjectPool That Holds Our Pool of Connections Object!
                 gPool = new GenericObjectPool();
                 gPool.setMaxActive(this.maxPoolSize);
-                pools.put(dbName, gPool);
+                pools.put(destination, gPool);
 
                 // Creates a ConnectionFactory Object Which Will Be Used by the Pool to Create the Connection Object!
-                LOGGER.debug("Creating connection pool jdbc:" + sqlInstance +"://" + sqlHost + ":" + sqlPort + "/" + dbName
+                LOGGER.debug("Creating connection pool jdbc:" + sqlInstance +"://" + sqlHost + ":" + sqlPort + "/" + destination
                         + "?user=" + sqlUsername + "&password=XXXXXXXXXX");
                 ConnectionFactory cf = new DriverManagerConnectionFactory(jdbcUrl, sqlUsername, sqlPassword);
 
@@ -678,15 +685,15 @@ public class SQLBackend {
             int poolCount = 0;
             int poolsSize = pools.size();
 
-            for ( String dbName : pools.keySet()){
-                GenericObjectPool pool = pools.get(dbName);
+            for ( String destination : pools.keySet()){
+                GenericObjectPool pool = pools.get(destination);
                 try {
                     pool.close();
-                    pools.remove(dbName);
+                    pools.remove(destination);
                     poolCount ++;
-                    LOGGER.debug("Pool closed: (" + dbName + ")");
+                    LOGGER.debug("Pool closed: (" + destination + ")");
                 } catch (Exception e) {
-                    LOGGER.error("Error closing SQL pool " + dbName +": " + e.getMessage());
+                    LOGGER.error("Error closing SQL pool " + destination +": " + e.getMessage());
                 }
             }
             LOGGER.debug("Number of Pools closed: " + poolCount + "/" + poolsSize);
