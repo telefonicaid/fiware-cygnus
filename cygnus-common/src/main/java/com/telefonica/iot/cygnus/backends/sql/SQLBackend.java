@@ -25,7 +25,7 @@ public class SQLBackend {
     private static final CygnusLogger LOGGER = new CygnusLogger(SQLBackend.class);
     private SQLBackend.SQLDriver driver;
     private final SQLCache cache;
-    private String sqlInstance;
+    private final String sqlInstance;
 
     /**
      * Constructor.
@@ -667,7 +667,6 @@ public class SQLBackend {
                 // the ConnectionFactory to Add Object Pooling Functionality!
                 PoolableConnectionFactory pcf = new PoolableConnectionFactory(cf, gPool, null, null, false, true);
             } //else
-
             return new PoolingDataSource(gPool);
         } // createConnectionPool
 
