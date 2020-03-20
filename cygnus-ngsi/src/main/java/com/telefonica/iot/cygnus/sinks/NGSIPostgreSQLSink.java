@@ -18,16 +18,10 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
-import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl;
 import com.telefonica.iot.cygnus.backends.sql.SQLBackend;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
@@ -37,23 +31,16 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-
 import org.apache.flume.Context;
 
 /**
+ * The type Ngsi postgre sql sink.
  *
- * @author hermanjunge
-
- Detailed documentation can be found at:
- https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/design/NGSIPostgreSQLSink.md
+ * @author hermanjunge Detailed documentation can be found at:https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/design/NGSIPostgreSQLSink.md
  */
 public class NGSIPostgreSQLSink extends NGSISink {
 
@@ -265,6 +252,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
 
+    /**
+     * Initialices a lazy singleton to share among instances on JVM
+     */
     private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase) {
         if (postgreSQLPersistenceBackend == null) {
             postgreSQLPersistenceBackend = new SQLBackend(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, defaultSQLDataBase, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME);

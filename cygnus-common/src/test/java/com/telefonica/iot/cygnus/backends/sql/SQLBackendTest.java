@@ -33,10 +33,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
-/**
- *
- * @author frb
- */
 @RunWith(MockitoJUnitRunner.class)
 public class SQLBackendTest {
     

@@ -29,7 +29,6 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.flume.Context;
 
-import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
 import com.telefonica.iot.cygnus.backends.sql.SQLBackend;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
@@ -224,6 +223,9 @@ public class NGSIMySQLSink extends NGSISink {
         if (mySQLPersistenceBackend != null) mySQLPersistenceBackend.close();
     } // stop
 
+    /**
+     * Initialices a lazy singleton to share among instances on JVM
+     */
     private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize) {
         if (mySQLPersistenceBackend == null) {
             mySQLPersistenceBackend = new SQLBackend(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null);

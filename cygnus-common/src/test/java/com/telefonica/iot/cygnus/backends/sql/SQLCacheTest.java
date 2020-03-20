@@ -24,10 +24,6 @@ import org.junit.Test;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import static org.junit.Assert.assertTrue;
 
-/**
- *
- * @author frb
- */
 public class SQLCacheTest {
 
     /**
