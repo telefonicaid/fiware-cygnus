@@ -5,5 +5,5 @@
 [cygnus-ngsi][PostgisSink] Enable postgis functions without native types flag on.
 [cygnus-ngsi][RestHandler] Add a not null validation for ngsiVersion header of request.
 [cygnus-ngsi][HDFSSink] Separate files by property periodicity (#1830)
-[cygnus-common][PostgreSQL, MySQL] SQL generic backend (#1806)
+[cygnus-common][PostgreSQL, MySQL] Refactor code to use a SQL generic backend for all SQL-based sinks (#1806)
 [cygnus-common][PostgreSQL, MySQL] Lazy singleton to share pool connections of SQL backends among instances on JVM (#1806)
