@@ -100,17 +100,25 @@ public class ElasticsearchBackendImplTest {
         @Parameters
         public static Collection<Object[]> getParameters() {
             return Arrays.asList(new Object[][] {
-                {"http", false},
-                {"https", true}
+                {"http", false, "{\"message\": \"en - test data 1\"}", "CA7219C0B311573D5D84EC08C80DB1E0"},
+                {"http", false, "{\"message\": \"ja - テストデータ 1\"}", "60DF702634A1341562C192FB0876D04A"},
+                {"http", false, "{\"message\": \"de - Ä Ü Ö ä ü ö ß\"}", "6FE8AB2A91C5AC47461EC40FB85C08EE"},
+                {"https", true, "{\"message\": \"en - test data 1\"}", "CA7219C0B311573D5D84EC08C80DB1E0"},
+                {"https", true, "{\"message\": \"ja - テストデータ 1\"}", "60DF702634A1341562C192FB0876D04A"},
+                {"https", true, "{\"message\": \"de - Ä Ü Ö ä ü ö ß\"}", "6FE8AB2A91C5AC47461EC40FB85C08EE"},
             });
         } // getParameters
 
         private String schema;
         private boolean flag;
+        private String msg;
+        private String tsHash;
 
-        public HttpSuccessTest(String schema, boolean flag) {
+        public HttpSuccessTest(String schema, boolean flag, String msg, String tsHash) {
             this.schema = schema;
             this.flag = flag;
+            this.msg = msg;
+            this.tsHash = tsHash;
         } // constructor
 
         /**
@@ -149,17 +157,18 @@ public class ElasticsearchBackendImplTest {
         public void testBulkInsert_oneData() {
             System.out.println(getTestTraceHead(String.format("[ElasticsearchBackendImplTest.bulkInsert OK, TLS=%b, Data=1]", flag)));
 
+            System.out.println(String.format("%s, %b, %s", schema, flag, msg));
             List<Map<String, String>> data = new ArrayList<Map<String, String>>();
             data.add(new HashMap<String, String>(){
                 {
                     put("recvTimeTs", "test_recvTimeTs_1");
-                    put("data", "{\"message\": \"test data 1\"}");
+                    put("data", msg);
                 }
             });
-            String recvTimeTs1Hash = "599F4FB6AFDB1BEF51126B47DAC2696F";
+            // String recvTimeTs1Hash = "599F4FB6AFDB1BEF51126B47DAC2696F";
             String expected = "";
-            expected += String.format("{\"index\":{\"_id\":\"test_recvTimeTs_1-%s\"}}\n", recvTimeTs1Hash);
-            expected += String.format("{\"message\": \"test data 1\"}\n");
+            expected += String.format("{\"index\":{\"_id\":\"test_recvTimeTs_1-%s\"}}\n", tsHash);
+            expected += String.format("%s\n", msg);
 
             assertBulkInsert(data, expected);
         } // testBulkInsert_oneData
@@ -176,22 +185,21 @@ public class ElasticsearchBackendImplTest {
             data.add(new HashMap<String, String>(){
                 {
                     put("recvTimeTs", "test_recvTimeTs_1");
-                    put("data", "{\"message\": \"test data 1\"}");
+                    put("data", msg);
                 }
             });
-            String recvTimeTs1Hash = "599F4FB6AFDB1BEF51126B47DAC2696F";
             data.add(new HashMap<String, String>(){
                 {
                     put("recvTimeTs", "test_recvTimeTs_2");
-                    put("data", "{\"message\": \"test data 2\"}");
+                    put("data", "{\"message\": \"en - test data 2\"}");
                 }
             });
-            String recvTimeTs2Hash = "6E4BD4F33D72977355D951C986D7DCF8";
+            String recvTimeTs2Hash = "0739692298D884D622D004C2C479F0B3";
             String expected = "";
-            expected += String.format("{\"index\":{\"_id\":\"test_recvTimeTs_1-%s\"}}\n", recvTimeTs1Hash);
-            expected += String.format("{\"message\": \"test data 1\"}\n");
+            expected += String.format("{\"index\":{\"_id\":\"test_recvTimeTs_1-%s\"}}\n", tsHash);
+            expected += String.format("%s\n", msg);
             expected += String.format("{\"index\":{\"_id\":\"test_recvTimeTs_2-%s\"}}\n", recvTimeTs2Hash);
-            expected += String.format("{\"message\": \"test data 2\"}\n");
+            expected += String.format("{\"message\": \"en - test data 2\"}\n");
 
             assertBulkInsert(data, expected);
         } // testBulkInsert_oneData

@@ -25,9 +25,9 @@ import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -117,10 +117,10 @@ public class ElasticsearchBackendImpl extends HttpBackend implements Elasticsear
                 jsonLines += String.format("{\"index\":{\"_id\":\"%s-%s\"}}\n", erecvTimeTs, hash);
                 jsonLines += String.format("%s\n", edata);
             } // for
-            entity = new StringEntity(jsonLines);
+            entity = new StringEntity(jsonLines, Charset.forName("UTF-8"));
         } catch (NoSuchAlgorithmException e) {
             throw new CygnusPersistenceError("Could not create id (data=" + data + "), rootCause=" + e.toString() + ")");
-        } catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedCharsetException e) {
             throw new CygnusPersistenceError("Could not create StringEntity (data=" + data + "), rootCause=" + e.toString() + ")");
         } // try-catch
         LOGGER.debug("bulk insert (index=" + index + ", type=" + type + ", jsonLines=" + jsonLines + ")");
