@@ -21,7 +21,7 @@ package com.telefonica.iot.cygnus.sinks;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
-import com.telefonica.iot.cygnus.backends.sql.SQLBackend;
+import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
@@ -64,7 +64,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private String postgresqlPassword;
     private int maxPoolSize;
     private boolean rowAttrPersistence;
-    private static volatile SQLBackend postgreSQLPersistenceBackend;
+    private static volatile SQLBackendImpl postgreSQLPersistenceBackend;
     private boolean enableCache;
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
@@ -146,7 +146,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
-    protected SQLBackend getPersistenceBackend() {
+    protected SQLBackendImpl getPersistenceBackend() {
         return postgreSQLPersistenceBackend;
     } // getPersistenceBackend
 
@@ -154,7 +154,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
      * @param postgreSQLPersistenceBackend
      */
-    protected void setPersistenceBackend(SQLBackend postgreSQLPersistenceBackend) {
+    protected void setPersistenceBackend(SQLBackendImpl postgreSQLPersistenceBackend) {
         this.postgreSQLPersistenceBackend = postgreSQLPersistenceBackend;
     } // setPersistenceBackend
 
@@ -257,7 +257,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
      */
     private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase) {
         if (postgreSQLPersistenceBackend == null) {
-            postgreSQLPersistenceBackend = new SQLBackend(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, defaultSQLDataBase);
+            postgreSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, defaultSQLDataBase);
         }
     }
 

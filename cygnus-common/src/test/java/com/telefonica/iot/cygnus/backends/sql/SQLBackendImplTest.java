@@ -18,7 +18,7 @@
 
 package com.telefonica.iot.cygnus.backends.sql;
 
-import com.telefonica.iot.cygnus.backends.sql.SQLBackend.SQLDriver;
+import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl.SQLDriver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,10 +34,10 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SQLBackendTest {
+public class SQLBackendImplTest {
     
     // instance to be tested
-    private SQLBackend backend;
+    private SQLBackendImpl backend;
     
     // mocks
     @Mock
@@ -78,7 +78,7 @@ public class SQLBackendTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new SQLBackend(host, port, user, password, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null);
+        backend = new SQLBackendImpl(host, port, user, password, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null);
         
         // set up the behaviour of the mocked classes
         when(mockDriverDbCreate.getConnection(Mockito.anyString())).thenReturn(mockConnection);
@@ -95,7 +95,7 @@ public class SQLBackendTest {
      */
     @Test
     public void testCreateDatabase() {
-        System.out.println("Testing SQLBackend.createDatabase (first database creation)");
+        System.out.println("Testing SQLBackendImpl.createDatabase (first database creation)");
         
         try {
             if (!runRealTest) backend.setDriver(mockDriverDbCreate);
@@ -108,7 +108,7 @@ public class SQLBackendTest {
             assertTrue(backend.getDriver().isConnectionCreated(""));
         } // try catch finally
         
-        System.out.println("Testing SQLBackend.createDatabase (second database creation)");
+        System.out.println("Testing SQLBackendImpl.createDatabase (second database creation)");
         
         try {
             // once created a database, the empty database name must be within the connections map; this empty
@@ -129,7 +129,7 @@ public class SQLBackendTest {
      */
     @Test
     public void testCreateTable() {
-        System.out.println("Testing SQLBackend.createTable (within first database)");
+        System.out.println("Testing SQLBackendImpl.createTable (within first database)");
         
         try {
             if (!runRealTest) backend.setDriver(mockDriverTableCreate);
@@ -141,7 +141,7 @@ public class SQLBackendTest {
             assertTrue(backend.getDriver().isConnectionCreated(dbName1));
         } // try catch finally
         
-        System.out.println("Testing SQLBackend.createTable (within second database");
+        System.out.println("Testing SQLBackendImpl.createTable (within second database");
         
         try {
             backend.createDestination(dbName2);
@@ -160,7 +160,7 @@ public class SQLBackendTest {
      */
     @Test
     public void testInsertContextData() {
-        System.out.println("Testing SQLBackend.insertContextData");
+        System.out.println("Testing SQLBackendImpl.insertContextData");
         try {
             if (!runRealTest) backend.setDriver(mockDriverTableCreate);
             
@@ -172,7 +172,7 @@ public class SQLBackendTest {
             assertTrue(backend.getDriver().isConnectionCreated(dbName1));
         } // try catch finally
         
-        System.out.println("Testing SQLBackend.createTable (within second database");
+        System.out.println("Testing SQLBackendImpl.createTable (within second database");
         
         try {
             backend.createDestination(dbName2);

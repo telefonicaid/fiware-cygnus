@@ -23,13 +23,13 @@ import java.util.ArrayList;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
+import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.flume.Context;
 
-import com.telefonica.iot.cygnus.backends.sql.SQLBackend;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
@@ -65,7 +65,7 @@ public class NGSIMySQLSink extends NGSISink {
     private String mysqlPassword;
     private int maxPoolSize;
     private boolean rowAttrPersistence;
-    private static volatile SQLBackend mySQLPersistenceBackend;
+    private static volatile SQLBackendImpl mySQLPersistenceBackend;
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
 
@@ -121,7 +121,7 @@ public class NGSIMySQLSink extends NGSISink {
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
-    protected SQLBackend getPersistenceBackend() {
+    protected SQLBackendImpl getPersistenceBackend() {
         return mySQLPersistenceBackend;
     } // getPersistenceBackend
     
@@ -129,7 +129,7 @@ public class NGSIMySQLSink extends NGSISink {
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
      * @param persistenceBackend
      */
-    protected void setPersistenceBackend(SQLBackend persistenceBackend) {
+    protected void setPersistenceBackend(SQLBackendImpl persistenceBackend) {
         this.mySQLPersistenceBackend = persistenceBackend;
     } // setPersistenceBackend
 
@@ -228,7 +228,7 @@ public class NGSIMySQLSink extends NGSISink {
      */
     private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize) {
         if (mySQLPersistenceBackend == null) {
-            mySQLPersistenceBackend = new SQLBackend(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null);
+            mySQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null);
         }
     }
 
