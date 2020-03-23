@@ -1,6 +1,20 @@
 # SQL backend
+## `SQLBackend` interface	
+This class enumerates the methods any backend implementation must expose. In this case, the following ones:	
 
-## `SQLBackend` class
+    void createDatabase(String destination) throws Exception;	
+
+> Creates a database/scheme, given its name, if not existing.	
+
+    void createTable(String destination, String tableName, String fieldNames) throws Exception;	
+
+> Creates a table, given its name, if not existing within the given database/scheme. The field names are given as well.	
+
+    insertContextData(String destination, String tableName, String fieldNames, String fieldValues) throws Exception;	
+
+> Persists the accumulated context data (in the form of the given field values) regarding an entity within the given table. This table belongs to the given database/scheme. The field names are given as well to ensure the right insert of the field values.
+
+## `SQLBackendImpl` class
 
 This class replaces MySQL and PostgreSQL backends. Since actually the backend implemetation for Cygnus purposes doesn't uses any particular feature of each handler, it's possible to use a generic backend implementation for both SQL interfaces.
 
