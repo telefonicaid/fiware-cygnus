@@ -157,7 +157,6 @@ public class ElasticsearchBackendImplTest {
         public void testBulkInsert_oneData() {
             System.out.println(getTestTraceHead(String.format("[ElasticsearchBackendImplTest.bulkInsert OK, TLS=%b, Data=1]", flag)));
 
-            System.out.println(String.format("%s, %b, %s", schema, flag, msg));
             List<Map<String, String>> data = new ArrayList<Map<String, String>>();
             data.add(new HashMap<String, String>(){
                 {
@@ -165,7 +164,6 @@ public class ElasticsearchBackendImplTest {
                     put("data", msg);
                 }
             });
-            // String recvTimeTs1Hash = "599F4FB6AFDB1BEF51126B47DAC2696F";
             String expected = "";
             expected += String.format("{\"index\":{\"_id\":\"test_recvTimeTs_1-%s\"}}\n", tsHash);
             expected += String.format("%s\n", msg);
