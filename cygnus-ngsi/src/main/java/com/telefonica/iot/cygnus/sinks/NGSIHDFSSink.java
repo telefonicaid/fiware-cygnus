@@ -71,6 +71,9 @@ public class NGSIHDFSSink extends NGSISink {
      * Available file-format implementation.
      */
     protected enum FileFormat { JSONROW, JSONCOLUMN, CSVROW, CSVCOLUMN }
+
+
+    protected enum Periodicity { NONE, HOURLY, DAILY, MONTHLY, YEARLY }
     
     /**
      * Available Hive database types.
@@ -102,6 +105,7 @@ public class NGSIHDFSSink extends NGSISink {
     private int maxConns;
     private int maxConnsPerRoute;
     private boolean enableMetadataPersistance;
+    private Periodicity periodicityOfFileSeparation;
 
     /**
      * Constructor.
@@ -310,6 +314,19 @@ public class NGSIHDFSSink extends NGSISink {
                     + fileFormatStr + ") -- Must be 'json-row', 'json-column', 'csv-row' or 'csv-column'");
         } // catch
 
+        String periodicityOfFileSeparationStr = context.getString("periodicity_of_file_separation", "none");
+
+        try {
+            periodicityOfFileSeparation = Periodicity.valueOf(periodicityOfFileSeparationStr.toUpperCase());
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (periodicity_of_file_separation="
+                    + periodicityOfFileSeparationStr + ")");
+        } catch (Exception e) {
+            invalidConfiguration = true;
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (periodicity_of_file_separation="
+                    + periodicityOfFileSeparationStr + ") -- Must be 'none', 'hourly', 'daily', 'monthly' or 'yearly'");
+        } // catch
+
+
         // Hive configuration
         String enableHiveStr = context.getString("hive", "false");
         
@@ -494,6 +511,8 @@ public class NGSIHDFSSink extends NGSISink {
             NGSIEvent firstEvent = events.get(0);
             String service = firstEvent.getServiceForData();
             String servicePath = firstEvent.getServicePathForData();
+            GregorianCalendar calendar = new GregorianCalendar();
+            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
 
             // Get an aggregator for this entity and initialize it based on the first event
             NGSIGenericAggregator aggregator = getAggregator(fileFormat);
@@ -503,7 +522,7 @@ public class NGSIHDFSSink extends NGSISink {
             aggregator.setEntityForNaming(firstEvent.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
             aggregator.setAttrMetadataStore(enableMetadataPersistance);
             aggregator.setHdfsFolder(buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
-            aggregator.setHdfsFile(buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+            aggregator.setHdfsFile(buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
             aggregator.initialize(firstEvent);
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
@@ -979,25 +998,48 @@ public class NGSIHDFSSink extends NGSISink {
      * @return The file path
      * @throws com.telefonica.iot.cygnus.errors.CygnusBadConfiguration
      */
-    protected String buildFilePath(String service, String servicePath, String destination)
+    protected String buildFilePath(String service, String servicePath, String destination, GregorianCalendar calendar)
         throws CygnusBadConfiguration {
         String filePath;
-        
+        String separationPrefix = "";
+        switch (periodicityOfFileSeparation) {
+            case NONE:
+                break;
+            case HOURLY:
+                separationPrefix = "_" +
+                        ((String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)).length() ==  1) ? "0" +  String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)) : String.valueOf(calendar.get(Calendar.HOUR_OF_DAY))) +
+                        ((String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)).length() ==  1) ? "0" +  String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)) : String.valueOf(calendar.get(Calendar.DAY_OF_MONTH))) +
+                        ((String.valueOf(calendar.get(Calendar.MONTH) + 1).length() ==  1) ? "0" +  String.valueOf(calendar.get(Calendar.MONTH) + 1) : String.valueOf(calendar.get(Calendar.MONTH) + 1)) +
+                        String.valueOf(calendar.get(Calendar.YEAR));
+                break;
+            case DAILY:
+                separationPrefix = "_" +
+                        ((String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)).length() ==  1) ? "0" +  String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)) : String.valueOf(calendar.get(Calendar.DAY_OF_MONTH))) +
+                        ((String.valueOf(calendar.get(Calendar.MONTH) + 1).length() ==  1) ? "0" +  String.valueOf(calendar.get(Calendar.MONTH) + 1) : String.valueOf(calendar.get(Calendar.MONTH) + 1)) +
+                        String.valueOf(calendar.get(Calendar.YEAR));
+                break;
+            case MONTHLY:
+                separationPrefix = "_" + ((String.valueOf(calendar.get(Calendar.MONTH) + 1).length() ==  1) ? "0" +  String.valueOf(calendar.get(Calendar.MONTH) + 1) : String.valueOf(calendar.get(Calendar.MONTH) + 1)) +
+                        String.valueOf(calendar.get(Calendar.YEAR));
+                break;
+            case YEARLY:
+                separationPrefix = "_" + String.valueOf(calendar.get(Calendar.YEAR));
+                break;
+        }
         if (enableEncoding) {
             filePath = NGSICharsets.encodeHDFS(service, false) + NGSICharsets.encodeHDFS(servicePath, true)
                     + (servicePath.equals("/") ? "" : "/") + NGSICharsets.encodeHDFS(destination, false)
-                    + "/" + NGSICharsets.encodeHDFS(destination, false) + ".txt";
+                    + "/" + NGSICharsets.encodeHDFS(destination + separationPrefix, false) + ".txt";
         } else {
             filePath = NGSIUtils.encode(service, false, true) + NGSIUtils.encode(servicePath, false, false)
                     + (servicePath.equals("/") ? "" : "/") + NGSIUtils.encode(destination, false, true)
-                    + "/" + NGSIUtils.encode(destination, false, true) + ".txt";
+                    + "/" + NGSIUtils.encode(destination + separationPrefix, false, true) + ".txt";
         } // if else
         
         if (filePath.length() > NGSIConstants.HDFS_MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("-, Building file path name '" + filePath + "' and its length is "
                     + "greater than " + NGSIConstants.HDFS_MAX_NAME_LEN);
         } // if
-        
         return filePath;
     } // buildFilePath
     
