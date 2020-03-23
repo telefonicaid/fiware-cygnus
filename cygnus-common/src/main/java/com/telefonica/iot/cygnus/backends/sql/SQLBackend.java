@@ -537,7 +537,7 @@ public class SQLBackend {
          * @param sqlInstance
          * @param sqlDriverName
          */
-        public SQLDriver(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlInstance, String sqlDriverName) {
+        public SQLDriver(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase) {
             datasources = new HashMap<>();
             pools = new HashMap<>();
             this.sqlHost = sqlHost;

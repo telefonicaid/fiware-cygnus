@@ -257,7 +257,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
      */
     private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase) {
         if (postgreSQLPersistenceBackend == null) {
-            postgreSQLPersistenceBackend = new SQLBackend(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, defaultSQLDataBase, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME);
+            postgreSQLPersistenceBackend = new SQLBackend(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, defaultSQLDataBase);
         }
     }
 

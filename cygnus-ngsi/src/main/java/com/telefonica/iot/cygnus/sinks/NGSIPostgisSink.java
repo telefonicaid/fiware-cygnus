@@ -269,7 +269,7 @@ public class NGSIPostgisSink extends NGSISink {
      */
     private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase) {
         if (postgisPersistenceBackend == null) {
-            postgisPersistenceBackend = new SQLBackend(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, defaultSQLDataBase, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME);
+            postgisPersistenceBackend = new SQLBackend(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, defaultSQLDataBase);
         }
     }
 
