@@ -18,15 +18,10 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
-import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
@@ -36,23 +31,16 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-
 import org.apache.flume.Context;
 
 /**
+ * The type Ngsi postgre sql sink.
  *
- * @author hermanjunge
-
- Detailed documentation can be found at:
- https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/design/NGSIPostgreSQLSink.md
+ * @author hermanjunge Detailed documentation can be found at:https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/design/NGSIPostgreSQLSink.md
  */
 public class NGSIPostgreSQLSink extends NGSISink {
 
@@ -65,6 +53,8 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private static final String DEFAULT_ENABLE_CACHE = "false";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
+    private static final String POSTGRESQL_DRIVER_NAME = "org.postgresql.Driver";
+    private static final String POSTGRESQL_INSTANCE_NAME = "postgresql";
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgreSQLSink.class);
     private String postgresqlHost;
@@ -74,7 +64,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private String postgresqlPassword;
     private int maxPoolSize;
     private boolean rowAttrPersistence;
-    private PostgreSQLBackendImpl persistenceBackend;
+    private static volatile SQLBackendImpl postgreSQLPersistenceBackend;
     private boolean enableCache;
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
@@ -156,16 +146,16 @@ public class NGSIPostgreSQLSink extends NGSISink {
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
-    protected PostgreSQLBackendImpl getPersistenceBackend() {
-        return persistenceBackend;
+    protected SQLBackendImpl getPersistenceBackend() {
+        return postgreSQLPersistenceBackend;
     } // getPersistenceBackend
 
     /**
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
-     * @param persistenceBackend
+     * @param postgreSQLPersistenceBackend
      */
-    protected void setPersistenceBackend(PostgreSQLBackendImpl persistenceBackend) {
-        this.persistenceBackend = persistenceBackend;
+    protected void setPersistenceBackend(SQLBackendImpl postgreSQLPersistenceBackend) {
+        this.postgreSQLPersistenceBackend = postgreSQLPersistenceBackend;
     } // setPersistenceBackend
 
     @Override
@@ -252,7 +242,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     @Override
     public void start() {
         try {
-            persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlDatabase, postgresqlUsername, postgresqlPassword, maxPoolSize);
+            createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, postgresqlDatabase);
         } catch (Exception e) {
             LOGGER.error("Error while creating the PostgreSQL persistence backend. Details="
                     + e.getMessage());
@@ -261,6 +251,15 @@ public class NGSIPostgreSQLSink extends NGSISink {
         super.start();
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
+
+    /**
+     * Initialices a lazy singleton to share among instances on JVM
+     */
+    private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase) {
+        if (postgreSQLPersistenceBackend == null) {
+            postgreSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, defaultSQLDataBase);
+        }
+    }
 
     @Override
     void persistBatch(NGSIBatch batch)
@@ -334,8 +333,8 @@ public class NGSIPostgreSQLSink extends NGSISink {
         
         try {
             if (aggregator instanceof NGSIGenericRowAggregator) {
-                persistenceBackend.createSchema(schemaName);
-                persistenceBackend.createTable(schemaName, tableName, fieldsForCreate);
+                postgreSQLPersistenceBackend.createDestination(schemaName);
+                postgreSQLPersistenceBackend.createTable(schemaName, tableName, fieldsForCreate);
             } // if
             // creating the database and the table has only sense if working in row mode, in column node
             // everything must be provisioned in advance
@@ -343,7 +342,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             if (valuesForInsert.equals("")) {
                 LOGGER.debug("[" + this.getName() + "] no values for insert");
             } else {
-                persistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
+                postgreSQLPersistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
             }
         } catch (Exception e) {
             throw new CygnusPersistenceError("-, " + e.getMessage());

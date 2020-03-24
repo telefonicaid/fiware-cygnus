@@ -7,3 +7,5 @@
 [cygnus-ngsi][HDFSSink] Separate files by property periodicity (#1830)
 [cygnus-common][Elasticsearch] Fix a bug raised NullPointerException when 'ignore_white_spaces' is true and an attribute has null value. (#1838)
 [cygnus-ngsi][NGSISink]Handle generic exception to manage all scenarios when persisting batch (#1844)
+[cygnus-common][PostgreSQL, MySQL] Refactor code to use a SQL generic backend for all SQL-based sinks (#1806)
+[cygnus-common][PostgreSQL, MySQL] Lazy singleton to share pool connections of SQL backends among instances on JVM (#1806)

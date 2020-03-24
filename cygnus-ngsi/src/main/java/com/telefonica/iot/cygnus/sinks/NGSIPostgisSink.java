@@ -18,15 +18,10 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
-import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
@@ -36,16 +31,10 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
 
 /**
@@ -67,6 +56,8 @@ public class NGSIPostgisSink extends NGSISink {
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
     private static final String DEFAULT_POSTGIS_TYPE = "geometry";
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
+    private static final String POSTGIS_DRIVER_NAME = "org.postgresql.Driver";
+    private static final String POSTGIS_INSTANCE_NAME = "postgresql";
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgisSink.class);
     private String postgisHost;
@@ -76,7 +67,7 @@ public class NGSIPostgisSink extends NGSISink {
     private String postgisPassword;
     private boolean rowAttrPersistence;
     private int maxPoolSize;
-    private PostgreSQLBackendImpl persistenceBackend;
+    private static volatile SQLBackendImpl postgisPersistenceBackend;
     private boolean enableCache;
     private boolean swapCoordinates;
     private boolean attrNativeTypes;
@@ -159,16 +150,16 @@ public class NGSIPostgisSink extends NGSISink {
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
-    protected PostgreSQLBackendImpl getPersistenceBackend() {
-        return persistenceBackend;
+    protected SQLBackendImpl getPersistenceBackend() {
+        return postgisPersistenceBackend;
     } // getPersistenceBackend
 
     /**
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
-     * @param persistenceBackend
+     * @param postgisPersistenceBackend
      */
-    protected void setPersistenceBackend(PostgreSQLBackendImpl persistenceBackend) {
-        this.persistenceBackend = persistenceBackend;
+    protected void setPersistenceBackend(SQLBackendImpl postgisPersistenceBackend) {
+        this.postgisPersistenceBackend = postgisPersistenceBackend;
     } // setPersistenceBackend
 
     @Override
@@ -257,13 +248,13 @@ public class NGSIPostgisSink extends NGSISink {
     @Override
     public void stop() {
         super.stop();
-        if (persistenceBackend != null) persistenceBackend.close();
+        if (postgisPersistenceBackend != null) postgisPersistenceBackend.close();
     } // stop
 
     @Override
     public void start() {
         try {
-            persistenceBackend = new PostgreSQLBackendImpl(postgisHost, postgisPort, postgisDatabase, postgisUsername, postgisPassword, maxPoolSize);
+            createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, postgisDatabase);
         } catch (Exception e) {
             LOGGER.error("Error while creating the Postgis persistence backend. Details="
                     + e.getMessage());
@@ -272,6 +263,15 @@ public class NGSIPostgisSink extends NGSISink {
         super.start();
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
+
+    /**
+     * Initialices a lazy singleton to share among instances on JVM
+     */
+    private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase) {
+        if (postgisPersistenceBackend == null) {
+            postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, defaultSQLDataBase);
+        }
+    }
 
     @Override
     void persistBatch(NGSIBatch batch)
@@ -347,15 +347,15 @@ public class NGSIPostgisSink extends NGSISink {
                 + valuesForInsert + ")");
 
             if (aggregator instanceof NGSIGenericRowAggregator) {
-                persistenceBackend.createSchema(schemaName);
-                persistenceBackend.createTable(schemaName, tableName, fieldsForCreate);
+                postgisPersistenceBackend.createDestination(schemaName);
+                postgisPersistenceBackend.createTable(schemaName, tableName, fieldsForCreate);
             } // if
             // creating the database and the table has only sense if working in row mode, in column node
             // everything must be provisioned in advance
             if (valuesForInsert.equals("")) {
                 LOGGER.debug("[" + this.getName() + "] no values for insert");
             } else {
-                persistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
+                postgisPersistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
             }
     } // persistAggregation
     

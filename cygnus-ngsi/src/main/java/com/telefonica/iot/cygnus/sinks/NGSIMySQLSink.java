@@ -20,19 +20,16 @@ package com.telefonica.iot.cygnus.sinks;
 
 import java.util.ArrayList;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
+import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.flume.Context;
 
-import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
@@ -58,6 +55,8 @@ public class NGSIMySQLSink extends NGSISink {
     private static final String DEFAULT_USER_NAME = "root";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
+    private static final String MYSQL_DRIVER_NAME = "com.mysql.jdbc.Driver";
+    private static final String MYSQL_INSTANCE_NAME = "mysql";
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIMySQLSink.class);
     private String mysqlHost;
@@ -66,7 +65,7 @@ public class NGSIMySQLSink extends NGSISink {
     private String mysqlPassword;
     private int maxPoolSize;
     private boolean rowAttrPersistence;
-    private MySQLBackendImpl persistenceBackend;
+    private static volatile SQLBackendImpl mySQLPersistenceBackend;
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
 
@@ -122,16 +121,16 @@ public class NGSIMySQLSink extends NGSISink {
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
-    protected MySQLBackendImpl getPersistenceBackend() {
-        return persistenceBackend;
+    protected SQLBackendImpl getPersistenceBackend() {
+        return mySQLPersistenceBackend;
     } // getPersistenceBackend
     
     /**
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
      * @param persistenceBackend
      */
-    protected void setPersistenceBackend(MySQLBackendImpl persistenceBackend) {
-        this.persistenceBackend = persistenceBackend;
+    protected void setPersistenceBackend(SQLBackendImpl persistenceBackend) {
+        this.mySQLPersistenceBackend = persistenceBackend;
     } // setPersistenceBackend
 
 
@@ -208,7 +207,7 @@ public class NGSIMySQLSink extends NGSISink {
     @Override
     public void start() {
         try {
-            persistenceBackend = new MySQLBackendImpl(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize);
+            createPersistenceBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize);
             LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the MySQL persistence backend. Details="
@@ -221,9 +220,18 @@ public class NGSIMySQLSink extends NGSISink {
     @Override
     public void stop() {
         super.stop();
-        if (persistenceBackend != null) persistenceBackend.close();
+        if (mySQLPersistenceBackend != null) mySQLPersistenceBackend.close();
     } // stop
-    
+
+    /**
+     * Initialices a lazy singleton to share among instances on JVM
+     */
+    private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize) {
+        if (mySQLPersistenceBackend == null) {
+            mySQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null);
+        }
+    }
+
     @Override
     void persistBatch(NGSIBatch batch)
         throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
@@ -295,7 +303,7 @@ public class NGSIMySQLSink extends NGSISink {
                 String tableName = buildTableName(servicePathForNaming, entity, entityType, attribute);
                 LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",dbName="
                         + dbName + ", tableName=" + tableName + ")");
-                persistenceBackend.capRecords(dbName, tableName, maxRecords);
+                mySQLPersistenceBackend.capRecords(dbName, tableName, maxRecords);
             } catch (CygnusBadConfiguration e) {
                 throw new CygnusCappingError("Data capping error", "CygnusBadConfiguration", e.getMessage());
             } catch (CygnusRuntimeError e) {
@@ -311,7 +319,7 @@ public class NGSIMySQLSink extends NGSISink {
         LOGGER.debug("[" + this.getName() + "] Expirating records (time=" + expirationTime + ")");
         
         try {
-            persistenceBackend.expirateRecordsCache(expirationTime);
+            mySQLPersistenceBackend.expirateRecordsCache(expirationTime);
         } catch (CygnusRuntimeError e) {
             throw new CygnusExpiratingError("Data expiration error", "CygnusRuntimeError", e.getMessage());
         } catch (CygnusPersistenceError e) {
@@ -342,14 +350,14 @@ public class NGSIMySQLSink extends NGSISink {
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
         if (aggregator instanceof NGSIGenericRowAggregator) {
-            persistenceBackend.createDatabase(dbName);
-            persistenceBackend.createTable(dbName, tableName, fieldsForCreate);
+            mySQLPersistenceBackend.createDestination(dbName);
+            mySQLPersistenceBackend.createTable(dbName, tableName, fieldsForCreate);
         } // if
 
         if (valuesForInsert.equals("")) {
             LOGGER.debug("[" + this.getName() + "] no values for insert");
         } else {
-            persistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
+            mySQLPersistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
         }
     } // persistAggregation
     

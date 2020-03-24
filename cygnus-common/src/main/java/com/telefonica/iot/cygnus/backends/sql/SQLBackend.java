@@ -1,5 +1,5 @@
 /**
- * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2014-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FIWARE project).
  *
@@ -16,41 +16,36 @@
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
-package com.telefonica.iot.cygnus.backends.mysql;
+package com.telefonica.iot.cygnus.backends.sql;
 
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 
-/**
- * Interface for those backends implementing the persistence in MySQL.
- * 
- * @author frb
- */
-public interface MySQLBackend {
-    
+public interface SQLBackend {
+
     /**
      * Creates a database, given its name, if not exists.
-     * @param dbName
+     * @param destination
      * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
      * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
      */
-    void createDatabase(String dbName) throws CygnusRuntimeError, CygnusPersistenceError;
-    
+    void createDestination(String destination) throws CygnusRuntimeError, CygnusPersistenceError;
+
     /**
      * Creates a table, given its name, if not exists in the given database.
-     * @param dbName
+     * @param destination
      * @param tableName
      * @param fieldNames
      * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
      * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
      */
-    void createTable(String dbName, String tableName, String fieldNames)
-        throws CygnusRuntimeError, CygnusPersistenceError;
-    
+    void createTable(String destination, String tableName, String fieldNames)
+            throws CygnusRuntimeError, CygnusPersistenceError;
+
     /**
      * Insert already processed context data into the given table within the given database.
-     * @param dbName
+     * @param destination
      * @param tableName
      * @param fieldNames
      * @param fieldValues
@@ -58,19 +53,19 @@ public interface MySQLBackend {
      * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
      * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
      */
-    void insertContextData(String dbName, String tableName, String fieldNames, String fieldValues)
-        throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError;
-    
+    void insertContextData(String destination, String tableName, String fieldNames, String fieldValues)
+            throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError;
+
     /**
      * Caps records from the given table within the given database according to the given maximum number.
-     * @param dbName
+     * @param destination
      * @param tableName
      * @param maxRecords
      * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
      * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
      */
-    void capRecords(String dbName, String tableName, long maxRecords) throws CygnusRuntimeError, CygnusPersistenceError;
-    
+    void capRecords(String destination, String tableName, long maxRecords) throws CygnusRuntimeError, CygnusPersistenceError;
+
     /**
      * Expirates records within all the cached tables based on the expiration time.
      * @param expirationTime
@@ -78,5 +73,6 @@ public interface MySQLBackend {
      * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
      */
     void expirateRecordsCache(long expirationTime) throws CygnusRuntimeError, CygnusPersistenceError;
-    
-} // MySQLBackend
+
+
+}

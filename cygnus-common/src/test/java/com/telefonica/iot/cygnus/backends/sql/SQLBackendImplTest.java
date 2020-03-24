@@ -16,36 +16,34 @@
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
-package com.telefonica.iot.cygnus.backends.mysql;
+package com.telefonica.iot.cygnus.backends.sql;
 
-import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl.MySQLDriver;
-import java.sql.Connection;
-import java.sql.Statement;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl.SQLDriver;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.when;
 import org.mockito.runners.MockitoJUnitRunner;
 
-/**
- *
- * @author frb
- */
+import java.sql.Connection;
+import java.sql.Statement;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
+
 @RunWith(MockitoJUnitRunner.class)
-public class MySQLBackendImplTest {
+public class SQLBackendImplTest {
     
     // instance to be tested
-    private MySQLBackendImpl backend;
+    private SQLBackendImpl backend;
     
     // mocks
     @Mock
-    private MySQLDriver mockDriverDbCreate;
+    private SQLDriver mockDriverDbCreate;
     @Mock
-    private MySQLDriver mockDriverTableCreate;
+    private SQLDriver mockDriverTableCreate;
     @Mock
     private Connection mockConnection;
     @Mock
@@ -65,6 +63,8 @@ public class MySQLBackendImplTest {
     private final String fieldNamesInsert1 = "(a, b)";
     private final String fieldValues1 = "(1,2)";
     private final String fieldNames2 = "c text, d text";
+    private static final String MYSQL_DRIVER_NAME = "com.mysql.jdbc.Driver";
+    private static final String MYSQL_INSTANCE_NAME = "mysql";
     
     // True: real test, False: Mock test
     private final boolean runRealTest = false;
@@ -78,7 +78,7 @@ public class MySQLBackendImplTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new MySQLBackendImpl(host, port, user, password, maxPoolSize);
+        backend = new SQLBackendImpl(host, port, user, password, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null);
         
         // set up the behaviour of the mocked classes
         when(mockDriverDbCreate.getConnection(Mockito.anyString())).thenReturn(mockConnection);
@@ -91,16 +91,16 @@ public class MySQLBackendImplTest {
     } // setUp
     
     /**
-     * Test of createDatabase method, of class MySQLBackendImpl.
+     * Test of createDatabase method, of class SQLBackendImpl.
      */
     @Test
     public void testCreateDatabase() {
-        System.out.println("Testing MySQLBackend.createDatabase (first database creation)");
+        System.out.println("Testing SQLBackendImpl.createDatabase (first database creation)");
         
         try {
             if (!runRealTest) backend.setDriver(mockDriverDbCreate);
             
-            backend.createDatabase(dbName1);
+            backend.createDestination(dbName1);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -108,13 +108,13 @@ public class MySQLBackendImplTest {
             assertTrue(backend.getDriver().isConnectionCreated(""));
         } // try catch finally
         
-        System.out.println("Testing MySQLBackend.createDatabase (second database creation)");
+        System.out.println("Testing SQLBackendImpl.createDatabase (second database creation)");
         
         try {
             // once created a database, the empty database name must be within the connections map; this empty
             // database name has associated a default connection that will be used for new database creations
             assertTrue(backend.getDriver().isConnectionCreated(""));
-            backend.createDatabase(dbName2);
+            backend.createDestination(dbName2);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -125,11 +125,11 @@ public class MySQLBackendImplTest {
     } // testCreateDatabase
     
     /**
-     * Test of createTable method, of class MySQLBackendImpl.
+     * Test of createTable method, of class SQLBackendImpl.
      */
     @Test
     public void testCreateTable() {
-        System.out.println("Testing MySQLBackend.createTable (within first database)");
+        System.out.println("Testing SQLBackendImpl.createTable (within first database)");
         
         try {
             if (!runRealTest) backend.setDriver(mockDriverTableCreate);
@@ -141,10 +141,10 @@ public class MySQLBackendImplTest {
             assertTrue(backend.getDriver().isConnectionCreated(dbName1));
         } // try catch finally
         
-        System.out.println("Testing MySQLBackend.createTable (within second database");
+        System.out.println("Testing SQLBackendImpl.createTable (within second database");
         
         try {
-            backend.createDatabase(dbName2);
+            backend.createDestination(dbName2);
             backend.createTable(dbName2, tableName2, fieldNames2);
         } catch (Exception e) {
             fail(e.getMessage());
@@ -156,11 +156,11 @@ public class MySQLBackendImplTest {
     } // testCreateTable
     
     /**
-     * Test of insertContextData method, of class MySQLBackendImpl.
+     * Test of insertContextData method, of class SQLBackendImpl.
      */
     @Test
     public void testInsertContextData() {
-        System.out.println("Testing MySQLBackend.insertContextData");
+        System.out.println("Testing SQLBackendImpl.insertContextData");
         try {
             if (!runRealTest) backend.setDriver(mockDriverTableCreate);
             
@@ -172,10 +172,10 @@ public class MySQLBackendImplTest {
             assertTrue(backend.getDriver().isConnectionCreated(dbName1));
         } // try catch finally
         
-        System.out.println("Testing MySQLBackend.createTable (within second database");
+        System.out.println("Testing SQLBackendImpl.createTable (within second database");
         
         try {
-            backend.createDatabase(dbName2);
+            backend.createDestination(dbName2);
             backend.createTable(dbName2, tableName2, fieldNames2);
         } catch (Exception e) {
             fail(e.getMessage());
@@ -186,4 +186,4 @@ public class MySQLBackendImplTest {
         } // try catch finally
     } // testInsertContextData
 
-} // MySQLBackendImplTest
+} // SQLBackendImplTest
