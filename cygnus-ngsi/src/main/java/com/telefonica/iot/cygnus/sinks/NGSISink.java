@@ -404,6 +404,12 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             doRollbackAgain(rollbackedAccumulation);
             setMDCToNA();
             return Status.BACKOFF; // Slow down the sink since there are problems with the persistence backend
+        } catch (Exception e) {
+            updateServiceMetrics(batch, true);
+            LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+            doRollbackAgain(rollbackedAccumulation);
+            setMDCToNA();
+            return Status.BACKOFF;
         } // try catch
 
         if (persistencePolicyMaxRecords > -1) {
@@ -576,6 +582,14 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     txn.commit();
                     setMDCToNA();
                     return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
+                } catch (Exception e) {
+                    updateServiceMetrics(batch, true);
+                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                    doRollback(accumulator.clone()); // the global accumulator has to be cloned for rollbacking purposes
+                    accumulator.initialize(new Date().getTime());
+                    txn.commit();
+                    setMDCToNA();
+                    return Status.BACKOFF;
                 } // try catch
 
                 if (persistencePolicyMaxRecords > -1) {
