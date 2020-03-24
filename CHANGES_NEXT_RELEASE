@@ -6,3 +6,4 @@
 [cygnus-ngsi][RestHandler] Add a not null validation for ngsiVersion header of request.
 [cygnus-ngsi][HDFSSink] Separate files by property periodicity (#1830)
 [cygnus-common][Elasticsearch] Fix a bug raised NullPointerException when 'ignore_white_spaces' is true and an attribute has null value. (#1838)
+[cygnus-ngsi][NGSISink]Handle generic exception to manage all scenarios when persisting batch (#1844)
