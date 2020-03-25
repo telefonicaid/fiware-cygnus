@@ -462,6 +462,7 @@ The generated `mapping_type` of this index is like below:
 | cache\_flash\_interval\_sec | no | 0 | 0 if notified data will be persisted to Elasticsearch immediately. positive integer if notified data are cached on NGSIElasticsearchSink's memory and will be persisted to Elasticsearch periodically every `cache_flash_interval_sec` |
 | backend.max\_conns | no | 500 | Maximum number of connections allowed for a Http-based Elasticsearch backend |
 | backend.max\_conns\_per\_route | no | 100 | Maximum number of connections per route allowed for a Http-based Elasticsearch backend |
+| charset | no | UTF-8 | charset name used to encode attribute values when sending them to Elasticsearch. You have to set a valid charset name which is defined in "java.nio.charset.Charset" |
 
 A configuration example could be:
 
@@ -482,6 +483,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.elasticsearch-sink.cache_flash_interval_sec = 0
     cygnus-ngsi.sinks.elasticsearch-sink.backend.max_conns = 500
     cygnus-ngsi.sinks.elasticsearch-sink.backend.max_conns_per_route = 100
+    cygnus-ngsi.sinks.elasticsearch-sink.charset = UTF-8
 
 [Top](#top)
 
@@ -518,6 +520,7 @@ When NGSIElasticsearchSink is configured as `Column-like storing` and the **firs
 `NGSIElasticsearchSink` has been tested with the following versions of Elasticsearch:
 
 * 6.3
+* 7.6
 
 [Top](#top)
 

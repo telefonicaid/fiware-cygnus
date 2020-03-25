@@ -358,6 +358,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_ELASTICSEARCH_CACHE_FLASH_INTERVAL_SEC: 0 if notified data will be persisted to Elasticsearch immediately. positive integer if notified data are cached on container's memory and will be persisted to Elasticsearch periodically every `CYGNUS_ELASTICSEARCH_CACHE_FLASH_INTERVAL_SEC`. Default is `0`. (see [the document of NGSIElasticsearchSink](/doc/cygnus-ngsi/flume_extensions_catalogue/ngsi_elasticsearch_sink.md#section2.3.1) because there are some points to consider.)
     * CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONNS: Maximum number of connections allowed for a Http-based Elasticsearch backend. Default is `500`.
     * CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONSS_PER_ROUTE: Maximum number of connections per route allowed for a Http-based Elasticsearch backend. Default is `100`.
+    * CYGNUS_ELASTICSEARCH_CHARSET: The charset name used to encode attribute values when sending them to Elasticsearch. You have to set a valid charset name which is defined in "java.nio.charset.Charset". Default is `UTF-8`.
 
 
 * ArcGis:
