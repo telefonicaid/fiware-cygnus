@@ -105,6 +105,7 @@ public class NGSIElasticsearchSinkTest {
                              new Data<String, String>(null, "UTC"),
                              new Data<String, Boolean>(null, Boolean.valueOf(false)),
                              new Data<String, Integer>(null, Integer.valueOf(0)),
+                             new Data<String, String>(null, "UTF-8"),
                              false, null)},
                 {new Fixture(new Data<String, String>("test.example.com", "test.example.com"),
                              new Data<String, String>("1234", "1234"),
@@ -118,6 +119,7 @@ public class NGSIElasticsearchSinkTest {
                              new Data<String, String>("Asia/Tokyo", "Asia/Tokyo"),
                              new Data<String, Boolean>("true", Boolean.valueOf(true)),
                              new Data<String, Integer>("30", Integer.valueOf(30)),
+                             new Data<String, String>("US-ASCII", "US-ASCII"),
                              false, null)},
                 {new Fixture(new Data<String, String>(null, "localhost"),
                              new Data<String, String>(null, "9200"),
@@ -131,6 +133,7 @@ public class NGSIElasticsearchSinkTest {
                              new Data<String, String>(null, "UTC"),
                              new Data<String, Boolean>("false", Boolean.valueOf(false)),
                              new Data<String, Integer>("0", Integer.valueOf(0)),
+                             new Data<String, String>(null, "UTF-8"),
                              false, null)},
                 {new Fixture(new Data<String, String>(null, "localhost"),
                              new Data<String, String>("-1", "-1"),
@@ -144,6 +147,7 @@ public class NGSIElasticsearchSinkTest {
                              new Data<String, String>(null, "UTC"),
                              new Data<String, Boolean>(null, Boolean.valueOf(false)),
                              new Data<String, Integer>(null, Integer.valueOf(0)),
+                             new Data<String, String>(null, "UTF-8"),
                              true, null)},
                 {new Fixture(new Data<String, String>(null, "localhost"),
                              new Data<String, String>("65536", "65536"),
@@ -157,6 +161,7 @@ public class NGSIElasticsearchSinkTest {
                              new Data<String, String>(null, "UTC"),
                              new Data<String, Boolean>(null, Boolean.valueOf(false)),
                              new Data<String, Integer>(null, Integer.valueOf(0)),
+                             new Data<String, String>(null, "UTF-8"),
                              true, null)},
                 {new Fixture(new Data<String, String>(null, "localhost"),
                              new Data<String, String>("1.5", "1.5"),
@@ -170,6 +175,7 @@ public class NGSIElasticsearchSinkTest {
                              new Data<String, String>(null, "UTC"),
                              new Data<String, Boolean>(null, Boolean.valueOf(false)),
                              new Data<String, Integer>(null, Integer.valueOf(0)),
+                             new Data<String, String>(null, "UTF-8"),
                              true, null)},
                 {new Fixture(new Data<String, String>(null, "localhost"),
                              new Data<String, String>(null, "9200"),
@@ -183,6 +189,7 @@ public class NGSIElasticsearchSinkTest {
                              new Data<String, String>(null, "UTC"),
                              new Data<String, Boolean>(null, Boolean.valueOf(false)),
                              new Data<String, Integer>(null, Integer.valueOf(0)),
+                             new Data<String, String>(null, "UTF-8"),
                              true, null)},
                 {new Fixture(new Data<String, String>(null, "localhost"),
                              new Data<String, String>(null, "9200"),
@@ -196,6 +203,7 @@ public class NGSIElasticsearchSinkTest {
                              new Data<String, String>(null, null),
                              new Data<String, Boolean>(null, Boolean.valueOf(false)),
                              new Data<String, Integer>(null, Integer.valueOf(0)),
+                             new Data<String, String>(null, null),
                              false, java.lang.NumberFormatException.class)},
                 {new Fixture(new Data<String, String>(null, "localhost"),
                              new Data<String, String>(null, "9200"),
@@ -209,6 +217,7 @@ public class NGSIElasticsearchSinkTest {
                              new Data<String, String>(null, null),
                              new Data<String, Boolean>(null, Boolean.valueOf(false)),
                              new Data<String, Integer>(null, Integer.valueOf(0)),
+                             new Data<String, String>(null, null),
                              false, java.lang.NumberFormatException.class)},
                 {new Fixture(new Data<String, String>(null, "localhost"),
                              new Data<String, String>(null, "9200"),
@@ -222,6 +231,7 @@ public class NGSIElasticsearchSinkTest {
                              new Data<String, String>(null, "UTC"),
                              new Data<String, Boolean>(null, Boolean.valueOf(false)),
                              new Data<String, Integer>(null, Integer.valueOf(0)),
+                             new Data<String, String>(null, "UTF-8"),
                              true, null)},
                 {new Fixture(new Data<String, String>(null, "localhost"),
                              new Data<String, String>(null, "9200"),
@@ -235,6 +245,7 @@ public class NGSIElasticsearchSinkTest {
                              new Data<String, String>(null, "UTC"),
                              new Data<String, Boolean>(null, Boolean.valueOf(false)),
                              new Data<String, Integer>(null, Integer.valueOf(0)),
+                             new Data<String, String>(null, "UTF-8"),
                              true, null)},
                 {new Fixture(new Data<String, String>(null, "localhost"),
                              new Data<String, String>(null, "9200"),
@@ -248,6 +259,7 @@ public class NGSIElasticsearchSinkTest {
                              new Data<String, String>(null, "UTC"),
                              new Data<String, Boolean>("invalid", Boolean.valueOf(false)),
                              new Data<String, Integer>(null, Integer.valueOf(0)),
+                             new Data<String, String>(null, "UTF-8"),
                              true, null)},
                 {new Fixture(new Data<String, String>(null, "localhost"),
                              new Data<String, String>(null, "9200"),
@@ -261,6 +273,7 @@ public class NGSIElasticsearchSinkTest {
                              new Data<String, String>(null, "UTC"),
                              new Data<String, Boolean>(null, Boolean.valueOf(false)),
                              new Data<String, Integer>("-2147483649", Integer.valueOf(0)),
+                             new Data<String, String>(null, null),
                              false, java.lang.NumberFormatException.class)},
                 {new Fixture(new Data<String, String>(null, "localhost"),
                              new Data<String, String>(null, "9200"),
@@ -274,7 +287,36 @@ public class NGSIElasticsearchSinkTest {
                              new Data<String, String>(null, "UTC"),
                              new Data<String, Boolean>(null, Boolean.valueOf(false)),
                              new Data<String, Integer>("", Integer.valueOf(0)),
-                             false, java.lang.NumberFormatException.class)}
+                             new Data<String, String>(null, null),
+                             false, java.lang.NumberFormatException.class)},
+                {new Fixture(new Data<String, String>(null, "localhost"),
+                             new Data<String, String>(null, "9200"),
+                             new Data<String, Boolean>(null, Boolean.valueOf(false)),
+                             new Data<String, String>(null, "cygnus"),
+                             new Data<String, String>(null, "cygnus_type"),
+                             new Data<String, Integer>(null, Integer.valueOf(500)),
+                             new Data<String, Integer>(null, Integer.valueOf(100)),
+                             new Data<String, Boolean>(null, Boolean.valueOf(true)),
+                             new Data<String, Boolean>(null, Boolean.valueOf(true)),
+                             new Data<String, String>(null, "UTC"),
+                             new Data<String, Boolean>(null, Boolean.valueOf(false)),
+                             new Data<String, Integer>(null, Integer.valueOf(0)),
+                             new Data<String, String>("", ""),
+                             false, null)},
+                {new Fixture(new Data<String, String>(null, "localhost"),
+                             new Data<String, String>(null, "9200"),
+                             new Data<String, Boolean>(null, Boolean.valueOf(false)),
+                             new Data<String, String>(null, "cygnus"),
+                             new Data<String, String>(null, "cygnus_type"),
+                             new Data<String, Integer>(null, Integer.valueOf(500)),
+                             new Data<String, Integer>(null, Integer.valueOf(100)),
+                             new Data<String, Boolean>(null, Boolean.valueOf(true)),
+                             new Data<String, Boolean>(null, Boolean.valueOf(true)),
+                             new Data<String, String>(null, "UTC"),
+                             new Data<String, Boolean>(null, Boolean.valueOf(false)),
+                             new Data<String, Integer>(null, Integer.valueOf(0)),
+                             new Data<String, String>("invalid", "invalid"),
+                             false, null)}
             });
         } // getParameters
         private Fixture fixture;
@@ -314,6 +356,7 @@ public class NGSIElasticsearchSinkTest {
             assertEquals(fixture.timezone.expected, sink.getTimezone());
             assertEquals(fixture.castValue.expected, sink.getCastValue());
             assertEquals(fixture.cacheFlashIntervalSec.expected.intValue(), sink.getCacheFlashIntervalSec());
+            assertEquals(fixture.charSet.expected, sink.getCharSet());
             assertEquals(fixture.invalidConfiguration, sink.getInvalidConfiguration());
         } // testConfigure
     } // ConfigureTest
@@ -352,6 +395,7 @@ public class NGSIElasticsearchSinkTest {
                                   new Data<String, String>(null, "UTC"),
                                   new Data<String, Boolean>(null, Boolean.valueOf(false)),
                                   new Data<String, Integer>(null, Integer.valueOf(0)),
+                                  new Data<String, String>(null, "UTF-8"),
                                   false, null);
 
             aggregations = new TreeMap<>();
@@ -629,6 +673,7 @@ public class NGSIElasticsearchSinkTest {
                                   new Data<String, String>(null, "UTC"),
                                   new Data<String, Boolean>(null, Boolean.valueOf(false)),
                                   new Data<String, Integer>(null, Integer.valueOf(0)),
+                                  new Data<String, String>(null, "UTF-8"),
                                   false, null);
 
             MockitoAnnotations.initMocks(this);
@@ -1302,6 +1347,7 @@ public class NGSIElasticsearchSinkTest {
         public Data<String, String> timezone;
         public Data<String, Boolean> castValue;
         public Data<String, Integer> cacheFlashIntervalSec;
+        public Data<String, String> charSet;
         public boolean invalidConfiguration;
         public Class<? extends Exception> exceptionClass;
 
@@ -1317,6 +1363,7 @@ public class NGSIElasticsearchSinkTest {
                        Data<String, String> timezone,
                        Data<String, Boolean> castValue,
                        Data<String, Integer> cacheFlashIntervalSec,
+                       Data<String, String> charSet,
                        boolean invalidConfiguration,
                        Class<? extends Exception> exceptionClass) {
             this.elasticsearchHost = elasticsearchHost;
@@ -1331,6 +1378,7 @@ public class NGSIElasticsearchSinkTest {
             this.timezone = timezone;
             this.castValue = castValue;
             this.cacheFlashIntervalSec = cacheFlashIntervalSec;
+            this.charSet = charSet;
             this.invalidConfiguration = invalidConfiguration;
             this.exceptionClass = exceptionClass;
         } // constructor
@@ -1349,6 +1397,7 @@ public class NGSIElasticsearchSinkTest {
             context.put("timezone", this.timezone.value);
             context.put("cast_value", this.castValue.value);
             context.put("cache_flash_interval_sec", this.cacheFlashIntervalSec.value);
+            context.put("charset", this.charSet.value);
             return context;
         } // createContext
 
@@ -1365,6 +1414,7 @@ public class NGSIElasticsearchSinkTest {
                    "timezone=" + this.timezone + ", " +
                    "castValue=" + this.castValue + ", " +
                    "cacheFlashIntervalSec=" + this.cacheFlashIntervalSec + ", " +
+                   "charset=" + this.charSet + ", " +
                    "invalidConfiguration=" + this.invalidConfiguration;
         } // toString
     } // Fixture

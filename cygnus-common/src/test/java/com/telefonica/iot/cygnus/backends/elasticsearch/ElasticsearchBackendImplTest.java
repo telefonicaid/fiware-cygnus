@@ -68,6 +68,7 @@ public class ElasticsearchBackendImplTest {
     private final static int maxConnsPerRoute = 10;
     private final static String idx = "idx";
     private final static String type = "type";
+    private final static String charSet = "UTF-8";
 
     private static void assertRequestHeader(HttpPost requested, String schema) {
         assertEquals("POST", requested.getMethod());
@@ -100,12 +101,16 @@ public class ElasticsearchBackendImplTest {
         @Parameters
         public static Collection<Object[]> getParameters() {
             return Arrays.asList(new Object[][] {
-                {"http", false, "{\"message\": \"en - test data 1\"}", "CA7219C0B311573D5D84EC08C80DB1E0"},
-                {"http", false, "{\"message\": \"ja - テストデータ 1\"}", "60DF702634A1341562C192FB0876D04A"},
-                {"http", false, "{\"message\": \"de - Ä Ü Ö ä ü ö ß\"}", "6FE8AB2A91C5AC47461EC40FB85C08EE"},
-                {"https", true, "{\"message\": \"en - test data 1\"}", "CA7219C0B311573D5D84EC08C80DB1E0"},
-                {"https", true, "{\"message\": \"ja - テストデータ 1\"}", "60DF702634A1341562C192FB0876D04A"},
-                {"https", true, "{\"message\": \"de - Ä Ü Ö ä ü ö ß\"}", "6FE8AB2A91C5AC47461EC40FB85C08EE"},
+                {"http", false, "{\"message\": \"en - test data 1\"}", "CA7219C0B311573D5D84EC08C80DB1E0", "US-ASCII"},
+                {"http", false, "{\"message\": \"en - test data 1\"}", "CA7219C0B311573D5D84EC08C80DB1E0", "ISO-8859-1"},
+                {"http", false, "{\"message\": \"en - test data 1\"}", "CA7219C0B311573D5D84EC08C80DB1E0", "UTF-8"},
+                {"http", false, "{\"message\": \"ja - テストデータ 1\"}", "60DF702634A1341562C192FB0876D04A", "utf-8"},
+                {"http", false, "{\"message\": \"de - Ä Ü Ö ä ü ö ß\"}", "6FE8AB2A91C5AC47461EC40FB85C08EE", "uTf-8"},
+                {"https", true, "{\"message\": \"en - test data 1\"}", "CA7219C0B311573D5D84EC08C80DB1E0", "us-ascii"},
+                {"https", true, "{\"message\": \"en - test data 1\"}", "CA7219C0B311573D5D84EC08C80DB1E0", "iso-8859-1"},
+                {"https", true, "{\"message\": \"en - test data 1\"}", "CA7219C0B311573D5D84EC08C80DB1E0", "uTF-8"},
+                {"https", true, "{\"message\": \"ja - テストデータ 1\"}", "60DF702634A1341562C192FB0876D04A", "Utf-8"},
+                {"https", true, "{\"message\": \"de - Ä Ü Ö ä ü ö ß\"}", "6FE8AB2A91C5AC47461EC40FB85C08EE", "UTf-8"},
             });
         } // getParameters
 
@@ -113,12 +118,14 @@ public class ElasticsearchBackendImplTest {
         private boolean flag;
         private String msg;
         private String tsHash;
+        private String charSet;
 
-        public HttpSuccessTest(String schema, boolean flag, String msg, String tsHash) {
+        public HttpSuccessTest(String schema, boolean flag, String msg, String tsHash, String charSet) {
             this.schema = schema;
             this.flag = flag;
             this.msg = msg;
             this.tsHash = tsHash;
+            this.charSet = charSet;
         } // constructor
 
         /**
@@ -204,7 +211,7 @@ public class ElasticsearchBackendImplTest {
 
         private void assertBulkInsert(List<Map<String, String>> data, String expected) {
             try {
-                ElasticsearchBackendImpl backend = new ElasticsearchBackendImpl(host, port, flag, maxConns, maxConnsPerRoute);
+                ElasticsearchBackendImpl backend = new ElasticsearchBackendImpl(host, port, flag, maxConns, maxConnsPerRoute, charSet);
                 backend.setHttpClient(mockHttpClient);
                 backend.bulkInsert(idx, type, data);
 
@@ -283,7 +290,7 @@ public class ElasticsearchBackendImplTest {
             String expected = "";
 
             try {
-                ElasticsearchBackendImpl backend = new ElasticsearchBackendImpl(host, port, flag, maxConns, maxConnsPerRoute);
+                ElasticsearchBackendImpl backend = new ElasticsearchBackendImpl(host, port, flag, maxConns, maxConnsPerRoute, charSet);
                 backend.setHttpClient(mockHttpClient);
                 backend.bulkInsert(idx, type, data);
             } catch (CygnusPersistenceError e) {
@@ -361,7 +368,7 @@ public class ElasticsearchBackendImplTest {
             List<Map<String, String>> data = new ArrayList<Map<String, String>>();
 
             try {
-                ElasticsearchBackendImpl backend = new ElasticsearchBackendImpl(host, port, false, maxConns, maxConnsPerRoute);
+                ElasticsearchBackendImpl backend = new ElasticsearchBackendImpl(host, port, false, maxConns, maxConnsPerRoute, charSet);
                 backend.setHttpClient(mockHttpClient);
                 backend.bulkInsert(invalidIndex, invalidType, data);
             } catch (CygnusPersistenceError e) {
@@ -467,7 +474,7 @@ public class ElasticsearchBackendImplTest {
             }
 
             try {
-                ElasticsearchBackendImpl backend = new ElasticsearchBackendImpl(host, port, false, maxConns, maxConnsPerRoute);
+                ElasticsearchBackendImpl backend = new ElasticsearchBackendImpl(host, port, false, maxConns, maxConnsPerRoute, charSet);
                 backend.setHttpClient(mockHttpClient);
                 backend.bulkInsert(idx, type, data);
             } catch (CygnusPersistenceError e) {
@@ -486,4 +493,97 @@ public class ElasticsearchBackendImplTest {
             } // try-catch
         } // testBulkInsert_invlalidData
     } // InvaidDataTest
+
+    @RunWith(Parameterized.class)
+    public static class InvalidCharsetTest {
+        /**
+         * setup test class
+         */
+        @BeforeClass
+        public static void setUpClass() {
+            LogManager.getRootLogger().setLevel(Level.FATAL);
+        } // setUpClass
+
+        @Mock
+        private HttpClient mockHttpClient;
+
+        @Captor
+        private ArgumentCaptor<HttpPost> requestCaptor;
+
+        @Parameters
+        public static Collection<Object[]> getParameters() {
+            return Arrays.asList(new Object[][] {
+                {false, "invalid"},
+                {false, ""},
+                {false, null},
+                {true, "invalid"},
+                {true, ""},
+                {true, null},
+            });
+        } // getParameters
+
+        private boolean flag;
+        private String charSet;
+        private final String msg = "{\"message\": \"en - test data 1\"}";
+
+        public InvalidCharsetTest(boolean flag, String charSet) {
+            this.flag = flag;
+            this.charSet = charSet;
+        } // constructor
+
+        /**
+         * setup test case
+         *
+         * @throws Exception
+         */
+        @Before
+        public void setUp() throws Exception {
+            BasicHttpResponse response = new BasicHttpResponse(new ProtocolVersion("http", 1, 1), 200, "ok");
+            response.setEntity(new StringEntity("{\"result\": {\"whatever\":\"whatever\"}}"));
+
+            MockitoAnnotations.initMocks(this);
+            when(mockHttpClient.execute(Mockito.any(HttpPost.class))).thenReturn(response);
+        } // setUp
+
+        /**
+         * [ElasticsearchBackendImpl#InvalidCharsetTest.testBulkInsert]
+         * Test to insert a data successfully.
+         */
+        @Test
+        public void testBulkInsert() {
+            System.out.println(getTestTraceHead(String.format("[ElasticsearchBackendImpl#InvalidCharsetTest.bulkInsert OK, TLS=%b, Data=1]", flag)));
+
+            List<Map<String, String>> data = new ArrayList<Map<String, String>>();
+            data.add(new HashMap<String, String>(){
+                {
+                    put("recvTimeTs", "test_recvTimeTs_1");
+                    put("data", msg);
+                }
+            });
+
+            try {
+                ElasticsearchBackendImpl backend = new ElasticsearchBackendImpl(host, port, flag, maxConns, maxConnsPerRoute, charSet);
+                backend.setHttpClient(mockHttpClient);
+                backend.bulkInsert(idx, type, data);
+            } catch (CygnusPersistenceError e) {
+                String errorData = String.format("[{data=%s, recvTimeTs=test_recvTimeTs_1}]", msg);
+                String rootCause;
+                if (charSet == null) {
+                    rootCause = "java.lang.IllegalArgumentException: Null charset name";
+                } else if (charSet == "") {
+                    rootCause = "java.nio.charset.IllegalCharsetNameException: ";
+                } else {
+                    rootCause = String.format("java.nio.charset.UnsupportedCharsetException: %s", charSet);
+                }
+                assertEquals(String.format("CygnusPersistenceError. Could not create StringEntity (data=%s, charSet=%s, rootCause=%s). ", errorData, charSet, rootCause), e.getMessage());
+                try {
+                    verify(mockHttpClient, times(0)).execute(requestCaptor.capture());
+                } catch (Exception ex) {
+                    fail(ex.getMessage());
+                } // try-catch
+            } catch (Exception e) {
+                fail(e.getMessage());
+            } // try-catch
+        } // testBulkInsert_oneData
+    } // InvalidCharsetTest
 } // ElasticsearchBackendImplTest
