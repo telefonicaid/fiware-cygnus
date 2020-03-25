@@ -135,7 +135,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
             aggregator.setDbName(buildDbName(aggregator.getService()));
-            aggregator.setTableName(buildCollectionName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
+            aggregator.setCollectionName(buildCollectionName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
             aggregator.initialize(events.get(0));
 
             for (NGSIEvent event : events) {
