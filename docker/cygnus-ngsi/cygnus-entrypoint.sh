@@ -949,6 +949,9 @@ elif [ "$CYGNUS_ELASTICSEARCH_HOST" != "" ]; then
     if [ "$CYGNUS_ELASTICSEARCH_CACHE_FLASH_INTERVAL_SEC" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.cache_flash_interval_sec/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.cache_flash_interval_sec = '${CYGNUS_ELASTICSEARCH_CACHE_FLASH_INTERVAL_SEC} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+    if [ "$CYGNUS_ELASTICSEARCH_CHARSET" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.charset/c '${CYGNUS_AGENT_NAME}'.sinks.elasticsearch-sink.charset = '${CYGNUS_ELASTICSEARCH_CHARSET} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
 
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then

@@ -9,3 +9,4 @@
 [cygnus-ngsi][NGSISink]Handle generic exception to manage all scenarios when persisting batch (#1844)
 [cygnus-common][PostgreSQL, MySQL] Refactor code to use a SQL generic backend for all SQL-based sinks (#1806)
 [cygnus-common][PostgreSQL, MySQL] Lazy singleton to share pool connections of SQL backends among instances on JVM (#1806)
+[cygnus-ngsi][Elasticsearch] Fix a bug that non-Latin characters such as Japanese are garbled. (#1839)

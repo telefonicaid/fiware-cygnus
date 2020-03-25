@@ -10,4 +10,4 @@ This is a convenience backend class for Elasticsearch that implements the `Elast
 
 `ElasticsearchBackendImpl` uses the REST API of Elasticsearch in order to persist the context data, so `ElasticsearchBackend` extends the `HttpBackend`.
 
-Nothing special is done in this class with regards to the encoding, because Cygnus generally works with UTF-8 character set and Elasticsearch can accepts the UTF-8.
+The `charset` parameter is used to encode attribute values when sending them to Elasticsearch through its REST API. "UTF-8" is used to encode attribute values when a valid `charset` parameter is not given.
