@@ -619,7 +619,7 @@ public class NGSIElasticsearchSink extends NGSISink {
                 String attrMetadata = contextAttribute.getContextMetadata();
 
                 // check if the attribute value is based on white spaces
-                if (NGSIElasticsearchSink.this.ignoreWhiteSpaces && attrValue.trim().length() == 0) {
+                if (NGSIElasticsearchSink.this.ignoreWhiteSpaces && attrValue != null && attrValue.trim().length() == 0) {
                     continue;
                 } // if
 
@@ -691,7 +691,7 @@ public class NGSIElasticsearchSink extends NGSISink {
                 String attrValue = contextAttribute.getContextValue(false);
 
                 // check if the attribute value is based on white spaces
-                if (NGSIElasticsearchSink.this.ignoreWhiteSpaces && attrValue.trim().length() == 0) {
+                if (NGSIElasticsearchSink.this.ignoreWhiteSpaces && attrValue != null && attrValue.trim().length() == 0) {
                     continue;
                 } // if
 

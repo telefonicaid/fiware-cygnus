@@ -1223,20 +1223,9 @@ public class NGSIMySQLSinkTest {
         return contextElement;
     } // createContextElement
 
-    @Test
-    public void testNativeTypeColumnBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
-        String attr_native_types = "true"; // default
-        NGSIMySQLSink ngsiMySQLSink = new NGSIMySQLSink();
-        ngsiMySQLSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
-        // Create a NGSIEvent
-        String timestamp = "1461136795801";
-        String correlatorId = "123456789";
-        String transactionId = "123456789";
-        String originalService = "someService";
-        String originalServicePath = "somePath";
-        String mappedService = "newService";
-        String mappedServicePath = "newPath";
-        String destination = "someDestination";
+
+
+    public NGSIBatch setUpBatch(String timestamp, String correlatorId, String transactionId, String originalService, String originalServicePath, String mappedService, String mappedServicePath, String destination) {
         Map<String, String> headers = new HashMap<>();
         headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
         headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
@@ -1252,6 +1241,17 @@ public class NGSIMySQLSinkTest {
         NGSIBatch batch = new NGSIBatch();
         batch.addEvent(destination, ngsiEvent);
         batch.addEvent(destination, ngsiEvent2);
+        return batch;
+    }
+
+    @Test
+    public void testNativeTypeColumnBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        String attr_native_types = "true"; // default
+        NGSIMySQLSink ngsiMySQLSink = new NGSIMySQLSink();
+        ngsiMySQLSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        // Create a NGSIEvent
+        NGSIBatch batch = setUpBatch("1461136795801", "123456789", "123456789", "someService", "somePath", "newService", "newPath", "someDestination");
+        String destination = "someDestination";
         try {
             batch.startIterator();
             while (batch.hasNext()) {
@@ -1294,29 +1294,8 @@ public class NGSIMySQLSinkTest {
         NGSIMySQLSink ngsiMySQLSink = new NGSIMySQLSink();
         ngsiMySQLSink.configure(createContextforNativeTypes("row", null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
         // Create a NGSIEvent
-        String timestamp = "1461136795801";
-        String correlatorId = "123456789";
-        String transactionId = "123456789";
-        String originalService = "someService";
-        String originalServicePath = "somePath";
-        String mappedService = "newService";
-        String mappedServicePath = "newPath";
+        NGSIBatch batch = setUpBatch("1461136795801", "123456789", "123456789", "someService", "somePath", "newService", "newPath", "someDestination");
         String destination = "someDestination";
-        Map<String, String> headers = new HashMap<>();
-        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
-        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
-        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
-        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
-        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
-        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
-        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
-        NotifyContextRequest.ContextElement contextElement2 = createContextElement();
-        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
-        NGSIEvent ngsiEvent2 = new NGSIEvent(headers, contextElement2.toString().getBytes(), contextElement2, null);
-        NGSIBatch batch = new NGSIBatch();
-        batch.addEvent(destination, ngsiEvent);
-        batch.addEvent(destination, ngsiEvent2);
         try {
             batch.startIterator();
             while (batch.hasNext()) {

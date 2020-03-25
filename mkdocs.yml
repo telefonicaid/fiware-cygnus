@@ -42,11 +42,10 @@ pages:
           - 'Http backend': 'cygnus-common/backends_catalogue/http_backend.md'
           - 'Kafka backend': 'cygnus-common/backends_catalogue/kafka_backend.md'
           - 'MongoDB backend': 'cygnus-common/backends_catalogue/mongodb_backend.md'
-          - 'MySQL backend': 'cygnus-common/backends_catalogue/mysql_backend.md'
           - 'Orion backend': 'cygnus-common/backends_catalogue/orion_backend.md'
-          - 'PostgreSQL backend': 'cygnus-common/backends_catalogue/postgresql_backend.md'
           - 'CartoDB backend': 'cygnus-common/backends_catalogue/cartodb_backend.md'
           - 'Elasticsearch backend': 'cygnus-common/backends_catalogue/elasticsearch_backend.md'
+          - 'SQL backend': 'cygnus-common/backends_catalogue/sql_backend.md'
   - 'cygnus-ngsi agent':
       - 'Quick Start Guide': 'cygnus-ngsi/quick_start_guide.md'
       - 'Installation and Administration Guide':
