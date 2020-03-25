@@ -77,6 +77,7 @@ public class NGSIElasticsearchSink extends NGSISink {
     private String timezone;
     private boolean castValue;
     private int cacheFlashIntervalSec;
+    private String charSet;
     private ElasticsearchBackend persistenceBackend;
 
     private ScheduledExecutorService scheduler;
@@ -227,6 +228,14 @@ public class NGSIElasticsearchSink extends NGSISink {
     } // getCacheFlashIntervalSec
 
     /**
+     * Gets the CharSet. It is protected due to it is only required for testing purposes.
+     * @return The charSet
+     */
+    protected String getCharSet() {
+        return this.charSet;
+    } // getCharSet
+
+    /**
      * Gets the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
@@ -357,6 +366,9 @@ public class NGSIElasticsearchSink extends NGSISink {
         this.cacheFlashIntervalSec = context.getInteger("cache_flash_interval_sec", 0);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (cache_flash_interval_sec="
                 + this.cacheFlashIntervalSec + ")");
+
+        this.charSet = context.getString("charset", "UTF-8");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (charset=" + this.charSet + ")");
     } // configure
 
     /**
@@ -371,7 +383,7 @@ public class NGSIElasticsearchSink extends NGSISink {
     public void start() {
         try {
             this.persistenceBackend = new ElasticsearchBackendImpl(this.elasticsearchHost, this.elasticsearchPort,
-                this.ssl, this.backendMaxConns, this.backendMaxConnsPerRoute);
+                this.ssl, this.backendMaxConns, this.backendMaxConnsPerRoute, this.charSet);
             String endpoint = this.ssl ? "https://" : "http://" + this.elasticsearchHost + ":" + this.elasticsearchPort;
             LOGGER.debug("[" + this.getName() + "] Elasticsearch persistence backend created (endpoint=" + endpoint + ")");
         } catch (Exception e) {
