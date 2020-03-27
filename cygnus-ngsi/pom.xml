@@ -16,6 +16,12 @@
     </properties>
 
     <dependencies>
+        <!-- Development dependency, should be removed before a production deployment -->
+   		<dependency>
+   			<groupId>es.santander.smartcity</groupId>
+   			<artifactId>ArcgisRestUtils</artifactId>
+   			<version>0.0.1-SNAPSHOT</version>
+   		</dependency>
         <!-- Required for testing -->
         <dependency>
             <groupId>org.mockito</groupId>

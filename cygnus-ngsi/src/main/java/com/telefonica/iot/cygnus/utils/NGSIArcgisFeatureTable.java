@@ -19,45 +19,28 @@ package com.telefonica.iot.cygnus.utils;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
-import es.santander.smartcity.arcgisutils.Arcgis;
-import es.santander.smartcity.arcgisutils.exception.ArcGisException;
+import es.santander.smartcity.ArcgisRestUtils.ArcgisFeatureTable;
 
 /**
  * 
  * @author PMO Santander Smart City – Ayuntamiento de Santander
  *
  */
-public class ArcgisLog extends Arcgis {
+public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
 
     private static CygnusLogger cygnusLogger;
 
     /**
      * 
-     * @param url
-     * @param user
+     * @param featureServiceUrl
+     * @param username
      * @param password
+     * @param getTokenUrl
+     * @param b
      */
-    private ArcgisLog(String url, String user, String password)throws ArcGisException  {
-        super(url, user, password);
-        logDebug("init ArcgisLog");
-    }
-
-    /**
-     * 
-     * @param cygnusLogger
-     * @param url
-     * @param user
-     * @param password
-     * @return
-     */
-    public static ArcgisLog getInstance(CygnusLogger cygnusLogger, String url,
-            String user, String password)throws ArcGisException  {
-        cygnusLogger.debug("init cygnusLog");
-        ArcgisLog.cygnusLogger = cygnusLogger;
-        cygnusLogger.debug("inited cygnusLog");
-        cygnusLogger.debug("init ArcgisLog(url --> " + url + ", user --> " + user + ", password --> XXXXX)");
-        return new ArcgisLog(url, user, password);
-    }
+    public NGSIArcgisFeatureTable(String featureServiceUrl, String username, String password, String getTokenUrl) {
+		super(featureServiceUrl, username, password, getTokenUrl, false);
+	}
 
     /*
      * (non-Javadoc)

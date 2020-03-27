@@ -14,13 +14,13 @@ import org.json.simple.parser.ParseException;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
-import es.santander.smartcity.arcgisutils.Entity;
+import es.santander.smartcity.model.Feature;
 
 /**
  * @author joelcamus
  *
  */
-public class EntityArcGisUtils {
+public class FeatureArcGisUtils {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(PropertyUtils.class);
     
@@ -29,18 +29,18 @@ public class EntityArcGisUtils {
      * @param bodyJSON
      * @return
      */
-    public List<Entity> createEntities(JSONArray jsonArray, String service, String servicePath) {
-        LOGGER.debug("init createEntities(jsonArray --> " + jsonArray + ")");
-        List<Entity> listEntity = new ArrayList<Entity>();
+    public List<Feature> createFeatures(JSONArray jsonArray, String service, String servicePath) {
+        LOGGER.debug("init createFeatures(jsonArray --> " + jsonArray + ")");
+        List<Feature> featureList = new ArrayList<Feature>();
 
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject jsonObject = (JSONObject) jsonArray.get(i);
-            listEntity.add(createEntity(jsonObject, service, servicePath));
+            featureList.add(createFeature(jsonObject, service, servicePath));
         } // for
-        LOGGER.debug("listEntity--> " + listEntity);
-        return listEntity;
+        LOGGER.debug("listFeature--> " + featureList);
+        return featureList;
 
-    } // createEntities
+    } // createFeatures
 
     /**
      * Create Automatic entity.
@@ -48,7 +48,7 @@ public class EntityArcGisUtils {
      * @param jsonObject
      * @return
      */
-    public Entity createEntity(JSONObject jsonObject, String service, String servicePath) {
+    public Feature createFeature(JSONObject jsonObject, String service, String servicePath) {
         try {
             double latitude = 0, longitude = 0;
             Map<String, Object> attributes = new HashMap<String, Object>();
@@ -59,9 +59,9 @@ public class EntityArcGisUtils {
                     if (key.equals("id")) {
                         attributes.put(key, jsonObject.get(key).toString());
                     } else {
-                        attributes.put(key + "Entity", jsonObject.get(key).toString());
+                        attributes.put(key + "Feature", jsonObject.get(key).toString());
                     }
-                    // Get a coordenates of json
+                    // Get a coordinates of json
                 } else if (key.equals("location")) {
                     JSONObject jsonObjectV1 = JsonUtils.parseJsonString(jsonObject.get(key).toString());
                     String[] a = JsonUtils.parseJsonString(jsonObjectV1.get("value").toString()).get("coordinates")
@@ -84,8 +84,8 @@ public class EntityArcGisUtils {
                     }
                 }
             } // for
-              // create entity with latitud an longitud
-            Entity e = Entity.createPointEntity(latitude, longitude);
+              // create entity with latitude an longitude
+            Feature e = Feature.createPointFeature(latitude, longitude);
             // add other attributes
             attributes.put("service", service);
             attributes.put("servicePath", servicePath);
@@ -97,7 +97,7 @@ public class EntityArcGisUtils {
             return null;
         } // try catch
 
-    } // createEntity
+    } // createFeature
 
     /**
      * Get attribute.

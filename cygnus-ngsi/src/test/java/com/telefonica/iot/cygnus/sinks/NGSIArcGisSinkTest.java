@@ -31,8 +31,8 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.ArcgisLog;
-import com.telefonica.iot.cygnus.utils.EntityArcGisUtils;
+import com.telefonica.iot.cygnus.utils.NGSIArcgisFeatureTable;
+import com.telefonica.iot.cygnus.utils.FeatureArcGisUtils;
 import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 
 import es.santander.smartcity.arcgisutils.Entity;
@@ -45,13 +45,13 @@ import es.santander.smartcity.arcgisutils.Entity;
 public class NGSIArcGisSinkTest {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIArcGisSinkTest.class);
-    private NGSIArcGisSink sink;
+    private NGSIArcgisFeatureTableSink sink;
 
     @Mock
-    private ArcgisLog mockArcgisLog;
+    private NGSIArcgisFeatureTable mockArcgisLog;
     
     @Mock
-    private EntityArcGisUtils mockEntityArcGisUtils;
+    private FeatureArcGisUtils mockEntityArcGisUtils;
 
     /**
      * Constructor.
