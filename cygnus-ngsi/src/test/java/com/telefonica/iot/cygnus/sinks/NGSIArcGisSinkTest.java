@@ -20,7 +20,10 @@ package com.telefonica.iot.cygnus.sinks;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import static org.junit.Assert.assertTrue;
 
-import org.json.simple.JSONArray;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.flume.Context;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.Before;
@@ -30,12 +33,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.NGSIArcgisFeatureTable;
 import com.telefonica.iot.cygnus.utils.FeatureArcGisUtils;
+import com.telefonica.iot.cygnus.utils.NGSIArcgisFeatureTable;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 
-import es.santander.smartcity.arcgisutils.Entity;
+import es.santander.smartcity.model.Feature;
 
 /**
  *
@@ -65,17 +70,10 @@ public class NGSIArcGisSinkTest {
      */
     @Before
     public void setup() throws Exception {
-        Mockito.doNothing().when(mockArcgisLog).add(Mockito.anyList());
-        Mockito.doNothing().when(mockArcgisLog).addToBatch(Mockito.any(Entity.class));
+        Mockito.doNothing().when(mockArcgisLog).addToBatch(Mockito.any(Feature.class));
         Mockito.doNothing().when(mockArcgisLog).addToBatch(Mockito.anyList());
-        Mockito.when(mockArcgisLog.canAdd()).thenReturn(true);
-        Mockito.when(mockArcgisLog.commitEntities()).thenReturn(true);
-        Mockito.when(mockArcgisLog.isLoaded()).thenReturn(true);
+        Mockito.when(mockArcgisLog.connected()).thenReturn(true);
         
-        //EntityArcGisUtilsMock
-        Mockito.when(mockEntityArcGisUtils.createEntities(Mockito.any(JSONArray.class), Mockito.anyString(), Mockito.anyString())).thenReturn(null);
-        Mockito.when(mockEntityArcGisUtils.createEntity(Mockito.any(JSONObject.class), Mockito.anyString(), Mockito.anyString())).thenReturn(null);
-
     } // setup
 
     /**
@@ -94,24 +92,34 @@ public class NGSIArcGisSinkTest {
                     + " \"speed\": { \"type\":\"Float\", \"value\": 98 } }";
             String serviceFiware = "service";
             String servicePathFiware = "/test";
+            
+            Map<String, String> headers = new HashMap<String, String>();
+            headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, serviceFiware);
+            headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, servicePathFiware);
 
             String url = "XXXXXX";
             String username = "XXXXXX";
             String password = "XXXXXX";
 
-            sink = new NGSIArcGisSink();
-
-            sink.configure(NGSIUtilsForTests.createContextForArcGis(url, username, password));
+            sink = new NGSIArcgisFeatureTableSink();
+            
+            Context context = NGSIUtilsForTests.createContextForArcGis(url, username, password);
+            sink.configure(context);
 
             JSONParser jsonParser = new JSONParser();
             JSONObject json = (JSONObject) jsonParser.parse(bodyJSON);
-            sink.setEntityArcGisUtils(mockEntityArcGisUtils);
-            NGSIArcGisSink.ArcGISDomain arcGisDomain = sink.new ArcGISDomain(serviceFiware, servicePathFiware, json);
-
-            sink.setArcgisUtils(mockArcgisLog);
-
+            
+            NGSIArcgisFeatureTableSink.ArcgisAggregatorDomain arcGisDomain = null;
+            String serviceUrl = "127.0.0.1/services";
+            
+            NGSIArcgisFeatureTableSink.NGSIArcgisAggregator aggregator = sink.new NGSIArcgisAggregator(serviceUrl,false);
+            NGSIEvent event = null;
+            //TODO generar evento para el test
+//            event = new NGSIEvent(headers, bodyJSON.getBytes(), context, context);
+            
+            aggregator.aggregate(event);
             try {
-                sink.insertFeature(arcGisDomain);
+                sink.persistAggregation(aggregator);
                 assertTrue(true);
                 LOGGER.debug(getTestTraceHead("[NGSIArcGisSink.insertFeeature]") + "-  OKs");
             } catch (AssertionError e) {

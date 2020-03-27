@@ -29,9 +29,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.flume.Context;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -46,12 +44,12 @@ import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.utils.NGSIArcgisFeatureTable;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 
 import es.santander.smartcity.ArcgisRestUtils.ArcgisFeatureTable;
 import es.santander.smartcity.model.Feature;
 import es.santander.smartcity.model.Point;
-import groovy.json.JsonException;
 
 /**
  *
@@ -76,7 +74,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     private String password;
     private int maxBatchSize;
 //    private boolean rowAttrPersistence;
-    private static volatile Map<String,ArcgisFeatureTable> arcgisPersistenceBackend;
+    private static volatile Map<String,NGSIArcgisFeatureTable> arcgisPersistenceBackend;
 //    private boolean attrNativeTypes;
 //    private boolean attrMetadataStore;
 
@@ -134,12 +132,11 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     	if (arcgisPersistenceBackend.containsKey(featureServiceUrl)){
             return arcgisPersistenceBackend.get(featureServiceUrl);
     	}else{
-    		ArcgisFeatureTable newTable = new ArcgisFeatureTable(
+    		NGSIArcgisFeatureTable newTable = new NGSIArcgisFeatureTable(
     				featureServiceUrl, 
     				getUsername(), 
     				getPassword(),
-    				getGetTokenUrl(), 
-    				false);
+    				getGetTokenUrl());
     		arcgisPersistenceBackend.put(featureServiceUrl, newTable);
     		return newTable;
     	}
@@ -149,7 +146,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
      * @param persistenceBackend
      */
-    protected void setPersistenceBackend(String featureServiceUrl,ArcgisFeatureTable persistenceBackend) {
+    protected void setPersistenceBackend(String featureServiceUrl,NGSIArcgisFeatureTable persistenceBackend) {
         arcgisPersistenceBackend.put(featureServiceUrl, persistenceBackend);
     } // setPersistenceBackend
 
@@ -198,7 +195,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     public void stop() {
         super.stop();
         if (arcgisPersistenceBackend != null) {
-        	for (Map.Entry<String, ArcgisFeatureTable> backend : arcgisPersistenceBackend.entrySet()) {
+        	for (Map.Entry<String, NGSIArcgisFeatureTable> backend : arcgisPersistenceBackend.entrySet()) {
         		backend.getValue().flushBatch();
 			}
         }
@@ -209,7 +206,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
      */
     private static synchronized void createPersistenceBackend() {
         if (arcgisPersistenceBackend == null) {
-            arcgisPersistenceBackend = new HashMap<String, ArcgisFeatureTable>();
+            arcgisPersistenceBackend = new HashMap<String, NGSIArcgisFeatureTable>();
         }
     }
 
@@ -274,7 +271,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     } // expirateRecords
     
     
-    private void persistAggregation(NGSIArcgisAggregator aggregator)
+    public void persistAggregation(NGSIArcgisAggregator aggregator)
         throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
     	List<ArcgisAggregatorDomain> aggregationList = aggregator.getListArcgisAggregatorDomain();
         LOGGER.debug("[" + this.getName() + "] persisting aggregation, " + aggregator.getListArcgisAggregatorDomain().size() + " features.");
@@ -544,7 +541,7 @@ private String unquote(String string) {
  * @author PMO Santander Smart City – Ayuntamiento de Santander
  *
  */
-private class ArcgisAggregatorDomain {
+public class ArcgisAggregatorDomain {
 
     // string containing the data aggregation
     private Feature feature;
