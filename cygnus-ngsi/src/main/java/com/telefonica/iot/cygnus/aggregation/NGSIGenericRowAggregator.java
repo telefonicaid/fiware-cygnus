@@ -28,6 +28,7 @@ import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 
 /**
@@ -77,6 +78,18 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
             String attrType = contextAttribute.getType();
             JsonElement attrValue = contextAttribute.getValue();
             String attrMetadata = contextAttribute.getContextMetadata();
+            if (isEnableRecvTimeDateFormat()) {
+                if (isAttrMetadataStore()) {
+                    Long timeInstant = CommonUtils.getTimeInstant(attrMetadata);
+                    if (timeInstant != null) {
+                        recvTime = String.valueOf(new Date(timeInstant));
+                    } else {
+                        recvTime = String.valueOf(new Date(recvTimeTs));
+                    }
+                } else {
+                    recvTime = String.valueOf(new Date(recvTimeTs));
+                }
+            }
             LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                     + attrType + ")");
             // aggregate the attribute information
