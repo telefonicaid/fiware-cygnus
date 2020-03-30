@@ -11,3 +11,4 @@
 [cygnus-common][PostgreSQL, MySQL] Lazy singleton to share pool connections of SQL backends among instances on JVM (#1806)
 [cygnus-ngsi][Elasticsearch] Fix a bug that non-Latin characters such as Japanese are garbled. (#1839)
 [cygnus-ngsi][MongoSink]Fix on mongo collection name asignation. (#1845)
+[cygnus-ngsi][MongoSink]Fix on mongo recvTime Date format.

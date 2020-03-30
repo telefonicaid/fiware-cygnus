@@ -46,10 +46,7 @@ import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class NGSIMongoSinkTest {
 
@@ -216,6 +213,8 @@ public class NGSIMongoSinkTest {
                 aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setDbName(ngsiMongoSink.buildDbName(aggregator.getService()));
+                aggregator.setEnableRecvTimeDateFormat(true);
+                aggregator.setAttrMetadataStore(true);
                 aggregator.setCollectionName(ngsiMongoSink.buildCollectionName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
@@ -229,7 +228,13 @@ public class NGSIMongoSinkTest {
             for (JsonObject jsonObject : jsonObjects) {
                 documents.add(Document.parse(jsonObject.toString()));
             }
-            System.out.println(documents);
+            System.out.println("[NGSIMongoSinkTest.testNativeTypeColumnBatch: " + documents);
+            String correctBatch = "[Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", someNumber=2, someNumber_md=[], somneBoolean=true, somneBoolean_md=[], someDate=2016-09-21T01:23:00.00Z, someDate_md=[], someGeoJson={\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}, someGeoJson_md=[], someJson={\"String\": \"string\"}, someJson_md=[], someString=foo, someString_md=[], someString2=, someString2_md=[]}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", someName1=-3.7167, 40.3833, someName1_md=[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}], someName2=someValue2, someName2_md=[]}}]";
+            if (documents.toString().equals(correctBatch)) {
+                assertTrue(true);
+            } else {
+                assertFalse(true);
+            }
         } catch (Exception e) {
             System.out.println(e);
             assertFalse(true);
@@ -254,6 +259,7 @@ public class NGSIMongoSinkTest {
                 aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setDbName(ngsiMongoSink.buildDbName(aggregator.getService()));
+                aggregator.setEnableRecvTimeDateFormat(true);
                 aggregator.setCollectionName(ngsiMongoSink.buildCollectionName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
@@ -266,7 +272,13 @@ public class NGSIMongoSinkTest {
                 for (JsonObject jsonObject : jsonObjects) {
                     documents.add(Document.parse(jsonObject.toString()));
                 }
-                System.out.println(documents);
+                System.out.println("[NGSIMongoSinkTest.testNativeTypeRowBatch: " + documents);
+                String correctBatch = "[Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someNumber, attrType=number, attrValue=2}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=somneBoolean, attrType=Boolean, attrValue=true}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someDate, attrType=DateTime, attrValue=2016-09-21T01:23:00.00Z}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someGeoJson, attrType=geo:json, attrValue={\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someJson, attrType=json, attrValue={\"String\": \"string\"}}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someString, attrType=string, attrValue=foo}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someString2, attrType=string, attrValue=}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someName1, attrType=someType1, attrValue=-3.7167, 40.3833}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someName2, attrType=someType2, attrValue=someValue2}}]";
+                if (documents.toString().equals(correctBatch)) {
+                    assertTrue(true);
+                } else {
+                    assertFalse(true);
+                }
             }
         } catch (Exception e) {
             System.out.println(e);
