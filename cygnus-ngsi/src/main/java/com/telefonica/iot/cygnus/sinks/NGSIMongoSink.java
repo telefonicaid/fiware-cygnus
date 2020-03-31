@@ -171,18 +171,22 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             case DMBYSERVICEPATH:
                 if (rowAttrPersistence) {
                     keysToCrop.add(NGSIConstants.RECV_TIME_TS);
+                    keysToCrop.add(NGSIConstants.RECV_TIME);
                     keysToCrop.add(NGSIConstants.FIWARE_SERVICE_PATH);
                 } else {
+                    keysToCrop.add(NGSIConstants.RECV_TIME);
                     keysToCrop.add(NGSIConstants.FIWARE_SERVICE_PATH);
                 }
                 break;
             case DMBYENTITY:
                 if (rowAttrPersistence) {
                     keysToCrop.add(NGSIConstants.RECV_TIME_TS);
+                    keysToCrop.add(NGSIConstants.RECV_TIME);
                     keysToCrop.add(NGSIConstants.FIWARE_SERVICE_PATH);
                     keysToCrop.add(NGSIConstants.ENTITY_ID);
                     keysToCrop.add(NGSIConstants.ENTITY_TYPE);
                 } else {
+                    keysToCrop.add(NGSIConstants.RECV_TIME);
                     keysToCrop.add(NGSIConstants.FIWARE_SERVICE_PATH);
                     keysToCrop.add(NGSIConstants.ENTITY_ID);
                     keysToCrop.add(NGSIConstants.ENTITY_TYPE);
@@ -190,6 +194,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                 break;
             case DMBYATTRIBUTE:
                 if (rowAttrPersistence) {
+                    keysToCrop.add(NGSIConstants.RECV_TIME);
                     keysToCrop.add(NGSIConstants.RECV_TIME_TS);
                     keysToCrop.add(NGSIConstants.FIWARE_SERVICE_PATH);
                     keysToCrop.add(NGSIConstants.ENTITY_ID);
@@ -207,10 +212,23 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         LinkedHashMap<String, ArrayList<JsonElement>> cropedAggregation = NGSIUtils.cropLinkedHashMap(aggregator.getAggregationToPersist(), keysToCrop);
         ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonList(cropedAggregation);
         ArrayList<Document> aggregation = new ArrayList<>();
-        for (JsonObject jsonObject : jsonObjects) {
-            aggregation.add(Document.parse(jsonObject.toString()));
+        for (int i = 0 ; i < jsonObjects.size() ; i++) {
+            aggregation.add(Document.parse(jsonObjects.get(i).toString()));
+            if (rowAttrPersistence) {
+                if (Boolean.parseBoolean(attrMetadataStore)) {
+                    Long timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                    if (timeInstant != null) {
+                        aggregation.get(i).append(NGSIConstants.RECV_TIME, timeInstant);
+                    } else {
+                        aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(Long.parseLong(aggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS).get(i).getAsString())));
+                    }
+                } else {
+                    aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(Long.parseLong(aggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS).get(i).getAsString())));
+                }
+            } else {
+                aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(Long.parseLong(aggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS + "C").get(i).getAsString())));
+            }
         }
-        
         if (aggregation.isEmpty()) {
             return;
         } // if
