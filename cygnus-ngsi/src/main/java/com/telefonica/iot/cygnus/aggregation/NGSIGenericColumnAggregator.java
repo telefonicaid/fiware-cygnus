@@ -21,7 +21,6 @@ package com.telefonica.iot.cygnus.aggregation;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
@@ -31,7 +30,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedHashMap;
 
 /**
@@ -76,9 +74,6 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         // Get the event headers
         long recvTimeTs = event.getRecvTimeTs();
         String recvTime = CommonUtils.getHumanReadable(recvTimeTs, isEnableUTCRecvTime());
-        if (isEnableRecvTimeDateFormat()) {
-            recvTime = String.valueOf(new Date(recvTimeTs));
-        }
         // get the event body
         NotifyContextRequest.ContextElement contextElement = event.getContextElement();
         String entityId = contextElement.getId();

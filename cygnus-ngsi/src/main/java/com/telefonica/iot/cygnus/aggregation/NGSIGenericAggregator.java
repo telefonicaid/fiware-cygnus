@@ -19,10 +19,7 @@
 package com.telefonica.iot.cygnus.aggregation;
 
 import com.google.gson.JsonElement;
-import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
-import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 
 import java.util.*;
@@ -65,7 +62,6 @@ public abstract class NGSIGenericAggregator {
     private boolean enableGeoParse;
     private boolean attrMetadataStore;
     private boolean enableUTCRecvTime;
-    private boolean enableRecvTimeDateFormat;
 
     /**
      * Gets aggregation.
@@ -212,24 +208,6 @@ public abstract class NGSIGenericAggregator {
     public void setHdfsFile(String hdfsFile) {
         this.hdfsFile = hdfsFile;
     } //setHdfsFile
-
-    /**
-     * Gets enableRecvTimeDateFormat boolean. This is used to set if the column RECT_TIME showld have simple Date format
-     *
-     * @return the boolean
-     */
-    public boolean isEnableRecvTimeDateFormat() {
-        return enableRecvTimeDateFormat;
-    }
-
-    /**
-     * Sets enableRecvTimeDateFormat boolean. This is used to set if the column RECT_TIME showld have simple Date format
-     *
-     * @param enableRecvTimeDateFormat boolean
-     */
-    public void setEnableRecvTimeDateFormat(boolean enableRecvTimeDateFormat) {
-        this.enableRecvTimeDateFormat = enableRecvTimeDateFormat;
-    }
 
     /**
      * Sets md aggregations.
