@@ -23,10 +23,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.flume.Context;
 import org.json.JSONException;
@@ -83,15 +83,15 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
      */
     public NGSIArcgisFeatureTableSink() {
         super();
-    } // NGSIMySQLSink
+    } // NGSIArcgisFeatureTableSink
     
     /**
-     * Gets the MySQL host. It is protected due to it is only required for testing purposes.
-     * @return The MySQL host
+     * Gets the Argis services url. It is protected due to it is only required for testing purposes.
+     * @return The services url
      */
     protected String getrAcgisServicesUrl() {
         return arcgisServicesUrl;
-    } // getMySQLHost
+    } // getrAcgisServicesUrl
     /**
      * Gets getToken service url
      * @return
@@ -109,20 +109,20 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 	}
 
 	/**
-     * Gets the MySQL username. It is protected due to it is only required for testing purposes.
-     * @return The MySQL username
+     * Gets the  username. It is protected due to it is only required for testing purposes.
+     * @return The username
      */
     protected String getUsername() {
         return userName;
-    } // getMySQLUsername
+    } // getUsername
     
     /**
-     * Gets the MySQL password. It is protected due to it is only required for testing purposes.
-     * @return The MySQL password
+     * Gets the password. It is protected due to it is only required for testing purposes.
+     * @return The password
      */
     protected String getPassword() {
         return password;
-    } // getMySQLPassword
+    } // getPassword
     
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
@@ -133,8 +133,8 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
             return arcgisPersistenceBackend.get(featureServiceUrl);
     	}else{
     		NGSIArcgisFeatureTable newTable = new NGSIArcgisFeatureTable(
-    				featureServiceUrl, 
-    				getUsername(), 
+    				featureServiceUrl,
+    				getUsername(),
     				getPassword(),
     				getGetTokenUrl());
     		arcgisPersistenceBackend.put(featureServiceUrl, newTable);
@@ -161,7 +161,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
        
         userName = context.getString("arcgis_username", DEFAULT_USER_NAME);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (arcgis_username=" + userName + ")");
-        // FIXME: mysqlPassword should be read encrypted and decoded here
+        // FIXME: Password should be read encrypted and decoded here
         password = context.getString("arcgis_password", DEFAULT_PASSWORD);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (arcgis_password=" + password + ")");
         
@@ -174,7 +174,6 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
         	LOGGER.debug("[" + this.getName() + "] Reading configuration (arcgis_maxBatchSize=" + maxBatchSize + ")");
         }
         
-
         super.configure(context);
     } // configure
 
@@ -182,9 +181,9 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     public void start() {
         try {
             createPersistenceBackend();
-            LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
+            LOGGER.debug("[" + this.getName() + "] Arcgis persistence backend created");
         } catch (Exception e) {
-            LOGGER.error("Error while creating the MySQL persistence backend. Details="
+            LOGGER.error("Error while creating the Arcgis persistence backend. Details="
                     + e.getMessage());
         } // try catch
         
@@ -198,6 +197,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
         	for (Map.Entry<String, NGSIArcgisFeatureTable> backend : arcgisPersistenceBackend.entrySet()) {
         		backend.getValue().flushBatch();
 			}
+        	arcgisPersistenceBackend.clear();
         }
     } // stop
 
@@ -206,7 +206,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
      */
     private static synchronized void createPersistenceBackend() {
         if (arcgisPersistenceBackend == null) {
-            arcgisPersistenceBackend = new HashMap<String, NGSIArcgisFeatureTable>();
+            arcgisPersistenceBackend = new ConcurrentHashMap<String, NGSIArcgisFeatureTable>();
         }
     }
 
@@ -217,39 +217,44 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
         } // if
- 
-        // Iterate on the destinations
-        batch.startIterator();
         
-        while (batch.hasNext()) {
-            String destination = batch.getNextDestination();
-            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the "
-                    + destination + " destination");
-
-            // Get the events within the current sub-batch
-            ArrayList<NGSIEvent> events = batch.getNextEvents();
-            
-            // Get an aggregator for this destination and initialize it
-            NGSIArcgisAggregator aggregator = new NGSIArcgisAggregator(getrAcgisServicesUrl(),enableNameMappings);
-//            aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
-//            aggregator.setServicePathForData(events.get(0).getServicePathForData());
-//            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
-//            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
-//            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
-//            aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
-//            aggregator.setDbName(buildDbName(aggregator.getService()));
-//            aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
-//            aggregator.setAttrNativeTypes(attrNativeTypes);
-//            aggregator.setAttrMetadataStore(false);
-            aggregator.initialize(events.get(0));
-            for (NGSIEvent event : events) {
-                aggregator.aggregate(event);
-            } // for
-            
-            // Persist the aggregation
-            persistAggregation(aggregator);
-            batch.setNextPersisted(true);
-        } // for
+        try{
+	        // Iterate on the destinations
+	        batch.startIterator();
+	        
+	        while (batch.hasNext()) {
+	            String destination = batch.getNextDestination();
+	            LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the "
+	                    + destination + " destination");
+	
+	            // Get the events within the current sub-batch
+	            ArrayList<NGSIEvent> events = batch.getNextEvents();
+	            
+	            // Get an aggregator for this destination and initialize it
+	            NGSIArcgisAggregator aggregator = new NGSIArcgisAggregator(getrAcgisServicesUrl(),enableNameMappings);
+	//            aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
+	//            aggregator.setServicePathForData(events.get(0).getServicePathForData());
+	//            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
+	//            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
+	//            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
+	//            aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
+	//            aggregator.setDbName(buildDbName(aggregator.getService()));
+	//            aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
+	//            aggregator.setAttrNativeTypes(attrNativeTypes);
+	//            aggregator.setAttrMetadataStore(false);
+	            aggregator.initialize(events.get(0));
+	            for (NGSIEvent event : events) {
+	                aggregator.aggregate(event);
+	            } // for
+	            
+	            // Persist the aggregation
+	            persistAggregation(aggregator);
+	            batch.setNextPersisted(true);
+	        } // while
+        } catch (Exception e){
+        	LOGGER.error("[" + this.getName() + "] Error persisting batch, " + e.getMessage());
+        	throw new CygnusRuntimeError(e.getMessage());
+        }
     } // persistBatch
     
     @Override
@@ -273,17 +278,25 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     
     public void persistAggregation(NGSIArcgisAggregator aggregator)
         throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
-    	List<ArcgisAggregatorDomain> aggregationList = aggregator.getListArcgisAggregatorDomain();
-        LOGGER.debug("[" + this.getName() + "] persisting aggregation, " + aggregator.getListArcgisAggregatorDomain().size() + " features.");
-    	for ( ArcgisAggregatorDomain aggregation : aggregationList) {
-    		String featureTableUrl = aggregation.getFeatureTableUrl();
-    		boolean isNewFeatureTable = !arcgisPersistenceBackend.containsKey(featureTableUrl);
-    		
-			ArcgisFeatureTable featureTable = arcgisPersistenceBackend.get(featureTableUrl); // ¿?¿?¿? uniqueField
-			if (isNewFeatureTable) featureTable.setUniqueField(aggregation.getUniqueField());
-			
-			featureTable.addToBatch(aggregation.getFeature());
-		}
+    	try {
+	    	List<ArcgisAggregatorDomain> aggregationList = aggregator.getListArcgisAggregatorDomain();
+	        LOGGER.debug("[" + this.getName() + "] persisting aggregation, " + aggregator.getListArcgisAggregatorDomain().size() + " features.");
+	    	for ( ArcgisAggregatorDomain aggregation : aggregationList) {
+	    		String featureTableUrl = aggregation.getFeatureTableUrl();
+	    		
+	    		boolean isNewFeatureTable = !arcgisPersistenceBackend.containsKey(featureTableUrl);
+				ArcgisFeatureTable featureTable = getPersistenceBackend(featureTableUrl); // ¿?¿?¿? uniqueField
+				if (isNewFeatureTable) {
+					LOGGER.debug("[" + this.getName() + "] Created new backend for " + featureTableUrl + " with uniqueField: " + aggregation.getUniqueField());
+					featureTable.setUniqueField(aggregation.getUniqueField());
+				}
+				
+				featureTable.addToBatch(aggregation.getFeature());
+			}
+    	} catch (Exception e){
+        	LOGGER.error("[" + this.getName() + "] Error persisting batch, " + e.getMessage());
+        	throw new CygnusRuntimeError(e.getMessage());
+    	}
     } // persistAggregation
 
 
@@ -326,57 +339,64 @@ public class NGSIArcgisAggregator {
     /**
      * 
      * @param event
+     * @throws CygnusRuntimeError 
      */
-    public void aggregate(NGSIEvent event) {
+    public void aggregate(NGSIEvent event) throws CygnusRuntimeError {
         LOGGER.debug("[NGSIArcgisAggregator] aggregate - ContextElement ->" + event.getContextElement());
         LOGGER.debug("[NGSIArcgisAggregator] aggregate -  MappedCE ->" + event.getMappedCE());
         LOGGER.debug("[NGSIArcgisAggregator] aggregate - OriginalCE ->" + event.getOriginalCE());
-        LOGGER.debug("[NGSIArcgisAggregator] aggregate - enableNameMappings state -> " + enableNameMappings);
-        
-        ArcgisAggregatorDomain aggregation = new ArcgisAggregatorDomain();
-        Feature feature = aggregation.getFeature();
-        String service = "";
-        String subService = "";
-        String featureTableUrl = "";
-        
+        LOGGER.debug("[NGSIArcgisAggregator] aggregate - enableNameMappings status -> " + enableNameMappings);
 
-        // get the contextElement
         ContextElement contextElement = null;
-        if (!enableNameMappings) {
-            contextElement = event.getContextElement();
-        } else {
-            contextElement = event.getMappedCE();
-        }
+        try{
+	        LOGGER.debug("[NGSIArcgisAggregator] aggregate - creating new aggregation object.");
+	        ArcgisAggregatorDomain aggregation = new ArcgisAggregatorDomain(LOGGER);
+	        LOGGER.debug("[NGSIArcgisAggregator] aggregate - aggregation created");
+	        Feature feature = aggregation.getFeature();
+	        LOGGER.debug("[NGSIArcgisAggregator] aggregate - Feature getted");
+	        String service = "";
+	        String subService = "";
+	        String featureTableUrl = "";
+	        
+	        LOGGER.debug("[NGSIArcgisAggregator] aggregate - Selecting context");
+	        // get the contextElement
+	        if (!enableNameMappings) {
+	        	LOGGER.debug("[NGSIArcgisAggregator] aggregate - no mappings");
+	            contextElement = event.getContextElement();
+	        } else {
+	        	LOGGER.debug("[NGSIArcgisAggregator] aggregate - mappings");
+	            contextElement = event.getMappedCE();
+	        }
+	
+	        LOGGER.debug("[NGSIArcgisAggregator] aggregate - Selected context ->" + contextElement);
+	        
+	        // get the getRecvTimeTs headers
+	        Map<String, String> headers = event.getHeaders();
+	
+	
+	        for (Entry<String, String> entry : headers.entrySet()) {
+	            LOGGER.debug("Header entry key --> " + entry.getKey().toString() + ", value --> "
+	                    + entry.getValue().toString());
+	            if (entry.getKey() != null
+	                    && NGSIConstants.FLUME_HEADER_MAPPED_SERVICE.equals(entry.getKey().toString())) {
+	                service = entry.getValue().toString();
+	            } else if (entry.getKey() != null
+	                    && NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH.equals(entry.getKey().toString())) {
+	                subService = entry.getValue().toString();
+	            }
+	        } // for
+	
+	        featureTableUrl = argisServiceUrl + "/" + service + "/" + subService;
+	        featureTableUrl = featureTableUrl.replaceAll("//","/");
+	        aggregation.setFeatureTableUrl(featureTableUrl);
+	       
+		        
+	        LOGGER.debug("[NGSIArcgisAggregator] aggregate - featureTableUrl ->" + featureTableUrl);
+	        
+	        // iterate on all this context element attributes, if there are
+	        // attributes
+	        ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
 
-        LOGGER.debug("[NGSIArcgisAggregator] aggregate - Selected context ->" + contextElement);
-        
-        // get the getRecvTimeTs headers
-        Map<String, String> headers = event.getHeaders();
-
-
-        for (Entry<String, String> entry : headers.entrySet()) {
-            LOGGER.debug("Header entry key --> " + entry.getKey().toString() + ", value --> "
-                    + entry.getValue().toString());
-            if (entry.getKey() != null
-                    && NGSIConstants.FLUME_HEADER_MAPPED_SERVICE.equals(entry.getKey().toString())) {
-                service = entry.getValue().toString();
-            } else if (entry.getKey() != null
-                    && NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH.equals(entry.getKey().toString())) {
-                subService = entry.getValue().toString();
-            }
-        } // for
-
-        featureTableUrl = argisServiceUrl + "/" + service + "/" + subService;
-        featureTableUrl = featureTableUrl.replaceAll("//","/");
-        aggregation.setFeatureTableUrl(featureTableUrl);
-        
-        LOGGER.debug("[NGSIArcgisAggregator] aggregate - featureTableUrl ->" + featureTableUrl);
-        
-        // iterate on all this context element attributes, if there are
-        // attributes
-        ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
-
-        try {
 
             String entityId = contextElement.getId();
             String entityType = contextElement.getType();
@@ -389,10 +409,14 @@ public class NGSIArcgisAggregator {
 
             aggregation.setFeature(feature);
             listArcgisAggregatorDomain.add(aggregation);
-            
+	        
         } catch (JSONException e) {
             LOGGER.error("[NGSIArcgisAggregator] aggregate - Error pharsing JSON BODY " + contextElement.toString());
-        } 
+            throw new CygnusRuntimeError(e.getMessage());
+        } catch (Exception e){
+            LOGGER.error("[NGSIArcgisAggregator] aggregate - Unexpected Error" + e.getMessage() +"\n contextElement: " + contextElement.toString());
+            throw new CygnusRuntimeError(e.getMessage());
+        }
         
     } // aggregate
     /**
@@ -542,7 +566,8 @@ private String unquote(String string) {
  *
  */
 public class ArcgisAggregatorDomain {
-
+	private CygnusLogger LOGGER = null;
+	
     // string containing the data aggregation
     private Feature feature;
 
@@ -554,10 +579,21 @@ public class ArcgisAggregatorDomain {
   /**
      * 
      */
-    ArcgisAggregatorDomain() {
-        feature = Feature.createPointFeature(0, 0);
+    ArcgisAggregatorDomain(CygnusLogger logger) throws CygnusRuntimeError {
+    	
+    	LOGGER = logger;
+    	LOGGER.debug("[ArcgisAggregatorDomain] - constructor init.");
+        try{
+        	feature = Feature.createPointFeature(0, 0);
+        }catch(Throwable e){
+        	LOGGER.error ("ArcgisAggregatorDomain - Unexpected error " 
+        			+ e.getClass().getName()
+        			+ " - " + e.getMessage());
+        	throw new CygnusRuntimeError(e.getMessage());
+        }
         featureTableUrl = "";
         uniqueField = "";
+    	LOGGER.debug("[ArcgisAggregatorDomain] - constructor end");
     } // ArcgisAggregatorDomain
 
     /**
@@ -567,12 +603,12 @@ public class ArcgisAggregatorDomain {
      * @param subService
      * @param entityJSON
      */
-    ArcgisAggregatorDomain(String featureTableUrl, String uniqueField, Feature feature) {
-        super();
-        this.feature = feature;
-        this.featureTableUrl = featureTableUrl;
-        this.uniqueField = uniqueField;
-    }
+//    ArcgisAggregatorDomain(String featureTableUrl, String uniqueField, Feature feature) {
+//        super();
+//        this.feature = feature;
+//        this.featureTableUrl = featureTableUrl;
+//        this.uniqueField = uniqueField;
+//    }
 
 	/**
 	 * @return the feature
@@ -618,4 +654,4 @@ public class ArcgisAggregatorDomain {
 
 }
 
-} // NGSIMySQLSink
+} // NGSIArcgisFeatureTableSink
