@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.derby.agg.Aggregator;
 import org.apache.flume.Context;
 
 /**
@@ -65,7 +66,6 @@ public class NGSICKANSink extends NGSISink {
     private int backendMaxConnsPerRoute;
     private String ckanViewer;
     private CKANBackend persistenceBackend;
-    private String entityId;
 
     /*entityId
      * Constructor.
@@ -157,22 +157,6 @@ public class NGSICKANSink extends NGSISink {
     protected String getCKANViewer() {
         return ckanViewer;
     } // getCKANViewer
-
-    /**
-     * Gets the entityId
-     * @return
-     */
-    public String getEntityId() {
-        return entityId;
-    }
-
-    /**
-     * Set the entityId
-     * @param entityId
-     */
-    public void setEntityId(String entityId) {
-        this.entityId = entityId;
-    }
 
     @Override
     public void configure(Context context) {
@@ -269,6 +253,7 @@ public class NGSICKANSink extends NGSISink {
 
             // Get an aggregator for this entity and initialize it based on the first event
             NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
+            aggregator.setEntityId(events.get(0).getContextElement().getId());
             aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
             aggregator.setServicePathForData(events.get(0).getServicePathForData());
             aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
@@ -277,10 +262,9 @@ public class NGSICKANSink extends NGSISink {
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
             aggregator.setEnableUTCRecvTime(true);
             aggregator.setOrgName(buildOrgName(service));
-            aggregator.setPkgName(buildPkgName(service, aggregator.getServicePathForNaming()));
-            aggregator.setResName(buildResName(aggregator.getEntityForNaming()));
+            aggregator.setPkgName(buildPkgName(service, aggregator.getServicePathForNaming(), events.get(0).getContextElement().getId()));
+            aggregator.setResName(buildResName(aggregator.getEntityForNaming(), events.get(0).getContextElement().getId()));
             aggregator.initialize(events.get(0));
-            aggregator.setEntityId(events.get(0).getContextElement().getId());
 
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
@@ -315,8 +299,8 @@ public class NGSICKANSink extends NGSISink {
             String entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
             try {
                 String orgName = buildOrgName(service);
-                String pkgName = buildPkgName(service, servicePathForNaming);
-                String resName = buildResName(entityForNaming);
+                String pkgName = buildPkgName(service, servicePathForNaming, events.get(0).getContextElement().getId());
+                String resName = buildResName(entityForNaming, events.get(0).getContextElement().getId());
                 LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",orgName="
                         + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
                 persistenceBackend.capRecords(orgName, pkgName, resName, maxRecords);
@@ -362,7 +346,7 @@ public class NGSICKANSink extends NGSISink {
                 aggregation += "," + jsonObject;
             }
         }
-        entityId=aggregator.getEntityId();
+        //entityId=aggregator.getEntityId();
         String orgName = aggregator.getOrgName(enableLowercase);
         String pkgName = aggregator.getPkgName(enableLowercase);
         String resName = aggregator.getResName(enableLowercase);
@@ -429,12 +413,12 @@ public class NGSICKANSink extends NGSISink {
      * @return Package name
      * @throws CygnusBadConfiguration
      */
-    public String buildPkgName(String fiwareService, String fiwareServicePath) throws CygnusBadConfiguration {
+    public String buildPkgName(String fiwareService, String fiwareServicePath, String entityId) throws CygnusBadConfiguration {
         String pkgName;
         
         switch(dataModel) {
             case DMBYENTITYID:
-                pkgName=getEntityId();
+                pkgName=entityId;
                 break;
             default:
                 if (enableEncoding) {
@@ -468,11 +452,11 @@ public class NGSICKANSink extends NGSISink {
      * @return Resource name
      * @throws CygnusBadConfiguration
      */
-    public String buildResName(String entity) throws CygnusBadConfiguration {
+    public String buildResName(String entity, String entityId) throws CygnusBadConfiguration {
         String resName;
         switch(dataModel) {
             case DMBYENTITYID:
-                resName=getEntityId();
+            	resName=entityId;
                 break;
         default:
             if (enableEncoding) {

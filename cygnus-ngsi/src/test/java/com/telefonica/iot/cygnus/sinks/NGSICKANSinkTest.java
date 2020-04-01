@@ -617,6 +617,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -625,7 +626,7 @@ public class NGSICKANSinkTest {
         String servicePath = "/someServicePath";
         
         try {
-            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String builtPkgName = sink.buildPkgName(service, servicePath, entityId);
             String expectedPkgName = "someservice_someservicepath";
         
             try {
@@ -673,6 +674,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -681,7 +683,7 @@ public class NGSICKANSinkTest {
         String servicePath = "/someServicePath";
         
         try {
-            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String builtPkgName = sink.buildPkgName(service, servicePath, entityId);
             String expectedPkgName = "somex0053ervicexffffx002fsomex0053ervicex0050ath";
         
             try {
@@ -729,6 +731,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -737,7 +740,7 @@ public class NGSICKANSinkTest {
         String servicePath = "/";
         
         try {
-            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String builtPkgName = sink.buildPkgName(service, servicePath, entityId);
             String expectedPkgName = "someservice";
         
             try {
@@ -785,6 +788,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -793,7 +797,7 @@ public class NGSICKANSinkTest {
         String servicePath = "/";
         
         try {
-            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String builtPkgName = sink.buildPkgName(service, servicePath, entityId);
             String expectedPkgName = "somex0053ervicexffffx002f";
         
             try {
@@ -839,6 +843,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -846,7 +851,7 @@ public class NGSICKANSinkTest {
         String entity = "someId=someType";
         
         try {
-            String builtResName = sink.buildResName(entity);
+            String builtResName = sink.buildResName(entity, entityId);
             String expecetedResName = "someid_sometype";
         
             try {
@@ -891,6 +896,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -898,7 +904,7 @@ public class NGSICKANSinkTest {
         String entity = "someId=someType";
         
         try {
-            String builtResName = sink.buildResName(entity);
+            String builtResName = sink.buildResName(entity, entityId);
             String expecetedResName = "somex0049dxffffsomex0054ype";
         
             try {
@@ -983,6 +989,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -993,7 +1000,7 @@ public class NGSICKANSinkTest {
                 + "ooooooooogServicePath";
         
         try {
-            sink.buildPkgName(service, servicePath);
+            sink.buildPkgName(service, servicePath, entityId);
             System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
                     + "- FAIL - A package name length greater than 100 characters has not been detected");
             assertTrue(false);
@@ -1027,6 +1034,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -1035,7 +1043,7 @@ public class NGSICKANSinkTest {
                 + "ooooogEntity";
         
         try {
-            sink.buildResName(entity);
+            sink.buildResName(entity, entityId);
             System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
                     + "- FAIL - A resource name length greater than 100 characters has not been detected");
             assertTrue(false);
@@ -1234,8 +1242,8 @@ public class NGSICKANSinkTest {
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setEnableUTCRecvTime(true);
                 aggregator.setOrgName(ngsickanSink.buildOrgName(aggregator.getService()));
-                aggregator.setPkgName(ngsickanSink.buildPkgName(aggregator.getService(), aggregator.getServicePathForNaming()));
-                aggregator.setResName(ngsickanSink.buildResName(aggregator.getEntityForNaming()));
+                aggregator.setPkgName(ngsickanSink.buildPkgName(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityId()));
+                aggregator.setResName(ngsickanSink.buildResName(aggregator.getEntityForNaming(), aggregator.getEntityId()));
                 aggregator.initialize(events.get(0));
                 aggregator.setAttrMetadataStore(true);
                 for (NGSIEvent event : events) {
@@ -1286,7 +1294,6 @@ public class NGSICKANSinkTest {
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
                 viewer));
-        sink.setEntityId(entityId);
         sink.dataModel=DataModel.DMBYENTITYID;
         
         String subService = "someSubService";
@@ -1342,10 +1349,9 @@ public class NGSICKANSinkTest {
         sink.dataModel=DataModel.DMBYENTITYID;
         String service = "someService";
         String servicePath = "/someServicePath";
-        sink.setEntityId(entityId);
         
         try {
-            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String builtPkgName = sink.buildPkgName(service, servicePath, entityId);
             String expectedPkgName = "entityId";
         
             try {
@@ -1395,10 +1401,9 @@ public class NGSICKANSinkTest {
         sink.dataModel=DataModel.DMBYENTITYID;
         String service = "someService";
         String servicePath = "/someServicePath";
-        sink.setEntityId(entityId);
         
         try {
-            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String builtPkgName = sink.buildPkgName(service, servicePath, entityId);
             String expectedPkgName = "entityId";
         
             try {
@@ -1423,6 +1428,7 @@ public class NGSICKANSinkTest {
         ngsickanSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
         NGSIBatch batch = prepaireBatch();
         String destination = "someDestination";
+        String entityId = "";
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
@@ -1437,8 +1443,8 @@ public class NGSICKANSinkTest {
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setEnableUTCRecvTime(true);
                 aggregator.setOrgName(ngsickanSink.buildOrgName(aggregator.getService()));
-                aggregator.setPkgName(ngsickanSink.buildPkgName(aggregator.getService(), aggregator.getServicePathForNaming()));
-                aggregator.setResName(ngsickanSink.buildResName(aggregator.getEntityForNaming()));
+                aggregator.setPkgName(ngsickanSink.buildPkgName(aggregator.getService(), aggregator.getServicePathForNaming(), entityId));
+                aggregator.setResName(ngsickanSink.buildResName(aggregator.getEntityForNaming(), entityId));
                 aggregator.initialize(events.get(0));
                 aggregator.setAttrMetadataStore(true);
                 for (NGSIEvent event : events) {
