@@ -146,6 +146,8 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 	    				getPassword(),
 	    				getGetTokenUrl(),
 	    				LOGGER);
+	    		newTable.setBatchAction(ArcgisFeatureTable.ADD_ACTION);
+	    		//TODO uniqueField????
 
 	    		if (newTable.hasError()){
 	    			throw new CygnusRuntimeError("[" + this.getName() + "Error creating Persistence backend: " 
@@ -412,7 +414,7 @@ public class NGSIArcgisAggregator {
 	        } // for
 	
 	        featureTableUrl = argisServiceUrl + "/" + service + "/" + subService;
-	        featureTableUrl = featureTableUrl.replaceAll("//","/");
+	        featureTableUrl = featureTableUrl.replaceAll("([^:])\\/\\/","$1/");
 	        aggregation.setFeatureTableUrl(featureTableUrl);
 	       
 		        
