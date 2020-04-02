@@ -47,7 +47,6 @@ public abstract class NGSIGenericAggregator {
     private String servicePathForNaming;
     private String entityForNaming;
     private String entityType;
-    private String entityId;
     private String attribute;
     private String dbName;
     private String tableName;
@@ -392,24 +391,6 @@ public abstract class NGSIGenericAggregator {
     public void setEntityType(String entityType) {
         this.entityType = entityType;
     } //setEntityType
-
-    /**
-     * Gets the entityId
-     * 
-     * @return the entity id
-     */
-    public String getEntityId() {
-        return entityId;
-    }
-
-    /**
-     * Set the entityId
-     * 
-     * @param entityId
-     */
-	public void setEntityId(String entityId) {
-		this.entityId = entityId;
-	}
 
 	/**
      * Gets attribute.

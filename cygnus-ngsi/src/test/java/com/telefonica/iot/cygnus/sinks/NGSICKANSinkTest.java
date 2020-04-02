@@ -1228,6 +1228,7 @@ public class NGSICKANSinkTest {
         ngsickanSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
         NGSIBatch batch = prepaireBatch();
         String destination = "someDestination";
+        String entityId = ""; //default
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
@@ -1242,8 +1243,8 @@ public class NGSICKANSinkTest {
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setEnableUTCRecvTime(true);
                 aggregator.setOrgName(ngsickanSink.buildOrgName(aggregator.getService()));
-                aggregator.setPkgName(ngsickanSink.buildPkgName(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityId()));
-                aggregator.setResName(ngsickanSink.buildResName(aggregator.getEntityForNaming(), aggregator.getEntityId()));
+                aggregator.setPkgName(ngsickanSink.buildPkgName(aggregator.getService(), aggregator.getServicePathForNaming(), entityId));
+                aggregator.setResName(ngsickanSink.buildResName(aggregator.getEntityForNaming(), entityId));
                 aggregator.initialize(events.get(0));
                 aggregator.setAttrMetadataStore(true);
                 for (NGSIEvent event : events) {

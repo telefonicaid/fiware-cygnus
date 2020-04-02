@@ -325,7 +325,7 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 | enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
 | enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
-| data\_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. ||
+| data\_model | no | dm-by-entity | dm-by-entity-id | <i>dm-by-entity</i>, even if not configured. ||
 | attr\_persistence | no | row | <i>row</i> or <i>column.</i>|
 | ckan\_host | no | localhost | FQDN/IP address where the CKAN server runs. ||
 | ckan\_port | no | 80 ||

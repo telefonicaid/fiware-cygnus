@@ -253,7 +253,6 @@ public class NGSICKANSink extends NGSISink {
 
             // Get an aggregator for this entity and initialize it based on the first event
             NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
-            aggregator.setEntityId(events.get(0).getContextElement().getId());
             aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
             aggregator.setServicePathForData(events.get(0).getServicePathForData());
             aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
@@ -346,7 +345,6 @@ public class NGSICKANSink extends NGSISink {
                 aggregation += "," + jsonObject;
             }
         }
-        //entityId=aggregator.getEntityId();
         String orgName = aggregator.getOrgName(enableLowercase);
         String pkgName = aggregator.getPkgName(enableLowercase);
         String resName = aggregator.getResName(enableLowercase);
