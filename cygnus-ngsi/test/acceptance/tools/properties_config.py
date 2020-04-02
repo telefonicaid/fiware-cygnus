@@ -162,6 +162,8 @@ class Properties:
                                  port=world.config['mongo']['mongo_port'],
                                  user=world.config['mongo']['mongo_user'],
                                  password=world.config['mongo']['mongo_password'],
+                                 auth_source=world.config['mongo']['auth_source'],
+                                 replicaset=world.config['mongo']['replicaset'],
                                  database=world.config['mongo']['mongo_database'],
                                  retries=world.config['mongo']['mongo_retries_search'],
                                  retry_delay=world.config['mongo']['mongo_delay_to_retry']
@@ -174,6 +176,8 @@ class Properties:
                                  user=world.config['sth']['sth_user'],
                                  password=world.config['sth']['sth_password'],
                                  database=world.config['sth']['sth_database'],
+                                 auth_source=world.config['mongo']['auth_source'],
+                                 replicaset=world.config['mongo']['replicaset'],
                                  retries=world.config['sth']['sth_retries_search'],
                                  retry_delay=world.config['sth']['sth_delay_to_retry']
             )

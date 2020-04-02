@@ -33,6 +33,8 @@ PORT           = u'port'
 PORT_DEFAULT   = u'27017'
 USER           = u'user'
 PASSWORD       = u'password'
+AUTH_SOURCE    = u'auth_source'
+REPLICASET    = u'replicaset'
 DATABASE       = u'database'
 DATABASE_VALUE = u'test_mongo'
 COLLECTION     = u'collection'
@@ -66,6 +68,8 @@ class Mongo:
         self.port            = kwarg.get(PORT, PORT_DEFAULT)
         self.user            = kwarg.get(USER, EMPTY)
         self.password        = kwarg.get(PASSWORD, EMPTY)
+        self.auth_source     = kwarg.get(AUTH_SOURCE, EMPTY)
+        self.replicaset      = kwarg.get(REPLICASET, EMPTY)
         self.version         = kwarg.get(VERSION, EMPTY)
         self.verify_version  = kwarg.get(VERIFY_VERSION, EMPTY)
         self.database_name   = kwarg.get(DATABASE, DATABASE_VALUE)

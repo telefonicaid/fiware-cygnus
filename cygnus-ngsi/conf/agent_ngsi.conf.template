@@ -289,6 +289,10 @@ cygnus-ngsi.sinks.mongo-sink.channel = mongo-channel
 #cygnus-ngsi.sinks.mongo-sink.mongo_username = mongo_username
 # password for the user above (or empty if authentication is not enabled in MongoDB)
 #cygnus-ngsi.sinks.mongo-sink.mongo_password = xxxxxxxx
+# replicaset name if needed
+#cygnus-ngsi.sinks.mongo-sink.mongo_replicaset =
+# authSource for the mongoDB if needed
+#cygnus-ngsi.sinks.mongo-sink.mongo_auth_source =
 # prefix for the MongoDB databases
 #cygnus-ngsi.sinks.mongo-sink.db_prefix = sth_
 # prefix for the MongoDB collections
@@ -336,6 +340,10 @@ cygnus-ngsi.sinks.sth-sink.channel = sth-channel
 #cygnus-ngsi.sinks.sth-sink.mongo_username = mongo_username
 # password for the user above (or empty if authentication is not enabled in MongoDB)
 #cygnus-ngsi.sinks.sth-sink.mongo_password = xxxxxxxx
+# replicaset name if needed
+#cygnus-ngsi.sinks.mongo-sink.mongo_replicaset =
+# authSource for the mongoDB if needed
+#cygnus-ngsi.sinks.mongo-sink.mongo_auth_source =
 # prefix for the MongoDB databases
 #cygnus-ngsi.sinks.sth-sink.db_prefix = sth_
 # prefix for the MongoDB collections

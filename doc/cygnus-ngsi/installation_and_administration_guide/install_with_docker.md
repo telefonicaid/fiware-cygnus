@@ -202,6 +202,8 @@ As seen above, the default configuration distributed with the image is tied to c
     * The endpoint for Mongo and STH, containing host and port, is `iot-mongo:27017` but can be changed through the CYGNUS_MONGO_HOSTS environment variable.
     * The user for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
     * The pass for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_PASS environment variable.
+    * The replicaset name for Mongo can be changed through the CYGNUS_MONGO_REPLICASET environment variable.
+    * The auth source name for Mongo can be changed through the CYGNUS_MONGO_AUTH_SOURCE environment variable.
     * CYGNUS_MONGO_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_MONGO_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_MONGO_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.

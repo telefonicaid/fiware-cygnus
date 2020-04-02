@@ -37,6 +37,8 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     protected String mongoHosts;
     protected String mongoUsername;
     protected String mongoPassword;
+    protected String mongoAuthSource;
+    protected String mongoReplicaset;
     protected String dbPrefix;
     protected String collectionPrefix;
     protected MongoBackendImpl backend;
@@ -50,6 +52,22 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     protected String getMongoHosts() {
         return mongoHosts;
     } // getMongoHosts
+
+    /**
+     * Gets the mongo replicaset. It is protected since it is used by the tests.
+     * @return
+     */
+    protected String getMongoReplicaset() {
+        return mongoReplicaset;
+    } // getMongoReplicaset
+
+    /**
+     * Gets the mongo auth source. It is protected since it is used by the tests.
+     * @return
+     */
+    protected String getMongoAuthSource() {
+        return mongoAuthSource;
+    } // getMongoAuthSource
 
     /**
      * Gets the mongo username. It is protected since it is used by the tests.
@@ -98,11 +116,11 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     protected MongoBackendImpl getBackend() {
         return backend;
     } // getBackend
-    
+
     @Override
     public void configure(Context context) {
         super.configure(context);
-        
+
         mongoHosts = context.getString("mongo_hosts", "localhost:27017");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_hosts=" + mongoHosts + ")");
         mongoUsername = context.getString("mongo_username", "");
@@ -110,21 +128,25 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
         // FIXME: mongoPassword should be read as a SHA1 and decoded here
         mongoPassword = context.getString("mongo_password", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_password=" + mongoPassword + ")");
-        
+        mongoAuthSource = context.getString("mongo_auth_source", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_auth_source=" + mongoAuthSource + ")");
+        mongoReplicaset = context.getString("mongo_replicaset", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_replicaset=" + mongoReplicaset + ")");
+
         if (enableEncoding) {
             dbPrefix = NGSICharsets.encodeMongoDBDatabase(context.getString("db_prefix", "sth_"));
         } else {
             dbPrefix = NGSIUtils.encodeSTHDB(context.getString("db_prefix", "sth_"));
         } // if else
-        
+
         LOGGER.debug("[" + this.getName() + "] Reading configuration (db_prefix=" + dbPrefix + ")");
-        
+
         if (enableEncoding) {
             collectionPrefix = NGSICharsets.encodeMongoDBCollection(context.getString("collection_prefix", "sth_"));
         } else {
             collectionPrefix = NGSIUtils.encodeSTHCollection(context.getString("collection_prefix", "sth_"));
         } // if else
-        
+
         if (collectionPrefix.equals("system.")) {
             invalidConfiguration = true;
             LOGGER.warn("[" + this.getName() + "] Invalid configuration (collection_prefix="
@@ -135,9 +157,9 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
 
         dataExpiration = context.getLong("data_expiration", 0L);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (data_expiration=" + dataExpiration + ")");
-        
+
         String ignoreWhiteSpacesStr = context.getString("ignore_white_spaces", "true");
-        
+
         if (ignoreWhiteSpacesStr.equals("true") || ignoreWhiteSpacesStr.equals("false")) {
             ignoreWhiteSpaces = Boolean.valueOf(ignoreWhiteSpacesStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (ignore_white_spaces="
@@ -152,7 +174,8 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     @Override
     public void start() {
         try {
-            backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword, dataModel);
+            backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword, mongoAuthSource, mongoReplicaset,
+                    dataModel);
             LOGGER.debug("[" + this.getName() + "] MongoDB persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the MongoDB persistence backend. Details="
@@ -170,7 +193,7 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
      */
     protected String buildDbName(String fiwareService) throws CygnusBadConfiguration {
         String dbName;
-        
+
         if (enableEncoding) {
             dbName = dbPrefix + NGSICharsets.encodeMongoDBDatabase(fiwareService);
         } else {

@@ -330,6 +330,8 @@ A configuration example could be:
     cygnus-ngsi.sinks.sth-sink.mongo_hosts = 192.168.80.34:27017
     cygnus-ngsi.sinks.sth-sink.mongo_username = myuser
     cygnus-ngsi.sinks.sth-sink.mongo_password = mypassword
+    cygnus-ngsi.sinks.mongo-sink.mongo_auth_source = admin
+    cygnus-ngsi.sinks.mongo-sink.replicaset = replica
     cygnus-ngsi.sinks.sth-sink.db_prefix = cygnus_
     cygnus-ngsi.sinks.sth-sink.collection_prefix = cygnus_
     cygnus-ngsi.sinks.sth-sink.resolutions = month,day

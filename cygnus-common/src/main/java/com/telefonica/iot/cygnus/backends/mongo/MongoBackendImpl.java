@@ -56,6 +56,8 @@ public class MongoBackendImpl implements MongoBackend {
     private final String mongoHosts;
     private final String mongoUsername;
     private final String mongoPassword;
+    private final String authSource;
+    private final String replicaSet;
     private final DataModel dataModel;
     private static final CygnusLogger LOGGER = new CygnusLogger(MongoBackendImpl.class);
 
@@ -66,12 +68,14 @@ public class MongoBackendImpl implements MongoBackend {
      * @param mongoPassword
      * @param dataModel
      */
-    public MongoBackendImpl(String mongoHosts, String mongoUsername, String mongoPassword,
-            DataModel dataModel) {
+    public MongoBackendImpl(String mongoHosts, String mongoUsername, String mongoPassword, String authSource,
+            String replicaSet, DataModel dataModel) {
         client = null;
         this.mongoHosts = mongoHosts;
         this.mongoUsername = mongoUsername;
         this.mongoPassword = mongoPassword;
+        this.authSource = authSource;
+        this.replicaSet = replicaSet;
         this.dataModel = dataModel;
     } // MongoBackendImpl
 
@@ -213,7 +217,7 @@ public class MongoBackendImpl implements MongoBackend {
         MongoCollection collection = db.getCollection(collectionName);
         collection.insertMany(aggregation);
     } // insertContextDataRaw
-    
+
     @Override
     public void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs, String entityId,
             String entityType, String attrName, String attrType, double max, double min, double sum, double sum2,
@@ -249,7 +253,7 @@ public class MongoBackendImpl implements MongoBackend {
                     attrName, attrType, max, min, sum, sum2, numSamples, Resolution.MONTH);
         } // if
     } // insertContextDataAggregated
-    
+
     @Override
     public void insertContextDataAggregated(String dbName, String collectionName, long recvTimeTs, String entityId,
             String entityType, String attrName, String attrType, HashMap<String, Integer> counts,
@@ -285,7 +289,7 @@ public class MongoBackendImpl implements MongoBackend {
                     attrName, attrType, counts, Resolution.MONTH);
         } // if
     } // insertContextDataAggregated
-    
+
     private void insertContextDataAggregatedForResoultion(String dbName, String collectionName,
             GregorianCalendar calendar, String entityId, String entityType, String attrName, String attrType,
             double max, double min, double sum, double sum2, int numSamples, Resolution resolution) {
@@ -311,7 +315,7 @@ public class MongoBackendImpl implements MongoBackend {
                 + query.toString() + ", update=" + update.toString());
         collection.updateOne(query, update);
     } // insertContextDataAggregated
-    
+
     private void insertContextDataAggregatedForResoultion(String dbName, String collectionName,
             GregorianCalendar calendar, String entityId, String entityType, String attrName, String attrType,
             HashMap<String, Integer> counts, Resolution resolution) {
@@ -391,7 +395,7 @@ public class MongoBackendImpl implements MongoBackend {
      * @param attrType
      * @param resolution
      * @param isANumber
-     * @return 
+     * @return
      */
     protected BasicDBObject buildInsertForPrepopulate(String attrType, Resolution resolution, boolean isANumber) {
         BasicDBObject update = new BasicDBObject();
@@ -399,7 +403,7 @@ public class MongoBackendImpl implements MongoBackend {
                 .append("points", buildPrepopulatedPoints(resolution, isANumber)));
         return update;
     } // buildInsertForPrepopulate
-    
+
     /**
      * Builds the points part for the Json used to prepopulate.
      * @param resolution
@@ -450,7 +454,7 @@ public class MongoBackendImpl implements MongoBackend {
 
         return prepopulatedData;
     } // buildPrepopulatedPoints
-    
+
     protected BasicDBObject buildUpdateForUpdate(String attrType, GregorianCalendar calendar,
             double max, double min, double sum, double sum2, int numSamples) {
         BasicDBObject update = new BasicDBObject();
@@ -479,6 +483,7 @@ public class MongoBackendImpl implements MongoBackend {
      * @return
      */
     private MongoDatabase getDatabase(String dbName) {
+
         // create a ServerAddress object for each configured URI
         List<ServerAddress> servers = new ArrayList<>();
         String[] uris = mongoHosts.split(",");
@@ -492,9 +497,15 @@ public class MongoBackendImpl implements MongoBackend {
 
         if (client == null) {
             if (mongoUsername.length() != 0) {
-                MongoCredential credential = MongoCredential.createCredential(mongoUsername, dbName,
-                        mongoPassword.toCharArray());
-                client = new MongoClient(servers, Arrays.asList(credential));
+                MongoCredential credential = MongoCredential.createCredential(mongoUsername,
+                        authSource.length() != 0 ? authSource:dbName, mongoPassword.toCharArray());
+                if (this.replicaSet.length() != 0) {
+                    MongoClientOptions options = MongoClientOptions.builder().requiredReplicaSetName(this.replicaSet).build();
+                    client = new MongoClient(servers, Arrays.asList(credential),options);
+                } else {
+                    client = new MongoClient(servers, Arrays.asList(credential));
+                }
+
             } else {
                 client = new MongoClient(servers);
             } // if else
@@ -570,7 +581,7 @@ public class MongoBackendImpl implements MongoBackend {
      * Given a calendar and a resolution, gets the offset. It is protected for testing purposes.
      * @param calendar
      * @param resolution
-     * @return 
+     * @return
      */
     protected int getOffset(GregorianCalendar calendar, Resolution resolution) {
         int offset;

@@ -42,6 +42,8 @@ HOST                   = u'host'
 HOST_PORT              = u'host_port'
 LOCALHOST              = u'localhost'
 DATA_MODEL             = u'data_model'
+AUTH_SOURCE            = u'auth_source'
+REPLICASET             = u'replicaset'
 DB_PREFIX              = u'db_prefix'
 COLLECTION_PREFIX      = u'collection prefix'
 USER                   = u'user'
@@ -283,6 +285,8 @@ class Agent:
         :param port: the port where the MySQL server listes for incomming connections
         :param user: a valid user in the MySQL server
         :param password:  password for the user above
+        :param replicaset: replicaset name if needed
+        :param auth_source: where the user is defined
         :param persistence:  how the attributes are stored, either per row either per column (row, column)
         """
         mongo_sink                 = kwargs.get(SINK, "mongo-sink")
@@ -290,6 +294,8 @@ class Agent:
         mongo_host_port            = kwargs.get(HOST_PORT, "localhost:227017")
         mongo_user                 = kwargs.get(USER, EMPTY)
         mongo_password             = kwargs.get(PASSWORD, EMPTY)
+        mongo_auth_source          = kwargs.get(AUTH_SOURCE, EMPTY)
+        mongo_replicaset           = kwargs.get(REPLICASET, EMPTY)
         mongo_data_model           = kwargs.get(DATA_MODEL, "collection-per-entity")
         db_prefix                  = kwargs.get(DB_PREFIX, "sth_")
         collection_prefix          = kwargs.get(COLLECTION_PREFIX, "sth_")
@@ -301,6 +307,8 @@ class Agent:
         self.__append_command('sed -i "s/%s.mongo_hosts = .*/%s.mongo_hosts = %s/" %s/%s ' % (mongo_sink,mongo_sink, mongo_host_port, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.mongo_username = .*/%s.mongo_username = %s/" %s/%s ' % (mongo_sink,mongo_sink, mongo_user, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.mongo_password = .*/%s.mongo_password = %s/" %s/%s ' % (mongo_sink,mongo_sink, mongo_password, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.mongo_auth_source = .*/%s.mongo_auth_source = %s/" %s/%s ' % (mongo_sink,mongo_sink, mongo_auth_source, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.mongo_replicaset = .*/%s.mongo_replicaset = %s/" %s/%s ' % (mongo_sink,mongo_sink, mongo_replicaset, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.data_model = .*/%s.data_model = %s/" %s/%s ' % (mongo_sink, mongo_sink, mongo_data_model, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.db_prefix = .*/%s.db_prefix = %s/" %s/%s ' % (mongo_sink, mongo_sink, db_prefix, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.collection_prefix = .*/%s.collection_prefix = %s/" %s/%s ' % (mongo_sink, mongo_sink, collection_prefix, self.target_path, self.name), self.target_path, self.sudo)
@@ -322,6 +330,8 @@ class Agent:
         sth_host_port            = kwargs.get(HOST_PORT, "localhost:27017")
         sth_user                 = kwargs.get(USER, EMPTY)
         sth_password             = kwargs.get(PASSWORD, EMPTY)
+        mongo_auth_source          = kwargs.get(AUTH_SOURCE, EMPTY)
+        mongo_replicaset           = kwargs.get(REPLICASET, EMPTY)
         sth_data_model           = kwargs.get(DATA_MODEL, "collection-per-entity")
         db_prefix                  = kwargs.get(DB_PREFIX, "sth_")
         collection_prefix          = kwargs.get(COLLECTION_PREFIX, "sth_")
@@ -333,6 +343,8 @@ class Agent:
         self.__append_command('sed -i "s/%s.mongo_hosts = .*/%s.mongo_hosts = %s/" %s/%s ' % (sth_sink,sth_sink, sth_host_port, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.mongo_username = .*/%s.mongo_username = %s/" %s/%s ' % (sth_sink,sth_sink, sth_user, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.mongo_password = .*/%s.mongo_password = %s/" %s/%s ' % (sth_sink,sth_sink, sth_password, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.mongo_auth_source = .*/%s.mongo_auth_source = %s/" %s/%s ' % (sth_sink,sth_sink, mongo_auth_source, self.target_path, self.name), self.target_path, self.sudo)
+        self.__append_command('sed -i "s/%s.mongo_replicaset = .*/%s.mongo_replicaset = %s/" %s/%s ' % (sth_sink,sth_sink, mongo_replicaset, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.data_model = .*/%s.data_model = %s/" %s/%s ' % (sth_sink, sth_sink, sth_data_model, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.db_prefix = .*/%s.db_prefix = %s/" %s/%s ' % (sth_sink, sth_sink, db_prefix, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.collection_prefix = .*/%s.collection_prefix = %s/" %s/%s ' % (sth_sink, sth_sink, collection_prefix, self.target_path, self.name), self.target_path, self.sudo)
