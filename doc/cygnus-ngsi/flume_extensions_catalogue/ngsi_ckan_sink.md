@@ -50,31 +50,57 @@ This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks
 [Top](#top)
 
 #### <a name="section1.2.1"></a>Organizations naming conventions
-An organization named as the notified `fiware-service` header value (or, in absence of such a header, the defaulted value for the FIWARE service) is created (if not existing yet).
-
-Since based in [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
-
+* Data model by entity (`data_model=dm-by-entity`). An organization named as the notified `fiware-service` header value (or, in absence of such a header, the defaulted value for the FIWARE service) is created (if not existing yet).
+Since based in [PostgreSQL only accepts] 
+https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
 Nevertheless, different than PostgreSQL, [organization lengths](http://docs.ckan.org/en/latest/api/#ckan.logic.action.create.organization_create) may be up to 100 characters (minimum, 2 characters).
+
+
+* Data model by entity id (`data_model=dm-by-entity-id`). The organization name will take the value of the notified header `fiware-service` without encoding.
+
+The following table summarizes the organization name composition:
+
+| FIWARE service path | `dm-by-entity` | `dm-by-entity-id` |
+|---|---|---|
+| `/` | `<fiware-service>` | `<fiware-service>` | 
 
 [Top](#top)
 
 #### <a name="section1.2.2"></a>Packages/datasets naming conventions
-A package/dataset named as the concatenation of the notified `fiware-service` and `fiware-servicePath` header values (or, in absence of such headers, the defaulted value for the FIWARE service and service path) is created (if not existing yet) in the above organization.
-
-Since based in [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to  certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
-
+* Data model by entity (`data_model=dm-by-entity`). A package/dataset named as the concatenation of the notified `fiware-service` and `fiware-servicePath` header values (or, in absence of such headers, the defaulted value for the FIWARE service and service path) is created (if not existing yet) in the above organization.
+Since based in [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to  certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter
 Nevertheless, different than PostgreSQL, [dataset lengths](http://docs.ckan.org/en/latest/api/#ckan.logic.action.create.package_create) may be up to 100 characters (minimum, 2 characters).
+
+
+* Data model by entity id (`data_model=dm-by-entity-id`). A package/dataset name always take the entity ID. Such a name is already given in the NGSIEvent values, see the [Configuration](#section2.1) section for more details) within the the `NGSIEvent`.
+
+The following table summarizes the package name composition:
+
+| FIWARE service path | `dm-by-entity` | `dm-by-entity-id` |
+|---|---|---|
+| `/` | `<fiware-service>_<fiware-servicePath>` | `<entityId>` | 
 
 [Top](#top)
 
 #### <a name="section1.2.3"></a>Resources naming conventions
-CKAN resources follow a single data model (see the [Configuration](#section2.1) section for more details), i.e. per entity. Thus, a resource name always take the concatenation of the entity ID and type. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
+The resiurce name depends on the configured data model (see the [Configuration](#section2.1) section for more details):
+
+* Data model by entity (`data_model=dm-by-entity`). A resource name always take the concatenation of the entity ID and type. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
+
+
+* Data model by entity id (`data_model=dm-by-entity-id`). A resource name always take the entity ID. Such a name is already given in the NGSIEvent values, see the [Configuration](#section2.1) section for more details) within the the `NGSIEvent`. 
 
 It must be noticed a CKAN Datastore (and a viewer) is also created and associated to the resource above. This datastore, which in the end is a PostgreSQL table, will hold the persisted data.
 
 Since based in [PostgreSQL](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS), it must be said only alphanumeric characters and the underscore (`_`) are accepted. The hyphen ('-') is also accepted. This leads to  certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
 
 Despite there is no real limit on the resource names, Cygnus will keep limiting their lengths up to 100 characters (minimum, 2 characters), accordingly to what's done with organization and package names.
+
+The following table summarizes the resource name composition:
+
+| FIWARE service path | `dm-by-entity` | `dm-by-entity-id` |
+|---|---|---|
+| `/` | `<entityType>` | `<entityId>` |
 
 [Top](#top)
 
