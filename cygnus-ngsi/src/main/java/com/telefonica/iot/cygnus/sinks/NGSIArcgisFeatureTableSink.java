@@ -487,7 +487,7 @@ protected void jsonElementToFeatureAttr (String attrName, String attrType, JsonE
     	case "geo:json":
     		try{
     			JsonObject location = attrValue.getAsJsonObject();
-    			if (location.get("type").equals("Point")){
+    			if (location.get("type").getAsString().equals("Point")){
     				JsonArray coordinates = location.get("coordinates").getAsJsonArray();
     				double latitude = coordinates.get(0).getAsDouble();
     				double longitude = coordinates.get(1).getAsDouble();
