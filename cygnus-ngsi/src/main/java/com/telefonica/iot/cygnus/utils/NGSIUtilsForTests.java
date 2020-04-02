@@ -65,6 +65,7 @@ public final class NGSIUtilsForTests {
         context.put("mongo_hosts", "localhost:27017");
         context.put("mongo_password", "");
         context.put("mongo_username", "");
+        context.put("mongo_auth_source", "");
         return context;
     } // createContextForMongoSTH
     

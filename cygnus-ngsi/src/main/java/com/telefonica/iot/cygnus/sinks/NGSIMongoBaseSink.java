@@ -163,13 +163,6 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     @Override
     public void start() {
         try {
-            /****
-            // Create the backend and set authSource passing mongoAuthSource
-            // by using the setter function instead of using the new contructor
-            backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword, dataModel);
-            backend.setAuthSource(mongoAuthSource);
-            ****/
-            // Create the backend using the new constructor passing the mongoAuthSource
             backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword, mongoAuthSource, dataModel);
             LOGGER.debug("[" + this.getName() + "] MongoDB persistence backend created");
         } catch (Exception e) {
