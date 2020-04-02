@@ -17,9 +17,12 @@
  */
 package com.telefonica.iot.cygnus.utils;
 
+import java.util.Date;
+
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
 import es.santander.smartcity.ArcgisRestUtils.ArcgisFeatureTable;
+import es.santander.smartcity.model.Feature;
 
 /**
  * 
@@ -30,6 +33,8 @@ public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
 
     private static String CLASS_NAME = "NGSIArcgisFeatureTable";
     private CygnusLogger cygnusLogger;
+    private long timeoutSecs = 60;
+    private Date lastPersist = new Date();
 
     /**
      * 
@@ -39,8 +44,9 @@ public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
      * @param getTokenUrl
      * @param b
      */
-    public NGSIArcgisFeatureTable(String featureServiceUrl, String username, String password, String getTokenUrl, CygnusLogger cygnusLogger) {
+    public NGSIArcgisFeatureTable(String featureServiceUrl, String username, String password, String getTokenUrl, long timeoutSecs, CygnusLogger cygnusLogger) {
 		super();
+		this.timeoutSecs = timeoutSecs;
 		if (cygnusLogger != null){
 			this.cygnusLogger = cygnusLogger;
 			initFeatureTable(featureServiceUrl, username, password, getTokenUrl, false);
@@ -49,8 +55,30 @@ public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
 			error.set(true);
 		}
 	}
+    
+    public boolean hasTimeout(){
+    	return ((new Date().getTime() - this.lastPersist.getTime()) > (this.timeoutSecs * 1000)) && featuresBatched()>0;
+    }
+    
+    /* (non-Javadoc)
+	 * @see es.santander.smartcity.ArcgisRestUtils.ArcgisFeatureTable#addToBatch(es.santander.smartcity.model.Feature)
+	 */
+	@Override
+	public void addToBatch(Feature feature) {
+		super.addToBatch(feature);
+		this.lastPersist = new Date();
+	}
 
-    /*
+	/* (non-Javadoc)
+	 * @see es.santander.smartcity.ArcgisRestUtils.ArcgisFeatureTable#flushBatch()
+	 */
+	@Override
+	public void flushBatch() {
+		super.flushBatch();
+		this.lastPersist = new Date();
+	}
+
+	/*
      * (non-Javadoc)
      * 
      * @see es.santander.smartcity.utils.Arcgis#logBasic(java.lang.String)

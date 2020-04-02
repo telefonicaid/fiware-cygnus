@@ -66,6 +66,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     private static final String DEFAULT_USER_NAME = "root";
     private static final String DEFAULT_PASSWORD = "";
     private static final int DEFAULT_MAX_BATCH_SIZE = 10;
+    private static final int DEFAULT_BATCH_TIMEOUT_SECS = 60;
     private static final String ARCGIS_INSTANCE_NAME = "arcgis";
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIArcgisFeatureTableSink.class);
@@ -74,6 +75,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     private String userName;
     private String password;
     private int maxBatchSize;
+    private long timeoutSecs;
 //    private boolean rowAttrPersistence;
     private static volatile Map<String,NGSIArcgisFeatureTable> arcgisPersistenceBackend;
 //    private boolean attrNativeTypes;
@@ -145,6 +147,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 	    				getUsername(),
 	    				getPassword(),
 	    				getGetTokenUrl(),
+	    				timeoutSecs,
 	    				LOGGER);
 	    		newTable.setBatchAction(ArcgisFeatureTable.ADD_ACTION);
 	    		//TODO uniqueField????
@@ -190,10 +193,19 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
         maxBatchSize = context.getInteger("arcgis_maxBatchSize", DEFAULT_MAX_BATCH_SIZE);
         if ( maxBatchSize <= 0 || maxBatchSize > 65535){
         	invalidConfiguration = true;
-        	LOGGER.error("[" + this.getName() + "] Invalid configuration (maxBatchSize=" + maxBatchSize + ") "
+        	LOGGER.error("[" + this.getName() + "] Invalid configuration (arcgis_maxBatchSize=" + maxBatchSize + ") "
                     + "must be an integer between 1 and 65535");
         }else{
         	LOGGER.debug("[" + this.getName() + "] Reading configuration (arcgis_maxBatchSize=" + maxBatchSize + ")");
+        }
+        
+        timeoutSecs = context.getInteger("arcgis_timeoutSecs", DEFAULT_BATCH_TIMEOUT_SECS);
+        if ( timeoutSecs <= 0 || timeoutSecs > 65535){
+        	invalidConfiguration = true;
+        	LOGGER.error("[" + this.getName() + "] Invalid configuration (arcgis_timeoutSecs=" + timeoutSecs + ") "
+                    + "must be an integer between 1 and 65535");
+        }else{
+        	LOGGER.debug("[" + this.getName() + "] Reading configuration (arcgis_timeoutSecs=" + maxBatchSize + ")");
         }
         
         super.configure(context);
@@ -237,6 +249,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
         throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
+            checkTimeouts();
             return;
         } // if
         
@@ -272,12 +285,27 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 	            // Persist the aggregation
 	            persistAggregation(aggregator);
 	            batch.setNextPersisted(true);
+	            
+	            checkTimeouts();
 	        } // while
         } catch (Exception e){
         	LOGGER.error("[" + this.getName() + "] Error persisting batch, " + e.getMessage());
         	throw new CygnusRuntimeError(e.getMessage());
         }
     } // persistBatch
+    
+    /**
+     * Flush if timeout
+     */
+    protected void checkTimeouts(){
+    	for (Map.Entry<String, NGSIArcgisFeatureTable> entry : arcgisPersistenceBackend.entrySet()) {
+    		NGSIArcgisFeatureTable table = entry.getValue();
+			if (table.hasTimeout()){
+				LOGGER.info("[" + this.getName() + "] Feature table Timeout, flushing batch. " + entry.getKey());
+				table.flushBatch();
+			}
+		}
+    }
     
     @Override
     public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
