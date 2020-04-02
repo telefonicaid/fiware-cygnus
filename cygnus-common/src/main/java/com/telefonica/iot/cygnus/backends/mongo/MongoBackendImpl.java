@@ -56,26 +56,9 @@ public class MongoBackendImpl implements MongoBackend {
     private final String mongoHosts;
     private final String mongoUsername;
     private final String mongoPassword;
-    private String mongoAuthSource;
+    private final String mongoAuthSource;
     private final DataModel dataModel;
     private static final CygnusLogger LOGGER = new CygnusLogger(MongoBackendImpl.class);
-
-    /**
-     * Constructor.
-     * @param mongoHosts
-     * @param mongoUsername
-     * @param mongoPassword
-     * @param dataModel
-     */
-    public MongoBackendImpl(String mongoHosts, String mongoUsername, String mongoPassword,
-            DataModel dataModel) {
-        client = null;
-        this.mongoHosts = mongoHosts;
-        this.mongoUsername = mongoUsername;
-        this.mongoPassword = mongoPassword;
-        this.mongoAuthSource = "";
-        this.dataModel = dataModel;
-    } // MongoBackendImpl
 
     /**
      * Constructor.
@@ -521,7 +504,7 @@ public class MongoBackendImpl implements MongoBackend {
                 MongoCredential credential = MongoCredential.createCredential(mongoUsername, authSource,
                         mongoPassword.toCharArray());
                 /****
-                // This constructor is deprecated
+                // This constructor is deprecated see Mongo Client API documentation
                 // @deprecated Prefer {@link #MongoClient(List, MongoCredential, MongoClientOptions)}
                 client = new MongoClient(servers, Arrays.asList(credential));
                 ****/
@@ -630,25 +613,5 @@ public class MongoBackendImpl implements MongoBackend {
 
         return offset;
     } // getOffset
-
-    /**
-     * Gets the mongo auth_source
-     * @return
-     */
-    public String getAuthSource() {
-        return mongoAuthSource;
-    } // getAuthSource
-
-    /**
-     * Set the mongo auth_source
-     * @param authSource DB used for mongo authentication
-     */
-    public void setAuthSource(String authSource) {
-        if (authSource != null) {
-            this.mongoAuthSource = authSource;
-        } else {
-            this.mongoAuthSource = "";
-        }
-    } // setAuthSource
 
 } // MongoBackendImpl
