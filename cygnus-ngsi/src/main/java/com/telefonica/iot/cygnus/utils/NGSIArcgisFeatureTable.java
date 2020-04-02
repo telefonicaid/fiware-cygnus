@@ -28,7 +28,8 @@ import es.santander.smartcity.ArcgisRestUtils.ArcgisFeatureTable;
  */
 public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
 
-    private static CygnusLogger cygnusLogger;
+    private static String CLASS_NAME = "NGSIArcgisFeatureTable";
+    private CygnusLogger cygnusLogger;
 
     /**
      * 
@@ -38,8 +39,15 @@ public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
      * @param getTokenUrl
      * @param b
      */
-    public NGSIArcgisFeatureTable(String featureServiceUrl, String username, String password, String getTokenUrl) {
-		super(featureServiceUrl, username, password, getTokenUrl, false);
+    public NGSIArcgisFeatureTable(String featureServiceUrl, String username, String password, String getTokenUrl, CygnusLogger cygnusLogger) {
+		super();
+		if (cygnusLogger != null){
+			this.cygnusLogger = cygnusLogger;
+			initFeatureTable(featureServiceUrl, username, password, getTokenUrl, false);
+		} else {
+			setErrorDesc(CLASS_NAME + " CygnusLogger is mandatory and can not be NULL.");
+			error.set(true);
+		}
 	}
 
     /*
@@ -50,7 +58,7 @@ public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
     @Override
     public void logBasic(String message) {
         super.logBasic(message);
-        cygnusLogger.info(this.getClass().getName() + ": " + message);
+        cygnusLogger.info(CLASS_NAME + ": " + message);
     }
 
     /*
@@ -61,7 +69,7 @@ public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
     @Override
     public void logDebug(String message) {
         super.logDebug(message);
-        cygnusLogger.debug(this.getClass().getName() + ": " + message);
+        cygnusLogger.debug(CLASS_NAME + ": " + message);
     }
 
     /*
@@ -72,8 +80,8 @@ public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
     @Override
     public void logError(String message) {
         super.logError(message);
-        if (this != null && this.getClass() != null && this.getClass().getName() != null) {
-            cygnusLogger.error(this.getClass().getName() + ": " + message);
+        if (this != null && this.getClass() != null && CLASS_NAME != null) {
+            cygnusLogger.error(CLASS_NAME + ": " + message);
         }
         cygnusLogger.error("Error : " + message);
     }

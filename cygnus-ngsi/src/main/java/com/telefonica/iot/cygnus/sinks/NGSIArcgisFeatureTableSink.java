@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.flume.Context;
 import org.json.JSONException;
 
@@ -127,18 +128,37 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
+     * @throws CygnusRuntimeError 
      */
-    protected ArcgisFeatureTable getPersistenceBackend(String featureServiceUrl) {
+    protected ArcgisFeatureTable getPersistenceBackend(String featureServiceUrl) throws CygnusRuntimeError {
+    	
     	if (arcgisPersistenceBackend.containsKey(featureServiceUrl)){
             return arcgisPersistenceBackend.get(featureServiceUrl);
     	}else{
-    		NGSIArcgisFeatureTable newTable = new NGSIArcgisFeatureTable(
-    				featureServiceUrl,
-    				getUsername(),
-    				getPassword(),
-    				getGetTokenUrl());
-    		arcgisPersistenceBackend.put(featureServiceUrl, newTable);
-    		return newTable;
+    		LOGGER.debug("Creating new persistenceBackend for Feature table: " + featureServiceUrl);
+    		LOGGER.debug("Token url: " + getGetTokenUrl());
+    		LOGGER.debug("User name: " + getUsername());
+    		LOGGER.debug("Passwd: " + getPassword());
+    		try{
+	    		NGSIArcgisFeatureTable newTable = new NGSIArcgisFeatureTable(
+	    				featureServiceUrl,
+	    				getUsername(),
+	    				getPassword(),
+	    				getGetTokenUrl(),
+	    				LOGGER);
+
+	    		if (newTable.hasError()){
+	    			throw new CygnusRuntimeError("[" + this.getName() + "Error creating Persistence backend: " 
+	    					+ newTable.getErrorCode() + " - " + newTable.getErrorDesc());
+	    		}else{
+		    		arcgisPersistenceBackend.put(featureServiceUrl, newTable);
+		    		return newTable;
+	    		}
+    		} catch (Throwable e){
+    			String stackTrace = ExceptionUtils.getFullStackTrace(e);
+    			LOGGER.debug (stackTrace);
+    			throw new CygnusRuntimeError ("Error creating new persistence Backend. ",e.getClass().getName(), e.getMessage());
+    		}
     	}
     } // getPersistenceBackend
     
@@ -277,7 +297,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     
     
     public void persistAggregation(NGSIArcgisAggregator aggregator)
-        throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
+        throws CygnusRuntimeError {
     	try {
 	    	List<ArcgisAggregatorDomain> aggregationList = aggregator.getListArcgisAggregatorDomain();
 	        LOGGER.debug("[" + this.getName() + "] persisting aggregation, " + aggregator.getListArcgisAggregatorDomain().size() + " features.");
@@ -285,6 +305,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 	    		String featureTableUrl = aggregation.getFeatureTableUrl();
 	    		
 	    		boolean isNewFeatureTable = !arcgisPersistenceBackend.containsKey(featureTableUrl);
+	    		LOGGER.debug ("[" + this.getName() + "] persistAggregation - Feature table: " + featureTableUrl + " is new: " + isNewFeatureTable);
 				ArcgisFeatureTable featureTable = getPersistenceBackend(featureTableUrl); // ¿?¿?¿? uniqueField
 				if (isNewFeatureTable) {
 					LOGGER.debug("[" + this.getName() + "] Created new backend for " + featureTableUrl + " with uniqueField: " + aggregation.getUniqueField());
@@ -293,8 +314,12 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 				
 				featureTable.addToBatch(aggregation.getFeature());
 			}
+    	} catch ( CygnusRuntimeError e){
+    		String stackTrace = ExceptionUtils.getFullStackTrace(e);    		
+    		LOGGER.debug (" PersistAggregation Error: " + stackTrace);
+    		throw (e);
     	} catch (Exception e){
-        	LOGGER.error("[" + this.getName() + "] Error persisting batch, " + e.getMessage());
+        	LOGGER.error("[" + this.getName() + "] Error persisting batch, " + e.getClass().getSimpleName() + " - " + e.getMessage());
         	throw new CygnusRuntimeError(e.getMessage());
     	}
     } // persistAggregation
