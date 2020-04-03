@@ -30,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
+import org.apache.flume.Sink.Status;
 import org.json.JSONException;
 
 import com.google.gson.JsonArray;
@@ -249,7 +251,6 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
         throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
-            checkTimeouts();
             return;
         } // if
         
@@ -286,7 +287,6 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 	            persistAggregation(aggregator);
 	            batch.setNextPersisted(true);
 	            
-	            checkTimeouts();
 	        } // while
         } catch (Exception e){
         	LOGGER.error("[" + this.getName() + "] Error persisting batch, " + e.getMessage());
@@ -294,17 +294,30 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
         }
     } // persistBatch
     
-    /**
+        
+    /* (non-Javadoc)
+	 * @see com.telefonica.iot.cygnus.sinks.NGSISink#process()
+	 */
+	@Override
+	public Status process() throws EventDeliveryException {
+		checkTimeouts();
+		return super.process();
+	}
+
+	/**
      * Flush if timeout
      */
     protected void checkTimeouts(){
+    	boolean timeoutFound = false;
     	for (Map.Entry<String, NGSIArcgisFeatureTable> entry : arcgisPersistenceBackend.entrySet()) {
     		NGSIArcgisFeatureTable table = entry.getValue();
 			if (table.hasTimeout()){
+				timeoutFound = true;
 				LOGGER.info("[" + this.getName() + "] Feature table Timeout, flushing batch. " + entry.getKey());
 				table.flushBatch();
 			}
 		}
+    	if (!timeoutFound) LOGGER.debug("[" + this.getName() + "] No Feature table Timeouts found.");
     }
     
     @Override
