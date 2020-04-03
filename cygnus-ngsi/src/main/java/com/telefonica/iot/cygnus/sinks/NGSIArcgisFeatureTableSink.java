@@ -152,7 +152,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 	    				timeoutSecs,
 	    				LOGGER);
 	    		newTable.setBatchAction(ArcgisFeatureTable.ADD_UPDATE_ACTION);
-	    		//TODO uniqueField????
+	    		newTable.setBatchSize(maxBatchSize);
 
 	    		if (newTable.hasError()){
 	    			throw new CygnusRuntimeError("[" + this.getName() + "Error creating Persistence backend: " 
@@ -349,7 +349,9 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 	    		
 	    		boolean isNewFeatureTable = !arcgisPersistenceBackend.containsKey(featureTableUrl);
 	    		LOGGER.debug ("[" + this.getName() + "] persistAggregation - Feature table: " + featureTableUrl + " is new: " + isNewFeatureTable);
-				ArcgisFeatureTable featureTable = getPersistenceBackend(featureTableUrl); // ¿?¿?¿? uniqueField
+				ArcgisFeatureTable featureTable = getPersistenceBackend(featureTableUrl);
+				
+				// If it's a new one, sets uniqueField value
 				if (isNewFeatureTable) {
 					LOGGER.debug("[" + this.getName() + "] Created new backend for " + featureTableUrl + " with uniqueField: " + aggregation.getUniqueField());
 					featureTable.setUniqueField(aggregation.getUniqueField());
