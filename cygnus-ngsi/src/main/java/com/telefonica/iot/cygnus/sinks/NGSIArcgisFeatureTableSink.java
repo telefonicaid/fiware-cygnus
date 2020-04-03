@@ -151,7 +151,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 	    				getGetTokenUrl(),
 	    				timeoutSecs,
 	    				LOGGER);
-	    		newTable.setBatchAction(ArcgisFeatureTable.ADD_ACTION);
+	    		newTable.setBatchAction(ArcgisFeatureTable.ADD_UPDATE_ACTION);
 	    		//TODO uniqueField????
 
 	    		if (newTable.hasError()){
