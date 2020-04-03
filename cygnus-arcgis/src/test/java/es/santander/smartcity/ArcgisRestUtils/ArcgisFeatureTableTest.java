@@ -3,8 +3,6 @@ package es.santander.smartcity.ArcgisRestUtils;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.BasicConfigurator;
@@ -27,7 +25,7 @@ public class ArcgisFeatureTableTest implements ArcgisBaseTest{
 				ArcgisBaseTest.getUser(), 
 				ArcgisBaseTest.getPassword(), 
 				ArcgisBaseTest.getGenerateTokenUrl(), 
-				false);
+				false, null);
 	}
 
 	@Test
@@ -95,7 +93,6 @@ public class ArcgisFeatureTableTest implements ArcgisBaseTest{
 				}
 			}
 			
-			arcgis.deleteFeatures(list);
 			assertTrue(true);
 			
 		}catch (Exception e){
@@ -112,7 +109,7 @@ public class ArcgisFeatureTableTest implements ArcgisBaseTest{
 				"", 
 				"", 
 				"", 
-				false);
+				false, null);
 		List<Feature> resultList;
 		try {
 			resultList = arcgis.queryFeatures(arcgis.getUniqueIdField() + ">0");
@@ -132,7 +129,7 @@ public class ArcgisFeatureTableTest implements ArcgisBaseTest{
 				PORTAL_USER, 
 				PORTAL_PASSWORD, 
 				PORTAL_GENERATE_TOKEN_URL, 
-				false);
+				false, null);
 		List<Feature> resultList;
 		try {
 			resultList = arcgis.queryFeatures(arcgis.getUniqueIdField() + ">0");
