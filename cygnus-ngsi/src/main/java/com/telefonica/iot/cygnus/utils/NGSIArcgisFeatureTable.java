@@ -85,7 +85,7 @@ public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
      */
     @Override
     public void logBasic(String message) {
-        super.logBasic(message);
+//        super.logBasic(message);
         cygnusLogger.info(CLASS_NAME + ": " + message);
     }
 
@@ -96,7 +96,7 @@ public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
      */
     @Override
     public void logDebug(String message) {
-        super.logDebug(message);
+//        super.logDebug(message);
         cygnusLogger.debug(CLASS_NAME + ": " + message);
     }
 
@@ -107,11 +107,8 @@ public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
      */
     @Override
     public void logError(String message) {
-        super.logError(message);
-        if (this != null && this.getClass() != null && CLASS_NAME != null) {
-            cygnusLogger.error(CLASS_NAME + ": " + message);
-        }
-        cygnusLogger.error("Error : " + message);
+//        super.logError(message);
+          cygnusLogger.error(CLASS_NAME + ": " + message);
     }
 
 }
