@@ -8,20 +8,22 @@ package es.santander.smartcity.http;
  *
  */
 public enum HttpMethod {
-	GET("GET"),
-	POST("POST");
-	
-	protected String stringValue;
-	
-	
-	HttpMethod (String stringValue){
-		this.stringValue = stringValue;
-	}
-	
-	/**
-	 * Convertir Enum a String
-	 */
-	public String toString(){
-		return this.stringValue;
-	}
+    GET("GET"), POST("POST");
+
+    private String stringValue;
+
+    /**
+     * 
+     * @param stringValue
+     */
+    HttpMethod(String stringValue) {
+        this.stringValue = stringValue;
+    }
+
+    /**
+     * Convertir Enum a String.
+     */
+    public String toString() {
+        return this.stringValue;
+    }
 }

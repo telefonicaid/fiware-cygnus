@@ -8,9 +8,8 @@ package es.santander.smartcity.arcgisutils.baselogger;
  *
  */
 public interface BaseLoggerInterface {
-	
-		
-	 /**
+
+    /**
      * 
      * @param message
      */
