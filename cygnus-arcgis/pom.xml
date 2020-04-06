@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.telefonica.iot</groupId>
-    <artifactId>cygnus-ngsi</artifactId>
+    <artifactId>cygnus-arcgis</artifactId>
     <version>1.18.0_SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>cygnus-ngsi</name>
+    <name>cygnus-arcgis</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -16,12 +16,6 @@
     </properties>
 
     <dependencies>
-        <!-- Development dependency, should be removed before a production deployment -->
-   		<dependency>
-   			<groupId>com.telefonica.iot</groupId>
-   			<artifactId>cygnus-arcgis</artifactId>
-   			<version>1.18.0_SNAPSHOT</version>
-   		</dependency>
         <!-- Required for testing -->
         <dependency>
             <groupId>org.mockito</groupId>
@@ -35,11 +29,11 @@
             <version>4.11</version>
             <scope>test</scope>
         </dependency>
-        <!-- Required by NGSIRestHandler -->
+        <!-- Required by the extension added by cygnus-common to Apache Flume -->
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.3.1</version>
+            <groupId>org.apache.flume</groupId>
+            <artifactId>flume-ng-node</artifactId>
+            <version>1.9.0</version>
         </dependency>
         <!-- Required for logging -->
         <dependency>
@@ -47,24 +41,12 @@
             <artifactId>log4j</artifactId>
             <version>1.2.17</version>
         </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.21</version>
-        </dependency>
-        <!-- Required by NameMapper -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
-        </dependency>
         <!-- Required by any agent -->
         <dependency>
             <groupId>com.telefonica.iot</groupId>
             <artifactId>cygnus-common</artifactId>
             <version>1.18.0_SNAPSHOT</version>
         </dependency>
-                
     </dependencies>
 
     <build>
@@ -87,8 +69,7 @@
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
-				        <compilerArguments>
-				        </compilerArguments>
+                        <compilerArgument></compilerArgument>
                         <fork>true</fork>
                     </configuration>
                 </plugin>
@@ -97,20 +78,11 @@
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>2.6</version>
                     <configuration>
-                        <descriptors>
-                            <descriptor>src/main/assembly/assemblyCompile.xml</descriptor>
-                        </descriptors>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
                     </configuration>
-                    <executions>
-                        <execution>
-                            <id>jar-with-all-dependencies</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>single</goal>
-                            </goals>
-                        </execution>
-                    </executions>                
-                </plugin>                
+                </plugin>
                 <!-- http://www.chrissearle.org/2009/09/05/Using_maven-exec-plugin_to_store_the_current_git_sha_in_a_build/ -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
