@@ -10,80 +10,94 @@ import java.time.LocalDateTime;
  *
  */
 public class UserCredential extends Credential {
-	
-	protected String user;
-	protected String password;
-	protected String referer;
-	
-	/**
-	 * 
-	 */
-	private UserCredential() {
-		super();
-	}
 
-	/**
-	 * @param token
-	 */
-	public UserCredential(String user, String passwd) {
-		super();
-		this.user = user;
-		this.password = passwd;
-	}
-	
+    private String user;
+    private String password;
+    private String referer;
 
-	public UserCredential(String user, String passwd, String token, LocalDateTime expiration){
-		  this(user, passwd);
-	      this.setToken(token, expiration);
-	}
-	
-	public UserCredential(String user, String passwd, String token, int expirationMillis){
-		  this(user, passwd);
-	      this.setTokenMillis(token, expirationMillis);
-	}
+    /**
+     * 
+     */
+    private UserCredential() {
+        super();
+    }
 
-	/**
-	 * @return the user
-	 */
-	public String getUser() {
-		return user;
-	}
+    /**
+     * @param token
+     */
+    public UserCredential(String user, String passwd) {
+        super();
+        this.user = user;
+        this.password = passwd;
+    }
 
-	/**
-	 * @param user the user to set
-	 */
-	public void setUser(String user) {
-		this.user = user;
-	}
+    /**
+     * Constructor.
+     * @param user
+     * @param passwd
+     * @param token
+     * @param expiration
+     */
+    public UserCredential(String user, String passwd, String token, LocalDateTime expiration) {
+        this(user, passwd);
+        this.setToken(token, expiration);
+    }
 
-	/**
-	 * @return the password
-	 */
-	public String getPassword() {
-		return password;
-	}
+    /**
+     * Constructor.
+     * @param user
+     * @param passwd
+     * @param token
+     * @param expirationMillis
+     */
+    public UserCredential(String user, String passwd, String token, int expirationMillis) {
+        this(user, passwd);
+        this.setTokenMillis(token, expirationMillis);
+    }
 
-	/**
-	 * @param password the password to set
-	 */
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    /**
+     * @return the user
+     */
+    public String getUser() {
+        return user;
+    }
 
-	/**
-	 * @return the referer
-	 */
-	public String getReferer() {
-		return referer;
-	}
+    /**
+     * @param user
+     *            the user to set
+     */
+    public void setUser(String user) {
+        this.user = user;
+    }
 
-	/**
-	 * @param referer the referer to set
-	 */
-	public void setReferer(String referer) {
-		this.referer = referer;
-	}
-	
-	
+    /**
+     * @return the password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * @param password
+     *            the password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    /**
+     * @return the referer
+     */
+    public String getReferer() {
+        return referer;
+    }
+
+    /**
+     * @param referer
+     *            the referer to set
+     */
+    public void setReferer(String referer) {
+        this.referer = referer;
+    }
 
 }
