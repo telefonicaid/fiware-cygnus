@@ -305,6 +305,7 @@ Assuming `data_model=dm-by-entity` and all the possible resolutions as configura
 | mongo\_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
 | mongo\_username | no | <i>empty</i> | If empty, no authentication is done. |
 | mongo\_password | no | <i>empty</i> | If empty, no authentication is done. |
+| mongo\mongo_auth_source | no | <i>empty</i> | Auth source database use to authenticate the user. Usually could be `admin`. |
 | db\_prefix | no | sth_ ||
 | collection\_prefix | no | sth_ | `system.` is not accepted. |
 | resolutions | no | month,day,hour,minute,second | Resolutions for which it is desired to aggregate data. Accepted values are <i>month</i>, <i>day</i>, <i>hour</i>, <i>minute</i> and <i>second</i> separated  by comma. |
