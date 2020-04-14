@@ -216,13 +216,9 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         for (int i = 0 ; i < jsonObjects.size() ; i++) {
             aggregation.add(Document.parse(jsonObjects.get(i).toString()));
             if (rowAttrPersistence) {
-                if (Boolean.parseBoolean(attrMetadataStore)) {
-                    Long timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
-                    if (timeInstant != null) {
-                        aggregation.get(i).append(NGSIConstants.RECV_TIME, timeInstant);
-                    } else {
-                        aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(Long.parseLong(aggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS).get(i).getAsString())));
-                    }
+                Long timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                if (timeInstant != null) {
+                    aggregation.get(i).append(NGSIConstants.RECV_TIME, timeInstant);
                 } else {
                     aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(Long.parseLong(aggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS).get(i).getAsString())));
                 }
