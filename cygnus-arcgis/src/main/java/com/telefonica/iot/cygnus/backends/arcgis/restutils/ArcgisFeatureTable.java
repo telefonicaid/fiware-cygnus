@@ -145,7 +145,7 @@ public class ArcgisFeatureTable extends BaseLogger {
             if (connected) {
 
                 logDebug("Arcgis: Adding feature to Batch... ");
-                featureBatch.add(feature);
+                featureBatch.add(cleanFeature(feature));
 
                 if (featureBatch.size() >= getBatchSize()) {
                     logDebug("Sending Batch...");
@@ -660,6 +660,36 @@ public class ArcgisFeatureTable extends BaseLogger {
         this.errorCode = errorCode;
     }
 
+    /**
+     * Cleans feature attributes before sending it to Gis
+     * @param feature
+     * @return
+     */
+    protected Feature cleanFeature(Feature feature){
+    	Map<String, Object> attributes = feature.getAttributes();
+    	List<String> attrsToRemove = new ArrayList<String>();
+    	
+    	for (Map.Entry<String, Object> attrEntry : attributes.entrySet()) {
+    		String attName = attrEntry.getKey();
+    		Object attValue = attrEntry.getValue();
+    		if (hasAttribute(attName)){
+    			Field attribute = arcGISFeatureTable.getTableAttributes().get(attName);
+    			
+    			// Parse value if needed
+    			attrEntry.setValue(GisAttributeType.parseAttValue(attribute.getType(), attValue));
+    		} else {
+    			attrsToRemove.add(attName);
+    		}
+		}
+    	
+    	for (String attName : attrsToRemove) {
+			LOGGER.debug("ArcgisFeatureTable, cleanFeature: Field not found in table, ignoring it, " + attName);
+			attributes.remove(attName);
+		}
+    	
+    	return feature;
+    }
+    
     /**
      * 
      * @return

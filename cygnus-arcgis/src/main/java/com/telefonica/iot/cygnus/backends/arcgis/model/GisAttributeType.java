@@ -65,4 +65,56 @@ public enum GisAttributeType {
                 throw new ArcgisException("Invalid string type: " + strType);
         }
     }
+    
+    /**
+     * Prepares object value to send to Gis
+     * @param type
+     * @param value
+     * @return
+     */
+    public static Object parseAttValue ( GisAttributeType type, Object value){
+    	Object result = value;
+    	if (value != null){
+	    	switch (type){
+	    	case BOOLEAN:
+	    		String boolStr = value.toString();
+	    		boolStr = boolStr.trim().toLowerCase();
+	    		
+	    		if (("y").equals(boolStr) || ("s").equals(boolStr) || ("true").equals(boolStr) || ("1").equals(boolStr)){
+	    			result = new Integer(1);
+	    		} else{
+	    			result = new Integer(0);
+	    		}
+	    		break;
+	    	case INTEGER:
+	    		String integerStr =  value.toString();
+	    		try{
+	    			Integer intValue = Integer.parseInt(integerStr);
+	    			result = intValue;
+	    		} catch (NumberFormatException e){
+	    			integerStr = integerStr.trim().toLowerCase();
+	    			switch (integerStr){
+	    			case "y":
+	    			case "true":
+	    			case "t":
+	    			case "s":
+	    				result = true;
+	    				break;
+	    				
+	    			case "n":
+	    			case "false":
+	    			case "f":
+	    				result = false;
+	    				break;
+	    				
+	    			default:
+	    				result = null;
+	    			}
+	    		}
+	    		
+	    		break;
+	    	}
+    	}
+    	return result;
+    }
 }
