@@ -195,6 +195,7 @@ Verify if a label and its text exists in the last lines. The file log by default
     * mongo_port: port where mongo is listening.
     * mongo_user: user used in mongo server.
     * mongo_password: password to user above.
+    * mongo_auth_source: option to specify which common user database source to use for authentication.
     * mongo_database": mongo database by default
     * mongo_channel_capacity: capacity of the channel
     * mongo_channel_transaction_capacity: amount of bytes that can be sent per transaction
