@@ -22,6 +22,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -76,11 +77,8 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     private String password;
     private int maxBatchSize;
     private long timeoutSecs;
-    // private boolean rowAttrPersistence;
     private static volatile Map<String, NGSIArcgisFeatureTable> arcgisPersistenceBackend;
-    // private boolean attrNativeTypes;
-    // private boolean attrMetadataStore;
-
+    
     /**
      * Constructor.
      */
@@ -98,7 +96,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     } // getrAcgisServicesUrl
 
     /**
-     * Gets getToken service url.
+     * Gets getToken's service url.
      * 
      * @return
      */
@@ -133,6 +131,21 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
         return password;
     } // getPassword
 
+    /**
+     * 
+     */
+    protected int featuresBatched() {
+        int total = 0;
+        for (Map.Entry<String, NGSIArcgisFeatureTable> entry: arcgisPersistenceBackend.entrySet()) {
+            NGSIArcgisFeatureTable table = entry.getValue();
+            if (table != null){
+                total += table.featuresBatched();
+            }
+        }
+        
+        return total;
+    }
+    
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * 
@@ -306,7 +319,13 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     @Override
     public Status process() throws EventDeliveryException {
         checkTimeouts();
-        return super.process();
+        Status status = null;
+        try{
+            status = super.process();
+        }catch (Throwable e){
+            LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+        }
+        return status; 
     }
 
     /**
@@ -323,7 +342,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
             }
         }
         if (!timeoutFound) {
-            LOGGER.debug("[" + this.getName() + "] No Feature table Timeouts found.");
+            LOGGER.debug("[" + this.getName() + "] No Feature table Timeouts found. Features in batch: " + featuresBatched());
         }
     }
 
