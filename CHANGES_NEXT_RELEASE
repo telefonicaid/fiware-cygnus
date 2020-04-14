@@ -13,4 +13,4 @@
 [cygnus-ngsi][MongoSink]Fix on mongo collection name asignation. (#1845)
 [cygnus-ngsi][MongoSink]Fix on mongo recvTime Date format.
 [cygnus-common][MongoBackend] Fix persistence error mongo authentication and side effect (using new configuration parameter mongo_auth_source). (#1849)
-[cygnus-ngsi][MongoSink] Add a new mongoAuthSource parameter to create the Mongo backend.
+[cygnus-ngsi][MongoSink][MongoSTH] Add a new mongoAuthSource parameter to create the Mongo backend.
