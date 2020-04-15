@@ -48,6 +48,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSINameMappingsInterceptor.class);
     private final String nameMappingsConfFile;
+    private final boolean stopOnFirstAttrMatch;
     private final boolean invalidConfiguration;
     private NameMappings nameMappings;
     private PeriodicalNameMappingsReader periodicalNameMappingsReader;
@@ -58,8 +59,9 @@ public class NGSINameMappingsInterceptor implements Interceptor {
      * @param nameMappingsConfFile
      * @param invalidConfiguration
      */
-    public NGSINameMappingsInterceptor(String nameMappingsConfFile, boolean invalidConfiguration) {
+    public NGSINameMappingsInterceptor(String nameMappingsConfFile, boolean stopOnFirstAttrMatch, boolean invalidConfiguration) {
         this.nameMappingsConfFile = nameMappingsConfFile;
+        this.stopOnFirstAttrMatch = stopOnFirstAttrMatch;
         this.invalidConfiguration = invalidConfiguration;
     } // NGSINameMappingsInterceptor
 
@@ -150,11 +152,13 @@ public class NGSINameMappingsInterceptor implements Interceptor {
     public static class Builder implements Interceptor.Builder {
         private boolean invalidConfiguration;
         private String nameMappingsConfFile;
+        private Boolean stopOnFirstAttrMatch;
 
         @Override
         public void configure(Context context) {
             nameMappingsConfFile = context.getString("name_mappings_conf_file");
-
+            stopOnFirstAttrMatch = context.getBoolean("stop_on_first_attr_match", true);
+            
             if (nameMappingsConfFile == null) {
                 invalidConfiguration = true;
                 LOGGER.error("[nmi] Invalid configuration (name_mappings_conf_file = null) -- Must be configured");
@@ -168,7 +172,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
         @Override
         public Interceptor build() {
-            return new NGSINameMappingsInterceptor(nameMappingsConfFile, invalidConfiguration);
+            return new NGSINameMappingsInterceptor(nameMappingsConfFile, stopOnFirstAttrMatch, invalidConfiguration);
         } // build
 
         protected boolean getInvalidConfiguration() {
@@ -488,7 +492,9 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     newAttributeType = attributeMapping.getNewAttributeType();
                 } // if
 
-                break;
+                if (this.stopOnFirstAttrMatch) {
+                    break;
+                }
             } // for
 
             if (attributeMapping == null) {
