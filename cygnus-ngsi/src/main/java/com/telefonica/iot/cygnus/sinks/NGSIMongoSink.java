@@ -218,7 +218,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             if (rowAttrPersistence) {
                 Long timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
                 if (timeInstant != null) {
-                    aggregation.get(i).append(NGSIConstants.RECV_TIME, timeInstant);
+                    aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(timeInstant));
                 } else {
                     aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(Long.parseLong(aggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS).get(i).getAsString())));
                 }
