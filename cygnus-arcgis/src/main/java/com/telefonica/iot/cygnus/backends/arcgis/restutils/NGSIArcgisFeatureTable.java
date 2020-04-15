@@ -22,7 +22,6 @@ import java.util.Date;
 import com.telefonica.iot.cygnus.backends.arcgis.model.Feature;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
-
 /**
  * 
  * @author PMO Santander Smart City – Ayuntamiento de Santander
@@ -43,8 +42,8 @@ public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
      * @param getTokenUrl
      * @param b
      */
-    public NGSIArcgisFeatureTable(String featureServiceUrl, String username, String password, String getTokenUrl,
-            long timeoutSecs, CygnusLogger cygnusLogger) {
+    public NGSIArcgisFeatureTable(String featureServiceUrl, String username, String password,
+            String getTokenUrl, long timeoutSecs, CygnusLogger cygnusLogger) {
         super();
         this.timeoutSecs = timeoutSecs;
         if (cygnusLogger != null) {
@@ -58,6 +57,7 @@ public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
 
     /**
      * Timed out?.
+     * 
      * @return
      */
     public boolean hasTimeout() {
@@ -68,7 +68,9 @@ public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
     /*
      * (non-Javadoc)
      * 
-     * @see es.santander.smartcity.ArcgisRestUtils.ArcgisFeatureTable#addToBatch(es.santander.smartcity.model.Feature)
+     * @see
+     * es.santander.smartcity.ArcgisRestUtils.ArcgisFeatureTable#addToBatch(es.santander.smartcity.
+     * model.Feature)
      */
     @Override
     public void addToBatch(Feature feature) {

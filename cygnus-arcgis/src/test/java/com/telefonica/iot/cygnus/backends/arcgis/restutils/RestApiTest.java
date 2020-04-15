@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 import com.telefonica.iot.cygnus.backends.arcgis.http.HttpResponse;
-import com.telefonica.iot.cygnus.backends.arcgis.restutils.RestApi;
 
 /**
  * @author dmartinez
@@ -22,11 +21,17 @@ import com.telefonica.iot.cygnus.backends.arcgis.restutils.RestApi;
  */
 public class RestApiTest {
 
+    /**
+     * 
+     */
     @Before
     public void setUp() {
         BasicConfigurator.configure();
     }
 
+    /**
+     * 
+     */
     @Test
     public void simpleGetTest() {
         String urlRequest = "http://www.google.es";
@@ -44,8 +49,11 @@ public class RestApiTest {
 
     }
 
+    /**
+     * 
+     */
     @Test
-    public void ParameterTest() {
+    public void parameterTest() {
 
         String urlRequest = "https://sags1/arcgis/rest/services/Policia";
 
@@ -63,6 +71,9 @@ public class RestApiTest {
 
     }
 
+    /**
+     * 
+     */
     @Test
     public void checkResponseTest() {
         HttpResponse response = new HttpResponse(200, "{OK}");
@@ -71,6 +82,9 @@ public class RestApiTest {
         Assert.assertTrue("Response should be ok.", response.isSuccessful());
     }
 
+    /**
+     * 
+     */
     @Test
     public void checkMultiResponseTest() {
         HttpResponse response = new HttpResponse(200,
@@ -80,6 +94,10 @@ public class RestApiTest {
         Assert.assertTrue("Response should be error.", response.hasError());
     }
 
+    /**
+     * 
+     * @throws Exception
+     */
     @Test
     public void finallyTest() throws Exception {
         try {

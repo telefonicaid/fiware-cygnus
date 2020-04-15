@@ -55,7 +55,8 @@ public class RestFeatureTable extends CredentialRestApi {
         this.serviceUrl = serviceUrl;
     }
 
-    private RestFeatureTable(URL serviceUrl, Credential credential, BaseLoggerInterface parentLogger) {
+    private RestFeatureTable(URL serviceUrl, Credential credential,
+            BaseLoggerInterface parentLogger) {
         this(serviceUrl, credential);
         this.parentLogger = parentLogger;
     }
@@ -67,7 +68,8 @@ public class RestFeatureTable extends CredentialRestApi {
      * @param credential
      * @throws MalformedURLException
      */
-    public RestFeatureTable(String url, Credential credential, String tokenGenUrl) throws ArcgisException {
+    public RestFeatureTable(String url, Credential credential, String tokenGenUrl)
+            throws ArcgisException {
         super(tokenGenUrl, credential, url);
 
         try {
@@ -86,8 +88,8 @@ public class RestFeatureTable extends CredentialRestApi {
      * @param parentLogger
      * @throws ArcgisException
      */
-    public RestFeatureTable(String url, Credential credential, String tokenGenUrl, BaseLoggerInterface parentLogger)
-            throws ArcgisException {
+    public RestFeatureTable(String url, Credential credential, String tokenGenUrl,
+            BaseLoggerInterface parentLogger) throws ArcgisException {
         this(url, credential, tokenGenUrl);
         this.parentLogger = parentLogger;
     }
@@ -175,7 +177,8 @@ public class RestFeatureTable extends CredentialRestApi {
      * @return
      * @throws ArcgisException
      */
-    public ResultPage<Feature> getFeatureList(String whereClause, int pageOffset, String token) throws ArcgisException {
+    public ResultPage<Feature> getFeatureList(String whereClause, int pageOffset, String token)
+            throws ArcgisException {
 
         logDebug("getFeatureList - Connecting Feature table: " + serviceUrl);
 
@@ -188,13 +191,13 @@ public class RestFeatureTable extends CredentialRestApi {
             params.put("resultOffset", String.valueOf(pageOffset));
         }
         params.put("where", whereClause);
-        if (token != null && !"".equals(token))  {
+        if (token != null && !"".equals(token)) {
             params.put("token", token);
         }
         params.put("f", "pjson");
 
         String fullUrl = serviceUrl.toString();
-        if (!fullUrl.endsWith("/query"))  {
+        if (!fullUrl.endsWith("/query")) {
             fullUrl += "/query";
         }
 
@@ -216,7 +219,8 @@ public class RestFeatureTable extends CredentialRestApi {
      */
     protected void checkResponse(HttpResponse response) throws ArcgisException {
         if (!checkHttpResponse(response)) {
-            String errorMsg = "Error: " + response.getErrorCode() + "\n" + response.getErrorMessage();
+            String errorMsg = "Error: " + response.getErrorCode() + "\n"
+                    + response.getErrorMessage();
             logError(errorMsg);
             throw new ArcgisException(errorMsg);
         } else {
@@ -231,11 +235,12 @@ public class RestFeatureTable extends CredentialRestApi {
      * @throws ArcgisException
      */
     public void sendFeatureList(List<Feature> featureList, String action) throws ArcgisException {
-        logDebug(action + " feature list(" + featureList.size() + "), into Feature table: " + serviceUrl);
+        logDebug(action + " feature list(" + featureList.size() + "), into Feature table: "
+                + serviceUrl);
 
         Map<String, String> params = new LinkedHashMap<String, String>();
         params.put("outSR", "{\"wkid\":4326}");
-        if (getCredential() != null && !"".equals(getCredential().getToken()))  {
+        if (getCredential() != null && !"".equals(getCredential().getToken())) {
             params.put("token", getCredential().getToken());
         }
         params.put("rollbackOnFailure", "true");
@@ -245,7 +250,7 @@ public class RestFeatureTable extends CredentialRestApi {
         bodyParams.put("f", "json");
 
         String fullUrl = serviceUrl.toString();
-        if (!fullUrl.endsWith("/" + action))  {
+        if (!fullUrl.endsWith("/" + action)) {
             fullUrl += "/" + action;
         }
 
@@ -276,7 +281,8 @@ public class RestFeatureTable extends CredentialRestApi {
      * @throws ArcgisException
      */
     public void addFeatureList(List<Feature> featureList) throws ArcgisException {
-        logDebug("Adding feature List (" + featureList.size() + ") to Feature table: " + serviceUrl);
+        logDebug(
+                "Adding feature List (" + featureList.size() + ") to Feature table: " + serviceUrl);
 
         sendFeatureList(featureList, "addFeatures");
     }
@@ -302,7 +308,8 @@ public class RestFeatureTable extends CredentialRestApi {
      * @throws ArcgisException
      */
     public void updateFeatureList(List<Feature> featureList) throws ArcgisException {
-        logDebug("Adding feature list (" + featureList.size() + ") to Feature table: " + serviceUrl);
+        logDebug(
+                "Adding feature list (" + featureList.size() + ") to Feature table: " + serviceUrl);
 
         sendFeatureList(featureList, "updateFeatures");
     }
@@ -314,10 +321,11 @@ public class RestFeatureTable extends CredentialRestApi {
      * @throws ArcgisException
      */
     public void deleteEntities(List<String> objectIdList) throws ArcgisException {
-        logDebug("Deleting entities (" + objectIdList.size() + ") from Feature table: " + serviceUrl);
+        logDebug("Deleting entities (" + objectIdList.size() + ") from Feature table: "
+                + serviceUrl);
 
         Map<String, String> params = new LinkedHashMap<String, String>();
-        if (getCredential() != null && !"".equals(getCredential().getToken()))  {
+        if (getCredential() != null && !"".equals(getCredential().getToken())) {
             params.put("token", getCredential().getToken());
         }
         params.put("returnDeleteResults", "false");
@@ -327,7 +335,7 @@ public class RestFeatureTable extends CredentialRestApi {
         bodyParams.put("f", "json");
 
         String fullUrl = serviceUrl.toString();
-        if (!fullUrl.endsWith("/deleteFeatures"))  {
+        if (!fullUrl.endsWith("/deleteFeatures")) {
             fullUrl += "/deleteFeatures";
         }
 
@@ -345,7 +353,8 @@ public class RestFeatureTable extends CredentialRestApi {
      * @throws ArcgisException
      */
     public void deleteFeatureList(List<Feature> featureList) throws ArcgisException {
-        logDebug("Deleting feature list (" + featureList.size() + ") from Feature table: " + serviceUrl);
+        logDebug("Deleting feature list (" + featureList.size() + ") from Feature table: "
+                + serviceUrl);
 
         List<String> objectIdList = new ArrayList<String>();
 
@@ -402,7 +411,8 @@ public class RestFeatureTable extends CredentialRestApi {
         } catch (ArcgisException e) {
             throw e;
         } catch (Exception e) {
-            throw new ArcgisException("getTableAttributesInfo, Unexpected Exception " + e.toString());
+            throw new ArcgisException(
+                    "getTableAttributesInfo, Unexpected Exception " + e.toString());
         }
     }
 
@@ -484,8 +494,8 @@ public class RestFeatureTable extends CredentialRestApi {
             }
         } catch (Exception e) {
             logError("Error setting unique attributes");
-            throw new ArcgisException(
-                    "Error setting unique attributes, " + e.getClass().getSimpleName() + "  " + e.getMessage());
+            throw new ArcgisException("Error setting unique attributes, "
+                    + e.getClass().getSimpleName() + "  " + e.getMessage());
         }
     }
 
@@ -532,8 +542,8 @@ public class RestFeatureTable extends CredentialRestApi {
      * @return
      * @throws ArcgisException
      */
-    protected ResultPage<Feature> resultPageFromJson(String responseJson, String listTag, int pageOffset)
-            throws ArcgisException {
+    protected ResultPage<Feature> resultPageFromJson(String responseJson, String listTag,
+            int pageOffset) throws ArcgisException {
 
         boolean hasMore = false;
 

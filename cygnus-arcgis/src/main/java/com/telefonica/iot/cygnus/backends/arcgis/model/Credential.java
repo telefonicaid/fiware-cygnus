@@ -9,8 +9,6 @@ import org.apache.log4j.Logger;
 
 import com.telefonica.iot.cygnus.backends.arcgis.baselogger.BaseLogger;
 
-import com.telefonica.iot.cygnus.backends.arcgis.model.Credential;
-
 /**
  * @author dmartinez
  *

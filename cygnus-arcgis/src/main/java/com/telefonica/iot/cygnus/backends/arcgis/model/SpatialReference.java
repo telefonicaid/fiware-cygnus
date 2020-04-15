@@ -8,13 +8,13 @@ package com.telefonica.iot.cygnus.backends.arcgis.model;
  *
  */
 public enum SpatialReference {
-    WGS84(4326), ED50(23030),
-    ETRS89(4258);
+    WGS84(4326), ED50(23030), ETRS89(4258);
 
     private int wkid;
 
     /**
      * Constructor.
+     * 
      * @param wkid
      */
     SpatialReference(int wkid) {

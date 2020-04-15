@@ -78,7 +78,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     private int maxBatchSize;
     private long timeoutSecs;
     private static volatile Map<String, NGSIArcgisFeatureTable> arcgisPersistenceBackend;
-    
+
     /**
      * Constructor.
      */
@@ -136,16 +136,16 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
      */
     protected int featuresBatched() {
         int total = 0;
-        for (Map.Entry<String, NGSIArcgisFeatureTable> entry: arcgisPersistenceBackend.entrySet()) {
+        for (Map.Entry<String, NGSIArcgisFeatureTable> entry : arcgisPersistenceBackend.entrySet()) {
             NGSIArcgisFeatureTable table = entry.getValue();
-            if (table != null){
+            if (table != null) {
                 total += table.featuresBatched();
             }
         }
-        
+
         return total;
     }
-    
+
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * 
@@ -320,12 +320,12 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     public Status process() throws EventDeliveryException {
         checkTimeouts();
         Status status = null;
-        try{
+        try {
             status = super.process();
-        }catch (Throwable e){
+        } catch (Throwable e) {
             LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
         }
-        return status; 
+        return status;
     }
 
     /**
@@ -342,7 +342,8 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
             }
         }
         if (!timeoutFound) {
-            LOGGER.debug("[" + this.getName() + "] No Feature table Timeouts found. Features in batch: " + featuresBatched());
+            LOGGER.debug("[" + this.getName() + "] No Feature table Timeouts found. Features in batch: "
+                    + featuresBatched());
         }
     }
 

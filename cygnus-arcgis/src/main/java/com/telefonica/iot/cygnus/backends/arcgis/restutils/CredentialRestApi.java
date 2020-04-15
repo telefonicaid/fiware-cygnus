@@ -43,7 +43,8 @@ public abstract class CredentialRestApi extends RestApi {
      * @param expirationMins
      * @throws ArcgisException
      */
-    public CredentialRestApi(String tokenGenUrl, Credential credential, String referer) throws ArcgisException {
+    public CredentialRestApi(String tokenGenUrl, Credential credential, String referer)
+            throws ArcgisException {
         super();
 
         this.credential = credential;
@@ -68,8 +69,9 @@ public abstract class CredentialRestApi extends RestApi {
      * @throws ArcgisException
      */
     public Credential getCredential() throws ArcgisException {
-        logDebug("------------------ getCredential() " + "\n\t tokenGenUrl: " + tokenGenUrl + "\n\t credential: "
-                + credential + "\n\t credential.isExpired(): " + (credential != null ? credential.isExpired() : null));
+        logDebug("------------------ getCredential() " + "\n\t tokenGenUrl: " + tokenGenUrl
+                + "\n\t credential: " + credential + "\n\t credential.isExpired(): "
+                + (credential != null ? credential.isExpired() : null));
         if (tokenGenUrl != null && (credential == null || credential.isExpired())) {
             logDebug("Creating/Refreshing token.");
             credential = RestAuthentication.createToken(credential, tokenGenUrl, referer);

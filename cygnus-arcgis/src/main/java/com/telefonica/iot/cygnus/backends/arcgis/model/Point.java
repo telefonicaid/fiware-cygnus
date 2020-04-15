@@ -5,10 +5,6 @@ import org.apache.log4j.Logger;
 import com.google.gson.JsonObject;
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 
-import com.telefonica.iot.cygnus.backends.arcgis.model.Geometry;
-import com.telefonica.iot.cygnus.backends.arcgis.model.Point;
-import com.telefonica.iot.cygnus.backends.arcgis.model.SpatialReference;
-
 /**
  * 
  * @author dmartinez
@@ -25,6 +21,7 @@ public class Point implements Geometry {
 
     /**
      * Constructor.
+     * 
      * @param lat
      * @param lng
      * @param spatialReference
@@ -37,6 +34,7 @@ public class Point implements Geometry {
 
     /**
      * Constructor.
+     * 
      * @param lat
      * @param lng
      */
@@ -60,6 +58,7 @@ public class Point implements Geometry {
 
     /**
      * Constructor.
+     * 
      * @param strPoint
      * @throws ArcgisException
      */
@@ -106,6 +105,7 @@ public class Point implements Geometry {
 
     /**
      * Factroy method.
+     * 
      * @param json
      * @return
      * @throws ArcgisException

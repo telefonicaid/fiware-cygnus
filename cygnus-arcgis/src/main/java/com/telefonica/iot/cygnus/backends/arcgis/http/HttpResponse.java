@@ -108,8 +108,8 @@ public class HttpResponse {
      * Full toString conversion.
      */
     public String toFullString() {
-        String json = "{ \"responseCode\" : " + responseCode + ", \"responseMessage\": \"" + responseMessage
-                + ", \"body\": \"" + body + "\"}";
+        String json = "{ \"responseCode\" : " + responseCode + ", \"responseMessage\": \""
+                + responseMessage + ", \"body\": \"" + body + "\"}";
         return json;
     }
 
@@ -144,7 +144,8 @@ public class HttpResponse {
      * Resumed toString conversion.
      */
     public String toString() {
-        String json = "{ \"responseCode\" : " + responseCode + ", \"responseMessage\": \"" + responseMessage + "\"}";
+        String json = "{ \"responseCode\" : " + responseCode + ", \"responseMessage\": \""
+                + responseMessage + "\"}";
         return json;
     }
 

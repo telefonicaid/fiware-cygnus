@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 import com.telefonica.iot.cygnus.backends.arcgis.model.Credential;
-import com.telefonica.iot.cygnus.backends.arcgis.restutils.RestAuthentication;
 
 /**
  * @author dmartinez
@@ -22,11 +21,18 @@ import com.telefonica.iot.cygnus.backends.arcgis.restutils.RestAuthentication;
  */
 public class RestAuthenticationTest implements ArcgisBaseTest {
 
+    /**
+     * 
+     * @throws Exception
+     */
     @Before
     public void setup() throws Exception {
 
     }
 
+    /**
+     * 
+     */
     @Test
     public void getPortalTokenTest() {
         Credential credential;
@@ -47,6 +53,9 @@ public class RestAuthenticationTest implements ArcgisBaseTest {
         }
     }
 
+    /**
+     * 
+     */
     @Test
     public void getOnlineTokenTest() {
         Credential credential;

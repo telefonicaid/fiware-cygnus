@@ -72,7 +72,8 @@ public class ArcgisFeatureTable extends BaseLogger {
      * @param tokenGenUrl
      * @param readOnly
      */
-    protected void initFeatureTable(String url, String user, String password, String tokenGenUrl, boolean readOnly) {
+    protected void initFeatureTable(String url, String user, String password, String tokenGenUrl,
+            boolean readOnly) {
 
         logDebug("Arcgis constructor.. " + url);
 
@@ -113,8 +114,8 @@ public class ArcgisFeatureTable extends BaseLogger {
      * @param readOnly
      * @param parentLogger
      */
-    public ArcgisFeatureTable(String url, String user, String password, String tokenGenUrl, boolean readOnly,
-            BaseLoggerInterface parentLogger) {
+    public ArcgisFeatureTable(String url, String user, String password, String tokenGenUrl,
+            boolean readOnly, BaseLoggerInterface parentLogger) {
         this.parentLogger = parentLogger;
     }
 
@@ -258,14 +259,16 @@ public class ArcgisFeatureTable extends BaseLogger {
      * @param featureArray
      * @param uniqueField
      */
-    public void addUpdateFeatures(List<Feature> featureArray, String uniqueField) throws ArcgisException {
+    public void addUpdateFeatures(List<Feature> featureArray, String uniqueField)
+            throws ArcgisException {
         clearResults();
         if (featureArray != null && featureArray.size() > 0) {
             String keyList = getUniqueFieldList(featureArray, uniqueField);
             String whereClause = uniqueField + " IN (" + keyList + ")";
 
             List<Feature> foundFeatures = queryFeatures(whereClause);
-            splitFeatureListIfExists(featureArray, foundFeatures, updateBatch, addBatch, uniqueField);
+            splitFeatureListIfExists(featureArray, foundFeatures, updateBatch, addBatch,
+                    uniqueField);
         }
 
         if (addBatch.size() >= batchSize) {
@@ -282,7 +285,8 @@ public class ArcgisFeatureTable extends BaseLogger {
     }
 
     /**
-     * Removes duplicate features from list given a field that should be unique, last occurrence remains.
+     * Removes duplicate features from list given a field that should be unique, last occurrence
+     * remains.
      * 
      * @param featureList
      * @param uniqueField
@@ -335,7 +339,8 @@ public class ArcgisFeatureTable extends BaseLogger {
      * @return comma separated list with uniqueField values.
      * @throws ArcgisException
      */
-    protected String getUniqueFieldList(List<Feature> featureArray, String uniqueField) throws ArcgisException {
+    protected String getUniqueFieldList(List<Feature> featureArray, String uniqueField)
+            throws ArcgisException {
         StringBuffer result = new StringBuffer();
         String separator = "";
         boolean quoted = true;
@@ -343,7 +348,8 @@ public class ArcgisFeatureTable extends BaseLogger {
         // Checks if field exists in table, an retrieves it's type
         if (hasAttribute(uniqueField)) {
             String uniqueFieldType = getAttributeType(uniqueField);
-            quoted = GisAttributeType.DATE.equals(uniqueFieldType) || GisAttributeType.STRING.equals(uniqueFieldType);
+            quoted = GisAttributeType.DATE.equals(uniqueFieldType)
+                    || GisAttributeType.STRING.equals(uniqueFieldType);
 
             // Make the list
             for (Feature feature : featureArray) {
@@ -372,8 +378,9 @@ public class ArcgisFeatureTable extends BaseLogger {
      * @param uniqueField
      * @throws ArcgisException
      */
-    protected void splitFeatureListIfExists(List<Feature> featureArray, List<Feature> serverFeatures,
-            List<Feature> existentFeatures, List<Feature> newFeatures, String uniqueField) throws ArcgisException {
+    protected void splitFeatureListIfExists(List<Feature> featureArray,
+            List<Feature> serverFeatures, List<Feature> existentFeatures, List<Feature> newFeatures,
+            String uniqueField) throws ArcgisException {
 
         for (Feature feature : featureArray) {
             boolean found = false;
@@ -494,7 +501,8 @@ public class ArcgisFeatureTable extends BaseLogger {
 
         try {
             resultFeatureList = arcGISFeatureTable.getFeatureList(whereClause);
-            logDebug("queryFeatures - processingQuery: Returning Results. " + resultFeatureList.size());
+            logDebug("queryFeatures - processingQuery: Returning Results. "
+                    + resultFeatureList.size());
         } catch (ArcgisException e) {
             logError(e.getMessage());
             setError(e);
@@ -525,23 +533,24 @@ public class ArcgisFeatureTable extends BaseLogger {
                     // Esperamos a que termine de insertar el paquete anterior
                     try {
                         switch (action) {
-                            case ADD_ACTION:
-                                arcGISFeatureTable.addFeatureList(featureList);
-                                break;
-                            case UPDATE_ACTION:
-                                arcGISFeatureTable.updateFeatureList(featureList);
-                                break;
-                            default:
-                                logError("commitFeatures: Invalid Action");
-                                this.error.set(true);
+                        case ADD_ACTION:
+                            arcGISFeatureTable.addFeatureList(featureList);
+                            break;
+                        case UPDATE_ACTION:
+                            arcGISFeatureTable.updateFeatureList(featureList);
+                            break;
+                        default:
+                            logError("commitFeatures: Invalid Action");
+                            this.error.set(true);
                         }
                     } catch (ArcgisException e) {
                         logError(e.getMessage());
                         setError(new Exception(e.getMessage()));
                     }
 
-                    logDebug("pendingFeatures.commitFeatures adding listener to commitFeatureFuture: "
-                            + featureList.size());
+                    logDebug(
+                            "pendingFeatures.commitFeatures adding listener to commitFeatureFuture: "
+                                    + featureList.size());
                 }
             } else {
                 logError("WARN - Argis.commitFeatures called with 0 entities.");
@@ -662,34 +671,36 @@ public class ArcgisFeatureTable extends BaseLogger {
 
     /**
      * Cleans feature attributes before sending it to Gis
+     * 
      * @param feature
      * @return
      */
-    protected Feature cleanFeature(Feature feature){
-    	Map<String, Object> attributes = feature.getAttributes();
-    	List<String> attrsToRemove = new ArrayList<String>();
-    	
-    	for (Map.Entry<String, Object> attrEntry : attributes.entrySet()) {
-    		String attName = attrEntry.getKey();
-    		Object attValue = attrEntry.getValue();
-    		if (hasAttribute(attName)){
-    			Field attribute = arcGISFeatureTable.getTableAttributes().get(attName);
-    			
-    			// Parse value if needed
-    			attrEntry.setValue(GisAttributeType.parseAttValue(attribute.getType(), attValue));
-    		} else {
-    			attrsToRemove.add(attName);
-    		}
-		}
-    	
-    	for (String attName : attrsToRemove) {
-			LOGGER.debug("ArcgisFeatureTable, cleanFeature: Field not found in table, ignoring it, " + attName);
-			attributes.remove(attName);
-		}
-    	
-    	return feature;
+    protected Feature cleanFeature(Feature feature) {
+        Map<String, Object> attributes = feature.getAttributes();
+        List<String> attrsToRemove = new ArrayList<String>();
+
+        for (Map.Entry<String, Object> attrEntry : attributes.entrySet()) {
+            String attName = attrEntry.getKey();
+            Object attValue = attrEntry.getValue();
+            if (hasAttribute(attName)) {
+                Field attribute = arcGISFeatureTable.getTableAttributes().get(attName);
+
+                // Parse value if needed
+                attrEntry.setValue(GisAttributeType.parseAttValue(attribute.getType(), attValue));
+            } else {
+                attrsToRemove.add(attName);
+            }
+        }
+
+        for (String attName : attrsToRemove) {
+            LOGGER.debug("ArcgisFeatureTable, cleanFeature: Field not found in table, ignoring it, "
+                    + attName);
+            attributes.remove(attName);
+        }
+
+        return feature;
     }
-    
+
     /**
      * 
      * @return

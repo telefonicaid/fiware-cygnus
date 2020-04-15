@@ -5,7 +5,6 @@ package com.telefonica.iot.cygnus.backends.arcgis.model;
 
 import java.time.LocalDateTime;
 
-
 /**
  * @author dmartinez
  *
@@ -34,6 +33,7 @@ public class UserCredential extends Credential {
 
     /**
      * Constructor.
+     * 
      * @param user
      * @param passwd
      * @param token
@@ -46,6 +46,7 @@ public class UserCredential extends Credential {
 
     /**
      * Constructor.
+     * 
      * @param user
      * @param passwd
      * @param token

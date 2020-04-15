@@ -46,6 +46,10 @@ public interface ArcgisBaseTest {
         }
     }
 
+    /**
+     * 
+     * @return Tokenken generation url
+     */
     public static String getGenerateTokenUrl() {
         if (testPortal) {
             return PORTAL_GENERATE_TOKEN_URL;
@@ -54,6 +58,10 @@ public interface ArcgisBaseTest {
         }
     }
 
+    /**
+     * 
+     * @return feature url
+     */
     public static String getFeatureUrl() {
         if (testPortal) {
             return PORTAL_FEATURETABLE_URL;

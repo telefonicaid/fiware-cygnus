@@ -81,7 +81,8 @@ public class RestAuthentication extends RestApi {
      * @return
      * @throws ArcgisException
      */
-    public static LocalDateTime expirationFromJson(String tokenJson, String expirationTag) throws ArcgisException {
+    public static LocalDateTime expirationFromJson(String tokenJson, String expirationTag)
+            throws ArcgisException {
         LocalDateTime result = null;
         if ("".equals(expirationTag)) {
             expirationTag = ONLINE_RESPONSE_EXPIRES_TAG;
@@ -100,7 +101,8 @@ public class RestAuthentication extends RestApi {
 
             long expiration = expirationElement.getAsLong();
 
-            result = LocalDateTime.ofInstant(Instant.ofEpochMilli(expiration), ZoneId.systemDefault());
+            result = LocalDateTime.ofInstant(Instant.ofEpochMilli(expiration),
+                    ZoneId.systemDefault());
         } else {
             String errorDesc = "Invalid token response format.";
             if (json.get("error") != null) {
@@ -122,8 +124,8 @@ public class RestAuthentication extends RestApi {
      * @return token
      * @throws ArcGisException
      */
-    public static Credential createUserToken(String user, String password, URL tokenGenUrl, String referer,
-            Integer expirationMins) throws ArcgisException {
+    public static Credential createUserToken(String user, String password, URL tokenGenUrl,
+            String referer, Integer expirationMins) throws ArcgisException {
         String tokenJSON = null;
         try {
             Map<String, String> bodyParams = new LinkedHashMap<String, String>();
@@ -142,7 +144,8 @@ public class RestAuthentication extends RestApi {
                 tokenJSON = response.getBody();
                 System.out.println("    tokenJSON: " + tokenJSON);
                 String token = tokenFromJson(tokenJSON, ONLINE_RESPONSE_TOKEN_TAG);
-                LocalDateTime expiration = expirationFromJson(tokenJSON, ONLINE_RESPONSE_EXPIRES_TAG);
+                LocalDateTime expiration = expirationFromJson(tokenJSON,
+                        ONLINE_RESPONSE_EXPIRES_TAG);
 
                 System.out.println("Token recived from service: " + token);
                 return new UserCredential(user, password, token, expiration);
@@ -165,8 +168,8 @@ public class RestAuthentication extends RestApi {
      * @return token
      * @throws ArcGisException
      */
-    public static Credential createUserToken(String user, String password, URL tokenGenUrl, String referer)
-            throws ArcgisException {
+    public static Credential createUserToken(String user, String password, URL tokenGenUrl,
+            String referer) throws ArcgisException {
         return createUserToken(user, password, tokenGenUrl, referer, null);
     }
 
@@ -185,7 +188,8 @@ public class RestAuthentication extends RestApi {
 
         if (credential instanceof UserCredential) {
             UserCredential userCredential = (UserCredential) credential;
-            credential = createUserToken(userCredential.getUser(), userCredential.getPassword(), tokenGenUrl, referer);
+            credential = createUserToken(userCredential.getUser(), userCredential.getPassword(),
+                    tokenGenUrl, referer);
 
         } else {
             throw new ArcgisException("Invalid Credential type.");

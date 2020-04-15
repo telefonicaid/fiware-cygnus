@@ -1,6 +1,7 @@
 package com.telefonica.iot.cygnus.backends.arcgis.restutils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.apache.log4j.BasicConfigurator;
 import org.junit.Before;
@@ -13,8 +14,6 @@ import com.google.gson.JsonParser;
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 import com.telefonica.iot.cygnus.backends.arcgis.model.Feature;
 
-import junit.framework.Assert;
-
 /**
  * 
  * @author dmartinez
@@ -22,11 +21,18 @@ import junit.framework.Assert;
  */
 public class FeatureTest {
 
+    /**
+     * 
+     * @throws Exception
+     */
     @Before
     public void setUp() throws Exception {
         BasicConfigurator.configure();
     }
 
+    /**
+     * 
+     */
     @Test
     public void getObjectIdTest() {
         System.out.println("----------------  getObjectIdTest");
@@ -51,6 +57,9 @@ public class FeatureTest {
         assertTrue("ok.", true);
     }
 
+    /**
+     * 
+     */
     @Test
     public void createInstanceFromJson() {
         System.out.println("----------------  createInstanceFromJson");
@@ -74,6 +83,9 @@ public class FeatureTest {
 
     }
 
+    /**
+     * 
+     */
     @Test
     public void getSetObjectId() {
         System.out.println("----------------  getSetObjectId");
@@ -82,12 +94,16 @@ public class FeatureTest {
         try {
             feature.setObjectId(255);
             assertTrue("getObjectId() doesn't match", feature.getObjectId() == 255);
-            assertTrue("OBJECTID not properly saved", ((Long) feature.getAttributes().get("OBJECTID")) == 255);
+            assertTrue("OBJECTID not properly saved",
+                    ((Long) feature.getAttributes().get("OBJECTID")) == 255);
         } catch (ArcgisException e) {
             fail(e.getMessage());
         }
     }
 
+    /**
+     * 
+     */
     @Test
     public void createInstanceFromJson2() {
         System.out.println("----------------  createInstanceFromJson2");
@@ -101,11 +117,12 @@ public class FeatureTest {
 
             for (JsonElement featureJson : features) {
                 Feature feature = Feature.createInstanceFromJson(featureJson.getAsJsonObject());
-                if (feature == null)
+                if (feature == null) {
                     fail("Feature, Cant be created, " + featureJson.toString());
+                }
             }
 
-            Assert.assertTrue(true);
+            assertTrue(true);
         } catch (ArcgisException e) {
             fail(e.getMessage());
         } catch (Exception e) {

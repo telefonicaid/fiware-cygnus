@@ -11,7 +11,6 @@ import org.junit.Test;
 
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 import com.telefonica.iot.cygnus.backends.arcgis.model.Feature;
-import com.telefonica.iot.cygnus.backends.arcgis.restutils.ArcgisFeatureTable;
 
 /**
  * 
@@ -71,7 +70,8 @@ public class ArcgisFeatureTableTest implements ArcgisBaseTest {
             arcgis.setUniqueField(uniqueField);
             arcgis.setBatchAction(ArcgisFeatureTable.ADD_UPDATE_ACTION);
 
-            Feature feature = FeatureTestFactory.getNewOcupacionFeature("Prueba 1 Arcgis.java ", 9991);
+            Feature feature = FeatureTestFactory.getNewOcupacionFeature("Prueba 1 Arcgis.java ",
+                    9991);
             arcgis.addToBatch(feature);
             feature = FeatureTestFactory.getNewOcupacionFeature("Prueba 2 Arcgis.java", 9992);
             arcgis.addToBatch(feature);
@@ -98,7 +98,8 @@ public class ArcgisFeatureTableTest implements ArcgisBaseTest {
                         assertTrue(feature2.getAttributes().get("descripcion").equals("modificado"));
                         break;
                     case 9992:
-                        assertTrue(feature2.getAttributes().get("descripcion").equals("Prueba 2 Arcgis.java"));
+                        assertTrue(feature2.getAttributes().get("descripcion")
+                                .equals("Prueba 2 Arcgis.java"));
                         break;
                     default:
                         fail("Unexpected Feature");
@@ -120,8 +121,8 @@ public class ArcgisFeatureTableTest implements ArcgisBaseTest {
     public void arcgisGetFeatures() {
         System.out.println("----------------  arcgisGetFeatures");
         ArcgisFeatureTable arcgis = new ArcgisFeatureTable(
-                "https://sags1/arcgis/rest/services/Urbanismo/MobiliarioUrbano_ETRS89/FeatureServer/5", "", "", "",
-                false, null);
+                "https://sags1/arcgis/rest/services/Urbanismo/MobiliarioUrbano_ETRS89/FeatureServer/5",
+                "", "", "", false, null);
         List<Feature> resultList;
         try {
             resultList = arcgis.queryFeatures(arcgis.getUniqueIdField() + ">0");
@@ -139,8 +140,8 @@ public class ArcgisFeatureTableTest implements ArcgisBaseTest {
     @Test
     public void arcgisGetSecuredFeatures() {
         System.out.println("----------------  arcgisGetSecuredFeatures");
-        ArcgisFeatureTable arcgis = new ArcgisFeatureTable(PORTAL_FEATURETABLE_URL, PORTAL_USER, PORTAL_PASSWORD,
-                PORTAL_GENERATE_TOKEN_URL, false, null);
+        ArcgisFeatureTable arcgis = new ArcgisFeatureTable(PORTAL_FEATURETABLE_URL, PORTAL_USER,
+                PORTAL_PASSWORD, PORTAL_GENERATE_TOKEN_URL, false, null);
         List<Feature> resultList;
         try {
             resultList = arcgis.queryFeatures(arcgis.getUniqueIdField() + ">0");

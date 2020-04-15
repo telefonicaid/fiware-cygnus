@@ -32,7 +32,8 @@ public class ResultPage<T> implements Iterable<T>, Serializable {
 
     private boolean hasNext;
 
-    private static final ResultPage<?> EMPTY = new ResultPage<Object>(0, 0, Collections.emptyList());
+    private static final ResultPage<?> EMPTY = new ResultPage<Object>(0, 0,
+            Collections.emptyList());
 
     /**
      * 
@@ -309,9 +310,10 @@ public class ResultPage<T> implements Iterable<T>, Serializable {
     public String toString() {
 
         StringBuffer sb = new StringBuffer(super.toString());
-        sb.append(" count:[").append(count).append("] hasNext:[").append(hasNext).append("] pageSize:[")
-                .append(pageSize).append("] startIndex:[").append(startIndex).append("] listSize:[")
-                .append(items.size()).append("] pageNumber:[").append(getPageNumber()).append("]");
+        sb.append(" count:[").append(count).append("] hasNext:[").append(hasNext)
+                .append("] pageSize:[").append(pageSize).append("] startIndex:[").append(startIndex)
+                .append("] listSize:[").append(items.size()).append("] pageNumber:[")
+                .append(getPageNumber()).append("]");
         return sb.toString();
 
     }

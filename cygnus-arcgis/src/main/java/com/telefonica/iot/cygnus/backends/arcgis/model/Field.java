@@ -9,10 +9,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 
-import com.telefonica.iot.cygnus.backends.arcgis.model.Feature;
-import com.telefonica.iot.cygnus.backends.arcgis.model.Field;
-import com.telefonica.iot.cygnus.backends.arcgis.model.GisAttributeType;
-
 /**
  * @author dmartinez
  *
@@ -44,8 +40,7 @@ public class Field {
     }
 
     /**
-     * @param name
-     *            the name to set
+     * @param the name to set
      */
     public void setName(String name) {
         this.name = name;
@@ -59,8 +54,7 @@ public class Field {
     }
 
     /**
-     * @param alias
-     *            the alias to set
+     * @param the alias to set
      */
     public void setAlias(String alias) {
         this.alias = alias;
@@ -74,8 +68,7 @@ public class Field {
     }
 
     /**
-     * @param type
-     *            the type to set
+     * @param the type to set
      */
     public void setType(GisAttributeType type) {
         this.type = type;
@@ -89,23 +82,21 @@ public class Field {
     }
 
     /**
-     * @param unique
-     *            the unique to set
+     * @param the unique to set
      */
     public void setUnique(boolean unique) {
         this.unique = unique;
     }
 
     /**
-     * @return the nullable
+     * @return is nullable
      */
     public boolean isNullable() {
         return nullable;
     }
 
     /**
-     * @param nullable
-     *            the nullable to set
+     * @param the nullable to set
      */
     public void setNullable(boolean nullable) {
         this.nullable = nullable;
@@ -113,6 +104,7 @@ public class Field {
 
     /**
      * Factory method.
+     * 
      * @param jsonStr
      * @return
      * @throws ArcgisException

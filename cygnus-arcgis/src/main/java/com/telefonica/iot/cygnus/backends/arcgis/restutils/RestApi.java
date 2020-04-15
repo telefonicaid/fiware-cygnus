@@ -59,7 +59,8 @@ public class RestApi extends BaseLogger {
                 } catch (UnsupportedEncodingException e) {
                     result += separator + param.getKey() + "=" + param.getValue();
                 } catch (Exception e) {
-                    LOGGER.error("Error parsing URL param " + param.getKey() + " value " + param.getValue());
+                    LOGGER.error("Error parsing URL param " + param.getKey() + " value "
+                            + param.getValue());
                     throw e;
                 }
                 separator = "&";
@@ -128,8 +129,8 @@ public class RestApi extends BaseLogger {
      * @return
      * @throws Exception
      */
-    public static HttpResponse requestHTTP(String urlToRead, Map<String, String> params, HttpMethod httpMethod,
-            String body) {
+    public static HttpResponse requestHTTP(String urlToRead, Map<String, String> params,
+            HttpMethod httpMethod, String body) {
 
         HttpResponse httpResponse = new HttpResponse();
         StringBuilder result = new StringBuilder("");
@@ -174,8 +175,8 @@ public class RestApi extends BaseLogger {
             httpResponse.setResponseCode(responseCode);
             httpResponse.setResponseMessage(conn.getResponseMessage());
 
-            rd = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream(), java.nio.charset.StandardCharsets.UTF_8.name()));
+            rd = new BufferedReader(new InputStreamReader(conn.getInputStream(),
+                    java.nio.charset.StandardCharsets.UTF_8.name()));
             String line;
 
             if (responseCode == 200) {
@@ -194,8 +195,8 @@ public class RestApi extends BaseLogger {
             httpResponse.setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
             httpResponse.setResponseMessage(e.getClass() + "\n" + e.getMessage());
         } catch (IllegalArgumentException e) {
-            httpResponse.setResponseMessage(
-                    "Check url, it may have 'http:/' instead of 'http://' " + e.getClass() + "\n" + e.getMessage());
+            httpResponse.setResponseMessage("Check url, it may have 'http:/' instead of 'http://' "
+                    + e.getClass() + "\n" + e.getMessage());
         } catch (Exception e) {
             httpResponse.setResponseMessage(e.getClass() + "\n" + e.getMessage());
         } finally {
@@ -247,7 +248,8 @@ public class RestApi extends BaseLogger {
      * @return
      * @throws UnsupportedEncodingException
      */
-    public static HttpResponse httpPost(String urlToRead, Map<String, String> params, Map<String, String> bodyParams) {
+    public static HttpResponse httpPost(String urlToRead, Map<String, String> params,
+            Map<String, String> bodyParams) {
         bodyParams = checkParameters(bodyParams);
         return requestHTTP(urlToRead, params, HttpMethod.POST, getPostParameters(bodyParams));
     }
@@ -287,10 +289,11 @@ public class RestApi extends BaseLogger {
         } catch (JsonSyntaxException e) {
             throw new ArcgisException("Unexpected response format" + httpResponse);
         } catch (IllegalStateException | ClassCastException e) {
-            throw new ArcgisException(
-                    "checkHttpResponse, Unexpected exception" + e.getMessage() + " \n\t" + httpResponse);
+            throw new ArcgisException("checkHttpResponse, Unexpected exception" + e.getMessage()
+                    + " \n\t" + httpResponse);
         } catch (NullPointerException e) {
-            throw new ArcgisException("checkHttpResponse, Null Body recived from server." + httpResponse);
+            throw new ArcgisException(
+                    "checkHttpResponse, Null Body recived from server." + httpResponse);
         }
     }
 
@@ -324,7 +327,8 @@ public class RestApi extends BaseLogger {
      * @return
      * @throws ArcgisException
      */
-    protected static JsonElement getErrorJsonobject(JsonObject httpResponse) throws ArcgisException {
+    protected static JsonElement getErrorJsonobject(JsonObject httpResponse)
+            throws ArcgisException {
         JsonElement result = null;
         try {
             if (httpResponse.has("error")) {
@@ -394,10 +398,12 @@ public class RestApi extends BaseLogger {
                     details = errorNode.get("details").getAsString();
                 }
             } catch (Exception e) {
-                throw new ArcgisException("Error checking single reponse, " + node.toString() + " - " + e.getMessage());
+                throw new ArcgisException("Error checking single reponse, " + node.toString()
+                        + " - " + e.getMessage());
             }
 
-            throw new ArcgisException(errorCode, "Response Error " + errorCode + "  " + message + "\n" + details);
+            throw new ArcgisException(errorCode,
+                    "Response Error " + errorCode + "  " + message + "\n" + details);
         }
     }
 

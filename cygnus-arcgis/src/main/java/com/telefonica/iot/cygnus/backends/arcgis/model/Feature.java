@@ -16,12 +16,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 
-import com.telefonica.iot.cygnus.backends.arcgis.model.Feature;
-import com.telefonica.iot.cygnus.backends.arcgis.model.Geometry;
-import com.telefonica.iot.cygnus.backends.arcgis.model.GisAttributeType;
-import com.telefonica.iot.cygnus.backends.arcgis.model.Point;
-import com.telefonica.iot.cygnus.backends.arcgis.model.SpatialReference;
-
 /**
  * @author dmartinez
  *
@@ -270,7 +264,8 @@ public class Feature {
                 attributes.put(OBJECTID_FIELDNAME, objectId);
             }
         } catch (Exception e) {
-            throw new ArcgisException("Error setting OBJECTID for feature " + this.toString() + " - Error: " + e);
+            throw new ArcgisException(
+                    "Error setting OBJECTID for feature " + this.toString() + " - Error: " + e);
         }
     }
 
@@ -315,15 +310,16 @@ public class Feature {
             Geometry geometry;
             if (json.has("geometry")) {
                 JsonObject jsonGeometry = json.get("geometry").getAsJsonObject();
-                geometry = Point.createInstanceFromJson(jsonGeometry); // TODO ¿distintos tipos de geometría?
+                geometry = Point.createInstanceFromJson(jsonGeometry); // TODO ¿distintos tipos de
+                                                                       // geometría?
             } else {
                 geometry = new Point(0, 0);
             }
             Map<String, Object> attributes = attToMap(json.get("attributes").getAsJsonObject());
             return new Feature(geometry, attributes);
         } catch (Exception e) {
-            throw new ArcgisException(
-                    "Can't cast Feature from Json, " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            throw new ArcgisException("Can't cast Feature from Json, "
+                    + e.getClass().getSimpleName() + " - " + e.getMessage());
         }
 
     }
