@@ -18,8 +18,14 @@
 package com.telefonica.iot.cygnus.containers;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
 /**
@@ -591,17 +597,23 @@ public class NameMappings {
      */
     public class AttributeMapping {
         
+        private static final String JSONPATH_PATTERN_STR = "^(\\w*[^\\\\])\\.([^*+?].+)";
+        private final JsonParser jsonParser = new JsonParser();
+        
         private String originalAttributeName;
         private Pattern originalAttributeNamePattern;
         private String originalAttributeType;
         private Pattern originalAttributeTypePattern;
         private String newAttributeName;
         private String newAttributeType;
+        private String jsonPath;
+        private boolean isJsonPath;
         
         /**
          * Constructor.
          */
         public AttributeMapping() {
+            isJsonPath = false;
         } // AttributeMapping
         
         public String getOriginalAttributeName() {
@@ -627,15 +639,56 @@ public class NameMappings {
         public Pattern getOriginalAttributeTypePattern() {
             return originalAttributeTypePattern;
         } // getOriginalAttributeTypePattern
+          
+        public boolean isJsonPath() {
+            return isJsonPath;
+        } // isJsonPath
+        
+        /**
+         * Maps value if it's JsonPath mapping.
+         * @param originalValue
+         * @return
+         */
+        public JsonElement getMappedValue (JsonElement originalValue){
+            JsonElement result = originalValue;
+            
+            if(isJsonPath() && originalValue != null && originalValue.isJsonObject()){
+                String attValue = originalValue.getAsString();
+                DocumentContext attContext = JsonPath.parse(attValue);
+                
+                String resultValue = attContext.read(jsonPath);
+                LOGGER.debug ( "mappedValue: " + newAttributeName + ": " + resultValue);
+                try{
+                    result = jsonParser.parse(resultValue);
+                }catch(JsonParseException e){
+                    LOGGER.error(" Unable to map attribute: " + originalAttributeName + " jsonPath: " + jsonPath);
+                    LOGGER.error("Error: " + e.getMessage());
+                }
+            }
+            
+            return result;
+        }
         
         /**
          * Compiles the regular expressions into Java Patterns.
          */
         public void compilePatterns() {
-            originalAttributeNamePattern = Pattern.compile(originalAttributeName);
             originalAttributeTypePattern = Pattern.compile(originalAttributeType);
+            
+
+            Pattern isJsonPathPattern = Pattern.compile(JSONPATH_PATTERN_STR);
+            
+            Matcher jsonPathMatcher = isJsonPathPattern.matcher(originalAttributeName);
+            isJsonPath = jsonPathMatcher.matches();
+            
+            if (isJsonPath){
+                originalAttributeNamePattern = Pattern.compile(jsonPathMatcher.group(1));
+                jsonPath = "$." + jsonPathMatcher.group(2);
+            } else {
+                originalAttributeNamePattern = Pattern.compile(originalAttributeName);
+            }
         } // compilePatterns
-        
+                
         @Override
         public String toString() {
             String attrMappingStr =

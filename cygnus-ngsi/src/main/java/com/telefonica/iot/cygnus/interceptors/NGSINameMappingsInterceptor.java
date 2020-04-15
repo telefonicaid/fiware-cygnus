@@ -17,6 +17,16 @@
  */
 package com.telefonica.iot.cygnus.interceptors;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.flume.Context;
+import org.apache.flume.Event;
+import org.apache.flume.interceptor.Interceptor;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
@@ -31,14 +41,6 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.JsonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-import org.apache.flume.Context;
-import org.apache.flume.Event;
-import org.apache.flume.interceptor.Interceptor;
 
 /**
  *
@@ -57,6 +59,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
      * Constructor.
      * 
      * @param nameMappingsConfFile
+     * @param stopOnFirstAttrMatch
      * @param invalidConfiguration
      */
     public NGSINameMappingsInterceptor(String nameMappingsConfFile, boolean stopOnFirstAttrMatch, boolean invalidConfiguration) {
@@ -64,6 +67,15 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         this.stopOnFirstAttrMatch = stopOnFirstAttrMatch;
         this.invalidConfiguration = invalidConfiguration;
     } // NGSINameMappingsInterceptor
+
+    /**
+     * Constructor.
+     * @param nameMappingsConfFile
+     * @param invalidConfiguration
+     */
+    public NGSINameMappingsInterceptor(String nameMappingsConfFile, boolean invalidConfiguration) {
+        this(nameMappingsConfFile, true, invalidConfiguration);
+    }// NGSINameMappingsInterceptor
 
     @Override
     public void initialize() {
@@ -496,16 +508,18 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 if (attributeMapping.getNewAttributeType() != null) {
                     newAttributeType = attributeMapping.getNewAttributeType();
                 } // if
-
+                
                 // Modify context data, or add a new attribute to the list.
                 if (firstMatch){
                     newCA.setName(newAttributeName);
                     newCA.setType(newAttributeType);
+                    newCA.setContextValue(attributeMapping.getMappedValue(newCA.getValue()));
                     LOGGER.debug("[nmi] newCA: " + newCA.toString());
                 } else {
                     ContextAttribute otherCA = newCA.deepCopy();
                     otherCA.setName(newAttributeName);
                     otherCA.setType(newAttributeType);
+                    otherCA.setContextValue(attributeMapping.getMappedValue(otherCA.getValue()));
                     LOGGER.debug("[nmi] brand newCA: " + otherCA.toString());
                     
                     newAttributes.add(otherCA);

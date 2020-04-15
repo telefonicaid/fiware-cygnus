@@ -16,6 +16,12 @@
     </properties>
 
     <dependencies>
+    	<!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
+		<dependency>
+		    <groupId>com.jayway.jsonpath</groupId>
+		    <artifactId>json-path</artifactId>
+		    <version>2.4.0</version>
+		</dependency>
         <!-- Required for testing -->
         <dependency>
             <groupId>org.mockito</groupId>
