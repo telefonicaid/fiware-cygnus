@@ -19,8 +19,6 @@ import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 import com.telefonica.iot.cygnus.backends.arcgis.model.Credential;
 import com.telefonica.iot.cygnus.backends.arcgis.model.Feature;
 import com.telefonica.iot.cygnus.backends.arcgis.model.UserCredential;
-import com.telefonica.iot.cygnus.backends.arcgis.restutils.RestApi;
-import com.telefonica.iot.cygnus.backends.arcgis.restutils.RestFeatureTable;
 
 /**
  * @author dmartinez
@@ -28,22 +26,30 @@ import com.telefonica.iot.cygnus.backends.arcgis.restutils.RestFeatureTable;
  */
 public class RestFeatureTableTest implements ArcgisBaseTest {
 
-    static final Logger logger = Logger.getLogger(RestFeatureTableTest.class);
+    static final Logger LOGGER = Logger.getLogger(RestFeatureTableTest.class);
 
+    /**
+     * 
+     */
     @Before
     public void setUp() {
         BasicConfigurator.configure();
     }
 
+    /**
+     * 
+     * @throws MalformedURLException
+     */
     @Test
-    public void ConnectionTest() throws MalformedURLException {
+    public void connectionTest() throws MalformedURLException {
         String serviceUrl = ArcgisBaseTest.getFeatureUrl();
         String tokenUrl = ArcgisBaseTest.getGenerateTokenUrl();
 
         System.out.println("----------------  ConnectionTest. Portal:" + ArcgisBaseTest.testPortal);
 
         try {
-            Credential credential = new UserCredential(ArcgisBaseTest.getUser(), ArcgisBaseTest.getPassword());
+            Credential credential = new UserCredential(ArcgisBaseTest.getUser(),
+                    ArcgisBaseTest.getPassword());
             RestFeatureTable featureTable = new RestFeatureTable(serviceUrl, credential, tokenUrl);
 
             System.out.println("Connecting....");
@@ -63,16 +69,27 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
 
     }
 
+    /**
+     * 
+     * @param serviceUrl
+     * @return
+     * @throws ArcgisException
+     */
     private RestFeatureTable createFeatureTable(String serviceUrl) throws ArcgisException {
         String tokenUrl = ArcgisBaseTest.getGenerateTokenUrl();
 
         System.out.println("----------------  PortalConnectionTest");
-        Credential credential = new UserCredential(ArcgisBaseTest.getUser(), ArcgisBaseTest.getPassword());
+        Credential credential = new UserCredential(ArcgisBaseTest.getUser(),
+                ArcgisBaseTest.getPassword());
         return new RestFeatureTable(serviceUrl, credential, tokenUrl);
     }
 
+    /**
+     * 
+     * @throws MalformedURLException
+     */
     @Test
-    public void ConnectionWithoutCredentialsTest() throws MalformedURLException {
+    public void connectionWithoutCredentialsTest() throws MalformedURLException {
         String serviceUrl = ArcgisBaseTest.getFeatureUrl();
         System.out.println("----------------  ConnectionWithoutCredentialsTest");
 
@@ -93,6 +110,10 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
         assertTrue("Ejecución correcta", true);
     }
 
+    /**
+     * 
+     * @throws MalformedURLException
+     */
     @Test
     public void checkResponse() throws MalformedURLException {
         String responseError = "{\"error\":{\"code\":500,\"message\":\"Unable to complete operation.\",\"details\":[\"Parser error: Some parameters could not be recognized.\"]}}";
@@ -106,14 +127,16 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
                 RestApi.checkHttpResponse(responseError);
                 fail("FAILED - Failed detecting error response");
             } catch (ArcgisException e) {
-                System.out.println("SUCCESS - Error response successfully detected: " + e.getMessage());
+                System.out.println(
+                        "SUCCESS - Error response successfully detected: " + e.getMessage());
             }
 
             try {
                 RestApi.checkHttpResponse(responseInvalid);
                 fail("FAILED - Failed detecting error response");
             } catch (ArcgisException e) {
-                System.out.println("SUCCESS - Invalid response successfully detected: " + e.getMessage());
+                System.out.println(
+                        "SUCCESS - Invalid response successfully detected: " + e.getMessage());
             }
 
             try {
@@ -128,6 +151,11 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
         }
     }
 
+    /**
+     * 
+     * @throws MalformedURLException
+     * @throws ArcgisException
+     */
     @Test
     public void addFeature() throws MalformedURLException, ArcgisException {
 
@@ -142,6 +170,11 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
 
     }
 
+    /**
+     * 
+     * @throws MalformedURLException
+     * @throws ArcgisException
+     */
     @Test
     public void updateFeature() throws MalformedURLException, ArcgisException {
 
@@ -149,13 +182,19 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
         String serviceUrl = ArcgisBaseTest.getFeatureUrl();
         RestFeatureTable featureTable = createFeatureTable(serviceUrl);
 
-        Feature feature = FeatureTestFactory.getUpdatedOcupacionFeature(621, "prueba updatePortalFeature");
+        Feature feature = FeatureTestFactory.getUpdatedOcupacionFeature(621,
+                "prueba updatePortalFeature");
         System.out.println(feature.toJson().toString());
 
         featureTable.updateFeature(feature);
 
     }
 
+    /**
+     * 
+     * @throws MalformedURLException
+     * @throws ArcgisException
+     */
     @Test
     public void deleteFeature() throws MalformedURLException, ArcgisException {
         try {
@@ -175,13 +214,19 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
 
     }
 
+    /**
+     * 
+     * @throws MalformedURLException
+     * @throws ArcgisException
+     */
     @Test
     public void getFeatures() throws MalformedURLException, ArcgisException {
         try {
             System.out.println("----------------  getOnlineFeatures");
             String serviceUrl = ArcgisBaseTest.getFeatureUrl();
             String tokenUrl = ArcgisBaseTest.getGenerateTokenUrl();
-            Credential credential = new UserCredential(ArcgisBaseTest.getUser(), ArcgisBaseTest.getPassword());
+            Credential credential = new UserCredential(ArcgisBaseTest.getUser(),
+                    ArcgisBaseTest.getPassword());
             RestFeatureTable featureTable = new RestFeatureTable(serviceUrl, credential, tokenUrl);
 
             String whereClause = "OBJECTID>0";
@@ -194,16 +239,23 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
 
     }
 
+    /**
+     * 
+     * @throws MalformedURLException
+     * @throws ArcgisException
+     */
     @Test
-    public void getTableAttributesInfo_noCred() throws MalformedURLException, ArcgisException {
+    public void getTableAttributesInfoNoCred() throws MalformedURLException, ArcgisException {
         try {
             System.out.println("----------------  getTableAttributesInfo_noCred");
             String serviceUrl = ArcgisBaseTest.getFeatureUrl();
             RestFeatureTable featureTable = createFeatureTable(serviceUrl);
 
             featureTable.getTableAttributesInfo();
-            System.out.println("Number of fields detected: " + featureTable.getTableAttributes().size());
-            System.out.println("Number of Unique fields: " + featureTable.getUniqueAttributes().size());
+            System.out.println(
+                    "Number of fields detected: " + featureTable.getTableAttributes().size());
+            System.out.println(
+                    "Number of Unique fields: " + featureTable.getUniqueAttributes().size());
             assertTrue(true);
         } catch (Exception e) {
             fail(e.getMessage());
@@ -211,20 +263,28 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
 
     }
 
+    /**
+     * 
+     * @throws MalformedURLException
+     * @throws ArcgisException
+     */
     @Test
     public void getTableAttributesInfo() throws MalformedURLException, ArcgisException {
         try {
             System.out.println("----------------  getTableAttributesInfo");
             String serviceUrl = "https://sags1/arcgis/rest/services/Policia/SenalesTrafico_ETRS89/MapServer/5";
             serviceUrl = "https://services5.arcgis.com/398f12mJiCbJeoAQ/arcgis/rest/services/OcupacionDummy/FeatureServer/0";
-            Credential credential = new UserCredential(ArcgisBaseTest.getUser(), ArcgisBaseTest.getPassword());
+            Credential credential = new UserCredential(ArcgisBaseTest.getUser(),
+                    ArcgisBaseTest.getPassword());
 
             RestFeatureTable featureTable = new RestFeatureTable(serviceUrl, credential,
                     ArcgisBaseTest.getGenerateTokenUrl());
 
             featureTable.getTableAttributesInfo();
-            System.out.println("Number of fields detected: " + featureTable.getTableAttributes().size());
-            System.out.println("Number of Unique fields: " + featureTable.getUniqueAttributes().size());
+            System.out.println(
+                    "Number of fields detected: " + featureTable.getTableAttributes().size());
+            System.out.println(
+                    "Number of Unique fields: " + featureTable.getUniqueAttributes().size());
             assertTrue(true);
         } catch (Exception e) {
             fail(e.getMessage());
