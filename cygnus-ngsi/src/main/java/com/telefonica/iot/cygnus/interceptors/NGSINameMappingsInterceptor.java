@@ -451,6 +451,10 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             String newAttributeName = originalAttributeName;
             String newAttributeType = originalAttributeType;
             AttributeMapping attributeMapping = null;
+            List<ContextAttribute> newAttributes = new ArrayList<ContextAttribute>();
+            
+            boolean firstMatch = true;
+            boolean attributeFound = false;
 
             for (AttributeMapping am : entityMapping.getAttributeMappings()) {
                 attributeMapping = am;
@@ -483,6 +487,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 } // if
 
                 LOGGER.debug("[nmi] Attribute found: " + originalAttributeName + ", " + originalAttributeType);
+                attributeFound = true;
 
                 if (attributeMapping.getNewAttributeName() != null) {
                     newAttributeName = attributeMapping.getNewAttributeName();
@@ -492,19 +497,34 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     newAttributeType = attributeMapping.getNewAttributeType();
                 } // if
 
+                // Modify context data, or add a new attribute to the list.
+                if (firstMatch){
+                    newCA.setName(newAttributeName);
+                    newCA.setType(newAttributeType);
+                    LOGGER.debug("[nmi] newCA: " + newCA.toString());
+                } else {
+                    ContextAttribute otherCA = newCA.deepCopy();
+                    otherCA.setName(newAttributeName);
+                    otherCA.setType(newAttributeType);
+                    LOGGER.debug("[nmi] brand newCA: " + otherCA.toString());
+                    
+                    newAttributes.add(otherCA);
+                }
+                
                 if (this.stopOnFirstAttrMatch) {
                     break;
+                } else {
+                    firstMatch = false;
                 }
             } // for
-
-            if (attributeMapping == null) {
+            
+            // Add new Attributes
+            newCE.getAttributes().addAll(newAttributes);
+            
+            if (!attributeFound) {
                 LOGGER.debug("[nmi] Attribute not found: " + originalAttributeName + ", " + originalAttributeType);
-                continue;
-            } // if
+            } 
 
-            newCA.setName(newAttributeName);
-            newCA.setType(newAttributeType);
-            LOGGER.debug("[nmi] newCA: " + newCA.toString());
         } // for
         LOGGER.debug("[nmi] newCE: " + newCE.toString());
         return new ImmutableTriple(newService, newServicePath, newCE);
