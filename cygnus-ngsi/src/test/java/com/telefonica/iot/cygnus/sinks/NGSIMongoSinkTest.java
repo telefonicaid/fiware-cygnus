@@ -47,6 +47,9 @@ import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
 
 public class NGSIMongoSinkTest {
@@ -292,7 +295,7 @@ public class NGSIMongoSinkTest {
                     }
                 }
                 System.out.println("[NGSIMongoSinkTest.testNativeTypeRowBatch: " + aggregation);
-                String correctBatch = "[Document{{attrName=someNumber, attrType=number, attrValue=2, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=somneBoolean, attrType=Boolean, attrValue=true, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someDate, attrType=DateTime, attrValue=2016-09-21T01:23:00.00Z, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someGeoJson, attrType=geo:json, attrValue={\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someJson, attrType=json, attrValue={\"String\": \"string\"}, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someString, attrType=string, attrValue=foo, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someString2, attrType=string, attrValue=, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someName1, attrType=someType1, attrValue=-3.7167, 40.3833, recvTime=Mon Sep 09 11:09:09 CEST 2019}}, Document{{attrName=someName2, attrType=someType2, attrValue=someValue2, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}]";
+                String correctBatch = "[Document{{attrName=someNumber, attrType=number, attrValue=2, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=somneBoolean, attrType=Boolean, attrValue=true, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someDate, attrType=DateTime, attrValue=2016-09-21T01:23:00.00Z, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someGeoJson, attrType=geo:json, attrValue={\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someJson, attrType=json, attrValue={\"String\": \"string\"}, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someString, attrType=string, attrValue=foo, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someString2, attrType=string, attrValue=, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someName1, attrType=someType1, attrValue=-3.7167, 40.3833, recvTime=" + new Date(Long.parseLong("1568020149999")) + "}}, Document{{attrName=someName2, attrType=someType2, attrValue=someValue2, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}]";
                 if (aggregation.toString().equals(correctBatch)) {
                     assertTrue(true);
                 } else {
