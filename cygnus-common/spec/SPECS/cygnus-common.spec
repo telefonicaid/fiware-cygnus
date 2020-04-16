@@ -172,8 +172,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Apr 16 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.0.0
-- [cygnus-common][PostgreSQL, MySQL] Refactor code to use a SQL generic backend for all SQL-based sinks (#1806)
-- [cygnus-common][PostgreSQL, MySQL] Lazy singleton to share pool connections of SQL backends among instances on JVM (#1806)
+- [cygnus-common][PostgreSQL, MySQL] Refactor code to use a SQL generic backend for all SQL-based sinks (#1836)
+- [cygnus-common][PostgreSQL, MySQL] Lazy singleton to share pool connections of SQL backends among instances on JVM (#1836)
 - [cygnus-common][PostgreSQL, MySQL] SQL error persistance (#1791)
 - [cygnus-common][MongoBackend] Fix persistence error mongo authentication and side effect (using new configuration parameter mongo_auth_source) (#1849)
 - [cygnus-common][Elasticsearch] Fix a bug raised NullPointerException when 'ignore_white_spaces' is true and an attribute has null value (#1838)
