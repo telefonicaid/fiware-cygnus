@@ -28,6 +28,7 @@ import org.apache.flume.Event;
 import org.apache.flume.interceptor.Interceptor;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.telefonica.iot.cygnus.containers.NameMappings;
@@ -459,6 +460,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
         for (ContextAttribute newCA : newCE.getAttributes()) {
             LOGGER.debug("[nmi] checking with CA: " + newCA.toString());
+            JsonElement originalCAValue = newCA.getValue();
             String originalAttributeName = newCA.getName();
             String originalAttributeType = newCA.getType();
             String newAttributeName = originalAttributeName;
@@ -467,7 +469,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             
             boolean firstMatch = true;
             boolean attributeFound = false;
-
+            
             for (AttributeMapping am : entityMapping.getAttributeMappings()) {
                 attributeMapping = am;
                 LOGGER.debug("[nmi] checking with attributeMapping: " + attributeMapping.toString());
@@ -525,7 +527,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     ContextAttribute otherCA = newCA.deepCopy();
                     otherCA.setName(newAttributeName);
                     otherCA.setType(newAttributeType);
-                    otherCA.setContextValue(attributeMapping.getMappedValue(otherCA.getValue()));
+                    otherCA.setContextValue(attributeMapping.getMappedValue(originalCAValue));
                     LOGGER.debug("[nmi] brand newCA: " + otherCA.toString());
                     
                     newAttributes.add(otherCA);

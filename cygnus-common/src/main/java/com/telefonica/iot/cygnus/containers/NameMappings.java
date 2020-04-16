@@ -22,10 +22,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
 /**
@@ -453,7 +455,7 @@ public class NameMappings {
          * Constructor.
          */
         public EntityMapping() {
-            attributeMappings = new ArrayList<>();
+            attributeMappings = new ArrayList<AttributeMapping>();
         } // EntityMapping
         
         public ArrayList<AttributeMapping> getAttributeMappings() {
@@ -598,7 +600,7 @@ public class NameMappings {
     public class AttributeMapping {
         
         private static final String JSONPATH_PATTERN_STR = "^(\\w*[^\\\\])\\.([^*+?].+)";
-        private final JsonParser jsonParser = new JsonParser();
+        private JsonParser jsonParser;
         
         private String originalAttributeName;
         private Pattern originalAttributeNamePattern;
@@ -614,6 +616,7 @@ public class NameMappings {
          */
         public AttributeMapping() {
             isJsonPath = false;
+            jsonParser = new JsonParser();
         } // AttributeMapping
         
         public String getOriginalAttributeName() {
@@ -653,16 +656,18 @@ public class NameMappings {
             JsonElement result = originalValue;
             
             if(isJsonPath() && originalValue != null && originalValue.isJsonObject()){
-                String attValue = originalValue.getAsString();
+                String attValue = originalValue.toString();
                 DocumentContext attContext = JsonPath.parse(attValue);
-                
-                String resultValue = attContext.read(jsonPath);
-                LOGGER.debug ( "mappedValue: " + newAttributeName + ": " + resultValue);
+
                 try{
+                    String resultValue = attContext.read(jsonPath);
+                    LOGGER.debug ( "[NameMappings] mappedValue: " + newAttributeName + ": " + resultValue + " " +jsonParser.toString());
                     result = jsonParser.parse(resultValue);
-                }catch(JsonParseException e){
-                    LOGGER.error(" Unable to map attribute: " + originalAttributeName + " jsonPath: " + jsonPath);
-                    LOGGER.error("Error: " + e.getMessage());
+                }catch(JsonParseException|PathNotFoundException e){
+                    LOGGER.error("[NameMappings]  Unable to map attribute: " + originalAttributeName + " jsonPath: " + jsonPath);
+                    LOGGER.error("[NameMappings]      From Json value: " + attValue );
+                    LOGGER.error("[NameMappings] Error: " + e.getMessage());
+                    result = JsonNull.INSTANCE;
                 }
             }
             
@@ -673,6 +678,7 @@ public class NameMappings {
          * Compiles the regular expressions into Java Patterns.
          */
         public void compilePatterns() {
+            
             originalAttributeTypePattern = Pattern.compile(originalAttributeType);
             
 
@@ -682,10 +688,18 @@ public class NameMappings {
             isJsonPath = jsonPathMatcher.matches();
             
             if (isJsonPath){
+                LOGGER.debug("[NameMappings] Compile Attribute mapping patterns as JsonPath");
                 originalAttributeNamePattern = Pattern.compile(jsonPathMatcher.group(1));
                 jsonPath = "$." + jsonPathMatcher.group(2);
+
+                LOGGER.debug("[NameMappings] Original att name: " + jsonPathMatcher.group(1));
+                LOGGER.debug("[NameMappings] JsonPath expression: " + jsonPath);
             } else {
                 originalAttributeNamePattern = Pattern.compile(originalAttributeName);
+            }
+            
+            if(jsonParser == null ) {
+                jsonParser = new JsonParser();
             }
         } // compilePatterns
                 
