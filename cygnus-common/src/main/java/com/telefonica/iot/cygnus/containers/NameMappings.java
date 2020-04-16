@@ -616,7 +616,6 @@ public class NameMappings {
          */
         public AttributeMapping() {
             isJsonPath = false;
-            jsonParser = new JsonParser();
         } // AttributeMapping
         
         public String getOriginalAttributeName() {
@@ -661,7 +660,7 @@ public class NameMappings {
 
                 try{
                     String resultValue = attContext.read(jsonPath);
-                    LOGGER.debug ( "[NameMappings] mappedValue: " + newAttributeName + ": " + resultValue + " " +jsonParser.toString());
+                    LOGGER.debug ( "[NameMappings] mappedValue: " + newAttributeName + ": " + resultValue);
                     result = jsonParser.parse(resultValue);
                 }catch(JsonParseException|PathNotFoundException e){
                     LOGGER.error("[NameMappings]  Unable to map attribute: " + originalAttributeName + " jsonPath: " + jsonPath);
