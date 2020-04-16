@@ -455,6 +455,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
         newCE.setId(newEntityId);
         newCE.setType(newEntityType);
+        List<ContextAttribute> newAttributes = new ArrayList<ContextAttribute>();
 
         for (ContextAttribute newCA : newCE.getAttributes()) {
             LOGGER.debug("[nmi] checking with CA: " + newCA.toString());
@@ -463,7 +464,6 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             String newAttributeName = originalAttributeName;
             String newAttributeType = originalAttributeType;
             AttributeMapping attributeMapping = null;
-            List<ContextAttribute> newAttributes = new ArrayList<ContextAttribute>();
             
             boolean firstMatch = true;
             boolean attributeFound = false;
@@ -515,6 +515,12 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     newCA.setType(newAttributeType);
                     newCA.setContextValue(attributeMapping.getMappedValue(newCA.getValue()));
                     LOGGER.debug("[nmi] newCA: " + newCA.toString());
+
+                    if (this.stopOnFirstAttrMatch) {
+                        break;
+                    } else {
+                        firstMatch = false;
+                    }
                 } else {
                     ContextAttribute otherCA = newCA.deepCopy();
                     otherCA.setName(newAttributeName);
@@ -525,21 +531,18 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     newAttributes.add(otherCA);
                 }
                 
-                if (this.stopOnFirstAttrMatch) {
-                    break;
-                } else {
-                    firstMatch = false;
-                }
             } // for
-            
-            // Add new Attributes
-            newCE.getAttributes().addAll(newAttributes);
             
             if (!attributeFound) {
                 LOGGER.debug("[nmi] Attribute not found: " + originalAttributeName + ", " + originalAttributeType);
             } 
 
         } // for
+
+        
+        // Add new Attributes
+        newCE.getAttributes().addAll(newAttributes);
+        
         LOGGER.debug("[nmi] newCE: " + newCE.toString());
         return new ImmutableTriple(newService, newServicePath, newCE);
     } // map
