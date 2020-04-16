@@ -53,6 +53,8 @@ import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 
+import jodd.util.URLDecoder;
+
 /**
  *
  * @author dmartinez
@@ -498,7 +500,8 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                         subService = entry.getValue().toString();
                     }
                 } // for
-
+                
+                // Compose full url
                 featureTableUrl = argisServiceUrl + "/" + service + "/" + subService;
                 featureTableUrl = featureTableUrl.replaceAll("([^:])\\/\\/", "$1/");
                 aggregation.setFeatureTableUrl(featureTableUrl);
@@ -619,7 +622,8 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                 // Verify if it is a string (it is into quotation marks)
                 if (isQuoted(attrValue.toString())) {
                     // Insert unquoted
-                    feature.getAttributes().put(attrName, unquote(attrValue.toString()));
+                    String strValue = URLDecoder.decode(unquote(attrValue.toString()));
+                    feature.getAttributes().put(attrName, strValue);
                 } else {
                     try {
                         // Try to insert as Integer
@@ -632,7 +636,8 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                             // If all fails, insert as String
                             LOGGER.warn(
                                     "[NGSIArcgisAggregator] Unquoted String attribute: " + attrName + ":" + attrValue);
-                            feature.addAttribute(attrName, attrValue);
+                            String strValue = URLDecoder.decode(attrValue.toString());
+                            feature.addAttribute(attrName, strValue);
                         }
                     }
                 }
