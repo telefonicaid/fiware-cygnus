@@ -19,10 +19,7 @@
 package com.telefonica.iot.cygnus.aggregation;
 
 import com.google.gson.JsonElement;
-import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
-import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 
 import java.util.*;
