@@ -23,7 +23,7 @@ MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "1.18.0_SNAPSHOT"
+ENV CYGNUS_VERSION "2.0.0_SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
@@ -61,6 +61,7 @@ ENV CYGNUS_MYSQL_BATCH_TTL ""
 ENV CYGNUS_MONGO_HOSTS ""
 # ENV CYGNUS_MONGO_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
 # ENV CYGNUS_MONGO_PASS "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+ENV CYGNUS_MONGO_AUTH_SOURCE ""
 ENV CYGNUS_MONGO_SKIP_CONF_GENERATION ""
 ENV CYGNUS_MONGO_SERVICE_PORT "5051"
 ENV CYGNUS_MONGO_ENABLE_ENCODING ""
