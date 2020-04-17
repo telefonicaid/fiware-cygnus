@@ -25,6 +25,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
@@ -615,8 +616,7 @@ public class NameMappings {
     public class AttributeMapping {
 
         private static final String JSONPATH_PATTERN_STR = "^(\\w*[^\\\\])\\.([^*+?].+)";
-        private JsonParser jsonParser;
-
+        
         private String originalAttributeName;
         private Pattern originalAttributeNamePattern;
         private String originalAttributeType;
@@ -678,7 +678,7 @@ public class NameMappings {
                     String resultValue = attContext.read(jsonPath);
                     LOGGER.debug(
                             "[NameMappings] mappedValue: " + newAttributeName + ": " + resultValue);
-                    result = jsonParser.parse(resultValue);
+                    result = new JsonPrimitive(resultValue);
                 } catch (JsonParseException | PathNotFoundException e) {
                     LOGGER.error("[NameMappings]  Unable to map attribute: " + originalAttributeName
                             + " jsonPath: " + jsonPath);
@@ -714,9 +714,6 @@ public class NameMappings {
                 originalAttributeNamePattern = Pattern.compile(originalAttributeName);
             }
 
-            if (jsonParser == null) {
-                jsonParser = new JsonParser();
-            }
         } // compilePatterns
 
         @Override
