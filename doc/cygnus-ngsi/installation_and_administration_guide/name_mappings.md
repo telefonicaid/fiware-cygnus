@@ -136,9 +136,13 @@ $ cat /path/to/conf/name_mappings.conf
 }
 ```
 
-Last but not least, the original names support Java-based regular expressions. For instance, if you want all the service paths are re-named equals simply use `/.*` as value for `originalServicePath`:
+## Advanced Mapping
 
-```
+### Regular Expresion Matching
+
+The original names support Java-based regular expressions. For instance, if you want all the service paths are re-named equals simply use `/.*` as value for `originalServicePath`:
+
+```json
 $ cat /path/to/conf/name_mappings.conf
 {
    "serviceMappings": [
@@ -171,9 +175,13 @@ $ cat /path/to/conf/name_mappings.conf
    ]
 }
 ```
+
+
+
+### Find and replace using regular expressions
 In addition, above mentioned Java-based regular expressions can be also used in new entity IDs. For instance, if we want to rename certain entity IDs described as a string concatenated with a number, and we want to replace the string but maintaining the number:
 
-```
+```json
 {
     "serviceMappings": [{
         "originalService": "service",
@@ -191,9 +199,52 @@ In addition, above mentioned Java-based regular expressions can be also used in 
     }]
 }
 ```
+### Clone attributes
+By default,  `NGSIMappingInterceptor` stops seraching map rules for an attribute when it finds a match for it. We may need an attribute to match more than one mapping rule for some reasons. This can be done by setting `stop_on_first_attr_match` interceptor's property to false inside agent configuration file.
+```
+agent.sources.ngsi-source.interceptors = nmi
+agent.sources.ngsi-source.interceptors.nmi.type = com.telefonica.iot.cygnus.interceptors.NGSINameMappingsInterceptor$Builder
+agent.sources.ngsi-source.interceptors.nmi.name_mappings_conf_file = /path/name_mappings.conf
+agent.sources.ngsi-source.interceptors.nmi.stop_on_first_attr_match = false
+```
+This option has an impact on performance, so it should only be used where necessary.
 
+### Using JsonPath Expresions
+For attributes, as an alternative to regular expressions, we can use JsonPath based expressions.
+This allows us to obtain a primitive data contained within a complex NGSI attribute.
+
+Postal address `NGSI` attributes are a good example. We can use JsonPath if we need to persist the __city__ and the __address__ individually.
+```json
+"address": {
+    "type": "PostalAddress",
+    "addressLocality": "Santander",
+    "addressRegion": "CA",
+    "postalCode": "39002",
+    "streetAddress": "39002 Plaza Ayuntamiento 1"
+  }
+```
+Name mapping should look like:
+```json
+"attributeMappings": [
+	{
+		"originalAttributeName": "address.addressLocality",
+		"newAttributeName": "city",
+		...
+	}, 
+	{
+		"originalAttributeName": "address.streetAddress",
+		"newAttributeName": "street",
+		...
+	},
+	...
+]
+```
+Note that `JsonPath` expression must start with the original attribute name to allow `NGSIMappingInterceptor`  to do the match.
+
+Remark that as we need to split the source attribute, `stop_on_first_attr_match` interceptor's property must be set to __false__, otherwhise only city attribute will be generated.
+
+## Examples
 Sumarizing these are some useful examples and their result in a sink like MySQL:
-
 ### Case 1: groups matching exactly by service, subservice, entityid and entitytype
 - Service Mapping:
 ```
