@@ -1,0 +1,3 @@
+[cygnus-ngsi][ArcgisFeatureTableSink]New sink to persist Arcgis data. (#1672)
+[cygnus-arcgis][new backend]New backend to persist Arcgis data. (#1672)
+[cygnus-ngsi][NameMappings] Allow JsonPath expressions while mapping attributes, and don't stop on first match.
