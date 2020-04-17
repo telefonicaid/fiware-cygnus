@@ -63,7 +63,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
      * @param stopOnFirstAttrMatch
      * @param invalidConfiguration
      */
-    public NGSINameMappingsInterceptor(String nameMappingsConfFile, boolean stopOnFirstAttrMatch, boolean invalidConfiguration) {
+    public NGSINameMappingsInterceptor(String nameMappingsConfFile, boolean stopOnFirstAttrMatch,
+            boolean invalidConfiguration) {
         this.nameMappingsConfFile = nameMappingsConfFile;
         this.stopOnFirstAttrMatch = stopOnFirstAttrMatch;
         this.invalidConfiguration = invalidConfiguration;
@@ -71,6 +72,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
     /**
      * Constructor.
+     * 
      * @param nameMappingsConfFile
      * @param invalidConfiguration
      */
@@ -171,7 +173,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         public void configure(Context context) {
             nameMappingsConfFile = context.getString("name_mappings_conf_file");
             stopOnFirstAttrMatch = context.getBoolean("stop_on_first_attr_match", true);
-            
+
             if (nameMappingsConfFile == null) {
                 invalidConfiguration = true;
                 LOGGER.error("[nmi] Invalid configuration (name_mappings_conf_file = null) -- Must be configured");
@@ -195,8 +197,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
     } // Builder
 
     /**
-     * Class in charge or periodically reading the NGSINameMappingsInterceptor
-     * configuration file.
+     * Class in charge or periodically reading the NGSINameMappingsInterceptor configuration file.
      */
     private class PeriodicalNameMappingsReader extends Thread {
 
@@ -267,8 +268,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
     } // loadNameMappings
 
     /**
-     * Loads the Name Mappings given a Json string. It is protected since it
-     * only can be used by this class and test classes.
+     * Loads the Name Mappings given a Json string. It is protected since it only can be used by this class and test
+     * classes.
      * 
      * @param jsonStr
      */
@@ -314,7 +315,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
      * @param originalCE
      * @return The input NotifyContextRequest object with maps applied
      */
-    public ImmutableTriple<String, String, ContextElement> doMap(String originalService, String originalServicePath,
+    public ImmutableTriple<String, String, ContextElement> doMap(String originalService,String originalServicePath,
             ContextElement originalCE) {
         if (nameMappings == null) {
             return new ImmutableTriple(originalService, originalServicePath, originalCE);
@@ -340,7 +341,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
             if (serviceMapping.getNewService() != null) {
                 newService = originalService.replaceAll(serviceMapping.getOriginalServicePattern().toString(),
-                                                        serviceMapping.getNewService());
+                        serviceMapping.getNewService());
                 LOGGER.debug("[nmi] FIWARE new service obtained: " + newService);
             } // if
 
@@ -371,8 +372,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                         continue;
                     } else {
                         if (spm.getNewServicePath() != null) {
-                            newServicePath = originalServicePath.replaceAll(spm.getOriginalServicePathPattern().toString(),
-                                                                            spm.getNewServicePath());
+                            newServicePath = originalServicePath.replaceAll(
+                                    spm.getOriginalServicePathPattern().toString(), spm.getNewServicePath());
                         }
                         LOGGER.debug("[nmi] FIWARE new service path obtained: " + newServicePath);
                         servicePathMapping = spm;
@@ -381,7 +382,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 } else {
                     if (spm.getNewServicePath() != null) {
                         newServicePath = originalServicePath.replaceAll(spm.getOriginalServicePathPattern().toString(),
-                                                                        spm.getNewServicePath());
+                                spm.getNewServicePath());
                     }
                     LOGGER.debug("[nmi] FIWARE new service path obtained: " + newServicePath);
                     servicePathMapping = spm;
@@ -426,8 +427,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     LOGGER.debug("[nmi] " + entityMapping.getOriginalEntityId() + " matches " + newCE.getId());
                 }
             }
-            if (!entityMapping.getOriginalEntityIdPattern().matcher(originalEntityId).matches() ||
-                !entityMapping.getOriginalEntityTypePattern().matcher(originalEntityType).matches()) {
+            if (!entityMapping.getOriginalEntityIdPattern().matcher(originalEntityId).matches()
+                    || !entityMapping.getOriginalEntityTypePattern().matcher(originalEntityType).matches()) {
                 LOGGER.debug("[nmi] not matches both type and entityId");
                 entityMapping = null;
                 continue;
@@ -466,10 +467,10 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             String newAttributeName = originalAttributeName;
             String newAttributeType = originalAttributeType;
             AttributeMapping attributeMapping = null;
-            
+
             boolean firstMatch = true;
             boolean attributeFound = false;
-            
+
             for (AttributeMapping am : entityMapping.getAttributeMappings()) {
                 attributeMapping = am;
                 LOGGER.debug("[nmi] checking with attributeMapping: " + attributeMapping.toString());
@@ -493,8 +494,9 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     }
                 }
 
-                if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches() ||
-                    !attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType).matches()) {
+                if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches()
+                        || !attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType)
+                                .matches()) {
                     LOGGER.debug("[nmi] not matches both attribute type and name");
                     attributeMapping = null;
                     continue;
@@ -510,9 +512,9 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 if (attributeMapping.getNewAttributeType() != null) {
                     newAttributeType = attributeMapping.getNewAttributeType();
                 } // if
-                
+
                 // Modify context data, or add a new attribute to the list.
-                if (firstMatch){
+                if (firstMatch) {
                     newCA.setName(newAttributeName);
                     newCA.setType(newAttributeType);
                     newCA.setContextValue(attributeMapping.getMappedValue(newCA.getValue()));
@@ -529,22 +531,21 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     otherCA.setType(newAttributeType);
                     otherCA.setContextValue(attributeMapping.getMappedValue(originalCAValue));
                     LOGGER.debug("[nmi] brand newCA: " + otherCA.toString());
-                    
+
                     newAttributes.add(otherCA);
                 }
-                
+
             } // for
-            
+
             if (!attributeFound) {
                 LOGGER.debug("[nmi] Attribute not found: " + originalAttributeName + ", " + originalAttributeType);
-            } 
+            }
 
         } // for
 
-        
         // Add new Attributes
         newCE.getAttributes().addAll(newAttributes);
-        
+
         LOGGER.debug("[nmi] newCE: " + newCE.toString());
         return new ImmutableTriple(newService, newServicePath, newCE);
     } // map
