@@ -50,7 +50,7 @@ Let's see an example:
 
 ##### Agent.conf file:
 
-	agent.arcgis-sink.arcgis_service_url = https://arcgis.com398f12mJiCbJeoAQ/arcgis/rest/services
+	agent.arcgis-sink.arcgis_service_url = https://arcgis.com/{hash}/arcgis/rest/services
 ##### Entity data:
 
 	service = vehicles
@@ -58,7 +58,7 @@ Let's see an example:
 	entity-type = car
 ##### result
 
-	Feature table url: https://arcgis.com398f12mJiCbJeoAQ/arcgis/rest/services/vehicles/4wheels
+	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/4wheels
 	Table's unique field: car
 
 [Top](#top)
@@ -99,7 +99,7 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
 Resultant service url:
 
-	https://arcgis.com398f12mJiCbJeoAQ/arcgis/rest/services/vehicles/4wheels
+	https://arcgis.com/{hash}/arcgis/rest/services/vehicles/4wheels
 Feature table unique field:
 
 	Unique field name: car
