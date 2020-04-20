@@ -16,12 +16,6 @@
     </properties>
 
     <dependencies>
-        <!-- Development dependency, should be removed before a production deployment -->
-   		<dependency>
-   			<groupId>com.telefonica.iot</groupId>
-   			<artifactId>cygnus-arcgis</artifactId>
-   			<version>1.18.0_SNAPSHOT</version>
-   		</dependency>
         <!-- Required for testing -->
         <dependency>
             <groupId>org.mockito</groupId>
