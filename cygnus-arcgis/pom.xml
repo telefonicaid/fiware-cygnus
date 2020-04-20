@@ -5,7 +5,7 @@
 
     <groupId>com.telefonica.iot</groupId>
     <artifactId>cygnus-arcgis</artifactId>
-    <version>1.18.0_SNAPSHOT</version>
+    <version>2.0.0_SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>cygnus-arcgis</name>
@@ -45,7 +45,12 @@
         <dependency>
             <groupId>com.telefonica.iot</groupId>
             <artifactId>cygnus-common</artifactId>
-            <version>1.18.0_SNAPSHOT</version>
+            <version>2.0.0_SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.telefonica.iot</groupId>
+            <artifactId>cygnus-ngsi</artifactId>
+            <version>2.0.0_SNAPSHOT</version>
         </dependency>
     </dependencies>
 
@@ -69,8 +74,6 @@
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
-                        <compilerArgument></compilerArgument>
-                        <fork>true</fork>
                     </configuration>
                 </plugin>
                 <plugin>
