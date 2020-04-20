@@ -727,20 +727,5 @@ public class NGSINameMappingsInterceptorTest {
         } // try catch
     } // testDoMapConfig4
 
-    @Test
-    void borrame(){
-        String jsonEntity = "{'address'={'city'='santander'}}";
-        String originalAttName = "address.city";
-        
-        String isJsonPathRegex = "[^\\\\]\\.[^*+?]";
-        Pattern isJsonPathPattern = Pattern.compile(isJsonPathRegex);
-        
-        if (isJsonPathPattern.matcher(originalAttName).find()){
-            System.out.println("IT's a JsonaPath expression");
-        } else {
-            System.out.println("Don't know.");
-        }
-        
-        assertTrue(true);
-    }
+   
 } // NGSINameMappingsInterceptorTest

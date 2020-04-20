@@ -78,7 +78,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
      */
     public NGSINameMappingsInterceptor(String nameMappingsConfFile, boolean invalidConfiguration) {
         this(nameMappingsConfFile, true, invalidConfiguration);
-    }// NGSINameMappingsInterceptor
+    } // NGSINameMappingsInterceptor
 
     @Override
     public void initialize() {
