@@ -399,11 +399,14 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
      */
     public class NGSIArcgisAggregator {
 
-        private List<ArcgisAggregatorDomain> listArcgisAggregatorDomain = new ArrayList<ArcgisAggregatorDomain>();
-        private boolean enableNameMappings = true;
-        private String argisServiceUrl = "";
+        private List<ArcgisAggregatorDomain> listArcgisAggregatorDomain;
+        private boolean enableNameMappings;
+        private String argisServiceUrl;
 
         private NGSIArcgisAggregator() {
+            listArcgisAggregatorDomain = new ArrayList<ArcgisAggregatorDomain>();
+            enableNameMappings = true;
+            argisServiceUrl = "";
         } // ArcgisAggregator
 
         /**
