@@ -284,19 +284,6 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 
                 // Get an aggregator for this destination and initialize it
                 NGSIArcgisAggregator aggregator = new NGSIArcgisAggregator(getrAcgisServicesUrl(), enableNameMappings);
-                // aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
-                // aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                // aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping,
-                // enableNameMappings));
-                // aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings,
-                // enableEncoding));
-                // aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
-                // aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
-                // aggregator.setDbName(buildDbName(aggregator.getService()));
-                // aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(),
-                // aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
-                // aggregator.setAttrNativeTypes(attrNativeTypes);
-                // aggregator.setAttrMetadataStore(false);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
