@@ -86,12 +86,11 @@ public class ArcgisFeatureTable {
      */
     public ArcgisFeatureTable(String url, String user, String password, String tokenGenUrl,
             boolean readOnly) {
-
+        this();
+        
         LOGGER.debug("Arcgis constructor.. " + url);
 
         LOGGER.debug("Arcgis url.. " + url);
-        LOGGER.debug("Arcgis user.. " + user);
-        LOGGER.debug("Arcgis password.. " + password);
         LOGGER.debug("Arcgis tokenGenUrl.. " + tokenGenUrl);
         LOGGER.debug("Arcgis readOnly.. " + readOnly);
 
@@ -162,8 +161,9 @@ public class ArcgisFeatureTable {
                 }
 
             } else {
-                LOGGER.debug("Can't add Entitie.");
+                LOGGER.error("Not connected, can't add Entitie to batch.");
                 this.error.set(true);
+                this.errorDesc = "Not connected, can't add Entitie to batch";
             }
         }
     }

@@ -37,6 +37,7 @@ import org.json.JSONException;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 import com.telefonica.iot.cygnus.backends.arcgis.model.Feature;
 import com.telefonica.iot.cygnus.backends.arcgis.model.GisAttributeType;
 import com.telefonica.iot.cygnus.backends.arcgis.model.Point;
@@ -162,15 +163,14 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
         } else {
             LOGGER.debug("Creating new persistenceBackend for Feature table: " + featureServiceUrl);
             LOGGER.debug("Token url: " + getGetTokenUrl());
-            LOGGER.debug("User name: " + getUsername());
-            LOGGER.debug("Passwd: " + getPassword());
             try {
                 NGSIArcgisFeatureTable newTable = new NGSIArcgisFeatureTable(featureServiceUrl, getUsername(),
                         getPassword(), getGetTokenUrl(), timeoutSecs);
                 newTable.setBatchAction(ArcgisFeatureTable.ADD_UPDATE_ACTION);
                 newTable.setBatchSize(maxBatchSize);
 
-                if (newTable.hasError()) {
+                if (newTable.hasError() || !newTable.connected()) {
+                    LOGGER.error("Error creating new persistence Backend. " + newTable.getErrorDesc());
                     throw new CygnusRuntimeError("[" + this.getName() + "Error creating Persistence backend: "
                             + newTable.getErrorCode() + " - " + newTable.getErrorDesc());
                 } else {
@@ -179,7 +179,10 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                 }
             } catch (Throwable e) {
                 String stackTrace = ExceptionUtils.getFullStackTrace(e);
+                
+                LOGGER.error("Error creating new persistence Backend. " +e.getClass().getSimpleName());
                 LOGGER.debug(stackTrace);
+                
                 throw new CygnusRuntimeError("Error creating new persistence Backend. ", e.getClass().getName(),
                         e.getMessage());
             }
@@ -208,7 +211,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (arcgis_username=" + userName + ")");
         // FIXME: Password should be read encrypted and decoded here
         password = context.getString("arcgis_password", DEFAULT_PASSWORD);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (arcgis_password=" + password + ")");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (arcgis_password=" + "XXXXXXXX" + ")");
 
         maxBatchSize = context.getInteger("arcgis_maxBatchSize", DEFAULT_MAX_BATCH_SIZE);
         if (maxBatchSize <= 0 || maxBatchSize > 65535) {
@@ -296,7 +299,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 
             } // while
         } catch (Exception e) {
-            LOGGER.error("[" + this.getName() + "] Error persisting batch, " + e.getMessage());
+            LOGGER.error("[" + this.getName() + "] Error persisting batch, " + e.getClass().getSimpleName() + "." + e.getMessage());
             throw new CygnusRuntimeError(e.getMessage());
         }
     } // persistBatch
@@ -382,6 +385,9 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                 }
 
                 featureTable.addToBatch(aggregation.getFeature());
+                if (featureTable.hasError()){
+                    throw new ArcgisException(featureTable.getErrorCode(), featureTable.getErrorDesc());
+                }
             }
         } catch (CygnusRuntimeError e) {
             String stackTrace = ExceptionUtils.getFullStackTrace(e);

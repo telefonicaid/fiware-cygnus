@@ -46,7 +46,7 @@ public class NGSIArcgisFeatureTable extends ArcgisFeatureTable {
      */
     public NGSIArcgisFeatureTable(String featureServiceUrl, String username, String password,
             String getTokenUrl, long timeoutSecs) {
-        super();
+        super(featureServiceUrl, username, password, getTokenUrl, false);
         this.timeoutSecs = timeoutSecs;
     }
 

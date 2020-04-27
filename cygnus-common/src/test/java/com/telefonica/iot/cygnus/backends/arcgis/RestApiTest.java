@@ -72,7 +72,7 @@ public class RestApiTest extends RestApi{
     @Test
     public void parameterTest() {
 
-        String urlRequest = "https://sags1/arcgis/rest/services/Policia";
+        String urlRequest = "http://www.google.es";
 
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("f", "pjson");
@@ -105,27 +105,10 @@ public class RestApiTest extends RestApi{
     @Test
     public void checkMultiResponseTest() {
         HttpResponse response = new HttpResponse(200,
-                "{\"addResults\":[{\"objectId\":null,\"uniqueId\":null,\"globalId\":\"B7131F8B-CCE4-4D77-BA75-CD474D8F05EF\",\"success\":false,\"error\":{\"code\":1000,\"description\":\"Cannot insert duplicate key row in object 'user_19420.OcupacionDummy_POINT_LAYER' with unique index 'Id_Index'. The duplicate key value is (8).\\r\\nThe statement has been terminated.\"}}]}");
+                "{\"addResults\":[{\"objectId\":null,\"uniqueId\":null,\"globalId\":\"B7131F8B-CCE4-DFAA-BA75-CD474D8F05EF\",\"success\":false,\"error\":{\"code\":1000,\"description\":\"Cannot insert duplicate key row in object 'user_19420.FeatureTable_POINT_LAYER' with unique index 'Id_Index'. The duplicate key value is (8).\\r\\nThe statement has been terminated.\"}}]}");
         RestApi.checkHttpResponse(response);
 
         Assert.assertTrue("Response should be error.", response.hasError());
-    }
-
-    /**
-     * 
-     * @throws Exception
-     */
-    @Test
-    public void finallyTest() throws Exception {
-        try {
-            System.out.println("Running try");
-            throw new Exception("Test Exception.");
-        } catch (ArcgisException e) {
-            System.out.println("Catching exception: " + e);
-        } finally {
-            System.out.println("Finally...................................");
-            Assert.assertTrue(true);
-        }
     }
     
     /**

@@ -36,7 +36,15 @@ public interface ArcgisBaseTest {
     public static final String ONLINE_FEATURETABLE_URL = "***************";
 
     public boolean testPortal = false;
+    public boolean skipConnectionTest = true;
 
+    /**
+     * 
+     * @return
+     */
+    public static boolean connectionTestsSkipped() {
+        return skipConnectionTest;
+    }
     /**
      * 
      * @return
@@ -48,6 +56,7 @@ public interface ArcgisBaseTest {
             return ONLINE_USER;
         }
     }
+    
 
     /**
      * 

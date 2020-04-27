@@ -49,40 +49,45 @@ public class CredentialRestApiTest extends CredentialRestApi implements ArcgisBa
      * 
      */
     @Test
-    public void test() {
+    public void testUserCredential() {
 
-        try {
-            Credential credential = RestAuthentication.createUserToken(PORTAL_USER, PORTAL_PASSWORD,
-                    new URL(PORTAL_GENERATE_TOKEN_URL), PORTAL_FEATURETABLE_URL, new Integer(1));
-            System.out.println("ExpirationTime: " + credential.getExpirationTime());
-            this.setCredential(credential);
-            credential = getCredential();
-            System.out.println(
-                    "ExpirationTime after getCredential(): " + credential.getExpirationTime());
-            System.out.println(" ------------> TOKEN: " + credential.getToken());
-            String token = credential.getToken();
-            assertTrue("Bad Credential", !"".equals(token));
-
-            credential = getCredential();
-            System.out.println(
-                    "ExpirationTime after getCredential(): " + credential.getExpirationTime());
-            System.out.println(" ------------> TOKEN: " + credential.getToken());
-            String token2 = credential.getToken();
-            assertTrue("Bad Credential", !token.equals(token2));
-
-            Thread.sleep(61000);
-
-            credential = getCredential();
-            System.out.println("new ExpirationTime: " + credential.getExpirationTime());
-            System.out.println(" ++----------> TOKEN: " + credential.getToken());
-            assertTrue("Bad Credential", !token.equals(credential.getToken()));
-
-        } catch (ArcgisException e) {
-            System.err.println(e);
-            fail("Cannot get credential.");
-        } catch (Exception e) {
-            System.err.println(e);
-            fail("Cannot get credential.");
+        if (!ArcgisBaseTest.connectionTestsSkipped()){
+            try {
+                Credential credential = RestAuthentication.createUserToken(PORTAL_USER, PORTAL_PASSWORD,
+                        new URL(PORTAL_GENERATE_TOKEN_URL), PORTAL_FEATURETABLE_URL, new Integer(1));
+                System.out.println("ExpirationTime: " + credential.getExpirationTime());
+                this.setCredential(credential);
+                credential = getCredential();
+                System.out.println(
+                        "ExpirationTime after getCredential(): " + credential.getExpirationTime());
+                System.out.println(" ------------> TOKEN: " + credential.getToken());
+                String token = credential.getToken();
+                assertTrue("Bad Credential", !"".equals(token));
+    
+                credential = getCredential();
+                System.out.println(
+                        "ExpirationTime after getCredential(): " + credential.getExpirationTime());
+                System.out.println(" ------------> TOKEN: " + credential.getToken());
+                String token2 = credential.getToken();
+                assertTrue("Bad Credential", !token.equals(token2));
+    
+                Thread.sleep(61000);
+    
+                credential = getCredential();
+                System.out.println("new ExpirationTime: " + credential.getExpirationTime());
+                System.out.println(" ++----------> TOKEN: " + credential.getToken());
+                assertTrue("Bad Credential", !token.equals(credential.getToken()));
+    
+            } catch (ArcgisException e) {
+                System.err.println(e);
+                fail("Cannot get credential.");
+            } catch (Exception e) {
+                System.err.println(e);
+                fail("Cannot get credential.");
+            }
+        } else {
+            System.out.println(" -- Skipped");
+            assertTrue(true);
         }
     }
 

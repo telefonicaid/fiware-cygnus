@@ -63,24 +63,29 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
 
         System.out.println("----------------  ConnectionTest. Portal:" + ArcgisBaseTest.testPortal);
 
-        try {
-            Credential credential = new UserCredential(ArcgisBaseTest.getUser(),
-                    ArcgisBaseTest.getPassword());
-            RestFeatureTable featureTable = new RestFeatureTable(serviceUrl, credential, tokenUrl);
-
-            System.out.println("Connecting....");
-
-            String whereClause = "OBJECTID>0";
-            featureTable.getFeatureList(whereClause);
-
-            System.out.println("Token: " + credential.getToken());
-
-            assertTrue("Ejecución correcta", true);
-
-        } catch (ArcgisException e) {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
-            fail(e.getMessage());
+        if (!ArcgisBaseTest.connectionTestsSkipped()){
+            try {
+                Credential credential = new UserCredential(ArcgisBaseTest.getUser(),
+                        ArcgisBaseTest.getPassword());
+                RestFeatureTable featureTable = new RestFeatureTable(serviceUrl, credential, tokenUrl);
+    
+                System.out.println("Connecting....");
+    
+                String whereClause = "OBJECTID>0";
+                featureTable.getFeatureList(whereClause);
+    
+                System.out.println("Token: " + credential.getToken());
+    
+                assertTrue("Ejecución correcta", true);
+    
+            } catch (ArcgisException e) {
+                System.err.println("Error: " + e.getMessage());
+                e.printStackTrace();
+                fail(e.getMessage());
+            }
+        } else {
+            System.out.println(" -- Skipped");
+            assertTrue(true);
         }
 
     }
@@ -94,7 +99,7 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
     private RestFeatureTable createFeatureTable(String serviceUrl) throws ArcgisException {
         String tokenUrl = ArcgisBaseTest.getGenerateTokenUrl();
 
-        System.out.println("----------------  PortalConnectionTest");
+        System.out.println("----------------  createFeatureTable");
         Credential credential = new UserCredential(ArcgisBaseTest.getUser(),
                 ArcgisBaseTest.getPassword());
         return new RestFeatureTable(serviceUrl, credential, tokenUrl);
@@ -109,18 +114,23 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
         String serviceUrl = ArcgisBaseTest.getFeatureUrl();
         System.out.println("----------------  ConnectionWithoutCredentialsTest");
 
-        try {
-            RestFeatureTable featureTable = createFeatureTable(serviceUrl);
-
-            System.out.println("Connecting....");
-
-            String whereClause = "OBJECTID>0";
-            featureTable.getFeatureList(whereClause);
-
-        } catch (ArcgisException e) {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
-            fail(e.getMessage());
+        if (!ArcgisBaseTest.connectionTestsSkipped()){
+            try {
+                RestFeatureTable featureTable = createFeatureTable(serviceUrl);
+    
+                System.out.println("Connecting....");
+    
+                String whereClause = "OBJECTID>0";
+                featureTable.getFeatureList(whereClause);
+    
+            } catch (ArcgisException e) {
+                System.err.println("Error: " + e.getMessage());
+                e.printStackTrace();
+                fail(e.getMessage());
+            }
+        } else {
+            System.out.println(" -- Skipped");
+            assertTrue(true);
         }
 
         assertTrue("Ejecución correcta", true);
@@ -135,14 +145,25 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
     @Test
     public void addFeature() throws MalformedURLException, ArcgisException {
 
-        System.out.println("----------------  addFeature");
         String serviceUrl = ArcgisBaseTest.getFeatureUrl();
-        RestFeatureTable featureTable = createFeatureTable(serviceUrl);
-
-        Feature feature = FeatureTestFactory.getNewOcupacionFeature("Prueba addPortalFeature");
-        System.out.println(feature.toJson().toString());
-
-        featureTable.addFeature(feature);
+        System.out.println("----------------  addFeature");
+        
+        if (!ArcgisBaseTest.connectionTestsSkipped()){
+            try{
+                RestFeatureTable featureTable = createFeatureTable(serviceUrl);
+        
+                Feature feature = FeatureTestFactory.getNewOcupacionFeature("Prueba addPortalFeature");
+                System.out.println(feature.toJson().toString());
+        
+                featureTable.addFeature(feature);
+                assertTrue("OK", true);
+            } catch(Exception e) {
+                fail ("ERROR adding feature." + e.getMessage());
+            }
+        } else {
+            System.out.println(" -- Skipped");
+            assertTrue(true);
+        }
 
     }
 
@@ -153,39 +174,25 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
      */
     @Test
     public void updateFeature() throws MalformedURLException, ArcgisException {
-
-        System.out.println("----------------  updateFeature");
-        String serviceUrl = ArcgisBaseTest.getFeatureUrl();
-        RestFeatureTable featureTable = createFeatureTable(serviceUrl);
-
-        Feature feature = FeatureTestFactory.getUpdatedOcupacionFeature(621,
-                "prueba updatePortalFeature");
-        System.out.println(feature.toJson().toString());
-
-        featureTable.updateFeature(feature);
-
-    }
-
-    /**
-     * 
-     * @throws MalformedURLException
-     * @throws ArcgisException
-     */
-    @Test
-    public void deleteFeature() throws MalformedURLException, ArcgisException {
-        try {
-            System.out.println("----------------  deleteFeature");
-            String serviceUrl = ArcgisBaseTest.getFeatureUrl();
-            RestFeatureTable featureTable = createFeatureTable(serviceUrl);
-
-            List<String> idList = new ArrayList<String>();
-            idList.add("327");
-            idList.add("326");
-
-            featureTable.deleteEntities(idList);
+        
+        if (!ArcgisBaseTest.connectionTestsSkipped()){
+            try{
+                System.out.println("----------------  updateFeature");
+                String serviceUrl = ArcgisBaseTest.getFeatureUrl();
+                RestFeatureTable featureTable = createFeatureTable(serviceUrl);
+        
+                Feature feature = FeatureTestFactory.getUpdatedOcupacionFeature(621,
+                        "prueba updatePortalFeature");
+                System.out.println(feature.toJson().toString());
+        
+                featureTable.updateFeature(feature);
+                assertTrue("OK", true);
+            } catch(Exception e) {
+                fail ("ERROR adding feature." + e.getMessage());
+            }
+        } else {
+            System.out.println(" -- Skipped");
             assertTrue(true);
-        } catch (Exception e) {
-            fail(e.getMessage());
         }
 
     }
@@ -196,21 +203,25 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
      * @throws ArcgisException
      */
     @Test
-    public void getFeatures() throws MalformedURLException, ArcgisException {
-        try {
-            System.out.println("----------------  getOnlineFeatures");
-            String serviceUrl = ArcgisBaseTest.getFeatureUrl();
-            String tokenUrl = ArcgisBaseTest.getGenerateTokenUrl();
-            Credential credential = new UserCredential(ArcgisBaseTest.getUser(),
-                    ArcgisBaseTest.getPassword());
-            RestFeatureTable featureTable = new RestFeatureTable(serviceUrl, credential, tokenUrl);
-
-            String whereClause = "OBJECTID>0";
-
-            List<Feature> featureList = featureTable.getFeatureList(whereClause);
-            assertTrue(featureList.size() > 0);
-        } catch (Exception e) {
-            fail(e.getMessage());
+    public void deleteFeature() throws MalformedURLException, ArcgisException {        
+        if (!ArcgisBaseTest.connectionTestsSkipped()){
+            try {
+                System.out.println("----------------  deleteFeature");
+                String serviceUrl = ArcgisBaseTest.getFeatureUrl();
+                RestFeatureTable featureTable = createFeatureTable(serviceUrl);
+    
+                List<String> idList = new ArrayList<String>();
+                idList.add("327");
+                idList.add("326");
+    
+                featureTable.deleteEntities(idList);
+                assertTrue("OK", true);
+            } catch (Exception e) {
+                fail(e.getMessage());
+            }
+        } else {
+            System.out.println(" -- Skipped");
+            assertTrue(true);
         }
 
     }
@@ -221,20 +232,26 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
      * @throws ArcgisException
      */
     @Test
-    public void getTableAttributesInfoNoCred() throws MalformedURLException, ArcgisException {
-        try {
-            System.out.println("----------------  getTableAttributesInfo_noCred");
-            String serviceUrl = ArcgisBaseTest.getFeatureUrl();
-            RestFeatureTable featureTable = createFeatureTable(serviceUrl);
-
-            featureTable.getTableAttributesInfo();
-            System.out.println(
-                    "Number of fields detected: " + featureTable.getTableAttributes().size());
-            System.out.println(
-                    "Number of Unique fields: " + featureTable.getUniqueAttributes().size());
+    public void getFeatures() throws MalformedURLException, ArcgisException {      
+        if (!ArcgisBaseTest.connectionTestsSkipped()){
+            try {
+                System.out.println("----------------  getOnlineFeatures");
+                String serviceUrl = ArcgisBaseTest.getFeatureUrl();
+                String tokenUrl = ArcgisBaseTest.getGenerateTokenUrl();
+                Credential credential = new UserCredential(ArcgisBaseTest.getUser(),
+                        ArcgisBaseTest.getPassword());
+                RestFeatureTable featureTable = new RestFeatureTable(serviceUrl, credential, tokenUrl);
+    
+                String whereClause = "OBJECTID>0";
+    
+                List<Feature> featureList = featureTable.getFeatureList(whereClause);
+                assertTrue(featureList.size() > 0);
+            } catch (Exception e) {
+                fail(e.getMessage());
+            }
+        } else {
+            System.out.println(" -- Skipped");
             assertTrue(true);
-        } catch (Exception e) {
-            fail(e.getMessage());
         }
 
     }
@@ -245,25 +262,59 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
      * @throws ArcgisException
      */
     @Test
-    public void getTableAttributesInfo() throws MalformedURLException, ArcgisException {
+    public void getTableAttributesInfoNoCred() throws MalformedURLException, ArcgisException {      
+        if (!ArcgisBaseTest.connectionTestsSkipped()){
         try {
-            System.out.println("----------------  getTableAttributesInfo");
-            String serviceUrl = "https://sags1/arcgis/rest/services/Policia/SenalesTrafico_ETRS89/MapServer/5";
-            serviceUrl = "https://services5.arcgis.com/398f12mJiCbJeoAQ/arcgis/rest/services/OcupacionDummy/FeatureServer/0";
-            Credential credential = new UserCredential(ArcgisBaseTest.getUser(),
-                    ArcgisBaseTest.getPassword());
-
-            RestFeatureTable featureTable = new RestFeatureTable(serviceUrl, credential,
-                    ArcgisBaseTest.getGenerateTokenUrl());
-
-            featureTable.getTableAttributesInfo();
-            System.out.println(
-                    "Number of fields detected: " + featureTable.getTableAttributes().size());
-            System.out.println(
-                    "Number of Unique fields: " + featureTable.getUniqueAttributes().size());
+                System.out.println("----------------  getTableAttributesInfo_noCred");
+                String serviceUrl = ArcgisBaseTest.getFeatureUrl();
+                RestFeatureTable featureTable = createFeatureTable(serviceUrl);
+    
+                featureTable.getTableAttributesInfo();
+                System.out.println(
+                        "Number of fields detected: " + featureTable.getTableAttributes().size());
+                System.out.println(
+                        "Number of Unique fields: " + featureTable.getUniqueAttributes().size());
+                assertTrue(true);
+            } catch (Exception e) {
+                fail(e.getMessage());
+            }
+        } else {
+            System.out.println(" -- Skipped");
             assertTrue(true);
-        } catch (Exception e) {
-            fail(e.getMessage());
+        }
+
+    }
+
+    /**
+     * 
+     * @throws MalformedURLException
+     * @throws ArcgisException
+     */
+    @Test
+    public void getTableAttributesInfo() throws MalformedURLException, ArcgisException {  
+        if (!ArcgisBaseTest.connectionTestsSkipped()){
+            try {
+                System.out.println("----------------  getTableAttributesInfo");
+                String serviceUrl = ArcgisBaseTest.getFeatureUrl();
+                serviceUrl = ArcgisBaseTest.getGenerateTokenUrl();
+                Credential credential = new UserCredential(ArcgisBaseTest.getUser(),
+                        ArcgisBaseTest.getPassword());
+    
+                RestFeatureTable featureTable = new RestFeatureTable(serviceUrl, credential,
+                        ArcgisBaseTest.getGenerateTokenUrl());
+    
+                featureTable.getTableAttributesInfo();
+                System.out.println(
+                        "Number of fields detected: " + featureTable.getTableAttributes().size());
+                System.out.println(
+                        "Number of Unique fields: " + featureTable.getUniqueAttributes().size());
+                assertTrue(true);
+            } catch (Exception e) {
+                fail(e.getMessage());
+            }
+        } else {
+            System.out.println(" -- Skipped");
+            assertTrue(true);
         }
 
     }

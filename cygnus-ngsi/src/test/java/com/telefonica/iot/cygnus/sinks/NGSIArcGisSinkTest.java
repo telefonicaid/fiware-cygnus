@@ -128,53 +128,58 @@ public class NGSIArcGisSinkTest {
 		LOGGER.debug(getTestTraceHead("[NGSIArcGISBaseSink.insertFeature]")
 				+ "-------- When / service-path is notified/defaulted, NGSIArcGisSink send entities to GIS.");
 
-		try {
-			String bodyJSON = "{\"id\": \"Car1\", \"type\": \"Car\", "
-					+ "\"location\": { \"type\": \"geo:json\" \"value\": "
-					+ "{\"type\": \"Point\", \"coordinates\": [-3.79109661, 43.48712556]}}, "
-					+ " \"speed\": { \"type\":\"Float\", \"value\": 98 } }";
-			String serviceFiware = "service";
-			String servicePathFiware = "/test";
-
-			Map<String, String> headers = new HashMap<String, String>();
-			headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, serviceFiware);
-			headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, servicePathFiware);
-
-			String url = ArcgisBaseTest.getFeatureUrl();
-			String username = ArcgisBaseTest.getUser();
-			String password = ArcgisBaseTest.getPassword();
-
-			sink = new NGSIArcgisFeatureTableSink();
-
-			Context context = NGSIUtilsForTests.createContextForArcGis(url, username, password);
-			sink.configure(context);
-
-			JSONParser jsonParser = new JSONParser();
-			JSONObject json = (JSONObject) jsonParser.parse(bodyJSON);
-
-			NGSIArcgisFeatureTableSink.ArcgisAggregatorDomain arcGisDomain = null;
-			String serviceUrl = "127.0.0.1/services";
-
-			NGSIArcgisFeatureTableSink.NGSIArcgisAggregator aggregator = sink.new NGSIArcgisAggregator(serviceUrl,
-					false);
-			NGSIEvent event = null;
-
-			aggregator.aggregate(event);
-			try {
-				sink.persistAggregation(aggregator);
-				assertTrue(true);
-				LOGGER.debug(getTestTraceHead("[NGSIArcGisSink.insertFeeature]") + "-  OKs");
-			} catch (AssertionError e) {
-				LOGGER.error(getTestTraceHead("[NGSIArcGisSink.insertFeeature]") + "- FAIL");
-				throw e;
-			} // try catch
-		} catch (Exception e) {
-			e.printStackTrace();
-			LOGGER.error(getTestTraceHead("[NGSIArcGisSink.insertFeeature]") + "- FAIL");
-
-			assertTrue(false);
-
-		} // catch
+        if (!ArcgisBaseTest.connectionTestsSkipped()){
+    		try {
+    			String bodyJSON = "{\"id\": \"Car1\", \"type\": \"Car\", "
+    					+ "\"location\": { \"type\": \"geo:json\" \"value\": "
+    					+ "{\"type\": \"Point\", \"coordinates\": [-3.79109661, 43.48712556]}}, "
+    					+ " \"speed\": { \"type\":\"Float\", \"value\": 98 } }";
+    			String serviceFiware = "service";
+    			String servicePathFiware = "/test";
+    
+    			Map<String, String> headers = new HashMap<String, String>();
+    			headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, serviceFiware);
+    			headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, servicePathFiware);
+    
+    			String url = ArcgisBaseTest.getFeatureUrl();
+    			String username = ArcgisBaseTest.getUser();
+    			String password = ArcgisBaseTest.getPassword();
+    
+    			sink = new NGSIArcgisFeatureTableSink();
+    
+    			Context context = NGSIUtilsForTests.createContextForArcGis(url, username, password);
+    			sink.configure(context);
+    
+    			JSONParser jsonParser = new JSONParser();
+    			JSONObject json = (JSONObject) jsonParser.parse(bodyJSON);
+    
+    			NGSIArcgisFeatureTableSink.ArcgisAggregatorDomain arcGisDomain = null;
+    			String serviceUrl = "127.0.0.1/services";
+    
+    			NGSIArcgisFeatureTableSink.NGSIArcgisAggregator aggregator = sink.new NGSIArcgisAggregator(serviceUrl,
+    					false);
+    			NGSIEvent event = null;
+    
+    			aggregator.aggregate(event);
+    			try {
+    				sink.persistAggregation(aggregator);
+    				assertTrue(true);
+    				LOGGER.debug(getTestTraceHead("[NGSIArcGisSink.insertFeeature]") + "-  OKs");
+    			} catch (AssertionError e) {
+    				LOGGER.error(getTestTraceHead("[NGSIArcGisSink.insertFeeature]") + "- FAIL");
+    				throw e;
+    			} // try catch
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    			LOGGER.error(getTestTraceHead("[NGSIArcGisSink.insertFeeature]") + "- FAIL");
+    
+    			assertTrue(false);
+    
+    		} // catch
+        } else {
+            System.out.println(" -- Skipped");
+            assertTrue(true);
+        }
 
 	} // testInsertFeature
 
