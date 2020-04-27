@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 import com.telefonica.iot.cygnus.backends.arcgis.model.Credential;
+import com.telefonica.iot.cygnus.backends.arcgis.restutils.ArcgisBaseTest;
 import com.telefonica.iot.cygnus.backends.arcgis.restutils.RestAuthentication;
 
 /**

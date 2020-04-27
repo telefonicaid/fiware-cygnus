@@ -35,9 +35,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.telefonica.iot.cygnus.backends.arcgis.ArcgisBaseTest;
+import com.telefonica.iot.cygnus.backends.arcgis.NGSIArcgisFeatureTable;
 import com.telefonica.iot.cygnus.backends.arcgis.model.Feature;
-import com.telefonica.iot.cygnus.backends.arcgis.restutils.NGSIArcgisFeatureTable;
+import com.telefonica.iot.cygnus.backends.arcgis.restutils.ArcgisBaseTest;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
@@ -48,7 +48,7 @@ import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
  * @author PMO Santander Smart City – Ayuntamiento de Santander
  */
 @RunWith(MockitoJUnitRunner.class)
-public class NGSIArcGisSinkTest {
+public class NGSIArcGisSinkTest implements ArcgisBaseTest{
 
 	private static final CygnusLogger LOGGER = new CygnusLogger(NGSIArcGisSinkTest.class);
 	private NGSIArcgisFeatureTableSink sink;
@@ -111,7 +111,7 @@ public class NGSIArcGisSinkTest {
 
 		sink.jsonElementToFeatureAttr("name", "geo:json", jsonElement, feature);
 
-		String featureTableUrl = "https://services5.arcgis.com//398f12mJiCbJeoAQ//arcgis/rest/services/OcupacionDummy/FeatureServer/0";
+		String featureTableUrl = "https://arcgis.com//XXXXXXXXXXXX//arcgis/rest/services/FeatureTable01/FeatureServer/0";
 		featureTableUrl = featureTableUrl.replaceAll("([^:])\\/\\/", "$1/");
 
 		System.out.println(featureTableUrl);

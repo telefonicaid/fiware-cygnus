@@ -16,7 +16,7 @@
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
-package com.telefonica.iot.cygnus.backends.arcgis;
+package com.telefonica.iot.cygnus.backends.arcgis.restutils;
 
 /**
  * @author dmartinez
@@ -35,8 +35,8 @@ public interface ArcgisBaseTest {
     public static final String ONLINE_GENERATE_TOKEN_URL = "***************";
     public static final String ONLINE_FEATURETABLE_URL = "***************";
 
-    public boolean testPortal = false;
-    public boolean skipConnectionTest = true;
+    public static final boolean testPortal = false;
+    public static final boolean skipConnectionTest = true;
 
     /**
      * 

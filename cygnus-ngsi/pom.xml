@@ -16,6 +16,12 @@
     </properties>
 
     <dependencies>
+        <!-- Required by any agent -->
+        <dependency>
+            <groupId>com.telefonica.iot</groupId>
+            <artifactId>cygnus-common</artifactId>
+            <version>2.0.0_SNAPSHOT</version>
+        </dependency>
         <!-- Required for testing -->
         <dependency>
             <groupId>org.mockito</groupId>
@@ -52,13 +58,6 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
         </dependency>
-        <!-- Required by any agent -->
-        <dependency>
-            <groupId>com.telefonica.iot</groupId>
-            <artifactId>cygnus-common</artifactId>
-            <version>2.0.0_SNAPSHOT</version>
-        </dependency>
-                
     </dependencies>
 
     <build>
@@ -81,9 +80,18 @@
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
-				        <compilerArguments>
-				        </compilerArguments>
+				        <compilerArgument></compilerArgument>
                         <fork>true</fork>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.6</version>
+                    <configuration>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
                     </configuration>
                 </plugin>
                 <plugin>
