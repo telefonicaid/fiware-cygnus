@@ -43,6 +43,37 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
  *
  */
 public class RestFeatureTable extends CredentialRestApi {
+    
+    private static final String DEFAULT_OUTPUT_FORMAT = "json";
+    private static final String DEFAULT_SPATIAL_REFERENCE = "{\"wkid\":4326}";
+    private static final String ALL_FIELDS = "*";
+    
+    private static final String QUERY_RELATIVE_PATH = "/query";
+    private static final String DELETE_FEATURES_RELATIVE_PATH = "/deleteFeatures";
+
+    private static final String ERROR_TAG = "error";
+    private static final String GEOMETRY_TAG = "geometry";
+    private static final String ATTRIBUTES_TAG = "attributes";
+    private static final String HAS_MORE_TAG = "exceededTransferLimit";
+    private static final String INDEXES_TAG = "indexes";
+    private static final String IS_UNIQUE_TAG = "isUnique";
+    private static final String FIELDS_TAG = "fields";
+    private static final String OBJECT_ID_FIELD_TAG = "objectIdField";
+    private static final String UNIQUE_ID_FIELD_TAG = "uniqueIdField";
+    private static final String UPDATE_FEATURES_TAG = "updateFeatures";
+    private static final String ADD_FEATURES_TAG = "addFeatures";
+    
+    private static final String OBJECT_IDS_PARAM = "objectIds";
+    private static final String RETURN_DELETE_RESULTS_PARAM = "returnDeleteResults";
+    private static final String FEATURES_PARAM = "features";
+    private static final String ROLLBACK_ON_FAILURE_PARAM = "rollbackOnFailure";
+    private static final String OUTPUT_FORMAT_PARAM = "f";
+    private static final String TOKEN_PARAM = "token";
+    private static final String WHERE_PARAM = "where";
+    private static final String RESULT_OFFSET_PARAM = "resultOffset";
+    private static final String OUT_FIELDS_PARAM = "outFields";
+    private static final String OUT_SPATIAL_REFERENCE_PARAM = "outSR";
+
     private static final CygnusLogger LOGGER = new CygnusLogger(RestFeatureTable.class);
 
     protected URL serviceUrl;
@@ -165,20 +196,20 @@ public class RestFeatureTable extends CredentialRestApi {
         String responseJSON = null;
 
         Map<String, String> params = new LinkedHashMap<String, String>();
-        params.put("outSR", "{\"wkid\":4326}");
-        params.put("outFields", "*");
+        params.put(OUT_SPATIAL_REFERENCE_PARAM, DEFAULT_SPATIAL_REFERENCE);
+        params.put(OUT_FIELDS_PARAM, ALL_FIELDS);
         if (pageOffset >= 0) {
-            params.put("resultOffset", String.valueOf(pageOffset));
+            params.put(RESULT_OFFSET_PARAM, String.valueOf(pageOffset));
         }
-        params.put("where", whereClause);
+        params.put(WHERE_PARAM, whereClause);
         if (token != null && !"".equals(token)) {
-            params.put("token", token);
+            params.put(TOKEN_PARAM, token);
         }
-        params.put("f", "pjson");
+        params.put(OUTPUT_FORMAT_PARAM, DEFAULT_OUTPUT_FORMAT);
 
         String fullUrl = serviceUrl.toString();
-        if (!fullUrl.endsWith("/query")) {
-            fullUrl += "/query";
+        if (!fullUrl.endsWith(QUERY_RELATIVE_PATH)) {
+            fullUrl += QUERY_RELATIVE_PATH;
         }
 
         HttpResponse response = httpGet(fullUrl, params);
@@ -188,7 +219,7 @@ public class RestFeatureTable extends CredentialRestApi {
 
         responseJSON = response.getBody();
 
-        return resultPageFromJson(responseJSON, "features", pageOffset);
+        return resultPageFromJson(responseJSON, FEATURES_PARAM, pageOffset);
 
     }
 
@@ -219,15 +250,15 @@ public class RestFeatureTable extends CredentialRestApi {
                 + serviceUrl);
 
         Map<String, String> params = new LinkedHashMap<String, String>();
-        params.put("outSR", "{\"wkid\":4326}");
+        params.put(OUT_SPATIAL_REFERENCE_PARAM, DEFAULT_SPATIAL_REFERENCE);
         if (getCredential() != null && !"".equals(getCredential().getToken())) {
-            params.put("token", getCredential().getToken());
+            params.put(TOKEN_PARAM, getCredential().getToken());
         }
-        params.put("rollbackOnFailure", "true");
+        params.put(ROLLBACK_ON_FAILURE_PARAM, "true");
 
         Map<String, String> bodyParams = new LinkedHashMap<String, String>();
-        bodyParams.put("features", featureListToStrArray(featureList));
-        bodyParams.put("f", "json");
+        bodyParams.put(FEATURES_PARAM, featureListToStrArray(featureList));
+        bodyParams.put(OUTPUT_FORMAT_PARAM, DEFAULT_OUTPUT_FORMAT);
 
         String fullUrl = serviceUrl.toString();
         if (!fullUrl.endsWith("/" + action)) {
@@ -251,7 +282,7 @@ public class RestFeatureTable extends CredentialRestApi {
 
         List<Feature> featureList = new ArrayList<Feature>();
         featureList.add(feature);
-        sendFeatureList(featureList, "addFeatures");
+        sendFeatureList(featureList, ADD_FEATURES_TAG);
     }
 
     /**
@@ -264,7 +295,7 @@ public class RestFeatureTable extends CredentialRestApi {
         LOGGER.debug(
                 "Adding feature List (" + featureList.size() + ") to Feature table: " + serviceUrl);
 
-        sendFeatureList(featureList, "addFeatures");
+        sendFeatureList(featureList, ADD_FEATURES_TAG);
     }
 
     /**
@@ -278,7 +309,7 @@ public class RestFeatureTable extends CredentialRestApi {
 
         List<Feature> featureList = new ArrayList<Feature>();
         featureList.add(feature);
-        sendFeatureList(featureList, "updateFeatures");
+        sendFeatureList(featureList, UPDATE_FEATURES_TAG);
     }
 
     /**
@@ -291,7 +322,7 @@ public class RestFeatureTable extends CredentialRestApi {
         LOGGER.debug(
                 "Adding feature list (" + featureList.size() + ") to Feature table: " + serviceUrl);
 
-        sendFeatureList(featureList, "updateFeatures");
+        sendFeatureList(featureList, UPDATE_FEATURES_TAG);
     }
 
     /**
@@ -306,17 +337,17 @@ public class RestFeatureTable extends CredentialRestApi {
 
         Map<String, String> params = new LinkedHashMap<String, String>();
         if (getCredential() != null && !"".equals(getCredential().getToken())) {
-            params.put("token", getCredential().getToken());
+            params.put(TOKEN_PARAM, getCredential().getToken());
         }
-        params.put("returnDeleteResults", "false");
+        params.put(RETURN_DELETE_RESULTS_PARAM, "false");
 
         Map<String, String> bodyParams = new LinkedHashMap<String, String>();
-        bodyParams.put("objectIds", joinList(objectIdList, ","));
-        bodyParams.put("f", "json");
+        bodyParams.put(OBJECT_IDS_PARAM, joinList(objectIdList, ","));
+        bodyParams.put(OUTPUT_FORMAT_PARAM, DEFAULT_OUTPUT_FORMAT);
 
         String fullUrl = serviceUrl.toString();
-        if (!fullUrl.endsWith("/deleteFeatures")) {
-            fullUrl += "/deleteFeatures";
+        if (!fullUrl.endsWith(DELETE_FEATURES_RELATIVE_PATH)) {
+            fullUrl += DELETE_FEATURES_RELATIVE_PATH;
         }
 
         HttpResponse response = httpPost(fullUrl, params, bodyParams);
@@ -361,9 +392,9 @@ public class RestFeatureTable extends CredentialRestApi {
             Map<String, String> params = new LinkedHashMap<String, String>();
             if (getCredential() != null && !"".equals(getCredential().getToken())) {
                 token = getCredential().getToken();
-                params.put("token", token);
+                params.put(TOKEN_PARAM, token);
             }
-            params.put("f", "pjson");
+            params.put(OUTPUT_FORMAT_PARAM, DEFAULT_OUTPUT_FORMAT);
 
             LOGGER.debug("HttpGet " + fullUrl.toString() + " number of params: " + params.size());
             HttpResponse response = httpGet(fullUrl, params);
@@ -408,12 +439,12 @@ public class RestFeatureTable extends CredentialRestApi {
             JsonObject json = parser.parse(jsonStr).getAsJsonObject();
 
             // Unique field
-            if (json.has("uniqueIdField")) {
-                JsonObject uniqueId = json.get("uniqueIdField").getAsJsonObject();
+            if (json.has(UNIQUE_ID_FIELD_TAG)) {
+                JsonObject uniqueId = json.get(UNIQUE_ID_FIELD_TAG).getAsJsonObject();
                 this.uniqueIdField = uniqueId.get("name").getAsString();
                 LOGGER.debug("Unique id field detected: " + this.uniqueIdField);
-            } else if (json.has("objectIdField")) {
-                this.uniqueIdField = json.get("objectIdField").getAsString();
+            } else if (json.has(OBJECT_ID_FIELD_TAG)) {
+                this.uniqueIdField = json.get(OBJECT_ID_FIELD_TAG).getAsString();
                 LOGGER.debug("Unique id field detected (objectIdField): " + this.uniqueIdField);
             } else {
                 LOGGER.info("WARN: Feature table has not uniqueIdField");
@@ -436,7 +467,7 @@ public class RestFeatureTable extends CredentialRestApi {
             JsonObject json = parser.parse(jsonStr).getAsJsonObject();
 
             // Attribute list
-            JsonArray fields = json.get("fields").getAsJsonArray();
+            JsonArray fields = json.get(FIELDS_TAG).getAsJsonArray();
             for (JsonElement fieldElement : fields) {
                 Field field = Field.createInstanceFromJson(fieldElement.getAsJsonObject());
                 this.tableAttributes.put(field.getName(), field);
@@ -457,11 +488,11 @@ public class RestFeatureTable extends CredentialRestApi {
         try {
             JsonParser parser = new JsonParser();
             JsonObject json = parser.parse(jsonStr).getAsJsonObject();
-            JsonArray jsonFieldsArray = json.get("indexes").getAsJsonArray();
+            JsonArray jsonFieldsArray = json.get(INDEXES_TAG).getAsJsonArray();
             for (JsonElement fieldElement : jsonFieldsArray) {
                 JsonObject index = fieldElement.getAsJsonObject();
-                if (index.get("isUnique").getAsBoolean()) {
-                    String fields = index.get("fields").getAsString();
+                if (index.get(IS_UNIQUE_TAG).getAsBoolean()) {
+                    String fields = index.get(FIELDS_TAG).getAsString();
                     String[] fieldsArray = fields.split(",");
                     for (String fieldName : fieldsArray) {
                         if (tableAttributes.containsKey(fieldName)) {
@@ -528,7 +559,7 @@ public class RestFeatureTable extends CredentialRestApi {
         boolean hasMore = false;
 
         if ("".equals(listTag)) {
-            listTag = "features";
+            listTag = FEATURES_PARAM;
         }
         List<Feature> featureList = new ArrayList<Feature>();
 
@@ -536,8 +567,8 @@ public class RestFeatureTable extends CredentialRestApi {
         JsonObject json = parser.parse(responseJson).getAsJsonObject();
         JsonElement node = json.get(listTag);
 
-        if (json.has("exceededTransferLimit")) {
-            hasMore = json.get("exceededTransferLimit").getAsBoolean();
+        if (json.has(HAS_MORE_TAG)) {
+            hasMore = json.get(HAS_MORE_TAG).getAsBoolean();
         } else {
             hasMore = false;
         }
@@ -546,8 +577,8 @@ public class RestFeatureTable extends CredentialRestApi {
             JsonArray jsonArray = node.getAsJsonArray();
 
             for (JsonElement jsonElement : jsonArray) {
-                JsonElement attributes = jsonElement.getAsJsonObject().get("attributes");
-                JsonElement geometry = jsonElement.getAsJsonObject().get("geometry");
+                JsonElement attributes = jsonElement.getAsJsonObject().get(ATTRIBUTES_TAG);
+                JsonElement geometry = jsonElement.getAsJsonObject().get(GEOMETRY_TAG);
 
                 Feature feature = Feature.createInstanceFromJson(jsonElement.toString());
 
@@ -557,8 +588,8 @@ public class RestFeatureTable extends CredentialRestApi {
 
         } else {
             String errorDesc = "No entities found in Json response.";
-            if (json.get("error") != null) {
-                errorDesc = json.get("error").toString();
+            if (json.get(ERROR_TAG) != null) {
+                errorDesc = json.get(ERROR_TAG).toString();
             }
             throw new ArcgisException(errorDesc);
         }
