@@ -288,7 +288,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 
                 // Get an aggregator for this destination and initialize it
                 NGSIArcgisAggregator aggregator = new NGSIArcgisAggregator(getrAcgisServicesUrl(), enableNameMappings);
-                aggregator.initialize(events.get(0));
+                
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
                 } // for
@@ -427,13 +427,6 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
             this.enableNameMappings = enableNameMappings;
             this.argisServiceUrl = argisServiceUrl;
         } // ArcgisAggregator
-
-        /**
-         * 
-         * @param event
-         */
-        public void initialize(NGSIEvent event) {
-        } // initialize
 
         /**
          * @return the listArcgisAggregatorDomain
