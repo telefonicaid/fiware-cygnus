@@ -65,7 +65,11 @@ import jodd.util.URLDecoder;
  *         https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/ngsi_arcgis_sink.md
  */
 public class NGSIArcgisFeatureTableSink extends NGSISink {
-
+    
+    private static final String NGSI_DATETIME_DATATYPE = "datetime";
+    private static final String NGSI_BOOLEAN_DATATYPE = "boolean";
+    private static final String NGSI_GEO_JSON_DATATYPE = "geo:json";
+    
     private static final String DEFAULT_ARCGIS_SERVICE_URL = "localhost";
     private static final String DEFAULT_GETTOKEN_URL = "localhost";
     private static final String DEFAULT_USER_NAME = "root";
@@ -73,6 +77,10 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     private static final int DEFAULT_MAX_BATCH_SIZE = 10;
     private static final int DEFAULT_BATCH_TIMEOUT_SECS = 60;
     private static final String ARCGIS_INSTANCE_NAME = "arcgis";
+    
+    private static final String GEO_JSON_COORDINATES_TAG = "coordinates";
+    private static final String GEO_JSON_TYPE_TAG = "type";
+    private static final String GEO_JSON_POINT_TYPE = "Point";
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIArcgisFeatureTableSink.class);
     private String arcgisServicesUrl;
@@ -575,11 +583,12 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 
         switch (attrType) {
 
-            case "geo:json":
+            case NGSI_GEO_JSON_DATATYPE:
                 try {
                     JsonObject location = attrValue.getAsJsonObject();
-                    if (location.get("type").getAsString().equals("Point")) {
-                        JsonArray coordinates = location.get("coordinates").getAsJsonArray();
+                    if (location.get(GEO_JSON_TYPE_TAG).getAsString().toLowerCase()
+                            .equals(GEO_JSON_POINT_TYPE.toLowerCase())) {
+                        JsonArray coordinates = location.get(GEO_JSON_COORDINATES_TAG).getAsJsonArray();
                         double latitude = coordinates.get(0).getAsDouble();
                         double longitude = coordinates.get(1).getAsDouble();
 
@@ -594,7 +603,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                             + e.getMessage());
                 }
                 break;
-            case "boolean":
+            case NGSI_BOOLEAN_DATATYPE:
                 if (attrValue.isJsonPrimitive() && attrValue.getAsJsonPrimitive().isBoolean()) {
                     feature.addAttribute(attrName, attrValue.getAsBoolean());
                 } else {
@@ -603,7 +612,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                     feature.addAttribute(attrName, result);
                 }
                 break;
-            case "datetime":
+            case NGSI_DATETIME_DATATYPE:
                 String dateStr = attrValue.toString();
                 feature.addAttribute(attrName, parseFiwareDate(dateStr));
                 break;
