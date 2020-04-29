@@ -316,6 +316,7 @@ RUN \
     cp ${CYGNUS_HOME}/cygnus-ngsi/conf/name_mappings.conf.template ${FLUME_HOME}/conf/name_mappings.conf && \
     echo "INFO: Create Cygnus log folder" && \
     mkdir -p /var/log/cygnus && \
+    chmod 777 /var/log/cygnus && \
     echo "INFO: Cleanup to thin the final image... doing optimizations..." && \
     cd ${CYGNUS_HOME}/cygnus-common && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
