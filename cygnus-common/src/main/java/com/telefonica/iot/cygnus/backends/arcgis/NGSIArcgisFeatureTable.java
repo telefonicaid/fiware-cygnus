@@ -22,7 +22,6 @@ import java.util.Date;
 
 import com.telefonica.iot.cygnus.backends.arcgis.model.Feature;
 import com.telefonica.iot.cygnus.backends.arcgis.restutils.ArcgisFeatureTable;
-import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
 /**
