@@ -107,7 +107,7 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 * `attrName`: Notified attribute name.
 * `attrType`: Notified attribute type.
 * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
-* `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
+* `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted). Will be stored only if it was configured to (attr_metadata_store set to true in the configuration file ngsi_agent.conf). It is a Json object.
 
 [Top](#top)
 
@@ -252,6 +252,7 @@ Coming soon.
 | postgresql\_username | no | postgres | `postgres` is the default username that is created automatically when install |
 | postgresql\_password | no | N/A | Empty value by default (No password is created when install) |
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
+| attr\_metadata\_store | no | false | <i>true</i> or <i>false</i>. |
 | attr\_native\_types | no | false | if the attribute value will be native <i>true</i> or stringfy or <i>false</i>. |
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
