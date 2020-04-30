@@ -234,9 +234,11 @@ elif [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_hosts/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_hosts = '${CYGNUS_MONGO_HOSTS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_username/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_username = '${CYGNUS_MONGO_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_password/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_password = '${CYGNUS_MONGO_PASS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_auth_source/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_auth_source = '${CYGNUS_MONGO_AUTH_SOURCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_hosts/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_hosts = '${CYGNUS_MONGO_HOSTS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_username/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_username = '${CYGNUS_MONGO_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_password/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_password = '${CYGNUS_MONGO_PASS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_auth_source/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_auth_source = '${CYGNUS_MONGO_AUTH_SOURCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     # The following are optional and disabled by default
     if [ "$CYGNUS_MONGO_ENABLE_ENCODING" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_encoding = '${CYGNUS_MONGO_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}

@@ -21,7 +21,6 @@ package com.telefonica.iot.cygnus.aggregation;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
