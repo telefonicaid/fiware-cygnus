@@ -271,15 +271,26 @@ public final class NGSIUtils {
      * @return the fields (column names) for insert in SQL format.
      */
     public static String getFieldsForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        return getFieldsForInsert(aggregation, "");
+    }
+    
+    /**
+     * Gets fields for insert.
+     * 
+     * @param aggregation the aggregation
+     * @param quoteChar char to quote field names
+     * @return he fields (column names) for insert in SQL format.
+     */
+    public static String getFieldsForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, String quoteChar) {
         String fieldsForInsert = "(";
         boolean first = true;
         Iterator<String> it = aggregation.keySet().iterator();
         while (it.hasNext()) {
             if (first) {
-                fieldsForInsert += (String) it.next();
+                fieldsForInsert += quoteChar + (String) it.next() + quoteChar;
                 first = false;
             } else {
-                fieldsForInsert += "," + (String) it.next();
+                fieldsForInsert += "," + quoteChar + (String) it.next() + quoteChar;
             } // if else
         } // while
         return fieldsForInsert + ")";
