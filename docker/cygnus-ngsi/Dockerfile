@@ -145,6 +145,7 @@ ENV CYGNUS_POSTGRESQL_HOST ""
 ENV CYGNUS_POSTGRESQL_PORT ""
 # ENV CYGNUS_POSTGRESQL_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
 # ENV CYGNUS_POSTGRESQL_PASS "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+ENV CYGNUS_POSTGRESQL_DATABASE ""
 ENV CYGNUS_POSTGRESQL_SKIP_CONF_GENERATION ""
 ENV CYGNUS_POSTGRESQL_SERVICE_PORT "5055"
 ENV CYGNUS_POSTGRESQL_ENABLE_ENCODING ""
