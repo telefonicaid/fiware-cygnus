@@ -27,6 +27,7 @@ Content:
 * [Programmers guide](#section3)
     * [`NGSIPostgreSQLSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
+    * [SSL/TLS connection](#section3.3)
 
 ## <a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIPostgreSQLSink`, or simply `NGSIPostgreSQLSink` is a sink designed to persist NGSI-like context data events within a [PostgreSQL server](https://www.postgresql.org/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -251,6 +252,7 @@ Coming soon.
 | postgresql\_database | no | postgres | `postgres` is the default database that is created automatically when install |
 | postgresql\_username | no | postgres | `postgres` is the default username that is created automatically when install |
 | postgresql\_password | no | N/A | Empty value by default (No password is created when install) |
+| postgresql\_options | no | N/A | optional connection parameter(s) concatinated to jdbc url if necessary<br/>When `sslmode=require` is set to `postgresql_options`, jdbc url will become like <b>jdbc:postgresql://postgresql.example.com:5432/postgres?sslmode=require</b>|
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
 | attr\_metadata\_store | no | false | <i>true</i> or <i>false</i>. |
 | attr\_native\_types | no | false | if the attribute value will be native <i>true</i> or stringfy or <i>false</i>. |
@@ -277,6 +279,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.postgresql-sink.postgresql_database = mydatabase
     cygnus-ngsi.sinks.postgresql-sink.postgresql_username = myuser
     cygnus-ngsi.sinks.postgresql-sink.postgresql_password = mypassword
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_options = sslmode=require
     cygnus-ngsi.sinks.postgresql-sink.attr_persistence = row
     cygnus-ngsi.sinks.postgresql-sink.attr_native_types = false
     cygnus-ngsi.sinks.postgresql-sink.batch_size = 100
@@ -369,5 +372,9 @@ A complete configuration as the described above is read from the given `Context`
 
 ### <a name="section3.2"></a>Authentication and authorization
 Current implementation of `NGSIPostgreSQLSink` relies on the database, username and password credentials created at the PostgreSQL endpoint.
+
+### <a name="section3.3"></a>SSL/TLS connection
+When `NGSIPostgreSQLSink` want to connect PostgreSQL Server by using SSL or TLS, please set `postgresql_options` configuration parameter to configure jdbc.
+
 
 [Top](#top)
