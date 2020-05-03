@@ -37,6 +37,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -227,6 +228,63 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testConfigureAttrPersistence
+
+    /**
+     * [NGSIMySQLSink.configure] -------- sqlOptions is null when it is not configured.
+     */
+    @Test
+    public void testConfigureSQLOptionsIsNull() {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                + "-------- mysqlOptions is null when mysql_options is not configured");
+        String attrPersistence = null;
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username));
+
+        assertNull(sink.getMySQLOptions());
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                + "-  OK  - mysqlOptions is null when it is not configured");
+    } // testConfigureSQLOptionsIsNull
+
+    /**
+     * [NGSIMySQLSink.configure] -------- sqlOptions has value when it is configured.
+     */
+    @Test
+    public void testConfigureSQLOptionsHasValue() {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                + "-------- mysqlOptions has value when mysql_options is configured");
+        String attrPersistence = null;
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String sqlOptions = "useSSL=true&requireSSL=true";
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, sqlOptions));
+
+        assertEquals(sqlOptions, sink.getMySQLOptions());
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
+                + "-  OK  - mysqlOptions has value when it is configured");
+    } // testConfigureSQLOptionsHasValue
 
     /**
      * [NGSIMySQLSink.buildDBName] -------- When no encoding, the DB name is equals to the encoding of the
@@ -1112,6 +1170,26 @@ public class NGSIMySQLSinkTest {
         context.put("mysql_password", password);
         context.put("mysql_port", port);
         context.put("mysql_username", username);
+        return context;
+    } // createContext
+
+    private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
+                                  String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
+                                  String password, String port, String username, String sqlOptions) {
+        Context context = new Context();
+        context.put("attr_persistence", attrPersistence);
+        context.put("batch_size", batchSize);
+        context.put("batch_time", batchTime);
+        context.put("batch_ttl", batchTTL);
+        context.put("data_model", dataModel);
+        context.put("enable_encoding", enableEncoding);
+        context.put("enable_grouping", enableGrouping);
+        context.put("enable_lowercase", enableLowercase);
+        context.put("mysql_host", host);
+        context.put("mysql_password", password);
+        context.put("mysql_port", port);
+        context.put("mysql_username", username);
+        context.put("mysql_options", sqlOptions);
         return context;
     } // createContext
 
