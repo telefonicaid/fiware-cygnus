@@ -1,0 +1,1 @@
+[cygnus-ngsi][MysqlSink] Quoted Sql field names to avoid naming problems. (#1863)
