@@ -102,7 +102,7 @@ public final class NGSIUtils {
             boolean swapCoordinates) {
         // First, check the attribute type
         if (attrType.equals("geo:point")) {
-            String[] split = attrValue.split(",");
+            String[] split = attrValue.replace("\"","").split(",");
                 
             if (swapCoordinates) {
                 return new ImmutablePair(
