@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Telefonica 
+ * Copyright 2019 Telefonica
  *
  * This file is part of fiware-cygnus (FIWARE project).
  *
@@ -84,7 +84,7 @@ public class NGSIPostgisSinkTest {
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username, cache));
-        
+
         try {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
@@ -95,7 +95,7 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testConfigureEnableEncoding
-    
+
     /**
      * [NGSIPostgisSink.configure] -------- enable_lowercase can only be 'true' or 'false'.
      */
@@ -119,7 +119,7 @@ public class NGSIPostgisSinkTest {
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username, cache));
-        
+
         try {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
@@ -130,7 +130,7 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testConfigureEnableLowercase
-    
+
     /**
      * [NGSIPostgisSink.configure] -------- enable_grouping can only be 'true' or 'false'.
      */
@@ -154,7 +154,7 @@ public class NGSIPostgisSinkTest {
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username, cache));
-        
+
         try {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
@@ -165,11 +165,11 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testConfigureEnableGrouping
-    
+
     /**
      * [NGSIPostgisSink.configure] -------- data_model can only be 'dm-by-service-path' or 'dm-by-entity'.
      */
-    // TBD: check for dataModel values in NGSIMySQLSink and uncomment this test.
+    // TBD: check for dataModel values in NGSIPostgisSink and uncomment this test.
     // @Test
     public void testConfigureDataModel() {
         System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
@@ -190,7 +190,7 @@ public class NGSIPostgisSinkTest {
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username, cache));
-        
+
         try {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
@@ -201,7 +201,7 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testConfigureDataModel
-    
+
     /**
      * [NGSIPostgisSink.configure] -------- attr_persistence can only be 'row' or 'column'.
      */
@@ -225,7 +225,7 @@ public class NGSIPostgisSinkTest {
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username, cache));
-        
+
         try {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
@@ -236,7 +236,66 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testConfigureAttrPersistence
-    
+
+    /**
+     * [NGSIPostgisSink.configure] -------- sqlOptions is null when it is not configured.
+     */
+    @Test
+    public void testConfigureSQLOptionsIsNull() {
+        System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
+                + "-------- postgisOptions is null when postgis_options is not configured");
+        String attrPersistence = null;
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgisSink sink = new NGSIPostgisSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+
+        assertNull(sink.getPostgisOptions());
+        System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
+                + "-  OK  - postgisOptions is null when it is not configured");
+    } // testConfigureSQLOptionsIsNull
+
+    /**
+     * [NGSIPostgisSink.configure] -------- sqlOptions has value when it is onfigured.
+     */
+    @Test
+    public void testConfigureSQLOptionsHasValue() {
+        System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
+                + "-------- postgisOptions has value when postgis_options is configured");
+        String attrPersistence = null;
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        String sqlOptions = "sslmode=require";
+        NGSIPostgisSink sink = new NGSIPostgisSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache, sqlOptions));
+
+        assertEquals(sqlOptions, sink.getPostgisOptions());
+        System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
+                + "-  OK  - postgisOptions has value when it is configured");
+    } // testConfigureSQLOptionsIsNull
+
     /**
      * [NGSIPostgisSink.buildDBName] -------- The schema name is equals to the encoding of the notified/defaulted
      * service.
@@ -263,11 +322,11 @@ public class NGSIPostgisSinkTest {
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String service = "someService";
-        
+
         try {
             String builtSchemaName = sink.buildSchemaName(service);
             String expectedDBName = "someService";
-        
+
             try {
                 assertEquals(expectedDBName, builtSchemaName);
                 System.out.println(getTestTraceHead("[NGSIPostgisSink.buildDBName]")
@@ -283,7 +342,7 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testBuildDBNameOldEncoding
-    
+
     /**
      * [NGSIPostgisSink.buildDBName] -------- The schema name is equals to the encoding of the notified/defaulted
      * service.
@@ -310,11 +369,11 @@ public class NGSIPostgisSinkTest {
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String service = "someService";
-        
+
         try {
             String builtSchemaName = sink.buildSchemaName(service);
             String expectedDBName = "somex0053ervice";
-        
+
             try {
                 assertEquals(expectedDBName, builtSchemaName);
                 System.out.println(getTestTraceHead("[NGSIPostgisSink.buildDBName]")
@@ -330,17 +389,17 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testBuildDBNameNewEncoding
-    
+
     /**
      * [NGSIPostgisSink.buildTableName] -------- When a non root service-path is notified/defaulted and
-     * data_model is 'dm-by-service-path' the MySQL table name is the encoding of <service-path>.
+     * data_model is 'dm-by-service-path' the Postgis table name is the encoding of <service-path>.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildTableNameNonRootServicePathDataModelByServicePathOldEncoding() throws Exception {
         System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
                 + "-------- When a non root service-path is notified/defaulted and data_model is "
-                + "'dm-by-service-path' the MySQL table name is the encoding of <service-path>");
+                + "'dm-by-service-path' the Postgis table name is the encoding of <service-path>");
         String attrPersistence = null; // default
         String batchSize = null; // default
         String batchTime = null; // default
@@ -361,11 +420,11 @@ public class NGSIPostgisSinkTest {
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "somePath";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
@@ -381,17 +440,17 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameNonRootServicePathDataModelByServicePathOldEncoding
-    
+
     /**
      * [NGSIPostgisSink.buildTableName] -------- When a non root service-path is notified/defaulted and
-     * data_model is 'dm-by-service-path' the MySQL table name is the encoding of <service-path>.
+     * data_model is 'dm-by-service-path' the Postgis table name is the encoding of <service-path>.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildTableNameNonRootServicePathDataModelByServicePathNewEncoding() throws Exception {
         System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
                 + "-------- When a non root service-path is notified/defaulted and data_model is "
-                + "'dm-by-service-path' the MySQL table name is the encoding of <service-path>");
+                + "'dm-by-service-path' the Postgis table name is the encoding of <service-path>");
         String attrPersistence = null; // default
         String batchSize = null; // default
         String batchTime = null; // default
@@ -412,11 +471,11 @@ public class NGSIPostgisSinkTest {
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "x002fsomex0050ath";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
@@ -432,10 +491,10 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameNonRootServicePathDataModelByServicePathNewEncoding
-    
+
     /**
      * [NGSIPostgisSink.buildTableName] -------- When a non root service-path is notified/defaulted and
-     * data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
+     * data_model is 'dm-by-entity' the Postgis table name is the encoding of the concatenation of \<service-path\>,
      * \<entity_id\> and \<entity_type\>.
      * @throws java.lang.Exception
      */
@@ -443,7 +502,7 @@ public class NGSIPostgisSinkTest {
     public void testBuildTableNameNonRootServicePathDataModelByEntityOldEncoding() throws Exception {
         System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
                 + "-------- When a non root service-path is notified/defaulted and data_model is "
-                + "'dm-by-service-path' the MySQL table name is the encoding of the concatenation of <service-path>, "
+                + "'dm-by-service-path' the Postgis table name is the encoding of the concatenation of <service-path>, "
                 + "<entityId> and <entityType>");
         String attrPersistence = null; // default
         String batchSize = null; // default
@@ -465,11 +524,11 @@ public class NGSIPostgisSinkTest {
         String entity = "someId=someType";
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "somePath_someId_someType";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
@@ -487,10 +546,10 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameNonRootServicePathDataModelByEntityOldEncoding
-    
+
     /**
      * [NGSIPostgisSink.buildTableName] -------- When a non root service-path is notified/defaulted and
-     * data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
+     * data_model is 'dm-by-entity' the Postgis table name is the encoding of the concatenation of \<service-path\>,
      * \<entity_id\> and \<entity_type\>.
      * @throws java.lang.Exception
      */
@@ -498,7 +557,7 @@ public class NGSIPostgisSinkTest {
     public void testBuildTableNameNonRootServicePathDataModelByEntityNewEncoding() throws Exception {
         System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
                 + "-------- When a non root service-path is notified/defaulted and data_model is "
-                + "'dm-by-service-path' the MySQL table name is the encoding of the concatenation of <service-path>, "
+                + "'dm-by-service-path' the Postgis table name is the encoding of the concatenation of <service-path>, "
                 + "<entityId> and <entityType>");
         String attrPersistence = null; // default
         String batchSize = null; // default
@@ -520,11 +579,11 @@ public class NGSIPostgisSinkTest {
         String entity = "someId=someType";
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "x002fsomex0050athxffffsomex0049dxffffsomex0054ype";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
@@ -545,7 +604,7 @@ public class NGSIPostgisSinkTest {
 
     /**
      * [NGSIPostgisSink.buildTableName] -------- When a non root service-path is notified/defaulted and
-     * data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
+     * data_model is 'dm-by-entity' the Postgis table name is the encoding of the concatenation of \<service-path\>,
      * \<entity_id\> and \<entity_type\>.
      * @throws java.lang.Exception
      */
@@ -652,17 +711,17 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameNonRootServicePathDataModelByEntityTypeNewEncoding
-    
+
     /**
      * [NGSIPostgisSink.buildTableName] -------- When a root service-path is notified/defaulted and
-     * data_model is 'dm-by-service-path' the MySQL table name cannot be built.
+     * data_model is 'dm-by-service-path' the Postgis table name cannot be built.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildTableNameRootServicePathDataModelByServicePathOldEncoding() throws Exception {
         System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
                 + "-------- When a root service-path is notified/defaulted and data_model is "
-                + "'dm-by-service-path' the MySQL table name cannot be built");
+                + "'dm-by-service-path' the Postgis table name cannot be built");
         String attrPersistence = null; // default
         String batchSize = null; // default
         String batchTime = null; // default
@@ -683,7 +742,7 @@ public class NGSIPostgisSinkTest {
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        
+
         try {
             sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
@@ -693,17 +752,17 @@ public class NGSIPostgisSinkTest {
                     + "-  OK  - The root service path was detected as not valid");
         } // try catch
     } // testBuildTableNameRootServicePathDataModelByServicePathOldEncoding
-    
+
     /**
      * [NGSIPostgisSink.buildTableName] -------- When a root service-path is notified/defaulted and
-     * data_model is 'dm-by-service-path' the MySQL table name is the encoding of \<service-path\>.
+     * data_model is 'dm-by-service-path' the Postgis table name is the encoding of \<service-path\>.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildTableNameRootServicePathDataModelByServicePathNewEncoding() throws Exception {
         System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
                 + "-------- When a root service-path is notified/defaulted and data_model is "
-                + "'dm-by-service-path' the MySQL table name is the encoding of <service-path>");
+                + "'dm-by-service-path' the Postgis table name is the encoding of <service-path>");
         String attrPersistence = null; // default
         String batchSize = null; // default
         String batchTime = null; // default
@@ -724,11 +783,11 @@ public class NGSIPostgisSinkTest {
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "x002f";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
@@ -744,10 +803,10 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameRootServicePathDataModelByServicePathNewEncoding
-    
+
     /**
      * [NGSIPostgisSink.buildTableName] -------- When a root service-path is notified/defaulted and
-     * data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
+     * data_model is 'dm-by-entity' the Postgis table name is the encoding of the concatenation of \<service-path\>,
      * \<entityId\> and \<entityType\>.
      * @throws java.lang.Exception
      */
@@ -755,7 +814,7 @@ public class NGSIPostgisSinkTest {
     public void testBuildTableNameRootServicePathDataModelByEntityOldEncoding() throws Exception {
         System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
                 + "-------- When a root service-path is notified/defaulted and data_model is "
-                + "'dm-by-service-path' the MySQL table name is the encoding of the concatenation of <service-path>, "
+                + "'dm-by-service-path' the Postgis table name is the encoding of the concatenation of <service-path>, "
                 + "<entityId> and <entityType>");
         String attrPersistence = null; // default
         String batchSize = null; // default
@@ -777,11 +836,11 @@ public class NGSIPostgisSinkTest {
         String entity = "someId=someType";
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "someId_someType";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
@@ -797,10 +856,10 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameRootServicePathDataModelByEntityOldencoding
-    
+
     /**
      * [NGSIPostgisSink.buildTableName] -------- When a root service-path is notified/defaulted and
-     * data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
+     * data_model is 'dm-by-entity' the Postgis table name is the encoding of the concatenation of \<service-path\>,
      * \<entityId\> and \<entityType\>.
      * @throws java.lang.Exception
      */
@@ -808,7 +867,7 @@ public class NGSIPostgisSinkTest {
     public void testBuildTableNameRootServicePathDataModelByEntityNewEncoding() throws Exception {
         System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
                 + "-------- When a root service-path is notified/defaulted and data_model is "
-                + "'dm-by-service-path' the MySQL table name is the encoding of the concatenation of <service-path>, "
+                + "'dm-by-service-path' the Postgis table name is the encoding of the concatenation of <service-path>, "
                 + "<entityId> and <entityType>");
         String attrPersistence = null; // default
         String batchSize = null; // default
@@ -830,11 +889,11 @@ public class NGSIPostgisSinkTest {
         String entity = "someId=someType";
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        
+
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
             String expecetedTableName = "x002fxffffsomex0049dxffffsomex0054ype";
-        
+
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
@@ -855,7 +914,7 @@ public class NGSIPostgisSinkTest {
     public void testBuildTableNameRootServicePathDataModelByEntityTypeOldEncoding() throws Exception {
         System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
                 + "-------- When a root service-path is notified/defaulted and data_model is "
-                + "'dm-by-entity-type' the MySQL table name is the encoding of the concatenation of <service-path>, "
+                + "'dm-by-entity-type' the Postgis table name is the encoding of the concatenation of <service-path>, "
                 + "<entityId> and <entityType>");
         String attrPersistence = null; // default
         String batchSize = null; // default
@@ -900,7 +959,7 @@ public class NGSIPostgisSinkTest {
 
     /**
      * [NGSIPostgisSink.buildTableName] -------- When a root service-path is notified/defaulted and
-     * data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
+     * data_model is 'dm-by-entity' the Postgis table name is the encoding of the concatenation of \<service-path\>,
      * \<entityId\> and \<entityType\>.
      * @throws java.lang.Exception
      */
@@ -908,7 +967,7 @@ public class NGSIPostgisSinkTest {
     public void testBuildTableNameRootServicePathDataModelByEntityTypeNewEncoding() throws Exception {
         System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
                 + "-------- When a root service-path is notified/defaulted and data_model is "
-                + "'dm-by-entity-type' the MySQL table name is the encoding of the concatenation of <service-path>, "
+                + "'dm-by-entity-type' the Postgis table name is the encoding of the concatenation of <service-path>, "
                 + "<entityId> and <entityType>");
         String attrPersistence = null; // default
         String batchSize = null; // default
@@ -950,7 +1009,7 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameRootServicePathDataModelByEntityTypeNewEncoding
-    
+
     /**
      * [NGSIPostgisSink.buildSchemaName] -------- A schema name length greater than 63 characters is detected.
      * @throws java.lang.Exception
@@ -976,7 +1035,7 @@ public class NGSIPostgisSinkTest {
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String service = "tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongService";
-        
+
         try {
             sink.buildSchemaName(service);
             System.out.println(getTestTraceHead("[NGSIPostgisSink.buildSchemaName]")
@@ -988,7 +1047,7 @@ public class NGSIPostgisSinkTest {
                     + "-  OK  - A schema name length greater than 63 characters has been detected");
         } // try catch
     } // testBuildSchemaNameLength
-    
+
     /**
      * [NGSIPostgisSink.buildTableName] -------- When data model is by service path, a table name length greater
      * than 63 characters is detected.
@@ -1019,7 +1078,7 @@ public class NGSIPostgisSinkTest {
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
-        
+
         try {
             sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
@@ -1031,7 +1090,7 @@ public class NGSIPostgisSinkTest {
                     + "-  OK  - A table name length greater than 63 characters has been detected");
         } // try catch
     } // testBuildTableNameLengthDataModelByServicePath
-    
+
     /**
      * [NGSIPostgisSink.buildTableName] -------- When data model is by entity, a table name length greater than 63
             * characters is detected.
@@ -1146,7 +1205,7 @@ public class NGSIPostgisSinkTest {
         String entity = "tooLooooooooooooooooooongEntity";
         String entityType = null; // irrelevant for this test
         String attribute = "tooLooooooooooooongAttribute";
-        
+
         try {
             sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIPostgisSink.buildTableName]")
@@ -1158,7 +1217,7 @@ public class NGSIPostgisSinkTest {
                     + "-  OK  - A table name length greater than 63 characters has been detected");
         } // try catch
     } // testBuildTableNameLengthDataModelByAttribute
-    
+
     /**
      * [NGSIPostgisSink.configure] -------- cache can only be 'true' or 'false'.
      */
@@ -1182,7 +1241,7 @@ public class NGSIPostgisSinkTest {
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username, cache));
-        
+
         try {
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
@@ -1276,11 +1335,32 @@ public class NGSIPostgisSinkTest {
         context.put("enable_encoding", enableEncoding);
         context.put("enable_grouping", enableGrouping);
         context.put("enable_lowercase", enableLowercase);
-        context.put("mysql_host", host);
-        context.put("mysql_password", password);
-        context.put("mysql_port", port);
-        context.put("mysql_username", username);
+        context.put("postgis_host", host);
+        context.put("postgis_password", password);
+        context.put("postgis_port", port);
+        context.put("postgis_username", username);
         context.put("backend.enable_cache", cache);
+        return context;
+    } // createContext
+
+    private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
+            String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
+            String password, String port, String username, String cache, String sqlOptions) {
+        Context context = new Context();
+        context.put("attr_persistence", attrPersistence);
+        context.put("batch_size", batchSize);
+        context.put("batch_time", batchTime);
+        context.put("batch_ttl", batchTTL);
+        context.put("data_model", dataModel);
+        context.put("enable_encoding", enableEncoding);
+        context.put("enable_grouping", enableGrouping);
+        context.put("enable_lowercase", enableLowercase);
+        context.put("postgis_host", host);
+        context.put("postgis_password", password);
+        context.put("postgis_port", port);
+        context.put("postgis_username", username);
+        context.put("backend.enable_cache", cache);
+        context.put("postgis_options", sqlOptions);
         return context;
     } // createContext
 
@@ -1296,10 +1376,10 @@ public class NGSIPostgisSinkTest {
         context.put("enable_encoding", enableEncoding);
         context.put("enable_grouping", enableGrouping);
         context.put("enable_lowercase", enableLowercase);
-        context.put("mysql_host", host);
-        context.put("mysql_password", password);
-        context.put("mysql_port", port);
-        context.put("mysql_username", username);
+        context.put("postgis_host", host);
+        context.put("postgis_password", password);
+        context.put("postgis_port", port);
+        context.put("postgis_username", username);
         context.put("backend.enable_cache", cache);
         context.put("attr_native_types", attrNativeTypes);
         return context;
