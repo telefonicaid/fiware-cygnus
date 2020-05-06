@@ -68,6 +68,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private boolean enableCache;
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
+    private String postgresqlOptions;
 
     /**
      * Constructor.
@@ -132,6 +133,14 @@ public class NGSIPostgreSQLSink extends NGSISink {
     protected boolean getRowAttrPersistence() {
         return rowAttrPersistence;
     } // getRowAttrPersistence
+
+    /**
+     * Gets the PostgreSQL options. It is protected due to it is only required for testing purposes.
+     * @return The PostgreSQL options
+     */
+    protected String getPostgreSQLOptions() {
+        return postgresqlOptions;
+    } // getPostgreSQLOptions
 
     /**
      * Returns if the attribute value will be native or stringfy. It will be stringfy due to backward compatibility
@@ -237,12 +246,15 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
         }
 
+        postgresqlOptions = context.getString("postgresql_options", null);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_options=" + postgresqlOptions + ")");
+
     } // configure
 
     @Override
     public void start() {
         try {
-            createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, postgresqlDatabase);
+            createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, postgresqlDatabase, postgresqlOptions);
         } catch (Exception e) {
             LOGGER.error("Error while creating the PostgreSQL persistence backend. Details="
                     + e.getMessage());
@@ -255,9 +267,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase) {
+    private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions) {
         if (postgreSQLPersistenceBackend == null) {
-            postgreSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, defaultSQLDataBase);
+            postgreSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, defaultSQLDataBase, sqlOptions);
         }
     }
 
