@@ -1,1 +1,2 @@
 - Remove \" in value handled by getGeometry
+- Fix: new env var CYGNUS_POSTGRESQL_DATABASE to set Postgresql database in Docker
