@@ -599,6 +599,9 @@ elif [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_username/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_username = '${CYGNUS_POSTGRESQL_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_password/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_password = '${CYGNUS_POSTGRESQL_PASS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     # The following are optional and disabled by default
+    if [ "$CYGNUS_POSTGRESQL_DATABASE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_database/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_database = '${CYGNUS_POSTGRESQL_DATABASE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
     if [ "$CYGNUS_POSTGRESQL_ENABLE_ENCODING" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_encoding = '${CYGNUS_POSTGRESQL_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi

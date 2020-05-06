@@ -172,6 +172,8 @@ cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPos
 # password for the user above
 #cygnus-ngsi.sinks.postgresql-sink.postgresql_password = xxxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
+#cygnus-ngsi.sinks.postgresql-sink.postgresql_database = postgres
+# the database name of PostgreSQL
 #cygnus-ngsi.sinks.postgresql-sink.attr_persistence = column
 # select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type
 #cygnus-ngsi.sinks.postgresql-sink.data_model = by-service-path
