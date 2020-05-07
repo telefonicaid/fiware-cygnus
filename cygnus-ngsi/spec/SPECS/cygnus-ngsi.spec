@@ -99,6 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Thu May 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.1.0
+- [cygnus-ngsi][NGSIPostgreSQLSink][Docker] Add new env var CYGNUS_POSTGRESQL_DATABASE to set Postgresql database in Docker
+- [cygnus-ngsi][NGSIPostgreSQLSink][NGSIPostGISSink] Remove \" in value handled by getGeometry
+
 * Thu Apr 16 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.0.0
 - [cygnus-ngsi][PostgisSink, PostGRESQLSink] Enable datamodel by entity type (dm-by-entity-type) (#1684)
 - [cygnus-ngsi] Add correlatorId rollbacked transactions (#1770)
