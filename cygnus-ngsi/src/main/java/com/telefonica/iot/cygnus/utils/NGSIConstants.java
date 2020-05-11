@@ -60,6 +60,7 @@ public final class NGSIConstants {
     public static final String PARAM_DEFAULT_SERVICE      = "default_service";
     public static final String PARAM_DEFAULT_SERVICE_PATH = "default_service_path";
     public static final String PARAM_NOTIFICATION_TARGET  = "notification_target";
+    public static final String PARAM_DEFAULT_NGSI_VERSION  = "ngsi_version";
     
     //NGSICKANSink specific constants
     // http://docs.ckan.org/en/latest/api/#ckan.logic.action.create.organization_create

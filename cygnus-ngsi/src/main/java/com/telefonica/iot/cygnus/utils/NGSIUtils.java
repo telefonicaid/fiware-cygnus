@@ -21,6 +21,7 @@ package com.telefonica.iot.cygnus.utils;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.ivy.osgi.p2.P2Artifact;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -35,6 +36,7 @@ public final class NGSIUtils {
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIUtils.class);
     private static final Pattern ENCODEPATTERN = Pattern.compile("[^a-zA-Z0-9\\.\\-]");
     private static final Pattern ENCODEPATTERNSLASH = Pattern.compile("[^a-zA-Z0-9\\.\\-\\/]");
+    private static final Pattern ENCODEPOSTGRESQL = Pattern.compile("[^a-zA-Z0-9\\/]");
     private static final Pattern ENCODEHIVEPATTERN = Pattern.compile("[^a-zA-Z0-9]");
     private static final Pattern ENCODESTHDBPATTERN = Pattern.compile("[=\\/\\\\.\\$\" ]");
     private static final Pattern ENCODESTHCOLLECTIONPATTERN = Pattern.compile("[=\\$]");
@@ -62,6 +64,17 @@ public final class NGSIUtils {
         } else {
             return ENCODEPATTERNSLASH.matcher(in).replaceAll("_");
         } // if else
+    } // encode
+
+    /**
+     * Encodes a string replacing all the non alphanumeric characters by '_' (except by '-' and '.').
+     * This should be only called when building a persistence element name, such as table names, file paths, etc.
+     *
+     * @param in
+     * @return The encoded version of the input string.
+     */
+    public static String encodePostgreSQL(String in) {
+        return ENCODEPOSTGRESQL.matcher(in).replaceAll("_");
     } // encode
 
     /**

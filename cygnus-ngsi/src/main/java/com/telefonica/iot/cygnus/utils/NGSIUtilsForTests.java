@@ -20,9 +20,13 @@ package com.telefonica.iot.cygnus.utils;
 import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NameMappings;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequestLD;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import java.util.HashMap;
+
+import com.telefonica.iot.cygnus.interceptors.NGSILDEvent;
 import org.apache.flume.Context;
+import org.json.JSONObject;
 
 /**
  *
@@ -106,6 +110,11 @@ public final class NGSIUtilsForTests {
         return gson.fromJson(jsonStr, NotifyContextRequest.class);
     } // createJsonNotifyContextRequest
 
+    public static NotifyContextRequestLD createJsonNotifyContextRequestLD(String jsonStr) throws Exception {
+        Gson gson = new Gson();
+        return gson.fromJson(jsonStr, NotifyContextRequestLD.class);
+    } // createJsonNotifyContextRequest
+
     /**
      * Creates a Json-based StatusCode given the string representation of such Json.
      * @param jsonStr
@@ -140,6 +149,29 @@ public final class NGSIUtilsForTests {
     } // createNGSIEvent
 
     /**
+     * Creates a NGSIEvent as NGSIRestHandler would create it (not intercepted).
+     * @param originalCEStr
+     * @param mappedCEStr
+     * @param service
+     * @param servicePath
+     * @param correlatorID
+     * @return A NGSIEvent as NGSIRestHandler would create it (not intercepted)
+     * @throws java.lang.Exception
+     */
+    public static NGSILDEvent createNGSIEventLD(String originalCEStr, String mappedCEStr, String service,
+                                                      String servicePath, String correlatorID, String ngsiVersion) throws Exception {
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, service);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, servicePath);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorID);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, correlatorID);
+        NotifyContextRequestLD.ContextElement originalCE = createJsonContextElementLD(originalCEStr);
+        NotifyContextRequestLD.ContextElement mappedCE = createJsonContextElementLD(mappedCEStr);
+        return new NGSILDEvent(headers, (originalCEStr + CommonConstants.CONCATENATOR).getBytes(), originalCE);
+    } // createNGSIEvent
+
+
+    /**
      * Creates a Json-based NameMappings given the string representation of such Json.
      * @param jsonStr
      * @return The Json-based NameMappings
@@ -157,7 +189,7 @@ public final class NGSIUtilsForTests {
      * @return A NGSIEvent as NGSINameMappings would create it
      * @throws java.lang.Exception
      */
-    public static NGSIEvent createInterceptedNGSIEvent(String originalCEStr, String mappedCEStr) throws Exception {
+    public static NGSIEvent createInterceptedNGSIEvent(String originalCEStr, String mappedCEStr,String ngsiVersion) throws Exception {
         HashMap<String, String> headers = new HashMap<>();
         NotifyContextRequest.ContextElement originalCE = createJsonContextElement(originalCEStr);
         NotifyContextRequest.ContextElement mappedCE = createJsonContextElement(mappedCEStr);
@@ -175,6 +207,11 @@ public final class NGSIUtilsForTests {
     public static NotifyContextRequest.ContextElement createJsonContextElement(String jsonStr) throws Exception {
         Gson gson = new Gson();
         return gson.fromJson(jsonStr, NotifyContextRequest.ContextElement.class);
+    } // createJsonContextElement
+
+    public static NotifyContextRequestLD.ContextElement createJsonContextElementLD(String jsonStr) throws Exception {
+        NotifyContextRequestLD.ContextElement ncrld = new NotifyContextRequestLD.ContextElement(jsonStr);
+        return ncrld;
     } // createJsonContextElement
     
 } // NGSIUtilsForTests

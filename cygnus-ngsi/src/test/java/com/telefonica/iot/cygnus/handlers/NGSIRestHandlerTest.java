@@ -56,6 +56,10 @@ public class NGSIRestHandlerTest {
     private HttpServletRequest mockHttpServletRequest;
     @Mock
     private HttpServletRequest mockHttpServletRequest2;
+    @Mock
+    private HttpServletRequest mockHttpServletRequest3;
+    @Mock
+    private HttpServletRequest mockHttpServletRequest4;
     
     // Other variables
     private final String notification = ""
@@ -126,6 +130,117 @@ public class NGSIRestHandlerTest {
             + "    }"
             + "  ]"
             + "}";
+
+    private final String notification3 = "{\n" +
+            "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n" +
+            "\"data\":\n" +
+            "[\n" +
+            "   {\n" +
+            "    \"id\": \"urn:ngsi-ld:Vehicle:V123\",\n" +
+            "    \"type\": \"Vehicle\",\n" +
+            "    \"speed\": {\n" +
+            "      \"type\": \"Property\",\n" +
+            "      \"value\": 23,\n" +
+            "      \"accuracy\": {\n" +
+            "        \"type\": \"Property\",\n" +
+            "        \"value\": 0.7\n" +
+            "      },\n" +
+            "      \"providedBy\": {\n" +
+            "        \"type\": \"Relationship\",\n" +
+            "        \"object\": \"urn:ngsi-ld:Person:Bob\"\n" +
+            "      }\n" +
+            "    },\n" +
+            "    \"closeTo\": {\n" +
+            "      \"type\": \"Relationship\",\n" +
+            "      \"object\": \"urn:ngsi-ld:Building:B1234\"\n" +
+            "    },\n" +
+            "    \"location\": {\n" +
+            "        \"type\": \"GeoProperty\",\n" +
+            "        \"value\": {\n" +
+            "          \"type\":\"Point\",\n" +
+            "          \"coordinates\": [-8,44]\n" +
+            "        }\n" +
+            "    },\n" +
+            "    \"@context\": [\n" +
+            "        \"https://example.org/ld/vehicle.jsonld\",\n" +
+            "        \"https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld\"\n" +
+            "    ]\n" +
+            "  }]\n"+
+            "}";
+
+    private final String notification4 = "{\n" +
+            "\"subscriptionId\" : \"51c0ac9ed714fb3b37d7d5a8\",\n" +
+            "\"data\":\n" +
+            "[\n" +
+            "   {\n" +
+            "    \"id\": \"urn:ngsi-ld:Vehicle:V123\",\n" +
+            "    \"type\": \"Vehicle\",\n" +
+            "    \"speed\": {\n" +
+            "      \"type\": \"Property\",\n" +
+            "      \"value\": 23,\n" +
+            "      \"accuracy\": {\n" +
+            "        \"type\": \"Property\",\n" +
+            "        \"value\": 0.7\n" +
+            "      },\n" +
+            "      \"providedBy\": {\n" +
+            "        \"type\": \"Relationship\",\n" +
+            "        \"object\": \"urn:ngsi-ld:Person:Bob\"\n" +
+            "      }\n" +
+            "    },\n" +
+            "    \"closeTo\": {\n" +
+            "      \"type\": \"Relationship\",\n" +
+            "      \"object\": \"urn:ngsi-ld:Building:B1234\"\n" +
+            "    },\n" +
+            "    \"location\": {\n" +
+            "        \"type\": \"GeoProperty\",\n" +
+            "        \"value\": {\n" +
+            "          \"type\":\"Point\",\n" +
+            "          \"coordinates\": [-8,44]\n" +
+            "        }\n" +
+            "    },\n" +
+            "    \"@context\": [\n" +
+            "        \"https://example.org/ld/vehicle.jsonld\",\n" +
+            "        \"https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld\"\n" +
+            "    ]\n" +
+            "  },\n" +
+            "  {\n" +
+            "    \"id\": \"urn:ngsi-ld:OffStreetParking:Downtown1\",\n" +
+            "    \"type\": \"OffStreetParking\",\n" +
+            "    \"name\": {\n" +
+            "      \"type\": \"Property\",\n" +
+            "        \"value\": \"Downtown One\"\n" +
+            "    },\n" +
+            "    \"availableSpotNumber\": {\n" +
+            "      \"type\": \"Property\",\n" +
+            "      \"value\": 121,\n" +
+            "      \"observedAt\": \"2017-07-29T12:05:02Z\",\n" +
+            "      \"reliability\": {\n" +
+            "            \"type\": \"Property\",\n" +
+            "            \"value\": 0.7\n" +
+            "      },\n" +
+            "      \"providedBy\": {\n" +
+            "            \"type\": \"Relationship\",\n" +
+            "            \"object\": \"urn:ngsi-ld:Camera:C1\"\n" +
+            "      }\n" +
+            "    },\n" +
+            "    \"totalSpotNumber\": {\n" +
+            "        \"type\": \"Property\",\n" +
+            "        \"value\": 200\n" +
+            "    },\n" +
+            "    \"location\": {\n" +
+            "      \"type\": \"GeoProperty\",\n" +
+            "      \"value\": {\n" +
+            "        \"type\": \"Point\",\n" +
+            "        \"coordinates\": [-8.5, 41.2]\n" +
+            "      }\n" +
+            "    },\n" +
+            "    \"@context\": [\n" +
+            "        \"http://example.org/ngsi-ld/parking.jsonld\",\n" +
+            "        \"https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld\"\n" +
+            "    ]\n" +
+            "  }\n" +
+            "]\n" +
+            "}";
     
     /**
      * Constructor.
@@ -162,6 +277,26 @@ public class NGSIRestHandlerTest {
         when(mockHttpServletRequest2.getHeader("fiware-servicepath")).thenReturn("/a,/b");
         when(mockHttpServletRequest2.getReader()).thenReturn(
                 new BufferedReader(new InputStreamReader(new ByteArrayInputStream(notification2.getBytes()))));
+        when(mockHttpServletRequest3.getMethod()).thenReturn("POST");
+        when(mockHttpServletRequest3.getRequestURI()).thenReturn("/notify");
+        String[] headerNames3 = {"Content-Type", "fiware-service", "fiware-servicePath"};
+        when(mockHttpServletRequest3.getHeaderNames()).thenReturn(
+                Collections.enumeration(new ArrayList(Arrays.asList(headerNames))));
+        when(mockHttpServletRequest3.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
+        when(mockHttpServletRequest3.getHeader("fiware-service")).thenReturn("myservice");
+        when(mockHttpServletRequest3.getHeader("fiware-servicepath")).thenReturn("/myservicepath");
+        when(mockHttpServletRequest3.getReader()).thenReturn(
+                new BufferedReader(new InputStreamReader(new ByteArrayInputStream(notification3.getBytes()))));
+        when(mockHttpServletRequest4.getMethod()).thenReturn("POST");
+        when(mockHttpServletRequest4.getRequestURI()).thenReturn("/notify");
+        String[] headerNames4 = {"Content-Type", "fiware-service", "fiware-servicePath"};
+        when(mockHttpServletRequest4.getHeaderNames()).thenReturn(
+                Collections.enumeration(new ArrayList(Arrays.asList(headerNames2))));
+        when(mockHttpServletRequest4.getHeader("content-type")).thenReturn("application/json; charset=utf-8");
+        when(mockHttpServletRequest4.getHeader("fiware-service")).thenReturn("myservice");
+        when(mockHttpServletRequest4.getHeader("fiware-servicepath")).thenReturn("/a,/b");
+        when(mockHttpServletRequest4.getReader()).thenReturn(
+                new BufferedReader(new InputStreamReader(new ByteArrayInputStream(notification4.getBytes()))));
     } // setUp
     
     /**
@@ -173,7 +308,7 @@ public class NGSIRestHandlerTest {
         System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
                 + "-------- When not configured, the default values are used for non mandatory parameters");
         NGSIRestHandler handler = new NGSIRestHandler();
-        handler.configure(createContext(null, null, null)); // default configuration
+        handler.configure(createContext(null, null, null,null)); // default configuration
         
         try {
             assertEquals("/notify", handler.getNotificationTarget());
@@ -207,6 +342,18 @@ public class NGSIRestHandlerTest {
                     + handler.getDefaultServicePath() + "'");
             throw e;
         } // try catch
+
+        try {
+            assertEquals("v2", handler.getNgsiVersion());
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
+                    + "-  OK  - The default configuration value for 'default_NgsiVersion' is 'v2'");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
+                    + "- FAIL - The default configuration value for 'default_NgsiVersion' is '"
+                    + handler.getDefaultServicePath() + "'");
+            throw e;
+        } // try catch
+
     } // testConfigureNotMandatoryParameters
     
     /**
@@ -219,7 +366,7 @@ public class NGSIRestHandlerTest {
                 + "-------- The configured default service can only contain alphanumerics and underscores");
         NGSIRestHandler handler = new NGSIRestHandler();
         String configuredDefaultService = "default-service!!";
-        handler.configure(createContext(null, configuredDefaultService, null));
+        handler.configure(createContext(null, configuredDefaultService, null,null));
         
         try {
             assertTrue(handler.getInvalidConfiguration());
@@ -244,7 +391,7 @@ public class NGSIRestHandlerTest {
                 + "-------- The configured default service path can only contain alphanumerics and underscores");
         NGSIRestHandler handler = new NGSIRestHandler();
         String configuredDefaultServicePath = "/something.?";
-        handler.configure(createContext(null, null, configuredDefaultServicePath));
+        handler.configure(createContext(null, null, configuredDefaultServicePath,null));
         
         try {
             assertTrue(handler.getInvalidConfiguration());
@@ -268,7 +415,7 @@ public class NGSIRestHandlerTest {
                 + "-------- The configured default service path must start with '/'");
         NGSIRestHandler handler = new NGSIRestHandler();
         String configuredDefaultServicePath = "/something";
-        handler.configure(createContext(null, null, configuredDefaultServicePath));
+        handler.configure(createContext(null, null, configuredDefaultServicePath,null));
         
         try {
             assertEquals(configuredDefaultServicePath, handler.getDefaultServicePath());
@@ -293,7 +440,7 @@ public class NGSIRestHandlerTest {
                 + "-------- The configured notification target must start with '/'");
         NGSIRestHandler handler = new NGSIRestHandler();
         String configuredNotificationTarget = "/notify";
-        handler.configure(createContext(configuredNotificationTarget, null, null));
+        handler.configure(createContext(configuredNotificationTarget, null, null,null));
         
         try {
             assertEquals(configuredNotificationTarget, handler.getNotificationTarget());
@@ -317,11 +464,10 @@ public class NGSIRestHandlerTest {
         System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                 + "-------- When a notification is sent, the headers are valid");
         NGSIRestHandler handler = new NGSIRestHandler();
-        handler.configure(createContext(null, null, null)); // default configuration
+        handler.configure(createContext(null, null, null,null)); // default configuration
         
         try {
             handler.getEvents(mockHttpServletRequest);
-            assertTrue(true);
             System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                     + "-  OK  - The value for 'Content-Type' header is 'application/json; charset=utf-8'");
             System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
@@ -332,6 +478,7 @@ public class NGSIRestHandlerTest {
             System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                     + "-  OK  - The length of 'fiware-servicePath' header value "
                     + "is less or equal than '" + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + "'");
+            assertTrue(true);
         } catch (Exception e) {
             if (e.getMessage().contains("content type not supported")) {
                 System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
@@ -365,7 +512,7 @@ public class NGSIRestHandlerTest {
         String configuredDefaultService = "default";
         String configuredDefaultServicePath = "something"; // wrong value
         handler.configure(createContext(configuredNotificationTarget, configuredDefaultService,
-                configuredDefaultServicePath));
+                configuredDefaultServicePath,null));
         List<Event> events;
         
         try {
@@ -392,11 +539,11 @@ public class NGSIRestHandlerTest {
      * is generated.
      */
     @Test
-    public void testGetEventsSingleEvent() {
+    public void testGetEventsSingleEventV2() {
         System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                 + "-------- When a notification is sent as a Http message, a single Flume event is generated");
         NGSIRestHandler handler = new NGSIRestHandler();
-        handler.configure(createContext(null, null, null)); // default configuration
+        handler.configure(createContext(null, null, null,"v2")); // default configuration
         List<Event> events;
         
         try {
@@ -413,7 +560,38 @@ public class NGSIRestHandlerTest {
             } // try catch
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                    + "- FAIL - There was some problem while processing the events");
+                    + "- FAIL - There was some problem while processing the events"+ e);
+            assertTrue(false);
+        } // try catch
+    } // testGetEventsSingleEvent
+
+    /**
+     * [NGSIRestHandler.getEvents] -------- When a notification LD is sent as a Http message, a single Flume event
+     * is generated.
+     */
+    @Test
+    public void testGetEventsSingleEventLD() {
+        System.out.println(getTestTraceHead("[NGSIRestHandler.getEventsLD]")
+                + "-------- When a notification LD is sent as a Http message, a single Flume event is generated");
+        NGSIRestHandler handler = new NGSIRestHandler();
+        handler.configure(createContext(null, null, null,"ld")); // default configuration
+        List<Event> events;
+
+        try {
+            events = handler.getEvents(mockHttpServletRequest3);
+
+            try {
+                assertEquals(1, events.size());
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                        + "-  OK  - A single LD event has been generated");
+            } catch (AssertionError e1) {
+                System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                        + "- FAIL - 0, 2 or more than an LD event were generated");
+                throw e1;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "- FAIL - There was some problem while processing the events"+ e);
             assertTrue(false);
         } // try catch
     } // testGetEventsSingleEvent
@@ -428,7 +606,7 @@ public class NGSIRestHandlerTest {
                 + "-------- When a Flume event is generated, it contains fiware-service, fiware-servicepath, "
                 + "fiware-correlator and transaction-id headers");
         NGSIRestHandler handler = new NGSIRestHandler();
-        handler.configure(createContext(null, null, null)); // default configuration
+        handler.configure(createContext(null, null, null,null)); // default configuration
         Map<String, String> headers;
         
         try {
@@ -485,19 +663,19 @@ public class NGSIRestHandlerTest {
      * is generated for each one of them; the notified service path is split as well.
      */
     @Test
-    public void testGetEventsMultiValuedServicePath() {
+    public void testGetEventsMultiValuedServicePathV2() {
         System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
                 + "-------- When a notification contains multiple ContextElementResponses, a NGSIEvent is generated "
                 + "for each one of them; the notified service path is split as well");
         NGSIRestHandler handler = new NGSIRestHandler();
-        handler.configure(createContext(null, null, null)); // default configuration
+        handler.configure(createContext(null, null, null,null)); // default configuration
         List<Event> events;
         
         try {
             events = handler.getEvents(mockHttpServletRequest2);
         } catch (Exception e) {
             System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                    + "- FAIL - There was some problem when intercepting the event");
+                    + "- FAIL - There was some problem when intercepting the event"+e);
             throw new AssertionError(e.getMessage());
         } // try catch
             
@@ -511,6 +689,53 @@ public class NGSIRestHandlerTest {
             throw e1;
         } // try catch
         
+        try {
+            String event1ServicePath = events.get(0).getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
+            String event2ServicePath = events.get(1).getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
+            assertTrue((event1ServicePath.equals("/a") && event2ServicePath.equals("/b"))
+                    || (event1ServicePath.equals("/b") && event2ServicePath.equals("/a")));
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "-  OK  - The generated events have a service path equals to a split of the notified service "
+                    + "path");
+        } catch (AssertionError e1) {
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "- FAIL - The generated events have not a service path equals to a split of the notified service "
+                    + "path");
+            throw e1;
+        } // try catch
+    } // testGetEventsMultiValuedServicePath
+
+    /**
+     * [NGSIRestHandler.getEvents] -------- When a notification contains multiple ContextElementResponses, a NGSIEvent
+     * is generated for each one of them; the notified service path is split as well.
+     */
+    @Test
+    public void testGetEventsMultiValuedServicePathLD() {
+        System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                + "-------- When a notification contains multiple ContextElementResponses, a NGSIEvent is generated "
+                + "for each one of them; the notified service path is split as well");
+        NGSIRestHandler handler = new NGSIRestHandler();
+        handler.configure(createContext(null, null, null,"ld")); // default configuration
+        List<Event> events;
+
+        try {
+            events = handler.getEvents(mockHttpServletRequest4);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "- FAIL - There was some problem when intercepting the event"+e);
+            throw new AssertionError(e.getMessage());
+        } // try catch
+
+        try {
+            assertEquals(2, events.size());
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "-  OK  - The generated events are 2");
+        } catch (AssertionError e1) {
+            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
+                    + "- FAIL - The generated events are not 2");
+            throw e1;
+        } // try catch
+
         try {
             String event1ServicePath = events.get(0).getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
             String event2ServicePath = events.get(1).getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
@@ -713,11 +938,12 @@ public class NGSIRestHandlerTest {
         } // try catch
     } // testWrongServicePathHeaderInitialCharacter
     
-    private Context createContext(String notificationTarget, String defaultService, String defaultServicePath) {
+    private Context createContext(String notificationTarget, String defaultService, String defaultServicePath,String ngsiVersion) {
         Context context = new Context();
         context.put("notification_target", notificationTarget);
         context.put("default_service", defaultService);
         context.put("default_service_path", defaultServicePath);
+        context.put("ngsi_version",ngsiVersion);
         return context;
     } // createContext
 
