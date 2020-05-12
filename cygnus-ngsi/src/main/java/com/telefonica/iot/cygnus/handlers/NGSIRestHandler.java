@@ -260,15 +260,11 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                     break;
                 case "link":
                     link = headerValue.split(";")[0].replaceAll("<","").replaceAll(">","");
-                    System.out.println(link);
                     break;
                 default:
                     LOGGER.debug("[NGSIRestHandler] Unnecessary header");
             } // switch
         } // while
-
-        LOGGER.info("[NGSIRestHandler] info test control ");
-
 
         // Get a service and servicePath and store it in the log4j Mapped Diagnostic Context (MDC)
         MDC.put(CommonConstants.LOG4J_SVC, service == null ? defaultService : service);
@@ -407,15 +403,12 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                 headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transId);
                 LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
                         + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + ": " + transId + ")");
-                System.out.println(notifyContextRequestLD.getContext());
                 headers.put("link", link);
                 LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
                         + "Link" + ": " + link + ")");
                 if(!"".contentEquals(link)){
                     notifyContextRequestLD.setContext(link);
                 }
-                headers.forEach((k,v)->System.out.println("k:"+k+"--"+"v:"+v));
-                System.out.println(notifyContextRequestLD.getContext());
                 // Create the NGSI event and add it to the list
 
                 NGSILDEvent ngsiLdEvent = new NGSILDEvent(

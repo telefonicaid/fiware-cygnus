@@ -395,19 +395,14 @@ public class NGSILDPostgreSQLSink extends NGSILDSink {
 
             // particulat initialization
             typedFieldNames = "(" + NGSIConstants.RECV_TIME + " text,"
-                    + NGSIConstants.FIWARE_SERVICE_PATH + " text,"
                     + NGSIConstants.ENTITY_ID + " text,"
                     + NGSIConstants.ENTITY_TYPE + " text";
             fieldNames = "(" + NGSIConstants.RECV_TIME + ","
-                    + NGSIConstants.FIWARE_SERVICE_PATH + ","
                     + NGSIConstants.ENTITY_ID + ","
                     + NGSIConstants.ENTITY_TYPE;
 
             // iterate on all this context element attributes, if there are attributes
             Map<String, Object> contextAttributes = cygnusEvent.getContextElement().getAttributes();
-            contextAttributes.forEach ((k,v)->System.out.println("clave:"+k +"valor:"+ v));
-
-
 
             if (contextAttributes == null || contextAttributes.isEmpty()) {
                 return;
@@ -415,24 +410,20 @@ public class NGSILDPostgreSQLSink extends NGSILDSink {
 
             for (Map.Entry<String, Object> entry : contextAttributes.entrySet()) {
                 String x = entry.getKey();
-                System.out.println(entry.getValue());
-                System.out.println(entry.getValue().toString());
                 String attrName =x;
                 String subAttrName="";
                 typedFieldNames += "," + attrName + " text";
                 fieldNames += "," + attrName;
                 if (isValid(entry.getValue().toString())) {
-                    System.out.println(entry.getValue().toString()+"----");
                     JsonObject y = (JsonObject) entry.getValue();
                     for (Map.Entry<String, JsonElement> entry2 : y.entrySet()) {
                         String x2 = entry2.getKey();
                         Object y2 = entry2.getValue();
                         if (!"type".contentEquals(x2) && !"value".contentEquals(x2)
-                                && !"Relationship".contentEquals(y.get("type").getAsString())) {
+                                && !"object".contentEquals(x2)) {
                             subAttrName = x2;
                             typedFieldNames += "," + attrName + "_" + subAttrName + " text";
                             fieldNames += "," + attrName + "_" + subAttrName;
-                            System.out.println(x2);
                         }
                     }
                 }
@@ -463,7 +454,7 @@ public class NGSILDPostgreSQLSink extends NGSILDSink {
                 return;
             } // if
 
-            String column = "('" + recvTime + "','" + servicePathForData + "','" + entityId + "','" + entityType + "'";
+            String column = "('" + recvTime + "','" + entityId + "','" + entityType + "'";
             for (Map.Entry<String, Object> entry : contextAttributes.entrySet()) {
                 String x = entry.getKey();
                 String attrValue ="";
@@ -507,7 +498,7 @@ public class NGSILDPostgreSQLSink extends NGSILDSink {
                     attrValue= entry.getValue().toString();
                     column += ",'"+attrValue+"'";
                 }
-            } System.out.println(column);
+            }
              // for
 
             // now, aggregate the column
