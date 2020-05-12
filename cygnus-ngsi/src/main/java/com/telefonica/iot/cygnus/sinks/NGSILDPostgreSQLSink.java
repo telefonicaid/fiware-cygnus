@@ -247,6 +247,7 @@ public class NGSILDPostgreSQLSink extends NGSILDSink {
         protected String servicePathForData;
         protected String servicePathForNaming;
         protected String entityForNaming;
+        protected String entityTypeForNaming;
         protected String attributeForNaming;
         protected String schemaName;
         protected String tableName;
@@ -290,9 +291,10 @@ public class NGSILDPostgreSQLSink extends NGSILDSink {
             servicePathForData = event.getServicePathForData();
             servicePathForNaming = event.getServicePathForNaming(enableGrouping);
             entityForNaming = event.getEntityForNaming(enableGrouping, enableEncoding);
+            entityTypeForNaming = event.getEntityTypeForNaming(enableEncoding);
             attributeForNaming = event.getAttributeForNaming();
             schemaName = buildSchemaName(service);
-            tableName = buildTableName(entityForNaming, attributeForNaming);
+            tableName = buildTableName(entityForNaming, entityTypeForNaming);
         } // initialize
 
         public abstract void aggregate(NGSILDEvent cygnusEvent);
