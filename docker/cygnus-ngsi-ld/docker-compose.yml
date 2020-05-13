@@ -45,6 +45,7 @@ services:
       CYGNUS_POSTGRESQL_HOST: postgres-db
       CYGNUS_POSTGRESQL_PASS: example
       CYGNUS_POSTGRESQL_USER: postgres
+      CYGNUS_POSTGRESQL_DATA_MODEL: dm-by-entity
     ports: 
       - "5050:5050"
       
