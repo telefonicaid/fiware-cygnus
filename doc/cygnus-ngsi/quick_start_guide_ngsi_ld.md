@@ -206,7 +206,7 @@ The additional tasks that are needed to set up this enviroment are:
  * Create two new subscriptions for notifying Cygnus
  * Check the data inserted in the psotgresql
 The scenario provided in this guide is:
-![tutorial scenario](./images/cygnus-ld-tutorial.png)
+![tutorial scenario](./images/cygnus-ld-toturial.png)
 
 As you can see we add cygnus an postgresql for storing the context data
 
