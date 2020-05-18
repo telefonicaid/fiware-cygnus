@@ -65,7 +65,7 @@ public class NGSIMySQLSink extends NGSISink {
     private String mysqlPassword;
     private int maxPoolSize;
     private boolean rowAttrPersistence;
-    private static volatile SQLBackendImpl mySQLPersistenceBackend;
+    private SQLBackendImpl mySQLPersistenceBackend;
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
     private String mysqlOptions;
@@ -238,7 +238,7 @@ public class NGSIMySQLSink extends NGSISink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlOptions) {
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlOptions) {
         if (mySQLPersistenceBackend == null) {
             mySQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null, sqlOptions);
         }
