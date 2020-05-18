@@ -64,7 +64,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private String postgresqlPassword;
     private int maxPoolSize;
     private boolean rowAttrPersistence;
-    private static volatile SQLBackendImpl postgreSQLPersistenceBackend;
+    private SQLBackendImpl postgreSQLPersistenceBackend;
     private boolean enableCache;
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
@@ -267,7 +267,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions) {
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions) {
         if (postgreSQLPersistenceBackend == null) {
             postgreSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, defaultSQLDataBase, sqlOptions);
         }
