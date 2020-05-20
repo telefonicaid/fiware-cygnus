@@ -14,6 +14,6 @@ public class Enums {
     /**
      * Available data models for all the sinks.
      */
-    public enum DataModel { DMBYSERVICE, DMBYSERVICEPATH, DMBYENTITY, DMBYENTITYTYPE, DMBYATTRIBUTE }
+    public enum DataModel { DMBYSERVICE, DMBYSERVICEPATH, DMBYENTITY, DMBYENTITYTYPE, DMBYATTRIBUTE, DMBYENTITYDATABASE, DMBYENTITYDATABASESCHEME }
     
 } // Enums

@@ -760,6 +760,12 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 case DMBYATTRIBUTE:
                     accumulateByAttribute(event);
                     break;
+                case DMBYENTITYDATABASE:
+                    accumulateByEntity(event);
+                    break;
+                case DMBYENTITYDATABASESCHEME:
+                    accumulateByEntity(event);
+                    break;
                 default:
                     LOGGER.error("Unknown data model. Details=" + dataModel.toString());
             } // switch
