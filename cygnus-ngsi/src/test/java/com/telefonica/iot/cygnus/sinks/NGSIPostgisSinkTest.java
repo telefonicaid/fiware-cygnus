@@ -302,9 +302,104 @@ public class NGSIPostgisSinkTest {
      * @throws java.lang.Exception
      */
     @Test
-    public void testBuildDBNameOldEncoding() throws Exception {
-        System.out.println(getTestTraceHead("[NGSIPostgisSink.buildDBName]")
+    public void testBuildSchemaNameOldEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgisSink.buildSchemaName]")
                 + "-------- The schema name is equals to the encoding of the notified/defaulted service");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = "false";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgisSink sink = new NGSIPostgisSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+        String service = "someService";
+        String servicePath = "someServicePath";
+
+        try {
+            String builtSchemaName = sink.buildSchemaName(service, servicePath);
+            String expectedDBName = "someService";
+
+            try {
+                assertEquals(expectedDBName, builtSchemaName);
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.buildSchemaName]")
+                        + "-  OK  - '" + expectedDBName + "' is equals to the encoding of <service>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.buildSchemaName]")
+                        + "- FAIL - '" + expectedDBName + "' is not equals to the encoding of <service>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIPostgisSink.buildSchemaName]")
+                    + "- FAIL - There was some problem when building the schema name");
+            throw e;
+        } // try catch
+    } // testBuildDBNameOldEncoding
+
+    /**
+     * [NGSIPostgisSink.testBuildDBNameOldEncodingDatabaseDataModel] -------- The DB name is equals to the encoding of the notified/defaulted
+     * service.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildDBNameOldEncodingDatabaseDataModel() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameOldEncodingDatabaseDataModel]")
+                + "-------- The db name is equals to the encoding of the notified/defaulted service");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-entity-database"; // default
+        String enableEncoding = "false";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgisSink sink = new NGSIPostgisSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+        String service = "someService";
+
+        try {
+            String builtSchemaName = sink.buildDBName(service);
+            String expectedDBName = "someService";
+
+            try {
+                assertEquals(expectedDBName, builtSchemaName);
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameOldEncodingDatabaseDataModel]")
+                        + "-  OK  - '" + expectedDBName + "' is equals to the encoding of <service>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameOldEncodingDatabaseDataModel]")
+                        + "- FAIL - '" + expectedDBName + "' is not equals to the encoding of <service>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameOldEncodingDatabaseDataModel]")
+                    + "- FAIL - There was some problem when building the Schema name");
+            throw e;
+        } // try catch
+    } // testBuildDBNameOldEncodingDatabaseDataModel
+
+    /**
+     * [NGSIPostgisSink.testBuildDBNameOldEncoding] -------- The DB name is equals to the encoding of the notified/defaulted
+     * service.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildDBNameOldEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameOldEncoding]")
+                + "-------- The db name is equals to the encoding of the notified/defaulted service");
         String attrPersistence = null; // default
         String batchSize = null; // default
         String batchTime = null; // default
@@ -324,21 +419,22 @@ public class NGSIPostgisSinkTest {
         String service = "someService";
 
         try {
-            String builtSchemaName = sink.buildSchemaName(service);
-            String expectedDBName = "someService";
+            String builtSchemaName = sink.buildDBName(service);
+            // The default vale for the DB name
+            String expectedDBName = "postgres";
 
             try {
                 assertEquals(expectedDBName, builtSchemaName);
-                System.out.println(getTestTraceHead("[NGSIPostgisSink.buildDBName]")
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameOldEncoding]")
                         + "-  OK  - '" + expectedDBName + "' is equals to the encoding of <service>");
             } catch (AssertionError e) {
-                System.out.println(getTestTraceHead("[NGSIPostgisSink.buildDBName]")
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameOldEncoding]")
                         + "- FAIL - '" + expectedDBName + "' is not equals to the encoding of <service>");
                 throw e;
             } // try catch
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[NGSIPostgisSink.buildDBName]")
-                    + "- FAIL - There was some problem when building the DB name");
+            System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameOldEncoding]")
+                    + "- FAIL - There was some problem when building the Schema name");
             throw e;
         } // try catch
     } // testBuildDBNameOldEncoding
@@ -349,9 +445,57 @@ public class NGSIPostgisSinkTest {
      * @throws java.lang.Exception
      */
     @Test
-    public void testBuildDBNameNewEncoding() throws Exception {
-        System.out.println(getTestTraceHead("[NGSIPostgisSink.buildDBName]")
+    public void testBuildSchemaNameNewEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildSchemaNameNewEncoding]")
                 + "-------- The schema name is equals to the encoding of the notified/defaulted service");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgisSink sink = new NGSIPostgisSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+        String service = "someService";
+        String servicePath = "someServicePath";
+
+        try {
+            String builtSchemaName = sink.buildSchemaName(service, servicePath);
+            String expectedDBName = "somex0053ervice";
+
+            try {
+                assertEquals(expectedDBName, builtSchemaName);
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildSchemaNameNewEncoding]")
+                        + "-  OK  - '" + expectedDBName + "' is equals to the encoding of <service>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildSchemaNameNewEncoding]")
+                        + "- FAIL - '" + expectedDBName + "' is not equals to the encoding of <service>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildSchemaNameNewEncoding]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildSchemaNameNewEncoding
+
+    /**
+     * [NGSIPostgisSink.testBuildDBNameNewEncoding] -------- The DB name is equals to the encoding of the notified/defaulted
+     * service.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildDBNameNewEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameNewEncoding]")
+                + "-------- The DB name is equals to the encoding of the notified/defaulted service");
         String attrPersistence = null; // default
         String batchSize = null; // default
         String batchTime = null; // default
@@ -371,24 +515,71 @@ public class NGSIPostgisSinkTest {
         String service = "someService";
 
         try {
-            String builtSchemaName = sink.buildSchemaName(service);
-            String expectedDBName = "somex0053ervice";
+            String builtSchemaName = sink.buildDBName(service);
+            String expectedDBName = "postgres";
 
             try {
                 assertEquals(expectedDBName, builtSchemaName);
-                System.out.println(getTestTraceHead("[NGSIPostgisSink.buildDBName]")
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameNewEncoding]")
                         + "-  OK  - '" + expectedDBName + "' is equals to the encoding of <service>");
             } catch (AssertionError e) {
-                System.out.println(getTestTraceHead("[NGSIPostgisSink.buildDBName]")
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameNewEncoding]")
                         + "- FAIL - '" + expectedDBName + "' is not equals to the encoding of <service>");
                 throw e;
             } // try catch
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[NGSIPostgisSink.buildDBName]")
+            System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameNewEncoding]")
                     + "- FAIL - There was some problem when building the DB name");
             throw e;
         } // try catch
     } // testBuildDBNameNewEncoding
+
+    /**
+     * [NGSIPostgisSink.testBuildDBNameNewEncodingDatabaseDataModel] -------- The DB name is equals to the encoding of the notified/defaulted
+     * service.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildDBNameNewEncodingDatabaseDataModel() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameNewEncodingDatabaseDataModel]")
+                + "-------- The DB name is equals to the encoding of the notified/defaulted service");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-entity-database"; // default
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgisSink sink = new NGSIPostgisSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+        String service = "someService";
+
+        try {
+            String builtSchemaName = sink.buildDBName(service);
+            String expectedDBName = "somex0053ervice";
+
+            try {
+                assertEquals(expectedDBName, builtSchemaName);
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameNewEncodingDatabaseDataModel]")
+                        + "-  OK  - '" + expectedDBName + "' is equals to the encoding of <service>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameNewEncodingDatabaseDataModel]")
+                        + "- FAIL - '" + expectedDBName + "' is not equals to the encoding of <service>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIPostgisSink.testBuildDBNameNewEncodingDatabaseDataModel]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildDBNameNewEncodingDatabaseDataModel
 
     /**
      * [NGSIPostgisSink.buildTableName] -------- When a non root service-path is notified/defaulted and
@@ -1035,9 +1226,9 @@ public class NGSIPostgisSinkTest {
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String service = "tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongService";
-
+        String servicePath = "someServicePath";
         try {
-            sink.buildSchemaName(service);
+            sink.buildSchemaName(service, servicePath);
             System.out.println(getTestTraceHead("[NGSIPostgisSink.buildSchemaName]")
                     + "- FAIL - A schema name length greater than 63 characters has not been detected");
             assertTrue(false);
@@ -1519,7 +1710,7 @@ public class NGSIPostgisSinkTest {
                 aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
                 aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
-                aggregator.setDbName(ngsiPostgisSink.buildSchemaName(aggregator.getService()));
+                aggregator.setDbName(ngsiPostgisSink.buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
                 aggregator.setTableName(ngsiPostgisSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
                 aggregator.setAttrNativeTypes(true);
                 aggregator.setEnableGeoParse(true);
