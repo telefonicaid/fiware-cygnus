@@ -52,9 +52,30 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlPort
      * @param sqlUsername
      * @param sqlPassword
+     * @param maxPoolSize
+     * @param sqlInstance
+     * @param sqlDriverName
+     * @param defaultSQLDataBase
      */
     public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase) {
-        driver = new SQLBackendImpl.SQLDriver(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase);
+        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, null);
+    } // SQLBackendImpl
+
+    /**
+     * Constructor.
+     *
+     * @param sqlHost
+     * @param sqlPort
+     * @param sqlUsername
+     * @param sqlPassword
+     * @param maxPoolSize
+     * @param sqlInstance
+     * @param sqlDriverName
+     * @param defaultSQLDataBase
+     * @param sqlOptions
+     */
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, String sqlOptions) {
+        driver = new SQLBackendImpl.SQLDriver(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, sqlOptions);
         cache = new SQLCache();
         this.sqlInstance = sqlInstance;
     } // SQLBackendImpl
@@ -530,6 +551,7 @@ public class SQLBackendImpl implements SQLBackend{
         private final String sqlDriverName;
         private final String defaultSQLDataBase;
         private final int maxPoolSize;
+        private final String sqlOptions;
 
         /**
          * Constructor.
@@ -541,8 +563,9 @@ public class SQLBackendImpl implements SQLBackend{
          * @param maxPoolSize
          * @param sqlInstance
          * @param sqlDriverName
+         * @param sqlOptions
          */
-        public SQLDriver(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase) {
+        public SQLDriver(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, String sqlOptions) {
             datasources = new HashMap<>();
             pools = new HashMap<>();
             this.sqlHost = sqlHost;
@@ -553,6 +576,7 @@ public class SQLBackendImpl implements SQLBackend{
             this.sqlInstance = sqlInstance;
             this.sqlDriverName = sqlDriverName;
             this.defaultSQLDataBase = defaultSQLDataBase;
+            this.sqlOptions = sqlOptions;
         } // SQLDriver
 
         /**
@@ -675,12 +699,7 @@ public class SQLBackendImpl implements SQLBackend{
                 LOGGER.debug(sqlInstance.toUpperCase() + " Pool recovered from Cache (" + destination + ")");
                 gPool = pools.get(destination);
             }else{
-                String jdbcUrl = "";
-                if (sqlInstance.equals("mysql")) {
-                    jdbcUrl = "jdbc:" + sqlInstance + "://" + sqlHost + ":" + sqlPort + "/" + destination;
-                } else {
-                    jdbcUrl = "jdbc:" + sqlInstance + "://" + sqlHost + ":" + sqlPort + "/" + defaultSQLDataBase;
-                }
+                String jdbcUrl = generateJDBCUrl(destination);
                 Class.forName(sqlDriverName);
 
                 // Creates an Instance of GenericObjectPool That Holds Our Pool of Connections Object!
@@ -689,8 +708,10 @@ public class SQLBackendImpl implements SQLBackend{
                 pools.put(destination, gPool);
 
                 // Creates a ConnectionFactory Object Which Will Be Used by the Pool to Create the Connection Object!
-                LOGGER.debug(sqlInstance.toUpperCase() + " Creating connection pool jdbc:" + sqlInstance +"://" + sqlHost + ":" + sqlPort + "/" + destination
-                        + "?user=" + sqlUsername + "&password=XXXXXXXXXX");
+                String sep = (sqlOptions != null && !sqlOptions.trim().isEmpty()) ? "&" : "?";
+                String logJdbc = jdbcUrl + sep + "user=" + sqlUsername + "&password=XXXXXXXXXX";
+
+                LOGGER.debug(sqlInstance.toUpperCase() + " Creating connection pool jdbc:" + logJdbc);
                 ConnectionFactory cf = new DriverManagerConnectionFactory(jdbcUrl, sqlUsername, sqlPassword);
 
                 // Creates a PoolableConnectionFactory That Will Wraps the Connection Object Created by
@@ -699,6 +720,27 @@ public class SQLBackendImpl implements SQLBackend{
             } //else
             return new PoolingDataSource(gPool);
         } // createConnectionPool
+
+        /**
+         * Generate the JDBC Url. This method is portected since this is called from test class.
+         *
+         * @param destination
+         * @return jdbcurl
+         */
+        protected String generateJDBCUrl(String destination) {
+            String jdbcUrl = "";
+            if (sqlInstance.equals("mysql")) {
+                jdbcUrl = "jdbc:" + sqlInstance + "://" + sqlHost + ":" + sqlPort + "/" + destination;
+            } else {
+                jdbcUrl = "jdbc:" + sqlInstance + "://" + sqlHost + ":" + sqlPort + "/" + defaultSQLDataBase;
+            }
+
+            if (sqlOptions != null && !sqlOptions.trim().isEmpty()) {
+                jdbcUrl += "?" + sqlOptions;
+            }
+
+            return jdbcUrl;
+        } // generateJDBCUrl
 
         /**
          * Closes the Driver releasing resources

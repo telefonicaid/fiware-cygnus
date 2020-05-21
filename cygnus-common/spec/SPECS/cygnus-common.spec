@@ -171,6 +171,16 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Thu May 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.1.0
+- [cygnus-common][cygnus-ngsi] Add following parameters (and environment variables for docker) to be able to connect to sql database with SSL/TLS: "mysql_options" (`CYGNUS_MYSQL_OPTIONS`), "postgresql_options" (`CYGNUS_POSTGRESQL_OPTIONS`) and "postgis_options" (`CYGNUS_POSTGIS_OPTIONS`) (#1867)
+
+* Thu Apr 16 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.0.0
+- [cygnus-common][PostgreSQL, MySQL] Refactor code to use a SQL generic backend for all SQL-based sinks (#1836)
+- [cygnus-common][PostgreSQL, MySQL] Lazy singleton to share pool connections of SQL backends among instances on JVM (#1836)
+- [cygnus-common][PostgreSQL, MySQL] SQL error persistance (#1791)
+- [cygnus-common][MongoBackend] Fix persistence error mongo authentication and side effect (using new configuration parameter mongo_auth_source) (#1849)
+- [cygnus-common][Elasticsearch] Fix a bug raised NullPointerException when 'ignore_white_spaces' is true and an attribute has null value (#1838)
+
 * Fri Feb 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.0
 - [cygnus-common][MongoBackend] Proper processing of mongo errors in create index operations (#1756)
 - [cygnus-common] Fix: Changing cygnus port does not work (#1698)

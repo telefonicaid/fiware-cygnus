@@ -21,14 +21,12 @@ package com.telefonica.iot.cygnus.aggregation;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 
 /**
@@ -78,18 +76,6 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
             String attrType = contextAttribute.getType();
             JsonElement attrValue = contextAttribute.getValue();
             String attrMetadata = contextAttribute.getContextMetadata();
-            if (isEnableRecvTimeDateFormat()) {
-                if (isAttrMetadataStore()) {
-                    Long timeInstant = CommonUtils.getTimeInstant(attrMetadata);
-                    if (timeInstant != null) {
-                        recvTime = String.valueOf(new Date(timeInstant));
-                    } else {
-                        recvTime = String.valueOf(new Date(recvTimeTs));
-                    }
-                } else {
-                    recvTime = String.valueOf(new Date(recvTimeTs));
-                }
-            }
             LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                     + attrType + ")");
             // aggregate the attribute information

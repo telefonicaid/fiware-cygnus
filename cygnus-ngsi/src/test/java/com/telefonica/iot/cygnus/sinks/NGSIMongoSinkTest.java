@@ -31,6 +31,7 @@ import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.flume.Context;
@@ -46,6 +47,9 @@ import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.*;
 
 public class NGSIMongoSinkTest {
@@ -63,9 +67,9 @@ public class NGSIMongoSinkTest {
     private NotifyContextRequest.ContextElement createContextElement() {
         NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
         NotifyContextRequest.ContextMetadata contextMetadata = new NotifyContextRequest.ContextMetadata();
-        contextMetadata.setName("location");
-        contextMetadata.setType("string");
-        contextMetadata.setContextMetadata(new JsonPrimitive("WGS84"));
+        contextMetadata.setName("TimeInstant");
+        contextMetadata.setType("recvTime");
+        contextMetadata.setContextMetadata(new JsonPrimitive("2019-09-09T09:09:09.999Z"));
         ArrayList<NotifyContextRequest.ContextMetadata> metadata = new ArrayList<>();
         metadata.add(contextMetadata);
         NotifyContextRequest.ContextAttribute contextAttribute1 = new NotifyContextRequest.ContextAttribute();
@@ -213,7 +217,6 @@ public class NGSIMongoSinkTest {
                 aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setDbName(ngsiMongoSink.buildDbName(aggregator.getService()));
-                aggregator.setEnableRecvTimeDateFormat(true);
                 aggregator.setAttrMetadataStore(true);
                 aggregator.setCollectionName(ngsiMongoSink.buildCollectionName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
                 aggregator.initialize(events.get(0));
@@ -224,13 +227,23 @@ public class NGSIMongoSinkTest {
             ArrayList<String> keysToCrop = ngsiMongoSink.getKeysToCrop(false);
             LinkedHashMap<String, ArrayList<JsonElement>> cropedAggregation = NGSIUtils.cropLinkedHashMap(aggregator.getAggregationToPersist(), keysToCrop);
             ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonList(cropedAggregation);
-            ArrayList<Document> documents = new ArrayList<>();
-            for (JsonObject jsonObject : jsonObjects) {
-                documents.add(Document.parse(jsonObject.toString()));
+            ArrayList<Document> aggregation = new ArrayList<>();
+            for (int i = 0 ; i < jsonObjects.size() ; i++) {
+                aggregation.add(Document.parse(jsonObjects.get(i).toString()));
+                if (aggregator instanceof NGSIGenericRowAggregator) {
+                    Long timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                    if (timeInstant != null) {
+                        aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(timeInstant));
+                    } else {
+                        aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(Long.parseLong(aggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS).get(i).getAsString())));
+                    }
+                } else {
+                    aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(Long.parseLong(aggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS + "C").get(i).getAsString())));
+                }
             }
-            System.out.println("[NGSIMongoSinkTest.testNativeTypeColumnBatch: " + documents);
-            String correctBatch = "[Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", someNumber=2, someNumber_md=[], somneBoolean=true, somneBoolean_md=[], someDate=2016-09-21T01:23:00.00Z, someDate_md=[], someGeoJson={\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}, someGeoJson_md=[], someJson={\"String\": \"string\"}, someJson_md=[], someString=foo, someString_md=[], someString2=, someString2_md=[]}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", someName1=-3.7167, 40.3833, someName1_md=[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}], someName2=someValue2, someName2_md=[]}}]";
-            if (documents.toString().equals(correctBatch)) {
+            System.out.println("[NGSIMongoSinkTest.testNativeTypeColumnBatch: " + aggregation);
+            String correctBatch = "[Document{{someNumber=2, someNumber_md=[], somneBoolean=true, somneBoolean_md=[], someDate=2016-09-21T01:23:00.00Z, someDate_md=[], someGeoJson={\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}, someGeoJson_md=[], someJson={\"String\": \"string\"}, someJson_md=[], someString=foo, someString_md=[], someString2=, someString2_md=[], recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{someName1=-3.7167, 40.3833, someName1_md=[{\"name\":\"TimeInstant\",\"type\":\"recvTime\",\"value\":\"2019-09-09T09:09:09.999Z\"}], someName2=someValue2, someName2_md=[], recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}]";
+            if (aggregation.toString().equals(correctBatch)) {
                 assertTrue(true);
             } else {
                 assertFalse(true);
@@ -259,7 +272,6 @@ public class NGSIMongoSinkTest {
                 aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setDbName(ngsiMongoSink.buildDbName(aggregator.getService()));
-                aggregator.setEnableRecvTimeDateFormat(true);
                 aggregator.setCollectionName(ngsiMongoSink.buildCollectionName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
@@ -268,13 +280,23 @@ public class NGSIMongoSinkTest {
                 ArrayList<String> keysToCrop = ngsiMongoSink.getKeysToCrop(true);
                 LinkedHashMap<String, ArrayList<JsonElement>> cropedAggregation = NGSIUtils.cropLinkedHashMap(aggregator.getAggregationToPersist(), keysToCrop);
                 ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonList(cropedAggregation);
-                ArrayList<Document> documents = new ArrayList<>();
-                for (JsonObject jsonObject : jsonObjects) {
-                    documents.add(Document.parse(jsonObject.toString()));
+                ArrayList<Document> aggregation = new ArrayList<>();
+                for (int i = 0 ; i < jsonObjects.size() ; i++) {
+                    aggregation.add(Document.parse(jsonObjects.get(i).toString()));
+                    if (aggregator instanceof NGSIGenericRowAggregator) {
+                        Long timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                        if (timeInstant != null) {
+                            aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(timeInstant));
+                        } else {
+                            aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(Long.parseLong(aggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS).get(i).getAsString())));
+                        }
+                    } else {
+                        aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(Long.parseLong(aggregator.getAggregation().get(NGSIConstants.RECV_TIME_TS + "C").get(i).getAsString())));
+                    }
                 }
-                System.out.println("[NGSIMongoSinkTest.testNativeTypeRowBatch: " + documents);
-                String correctBatch = "[Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someNumber, attrType=number, attrValue=2}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=somneBoolean, attrType=Boolean, attrValue=true}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someDate, attrType=DateTime, attrValue=2016-09-21T01:23:00.00Z}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someGeoJson, attrType=geo:json, attrValue={\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someJson, attrType=json, attrValue={\"String\": \"string\"}}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someString, attrType=string, attrValue=foo}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someString2, attrType=string, attrValue=}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someName1, attrType=someType1, attrValue=-3.7167, 40.3833}}, Document{{recvTime=" + new Date(Long.parseLong("1461136795801")) + ", attrName=someName2, attrType=someType2, attrValue=someValue2}}]";
-                if (documents.toString().equals(correctBatch)) {
+                System.out.println("[NGSIMongoSinkTest.testNativeTypeRowBatch: " + aggregation);
+                String correctBatch = "[Document{{attrName=someNumber, attrType=number, attrValue=2, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=somneBoolean, attrType=Boolean, attrValue=true, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someDate, attrType=DateTime, attrValue=2016-09-21T01:23:00.00Z, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someGeoJson, attrType=geo:json, attrValue={\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someJson, attrType=json, attrValue={\"String\": \"string\"}, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someString, attrType=string, attrValue=foo, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someString2, attrType=string, attrValue=, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{attrName=someName1, attrType=someType1, attrValue=-3.7167, 40.3833, recvTime=" + new Date(Long.parseLong("1568020149999")) + "}}, Document{{attrName=someName2, attrType=someType2, attrValue=someValue2, recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}]";
+                if (aggregation.toString().equals(correctBatch)) {
                     assertTrue(true);
                 } else {
                     assertFalse(true);

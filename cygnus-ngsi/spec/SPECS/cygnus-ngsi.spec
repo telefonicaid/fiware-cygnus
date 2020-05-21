@@ -99,6 +99,24 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Thu May 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.1.0
+- [cygnus-ngsi][NGSIPostgreSQLSink][Docker] Add new env var CYGNUS_POSTGRESQL_DATABASE to set Postgresql database in Docker
+- [cygnus-ngsi][NGSIPostgreSQLSink][NGSIPostGISSink] Remove \" in value handled by getGeometry
+
+* Thu Apr 16 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.0.0
+- [cygnus-ngsi][PostgisSink, PostGRESQLSink] Enable datamodel by entity type (dm-by-entity-type) (#1684)
+- [cygnus-ngsi] Add correlatorId rollbacked transactions (#1770)
+- [cygnus-ngsi][PostGRESQLSink] Fix schemaName when inserting data into DB
+- [cygnus-ngsi][PostgisSink] Enable postgis functions without native types flag on
+- [cygnus-ngsi][RestHandler] Add a not null validation for ngsiVersion header of request
+- [cygnus-ngsi][HDFSSink] Separate files by property periodicity (#1830)
+- [cygnus-ngsi][NGSISink] Handle generic exception to manage all scenarios when persisting batch (#1844)
+- [cygnus-ngsi][Elasticsearch] Fix a bug that non-Latin characters such as Japanese are garbled.(#1839)
+- [cygnus-ngsi][MongoSink] Fix on mongo collection name asignation (#1845)
+- [cygnus-ngsi][MongoSink] Fix on mongo recvTime Date format
+- [cygnus-ngsi][MongoSink][STHSink] Add a new mongoAuthSource parameter to create the Mongo backend
+- [cygnus-ngsi][MongoSink] Search for metadata even if metadata persistence is not enabled
+
 * Fri Feb 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.0
 - [cygnus-ngsi] Support for NGSIv2 notifications (#953)
 - [cygnus-ngsi][ArcGIS] Fix classpath for instantation of arcgis sink (#1741)

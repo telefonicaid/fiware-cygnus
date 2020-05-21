@@ -23,7 +23,7 @@ MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "1.18.0_SNAPSHOT"
+ENV CYGNUS_VERSION "2.1.0_SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
@@ -56,11 +56,13 @@ ENV CYGNUS_MYSQL_ATTR_NATIVE_TYPES ""
 ENV CYGNUS_MYSQL_BATCH_SIZE ""
 ENV CYGNUS_MYSQL_BATCH_TIMEOUT ""
 ENV CYGNUS_MYSQL_BATCH_TTL ""
+ENV CYGNUS_MYSQL_OPTIONS ""
 
 # MongoDB / STH options
 ENV CYGNUS_MONGO_HOSTS ""
 # ENV CYGNUS_MONGO_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
 # ENV CYGNUS_MONGO_PASS "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+ENV CYGNUS_MONGO_AUTH_SOURCE ""
 ENV CYGNUS_MONGO_SKIP_CONF_GENERATION ""
 ENV CYGNUS_MONGO_SERVICE_PORT "5051"
 ENV CYGNUS_MONGO_ENABLE_ENCODING ""
@@ -144,6 +146,7 @@ ENV CYGNUS_POSTGRESQL_HOST ""
 ENV CYGNUS_POSTGRESQL_PORT ""
 # ENV CYGNUS_POSTGRESQL_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
 # ENV CYGNUS_POSTGRESQL_PASS "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+ENV CYGNUS_POSTGRESQL_DATABASE ""
 ENV CYGNUS_POSTGRESQL_SKIP_CONF_GENERATION ""
 ENV CYGNUS_POSTGRESQL_SERVICE_PORT "5055"
 ENV CYGNUS_POSTGRESQL_ENABLE_ENCODING ""
@@ -157,6 +160,7 @@ ENV CYGNUS_POSTGRESQL_BATCH_SIZE ""
 ENV CYGNUS_POSTGRESQL_BATCH_TIMEOUT ""
 ENV CYGNUS_POSTGRESQL_BATCH_TTL ""
 ENV CYGNUS_POSTGRESQL_ENABLE_CACHE ""
+ENV CYGNUS_POSTGRESQL_OPTIONS ""
 
 # Carto options
 # ENV CYGNUS_CARTO_USER ""
@@ -220,6 +224,7 @@ ENV CYGNUS_POSTGIS_BATCH_SIZE ""
 ENV CYGNUS_POSTGIS_BATCH_TIMEOUT ""
 ENV CYGNUS_POSTGIS_BATCH_TTL ""
 ENV CYGNUS_POSTGIS_ENABLE_CACHE ""
+ENV CYGNUS_POSTGIS_OPTIONS ""
 
 
 # Elasticsearch options
@@ -315,6 +320,7 @@ RUN \
     cp ${CYGNUS_HOME}/cygnus-ngsi/conf/name_mappings.conf.template ${FLUME_HOME}/conf/name_mappings.conf && \
     echo "INFO: Create Cygnus log folder" && \
     mkdir -p /var/log/cygnus && \
+    chmod 777 /var/log/cygnus && \
     echo "INFO: Cleanup to thin the final image... doing optimizations..." && \
     cd ${CYGNUS_HOME}/cygnus-common && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
