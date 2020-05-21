@@ -83,7 +83,7 @@ The following table summarizes the package name composition:
 [Top](#top)
 
 #### <a name="section1.2.3"></a>Resources naming conventions
-The resiurce name depends on the configured data model (see the [Configuration](#section2.1) section for more details):
+The resource name depends on the configured data model (see the [Configuration](#section2.1) section for more details):
 
 * Data model by entity (`data_model=dm-by-entity`). A resource name always take the concatenation of the entity ID and type. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
 
