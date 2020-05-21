@@ -316,7 +316,7 @@ public class NGSIPostgisSink extends NGSISink {
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
             aggregator.setDbName(buildDBName(aggregator.getService()));
             aggregator.setSchemeName(buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
-            aggregator.setDbName(buildDBName(events.get(0).getServiceForData()));
+            aggregator.setDbName(buildDBName(events.get(0).getServiceForNaming(enableNameMappings)));
             aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
             aggregator.setAttrNativeTypes(attrNativeTypes);
             aggregator.setAttrMetadataStore(attrMetadataStore);
