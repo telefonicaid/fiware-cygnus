@@ -12,4 +12,4 @@
 [cygnus-ngsi][Elasticsearch] Fix a bug that non-Latin characters such as Japanese are garbled. (#1839)
 [cygnus-ngsi][MongoSink]Fix on mongo collection name asignation. (#1845)
 [cygnus-ngsi][MongoSink]Fix on mongo recvTime Date format.
-[cygnus-ngsi] New datamodel for CKAN (subservice -> org, entityId -> dataset, entityId -> resource) (#1792)
+[cygnus-ngsi] New datamodel for CKAN (dm-by-entity-id) implementing mapping: subservice -> org, entityId -> dataset, entityId -> resource (#1792)
