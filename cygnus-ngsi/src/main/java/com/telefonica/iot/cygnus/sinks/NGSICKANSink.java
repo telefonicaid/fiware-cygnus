@@ -67,7 +67,7 @@ public class NGSICKANSink extends NGSISink {
     private String ckanViewer;
     private CKANBackend persistenceBackend;
 
-    /*entityId
+    /**
      * Constructor.
      */
     public NGSICKANSink() {
