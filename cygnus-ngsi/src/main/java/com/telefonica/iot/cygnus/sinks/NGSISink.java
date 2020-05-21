@@ -875,7 +875,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         } // accumulateByEntityType
 
         private void accumulateByEntityId(NGSIEvent event) {
-        	Map<String, String> headers = event.getHeaders();
+        	   Map<String, String> headers = event.getHeaders();
             ContextElement originalCE = event.getOriginalCE();
             ContextElement mappedCE = event.getMappedCE();
             String destination;
