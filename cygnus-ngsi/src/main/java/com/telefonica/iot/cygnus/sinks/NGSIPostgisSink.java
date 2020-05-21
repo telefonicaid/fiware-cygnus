@@ -391,7 +391,7 @@ public class NGSIPostgisSink extends NGSISink {
         if (enableEncoding) {
             switch(dataModel) {
                 case DMBYENTITYDATABASE:
-                case DMBYENTITYDATABASESCHEME:
+                case DMBYENTITYDATABASESCHEMA:
                     if (service != null)
                         name = NGSICharsets.encodePostgreSQL(service);
                     break;
@@ -401,7 +401,7 @@ public class NGSIPostgisSink extends NGSISink {
         } else {
             switch(dataModel) {
                 case DMBYENTITYDATABASE:
-                case DMBYENTITYDATABASESCHEME:
+                case DMBYENTITYDATABASESCHEMA:
                     if (service != null)
                         name = NGSIUtils.encode(service, false, true);
                     break;
@@ -428,7 +428,7 @@ public class NGSIPostgisSink extends NGSISink {
         
         if (enableEncoding) {
             switch(dataModel) {
-                case DMBYENTITYDATABASESCHEME:
+                case DMBYENTITYDATABASESCHEMA:
                     name = NGSICharsets.encodePostgreSQL(subService);
                     break;
                 default:
@@ -436,7 +436,7 @@ public class NGSIPostgisSink extends NGSISink {
             }
         } else {
             switch(dataModel) {
-                case DMBYENTITYDATABASESCHEME:
+                case DMBYENTITYDATABASESCHEMA:
                     name = NGSIUtils.encode(subService, false, true);
                     break;
                 default:
@@ -469,7 +469,7 @@ public class NGSIPostgisSink extends NGSISink {
                     name = NGSICharsets.encodePostgreSQL(servicePath);
                     break;
                 case DMBYENTITYDATABASE:
-                case DMBYENTITYDATABASESCHEME:
+                case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITY:
                     name = NGSICharsets.encodePostgreSQL(servicePath)
                             + CommonConstants.CONCATENATOR
@@ -502,7 +502,7 @@ public class NGSIPostgisSink extends NGSISink {
                     name = NGSIUtils.encode(servicePath, true, false);
                     break;
                 case DMBYENTITYDATABASE:
-                case DMBYENTITYDATABASESCHEME:
+                case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITY:
                     String truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')

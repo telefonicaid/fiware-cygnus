@@ -547,7 +547,7 @@ public class NGSIPostgisSinkTest {
         String batchSize = null; // default
         String batchTime = null; // default
         String batchTTL = null; // default
-        String dataModel = "dm-by-entity-database"; // default
+        String dataModel = "dm-by-entity-database-schema"; // default
         String enableEncoding = "true";
         String enableGrouping = null; // default
         String enableLowercase = null; // default

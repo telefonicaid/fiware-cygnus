@@ -763,7 +763,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 case DMBYENTITYDATABASE:
                     accumulateByEntity(event);
                     break;
-                case DMBYENTITYDATABASESCHEME:
+                case DMBYENTITYDATABASESCHEMA:
                     accumulateByEntity(event);
                     break;
                 default:
