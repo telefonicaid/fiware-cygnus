@@ -384,7 +384,7 @@ public class NGSICKANSink extends NGSISink {
             case DMBYENTITYID:
                 orgName=fiwareService;
                 break;
-            default:
+            case DMBYENTITY:
                 if (enableEncoding) {
                     orgName = NGSICharsets.encodeCKAN(fiwareService);
                 } else {
@@ -398,6 +398,9 @@ public class NGSICKANSink extends NGSISink {
                     throw new CygnusBadConfiguration("Building organization name '" + orgName + "' and its length is "
                         + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
                 } // if else if
+                break;
+            default:
+                throw new CygnusBadConfiguration("Not supported Data Model for CKAN Sink: " + dataModel);
         }
             
         return orgName;
@@ -418,7 +421,7 @@ public class NGSICKANSink extends NGSISink {
             case DMBYENTITYID:
                 pkgName=entityId;
                 break;
-            default:
+            case DMBYENTITY:
                 if (enableEncoding) {
                     pkgName = NGSICharsets.encodeCKAN(fiwareService)
                         + CommonConstants.CONCATENATOR
@@ -431,14 +434,16 @@ public class NGSICKANSink extends NGSISink {
                             + NGSIUtils.encode(fiwareServicePath, false, true)).toLowerCase(Locale.ENGLISH);
                     } // if else
                 } // if else
-
                 if (pkgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
                     throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
                             + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
                 } else if (pkgName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
                     throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
                             + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
-            } // if else if
+                } // if else if
+                break;
+            default:
+                throw new CygnusBadConfiguration("Not supported Data Model for CKAN Sink: " + dataModel);
         }
 
         return pkgName;
@@ -456,20 +461,23 @@ public class NGSICKANSink extends NGSISink {
             case DMBYENTITYID:
             	resName=entityId;
                 break;
-        default:
-            if (enableEncoding) {
-                resName = NGSICharsets.encodeCKAN(entity);
-            } else {
-                resName = NGSIUtils.encode(entity, false, true).toLowerCase(Locale.ENGLISH);
-            } // if else
+            case DMBYENTITY:
+                if (enableEncoding) {
+                    resName = NGSICharsets.encodeCKAN(entity);
+                } else {
+                    resName = NGSIUtils.encode(entity, false, true).toLowerCase(Locale.ENGLISH);
+                } // if else
 
-            if (resName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
-                throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
-                        + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
-            } else if (resName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
-                throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
-                        + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
-            } // if else if
+                if (resName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
+                    throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
+                            + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
+                } else if (resName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
+                    throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
+                            + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
+                } // if else if
+                break;
+            default:
+                throw new CygnusBadConfiguration("Not supported Data Model for CKAN Sink: " + dataModel);
         }
 
         return resName;
