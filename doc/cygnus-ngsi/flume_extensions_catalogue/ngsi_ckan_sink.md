@@ -60,9 +60,9 @@ Nevertheless, different than PostgreSQL, [organization lengths](http://docs.ckan
 
 The following table summarizes the organization name composition:
 
-| FIWARE service path | `dm-by-entity` | `dm-by-entity-id` |
-|---|---|---|
-| `/` | `<fiware-service>` | `<fiware-service>` | 
+| `dm-by-entity` | `dm-by-entity-id` |
+|---|---|
+| `<fiware-service>` | `<fiware-service>` | 
 
 [Top](#top)
 
@@ -76,9 +76,9 @@ Nevertheless, different than PostgreSQL, [dataset lengths](http://docs.ckan.org/
 
 The following table summarizes the package name composition:
 
-| FIWARE service path | `dm-by-entity` | `dm-by-entity-id` |
-|---|---|---|
-| `/` | `<fiware-service>_<fiware-servicePath>` | `<entityId>` | 
+| `dm-by-entity` | `dm-by-entity-id` |
+|---|---|
+| `<fiware-service>_<fiware-servicePath>` | `<entityId>` | 
 
 [Top](#top)
 
@@ -98,9 +98,9 @@ Despite there is no real limit on the resource names, Cygnus will keep limiting 
 
 The following table summarizes the resource name composition:
 
-| FIWARE service path | `dm-by-entity` | `dm-by-entity-id` |
-|---|---|---|
-| `/` | `<entityType>` | `<entityId>` |
+| `dm-by-entity` | `dm-by-entity-id` |
+|---|---|
+| `<entityId>_<entityType>` | `<entityId>` |
 
 [Top](#top)
 
