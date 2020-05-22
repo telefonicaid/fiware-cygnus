@@ -370,7 +370,7 @@ public abstract class NGSIGenericAggregator {
         this.entityType = entityType;
     } //setEntityType
 
-    /**
+	/**
      * Gets attribute.
      *
      * @return the attribute
