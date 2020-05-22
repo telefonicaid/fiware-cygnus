@@ -72,7 +72,7 @@ Since based in [PostgreSQL only accepts](https://www.postgresql.org/docs/current
 Nevertheless, different than PostgreSQL, [dataset lengths](http://docs.ckan.org/en/latest/api/#ckan.logic.action.create.package_create) may be up to 100 characters (minimum, 2 characters).
 
 
-* Data model by entity id (`data_model=dm-by-entity-id`). A package/dataset name always take the entity ID. Such a name is already given in the NGSIEvent values, see the [Configuration](#section2.1) section for more details) within the the `NGSIEvent`.
+* Data model by entity id (`data_model=dm-by-entity-id`). A package/dataset name always take the entity ID. Such a name is already given in the NGSIEvent values, see the [Configuration](#section2.1) section for more details) within the the `NGSIEvent`. Note that in this case, encoding is never applied (this is current marked as "debt" in the source code with a FIXME mark).
 
 The following table summarizes the package name composition:
 
