@@ -56,7 +56,7 @@ https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTA
 Nevertheless, different than PostgreSQL, [organization lengths](http://docs.ckan.org/en/latest/api/#ckan.logic.action.create.organization_create) may be up to 100 characters (minimum, 2 characters).
 
 
-* Data model by entity id (`data_model=dm-by-entity-id`). The organization name will take the value of the notified header `fiware-service` without encoding.
+* Data model by entity id (`data_model=dm-by-entity-id`). The organization name will take the value of the notified header `fiware-service`. Note that in this case, encoding is never applied (this is current marked as "debt" in the source code with a FIXME mark).
 
 The following table summarizes the organization name composition:
 
