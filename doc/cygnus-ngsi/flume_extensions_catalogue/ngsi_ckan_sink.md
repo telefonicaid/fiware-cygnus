@@ -88,7 +88,7 @@ The resource name depends on the configured data model (see the [Configuration](
 * Data model by entity (`data_model=dm-by-entity`). A resource name always take the concatenation of the entity ID and type. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
 
 
-* Data model by entity id (`data_model=dm-by-entity-id`). A resource name always take the entity ID. Such a name is already given in the NGSIEvent values, see the [Configuration](#section2.1) section for more details) within the the `NGSIEvent`. 
+* Data model by entity id (`data_model=dm-by-entity-id`). A resource name always take the entity ID. Such a name is already given in the NGSIEvent values, see the [Configuration](#section2.1) section for more details) within the the `NGSIEvent`. Note that in this case, encoding is never applied (this is current marked as "debt" in the source code with a FIXME mark).
 
 It must be noticed a CKAN Datastore (and a viewer) is also created and associated to the resource above. This datastore, which in the end is a PostgreSQL table, will hold the persisted data.
 
