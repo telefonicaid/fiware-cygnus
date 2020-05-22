@@ -382,6 +382,8 @@ public class NGSICKANSink extends NGSISink {
         
         switch(dataModel) {
             case DMBYENTITYID:
+                //FIXME
+                //note that if we enable encode() and/or encodeCKAN() in this datamodel we could have problems, although it need to be analyzed in deep
                 orgName=fiwareService;
                 break;
             case DMBYENTITY:
@@ -419,6 +421,8 @@ public class NGSICKANSink extends NGSISink {
         
         switch(dataModel) {
             case DMBYENTITYID:
+                //FIXME
+                //note that if we enable encode() and/or encodeCKAN() in this datamodel we could have problems, although it need to be analyzed in deep
                 pkgName=entityId;
                 break;
             case DMBYENTITY:
@@ -459,6 +463,8 @@ public class NGSICKANSink extends NGSISink {
         String resName;
         switch(dataModel) {
             case DMBYENTITYID:
+                //FIXME
+                //note that if we enable encode() and/or encodeCKAN() in this datamodel we could have problems, although it need to be analyzed in deep
             	resName=entityId;
                 break;
             case DMBYENTITY:
