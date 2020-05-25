@@ -751,6 +751,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 case DMBYSERVICEPATH:
                     accumulateByServicePath(event);
                     break;
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITY:
                     accumulateByEntity(event);
                     break;
