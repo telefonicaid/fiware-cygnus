@@ -31,6 +31,9 @@ Colum should be provisioned as type [`geometry`](http://postgis.net/workshops/po
 [Top](#top)
 
 ### <a name="section1.2"></a>Mapping `NGSIEvent`s to PostgreSQL data structures
+
+NOTE: by the moment this mapping functionality works only for Postgis sink. However, the same will be implemented for the Postgresql sink itself. In that moment probably this documentation will be moved to the Postgresql sink documentation (as that is the common place for documentation which applies to both sinks)
+
 PostgreSQL organizes the data in schemas inside a database that contain tables of data rows. Such organization is exploited by `NGSIPostgreisSink` each time a `NGSIEvent` is going to be persisted.
 
 [Top](#top)
