@@ -1,3 +1,3 @@
 [cygnus-ngsi][MySQLSink, PostgreSQLSink, PostgisSQLSink] Remove SQLBackend singleton, thus allowing two sinks of the same SQL-type in the same Cygnus instance
 [cygnus-ngsi][CKANSink] New datamodel for CKAN (dm-by-entity-id) implementing mapping: subservice -> org, entityId -> dataset, entityId -> resource (#1792)
-[cygnus-ngsi][PostgisSQLSink] Add dm-by-entity-database and dm-by-entity-database-schema
+[cygnus-ngsi][PostgisSQLSink, PostgreSQLSink] Add dm-by-entity-database and dm-by-entity-database-schema
