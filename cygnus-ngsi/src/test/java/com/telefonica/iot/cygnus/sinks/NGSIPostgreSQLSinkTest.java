@@ -296,9 +296,152 @@ public class NGSIPostgreSQLSinkTest {
      * @throws java.lang.Exception
      */
     @Test
-    public void testBuildDBNameOldEncoding() throws Exception {
-        System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildDBName]")
+    public void testBuildSchemaNameOldEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildSchemaNameOldEncoding]")
                 + "-------- The schema name is equals to the encoding of the notified/defaulted service");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = "false";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+        String service = "someService";
+        String servicePath = "someServicePath";
+
+        try {
+            String builtSchemaName = sink.buildSchemaName(service, servicePath);
+            String expectedDBName = "someService";
+
+            try {
+                assertEquals(expectedDBName, builtSchemaName);
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildSchemaNameOldEncoding]")
+                        + "-  OK  - '" + expectedDBName + "' is equals to the encoding of <service>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildSchemaNameOldEncoding]")
+                        + "- FAIL - '" + expectedDBName + "' is not equals to the encoding of <service>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildSchemaNameOldEncoding]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildDBNameOldEncoding
+
+    /**
+     * [NGSIPostgreSQLSink.buildDBName] -------- The schema name is equals to the encoding of the notified/defaulted
+     * service.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildSchemaNameNewEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildSchemaNameNewEncoding]")
+                + "-------- The schema name is equals to the encoding of the notified/defaulted service");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+        String service = "someService";
+        String servicePath = "someServicePath";
+
+        try {
+            String builtSchemaName = sink.buildSchemaName(service, servicePath);
+            String expectedDBName = "somex0053ervice";
+
+            try {
+                assertEquals(expectedDBName, builtSchemaName);
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildSchemaNameNewEncoding]")
+                        + "-  OK  - '" + expectedDBName + "' is equals to the encoding of <service>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildSchemaNameNewEncoding]")
+                        + "- FAIL - '" + expectedDBName + "' is not equals to the encoding of <service>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildSchemaNameNewEncoding]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildDBNameNewEncoding
+
+    /**
+     * [NGSIPostgreSQLSink.testBuildDBNameOldEncodingDatabaseDataModel] -------- The DB name is equals to the encoding of the notified/defaulted
+     * service.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildDBNameOldEncodingDatabaseDataModel() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameOldEncodingDatabaseDataModel]")
+                + "-------- The db name is equals to the encoding of the notified/defaulted service");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-entity-database"; // default
+        String enableEncoding = "false";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+        String service = "someService";
+
+        try {
+            String builtSchemaName = sink.buildDBName(service);
+            String expectedDBName = "someService";
+
+            try {
+                assertEquals(expectedDBName, builtSchemaName);
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameOldEncodingDatabaseDataModel]")
+                        + "-  OK  - '" + expectedDBName + "' is equals to the encoding of <service>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameOldEncodingDatabaseDataModel]")
+                        + "- FAIL - '" + expectedDBName + "' is not equals to the encoding of <service>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameOldEncodingDatabaseDataModel]")
+                    + "- FAIL - There was some problem when building the Schema name");
+            throw e;
+        } // try catch
+    } // testBuildDBNameOldEncodingDatabaseDataModel
+
+    /**
+     * [NGSIPostgreSQLSink.testBuildDBNameOldEncoding] -------- The DB name is equals to the encoding of the notified/defaulted
+     * service.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildDBNameOldEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameOldEncoding]")
+                + "-------- The db name is equals to the encoding of the notified/defaulted service");
         String attrPersistence = null; // default
         String batchSize = null; // default
         String batchTime = null; // default
@@ -318,34 +461,35 @@ public class NGSIPostgreSQLSinkTest {
         String service = "someService";
 
         try {
-            String builtSchemaName = sink.buildSchemaName(service);
-            String expectedDBName = "someService";
+            String builtSchemaName = sink.buildDBName(service);
+            // The default vale for the DB name
+            String expectedDBName = "postgres";
 
             try {
                 assertEquals(expectedDBName, builtSchemaName);
-                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildDBName]")
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameOldEncoding]")
                         + "-  OK  - '" + expectedDBName + "' is equals to the encoding of <service>");
             } catch (AssertionError e) {
-                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildDBName]")
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameOldEncoding]")
                         + "- FAIL - '" + expectedDBName + "' is not equals to the encoding of <service>");
                 throw e;
             } // try catch
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildDBName]")
-                    + "- FAIL - There was some problem when building the DB name");
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameOldEncoding]")
+                    + "- FAIL - There was some problem when building the Schema name");
             throw e;
-        } // try catch
+        } // try catch	        } // try catch
     } // testBuildDBNameOldEncoding
 
     /**
-     * [NGSIPostgreSQLSink.buildDBName] -------- The schema name is equals to the encoding of the notified/defaulted
+     * [NGSIPostgreSQLSink.testBuildDBNameNewEncoding] -------- The DB name is equals to the encoding of the notified/defaulted
      * service.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildDBNameNewEncoding() throws Exception {
-        System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildDBName]")
-                + "-------- The schema name is equals to the encoding of the notified/defaulted service");
+        System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameNewEncoding]")
+                + "-------- The DB name is equals to the encoding of the notified/defaulted service");
         String attrPersistence = null; // default
         String batchSize = null; // default
         String batchTime = null; // default
@@ -365,24 +509,74 @@ public class NGSIPostgreSQLSinkTest {
         String service = "someService";
 
         try {
-            String builtSchemaName = sink.buildSchemaName(service);
-            String expectedDBName = "somex0053ervice";
+            String builtSchemaName = sink.buildDBName(service);
+            String expectedDBName = "postgres";
 
             try {
                 assertEquals(expectedDBName, builtSchemaName);
-                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildDBName]")
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameNewEncoding]")
                         + "-  OK  - '" + expectedDBName + "' is equals to the encoding of <service>");
             } catch (AssertionError e) {
-                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildDBName]")
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameNewEncoding]")
                         + "- FAIL - '" + expectedDBName + "' is not equals to the encoding of <service>");
                 throw e;
             } // try catch
         } catch (Exception e) {
-            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildDBName]")
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameNewEncoding]")
                     + "- FAIL - There was some problem when building the DB name");
             throw e;
         } // try catch
     } // testBuildDBNameNewEncoding
+
+
+    /**
+     * [NGSIPostgreSQLSink.testBuildDBNameNewEncodingDatabaseDataModel] -------- The DB name is equals to the encoding of the notified/defaulted
+     * service.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildDBNameNewEncodingDatabaseDataModel() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameNewEncodingDatabaseDataModel]")
+                + "-------- The DB name is equals to the encoding of the notified/defaulted service");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-entity-database-schema"; // default
+        String enableEncoding = "true";
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        String cache = null; // default
+        NGSIPostgreSQLSink sink = new NGSIPostgreSQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableGrouping, enableLowercase, host, password, port, username, cache));
+        String service = "someService";
+
+        try {
+            String builtSchemaName = sink.buildDBName(service);
+            String expectedDBName = "somex0053ervice";
+
+            try {
+                assertEquals(expectedDBName, builtSchemaName);
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameNewEncodingDatabaseDataModel]")
+                        + "-  OK  - '" + expectedDBName + "' is equals to the encoding of <service>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameNewEncodingDatabaseDataModel]")
+                        + "- FAIL - '" + expectedDBName + "' is not equals to the encoding of <service>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameNewEncodingDatabaseDataModel]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildDBNameNewEncodingDatabaseDataModel
+
+
 
     /**
      * [NGSIPostgreSQLSink.buildTableName] -------- When a non root service-path is notified/defaulted and
@@ -1028,9 +1222,10 @@ public class NGSIPostgreSQLSinkTest {
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableGrouping, enableLowercase, host, password, port, username, cache));
         String service = "tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongService";
+        String servicePath = "someServicePath";
 
         try {
-            sink.buildSchemaName(service);
+            sink.buildSchemaName(service, servicePath);
             System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.buildSchemaName]")
                     + "- FAIL - A schema name length greater than 63 characters has not been detected");
             assertTrue(false);
@@ -1407,7 +1602,7 @@ public class NGSIPostgreSQLSinkTest {
                 aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
                 aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
-                aggregator.setDbName(ngsiPostgreSQLSink.buildSchemaName(aggregator.getService()));
+                aggregator.setSchemeName(ngsiPostgreSQLSink.buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
                 aggregator.setTableName(ngsiPostgreSQLSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
                 aggregator.setAttrNativeTypes(true);
                 aggregator.setAttrMetadataStore(true);
