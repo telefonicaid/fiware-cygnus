@@ -1584,6 +1584,35 @@ public class NGSIPostgisSinkTest {
         contextMetadata.setContextMetadata(new JsonPrimitive("WGS84"));
         ArrayList<ContextMetadata> metadata = new ArrayList<>();
         metadata.add(contextMetadata);
+        ContextAttribute contextAttribute2 = new ContextAttribute();
+        contextAttribute2.setName("someName2");
+        contextAttribute2.setType("someType2");
+        contextAttribute2.setContextValue(new JsonPrimitive("someValue2"));
+        contextAttribute2.setContextMetadata(null);
+        ContextAttribute contextAttribute1 = new ContextAttribute();
+        contextAttribute1.setName("someName1");
+        contextAttribute1.setType("geooint");
+        contextAttribute1.setContextValue(new JsonPrimitive("-3.7167, 40.3833"));
+        contextAttribute1.setContextMetadata(metadata);
+        ArrayList<ContextAttribute> attributes = new ArrayList<>();
+        attributes.add(contextAttribute2);
+        attributes.add(contextAttribute1);
+        ContextElement contextElement = new ContextElement();
+        contextElement.setId("someId");
+        contextElement.setType("someType");
+        contextElement.setIsPattern("false");
+        contextElement.setAttributes(attributes);
+        return contextElement;
+    } // createContextElement
+
+    private ContextElement createMappedContextElement() {
+        NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
+        ContextMetadata contextMetadata = new ContextMetadata();
+        contextMetadata.setName("location");
+        contextMetadata.setType("string");
+        contextMetadata.setContextMetadata(new JsonPrimitive("WGS84"));
+        ArrayList<ContextMetadata> metadata = new ArrayList<>();
+        metadata.add(contextMetadata);
         ContextAttribute contextAttribute1 = new ContextAttribute();
         contextAttribute1.setName("someName1");
         contextAttribute1.setType("geo:point");
@@ -1683,7 +1712,7 @@ public class NGSIPostgisSinkTest {
         NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
         NotifyContextRequest.ContextElement contextElement2 = createContextElement();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
-        NGSIEvent ngsiEvent2 = new NGSIEvent(headers, contextElement2.toString().getBytes(), contextElement2, null);
+        NGSIEvent ngsiEvent2 = new NGSIEvent(headers, contextElement2.toString().getBytes(), contextElement2, createMappedContextElement());
         NGSIBatch batch = new NGSIBatch();
         batch.addEvent(destination, ngsiEvent);
         batch.addEvent(destination, ngsiEvent2);
@@ -1715,6 +1744,7 @@ public class NGSIPostgisSinkTest {
                 aggregator.setAttrNativeTypes(true);
                 aggregator.setEnableGeoParse(true);
                 aggregator.setAttrMetadataStore(true);
+                aggregator.setEnableNameMappings(true);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);

@@ -76,11 +76,13 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         String recvTime = CommonUtils.getHumanReadable(recvTimeTs, isEnableUTCRecvTime());
         // get the event body
         NotifyContextRequest.ContextElement contextElement = event.getContextElement();
+        NotifyContextRequest.ContextElement mappedContextElement = null;
         String entityId = contextElement.getId();
         String entityType = contextElement.getType();
         LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type=" + entityType + ")");
         // Iterate on all this context element attributes, if there are attributes
         ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = contextElement.getAttributes();
+        ArrayList<NotifyContextRequest.ContextAttribute> mappedContextAttributes = null;
         if (contextAttributes == null || contextAttributes.isEmpty()) {
             LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
                     + ", type=" + entityType + ")");
@@ -128,6 +130,31 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                 aggregation.put(attrName + "_type", valuesType);
             } // if else
         } // for
+
+        if (event.getMappedCE() != null && isEnableNameMappings() && isEnableGeoParse()) {
+            mappedContextElement = event.getMappedCE();
+            mappedContextAttributes = mappedContextElement.getAttributes();
+            for (NotifyContextRequest.ContextAttribute mapedContextAttribute : mappedContextAttributes) {
+                if (mapedContextAttribute.getType() != null && (mapedContextAttribute.getType().equalsIgnoreCase("geo:json") || mapedContextAttribute.getType().equalsIgnoreCase("geo:point"))) {
+                    for (int i = 0; i < aggregation.get(mapedContextAttribute.getName()).size(); i++) {
+                        if (aggregation.get(mapedContextAttribute.getName()).get(i) != null && (aggregation.get(mapedContextAttribute.getName()).get(i).equals(mapedContextAttribute.getValue()))) {
+                            try {
+                                //Process geometry if applyes
+                                ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(mapedContextAttribute.getValue().toString(), mapedContextAttribute.getType(), mapedContextAttribute.getContextMetadata(), swapCoordinates);
+                                if (location.right) {
+                                    LOGGER.debug("location=" + location.getLeft());
+                                    aggregation.get(mapedContextAttribute.getName()).set(i, new JsonPrimitive(location.getLeft()));
+                                }
+                            } catch (Exception e) {
+                                LOGGER.error("[" + getName() + "] Processing context attribute (name=" + mapedContextAttribute.getValue().toString());
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+
         // Iterate on all the aggregations, checking for not updated attributes; add an empty value if missing
         for (String key : aggregation.keySet()) {
             ArrayList<JsonElement> values = aggregation.get(key);
