@@ -94,7 +94,7 @@ PostgreSQL [tables name length](http://www.postgresql.org/docs/current/static/sq
 
 The following table summarizes the table name composition (old encoding):
 
-| FIWARE service path | `dm-by-service-path` | `dm-by-entity`, `data_model=dm-by-entity-database-schema`, `data_model=dm-by-entity-database` | `dm-by-entity-type` |
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity`, `dm-by-entity-database-schema`, `dm-by-entity-database` | `dm-by-entity-type` |
 |---|---|---|---|
 | `/` | N/A | `<entityId>_<entityType>` | `<entityType>` |
 | `/<svcPath>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` | `<svcPath>_<entityType>` |
@@ -262,7 +262,7 @@ Coming soon.
 | data\_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i> or <i>dm-by-entity-type</i> or <i>dm-by-entity-database</i> or <i>dm-by-entity-database-schema</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | postgresql\_host | no | localhost | FQDN/IP address where the PostgreSQL server runs. |
 | postgresql\_port | no | 5432 ||
-| postgresql\_database | no | postgres | `postgres` is the default database that is created automatically when install |
+| postgresql\_database | no | postgres | `postgres` is the default database that is created automatically when install. Note also than with datamodels <i>dm-by-entity-database</i> and <i>dm-by-entity-database-schema</i> this setting is ignored (as the database is part of the mapping done by the datamodel) | |
 | postgresql\_username | no | postgres | `postgres` is the default username that is created automatically when install |
 | postgresql\_password | no | N/A | Empty value by default (No password is created when install) |
 | postgresql\_options | no | N/A | optional connection parameter(s) concatinated to jdbc url if necessary<br/>When `sslmode=require` is set to `postgresql_options`, jdbc url will become like <b>jdbc:postgresql://postgresql.example.com:5432/postgres?sslmode=require</b>|
