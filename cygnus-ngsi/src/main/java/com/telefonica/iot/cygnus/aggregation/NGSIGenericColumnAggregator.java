@@ -98,7 +98,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             JsonElement attrValue = contextAttribute.getValue();
             String attrMetadata = contextAttribute.getContextMetadata();
             LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
-            if (isEnableGeoParse() && (attrType.equalsIgnoreCase("geo:json") || attrType.equalsIgnoreCase("geo:point"))) {
+            if (isEnableGeoParse() && (attrType.equals("geo:json") || attrType.equals("geo:point"))) {
                 try {
                     //Process geometry if applyes
                     ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(attrValue.toString(), attrType, attrMetadata, swapCoordinates);
