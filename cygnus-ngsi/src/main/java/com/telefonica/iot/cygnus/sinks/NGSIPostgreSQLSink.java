@@ -254,7 +254,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
     @Override
     public void start() {
         try {
-            createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, postgresqlDatabase, postgresqlOptions);
+            if (buildDBName(null) != null) {
+                createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, postgresqlDatabase, postgresqlOptions);
+            }
         } catch (Exception e) {
             LOGGER.error("Error while creating the PostgreSQL persistence backend. Details="
                     + e.getMessage());
@@ -270,6 +272,8 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions) {
         if (postgreSQLPersistenceBackend == null) {
             postgreSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, defaultSQLDataBase, sqlOptions);
+        } else {
+            LOGGER.info("The database name will be created on runtime, so if there is an specified database on the agent properties and you expect it to be read on startup, then you shoul look for the data model you are using. Maybe it's not the correct one");
         }
     }
 
@@ -300,7 +304,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
             aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
             aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
-            aggregator.setDbName(buildSchemaName(aggregator.getService()));
+            aggregator.setSchemeName(buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
+            aggregator.setDbName(buildDBName(events.get(0).getServiceForNaming(enableNameMappings)));
+            aggregator.setSchemeName(buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
             aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
             aggregator.setAttrNativeTypes(attrNativeTypes);
             aggregator.setAttrMetadataStore(attrMetadataStore);
@@ -339,6 +345,10 @@ public class NGSIPostgreSQLSink extends NGSISink {
         String schemaName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 
+        if (postgreSQLPersistenceBackend == null) {
+            createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgresqlOptions);
+        }
+
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgreSQLSink. Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
                 + valuesForInsert + ")");
@@ -360,20 +370,70 @@ public class NGSIPostgreSQLSink extends NGSISink {
             throw new CygnusPersistenceError("-, " + e.getMessage());
         } // try catch
     } // persistAggregation
-    
+
     /**
      * Creates a PostgreSQL DB name given the FIWARE service.
      * @param service
      * @return The PostgreSQL DB name
      * @throws CygnusBadConfiguration
      */
-    public String buildSchemaName(String service) throws CygnusBadConfiguration {
-        String name;
-        
+    public String buildDBName(String service) throws CygnusBadConfiguration {
+        String name = null;
+
         if (enableEncoding) {
-            name = NGSICharsets.encodePostgreSQL(service);
+            switch(dataModel) {
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
+                    if (service != null)
+                        name = NGSICharsets.encodePostgreSQL(service);
+                    break;
+                default:
+                    name = postgresqlDatabase;
+            }
         } else {
-            name = NGSIUtils.encode(service, false, true);
+            switch(dataModel) {
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
+                    if (service != null)
+                        name = NGSIUtils.encode(service, false, true);
+                    break;
+                default:
+                    name = postgresqlDatabase;
+            }
+        } // if else
+        if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building DB name '" + name
+                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_NAME_LEN);
+        } // if
+
+        return name;
+    } // buildSchemaName
+
+    /**
+     * Creates a PostgreSQL scheme name given the FIWARE service.
+     * @param service
+     * @return The PostgreSQL scheme name
+     * @throws CygnusBadConfiguration
+     */
+    public String buildSchemaName(String service, String subService) throws CygnusBadConfiguration {
+        String name;
+
+        if (enableEncoding) {
+            switch(dataModel) {
+                case DMBYENTITYDATABASESCHEMA:
+                    name = NGSICharsets.encodePostgreSQL(subService);
+                    break;
+                default:
+                    name = NGSICharsets.encodePostgreSQL(service);
+            }
+        } else {
+            switch(dataModel) {
+                case DMBYENTITYDATABASESCHEMA:
+                    name = NGSIUtils.encode(subService, false, true);
+                    break;
+                default:
+                    name = NGSIUtils.encode(service, false, true);
+            }
         } // if else
 
         if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
@@ -400,6 +460,8 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 case DMBYSERVICEPATH:
                     name = NGSICharsets.encodePostgreSQL(servicePath);
                     break;
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITY:
                     name = NGSICharsets.encodePostgreSQL(servicePath)
                             + CommonConstants.CONCATENATOR
@@ -431,6 +493,8 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     
                     name = NGSIUtils.encode(servicePath, true, false);
                     break;
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITY:
                     String truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
