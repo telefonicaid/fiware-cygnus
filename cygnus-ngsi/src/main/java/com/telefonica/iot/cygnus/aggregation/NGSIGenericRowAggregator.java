@@ -60,13 +60,18 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
         String recvTime = CommonUtils.getHumanReadable(recvTimeTs, isEnableUTCRecvTime());
         // get the getRecvTimeTs body
         NotifyContextRequest.ContextElement contextElement = event.getContextElement();
+        NotifyContextRequest.ContextElement mappedContextElement = event.getMappedCE();
         String entityId = contextElement.getId();
         String entityType = contextElement.getType();
         LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                 + entityType + ")");
-        // iterate on all this context element attributes, if there are attributes
-        ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = contextElement.getAttributes();
-        if (contextAttributes == null || contextAttributes.isEmpty()) {
+        // Iterate on all this context element attributes, if there are attributes
+        ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = null;
+        if (isEnableNameMappings() && mappedContextElement != null && mappedContextElement.getAttributes() != null && !mappedContextElement.getAttributes().isEmpty()) {
+            contextAttributes = mappedContextElement.getAttributes();
+        } else if (contextElement!= null && contextElement.getAttributes() != null && !contextElement.getAttributes().isEmpty()) {
+            contextAttributes = event.getContextElement().getAttributes();
+        } else {
             LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
                     + ", type=" + entityType + ")");
             return;
