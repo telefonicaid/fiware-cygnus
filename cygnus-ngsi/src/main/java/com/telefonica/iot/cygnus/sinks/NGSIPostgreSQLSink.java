@@ -342,7 +342,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
         String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
         String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist());
         String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
-        String schemaName = aggregator.getDbName(enableLowercase);
+        String schemaName = aggregator.getSchemeName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 
         if (postgreSQLPersistenceBackend == null) {
