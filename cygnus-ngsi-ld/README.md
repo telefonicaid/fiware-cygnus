@@ -1,4 +1,4 @@
-# <a name="top"></a>Cygnus NGSI
+# <a name="top"></a>Cygnus NGSI-LD
 Content:
 
 * [Welcome to Cygnus NGSI-LD](#section1)
