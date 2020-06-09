@@ -1,0 +1,53 @@
+version: "3.5"
+services:
+  # Orion is the context broker
+  orion:
+    image: fiware/orion-ld
+    hostname: orion
+    container_name: fiware-orion
+    depends_on:
+      - mongo-db
+    expose:
+      - "1026"
+    ports:
+      - "1026:1026" 
+    command: -dbhost mongo-db -logLevel DEBUG
+    healthcheck:
+      test: curl --fail -s http://orion:1026/version || exit 1
+
+  # Databases
+  mongo-db:
+    image: mongo:3.6
+    hostname: mongo-db
+    container_name: db-mongo
+    expose:
+      - "27017"
+    ports:
+      - "27017:27017" 
+    command: --nojournal
+    volumes:
+      - mongo-db:/data
+  postgres-db:
+    hostname: postgres-db
+    container_name: postgres-db
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: example
+
+  cygnus-ld:
+    hostname: cygnus-ld
+    container_name: cygnus-ld
+    image: anmunozx/cygnus-ld
+    environment:
+      CYGNUS_POSTGRESQL_HOST: postgres-db
+      CYGNUS_POSTGRESQL_PASS: example
+      CYGNUS_POSTGRESQL_USER: postgres
+      CYGNUS_POSTGRESQL_DATA_MODEL: dm-by-entity
+    ports: 
+      - "5050:5050"
+      
+volumes:
+  mongo-db: ~
