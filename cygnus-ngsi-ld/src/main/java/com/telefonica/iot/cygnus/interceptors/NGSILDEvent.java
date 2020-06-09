@@ -34,7 +34,7 @@ public class NGSILDEvent implements Event {
     private Map<String, String> headers;
     private byte[] body;
     private NotifyContextRequestLD.ContextElement originalCELD;
-    private static final CygnusLogger LOGGER = new CygnusLogger(NGSIEvent.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(NGSILDEvent.class);
 
     /**
      * Constructor.

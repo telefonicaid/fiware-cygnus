@@ -20,7 +20,6 @@ package com.telefonica.iot.cygnus.sinks;
 import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequestLD.ContextElement;
 import com.telefonica.iot.cygnus.errors.*;
-import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.interceptors.NGSILDEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
@@ -523,8 +522,7 @@ public abstract class NGSILDSink extends CygnusSink implements Configurable {
                     ngsiEvent.getHeaders().get(NGSIConstants.FLUME_HEADER_TRANSACTION_ID));
             MDC.put(CommonConstants.LOG4J_SVC,
                     ngsiEvent.getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE));
-            MDC.put(CommonConstants.LOG4J_SUBSVC,
-                    ngsiEvent.getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH));
+
 
             // Accumulate the event
             accumulator.accumulate(ngsiEvent);

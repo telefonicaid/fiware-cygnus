@@ -9,6 +9,7 @@ Content:
         * [PostgreSQL tables naming conventions](#section1.2.3)
         * [Row-like storing](#section1.2.4)
         * [Column-like storing](#section1.2.5)
+        * [Native attribute type](#section1.2.6)
     * [Example](#section1.3)
         * [`NGSIEvent`](#section1.3.1)
         * [Database, schema and table names](#section1.3.2)
@@ -26,6 +27,7 @@ Content:
 * [Programmers guide](#section3)
     * [`NGSIPostgreSQLSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
+    * [SSL/TLS connection](#section3.3)
 
 ## <a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIPostgreSQLSink`, or simply `NGSIPostgreSQLSink` is a sink designed to persist NGSI-like context data events within a [PostgreSQL server](https://www.postgresql.org/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -71,6 +73,7 @@ The name of these tables depends on the configured data model (see the [Configur
 
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
 * Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
+* Data model by entity type (`data_model=dm-by-entity-type`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity type in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity type is concatenated.
 
 It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
 
@@ -78,17 +81,17 @@ PostgreSQL [tables name length](http://www.postgresql.org/docs/current/static/sq
 
 The following table summarizes the table name composition (old encoding):
 
-| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
-|---|---|---|
-| `/` | N/A | `<entityId>_<entityType>` |
-| `/<svcPath>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` |
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-entity-type` |
+|---|---|---|---|
+| `/` | N/A | `<entityId>_<entityType>` | `<entityType>` |
+| `/<svcPath>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` | `<svcPath>_<entityType>` |
 
 Using the new encoding:
 
-| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
-|---|---|---|
-| `/` | `x002f` | `x002fxffff<entityId>xffff<entityType>` |
-| `/<svcPath>` | `x002f<svcPath>` | `x002f<svcPath>xffff<entityId>xffff<entityType>` |
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-entity-type` |
+|---|---|---|---|
+| `/` | `x002f` | `x002fxffff<entityId>xffff<entityType>` | `x002fxffff<entityType>` |
+| `/<svcPath>` | `x002f<svcPath>` | `x002f<svcPath>xffff<entityId>xffff<entityType>` |`x002f<svcPath>xffff<entityType>` |
 
 Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
 
@@ -105,7 +108,7 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 * `attrName`: Notified attribute name.
 * `attrType`: Notified attribute type.
 * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
-* `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
+* `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted). Will be stored only if it was configured to (attr_metadata_store set to true in the configuration file ngsi_agent.conf). It is a Json object.
 
 [Top](#top)
 
@@ -119,6 +122,20 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 *  For each notified attribute, a field named as the attribute is considered. This field will store the attribute values along the time.
 *  For each notified attribute, a field named as the concatenation of the attribute name and `_md` is considered. This field will store the attribute's metadata values along the time.
 
+#### <a name="section1.2.6"></a>Native attribute type
+Regarding the specific data stored within the above table, if `attr_native_types` parameter is set to `true` then attribute is inserted using its native type (according with the following table), if `false` then will be stringify. 
+
+Type json     | Type PostGreSQL/POSTGIS
+------------- | --------------------------------------- 
+string        | text
+number        | double, precision, real, others (numeric, decimal)
+boolean       | boolean (TRUE, FALSE, NULL)
+DateTime      | timestamp, timestamp with time zone, timestamp without time zone
+json          | text o json - it`s treated as String
+null          | NULL
+
+This only applies to Column mode.
+
 [Top](#top)
 
 ### <a name="section1.3"></a>Example
@@ -127,31 +144,31 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
     ngsi-event={
         headers={
-	         content-type=application/json,
-	         timestamp=1429535775,
-	         transactionId=1429535775-308-0000000000,
-	         correlationId=1429535775-308-0000000000,
-	         fiware-service=vehicles,
-	         fiware-servicepath=/4wheels,
-	         <grouping_rules_interceptor_headers>,
-	         <name_mappings_interceptor_headers>
+             content-type=application/json,
+             timestamp=1429535775,
+             transactionId=1429535775-308-0000000000,
+             correlationId=1429535775-308-0000000000,
+             fiware-service=vehicles,
+             fiware-servicepath=/4wheels,
+             <grouping_rules_interceptor_headers>,
+             <name_mappings_interceptor_headers>
         },
         body={
-	        entityId=car1,
-	        entityType=car,
-	        attributes=[
-	            {
-	                attrName=speed,
-	                attrType=float,
-	                attrValue=112.9
-	            },
-	            {
-	                attrName=oil_level,
-	                attrType=float,
-	                attrValue=74.6
-	            }
-	        ]
-	    }
+            entityId=car1,
+            entityType=car,
+            attributes=[
+                {
+                    attrName=speed,
+                    attrType=float,
+                    attrValue=112.9
+                },
+                {
+                    attrName=oil_level,
+                    attrType=float,
+                    attrValue=74.6
+                }
+            ]
+        }
     }
 
 
@@ -164,17 +181,17 @@ The PostgreSQL schema will always be `vehicles`.
 
 The PostgreSQL table names will be, depending on the configured data model, the following ones (old encoding):
 
-| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
-|---|---|---|
-| `/` | N/A | `car1_car` |
-| `/4wheels` | `4wheels` | `4wheels_car1_car` |
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-entity-type` |
+|---|---|---|---|
+| `/` | N/A | `car1_car` | `car` |
+| `/4wheels` | `4wheels` | `4wheels_car1_car` | `4wheels_car` |
 
 Using the new encoding:
 
-| FIWARE service path | `dm-by-service-path` | `dm-by-entity` |
-|---|---|---|
-| `/` | x002f | `x002fxffffcar1xffffcar` |
-| `/4wheels` | `x002f4wheels` | `x002f4wheelsxffffcar1xffffcar` |
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-entity` |
+|---|---|---|---|
+| `/` | `x002f` | `x002fxffffcar1xffffcar` | `x002fxffffcar` |
+| `/wheels` | `x002f4wheels` | `x002f4wheelsxffffcar1xffffcar` | `x002f4wheelsxffffcar` |
 
 [Top](#top)
 
@@ -229,13 +246,16 @@ Coming soon.
 | enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
-| data\_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
+| data\_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i> or <i>dm-by-entity-type</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | postgresql\_host | no | localhost | FQDN/IP address where the PostgreSQL server runs. |
 | postgresql\_port | no | 5432 ||
 | postgresql\_database | no | postgres | `postgres` is the default database that is created automatically when install |
 | postgresql\_username | no | postgres | `postgres` is the default username that is created automatically when install |
 | postgresql\_password | no | N/A | Empty value by default (No password is created when install) |
+| postgresql\_options | no | N/A | optional connection parameter(s) concatinated to jdbc url if necessary<br/>When `sslmode=require` is set to `postgresql_options`, jdbc url will become like <b>jdbc:postgresql://postgresql.example.com:5432/postgres?sslmode=require</b>|
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
+| attr\_metadata\_store | no | false | <i>true</i> or <i>false</i>. |
+| attr\_native\_types | no | false | if the attribute value will be native <i>true</i> or stringfy or <i>false</i>. |
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
@@ -259,7 +279,9 @@ A configuration example could be:
     cygnus-ngsi.sinks.postgresql-sink.postgresql_database = mydatabase
     cygnus-ngsi.sinks.postgresql-sink.postgresql_username = myuser
     cygnus-ngsi.sinks.postgresql-sink.postgresql_password = mypassword
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_options = sslmode=require
     cygnus-ngsi.sinks.postgresql-sink.attr_persistence = row
+    cygnus-ngsi.sinks.postgresql-sink.attr_native_types = false
     cygnus-ngsi.sinks.postgresql-sink.batch_size = 100
     cygnus-ngsi.sinks.postgresql-sink.batch_timeout = 30
     cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
@@ -350,5 +372,9 @@ A complete configuration as the described above is read from the given `Context`
 
 ### <a name="section3.2"></a>Authentication and authorization
 Current implementation of `NGSIPostgreSQLSink` relies on the database, username and password credentials created at the PostgreSQL endpoint.
+
+### <a name="section3.3"></a>SSL/TLS connection
+When `NGSIPostgreSQLSink` want to connect PostgreSQL Server by using SSL or TLS, please set `postgresql_options` configuration parameter to configure jdbc.
+
 
 [Top](#top)

@@ -70,7 +70,7 @@
         <dependency>
             <groupId>com.telefonica.iot</groupId>
             <artifactId>cygnus-common</artifactId>
-            <version>1.12.0_SNAPSHOT</version>
+            <version>2.1.0_SNAPSHOT</version>
         </dependency>
         <!-- libreria arcgis -->
         <dependency>
@@ -78,7 +78,7 @@
             <artifactId>arcgis-java</artifactId>
             <version>100.4.0</version>
         </dependency>
-        
+
         <dependency>
             <groupId>es.aytosantander.smartcity</groupId>
             <artifactId>ArcgisUtils</artifactId>
@@ -86,7 +86,7 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/src/main/resources/ArcgisUtils-0.0.1-SNAPSHOT.jar</systemPath>
         </dependency>
-        
+
     </dependencies>
 
     <build>

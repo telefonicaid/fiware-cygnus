@@ -173,7 +173,7 @@ Using the new encoding:
 Assuming `data_model=dm-by-entity` and all the possible resolutions as configuration parameters (see section [Configuration](#section2.1) for more details), then `NGSISTHSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
-    MongoDB shell version: 2.6.9
+    MongoDB shell version: 3.6.14
     connecting to: test
     > show databases
     admin              (empty)
@@ -305,6 +305,7 @@ Assuming `data_model=dm-by-entity` and all the possible resolutions as configura
 | mongo\_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
 | mongo\_username | no | <i>empty</i> | If empty, no authentication is done. |
 | mongo\_password | no | <i>empty</i> | If empty, no authentication is done. |
+| mongo\_auth_source | no | <i>empty</i> | Auth source database use to authenticate the user. Usually could be `admin`. |
 | db\_prefix | no | sth_ ||
 | collection\_prefix | no | sth_ | `system.` is not accepted. |
 | resolutions | no | month,day,hour,minute,second | Resolutions for which it is desired to aggregate data. Accepted values are <i>month</i>, <i>day</i>, <i>hour</i>, <i>minute</i> and <i>second</i> separated  by comma. |
@@ -330,6 +331,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.sth-sink.mongo_hosts = 192.168.80.34:27017
     cygnus-ngsi.sinks.sth-sink.mongo_username = myuser
     cygnus-ngsi.sinks.sth-sink.mongo_password = mypassword
+    cygnus-ngsi.sinks.sth-sink.mongo_auth_source = admin
     cygnus-ngsi.sinks.sth-sink.db_prefix = cygnus_
     cygnus-ngsi.sinks.sth-sink.collection_prefix = cygnus_
     cygnus-ngsi.sinks.sth-sink.resolutions = month,day
@@ -388,8 +390,9 @@ Despite the old encoding will be deprecated in the future, it is possible to swi
 #### <a name="section2.3.4"></a>About supported versions of MongoDB
 This sink has been tested with the following versions of Mongo:
 
-* 3.2.6
 * 3.4
+* 3.6
+* 4.2
 
 [Top](#top)
 

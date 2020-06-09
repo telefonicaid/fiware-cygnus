@@ -17,7 +17,6 @@
  */
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.interceptors.NGSILDEvent;
 
 import java.util.ArrayList;

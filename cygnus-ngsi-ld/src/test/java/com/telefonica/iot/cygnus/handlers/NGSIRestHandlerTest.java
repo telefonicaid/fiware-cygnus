@@ -263,18 +263,6 @@ public class NGSIRestHandlerTest {
                     + handler.getDefaultService() + "'");
             throw e;
         } // try catch
-        
-        try {
-            assertEquals("/", handler.getDefaultServicePath());
-            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
-                    + "-  OK  - The default configuration value for 'default_service_path' is '/'");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
-                    + "- FAIL - The default configuration value for 'default_service_path' is '"
-                    + handler.getDefaultServicePath() + "'");
-            throw e;
-        } // try catch
-
 
     } // testConfigureNotMandatoryParameters
     
@@ -303,56 +291,7 @@ public class NGSIRestHandlerTest {
         } // try catch
     } // testConfigureDefaultServiceIsLegal
     
-    /**
-     * [NGSIRestHandler.configure] -------- The configured default service path can only contain alphanumerics
-     * and underscores.
-     */
-    @Test
-    public void testConfigureDefaultServicePathIsLegal() {
-        System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
-                + "-------- The configured default service path can only contain alphanumerics and underscores");
-        NGSIRestHandler handler = new NGSIRestHandler();
-        String configuredDefaultServicePath = "/something.?";
-        handler.configure(createContext(null, null, configuredDefaultServicePath,null));
-        
-        try {
-            assertTrue(handler.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
-                    + "-  OK  - The configured default service path '" + configuredDefaultServicePath
-                    + "' was detected as invalid");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
-                    + "- FAIL - The configured default service path '" + configuredDefaultServicePath
-                    + "' was not detected as invalid");
-            throw e;
-        } // try catch
-    } // testConfigureDefaultServicePathIsLegal
-    
-    /**
-     * [NGSIRestHandler.configure] -------- The configured default service path must start with '/'.
-     */
-    @Test
-    public void testConfigureDefaultServicePathStartsWithSlash() {
-        System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
-                + "-------- The configured default service path must start with '/'");
-        NGSIRestHandler handler = new NGSIRestHandler();
-        String configuredDefaultServicePath = "/something";
-        handler.configure(createContext(null, null, configuredDefaultServicePath,null));
-        
-        try {
-            assertEquals(configuredDefaultServicePath, handler.getDefaultServicePath());
-            assertTrue(!handler.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
-                    + "-  OK  - The configured default service path '" + configuredDefaultServicePath
-                    + "' starts with '/'");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSIRestHandler.configure]")
-                    + "- FAIL - The configured default service path '" + configuredDefaultServicePath
-                    + "' does not start with '/'");
-            throw e;
-        } // try catch
-    } // testConfigureDefaultServicePathStartsWithSlash
-    
+
     /**
      * [NGSIRestHandler.configure] -------- The configured notification target must start with '/'.
      */
@@ -417,10 +356,6 @@ public class NGSIRestHandlerTest {
                         + "- FAIL - The length of 'fiware-servicePath' header "
                         + "value is greater than '" + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + "'");
             } // if
-            else {
-                System.out.println(e+"holaaa");
-
-            }
             
             assertTrue(false);
         } // try catch // try catch
@@ -498,19 +433,14 @@ public class NGSIRestHandlerTest {
     @Test
     public void testGetEventsHeadersInFlumeEvent() {
         System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                + "-------- When a Flume event is generated, it contains fiware-service, fiware-servicepath, "
+                + "-------- When a Flume event is generated, it contains fiware-service,"
                 + "fiware-correlator and transaction-id headers");
         NGSIRestHandler handler = new NGSIRestHandler();
         handler.configure(createContext(null, null, null,null)); // default configuration
         Map<String, String> headers;
         
         try {
-            System.out.println("holaaa");
             headers = handler.getEvents(mockHttpServletRequest).get(0).getHeaders();
-            for (int i=0;i< headers.size();i++){
-                System.out.println(headers.get(i));
-            }
-            
             try {
                 assertTrue(headers.containsKey("fiware-service"));
                 System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
@@ -547,52 +477,7 @@ public class NGSIRestHandlerTest {
         } // try catch
     } // testGetEventsHeadersInFlumeEvent
 
-    /**
-     * [NGSIRestHandler.getEvents] -------- When a notification contains multiple ContextElementResponses, a NGSIEvent
-     * is generated for each one of them; the notified service path is split as well.
-     */
-    @Test
-    public void testGetEventsMultiValuedServicePath() {
-        System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                + "-------- When a notification contains multiple ContextElementResponses, a NGSIEvent is generated "
-                + "for each one of them; the notified service path is split as well");
-        NGSIRestHandler handler = new NGSIRestHandler();
-        handler.configure(createContext(null, null, null,"ld")); // default configuration
-        List<Event> events;
 
-        try {
-            events = handler.getEvents(mockHttpServletRequest4);
-        } catch (Exception e) {
-            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                    + "- FAIL - There was some problem when intercepting the event"+e);
-            throw new AssertionError(e.getMessage());
-        } // try catch
-
-        try {
-            assertEquals(2, events.size());
-            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                    + "-  OK  - The generated events are 2");
-        } catch (AssertionError e1) {
-            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                    + "- FAIL - The generated events are not 2");
-            throw e1;
-        } // try catch
-
-        try {
-            String event1ServicePath = events.get(0).getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
-            String event2ServicePath = events.get(1).getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
-            assertTrue((event1ServicePath.equals("/a") && event2ServicePath.equals("/b"))
-                    || (event1ServicePath.equals("/b") && event2ServicePath.equals("/a")));
-            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                    + "-  OK  - The generated events have a service path equals to a split of the notified service "
-                    + "path");
-        } catch (AssertionError e1) {
-            System.out.println(getTestTraceHead("[NGSIRestHandler.getEvents]")
-                    + "- FAIL - The generated events have not a service path equals to a split of the notified service "
-                    + "path");
-            throw e1;
-        } // try catch
-    } // testGetEventsMultiValuedServicePath
     
     /**
      * [NGSIRestHandler.generateUniqueId] -------- An internal transaction ID is generated.
@@ -733,52 +618,7 @@ public class NGSIRestHandlerTest {
         } // try catch
     } // testWrongServiceHeaderLength
     
-    /**
-     * [NGSIRestHandler.wrongServicePathHeaderLength] -------- A FIWARE service path header whose length is greater than
-     * 50 characters is detected.
-     */
-    @Test
-    public void testWrongServicePathHeaderLength() {
-        System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServicePathHeaderLength]")
-                + "-------- A FIWARE service path header whose length is greater than 50 characters is detected");
-        NGSIRestHandler handler = new NGSIRestHandler();
-        String wrongServicePathHeader = "thisIsAFiwareServicePathHeaderWhoseLengthIsGreaterThanTheAccepted50"
-                + "CharactersLimit";
-        
-        try {
-            assertTrue(handler.wrongServicePathHeaderLength(wrongServicePathHeader));
-            System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServicePathHeaderLength]")
-                    + "-  OK  - A wrong FIWARE service path header '" + wrongServicePathHeader + "' has been detected");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServicePathHeaderLength]")
-                    + "- FAIL - A wrong FIWARE service path header '" + wrongServicePathHeader + "' has not been "
-                    + "detected");
-            throw e;
-        } // try catch
-    } // testWrongServicePathHeaderLength
-    
-    /**
-     * [NGSIRestHandler.wrongServicePathHeaderInitialCharacter] -------- A FIWARE service path header not starting by
-     * slash is detected.
-     */
-    @Test
-    public void testWrongServicePathHeaderInitialCharacter() {
-        System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServicePathHeaderInitialCharacter]")
-                + "-------- A FIWARE service path header not starting by slash is detected");
-        NGSIRestHandler handler = new NGSIRestHandler();
-        String wrongServicePathHeader = "servicePath";
-        
-        try {
-            assertTrue(handler.wrongServicePathHeaderInitialCharacter(wrongServicePathHeader));
-            System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServicePathHeaderInitialCharacter]")
-                    + "-  OK  - A wrong FIWARE service path header '" + wrongServicePathHeader + "' has been detected");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSIRestHandler.wrongServicePathHeaderInitialCharacter]")
-                    + "- FAIL - A wrong FIWARE service path header '" + wrongServicePathHeader + "' has not been "
-                    + "detected");
-            throw e;
-        } // try catch
-    } // testWrongServicePathHeaderInitialCharacter
+
     
     private Context createContext(String notificationTarget, String defaultService, String defaultServicePath,String ngsiVersion) {
         Context context = new Context();

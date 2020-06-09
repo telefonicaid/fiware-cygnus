@@ -348,7 +348,7 @@ public class NGSIPostgreSQLSinkTest {
         try {
             String builtTableName = sink.buildTableName(entity, attribute);
             System.out.println(builtTableName);
-            String expecetedTableName = "urn_ngsi-ld_Vehicle_V123";
+            String expecetedTableName = "urn_ngsi_ld_Vehicle_V123";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);

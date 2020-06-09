@@ -143,7 +143,8 @@ public class NotifyContextRequestLD {
         public ContextElement(String contextElement) {
             Gson gson = new Gson();
             String cer = contextElement;
-            Map<String, Object> map = gson.fromJson(cer, new TypeToken<Map<String, JsonElement>>(){}.getType());
+            Map<String, Object> map = gson.fromJson(cer, new TypeToken<Map<String, JsonElement>>() {
+            }.getType());
             Map<String,Object> attrs = new HashMap<String, Object>();
             this.id= map.get("id").toString().replaceAll("\"","");
             this.type=map.get("type").toString().replaceAll("\"","");

@@ -190,7 +190,7 @@ Using the new encoding:
 Assuming `data_model=dm-by-service-path` and `attr_persistence=row` as configuration parameters, then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
-    MongoDB shell version: 2.6.9
+    MongoDB shell version: 3.6.14
     connecting to: test
     > show databases
     admin              (empty)
@@ -209,7 +209,7 @@ Assuming `data_model=dm-by-service-path` and `attr_persistence=row` as configura
 If `data_model=dm-by-entity` and `attr_persistence=row` then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
-    MongoDB shell version: 2.6.9
+    MongoDB shell version: 3.6.14
     connecting to: test
     > show databases
     admin              (empty)
@@ -228,7 +228,7 @@ If `data_model=dm-by-entity` and `attr_persistence=row` then `NGSIMongoSink` wil
 If `data_model=dm-by-attribute` and `attr_persistence=row` then `NGSIMongoSink` will persist the data as:
 
     $ mongo -u myuser -p
-    MongoDB shell version: 2.6.9
+    MongoDB shell version: 3.6.14
     connecting to: test
     > show databases
     admin              (empty)
@@ -252,7 +252,7 @@ If `data_model=dm-by-attribute` and `attr_persistence=row` then `NGSIMongoSink` 
 If `data_model=dm-by-service-path` and `attr_persistence=column` then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
-    MongoDB shell version: 2.6.9
+    MongoDB shell version: 3.6.14
     connecting to: test
     > show databases
     admin              (empty)
@@ -270,7 +270,7 @@ If `data_model=dm-by-service-path` and `attr_persistence=column` then `NGSIMongo
 If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` will persist the data within the body as:
 
     $ mongo -u myuser -p
-    MongoDB shell version: 2.6.9
+    MongoDB shell version: 3.6.14
     connecting to: test
     > show databases
     admin              (empty)
@@ -305,6 +305,7 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 | mongo\_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
 | mongo\_username | no | <i>empty</i> | If empty, no authentication is done. |
 | mongo\_password | no | <i>empty</i> | If empty, no authentication is done. |
+| mongo\_auth_source | no | <i>empty</i> | Auth source database use to authenticate the user. Usually could be `admin`. |
 | db\_prefix | no | sth_ ||
 | collection\_prefix | no | sth_ | `system.` is not accepted. |
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
@@ -332,6 +333,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.mongo-sink.mongo_hosts = 192.168.80.34:27017
     cygnus-ngsi.sinks.mongo-sink.mongo_username = myuser
     cygnus-ngsi.sinks.mongo-sink.mongo_password = mypassword
+    cygnus-ngsi.sinks.mongo-sink.mongo_auth_source = admin
     cygnus-ngsi.sinks.mongo-sink.db_prefix = cygnus_
     cygnus-ngsi.sinks.mongo-sink.collection_prefix = cygnus_
     cygnus-ngsi.sinks.mongo-sink.data_model = dm-by-entity
@@ -392,8 +394,9 @@ Despite the old encoding will be deprecated in the future, it is possible to swi
 #### <a name="section2.3.4"></a>About supported versions of MongoDB
 This sink has been tested with the following versions of Mongo:
 
-* 3.2.6
 * 3.4
+* 3.6
+* 4.2
 
 [Top](#top)
 

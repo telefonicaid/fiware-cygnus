@@ -37,32 +37,6 @@ Finally, it must be said the `NGSIEVent` contains another field, of type `Contex
 
 [Top](#top)
 
-### <a name="section1.1"></a>Mapping NGSI-LD events to `NGSILDEvent` objects
-This section explains how a notified NGSI-LD event (a http message containing headers and payload) is used to create a `NGSILDEvent` object, suitable for being consumed by any of the Cygnus sinks, thanks to `NGSIRestHandler`.
-
-It is necessary to remark again this handler is designed for being used by `HttpSource`, the native component of Apache Flume. An http message containing a NGSI-like notification will be received by `HttpSource` and passed to `NGSIRestHandler` in order to create one or more `NGSILDEvent` objects (one per notified context element) to be put in a sink's channel (mainly, these channels are objects in memory, but could be files).
-
-On the one hand, the http message containing the NGSI-LD-like notification will be composed of a set of http headers, and a payload. On the other hand, the `NGSIEvent` objects are composed of a set of headers as well and an object of type `ContextElement` containing the already parsed version of the entities elements within the notification; this parsed version of the notified body is ready for being consumed by other components in the agent architecture, such as interceptors or sinks, thus parsing is just made once.
-
-As can be seen, there is a quasi-direct translation among http messages and `NGSIEvent` objects:
-
-| http message | `NGSILDEvent` object |
-|---|---|
-| `Fiware-Service` header | `fiware-service` header |
-| `Fiware-Correlator` header | `fiware-correlator` header. If this header is not sent, the `fiware-correlator` is equals to the `transaction-id` header. |
-| `Link` header | `link` header. If the NGSI-LD notification send the @context intead of the payload |
-|| `transaction-id` header (internally added) |
-| any other header | discarded |
-| payload | `ContextElement` object containing the parsed version of the payload |
-
-All the FIWARE headers are added to the `NGSIEvent` object if notified. If not, default values are used (it is the case of `fiware-service` and `fiware-servicepath`, which take the configured value of `default_service` and `default_service_path` respectively, see below the configuration section) or auto-generated (it is the case of `fiware-correlator`, whose value is the same than `transaction-id`).
-
-As already introduced, in addition to the `fiware-correlator`, a `transaction-id` is created for internally identify a complete Cygnus transaction, i.e. starting at the source when the context data is notified, and finishing in the sink, where such data is finally persisted. If `Fiware-Correlator` header is not notified, then `fiware-correlator` and `transactionid` get the same auto-generated value.
-
-Finally, it must be said the `NGSIEVent` contains another field, of type `ContextElement` as well, in order the `NGSINameMappingsInterceptor` add a mapped version of the original context element added by this handler.
-
-[Top](#top)
-
 ### <a name="section1.2"></a>Example
 Let's assume the following not-intercepted event regarding a received notification (the code below is an <i>object representation</i>, not any real data format):
 

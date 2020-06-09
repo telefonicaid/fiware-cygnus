@@ -19,8 +19,7 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequestLD;
+import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequestLD.ContextElement;
 import com.telefonica.iot.cygnus.errors.*;
 import com.telefonica.iot.cygnus.interceptors.NGSILDEvent;
@@ -38,7 +37,7 @@ import java.util.Map;
  *
  * @author anmunoz
  */
-public class NGSILDPostgreSQLSink extends NGSILDSink {
+public class NGSIPostgreSQLSink extends NGSILDSink {
 
     private static final String DEFAULT_ROW_ATTR_PERSISTENCE = "row";
     private static final String DEFAULT_PASSWORD = "";
@@ -48,8 +47,10 @@ public class NGSILDPostgreSQLSink extends NGSILDSink {
     private static final String DEFAULT_DATABASE = "postgres";
     private static final String DEFAULT_ENABLE_CACHE = "false";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
+    private static final String POSTGRESQL_DRIVER_NAME = "org.postgresql.Driver";
+    private static final String POSTGRESQL_INSTANCE_NAME = "postgresql";
 
-    private static final CygnusLogger LOGGER = new CygnusLogger(NGSILDPostgreSQLSink.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgreSQLSink.class);
     private String postgresqlHost;
     private String postgresqlPort;
     private String postgresqlDatabase;
@@ -57,13 +58,15 @@ public class NGSILDPostgreSQLSink extends NGSILDSink {
     private String postgresqlPassword;
     private int maxPoolSize;
     private boolean rowAttrPersistence;
-    private PostgreSQLBackendImpl persistenceBackend;
+    private SQLBackendImpl postgreSQLPersistenceBackend;
     private boolean enableCache;
+    private String postgresqlOptions;
+
 
     /**
      * Constructor.
      */
-    public NGSILDPostgreSQLSink() {
+    public NGSIPostgreSQLSink() {
         super();
     } // NGSIPostgreSQLSink
 
@@ -128,17 +131,25 @@ public class NGSILDPostgreSQLSink extends NGSILDSink {
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
-    protected PostgreSQLBackendImpl getPersistenceBackend() {
-        return persistenceBackend;
+    protected SQLBackendImpl getPersistenceBackend() {
+        return postgreSQLPersistenceBackend;
     } // getPersistenceBackend
 
     /**
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
-     * @param persistenceBackend
+     * @param postgreSQLPersistenceBackend
      */
-    protected void setPersistenceBackend(PostgreSQLBackendImpl persistenceBackend) {
-        this.persistenceBackend = persistenceBackend;
+    protected void setPersistenceBackend(SQLBackendImpl postgreSQLPersistenceBackend) {
+        this.postgreSQLPersistenceBackend = postgreSQLPersistenceBackend;
     } // setPersistenceBackend
+
+    /**
+     * Gets the PostgreSQL options. It is protected due to it is only required for testing purposes.
+     * @return The PostgreSQL options
+     */
+    protected String getPostgreSQLOptions() {
+        return postgresqlOptions;
+    } // getPostgreSQLOptions
 
     @Override
     public void configure(Context context) {
@@ -201,7 +212,7 @@ public class NGSILDPostgreSQLSink extends NGSILDSink {
     @Override
     public void start() {
         try {
-            persistenceBackend = new PostgreSQLBackendImpl(postgresqlHost, postgresqlPort, postgresqlDatabase, postgresqlUsername, postgresqlPassword, maxPoolSize);
+            createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, postgresqlDatabase, postgresqlOptions);
         } catch (Exception e) {
             LOGGER.error("Error while creating the PostgreSQL persistence backend. Details="
                     + e.getMessage());
@@ -210,6 +221,15 @@ public class NGSILDPostgreSQLSink extends NGSILDSink {
         super.start();
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
+
+    /**
+     * Initialices a lazy singleton to share among instances on JVM
+     */
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions) {
+        if (postgreSQLPersistenceBackend == null) {
+            postgreSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, defaultSQLDataBase, sqlOptions);
+        }
+    }
 
     @Override
     public void persistBatch(NGSILDBatch batch)
@@ -363,42 +383,6 @@ public class NGSILDPostgreSQLSink extends NGSILDSink {
             LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                     + entityType + ")");
 
-            // iterate on all this context element attributes, if there are attributes
-            /*ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-                        + ", type=" + entityType + ")");
-                return;
-            } // if
-
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
-                String attrMetadata = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
-                        + attrType + ")");
-
-                // create a column and aggregate it
-                String row = "('"
-                    + recvTimeTs + "','"
-                    + recvTime + "','"
-                    + servicePathForData + "','"
-                    + entityId + "','"
-                    + entityType + "','"
-                    + attrName + "','"
-                    + attrType + "','"
-                    + attrValue + "','"
-                    + attrMetadata
-                    + "')";
-
-                if (aggregation.isEmpty()) {
-                    aggregation += row;
-                } else {
-                    aggregation += "," + row;
-                } // if else
-            } // for*/
         } // aggregate
 
     } // RowAggregator
@@ -551,16 +535,16 @@ public class NGSILDPostgreSQLSink extends NGSILDSink {
         
         try {
             if (aggregator instanceof RowAggregator) {
-                persistenceBackend.createSchema(schemaName);
-                persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+                postgreSQLPersistenceBackend.createDestination(schemaName);
+                postgreSQLPersistenceBackend.createTable(schemaName, tableName, typedFieldNames);
             } else if (aggregator instanceof ColumnAggregator){
-                persistenceBackend.createSchema(schemaName);
-                persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+                postgreSQLPersistenceBackend.createDestination(schemaName);
+                postgreSQLPersistenceBackend.createTable(schemaName, tableName, typedFieldNames);
             }// if
             // creating the database and the table has only sense if working in row mode, in column node
             // everything must be provisioned in advance
 
-            persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
+            postgreSQLPersistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
         } catch (Exception e) {
             throw new CygnusPersistenceError("-, " + e.getMessage());
         } // try catch

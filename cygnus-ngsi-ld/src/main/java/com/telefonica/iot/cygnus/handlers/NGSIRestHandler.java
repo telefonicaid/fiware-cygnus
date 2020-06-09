@@ -22,11 +22,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElementResponse;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequestLD;
 import com.telefonica.iot.cygnus.interceptors.NGSILDEvent;
-import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
@@ -48,7 +45,7 @@ import org.json.JSONObject;
 
 /**
  *
- * @author frb
+ * @author anmunoz
  * 
  * Custom HTTP handler for the default HTTP Flume source. It checks the method, notificationTarget and headers are the
  * ones tipically sent by an instance of Orion Context Broker when notifying a context event. If everything is OK, a
@@ -56,20 +53,18 @@ import org.json.JSONObject;
  * sink. This event contains both the context event data and a header specifying the content type (Json).
  */
 public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler {
-    
+
     // LOGGER
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIRestHandler.class);
-    
+
     // configuration parameters
     private boolean invalidConfiguration;
     private String notificationTarget;
     private String defaultService;
-    private String defaultServicePath;
-    private String ngsiVersion;
-    
+
     // shared variables, making them static all the instances of this class will share them
     private static final Object LOCK = new Object();
-    
+
     /**
      * Constructor. This can be used as a place where to initialize all that things we would like to do in the Flume
      * "initialization" class, which is unreachable by our code. As long as this class is instantiated almost at boot
@@ -79,36 +74,30 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         // initially, the configuration is meant to be valid
         invalidConfiguration = false;
     } // NGSIRestHandler
-    
+
     /**
      * Gets the notifications target. It is protected due to it is only required for testing purposes.
+     *
      * @return The notifications target
      */
     protected String getNotificationTarget() {
         return notificationTarget;
     } // getNotificationTarget
-    
+
     /**
      * Gets the default service. It is protected due to it is only required for testing purposes.
+     *
      * @return
      */
     protected String getDefaultService() {
         return defaultService;
     } // getDefaultService
-    
-    /**
-     * Gets the default service path. It is protected due to it is only required for testing purposes.
-     * @return
-     */
-    protected String getDefaultServicePath() {
-        return defaultServicePath;
-    } // getDefaultServicePath
 
-    protected String getNgsiVersion() { return ngsiVersion; }
 
     /**
      * Gets true if the configuration is invalid, false otherwise. It is protected due to it is only
      * required for testing purposes.
+     *
      * @return
      */
     protected boolean getInvalidConfiguration() {
@@ -118,7 +107,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
     @Override
     public void configure(Context context) {
         notificationTarget = context.getString(NGSIConstants.PARAM_NOTIFICATION_TARGET, "/notify");
-        
+
         if (notificationTarget.startsWith("/")) {
             LOGGER.debug("[NGSIRestHandler] Reading configuration (" + NGSIConstants.PARAM_NOTIFICATION_TARGET + "="
                     + notificationTarget + ")");
@@ -127,9 +116,9 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             LOGGER.error("[NGSIRestHandler] Bad configuration (" + NGSIConstants.PARAM_NOTIFICATION_TARGET + "="
                     + notificationTarget + ") -- Must start with '/'");
         } // if else
-        
+
         defaultService = context.getString(NGSIConstants.PARAM_DEFAULT_SERVICE, "default");
-        
+
         if (defaultService.length() > NGSIConstants.SERVICE_HEADER_MAX_LEN) {
             invalidConfiguration = true;
             LOGGER.error("[NGSIRestHandler] Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE
@@ -142,40 +131,10 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             LOGGER.error("[NGSIRestHandler] Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE
                     + "' parameter can only contain alphanumerics or underscores)");
         } // if else
-        
-        defaultServicePath = context.getString(NGSIConstants.PARAM_DEFAULT_SERVICE_PATH, "/");
-        
-        if (defaultServicePath.length() > NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN) {
-            invalidConfiguration = true;
-            LOGGER.error("[NGSIRestHandler] Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
-                    + "' parameter length greater " + "than " + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
-        } else if (!defaultServicePath.startsWith("/")) {
-            invalidConfiguration = true;
-            LOGGER.error("[NGSIRestHandler] Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
-                    + "' must start with '/')");
-        } else if (CommonUtils.isMAdeOfAlphaNumericsOrUnderscores(defaultServicePath.substring(1))) {
-            LOGGER.debug("[NGSIRestHandler] Reading configuration (" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH + "="
-                    + defaultServicePath + ")");
-        } else {
-            invalidConfiguration = true;
-            LOGGER.error("[NGSIRestHandler] Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_SERVICE_PATH
-                    + "' parameter can only contain alphanumerics or underscores");
-        } // else
 
-        ngsiVersion= context.getString(NGSIConstants.PARAM_DEFAULT_NGSI_VERSION, "v2");
-
-        if ("v2".contentEquals(ngsiVersion) || "ld".contentEquals(ngsiVersion)) {
-            LOGGER.debug("[NGSIRestHandler] Reading configuration (" + NGSIConstants.PARAM_DEFAULT_NGSI_VERSION + "="
-                    + ngsiVersion + ")");
-        } else {
-            invalidConfiguration = true;
-            LOGGER.error("[NGSIRestHandler] Bad configuration ('" + NGSIConstants.PARAM_DEFAULT_NGSI_VERSION
-                    + "' parameter can only be v2 or ld");
-        } // else
-        
         LOGGER.info("[NGSIRestHandler] Startup completed");
     } // configure
-            
+
     @Override
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
         // Set some MDC logging fields to 'N/A' for this thread
@@ -194,10 +153,8 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         String corrId = null;
         String contentType = null;
         String service = defaultService;
-        String servicePath = defaultServicePath;
+        String servicePath = "";
         String link = "";
-        LOGGER.info("[NGSIRestHandler] info ngsi_version " + ngsiVersion);
-
 
         while (headerNames.hasMoreElements()) {
             String headerName = ((String) headerNames.nextElement()).toLowerCase(Locale.ENGLISH);
@@ -234,32 +191,8 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                     } // if else
 
                     break;
-                case CommonConstants.HEADER_FIWARE_SERVICE_PATH:
-                    String[] splitValues = headerValue.split(",");
-                    for (String splitValue : splitValues) {
-                        if (wrongServicePathHeaderLength(splitValue)) {
-                            LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('"
-                                    + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                                    + "' header value length greater than "
-                                    + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
-                            throw new HTTPBadRequestException(
-                                    "'fiware-servicePath' header length greater than "
-                                            + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
-                        } else if (wrongServicePathHeaderInitialCharacter(splitValue)) {
-                            LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('"
-                                    + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                                    + "' header value must start with '/'");
-                            throw new HTTPBadRequestException(
-                                    "'" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                                            + "' header value must start with '/'");
-                        } // if else
-                    } // for
-
-                    servicePath = headerValue;
-
-                    break;
                 case "link":
-                    link = headerValue.split(";")[0].replaceAll("<","").replaceAll(">","");
+                    link = headerValue.split(";")[0].replaceAll("<", "").replaceAll(">", "");
                     break;
                 default:
                     LOGGER.debug("[NGSIRestHandler] Unnecessary header");
@@ -268,7 +201,6 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
 
         // Get a service and servicePath and store it in the log4j Mapped Diagnostic Context (MDC)
         MDC.put(CommonConstants.LOG4J_SVC, service == null ? defaultService : service);
-        MDC.put(CommonConstants.LOG4J_SUBSVC, servicePath == null ? defaultServicePath : servicePath);
 
         // If the configuration is invalid, nothing has to be done but to return null
         if (invalidConfiguration) {
@@ -337,19 +269,13 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         LOGGER.info("[NGSIRestHandler] Received data (" + data + ")");
 
         // Parse the original data into a NotifyContextRequest object
-        JSONObject content= new JSONObject(data);
+        JSONObject content = new JSONObject(data);
         NotifyContextRequestLD notifyContextRequestLD = null;
-        NotifyContextRequest ncr = new NotifyContextRequest();
         Gson gson = new Gson();
 
         try {
-            if ("v2".contentEquals(ngsiVersion)) {
-                ncr = gson.fromJson(data, NotifyContextRequest.class);
-                LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest: " + ncr.toString());
-            } else if ("ld".contentEquals(ngsiVersion)) {
-                notifyContextRequestLD = new NotifyContextRequestLD(content);
-                LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest: " + notifyContextRequestLD.toString());
-            }
+            notifyContextRequestLD = new NotifyContextRequestLD(content);
+            LOGGER.debug("[NGSIRestHandler] Parsed NotifyContextRequest: " + notifyContextRequestLD.toString());
 
         } catch (JsonSyntaxException e) {
             serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
@@ -360,17 +286,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         // Split the notified service path and check if it matches the number of notified context responses
         String[] servicePaths = servicePath.split(",");
 
-        if ("v2".contentEquals(ngsiVersion) && servicePaths.length != ncr.getContextResponses().size()) {
-            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
-            LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('"
-                    + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                    + "' header value does not match the number of notified context responses");
-            throw new HTTPBadRequestException(
-                    "'" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                            + "' header value does not match the number of notified context responses");
-        } // if
-
-        if ("ld".contentEquals(ngsiVersion) && servicePaths.length != notifyContextRequestLD.getContextResponses().size()) {
+        if ( servicePaths.length != notifyContextRequestLD.getContextResponses().size()) {
             serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
             LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('"
                     + CommonConstants.HEADER_FIWARE_SERVICE_PATH
@@ -382,110 +298,57 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
 
         // Iterate on the NotifyContextRequest object in order to create an event per ContextElement
         String ids = "";
-        if ("ld".contentEquals(ngsiVersion)){
 
-            for (int i = 0; i < notifyContextRequestLD.getContextResponses().size(); i++) {
-                NotifyContextRequestLD.ContextElementResponse lData = notifyContextRequestLD.getContextResponses().get(i);
-                // NotifyContextRequestLD.ContextElementResponse cer = notifyContextRequestLD.getContextResponses().get(i);
-                LOGGER.debug("[NGSIRestHandler] NGSI event created for ContextElementResponse: ");//  + cer.toString());
+        for (int i = 0; i < notifyContextRequestLD.getContextResponses().size(); i++) {
+            NotifyContextRequestLD.ContextElementResponse lData = notifyContextRequestLD.getContextResponses().get(i);
+            // NotifyContextRequestLD.ContextElementResponse cer = notifyContextRequestLD.getContextResponses().get(i);
+            LOGGER.debug("[NGSIRestHandler] NGSI event created for ContextElementResponse: ");//  + cer.toString());
 
-                // Create the appropiate headers
-                Map<String, String> headers = new HashMap<>();
-                headers.put(CommonConstants.HEADER_FIWARE_SERVICE, service);
-                LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                        + CommonConstants.HEADER_FIWARE_SERVICE + ": " + service + ")");
-                headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, servicePaths[i]);
-                LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                        + CommonConstants.HEADER_FIWARE_SERVICE_PATH + ": " + servicePaths[i] + ")");
-                headers.put(CommonConstants.HEADER_CORRELATOR_ID, corrId);
-                LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                        + CommonConstants.HEADER_CORRELATOR_ID + ": " + corrId + ")");
-                headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transId);
-                LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                        + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + ": " + transId + ")");
-                headers.put("link", link);
-                LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                        + "Link" + ": " + link + ")");
-                if(!"".contentEquals(link)){
-                    notifyContextRequestLD.setContext(link);
-                }
-                // Create the NGSI event and add it to the list
+            // Create the appropiate headers
+            Map<String, String> headers = new HashMap<>();
+            headers.put(CommonConstants.HEADER_FIWARE_SERVICE, service);
+            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
+                    + CommonConstants.HEADER_FIWARE_SERVICE + ": " + service + ")");
+            headers.put(CommonConstants.HEADER_CORRELATOR_ID, corrId);
+            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
+                    + CommonConstants.HEADER_CORRELATOR_ID + ": " + corrId + ")");
+            headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transId);
+            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
+                    + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + ": " + transId + ")");
+            headers.put("link", link);
+            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
+                    + "Link" + ": " + link + ")");
+            if (!"".contentEquals(link)) {
+                notifyContextRequestLD.setContext(link);
+            }
+            // Create the NGSI event and add it to the list
+            NGSILDEvent ngsiLdEvent = new NGSILDEvent(
+                    // Headers
+                    headers,
+                    // Bytes version of the notified ContextElement
+                    (lData.toString() + CommonConstants.CONCATENATOR).getBytes(),
+                    // Object version of the notified ContextElement
+                    lData.getContextElement()
+                    // Will be set with the mapped object version of the notified ContextElement, by
+                    // NGSINameMappingsInterceptor (if configured). Currently, null
 
-                NGSILDEvent ngsiLdEvent = new NGSILDEvent(
-                        // Headers
-                        headers,
-                        // Bytes version of the notified ContextElement
-                         (lData.toString() + CommonConstants.CONCATENATOR).getBytes(),
-                        // Object version of the notified ContextElement
-                        lData.getContextElement()
-                        // Will be set with the mapped object version of the notified ContextElement, by
-                        // NGSINameMappingsInterceptor (if configured). Currently, null
+            );
+            ngsiEvents.add(ngsiLdEvent);
 
-                );
-                ngsiEvents.add(ngsiLdEvent);
+            if (ids.isEmpty()) {
+                ids += ngsiLdEvent.hashCode();
+            } else {
+                ids += "," + ngsiLdEvent.hashCode();
+            } // if else
+        } // for
 
-                if (ids.isEmpty()) {
-                    ids += ngsiLdEvent.hashCode();
-                } else {
-                    ids += "," + ngsiLdEvent.hashCode();
-                } // if else
-            } // for
+        // Return the NGSIEvent list
+        serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 0, 0, 0, 0, 0, 0);
+        LOGGER.debug("[NGSIRestHandler] NGSI events put in the channel, ids=" + ids);
+        numProcessedEvents++;
+        return ngsiEvents;
 
-            // Return the NGSIEvent list
-            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 0, 0, 0, 0, 0, 0);
-            LOGGER.debug("[NGSIRestHandler] NGSI events put in the channel, ids=" + ids);
-            numProcessedEvents++;
-            return ngsiEvents;
-
-        }
-        else {
-            for (int i = 0; i < ncr.getContextResponses().size(); i++) {
-                ContextElementResponse cer = ncr.getContextResponses().get(i);
-                LOGGER.debug("[NGSIRestHandler] NGSI event created for ContextElementResponse: " + cer.toString());
-
-                // Create the appropiate headers
-                Map<String, String> headers = new HashMap<>();
-                headers.put(CommonConstants.HEADER_FIWARE_SERVICE, service);
-                LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                        + CommonConstants.HEADER_FIWARE_SERVICE + ": " + service + ")");
-                headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, servicePaths[i]);
-                LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                        + CommonConstants.HEADER_FIWARE_SERVICE_PATH + ": " + servicePaths[i] + ")");
-                headers.put(CommonConstants.HEADER_CORRELATOR_ID, corrId);
-                LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                        + CommonConstants.HEADER_CORRELATOR_ID + ": " + corrId + ")");
-                headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transId);
-                LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                        + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + ": " + transId + ")");
-
-                // Create the NGSI event and add it to the list
-                NGSIEvent ngsiEvent = new NGSIEvent(
-                        // Headers
-                        headers,
-                        // Bytes version of the notified ContextElement
-                        (cer.getContextElement().toString() + CommonConstants.CONCATENATOR).getBytes(),
-                        // Object version of the notified ContextElement
-                        cer.getContextElement(),
-                        null
-                        // Will be set with the mapped object version of the notified ContextElement, by
-                        // NGSINameMappingsInterceptor (if configured). Currently, null
-                );
-                ngsiEvents.add(ngsiEvent);
-
-                if (ids.isEmpty()) {
-                    ids += ngsiEvent.hashCode();
-                } else {
-                    ids += "," + ngsiEvent.hashCode();
-                } // if else
-            } // for
-
-            // Return the NGSIEvent list
-            serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 0, 0, 0, 0, 0, 0);
-            LOGGER.debug("[NGSIRestHandler] NGSI events put in the channel, ids=" + ids);
-            numProcessedEvents++;
-            return ngsiEvents;
-        }
-    }// getEvents
+    }
     
     /**
      * Checks is the give Content-Type header value is wrong or not. It is protected since it is used by the tests.
@@ -511,25 +374,6 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
     protected boolean wrongServiceHeaderLength(String headerValue) {
         return headerValue.length() > NGSIConstants.SERVICE_HEADER_MAX_LEN;
     } // wrongServiceHeaderLength
-    
-    /**
-     * Checks if the given FIWARE service path header value length is wrong or not. It is protected since it is used by
-     * the tests.
-     * @param headerValue
-     * @return True is the header value length is wrong, otherwise false
-     */
-    protected boolean wrongServicePathHeaderLength(String headerValue) {
-        return headerValue.length() > NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN;
-    } // wrongServicePathHeaderLength
 
-    /**
-     * Checks if the given FIWARE service path header initial value is wrong or not. It is protected since it is used by
-     * the tests.
-     * @param headerValue
-     * @return True is the header value length is wrong, otherwise false
-     */
-    protected boolean wrongServicePathHeaderInitialCharacter(String headerValue) {
-        return !headerValue.startsWith("/");
-    } // wrongServicePathHeaderInitialCharacter
-    
+
 } // NGSIRestHandler
