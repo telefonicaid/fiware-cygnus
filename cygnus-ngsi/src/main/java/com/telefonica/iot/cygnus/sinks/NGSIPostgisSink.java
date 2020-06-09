@@ -58,6 +58,8 @@ public class NGSIPostgisSink extends NGSISink {
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
     private static final String POSTGIS_DRIVER_NAME = "org.postgresql.Driver";
     private static final String POSTGIS_INSTANCE_NAME = "postgresql";
+    private static final String DEFAULT_FIWARE_SERVICE = "default";
+    private static final String ESCAPED_DEFAULT_FIWARE_SERVICE = "default_service";
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgisSink.class);
     private String postgisHost;
@@ -358,6 +360,11 @@ public class NGSIPostgisSink extends NGSISink {
         String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
         String schemaName = aggregator.getSchemeName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
+
+        // Escape a syntax error in SQL
+        if (schemaName.equals(DEFAULT_FIWARE_SERVICE)) {
+            schemaName = ESCAPED_DEFAULT_FIWARE_SERVICE;
+        }
 
         if (postgisPersistenceBackend == null) {
             createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgisOptions);

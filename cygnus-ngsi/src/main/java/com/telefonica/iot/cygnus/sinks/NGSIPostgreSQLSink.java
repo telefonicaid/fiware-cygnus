@@ -55,6 +55,8 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
     private static final String POSTGRESQL_DRIVER_NAME = "org.postgresql.Driver";
     private static final String POSTGRESQL_INSTANCE_NAME = "postgresql";
+    private static final String DEFAULT_FIWARE_SERVICE = "default";
+    private static final String ESCAPED_DEFAULT_FIWARE_SERVICE = "default_service";
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgreSQLSink.class);
     private String postgresqlHost;
@@ -342,8 +344,13 @@ public class NGSIPostgreSQLSink extends NGSISink {
         String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
         String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist());
         String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
-        String schemaName = aggregator.getDbName(enableLowercase);
+        String schemaName = aggregator.getSchemeName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
+
+        // Escape a syntax error in SQL
+        if (schemaName.equals(DEFAULT_FIWARE_SERVICE)) {
+            schemaName = ESCAPED_DEFAULT_FIWARE_SERVICE;
+        }
 
         if (postgreSQLPersistenceBackend == null) {
             createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgresqlOptions);
