@@ -117,6 +117,7 @@ pages:
           - 'Reporting issues and contact information': 'cygnus-twitter/flume_extensions_catalogue/issues_and_contact.md'
       - 'Quick Start Guide': 'cygnus-twitter/quick_start_guide.md'
   - 'cygnus-ngsi-ld agent':
+        - 'Quick Start Guide': 'cygnus-ngsi-ld/quick_start_guide.md'
         - 'Installation and Administration Guide':
               - 'Introduction': 'cygnus-ngsi-ld/installation_and_administration_guide/introduction.md'
               - 'Installation via docker': 'cygnus-ngsi-ld/installation_and_administration_guide/install_with_docker.md'
@@ -128,4 +129,6 @@ pages:
               - 'NGSIRestHandler': 'cygnus-ngsi-ld/flume_extensions_catalogue/ngsi_rest_handler.md'
               - 'NGSIPostgreSQLSink': 'cygnus-ngsi-ld/flume_extensions_catalogue/ngsi_postgresql_sink.md'
               - 'Reporting issues and contact information': 'cygnus-ngsi-ld/flume_extensions_catalogue/issues_and_contact.md'
-        - 'Quick Start Guide': 'cygnus-ngsi-ld/quick_start_guide.md'
+        - 'User and Programmer Guide':
+              - 'Programmer Guide': 'cygnus-ngsi-ld/user_and_programmer_guide/programmer_guide.md'
+              - 'Reporting issues and contact information': 'cygnus-ngsi-ld/user_and_programmer_guide/issues_and_contact.md'
