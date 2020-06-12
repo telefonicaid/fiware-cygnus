@@ -3,3 +3,4 @@
 [cygnus-ngsi][PostgisSQLSink] Add dm-by-entity-database and dm-by-entity-database-schema
 [cygnus-ngsi][PostgisSQLSink] Ignore case for attribute types geo:json and geo:point interpretation
 [cygnus-common][pom.xml] Update Hive-jdbc dependency from version 2.3.4 to version 3.1.2
+[cygnus-ngsi-ld] Creation of the new cygnus-ngsi-ld bundle for receiving NGSI-LD notifications, the first sink provided is PostgreSQL
