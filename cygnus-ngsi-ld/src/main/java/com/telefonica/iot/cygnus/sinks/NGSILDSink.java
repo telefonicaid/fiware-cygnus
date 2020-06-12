@@ -806,7 +806,7 @@ public abstract class NGSILDSink extends CygnusSink implements Configurable {
          */
         public void initialize(long startDateMs) {
             // what happens if Cygnus falls down while accumulating the batch?
-            // TBD: https://github.com/telefonicaid/fiware-cygnus/issues/562
+            // FIXME: https://github.com/telefonicaid/fiware-cygnus/issues/562
             batch = new NGSILDBatch();
             accStartDate = startDateMs;
             accIndex = 0;

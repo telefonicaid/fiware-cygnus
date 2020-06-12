@@ -123,7 +123,7 @@ public final class NGSIUtils {
             return new ImmutablePair("ST_GeomFromGeoJSON(" + attrValue + ")", true);
         } // if
 
-        // TBD: What about:  ?
+        // FIXME: What about:  ?
           // 'geo:line'
           // 'geo:box'
           // 'geo:polygon'
