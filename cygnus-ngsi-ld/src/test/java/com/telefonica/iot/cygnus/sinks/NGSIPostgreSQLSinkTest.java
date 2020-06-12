@@ -150,8 +150,7 @@ public class NGSIPostgreSQLSinkTest {
     /**
      * [NGSIPostgreSQLSink.configure] -------- data_model can only be 'dm-by-service-path' or 'dm-by-entity'.
      */
-    // TBD: check for dataModel values in NGSIMySQLSink and uncomment this test.
-    //@Test
+    @Test
     public void testConfigureDataModel() {
         System.out.println(getTestTraceHead("[NGSILDPostgreSQLSink.configure]")
                 + "-------- data_model can only be 'dm-by-entity' or 'dm-by-entity-type'");
@@ -159,7 +158,7 @@ public class NGSIPostgreSQLSinkTest {
         String batchSize = null; // default
         String batchTime = null; // default
         String batchTTL = null; // default
-        String dataModel = "dm-by-service-path";
+        String dataModel = "entity";
         String enableEncoding = null; // default
         String enableGrouping = null; // default
         String enableLowercase = null; // default
@@ -173,6 +172,7 @@ public class NGSIPostgreSQLSinkTest {
                 enableGrouping, enableLowercase, host, password, port, username, cache));
 
         try {
+            System.out.println(sink.getDataModel()+"test");
             assertTrue(sink.getInvalidConfiguration());
             System.out.println(getTestTraceHead("[NGSILDPostgreSQLSink.configure]")
                     + "-  OK  - 'data_model=entity' was detected");
