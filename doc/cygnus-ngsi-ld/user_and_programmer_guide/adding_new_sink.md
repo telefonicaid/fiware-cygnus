@@ -54,7 +54,7 @@ These parameters are read (and defaulted, when required) in the `configure(Conte
 [Top](#top)
 
 ### <a name="section2.2"></a>Inherited starting and stoping
-TBD
+TBD (as in doc/cygnus-ngsi/user_and_programmer_guide/adding_new_sink.md)
 
 [Top](#top)
 
