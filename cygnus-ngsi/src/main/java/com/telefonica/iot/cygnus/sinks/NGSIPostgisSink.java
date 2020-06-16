@@ -58,6 +58,8 @@ public class NGSIPostgisSink extends NGSISink {
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
     private static final String POSTGIS_DRIVER_NAME = "org.postgresql.Driver";
     private static final String POSTGIS_INSTANCE_NAME = "postgresql";
+    private static final String DEFAULT_FIWARE_SERVICE = "default";
+    private static final String ESCAPED_DEFAULT_FIWARE_SERVICE = "default_service";
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgisSink.class);
     private String postgisHost;
@@ -284,6 +286,8 @@ public class NGSIPostgisSink extends NGSISink {
     private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions) {
         if (postgisPersistenceBackend == null) {
             postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, defaultSQLDataBase, sqlOptions);
+        } else {
+            LOGGER.info("The database name will be created on runtime, so if there is an specified database on the agent properties and you expect it to be read on startup, then you shoul look for the data model you are using. Maybe it's not the correct one");
         }
     }
 
@@ -314,7 +318,6 @@ public class NGSIPostgisSink extends NGSISink {
             aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
             aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
-            aggregator.setDbName(buildDBName(aggregator.getService()));
             aggregator.setSchemeName(buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
             aggregator.setDbName(buildDBName(events.get(0).getServiceForNaming(enableNameMappings)));
             aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
@@ -357,6 +360,11 @@ public class NGSIPostgisSink extends NGSISink {
         String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
         String schemaName = aggregator.getSchemeName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
+
+        // Escape a syntax error in SQL
+        if (schemaName.equals(DEFAULT_FIWARE_SERVICE)) {
+            schemaName = ESCAPED_DEFAULT_FIWARE_SERVICE;
+        }
 
         if (postgisPersistenceBackend == null) {
             createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgisOptions);
