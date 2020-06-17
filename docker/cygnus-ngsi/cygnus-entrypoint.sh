@@ -1073,7 +1073,7 @@ if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
 fi
 
 touch /var/log/cygnus/cygnus.log 
-ln -snf /dev/stdout /var/log/cygnus/cygnus.log 
+ln -snf /dev/stdout /var/log/cygnus/cygnus.log & PIDS="$PIDS $!"
 
 wait $PIDS
 trap - TERM INT
