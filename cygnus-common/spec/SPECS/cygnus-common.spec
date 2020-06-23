@@ -171,6 +171,8 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Tue Jun 23 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.2.0
+
 * Thu May 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.1.0
 - [cygnus-common][cygnus-ngsi] Add following parameters (and environment variables for docker) to be able to connect to sql database with SSL/TLS: "mysql_options" (`CYGNUS_MYSQL_OPTIONS`), "postgresql_options" (`CYGNUS_POSTGRESQL_OPTIONS`) and "postgis_options" (`CYGNUS_POSTGIS_OPTIONS`) (#1867)
 
