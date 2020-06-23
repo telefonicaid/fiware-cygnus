@@ -99,6 +99,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Tue Jun 23 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.2.0
+- [cygnus-ngsi][MySQLSink, PostgreSQLSink, PostgisSQLSink] Remove SQLBackend singleton, thus allowing two sinks of the same SQL-type in the same Cygnus instance
+- [cygnus-ngsi][CKANSink] New datamodel for CKAN (dm-by-entity-id) implementing mapping: subservice -> org, entityId -> dataset, entityId -> resource (#1792)
+- [cygnus-ngsi][PostgisSQLSink, PostgreSQLSink] Add dm-by-entity-database and dm-by-entity-database-schema.
+- [cygnus-ngsi][Generic Aggregation] If name mappings is enabled, then the aggregation will take all attributes from the mapped element on the event
+- [cygnus-ngsi] Update entrypoint to create a symlink from the logfile to stdout, and remove tail execution to stream logfile
+
 * Thu May 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.1.0
 - [cygnus-ngsi][NGSIPostgreSQLSink][Docker] Add new env var CYGNUS_POSTGRESQL_DATABASE to set Postgresql database in Docker
 - [cygnus-ngsi][NGSIPostgreSQLSink][NGSIPostGISSink] Remove \" in value handled by getGeometry
