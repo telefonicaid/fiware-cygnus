@@ -1,7 +1,2 @@
-[cygnus-ngsi][MySQLSink, PostgreSQLSink, PostgisSQLSink] Remove SQLBackend singleton, thus allowing two sinks of the same SQL-type in the same Cygnus instance
-[cygnus-ngsi][CKANSink] New datamodel for CKAN (dm-by-entity-id) implementing mapping: subservice -> org, entityId -> dataset, entityId -> resource (#1792)
-[cygnus-ngsi][PostgisSQLSink, PostgreSQLSink] Add dm-by-entity-database and dm-by-entity-database-schema.
-[cygnus-ngsi][Generic Aggregation] If name mappings is enabled, then the aggregation will take all attributes from the mapped element on the event.
 [cygnus-common][pom.xml] Update Hive-jdbc dependency from version 2.3.4 to version 3.1.2
 [cygnus-ngsi-ld] Creation of the new cygnus-ngsi-ld bundle for receiving NGSI-LD notifications, the first sink provided is PostgreSQL
-
