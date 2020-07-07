@@ -55,10 +55,11 @@ Current stable release is able to persist the following sources of data in the f
 * Twitter data in:
     * [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
 
-**IMPORTANT NOTE**: for the time being, `cygnus-ngsi` and `cygnus-twitter` agents cannot be installed in the same base path, because of an incompatibility with the required version of the `httpclient` library. Of course, if you are going to use just one of the agents, there is no problem at all.
+**IMPORTANT NOTE**: for the time being, `cygnus-ngsi`, `cygnus-twitter` and `cygnus-ngsi-ld` agents cannot be installed in the same base path, because of an incompatibility with the required version of the `httpclient` library. Of course, if you are going to use just one of the agents, there is no problem at all.
 
 cygnus-ngsi: [![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus-ngsi.svg)](https://hub.docker.com/r/fiware/cygnus-ngsi/)<br/>
-cygus-twitter : [![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus-twitter.svg)](https://hub.docker.com/r/fiware/cygnus-twitter/)
+cygus-twitter : [![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus-twitter.svg)](https://hub.docker.com/r/fiware/cygnus-twitter/)<br/>
+cygus-ngsi-ld : [![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus-ngsi-ld.svg)](https://hub.docker.com/r/fiware/cygnus-ngsi-ld/)
 
 ## Cygnus place in FIWARE architecture
 Cygnus (more specifically, cygnus-ngsi agent) plays the role of a connector between Orion Context Broker (which is a NGSI source of data) and many FIWARE storages such as CKAN, Cosmos Big Data (Hadoop) and STH Comet. Of course, as previously said, you may add MySQL, Kafka, Carto, etc as other non FIWARE storages to the FIWARE architecture.
@@ -80,7 +81,9 @@ Following are the links of install section of Fiware/Cygnus sub-modules:
 * cygnus-twitter:
   - [Install from sources](doc/cygnus-twitter/installation_and_administration_guide/install_from_sources.md)
   - [Install with docker](doc/cygnus-twitter/installation_and_administration_guide/install_with_docker.md)
-  
+* cygnus-ngsi-ld:
+  - [Install from sources](doc/cygnus-ngsi-ld/installation_and_administration_guide/install_from_sources.md)
+  - [Install with docker](doc/cygnus-ngsi-ld/installation_and_administration_guide/install_with_docker.md)
 ## Roadmap
 
 The roadmap of this FIWARE GE is described [here](doc/roadmap.md).
