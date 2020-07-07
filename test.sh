@@ -20,17 +20,25 @@
 
 # Move to cygnus-common
 cd cygnus-common
+echo "<<<<<<<<<<<< Run cygnus-common tests >>>>>>>>>>>>"
 # Run cygnus-common tests
 mvn -q test
-# Build and install cygnus-common, this is necessary because it is a dependency for cygnus-ngsi
+
+# Build and install cygnus-common, this is necessary because it is a dependency for cygnus-ngsi and others
 mvn -q clean compile exec:exec assembly:single
 VERSION=$(cat pom.xml | grep version | sed -n '1p' | sed -ne '/<version>/s#\s*<[^>]*>\s*##gp' | sed 's/ //g')
 mvn -q install:install-file -Dfile=target/cygnus-common-$VERSION-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=$VERSION -Dpackaging=jar -DgeneratePom=true
+
 # Move to cygnus-ngsi
 cd ../cygnus-ngsi
+echo "<<<<<<<<<<<< Run cygnus-ngsi tests >>>>>>>>>>>>"
 # Run cygnus-ngsi tests
 mvn -q test
+
 # Move to cygnus-ngsi-ld
 cd ../cygnus-ngsi-ld
+echo "<<<<<<<<<<<< Run cygnus-ngsi-ld tests >>>>>>>>>>>>"
 # Run cygnus-ngsi-ld tests
 mvn -q test
+
+# FIXME: cygnus-twitter test are not run by this script by I understand they should...
