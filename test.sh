@@ -30,3 +30,7 @@ mvn -q install:install-file -Dfile=target/cygnus-common-$VERSION-jar-with-depend
 cd ../cygnus-ngsi
 # Run cygnus-ngsi tests
 mvn -q test
+# Move to cygnus-ngsi-ld
+cd ../cygnus-ngsi-ld
+# Run cygnus-ngsi-ld tests
+mvn -q test

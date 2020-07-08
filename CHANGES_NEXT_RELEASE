@@ -1,1 +1,2 @@
 [cygnus-ngsi][Generic Aggregation] Add name mappings flag to all sinks who uses generic aggregation.
+[cygnus-ngsi-ld] Creation of the new cygnus-ngsi-ld bundle for receiving NGSI-LD notifications, the first sink provided is PostgreSQL (#1875)
