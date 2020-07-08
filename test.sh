@@ -47,5 +47,5 @@ R3=$?
 # FIXME: cygnus-twitter test are not run by this script by I understand they should...
 
 # Only if *all* R1, R2 and R3 are 0 the sum RT will be 0
-RT = `expr $R1 + $R2 + $R3`
+RT=`expr $R1 + $R2 + $R3`
 exit $RT
