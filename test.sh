@@ -23,6 +23,7 @@ cd cygnus-common
 echo "<<<<<<<<<<<< Run cygnus-common tests >>>>>>>>>>>>"
 # Run cygnus-common tests
 mvn -q test
+R1=$?
 
 # Build and install cygnus-common, this is necessary because it is a dependency for cygnus-ngsi and others
 mvn -q clean compile exec:exec assembly:single
@@ -34,11 +35,17 @@ cd ../cygnus-ngsi
 echo "<<<<<<<<<<<< Run cygnus-ngsi tests >>>>>>>>>>>>"
 # Run cygnus-ngsi tests
 mvn -q test
+R2=$?
 
 # Move to cygnus-ngsi-ld
 cd ../cygnus-ngsi-ld
 echo "<<<<<<<<<<<< Run cygnus-ngsi-ld tests >>>>>>>>>>>>"
 # Run cygnus-ngsi-ld tests
 mvn -q test
+R3=$?
 
 # FIXME: cygnus-twitter test are not run by this script by I understand they should...
+
+# Only if *all* R1, R2 and R3 are 0 the sum RT will be 0
+RT = `expr $R1 + $R2 + $R3`
+exit $RT
