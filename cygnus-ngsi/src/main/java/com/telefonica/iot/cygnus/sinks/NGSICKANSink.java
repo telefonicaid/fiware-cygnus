@@ -263,6 +263,7 @@ public class NGSICKANSink extends NGSISink {
             aggregator.setOrgName(buildOrgName(service));
             aggregator.setPkgName(buildPkgName(service, aggregator.getServicePathForNaming(), events.get(0).getContextElement().getId()));
             aggregator.setResName(buildResName(aggregator.getEntityForNaming(), events.get(0).getContextElement().getId()));
+            aggregator.setEnableNameMappings(enableNameMappings);
             aggregator.initialize(events.get(0));
 
             for (NGSIEvent event : events) {
