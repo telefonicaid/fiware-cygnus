@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
@@ -76,6 +77,7 @@ public class KeyStoneUtilsTest {
     /**
      * Test of getting session token from keystone server.
      */
+    @Ignore
     @Test
     public void testServiceLevelTokenOK() {
         System.out.println("Testing KeyStoneBackendImpl.serviceLevelToken");
@@ -113,6 +115,7 @@ public class KeyStoneUtilsTest {
     /**
      * Test of getting session token from keystone server.
      */
+    @Ignore
     @Test
     public void testServiceLevelTokenNoAuth() {
         System.out.println("Testing KeyStoneBackendImpl.serviceLevelToken");
@@ -152,6 +155,7 @@ public class KeyStoneUtilsTest {
     /**
      * Test of getting session token from keystone server.
      */
+    @Ignore
     @Test
     public void testGetSessionToken() {
         LOGGER.debug("Testing KeyStoneBackendImpl.getSessionToken");

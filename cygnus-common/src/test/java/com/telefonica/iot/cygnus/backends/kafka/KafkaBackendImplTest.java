@@ -24,6 +24,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -65,6 +66,7 @@ public class KafkaBackendImplTest {
      * [KafkaBackendImplTest.send] -------- The backend sends a message to Kafka.
      * @throws Exception
      */
+    @Ignore
     @Test
     public void recordIsAddedAndSent() throws Exception {
         // null zookeeperEndpoint because is not necessary for pass the tests
