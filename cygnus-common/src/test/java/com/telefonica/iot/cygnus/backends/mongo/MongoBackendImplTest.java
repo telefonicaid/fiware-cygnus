@@ -260,13 +260,14 @@ public class MongoBackendImplTest {
         String attrName = "someName";
         GregorianCalendar calendar = new GregorianCalendar(2017, 3, 5, 11, 46, 13); // month 3 is April
         MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, DataModel.DMBYSERVICEPATH);
-        String queryForInsertAggregated = "{ \"_id\" : { \"entityId\" : \"someId\" , \"entityType\" : \"someType\" , "
-                + "\"attrName\" : \"someName\" , \"origin\" : { \"$date\" : \"2017-04-05T11:46:00.000Z\"} , "
-                + "\"resolution\" : \"second\" , \"range\" : \"minute\"} , \"points.offset\" : 13}";
+        String queryForInsertAggregated = "{\"_id\": {\"entityId\": \"someId\", \"entityType\": \"someType\", "
+                + "\"attrName\": \"someName\", \"origin\": {\"$date\": 1491392760000}, "
+                + "\"resolution\": \"second\", \"range\": \"minute\"}, \"points.offset\": 13}";
 
         try {
-            assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
-                    entityType, attrName, MongoBackendImpl.Resolution.SECOND).toString());
+            String query = backend.buildQueryForInsertAggregated(calendar, entityId,
+                    entityType, attrName, MongoBackendImpl.Resolution.SECOND).toString();
+            assertEquals(queryForInsertAggregated, query);
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildQueryForInsertAggregated]")
                     + "-  OK  - The related query for '2017-04-05T11:46:13', 'SECOND' resolution and 'DMBYENTITY' "
                     + "data mode is '" + queryForInsertAggregated + "'");
@@ -276,10 +277,10 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"entityId\" : \"someId\" , \"entityType\" : \"someType\" , "
-                + "\"attrName\" : \"someName\" , \"origin\" : { \"$date\" : \"2017-04-05T11:00:00.000Z\"} , "
-                + "\"resolution\" : \"minute\" , \"range\" : \"hour\"} , \"points.offset\" : 46}";
+
+        queryForInsertAggregated = "{\"_id\": {\"entityId\": \"someId\", \"entityType\": \"someType\", "
+                + "\"attrName\": \"someName\", \"origin\": {\"$date\": 1491390000000}, "
+                + "\"resolution\": \"minute\", \"range\": \"hour\"}, \"points.offset\": 46}";
         
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
@@ -293,10 +294,10 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"entityId\" : \"someId\" , \"entityType\" : \"someType\" , "
-                + "\"attrName\" : \"someName\" , \"origin\" : { \"$date\" : \"2017-04-05T00:00:00.000Z\"} , "
-                + "\"resolution\" : \"hour\" , \"range\" : \"day\"} , \"points.offset\" : 11}";
+
+        queryForInsertAggregated = "{\"_id\": {\"entityId\": \"someId\", \"entityType\": \"someType\", "
+                + "\"attrName\": \"someName\", \"origin\": {\"$date\": 1491350400000}, "
+                + "\"resolution\": \"hour\", \"range\": \"day\"}, \"points.offset\": 11}";
         
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
@@ -310,10 +311,10 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"entityId\" : \"someId\" , \"entityType\" : \"someType\" , "
-                + "\"attrName\" : \"someName\" , \"origin\" : { \"$date\" : \"2017-04-01T00:00:00.000Z\"} , "
-                + "\"resolution\" : \"day\" , \"range\" : \"month\"} , \"points.offset\" : 5}";
+
+        queryForInsertAggregated = "{\"_id\": {\"entityId\": \"someId\", \"entityType\": \"someType\", "
+                + "\"attrName\": \"someName\", \"origin\": {\"$date\": 1491004800000}, "
+                + "\"resolution\": \"day\", \"range\": \"month\"}, \"points.offset\": 5}";
         
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
@@ -327,10 +328,10 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"entityId\" : \"someId\" , \"entityType\" : \"someType\" , "
-                + "\"attrName\" : \"someName\" , \"origin\" : { \"$date\" : \"2017-01-01T00:00:00.000Z\"} , "
-                + "\"resolution\" : \"month\" , \"range\" : \"year\"} , \"points.offset\" : 4}";
+
+        queryForInsertAggregated = "{\"_id\": {\"entityId\": \"someId\", \"entityType\": \"someType\", "
+                + "\"attrName\": \"someName\", \"origin\": {\"$date\": 1483228800000}, "
+                + "\"resolution\": \"month\", \"range\": \"year\"}, \"points.offset\": 4}";
         
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
@@ -346,9 +347,10 @@ public class MongoBackendImplTest {
         } // try catch
         
         backend = new MongoBackendImpl(null, null, null, null, DataModel.DMBYENTITY);
-        queryForInsertAggregated = "{ \"_id\" : { \"attrName\" : \"someName\" , "
-                + "\"origin\" : { \"$date\" : \"2017-04-05T11:46:00.000Z\"} , \"resolution\" : \"second\" , "
-                + "\"range\" : \"minute\"} , \"points.offset\" : 13}";
+
+        queryForInsertAggregated = "{\"_id\": {\"attrName\": \"someName\", "
+                + "\"origin\": {\"$date\": 1491392760000}, \"resolution\": \"second\", "
+                + "\"range\": \"minute\"}, \"points.offset\": 13}";
 
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
@@ -362,10 +364,10 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"attrName\" : \"someName\" , "
-                + "\"origin\" : { \"$date\" : \"2017-04-05T11:00:00.000Z\"} , \"resolution\" : \"minute\" , "
-                + "\"range\" : \"hour\"} , \"points.offset\" : 46}";
+
+        queryForInsertAggregated = "{\"_id\": {\"attrName\": \"someName\", "
+                + "\"origin\": {\"$date\": 1491390000000}, \"resolution\": \"minute\", "
+                + "\"range\": \"hour\"}, \"points.offset\": 46}";
         
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
@@ -379,10 +381,10 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"attrName\" : \"someName\" , "
-                + "\"origin\" : { \"$date\" : \"2017-04-05T00:00:00.000Z\"} , \"resolution\" : \"hour\" , "
-                + "\"range\" : \"day\"} , \"points.offset\" : 11}";
+
+        queryForInsertAggregated = "{\"_id\": {\"attrName\": \"someName\", "
+                + "\"origin\": {\"$date\": 1491350400000}, \"resolution\": \"hour\", "
+                + "\"range\": \"day\"}, \"points.offset\": 11}";
         
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
@@ -396,10 +398,10 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"attrName\" : \"someName\" , "
-                + "\"origin\" : { \"$date\" : \"2017-04-01T00:00:00.000Z\"} , \"resolution\" : \"day\" , "
-                + "\"range\" : \"month\"} , \"points.offset\" : 5}";
+
+        queryForInsertAggregated = "{\"_id\": {\"attrName\": \"someName\", "
+                + "\"origin\": {\"$date\": 1491004800000}, \"resolution\": \"day\", "
+                + "\"range\": \"month\"}, \"points.offset\": 5}";
         
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
@@ -413,10 +415,10 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"attrName\" : \"someName\" , "
-                + "\"origin\" : { \"$date\" : \"2017-01-01T00:00:00.000Z\"} , \"resolution\" : \"month\" , "
-                + "\"range\" : \"year\"} , \"points.offset\" : 4}";
+
+        queryForInsertAggregated = "{\"_id\": {\"attrName\": \"someName\", "
+                + "\"origin\": {\"$date\": 1483228800000}, \"resolution\": \"month\", "
+                + "\"range\": \"year\"}, \"points.offset\": 4}";
         
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
@@ -449,9 +451,9 @@ public class MongoBackendImplTest {
         int numSamples = 2;
         GregorianCalendar calendar = new GregorianCalendar(2017, 3, 5, 11, 46, 13); // month 3 is April
         MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null);
-        String updateForUpdate = "{ \"$set\" : { \"attrType\" : \"someType\"} , "
-                + "\"$inc\" : { \"points.$.samples\" : 2 , \"points.$.sum\" : 20.0 , \"points.$.sum2\" : 200.0} , "
-                + "\"$min\" : { \"points.$.min\" : 0.0} , \"$max\" : { \"points.$.max\" : 10.0}}";
+        String updateForUpdate = "{\"$set\": {\"attrType\": \"someType\"}, "
+                + "\"$inc\": {\"points.$.samples\": 2, \"points.$.sum\": 20.0, \"points.$.sum2\": 200.0}, "
+                + "\"$min\": {\"points.$.min\": 0.0}, \"$max\": {\"points.$.max\": 10.0}}";
 
         try {
             assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, calendar, max, min, sum, sum2,
@@ -481,8 +483,8 @@ public class MongoBackendImplTest {
         int count = 2;
         GregorianCalendar calendar = new GregorianCalendar(2017, 3, 5, 11, 46, 13); // month 3 is April
         MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null);
-        String updateForUpdate = "{ \"$set\" : { \"attrType\" : \"someType\"} , "
-                + "\"$inc\" : { \"points.13.samples\" : 2 , \"points.13.occur.someString\" : 2}}";
+        String updateForUpdate = "{\"$set\": {\"attrType\": \"someType\"}, "
+                + "\"$inc\": {\"points.13.samples\": 2, \"points.13.occur.someString\": 2}}";
 
         try {
             assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.SECOND,
@@ -497,8 +499,8 @@ public class MongoBackendImplTest {
             throw e;
         } // try catch
         
-        updateForUpdate = "{ \"$set\" : { \"attrType\" : \"someType\"} , "
-                + "\"$inc\" : { \"points.46.samples\" : 2 , \"points.46.occur.someString\" : 2}}";
+        updateForUpdate = "{\"$set\": {\"attrType\": \"someType\"}, "
+                + "\"$inc\": {\"points.46.samples\": 2, \"points.46.occur.someString\": 2}}";
 
         try {
             assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.MINUTE,
@@ -513,8 +515,8 @@ public class MongoBackendImplTest {
             throw e;
         } // try catch
         
-        updateForUpdate = "{ \"$set\" : { \"attrType\" : \"someType\"} , "
-                + "\"$inc\" : { \"points.11.samples\" : 2 , \"points.11.occur.someString\" : 2}}";
+        updateForUpdate ="{\"$set\": {\"attrType\": \"someType\"}, "
+                + "\"$inc\": {\"points.11.samples\": 2, \"points.11.occur.someString\": 2}}";
 
         try {
             assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.HOUR,
@@ -530,8 +532,8 @@ public class MongoBackendImplTest {
         } // try catch
         
         // Offsets for days start by 0, this the fifth day is 4
-        updateForUpdate = "{ \"$set\" : { \"attrType\" : \"someType\"} , "
-                + "\"$inc\" : { \"points.4.samples\" : 2 , \"points.4.occur.someString\" : 2}}";
+        updateForUpdate = "{\"$set\": {\"attrType\": \"someType\"}, "
+                + "\"$inc\": {\"points.4.samples\": 2, \"points.4.occur.someString\": 2}}";
 
         try {
             assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.DAY,
@@ -547,8 +549,8 @@ public class MongoBackendImplTest {
         } // try catch
         
         // Offsets for months start by 0, thus April is 3
-        updateForUpdate = "{ \"$set\" : { \"attrType\" : \"someType\"} , "
-                + "\"$inc\" : { \"points.3.samples\" : 2 , \"points.3.occur.someString\" : 2}}";
+        updateForUpdate = "{\"$set\": {\"attrType\": \"someType\"}, "
+                + "\"$inc\": {\"points.3.samples\": 2, \"points.3.occur.someString\": 2}}";
 
         try {
             assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.MONTH,
