@@ -58,6 +58,8 @@ public class NGSIPostgisSink extends NGSISink {
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
     private static final String POSTGIS_DRIVER_NAME = "org.postgresql.Driver";
     private static final String POSTGIS_INSTANCE_NAME = "postgresql";
+    private static final String DEFAULT_FIWARE_SERVICE = "default";
+    private static final String ESCAPED_DEFAULT_FIWARE_SERVICE = "default_service";
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgisSink.class);
     private String postgisHost;
@@ -67,11 +69,12 @@ public class NGSIPostgisSink extends NGSISink {
     private String postgisPassword;
     private boolean rowAttrPersistence;
     private int maxPoolSize;
-    private static volatile SQLBackendImpl postgisPersistenceBackend;
+    private SQLBackendImpl postgisPersistenceBackend;
     private boolean enableCache;
     private boolean swapCoordinates;
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
+    private String postgisOptions;
 
     /**
      * Constructor.
@@ -136,6 +139,14 @@ public class NGSIPostgisSink extends NGSISink {
     protected boolean getRowAttrPersistence() {
         return rowAttrPersistence;
     } // getRowAttrPersistence
+
+    /**
+     * Gets the Postgis options. It is protected due to it is only required for testing purposes.
+     * @return The Postgis options
+     */
+    protected String getPostgisOptions() {
+        return postgisOptions;
+    } // getPostgisOptions
 
     /**
      * Returns if the attribute value will be native or stringfy. It will be stringfy due to backward compatibility
@@ -242,7 +253,10 @@ public class NGSIPostgisSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
                     + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
         } // if else
-        
+
+        postgisOptions = context.getString("postgis_options", null);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_options=" + postgisOptions + ")");
+
     } // configure
 
     @Override
@@ -254,7 +268,9 @@ public class NGSIPostgisSink extends NGSISink {
     @Override
     public void start() {
         try {
-            createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, postgisDatabase);
+            if (buildDBName(null) != null) {
+                createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, buildDBName(null), postgisOptions);
+            }
         } catch (Exception e) {
             LOGGER.error("Error while creating the Postgis persistence backend. Details="
                     + e.getMessage());
@@ -267,9 +283,11 @@ public class NGSIPostgisSink extends NGSISink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase) {
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions) {
         if (postgisPersistenceBackend == null) {
-            postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, defaultSQLDataBase);
+            postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, defaultSQLDataBase, sqlOptions);
+        } else {
+            LOGGER.info("The database name will be created on runtime, so if there is an specified database on the agent properties and you expect it to be read on startup, then you shoul look for the data model you are using. Maybe it's not the correct one");
         }
     }
 
@@ -300,11 +318,13 @@ public class NGSIPostgisSink extends NGSISink {
             aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
             aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
-            aggregator.setDbName(buildSchemaName(aggregator.getService()));
+            aggregator.setSchemeName(buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
+            aggregator.setDbName(buildDBName(events.get(0).getServiceForNaming(enableNameMappings)));
             aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
             aggregator.setAttrNativeTypes(attrNativeTypes);
             aggregator.setAttrMetadataStore(attrMetadataStore);
             aggregator.setEnableGeoParse(true);
+            aggregator.setEnableNameMappings(enableNameMappings);
             aggregator.initialize(events.get(0));
 
             for (NGSIEvent event : events) {
@@ -339,8 +359,17 @@ public class NGSIPostgisSink extends NGSISink {
         String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
         String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist());
         String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
-        String schemaName = aggregator.getDbName(enableLowercase);
+        String schemaName = aggregator.getSchemeName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
+
+        // Escape a syntax error in SQL
+        if (schemaName.equals(DEFAULT_FIWARE_SERVICE)) {
+            schemaName = ESCAPED_DEFAULT_FIWARE_SERVICE;
+        }
+
+        if (postgisPersistenceBackend == null) {
+            createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgisOptions);
+        }
 
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgisSink. Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
@@ -358,20 +387,70 @@ public class NGSIPostgisSink extends NGSISink {
                 postgisPersistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
             }
     } // persistAggregation
-    
+
     /**
      * Creates a Postgis DB name given the FIWARE service.
      * @param service
      * @return The Postgis DB name
      * @throws CygnusBadConfiguration
      */
-    public String buildSchemaName(String service) throws CygnusBadConfiguration {
+    public String buildDBName(String service) throws CygnusBadConfiguration {
+        String name = null;
+
+        if (enableEncoding) {
+            switch(dataModel) {
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
+                    if (service != null)
+                        name = NGSICharsets.encodePostgreSQL(service);
+                    break;
+                default:
+                    name = postgisDatabase;
+            }
+        } else {
+            switch(dataModel) {
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
+                    if (service != null)
+                        name = NGSIUtils.encode(service, false, true);
+                    break;
+                default:
+                    name = postgisDatabase;
+            }
+        } // if else
+        if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building DB name '" + name
+                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_NAME_LEN);
+        } // if
+
+        return name;
+    } // buildSchemaName
+
+    /**
+     * Creates a Postgis scheme name given the FIWARE service.
+     * @param service
+     * @return The Postgis scheme name
+     * @throws CygnusBadConfiguration
+     */
+    public String buildSchemaName(String service, String subService) throws CygnusBadConfiguration {
         String name;
         
         if (enableEncoding) {
-            name = NGSICharsets.encodePostgreSQL(service);
+            switch(dataModel) {
+                case DMBYENTITYDATABASESCHEMA:
+                    name = NGSICharsets.encodePostgreSQL(subService);
+                    break;
+                default:
+                    name = NGSICharsets.encodePostgreSQL(service);
+            }
         } else {
-            name = NGSIUtils.encode(service, false, true);
+            switch(dataModel) {
+                case DMBYENTITYDATABASESCHEMA:
+                    name = NGSIUtils.encode(subService, false, true);
+                    break;
+                default:
+                    name = NGSIUtils.encode(service, false, true);
+            }
         } // if else
 
         if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
@@ -398,6 +477,8 @@ public class NGSIPostgisSink extends NGSISink {
                 case DMBYSERVICEPATH:
                     name = NGSICharsets.encodePostgreSQL(servicePath);
                     break;
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITY:
                     name = NGSICharsets.encodePostgreSQL(servicePath)
                             + CommonConstants.CONCATENATOR
@@ -429,6 +510,8 @@ public class NGSIPostgisSink extends NGSISink {
                     
                     name = NGSIUtils.encode(servicePath, true, false);
                     break;
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITY:
                     String truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')

@@ -66,9 +66,10 @@ public class NGSIMySQLSink extends NGSISink {
     private String mysqlPassword;
     private int maxPoolSize;
     private boolean rowAttrPersistence;
-    private static volatile SQLBackendImpl mySQLPersistenceBackend;
+    private SQLBackendImpl mySQLPersistenceBackend;
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
+    private String mysqlOptions;
 
     /**
      * Constructor.
@@ -117,6 +118,14 @@ public class NGSIMySQLSink extends NGSISink {
     protected boolean getRowAttrPersistence() {
         return rowAttrPersistence;
     } // getRowAttrPersistence
+
+    /**
+     * Gets the MySQL options. It is protected due to it is only required for testing purposes.
+     * @return The MySQL options
+     */
+    protected String getMySQLOptions() {
+        return mysqlOptions;
+    } // getMySQLOptions
 
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
@@ -202,13 +211,16 @@ public class NGSIMySQLSink extends NGSISink {
                     + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
         } // if else
 
+        mysqlOptions = context.getString("mysql_options", null);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_options=" + mysqlOptions + ")");
+
         super.configure(context);
     } // configure
 
     @Override
     public void start() {
         try {
-            createPersistenceBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize);
+            createPersistenceBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize, mysqlOptions);
             LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the MySQL persistence backend. Details="
@@ -227,9 +239,9 @@ public class NGSIMySQLSink extends NGSISink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private static synchronized void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize) {
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlOptions) {
         if (mySQLPersistenceBackend == null) {
-            mySQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null);
+            mySQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null, sqlOptions);
         }
     }
 
@@ -264,6 +276,7 @@ public class NGSIMySQLSink extends NGSISink {
             aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
             aggregator.setAttrNativeTypes(attrNativeTypes);
             aggregator.setAttrMetadataStore(attrMetadataStore);
+            aggregator.setEnableNameMappings(enableNameMappings);
             aggregator.initialize(events.get(0));
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);

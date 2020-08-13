@@ -259,6 +259,7 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
   <tr><td>Enable SSL</td><td>0.4.2</td></tr>
   <tr><td>Batching mechanism</td><td>0.11.0</td></tr>
   <tr><td>Capping and expiration</td><td>1.7.0</td></tr>
+  <tr><td>Possibility to select datamodel</td><td>2.2.0</td></tr>
   <tr><td>NGSIDynamoDBSink</td><td>First implementation</td><td>0.11.0</td></tr>
   <tr><td rowspan="2">NGSIKafkaSink</td><td>First implementation</td><td>0.9.0</td></tr>
   <tr><td>Batching mechanims</td><td>0.11.0</td></tr>
