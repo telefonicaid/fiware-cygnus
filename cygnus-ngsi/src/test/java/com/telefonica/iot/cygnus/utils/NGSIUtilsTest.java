@@ -18,30 +18,37 @@
 package com.telefonica.iot.cygnus.utils;
 
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+
+import com.google.gson.JsonElement;
 
 /**
  *
  * @author frb
  */
 public class NGSIUtilsTest {
-    
+
     /**
      * Constructor.
      */
     public NGSIUtilsTest() {
         LogManager.getRootLogger().setLevel(Level.FATAL);
     } // NGSIUtilsTest
-    
+
     /**
-     * [NGSIUtils.getGeometry] -------- When getting a geometry, a CartoDB point is obtained when passing
-     * an attribute of type 'geo:point'.
+     * [NGSIUtils.getGeometry] -------- When getting a geometry, a CartoDB point
+     * is obtained when passing an attribute of type 'geo:point'.
      */
     @Test
     public void testGetGeometryGeopoint() {
@@ -52,25 +59,24 @@ public class NGSIUtilsTest {
         String attrValue = "-3.7167, 40.3833";
         String attrType = "geo:point";
         boolean swapCoordinates = false; // irrelevant for this test
-        ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(
-                attrValue, attrType, attrMetadataStr, swapCoordinates);
+        ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(attrValue, attrType, attrMetadataStr,
+                swapCoordinates);
 
         try {
-            assertEquals("ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326)", geometry.getLeft());
-            System.out.println(getTestTraceHead("[Utils.getLocation]")
-                    + "-  OK  - Geometry '" + geometry.getLeft() + "' obtained for an attribute of type '" + attrType
-                    + "' and value '" + attrValue + "'");
+            assertEquals("ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326)",
+                    geometry.getLeft());
+            System.out.println(getTestTraceHead("[Utils.getLocation]") + "-  OK  - Geometry '" + geometry.getLeft()
+                    + "' obtained for an attribute of type '" + attrType + "' and value '" + attrValue + "'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[Utils.getLocation]")
-                    + "- FAIL - Geometry '" + geometry.getLeft() + "' obtained for an attribute of type '" + attrType
-                    + "' and value '" + attrValue + "'");
+            System.out.println(getTestTraceHead("[Utils.getLocation]") + "- FAIL - Geometry '" + geometry.getLeft()
+                    + "' obtained for an attribute of type '" + attrType + "' and value '" + attrValue + "'");
             throw e;
         } // try catch // try catch
     } // testGetGeometryGeopoint
-    
+
     /**
-     * [NGSIUtils.getGeometry] -------- When getting a geometry, a CartoDB point is obtained when passing
-     * an attribute with 'geometry' metadata.
+     * [NGSIUtils.getGeometry] -------- When getting a geometry, a CartoDB point
+     * is obtained when passing an attribute with 'geometry' metadata.
      */
     @Test
     public void testGetGeometryMetadata() {
@@ -87,25 +93,27 @@ public class NGSIUtilsTest {
         String attrValue = "-3.7167, 40.3833";
         String attrType = "coordinates"; // irrelevant for this test
         boolean swapCoordinates = false; // irrelevant for this test
-        ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(
-                attrValue, attrType, attrMetadataStr, swapCoordinates);
+        ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(attrValue, attrType, attrMetadataStr,
+                swapCoordinates);
 
         try {
-            assertEquals("ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326)", geometry.getLeft());
-            System.out.println(getTestTraceHead("[Utils.getLocation]")
-                    + "-  OK  - Geometry '" + geometry.getLeft() + "' obtained for an attribute with metadata '"
-                    + attrMetadataStr + "' and value '" + attrValue + "'");
+            assertEquals("ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326)",
+                    geometry.getLeft());
+            System.out.println(getTestTraceHead("[Utils.getLocation]") + "-  OK  - Geometry '" + geometry.getLeft()
+                    + "' obtained for an attribute with metadata '" + attrMetadataStr + "' and value '" + attrValue
+                    + "'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[Utils.getLocation]")
-                    + "- FAIL - Geometry '" + geometry.getLeft() + "' obtained for an attribute with metadata '"
-                    + attrMetadataStr + "' and value '" + attrValue + "'");
+            System.out.println(getTestTraceHead("[Utils.getLocation]") + "- FAIL - Geometry '" + geometry.getLeft()
+                    + "' obtained for an attribute with metadata '" + attrMetadataStr + "' and value '" + attrValue
+                    + "'");
             throw e;
         } // try catch // try catch
     } // testGetGeometryMetadata
-    
+
     /**
-     * [NGSIUtils.getGeometry] -------- When getting a geometry, the original attribute is returned when the
-     * attribute type is not geo:point and there is no WGS84 geometry metadata.
+     * [NGSIUtils.getGeometry] -------- When getting a geometry, the original
+     * attribute is returned when the attribute type is not geo:point and there
+     * is no WGS84 geometry metadata.
      */
     @Test
     public void testGetGeometryNoGeolocation() {
@@ -116,23 +124,23 @@ public class NGSIUtilsTest {
         String attrValue = "-3.7167, 40.3833";
         String attrType = "coordinates";
         boolean swapCoordinates = false; // irrelevant for this test
-        ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(
-                attrValue, attrType, attrMetadataStr, swapCoordinates);
+        ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(attrValue, attrType, attrMetadataStr,
+                swapCoordinates);
 
         try {
             assertEquals(attrValue, geometry.getLeft());
-            System.out.println(getTestTraceHead("[Utils.getLocation]")
-                    + "-  OK  - Geometry '" + geometry.getLeft() + "' obtained for a not geolocated attribute");
+            System.out.println(getTestTraceHead("[Utils.getLocation]") + "-  OK  - Geometry '" + geometry.getLeft()
+                    + "' obtained for a not geolocated attribute");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[Utils.getLocation]")
-                    + "- FAIL - Geometry '" + geometry.getLeft() + "' obtained for a not geolocated attribute");
+            System.out.println(getTestTraceHead("[Utils.getLocation]") + "- FAIL - Geometry '" + geometry.getLeft()
+                    + "' obtained for a not geolocated attribute");
             throw e;
         } // try catch // try catch
     } // testGetGeometryNoGeolocation
-    
+
     /**
-     * [NGSIUtils.getGeometry] -------- When getting a geometry, a CartoDB geometry is obtained when passing
-     * an attribute of type 'geo:json'.
+     * [NGSIUtils.getGeometry] -------- When getting a geometry, a CartoDB
+     * geometry is obtained when passing an attribute of type 'geo:json'.
      */
     @Test
     public void testGetGeometryGeojson() {
@@ -143,20 +151,73 @@ public class NGSIUtilsTest {
         String attrValue = "{\"coordinates\": [-3.7167, 40.3833], \"type\": \"Point\"}";
         String attrType = "geo:json";
         boolean swapCoordinates = false; // irrelevant for this test
-        ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(
-                attrValue, attrType, attrMetadataStr, swapCoordinates);
+        ImmutablePair<String, Boolean> geometry = NGSIUtils.getGeometry(attrValue, attrType, attrMetadataStr,
+                swapCoordinates);
 
         try {
-            assertEquals("ST_GeomFromGeoJSON('{\"coordinates\": [-3.7167, 40.3833], \"type\": \"Point\"}')", geometry.getLeft());
-            System.out.println(getTestTraceHead("[Utils.getLocation]")
-                    + "-  OK  - Geometry '" + geometry.getLeft() + "' obtained for an attribute of type '" + attrType
-                    + "' and value '" + attrValue + "'");
+            assertEquals("ST_GeomFromGeoJSON('{\"coordinates\": [-3.7167, 40.3833], \"type\": \"Point\"}')",
+                    geometry.getLeft());
+            System.out.println(getTestTraceHead("[Utils.getLocation]") + "-  OK  - Geometry '" + geometry.getLeft()
+                    + "' obtained for an attribute of type '" + attrType + "' and value '" + attrValue + "'");
         } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[Utils.getLocation]")
-                    + "- FAIL - Geometry '" + geometry.getLeft() + "' obtained for an attribute of type '" + attrType
-                    + "' and value '" + attrValue + "'");
+            System.out.println(getTestTraceHead("[Utils.getLocation]") + "- FAIL - Geometry '" + geometry.getLeft()
+                    + "' obtained for an attribute of type '" + attrType + "' and value '" + attrValue + "'");
             throw e;
         } // try catch // try catch
     } // testGetGeometryGeojson
+
+    /**
+     * [NGSIUtils.getFieldsForInsert] -------- Get fields to insert with quotes
+     */
+    @Test
+    public void testGetFieldForInsertWithQuotes() {
+        LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getValueFields();
+        String resultCompare = "(`recvTime`,`fiwareServicePath`,`entityId`,`entityType`,`load`,`load_md`)";
+        String result = NGSIUtils.getFieldsForInsert(aggregation, "`");
+        try {
+            assertEquals(resultCompare, result);
+            System.out.println(String.format("%s - OK  - getFieldForInsert '%s' is the same as '%s'",
+                    getTestTraceHead("[NGSIUtils.getFieldsForInsert]"), result, resultCompare));
+        } catch (AssertionError e) {
+            System.err.println(String.format("%s - FAIL  - getFieldForInsert '%s' is different from '%s'",
+                    getTestTraceHead("[NGSIUtils.getFieldsForInsert]"), result, resultCompare));
+            throw e;
+        } // try catch
+    }// testGetFieldForInsertWithQuotes
+
+    /**
+     * [NGSIUtils.getFieldsForInsert] -------- Get fields to insert without
+     * quotes
+     */
+    @Test
+    public void testGetFieldForInsertWithoutQuotes() {
+        LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getValueFields();
+        String resultCompare = "(recvTime,fiwareServicePath,entityId,entityType,load,load_md)";
+        String result = NGSIUtils.getFieldsForInsert(aggregation);
+        try {
+            assertEquals(resultCompare, result);
+            System.out.println(String.format("%s - OK  - getFieldForInsert '%s' is the same as '%s'",
+                    getTestTraceHead("[NGSIUtils.getFieldsForInsert]"), result, resultCompare));
+        } catch (AssertionError e) {
+            System.err.println(String.format("%s - FAIL  - getFieldForInsert '%s' is different from '%s'",
+                    getTestTraceHead("[NGSIUtils.getFieldsForInsert]"), result, resultCompare));
+            throw e;
+        } // try catch
+
+    }// testGetFieldForInsertWithoutQuotes
+    
+    /**
+     * It's a mock field
+     */
+    private LinkedHashMap<String, ArrayList<JsonElement>> getValueFields() {
+        LinkedHashMap<String, ArrayList<JsonElement>> aggregation = new LinkedHashMap<String, ArrayList<JsonElement>>();
+        aggregation.put("recvTime", null);
+        aggregation.put("fiwareServicePath", null);
+        aggregation.put("entityId", null);
+        aggregation.put("entityType", null);
+        aggregation.put("load", null);
+        aggregation.put("load_md", null);
+        return aggregation;
+    }// getValueFields
 
 } // NGSIUtilsTest
