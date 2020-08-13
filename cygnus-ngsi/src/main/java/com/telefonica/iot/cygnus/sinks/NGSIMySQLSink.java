@@ -49,7 +49,7 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 public class NGSIMySQLSink extends NGSISink {
     
     private static final String MYSQL_QUOTE_CHAR = "`";
-	private static final String DEFAULT_ROW_ATTR_PERSISTENCE = "row";
+    private static final String DEFAULT_ROW_ATTR_PERSISTENCE = "row";
     private static final String DEFAULT_PASSWORD = "";
     private static final String DEFAULT_PORT = "3306";
     private static final String DEFAULT_HOST = "localhost";
