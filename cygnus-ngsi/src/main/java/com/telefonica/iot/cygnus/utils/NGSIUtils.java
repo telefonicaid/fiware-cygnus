@@ -22,7 +22,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -30,8 +29,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
-import static java.io.File.separator;
 
 /**
  *
@@ -409,7 +406,7 @@ public final class NGSIUtils {
         attributeNames.remove(NGSIConstants.FIWARE_SERVICE_PATH);
         attributeNames.remove(NGSIConstants.ENTITY_ID);
         attributeNames.remove(NGSIConstants.ENTITY_TYPE);
-        ArrayList <String> cropedList = (ArrayList<String>) attributeNames.clone();
+        ArrayList<String> cropedList = (ArrayList<String>) attributeNames.clone();
         for (String key : cropedList) {
             if (key.contains("_md") || key.contains("_type")) {
                 attributeNames.remove(key);
