@@ -45,6 +45,7 @@ public abstract class NGSIGenericAggregator {
     private String entityForNaming;
     private String entityType;
     private String attribute;
+    private String schemeName;
     private String dbName;
     private String tableName;
     private String collectionName;
@@ -299,6 +300,29 @@ public abstract class NGSIGenericAggregator {
     } //setService
 
     /**
+     * Gets service scheme name for Postgis/Postgres
+     *
+     * @return the scheme name for Postgis/Postgres
+     */
+    public String getSchemeName(boolean enableLowercase) {
+        if (enableLowercase) {
+            return schemeName.toLowerCase();
+        } else {
+            return schemeName;
+        }
+    }
+
+    /**
+     * Sets service scheme name for Postgis/Postgres
+     *
+     * @param schemeName the scheme name for Postgis/Postgres
+     */
+    public void setSchemeName(String schemeName) {
+        this.schemeName = schemeName;
+    }
+
+
+    /**
      * Gets service path for data.
      *
      * @return the service path for data
@@ -370,7 +394,7 @@ public abstract class NGSIGenericAggregator {
         this.entityType = entityType;
     } //setEntityType
 
-    /**
+	/**
      * Gets attribute.
      *
      * @return the attribute

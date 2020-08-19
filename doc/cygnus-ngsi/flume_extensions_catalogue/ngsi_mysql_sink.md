@@ -27,6 +27,7 @@ Content:
 * [Programmers guide](#section3)
     * [`NGSIMySQLSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
+    * [SSL/TLS connection](#section3.3)
 
 ## <a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIMySQLSink`, or simply `NGSIMySQLSink` is a sink designed to persist NGSI-like context data events within a [MySQL server](https://www.mysql.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -98,7 +99,7 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 * `attrName`: Notified attribute name.
 * `attrType`: Notified attribute type.
 * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
-* `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
+* `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted). Will be stored only if it was configured to (attr_metadata_store set to true in the configuration file ngsi_agent.conf). It is a Json object.
 
 [Top](#top)
 
@@ -232,7 +233,9 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | mysql\_username | no | root | `root` is the default username that is created automatically |
 | mysql\_password | no | N/A | Empty value as default (no password is created automatically) |
 | mysql\_maxPoolSize | no | 3 | Max number of connections per database pool |
+| mysql\_options | no | N/A | optional connection parameter(s) concatinated to jdbc url if necessary<br/>When `useSSL=true&requireSSL=false` is set to `mysql_options`, jdbc url will become like <b>jdbc:mysql://mysql.example.com:3306/fiwareservice?useSSL=true&requireSSL=false</b>|
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>
+| attr\_metadata\_store | no | false | <i>true</i> or <i>false</i>. |
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
@@ -259,6 +262,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.mysql-sink.mysql_username = myuser
     cygnus-ngsi.sinks.mysql-sink.mysql_password = mypassword
     cygnus-ngsi.sinks.mysql-sink.mysql_maxPoolSize = 3
+    cygnus-ngsi.sinks.mysql-sink.mysql_options = useSSL=true&requireSSL=false
     cygnus-ngsi.sinks.mysql-sink.attr_persistence = row
     cygnus-ngsi.sinks.mysql-sink.attr_native_types = false
     cygnus-ngsi.sinks.mysql-sink.batch_size = 100
@@ -369,5 +373,8 @@ A complete configuration as the described above is read from the given `Context`
 
 ### <a name="section3.2"></a>Authentication and authorization
 Current implementation of `NGSIMySQLSink` relies on the username and password credentials created at the MySQL endpoint.
+
+### <a name="section3.3"></a>SSL/TLS connection
+When `NGSIMySQLSink` want to connect MySQL Server by using SSL or TLS, please set `mysql_options` configuration parameter to configure jdbc.
 
 [Top](#top)

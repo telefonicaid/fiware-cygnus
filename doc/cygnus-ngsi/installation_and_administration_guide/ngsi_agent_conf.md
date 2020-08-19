@@ -172,6 +172,8 @@ cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPos
 # password for the user above
 #cygnus-ngsi.sinks.postgresql-sink.postgresql_password = xxxxxxxxxxxxx
 # how the attributes are stored, either per row either per column (row, column)
+#cygnus-ngsi.sinks.postgresql-sink.postgresql_database = postgres
+# the database name of PostgreSQL
 #cygnus-ngsi.sinks.postgresql-sink.attr_persistence = column
 # select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type
 #cygnus-ngsi.sinks.postgresql-sink.data_model = by-service-path
@@ -183,6 +185,8 @@ cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPos
 cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
 # true enables cache, false disables cache
 #cygnus-ngsi.sinks.postgresql-sink.backend.enable_cache = false
+#cygnus-ngsi.sinks.postgresql-sink.postgresql_options = sslmode=require
+# the jdbc optional parameters string which concatinates to jdbc url
 
 # ============================================
 # NGSIPostgisSink configuration
@@ -220,6 +224,8 @@ cygnus-ngsi.sinks.postgis-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgi
 cygnus-ngsi.sinks.postgis-sink.batch_ttl = 10
 # true enables cache, false disables cache
 #cygnus-ngsi.sinks.postgis-sink.backend.enable_cache = false
+#cygnus-ngsi.sinks.postgis-sink.postgis_options = sslmode=require
+# the jdbc optional parameters string which concatinates to jdbc url
 
 # ============================================
 # NGSIMySQLSink configuration
@@ -253,6 +259,8 @@ cygnus-ngsi.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSin
 # cygunsagent.sinks.mysql-sink.batch_timeout = 30
 # number of retries upon persistence error
 #cygnus-ngsi.sinks.mysql-sink.batch_ttl = 10
+#cygnus-ngsi.sinks.mysql-sink.mysql_options = useSSL=true&requireSSL=false
+# the jdbc optional parameters string which concatinates to jdbc url
 
 # ============================================
 # NGSIMongoSink configuration
