@@ -425,7 +425,7 @@ public class SQLBackendImpl implements SQLBackend{
             try {
                 stmt.close();
             } catch (SQLException e) {
-                throw new CygnusRuntimeError(sqlInstance.toUpperCase() + " Objects closing error", "SQLException", e.getMessage());
+                LOGGER.warn(sqlInstance.toUpperCase() + " error closing invalid statement: " + e.getMessage());
             } // try catch
         } // if
 
@@ -433,7 +433,7 @@ public class SQLBackendImpl implements SQLBackend{
             try {
                 con.close();
             } catch (SQLException e) {
-                throw new CygnusRuntimeError(sqlInstance.toUpperCase() + " Objects closing error", "SQLException", e.getMessage());
+                LOGGER.warn(sqlInstance.toUpperCase() + " error closing invalid connection: " + e.getMessage());
             } // try catch
         } // if
 
