@@ -284,6 +284,8 @@ cygnus-ngsi.sinks.mongo-sink.channel = mongo-channel
 #cygnus-ngsi.sinks.mongo-sink.mongo_password = xxxxxxxx
 # Mongo option to specify which common user database source to use for authentication
 #cygnus-ngsi.sinks.mongo-sink.mongo_auth_source = admin
+# Mongo option to specify the name of the replica set
+#cygnus-ngsi.sinks.mongo-sink.mongo_replica_set = replica
 # prefix for the MongoDB databases
 #cygnus-ngsi.sinks.mongo-sink.db_prefix = sth_
 # prefix for the MongoDB collections
@@ -333,6 +335,8 @@ cygnus-ngsi.sinks.sth-sink.channel = sth-channel
 #cygnus-ngsi.sinks.sth-sink.mongo_password = xxxxxxxx
 # Mongo option to specify which common user database source to use for authentication
 #cygnus-ngsi.sinks.sth-sink.mongo_auth_source = admin
+# Mongo option to specify the of the replica set
+#cygnus-ngsi.sinks.sth-sink.mongo_replica_set = replica
 # prefix for the MongoDB databases
 #cygnus-ngsi.sinks.sth-sink.db_prefix = sth_
 # prefix for the MongoDB collections
