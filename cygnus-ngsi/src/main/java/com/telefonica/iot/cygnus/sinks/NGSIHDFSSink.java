@@ -523,6 +523,7 @@ public class NGSIHDFSSink extends NGSISink {
             aggregator.setAttrMetadataStore(enableMetadataPersistance);
             aggregator.setHdfsFolder(buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
             aggregator.setHdfsFile(buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
+            aggregator.setEnableNameMappings(enableNameMappings);
             aggregator.initialize(firstEvent);
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);

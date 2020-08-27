@@ -171,6 +171,13 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed Jul 15 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.3.0
+
+* Tue Jun 23 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.2.0
+
+* Thu May 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.1.0
+- [cygnus-common][cygnus-ngsi] Add following parameters (and environment variables for docker) to be able to connect to sql database with SSL/TLS: "mysql_options" (`CYGNUS_MYSQL_OPTIONS`), "postgresql_options" (`CYGNUS_POSTGRESQL_OPTIONS`) and "postgis_options" (`CYGNUS_POSTGIS_OPTIONS`) (#1867)
+
 * Thu Apr 16 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.0.0
 - [cygnus-common][PostgreSQL, MySQL] Refactor code to use a SQL generic backend for all SQL-based sinks (#1836)
 - [cygnus-common][PostgreSQL, MySQL] Lazy singleton to share pool connections of SQL backends among instances on JVM (#1836)

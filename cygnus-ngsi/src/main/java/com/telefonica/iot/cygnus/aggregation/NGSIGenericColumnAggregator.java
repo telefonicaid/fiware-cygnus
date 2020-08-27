@@ -53,11 +53,18 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<JsonElement>());
         aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<JsonElement>());
         aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<JsonElement>());
+
         // iterate on all this context element attributes, if there are attributes
-        ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = event.getContextElement().getAttributes();
-        if (contextAttributes == null || contextAttributes.isEmpty()) {
+        ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = null;
+        if (isEnableNameMappings() && event.getMappedCE() != null && event.getMappedCE().getAttributes() != null && !event.getMappedCE().getAttributes().isEmpty()) {
+            contextAttributes = event.getMappedCE().getAttributes();
+        } else if (event.getContextElement() != null && event.getContextElement().getAttributes() != null && !event.getContextElement().getAttributes().isEmpty()) {
+            contextAttributes = event.getContextElement().getAttributes();
+        } else {
+            LOGGER.warn("No attributes within the notified entity, nothing is done");
             return;
         } // if
+
         for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
             String attrName = contextAttribute.getName();
             aggregation.put(attrName, new ArrayList<JsonElement>());
@@ -76,12 +83,17 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         String recvTime = CommonUtils.getHumanReadable(recvTimeTs, isEnableUTCRecvTime());
         // get the event body
         NotifyContextRequest.ContextElement contextElement = event.getContextElement();
+        NotifyContextRequest.ContextElement mappedContextElement = event.getMappedCE();
         String entityId = contextElement.getId();
         String entityType = contextElement.getType();
         LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type=" + entityType + ")");
         // Iterate on all this context element attributes, if there are attributes
-        ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = contextElement.getAttributes();
-        if (contextAttributes == null || contextAttributes.isEmpty()) {
+        ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = null;
+        if (isEnableNameMappings() && mappedContextElement != null && mappedContextElement.getAttributes() != null && !mappedContextElement.getAttributes().isEmpty()) {
+            contextAttributes = mappedContextElement.getAttributes();
+        } else if (contextElement!= null && contextElement.getAttributes() != null && !contextElement.getAttributes().isEmpty()) {
+            contextAttributes = event.getContextElement().getAttributes();
+        } else {
             LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
                     + ", type=" + entityType + ")");
             return;
