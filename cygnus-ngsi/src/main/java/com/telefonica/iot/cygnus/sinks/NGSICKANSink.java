@@ -61,6 +61,7 @@ public class NGSICKANSink extends NGSISink {
     private String ckanPort;
     private String orionUrl;
     private boolean rowAttrPersistence;
+    private boolean attrMetadataStore;
     private boolean ssl;
     private int backendMaxConns;
     private int backendMaxConnsPerRoute;
@@ -189,6 +190,19 @@ public class NGSICKANSink extends NGSISink {
                 + attrPersistenceStr + ") -- Must be 'row' or 'column'");
         }  // if else
 
+
+        String attrMetadataStoreSrt = context.getString("attr_metadata_store", "true");
+
+        if (attrMetadataStoreSrt.equals("true") || attrMetadataStoreSrt.equals("false")) {
+            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreSrt);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_metadata_store="
+                    + attrMetadataStore + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
+                    + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
         String sslStr = context.getString("ssl", "false");
         
         if (sslStr.equals("true") || sslStr.equals("false")) {
@@ -263,6 +277,7 @@ public class NGSICKANSink extends NGSISink {
             aggregator.setOrgName(buildOrgName(aggregator.getService()));
             aggregator.setPkgName(buildPkgName(aggregator.getService(), aggregator.getServicePathForNaming(), events.get(0).getContextElement().getId()));
             aggregator.setResName(buildResName(aggregator.getEntityForNaming(), events.get(0).getContextElement().getId()));
+            aggregator.setAttrMetadataStore(attrMetadataStore);
             aggregator.setEnableNameMappings(enableNameMappings);
             aggregator.initialize(events.get(0));
 
