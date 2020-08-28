@@ -1,1 +1,2 @@
+[cygnus-ngsi][CKANSink] Fix bug about bad service name used by CKAN orgName with a name mapping (#1910)
 [cygnus-common][SQLBackendImpl] Exception handle for connection/statement SQL objects.
