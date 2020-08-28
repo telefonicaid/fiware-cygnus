@@ -1,1 +1,2 @@
+[cygnus-ngsi][CKANSink] Add flag option to disable metatada in CKAN (#1912)
 [cygnus-common][SQLBackendImpl] Exception handle for connection/statement SQL objects.
