@@ -236,16 +236,16 @@ public class NGSIPostgreSQLSink extends NGSISink {
 
 
 
-        String attrMetadataStoreSrt = context.getString("attr_metadata_store", "true");
+        String attrMetadataStoreStr = context.getString("attr_metadata_store", "true");
 
-        if (attrMetadataStoreSrt.equals("true") || attrMetadataStoreSrt.equals("false")) {
-            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreSrt);
+        if (attrMetadataStoreStr.equals("true") || attrMetadataStoreStr.equals("false")) {
+            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_metadata_store="
                     + attrMetadataStore + ")");
         } else {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
-                    + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
+                    + attrMetadataStoreStr + ") -- Must be 'true' or 'false'");
         }
 
         postgresqlOptions = context.getString("postgresql_options", null);
