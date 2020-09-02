@@ -18,8 +18,7 @@
 
 package com.telefonica.iot.cygnus.aggregation;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
@@ -109,6 +108,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             String attrType = contextAttribute.getType();
             JsonElement attrValue = contextAttribute.getValue();
             String attrMetadata = contextAttribute.getContextMetadata();
+            JsonArray jsonAttrMetadata = new Gson().fromJson(attrMetadata, JsonArray.class);
             LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
             if (isEnableGeoParse() && (attrType.equals("geo:json") || attrType.equals("geo:point"))) {
                 try {
@@ -126,14 +126,14 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             // add an empty value for all previous rows
             if (aggregation.containsKey(attrName)) {
                 aggregation.get(attrName).add(attrValue);
-                aggregation.get(attrName + "_md").add(new JsonPrimitive(attrMetadata));
+                aggregation.get(attrName + "_md").add(jsonAttrMetadata);
                 aggregation.get(attrName + "_type").add(new JsonPrimitive(attrType));
             } else {
                 ArrayList<JsonElement> values = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
                 values.add(attrValue);
                 aggregation.put(attrName, values);
                 ArrayList<JsonElement> valuesMd = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
-                valuesMd.add(new JsonPrimitive(attrMetadata));
+                valuesMd.add(jsonAttrMetadata);
                 aggregation.put(attrName + "_md", valuesMd);
                 ArrayList<JsonElement> valuesType = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
                 valuesType.add(new JsonPrimitive(attrType));

@@ -1764,7 +1764,7 @@ public class NGSIHDFSSinkTest {
                 }
             }
             String correctBatch = "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"someNumber\":2,\"someNumber_md\":[],\"somneBoolean\":true,\"somneBoolean_md\":[],\"someDate\":\"2016-09-21T01:23:00.00Z\",\"someDate_md\":[],\"someGeoJson\":\"{\"type\":\"Point\",\"coordinates\":[-0.036177,39.986159]}\",\"someGeoJson_md\":[],\"someJson\":\"{\"String\":\"string\"}\",\"someJson_md\":[],\"someString\":\"foo\",\"someString_md\":[],\"someString2\":\"\",\"someString2_md\":[]}\n" +
-                    "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"someName1\":\"-3.7167,40.3833\",\"someName1_md\":\"[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]\",\"someName2\":\"someValue2\",\"someName2_md\":[]}";
+                    "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"someName1\":\"-3.7167,40.3833\",\"someName1_md\":[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}],\"someName2\":\"someValue2\",\"someName2_md\":[]}";
             if (ngsihdfsSink.jsonToPersist(aggregator.getAggregationToPersist()).replace(" ", "").equals(correctBatch.replace(" ", ""))) {
                 assertTrue(true);
                 System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnBatchJson]") + "-  OK ");
