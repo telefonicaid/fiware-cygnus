@@ -683,7 +683,7 @@ public class NGSIHDFSSink extends NGSISink {
                         JsonElement metadata = genericAggregator.getAggregation().get(attributeName + "_md").get(i);
                         if (genericAggregator.isAttrMetadataStore() && metadata != null && !metadata.toString().isEmpty() && !metadata.toString().contains("[]")) {
                             String attrMdFileName = buildAttrMdFilePath(genericAggregator.getService(), genericAggregator.getServicePathForNaming(), genericAggregator.getEntityForNaming(), attributeName,
-                                    genericAggregator.getAggregation().get(attributeName + "_type").get(i).toString());
+                                    genericAggregator.getAggregation().get(attributeName + "_typeAut0_G3n3r47eD_").get(i).toString());
                             String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
                             line += csvSeparator + printableAttrMdFileName;
                             if (metadata.isJsonPrimitive()) {

@@ -376,7 +376,7 @@ public final class NGSIUtils {
         Iterator<String> it = aggregation.keySet().iterator();
         while (it.hasNext()) {
             String entry = (String) it.next();
-            if ((!attrMetadataStore && (entry.contains("_md") || entry.contains("_MD") || entry.equals(NGSIConstants.ATTR_MD)) || entry.contains("_type")) || (entry.equals(NGSIConstants.RECV_TIME_TS+"C"))) {
+            if ((!attrMetadataStore && (entry.contains("_md") || entry.contains("_MD") || entry.equals(NGSIConstants.ATTR_MD)) || entry.contains("_typeAut0_G3n3r47eD_")) || (entry.equals(NGSIConstants.RECV_TIME_TS+"C"))) {
                 keysToCrop.add(entry);
             }
         }
@@ -400,7 +400,7 @@ public final class NGSIUtils {
         attributeNames.remove(NGSIConstants.ENTITY_TYPE);
         ArrayList <String> cropedList = (ArrayList<String>) attributeNames.clone();
         for (String key : cropedList) {
-            if (key.contains("_md") || key.contains("_type")) {
+            if (key.contains("_md") || key.contains("_typeAut0_G3n3r47eD_")) {
                 attributeNames.remove(key);
             }
         }
