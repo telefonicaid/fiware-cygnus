@@ -171,7 +171,7 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
-* Fri Sep 4 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.4.0
+* Fri Sep 04 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.4.0
 
 * Wed Jul 15 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.3.0
 
