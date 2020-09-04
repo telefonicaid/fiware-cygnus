@@ -108,7 +108,8 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             String attrType = contextAttribute.getType();
             JsonElement attrValue = contextAttribute.getValue();
             String attrMetadata = contextAttribute.getContextMetadata();
-            JsonArray jsonAttrMetadata = new Gson().fromJson(attrMetadata, JsonArray.class);
+            JsonParser jsonParser = new JsonParser();
+            JsonArray jsonAttrMetadata = (JsonArray) jsonParser.parse(attrMetadata);
             LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type=" + attrType + ")");
             if (isEnableGeoParse() && (attrType.equals("geo:json") || attrType.equals("geo:point"))) {
                 try {
