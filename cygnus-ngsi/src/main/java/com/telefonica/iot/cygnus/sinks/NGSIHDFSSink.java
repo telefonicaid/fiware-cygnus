@@ -666,7 +666,11 @@ public class NGSIHDFSSink extends NGSISink {
                             genericAggregator.getAggregation().get(NGSIConstants.ATTR_TYPE).get(i).toString());
                     String printableAttrMdFileName = "hdfs:///user/" + username + "/" + attrMdFileName;
                     line += csvSeparator + printableAttrMdFileName;
-                    genericAggregator.setMdAggregations(persistMetadata(attrMdFileName, genericAggregator.getMdAggregations(),metadata.getAsString(), recvTimeTs));
+                    if (metadata.isJsonPrimitive()) {
+                        genericAggregator.setMdAggregations(persistMetadata(attrMdFileName, genericAggregator.getMdAggregations(), metadata.getAsString(), recvTimeTs));
+                    } else {
+                        genericAggregator.setMdAggregations(persistMetadata(attrMdFileName, genericAggregator.getMdAggregations(), metadata.toString(), recvTimeTs));
+                    }
                 }else {
                     if (genericAggregator.isAttrMetadataStore())
                         line += csvSeparator + "NULL";

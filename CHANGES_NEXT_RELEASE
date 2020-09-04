@@ -1,3 +1,4 @@
+[cygnus-ngsi][RowAggregator] Handle metadata as json. This is to upgrade json-like sinks behaviour. (#1902)
 [cygnus-ngsi][ColumnAggregator] Fix attribute type key to make it unique. (#1904)
 [cygnus-ngsi][PostgisSink, PostgreSQLSink] Implement records expiration for Postgis and PostgreSQL sinks (#1915)
 [cygnus-ngsi][ColumnAggregator] Handle metadata as json. This is to upgrade json-like sinks behaviour. (#1902)
