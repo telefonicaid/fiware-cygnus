@@ -97,7 +97,6 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
             aggregation.get(NGSIConstants.ATTR_TYPE).add(new JsonPrimitive(attrType));
             aggregation.get(NGSIConstants.ATTR_VALUE).add(attrValue);
             aggregation.get(NGSIConstants.ATTR_MD).add(jsonAttrMetadata);
-            //aggregation.get(NGSIConstants.ATTR_MD).add(new JsonPrimitive(attrMetadata));
         } // for
         setAggregation(aggregation);
     } // aggregate
