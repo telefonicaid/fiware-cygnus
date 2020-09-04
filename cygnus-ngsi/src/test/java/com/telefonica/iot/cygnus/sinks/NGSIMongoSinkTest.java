@@ -233,7 +233,12 @@ public class NGSIMongoSinkTest {
                 BasicDBObject basicDBObject = BasicDBObject.parse(jsonObjects.get(i).toString());
                 aggregation.add(new Document(basicDBObject.toMap()));
                 if (aggregator instanceof NGSIGenericRowAggregator) {
-                    Long timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                    Long timeInstant;
+                    if (aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).isJsonPrimitive()) {
+                        timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                    } else {
+                        timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).toString());
+                    }
                     if (timeInstant != null) {
                         aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(timeInstant));
                     } else {
@@ -286,7 +291,12 @@ public class NGSIMongoSinkTest {
                 for (int i = 0 ; i < jsonObjects.size() ; i++) {
                     aggregation.add(Document.parse(jsonObjects.get(i).toString()));
                     if (aggregator instanceof NGSIGenericRowAggregator) {
-                        Long timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                        Long timeInstant;
+                        if (aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).isJsonPrimitive()) {
+                            timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                        } else {
+                            timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).toString());
+                        }
                         if (timeInstant != null) {
                             aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(timeInstant));
                         } else {

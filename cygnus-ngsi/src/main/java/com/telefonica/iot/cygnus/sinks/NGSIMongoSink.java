@@ -219,7 +219,12 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             BasicDBObject basicDBObject = BasicDBObject.parse(jsonObjects.get(i).toString());
             aggregation.add(new Document(basicDBObject.toMap()));
             if (rowAttrPersistence) {
-                Long timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                Long timeInstant;
+                if (aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).isJsonPrimitive()) {
+                    timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                } else {
+                    timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).toString());
+                }
                 if (timeInstant != null) {
                     aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(timeInstant));
                 } else {
