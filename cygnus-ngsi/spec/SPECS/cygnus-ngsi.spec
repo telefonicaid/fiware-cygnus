@@ -106,7 +106,6 @@ rm -rf $RPM_BUILD_ROOT
 - [cygnus-ngsi][ColumnAggregator] Handle metadata as json. This is to upgrade json-like sinks behaviour (#1902)
 - [cygnus-ngsi][CKANSink] Fix bug about bad service name used by CKAN orgName with a name mapping (#1910)
 - [cygnus-ngsi][CKANSink] Add flag option to disable metatada in CKAN (#1912)
-- [cygnus-common][SQLBackendImpl] Exception handle for connection/statement SQL objects (#1907)
 
 * Wed Jul 15 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.3.0
 - [cygnus-ngsi][Generic Aggregation] Add name mappings flag to all sinks who uses generic aggregation
