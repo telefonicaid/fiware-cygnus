@@ -18,7 +18,9 @@
 
 package com.telefonica.iot.cygnus.aggregation;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
@@ -81,6 +83,8 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
             String attrType = contextAttribute.getType();
             JsonElement attrValue = contextAttribute.getValue();
             String attrMetadata = contextAttribute.getContextMetadata();
+            JsonParser jsonParser = new JsonParser();
+            JsonArray jsonAttrMetadata = (JsonArray) jsonParser.parse(attrMetadata);
             LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                     + attrType + ")");
             // aggregate the attribute information
@@ -92,7 +96,8 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
             aggregation.get(NGSIConstants.ATTR_NAME).add(new JsonPrimitive(attrName));
             aggregation.get(NGSIConstants.ATTR_TYPE).add(new JsonPrimitive(attrType));
             aggregation.get(NGSIConstants.ATTR_VALUE).add(attrValue);
-            aggregation.get(NGSIConstants.ATTR_MD).add(new JsonPrimitive(attrMetadata));
+            aggregation.get(NGSIConstants.ATTR_MD).add(jsonAttrMetadata);
+            //aggregation.get(NGSIConstants.ATTR_MD).add(new JsonPrimitive(attrMetadata));
         } // for
         setAggregation(aggregation);
     } // aggregate
