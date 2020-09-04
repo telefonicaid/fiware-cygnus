@@ -99,7 +99,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
-* Fri Sep 4 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.4.0
+* Fri Sep 04 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.4.0
 - [cygnus-ngsi][RowAggregator] Handle metadata as json. This is to upgrade json-like sinks behaviour (#1902)
 - [cygnus-ngsi][ColumnAggregator] Fix attribute type key to make it unique (#1904)
 - [cygnus-ngsi][PostgisSink, PostgreSQLSink] Implement records expiration for Postgis and PostgreSQL sinks (#1915)
