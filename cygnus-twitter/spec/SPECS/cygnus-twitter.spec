@@ -99,6 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Sep 04 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.4.0
+
+* Wed Jul 15 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.3.0
+
 * Tue Jun 23 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.2.0
 
 * Thu May 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.1.0
@@ -153,4 +157,3 @@ rm -rf $RPM_BUILD_ROOT
 - [cygnus-twitter][feature] Add cygnus-twitter (#1023)
 - [cygnus-twitter] [feature] Log time in UTC format (#1071)
 - [cygnus-twitter] Add documentation about logs and alarms (#1092)
-

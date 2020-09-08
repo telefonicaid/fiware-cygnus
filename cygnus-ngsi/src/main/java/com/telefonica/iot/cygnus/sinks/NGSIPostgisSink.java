@@ -242,16 +242,16 @@ public class NGSIPostgisSink extends NGSISink {
                 + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
         } // if else
 
-        String attrMetadataStoreSrt = context.getString("attr_metadata_store", "true");
+        String attrMetadataStoreStr = context.getString("attr_metadata_store", "true");
 
-        if (attrMetadataStoreSrt.equals("true") || attrMetadataStoreSrt.equals("false")) {
-            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreSrt);
+        if (attrMetadataStoreStr.equals("true") || attrMetadataStoreStr.equals("false")) {
+            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_metadata_store="
                     + attrMetadataStore + ")");
         } else {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
-                    + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
+                    + attrMetadataStoreStr + ") -- Must be 'true' or 'false'");
         } // if else
 
         postgisOptions = context.getString("postgis_options", null);
@@ -324,6 +324,7 @@ public class NGSIPostgisSink extends NGSISink {
             aggregator.setAttrNativeTypes(attrNativeTypes);
             aggregator.setAttrMetadataStore(attrMetadataStore);
             aggregator.setEnableGeoParse(true);
+            aggregator.setEnableNameMappings(enableNameMappings);
             aggregator.initialize(events.get(0));
 
             for (NGSIEvent event : events) {
@@ -344,6 +345,14 @@ public class NGSIPostgisSink extends NGSISink {
 
     @Override
     public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
+        LOGGER.debug("[" + this.getName() + "] Expirating records (time=" + expirationTime + ")");
+        try {
+            postgisPersistenceBackend.expirateRecordsCache(expirationTime);
+        } catch (CygnusRuntimeError e) {
+            throw new CygnusExpiratingError("Data expiration error", "CygnusRuntimeError", e.getMessage());
+        } catch (CygnusPersistenceError e) {
+            throw new CygnusExpiratingError("Data expiration error", "CygnusPersistenceError", e.getMessage());
+        } // try catch
     } // expirateRecords
 
     protected NGSIGenericAggregator getAggregator(boolean rowAttrPersistence) {

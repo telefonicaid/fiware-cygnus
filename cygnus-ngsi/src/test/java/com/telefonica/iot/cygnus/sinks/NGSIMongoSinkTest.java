@@ -21,6 +21,7 @@ package com.telefonica.iot.cygnus.sinks;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.mongodb.BasicDBObject;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
@@ -229,9 +230,15 @@ public class NGSIMongoSinkTest {
             ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonList(cropedAggregation);
             ArrayList<Document> aggregation = new ArrayList<>();
             for (int i = 0 ; i < jsonObjects.size() ; i++) {
-                aggregation.add(Document.parse(jsonObjects.get(i).toString()));
+                BasicDBObject basicDBObject = BasicDBObject.parse(jsonObjects.get(i).toString());
+                aggregation.add(new Document(basicDBObject.toMap()));
                 if (aggregator instanceof NGSIGenericRowAggregator) {
-                    Long timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                    Long timeInstant;
+                    if (aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).isJsonPrimitive()) {
+                        timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                    } else {
+                        timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).toString());
+                    }
                     if (timeInstant != null) {
                         aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(timeInstant));
                     } else {
@@ -242,7 +249,7 @@ public class NGSIMongoSinkTest {
                 }
             }
             System.out.println("[NGSIMongoSinkTest.testNativeTypeColumnBatch: " + aggregation);
-            String correctBatch = "[Document{{someNumber=2, someNumber_md=[], somneBoolean=true, somneBoolean_md=[], someDate=2016-09-21T01:23:00.00Z, someDate_md=[], someGeoJson={\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}, someGeoJson_md=[], someJson={\"String\": \"string\"}, someJson_md=[], someString=foo, someString_md=[], someString2=, someString2_md=[], recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{someName1=-3.7167, 40.3833, someName1_md=[{\"name\":\"TimeInstant\",\"type\":\"recvTime\",\"value\":\"2019-09-09T09:09:09.999Z\"}], someName2=someValue2, someName2_md=[], recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}]";
+            String correctBatch = "[Document{{someNumber=2, someNumber_md=[], somneBoolean=true, somneBoolean_md=[], someDate=2016-09-21T01:23:00.00Z, someDate_md=[], someGeoJson={\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}, someGeoJson_md=[], someJson={\"String\": \"string\"}, someJson_md=[], someString=foo, someString_md=[], someString2=, someString2_md=[], recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}, Document{{someName1=-3.7167, 40.3833, someName1_md=[{\"name\": \"TimeInstant\", \"type\": \"recvTime\", \"value\": \"2019-09-09T09:09:09.999Z\"}], someName2=someValue2, someName2_md=[], recvTime=" + new Date(Long.parseLong("1461136795801")) + "}}]";
             if (aggregation.toString().equals(correctBatch)) {
                 assertTrue(true);
             } else {
@@ -284,7 +291,12 @@ public class NGSIMongoSinkTest {
                 for (int i = 0 ; i < jsonObjects.size() ; i++) {
                     aggregation.add(Document.parse(jsonObjects.get(i).toString()));
                     if (aggregator instanceof NGSIGenericRowAggregator) {
-                        Long timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                        Long timeInstant;
+                        if (aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).isJsonPrimitive()) {
+                            timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                        } else {
+                            timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).toString());
+                        }
                         if (timeInstant != null) {
                             aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(timeInstant));
                         } else {
