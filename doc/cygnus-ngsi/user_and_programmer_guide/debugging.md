@@ -45,7 +45,7 @@ There are a couple of highlights on this compose file.
     - suspend  starts execution right away, tell the JVM not to wait until debugger is attached to begin execution
     - address=6006  TCP/IP port exposed, to connect from the debugger    
     
-Once the container is up and running you can find on startup a line like this one:
+Once the container is up and running you should find on startup a line like this one:
 
 ```
 Warning: JAVA_HOME is not set!
