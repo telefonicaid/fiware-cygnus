@@ -270,7 +270,7 @@ public class SQLBackendImplTest {
         String defaultDataBase = "default";
         String sqlOptions = "sslmode=require";
 
-        SQLBackendImpl backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, defaultDataBase, sqlOptions, persistsErrors);
+        SQLBackendImpl backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, defaultDataBase, sqlOptions, persistErrors);
         SQLBackendImpl.SQLDriver driver = backend.getDriver();
 
         assertEquals(driver.generateJDBCUrl(destination), "jdbc:postgresql://localhost:5432/default?sslmode=require");
