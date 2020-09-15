@@ -44,7 +44,7 @@ public class SQLBackendImpl implements SQLBackend{
     private SQLBackendImpl.SQLDriver driver;
     private final SQLCache cache;
     private final String sqlInstance;
-    private final Booelan persistErrors;
+    private final Boolean persistErrors;
 
     /**
      * Constructor.
