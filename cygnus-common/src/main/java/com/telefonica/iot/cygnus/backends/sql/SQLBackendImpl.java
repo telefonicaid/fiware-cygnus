@@ -44,6 +44,7 @@ public class SQLBackendImpl implements SQLBackend{
     private SQLBackendImpl.SQLDriver driver;
     private final SQLCache cache;
     private final String sqlInstance;
+    private final Booelan persistErrors;
 
     /**
      * Constructor.
@@ -56,9 +57,10 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlInstance
      * @param sqlDriverName
      * @param defaultSQLDataBase
+     * @param persistErrors
      */
-    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase) {
-        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, null);
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, Boolean persistErrors) {
+        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, null, persistErrors);
     } // SQLBackendImpl
 
     /**
@@ -73,11 +75,13 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlDriverName
      * @param defaultSQLDataBase
      * @param sqlOptions
+     * @param persistErrors
      */
-    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, String sqlOptions) {
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, String sqlOptions, Boolean persistErrors) {
         driver = new SQLBackendImpl.SQLDriver(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, sqlOptions);
         cache = new SQLCache();
         this.sqlInstance = sqlInstance;
+        this.persistErrors = persistErrors;
     } // SQLBackendImpl
 
     /**
@@ -528,8 +532,10 @@ public class SQLBackendImpl implements SQLBackend{
 
     private void persistError(String destination, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {
         try {
-            createErrorTable(destination);
-            insertErrorLog(destination, query, exception);
+            if (persistErrors) {
+                createErrorTable(destination);
+                insertErrorLog(destination, query, exception);
+            }
             return;
         } catch (CygnusBadContextData cygnusBadContextData) {
             LOGGER.debug(sqlInstance.toUpperCase() + " failed to persist error on database/scheme " + destination + "_error_log" + cygnusBadContextData);
