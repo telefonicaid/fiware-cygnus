@@ -244,6 +244,7 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | persistence\_policy.expiration_time | no | -1 | Maximum number of seconds a record is maintained in a table before expiration. `-1` disables this policy. |
 | persistence\_policy.checking_time | no | 3600 | Frequency (in seconds) at which the sink checks for record expiration. |
 | attr\_native\_types | no | false | if the attribute value will be native <i>true</i> or stringfy or <i>false</i>. When set to true, in case batch option is activated, insert null values for those attributes that doesn't exist in some of the entities to be inserted. If set to false, '' value is inserted for missing attributes. |
+| persist\_errors | no | true | if there is an exception when trying to persist data into storage then error is persisted into a table |
 
 A configuration example could be:
 
@@ -272,6 +273,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.mysql-sink.persistence_policy.max_records = 5
     cygnus-ngsi.sinks.mysql-sink.persistence_policy.expiration_time = 86400
     cygnus-ngsi.sinks.mysql-sink.persistence_policy.checking_time = 600
+    cygnus-ngsi.sinks.mysql-sink.persist_errors = true
 
 [Top](#top)
 
