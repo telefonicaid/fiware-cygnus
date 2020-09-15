@@ -71,6 +71,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
     private String postgresqlOptions;
+    private boolean persistErrors;
 
     /**
      * Constructor.

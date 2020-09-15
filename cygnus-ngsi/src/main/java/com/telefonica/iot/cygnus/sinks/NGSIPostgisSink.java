@@ -75,6 +75,7 @@ public class NGSIPostgisSink extends NGSISink {
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
     private String postgisOptions;
+    private boolean persistErrors;
 
     /**
      * Constructor.
