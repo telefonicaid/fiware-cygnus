@@ -48,6 +48,7 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
  */
 public class NGSIMySQLSink extends NGSISink {
     
+    private static final String MYSQL_QUOTE_CHAR = "`";
     private static final String DEFAULT_ROW_ATTR_PERSISTENCE = "row";
     private static final String DEFAULT_PASSWORD = "";
     private static final String DEFAULT_PORT = "3306";
@@ -364,7 +365,7 @@ public class NGSIMySQLSink extends NGSISink {
     private void persistAggregation(NGSIGenericAggregator aggregator)
         throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
-        String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist());
+        String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist(), MYSQL_QUOTE_CHAR);
         String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
         String dbName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
