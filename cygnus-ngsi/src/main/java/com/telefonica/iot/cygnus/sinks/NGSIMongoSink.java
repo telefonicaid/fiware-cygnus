@@ -19,6 +19,7 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
@@ -215,9 +216,15 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonList(cropedAggregation);
         ArrayList<Document> aggregation = new ArrayList<>();
         for (int i = 0 ; i < jsonObjects.size() ; i++) {
-            aggregation.add(Document.parse(jsonObjects.get(i).toString()));
+            BasicDBObject basicDBObject = BasicDBObject.parse(jsonObjects.get(i).toString());
+            aggregation.add(new Document(basicDBObject.toMap()));
             if (rowAttrPersistence) {
-                Long timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                Long timeInstant;
+                if (aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).isJsonPrimitive()) {
+                    timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).getAsString());
+                } else {
+                    timeInstant = CommonUtils.getTimeInstant(aggregator.getAggregation().get(NGSIConstants.ATTR_MD).get(i).toString());
+                }
                 if (timeInstant != null) {
                     aggregation.get(i).append(NGSIConstants.RECV_TIME, new Date(timeInstant));
                 } else {

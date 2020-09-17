@@ -99,6 +99,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Sep 04 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.4.0
+- [cygnus-ngsi][RowAggregator] Handle metadata as json. This is to upgrade json-like sinks behaviour (#1902)
+- [cygnus-ngsi][ColumnAggregator] Fix attribute type key to make it unique (#1904)
+- [cygnus-ngsi][PostgisSink, PostgreSQLSink] Implement records expiration for Postgis and PostgreSQL sinks (#1915)
+- [cygnus-ngsi][ColumnAggregator] Handle metadata as json. This is to upgrade json-like sinks behaviour (#1902)
+- [cygnus-ngsi][CKANSink] Fix bug about bad service name used by CKAN orgName with a name mapping (#1910)
+- [cygnus-ngsi][CKANSink] Add flag option to disable metatada in CKAN (#1912)
+
 * Wed Jul 15 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.3.0
 - [cygnus-ngsi][Generic Aggregation] Add name mappings flag to all sinks who uses generic aggregation
 

@@ -75,6 +75,7 @@ public class NGSIPostgisSink extends NGSISink {
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
     private String postgisOptions;
+    private boolean persistErrors;
 
     /**
      * Constructor.
@@ -242,20 +243,32 @@ public class NGSIPostgisSink extends NGSISink {
                 + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
         } // if else
 
-        String attrMetadataStoreSrt = context.getString("attr_metadata_store", "true");
+        String attrMetadataStoreStr = context.getString("attr_metadata_store", "true");
 
-        if (attrMetadataStoreSrt.equals("true") || attrMetadataStoreSrt.equals("false")) {
-            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreSrt);
+        if (attrMetadataStoreStr.equals("true") || attrMetadataStoreStr.equals("false")) {
+            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_metadata_store="
                     + attrMetadataStore + ")");
         } else {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
-                    + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
+                    + attrMetadataStoreStr + ") -- Must be 'true' or 'false'");
         } // if else
 
         postgisOptions = context.getString("postgis_options", null);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_options=" + postgisOptions + ")");
+
+        String persistErrorsStr = context.getString("persist_errors", "true");
+
+        if (persistErrorsStr.equals("true") || persistErrorsStr.equals("false")) {
+            persistErrors = Boolean.parseBoolean(persistErrorsStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (persist_errors="
+                    + persistErrors + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (persist_errors="
+                    + persistErrorsStr + ") -- Must be 'true' or 'false'");
+        } // if else
 
     } // configure
 
@@ -269,7 +282,7 @@ public class NGSIPostgisSink extends NGSISink {
     public void start() {
         try {
             if (buildDBName(null) != null) {
-                createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, buildDBName(null), postgisOptions);
+                createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, buildDBName(null), postgisOptions, persistErrors);
             }
         } catch (Exception e) {
             LOGGER.error("Error while creating the Postgis persistence backend. Details="
@@ -283,9 +296,9 @@ public class NGSIPostgisSink extends NGSISink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions) {
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions, boolean persistErrors) {
         if (postgisPersistenceBackend == null) {
-            postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, defaultSQLDataBase, sqlOptions);
+            postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, defaultSQLDataBase, sqlOptions, persistErrors);
         } else {
             LOGGER.info("The database name will be created on runtime, so if there is an specified database on the agent properties and you expect it to be read on startup, then you shoul look for the data model you are using. Maybe it's not the correct one");
         }
@@ -345,6 +358,14 @@ public class NGSIPostgisSink extends NGSISink {
 
     @Override
     public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
+        LOGGER.debug("[" + this.getName() + "] Expirating records (time=" + expirationTime + ")");
+        try {
+            postgisPersistenceBackend.expirateRecordsCache(expirationTime);
+        } catch (CygnusRuntimeError e) {
+            throw new CygnusExpiratingError("Data expiration error", "CygnusRuntimeError", e.getMessage());
+        } catch (CygnusPersistenceError e) {
+            throw new CygnusExpiratingError("Data expiration error", "CygnusPersistenceError", e.getMessage());
+        } // try catch
     } // expirateRecords
 
     protected NGSIGenericAggregator getAggregator(boolean rowAttrPersistence) {
@@ -368,7 +389,7 @@ public class NGSIPostgisSink extends NGSISink {
         }
 
         if (postgisPersistenceBackend == null) {
-            createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgisOptions);
+            createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgisOptions, persistErrors);
         }
 
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgisSink. Schema ("

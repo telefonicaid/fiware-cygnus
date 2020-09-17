@@ -171,6 +171,9 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Fri Sep 04 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.4.0
+- [cygnus-common][SQLBackendImpl] Exception handle for connection/statement SQL objects (#1907)
+
 * Wed Jul 15 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.3.0
 
 * Tue Jun 23 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.2.0

@@ -44,6 +44,7 @@ public class SQLBackendImpl implements SQLBackend{
     private SQLBackendImpl.SQLDriver driver;
     private final SQLCache cache;
     private final String sqlInstance;
+    private final boolean persistErrors;
 
     /**
      * Constructor.
@@ -56,9 +57,10 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlInstance
      * @param sqlDriverName
      * @param defaultSQLDataBase
+     * @param persistErrors
      */
-    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase) {
-        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, null);
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, boolean persistErrors) {
+        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, null, persistErrors);
     } // SQLBackendImpl
 
     /**
@@ -75,9 +77,28 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlOptions
      */
     public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, String sqlOptions) {
+        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, sqlOptions, false);
+    } // SQLBackendImpl
+
+    /**
+     * Constructor.
+     *
+     * @param sqlHost
+     * @param sqlPort
+     * @param sqlUsername
+     * @param sqlPassword
+     * @param maxPoolSize
+     * @param sqlInstance
+     * @param sqlDriverName
+     * @param defaultSQLDataBase
+     * @param sqlOptions
+     * @param persistErrors
+     */
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, String sqlOptions, boolean persistErrors) {
         driver = new SQLBackendImpl.SQLDriver(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, sqlOptions);
         cache = new SQLCache();
         this.sqlInstance = sqlInstance;
+        this.persistErrors = persistErrors;
     } // SQLBackendImpl
 
     /**
@@ -425,7 +446,7 @@ public class SQLBackendImpl implements SQLBackend{
             try {
                 stmt.close();
             } catch (SQLException e) {
-                throw new CygnusRuntimeError(sqlInstance.toUpperCase() + " Objects closing error", "SQLException", e.getMessage());
+                LOGGER.warn(sqlInstance.toUpperCase() + " error closing invalid statement: " + e.getMessage());
             } // try catch
         } // if
 
@@ -433,7 +454,7 @@ public class SQLBackendImpl implements SQLBackend{
             try {
                 con.close();
             } catch (SQLException e) {
-                throw new CygnusRuntimeError(sqlInstance.toUpperCase() + " Objects closing error", "SQLException", e.getMessage());
+                LOGGER.warn(sqlInstance.toUpperCase() + " error closing invalid connection: " + e.getMessage());
             } // try catch
         } // if
 
@@ -528,8 +549,10 @@ public class SQLBackendImpl implements SQLBackend{
 
     private void persistError(String destination, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {
         try {
-            createErrorTable(destination);
-            insertErrorLog(destination, query, exception);
+            if (persistErrors) {
+                createErrorTable(destination);
+                insertErrorLog(destination, query, exception);
+            }
             return;
         } catch (CygnusBadContextData cygnusBadContextData) {
             LOGGER.debug(sqlInstance.toUpperCase() + " failed to persist error on database/scheme " + destination + "_error_log" + cygnusBadContextData);
