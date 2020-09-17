@@ -4,10 +4,20 @@ If there is an exception when trying to persist data into storage. Cygnus is cap
 
 This only applies to SQL type backends PostgreSQL & MySQL. Notice that Postgis uses PostgreSQL backend so this function extends to Postgis as well as PostgreSQL and MySQL.
 
+This feature is enabled by default but could be disabled by setting sink option `persist_errors` to false.
+
 As mentioned before, if there is an exception when trying to persist data, Cygnus tryes to create a table with the following pattern.
 
+MySQL
 ```
-$databaseName_error_log
+$database_name_error_log
+
+```
+
+Postgis / PostgreSQL
+
+```
+$schema_name_error_log
 ```
 
 with the following scheme.

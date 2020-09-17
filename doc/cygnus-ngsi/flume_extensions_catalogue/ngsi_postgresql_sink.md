@@ -274,6 +274,7 @@ Coming soon.
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 | batch\_retry\_intervals | no | 5000 | Comma-separated list of intervals (in miliseconds) at which the retries regarding not persisted batches will be done. First retry will be done as many miliseconds after as the first value, then the second retry will be done as many miliseconds after as second value, and so on. If the batch\_ttl is greater than the number of intervals, the last interval is repeated. |
 | backend.enable\_cache | no | false | <i>true</i> or <i>false</i>, <i>true</i> enables the creation of a Cache, <i>false</i> disables the creation of a Cache. |
+| persist\_errors | no | true | if there is an exception when trying to persist data into storage then error is persisted into a table |
 
 A configuration example could be:
 
@@ -300,6 +301,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
     cygnus-ngsi.sinks.postgresql-sink.batch_retry_intervals = 5000
     cygnus-ngsi.sinks.postgresql.backend.enable_cache = false
+    cygnus-ngsi.sinks.postgresql-sink.persist_errors = true
 
 [Top](#top)
 
