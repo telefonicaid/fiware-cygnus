@@ -512,6 +512,7 @@ public class SQLBackendImpl implements SQLBackend{
         String errorTable = destination + "_error_log";
         String limit = "5"; // TBD: this value will be configurable by sink default will be 1000
 
+        Statement stmt = null;
         // get a connection to the given destination
         Connection con = driver.getConnection(destination);
 
