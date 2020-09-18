@@ -506,6 +506,40 @@ public class SQLBackendImpl implements SQLBackend{
         cache.addTable(destination, errorTable);
     } // createErrorTable
 
+    public void purgeErrorTable(String destination)
+            throws CygnusRuntimeError, CygnusPersistenceError {
+        // the default table for error log will be called the same as the destination name
+        String errorTable = destination + "_error_log";
+        String limit = "5"; // TBD: this value will be configurable by sink default will be 1000
+
+        // get a connection to the given destination
+        Connection con = driver.getConnection(destination);
+
+        String query = "";
+        if (sqlInstance.equals("mysql")) {
+            query = "delete from `" + errorTable + "` "  + " where timestamp not in (select timestamp from (select timestamp from `" + errorTable + "` "  + " order by timestamp desc limit " + limit + " ) foo )";
+        } else {
+            query = "DELETE FROM `" + destination + "." + errorTable + "` "  + " WHERE timestamp NOT IN (SELECT timestamp FROM (SELECT timestamp FROM `" + destination + "." + errorTable + "` "  + " ORDER BY timestamp DESC LIMIT " + limit + " ) foo )";
+        }
+
+        try {
+            stmt = con.createStatement();
+        } catch (SQLException e) {
+            closeSQLObjects(con, stmt);
+            throw new CygnusRuntimeError(sqlInstance.toUpperCase() + " Purge error table error", "SQLException", e.getMessage());
+        } // try catch
+
+        try {
+            LOGGER.debug(sqlInstance.toUpperCase() + " Executing SQL query '" + query + "'");
+            stmt.executeUpdate(query);
+        } catch (SQLException e) {
+            closeSQLObjects(con, stmt);
+            throw new CygnusPersistenceError(sqlInstance.toUpperCase() + " Purge error table error", "SQLException", e.getMessage());
+        } // try catch
+
+        closeSQLObjects(con, stmt);
+    }
+
     private void insertErrorLog(String destination, String errorQuery, Exception exception)
             throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError, SQLException {
         Statement stmt = null;
@@ -552,6 +586,7 @@ public class SQLBackendImpl implements SQLBackend{
             if (persistErrors) {
                 createErrorTable(destination);
                 insertErrorLog(destination, query, exception);
+                purgeErrorTable(destination);
             }
             return;
         } catch (CygnusBadContextData cygnusBadContextData) {
