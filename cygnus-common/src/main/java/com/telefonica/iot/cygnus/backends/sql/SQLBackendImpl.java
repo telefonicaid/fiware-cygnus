@@ -45,6 +45,7 @@ public class SQLBackendImpl implements SQLBackend{
     private final SQLCache cache;
     private final String sqlInstance;
     private final boolean persistErrors;
+    private final int maxLatestErrors;
 
     /**
      * Constructor.
@@ -58,9 +59,10 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlDriverName
      * @param defaultSQLDataBase
      * @param persistErrors
+     * @param maxLatestErrors
      */
-    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, boolean persistErrors) {
-        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, null, persistErrors);
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, boolean persistErrors, int maxLatestErrors) {
+        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, null, persistErrors, maxLatestErrors);
     } // SQLBackendImpl
 
     /**
@@ -77,7 +79,7 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlOptions
      */
     public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, String sqlOptions) {
-        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, sqlOptions, false);
+        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, sqlOptions, false, 0);
     } // SQLBackendImpl
 
     /**
@@ -93,12 +95,14 @@ public class SQLBackendImpl implements SQLBackend{
      * @param defaultSQLDataBase
      * @param sqlOptions
      * @param persistErrors
+     * @param maxLatestErrors
      */
-    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, String sqlOptions, boolean persistErrors) {
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
         driver = new SQLBackendImpl.SQLDriver(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, sqlOptions);
         cache = new SQLCache();
         this.sqlInstance = sqlInstance;
         this.persistErrors = persistErrors;
+        this.maxLatestErrors = naxLatestErrors;
     } // SQLBackendImpl
 
     /**
@@ -510,7 +514,7 @@ public class SQLBackendImpl implements SQLBackend{
             throws CygnusRuntimeError, CygnusPersistenceError {
         // the default table for error log will be called the same as the destination name
         String errorTable = destination + "_error_log";
-        String limit = "5"; // TBD: this value will be configurable by sink default will be 1000
+        String limit = maxLatestErrors;
 
         Statement stmt = null;
         // get a connection to the given destination

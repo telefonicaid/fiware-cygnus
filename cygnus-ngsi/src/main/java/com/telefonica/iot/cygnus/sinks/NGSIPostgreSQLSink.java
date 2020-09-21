@@ -57,6 +57,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private static final String POSTGRESQL_INSTANCE_NAME = "postgresql";
     private static final String DEFAULT_FIWARE_SERVICE = "default";
     private static final String ESCAPED_DEFAULT_FIWARE_SERVICE = "default_service";
+    private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgreSQLSink.class);
     private String postgresqlHost;
@@ -72,6 +73,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private boolean attrMetadataStore;
     private String postgresqlOptions;
     private boolean persistErrors;
+    private int maxLatestErrors;
 
     /**
      * Constructor.
@@ -263,6 +265,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (persist_errors="
                     + persistErrorsStr + ") -- Must be 'true' or 'false'");
         } // if else
+
+        maxLatestErrors = context.getInteger("max_latest_errors", DEFAULT_MAX_LATEST_ERRORS);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (max_latest_errors=" + maxLatestErrors + ")");
 
     } // configure
 
