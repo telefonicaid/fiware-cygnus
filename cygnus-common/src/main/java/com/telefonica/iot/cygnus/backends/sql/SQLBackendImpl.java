@@ -102,7 +102,7 @@ public class SQLBackendImpl implements SQLBackend{
         cache = new SQLCache();
         this.sqlInstance = sqlInstance;
         this.persistErrors = persistErrors;
-        this.maxLatestErrors = naxLatestErrors;
+        this.maxLatestErrors = maxLatestErrors;
     } // SQLBackendImpl
 
     /**
@@ -514,7 +514,7 @@ public class SQLBackendImpl implements SQLBackend{
             throws CygnusRuntimeError, CygnusPersistenceError {
         // the default table for error log will be called the same as the destination name
         String errorTable = destination + "_error_log";
-        String limit = maxLatestErrors;
+        String limit = String.valueOf(maxLatestErrors);
 
         Statement stmt = null;
         // get a connection to the given destination
