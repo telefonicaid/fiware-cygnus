@@ -278,78 +278,7 @@ public final class CommonUtils {
                 if (isANumber(mdValue)) {
                     res = new Long(mdValue);
                 } else {
-                    DateTime dateTime;
-                    
-                    try {
-                        // ISO 8601 without miliseconds
-                        dateTime = FORMATTER1.parseDateTime(mdValue);
-                    } catch (Exception e1) {
-                        LOGGER.debug(e1.getMessage());
-                        
-                        try {
-                            // ISO 8601 with miliseconds
-                            dateTime = FORMATTER2.parseDateTime(mdValue);
-                        } catch (Exception e2) {
-                            LOGGER.debug(e2.getMessage());
-                            
-                            try {
-                                // ISO 8601 with microsencods
-                                String mdValueTruncated = mdValue.substring(0, mdValue.length() - 4) + "Z";
-                                dateTime = FORMATTER2.parseDateTime(mdValueTruncated);
-                            } catch (Exception e3) {
-                                LOGGER.debug(e3.getMessage());
-                                
-                                try {
-                                    // SQL timestamp without miliseconds
-                                    dateTime = FORMATTER3.parseDateTime(mdValue);
-                                } catch (Exception e4) {
-                                    LOGGER.debug(e4.getMessage());
-
-                                    try {
-                                        // SQL timestamp with miliseconds
-                                        dateTime = FORMATTER4.parseDateTime(mdValue);
-                                    } catch (Exception e5) {
-                                        LOGGER.debug(e5.getMessage());
-                                        
-                                        try {
-                                            // SQL timestamp with microseconds
-                                            String mdValueTruncated = mdValue.substring(0, mdValue.length() - 3);
-                                            dateTime = FORMATTER4.parseDateTime(mdValueTruncated);
-                                        } catch (Exception e6) {
-                                            LOGGER.debug(e6.getMessage());
-
-                                            try {
-                                                // ISO 8601 with offset (without milliseconds)
-                                                dateTime = FORMATTER5.parseDateTime(mdValue);
-                                            } catch (Exception e7) {
-                                                LOGGER.debug(e7.getMessage());
-
-                                                try {
-                                                    // ISO 8601 with offset (with milliseconds)
-                                                    Matcher matcher = FORMATTER6_PATTERN.matcher(mdValue);
-                                                    if (matcher.matches()) {
-                                                        String mdValueTruncated = matcher.group(1) + "."
-                                                          + matcher.group(2).substring(0, 3)
-                                                          + matcher.group(3);
-                                                        dateTime = FORMATTER6.parseDateTime(mdValueTruncated);
-                                                    } else {
-                                                        LOGGER.debug("ISO8601 format does not match");
-                                                        return null;
-                                                    } // if
-                                                } catch (Exception e8) {
-                                                    LOGGER.debug(e8.getMessage());
-                                                    return null;
-                                                } // try catch
-                                            } // try catch
-                                        } // try catch
-                                    } // try catch
-                                } // try catch
-                            } // try catch
-                        } // try catch
-                    } // try catch
-
-                    GregorianCalendar cal = dateTime.toGregorianCalendar();
-                    res = cal.getTimeInMillis();
+                    res = getTimeInstantFromString(mdValue);
                 } // if else
                 
                 break;
@@ -358,6 +287,85 @@ public final class CommonUtils {
         
         return res;
     } // getTimeInstant
+
+    public static Long getTimeInstantFromString(String stringDate) {
+        String mdValue = stringDate;
+        Long res = null;
+        DateTime dateTime;
+        try {
+            // ISO 8601 without miliseconds
+            dateTime = FORMATTER1.parseDateTime(mdValue);
+        } catch (Exception e1) {
+            LOGGER.debug(e1.getMessage());
+
+            try {
+                // ISO 8601 with miliseconds
+                dateTime = FORMATTER2.parseDateTime(mdValue);
+            } catch (Exception e2) {
+                LOGGER.debug(e2.getMessage());
+
+                try {
+                    // ISO 8601 with microsencods
+                    String mdValueTruncated = mdValue.substring(0, mdValue.length() - 4) + "Z";
+                    dateTime = FORMATTER2.parseDateTime(mdValueTruncated);
+                } catch (Exception e3) {
+                    LOGGER.debug(e3.getMessage());
+
+                    try {
+                        // SQL timestamp without miliseconds
+                        dateTime = FORMATTER3.parseDateTime(mdValue);
+                    } catch (Exception e4) {
+                        LOGGER.debug(e4.getMessage());
+
+                        try {
+                            // SQL timestamp with miliseconds
+                            dateTime = FORMATTER4.parseDateTime(mdValue);
+                        } catch (Exception e5) {
+                            LOGGER.debug(e5.getMessage());
+
+                            try {
+                                // SQL timestamp with microseconds
+                                String mdValueTruncated = mdValue.substring(0, mdValue.length() - 3);
+                                dateTime = FORMATTER4.parseDateTime(mdValueTruncated);
+                            } catch (Exception e6) {
+                                LOGGER.debug(e6.getMessage());
+
+                                try {
+                                    // ISO 8601 with offset (without milliseconds)
+                                    dateTime = FORMATTER5.parseDateTime(mdValue);
+                                } catch (Exception e7) {
+                                    LOGGER.debug(e7.getMessage());
+
+                                    try {
+                                        // ISO 8601 with offset (with milliseconds)
+                                        Matcher matcher = FORMATTER6_PATTERN.matcher(mdValue);
+                                        if (matcher.matches()) {
+                                            String mdValueTruncated = matcher.group(1) + "."
+                                                    + matcher.group(2).substring(0, 3)
+                                                    + matcher.group(3);
+                                            dateTime = FORMATTER6.parseDateTime(mdValueTruncated);
+                                        } else {
+                                            LOGGER.debug("ISO8601 format does not match");
+                                            return null;
+                                        } // if
+                                    } catch (Exception e8) {
+                                        LOGGER.debug(e8.getMessage());
+                                        return null;
+                                    } // try catch
+                                } // try catch
+                            } // try catch
+                        } // try catch
+                    } // try catch
+                } // try catch
+            } // try catch
+        } // try catch
+
+        GregorianCalendar cal = dateTime.toGregorianCalendar();
+        res = cal.getTimeInMillis();
+
+        return res;
+
+    }
     
     /**
      * Gets is a string is made of alphanumerics and/or underscores.
