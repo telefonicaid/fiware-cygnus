@@ -1,11 +1,11 @@
-curl -X POST 'http://192.168.0.11:5050/notify' -H 'Content-Type: application/ld+json' -H 'Fiware-service: openiot' -d @- <<EOF 
+curl -X POST 'http://192.168.0.15:5050/notify' -H 'Content-Type: application/ld+json' -H 'Fiware-service: closeiot4' -d @- <<EOF 
 {
   "id": "urn:ngsi-ld:Notification:352334523452",
   "type": "Notification",
   "subscriptionId": "urn:ngsi-ld:Subscription:5e6257789f300bcd70b7b6e",
   "data": [
     {
-        "id": "urn:ngsi:ld:OffStreetParking:Downtown1",
+        "id": "urn:ngsi:ld:OffStreetParking:Downtown5",
         "type": "OffStreetParking",
         "@context": [
         "http://example.org/ngsi-ld/parking.jsonld",

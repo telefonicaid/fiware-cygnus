@@ -1,2 +1,2 @@
-[cygnus-ngsi-ld] Creation of the new PostGIS sink for persisting NGSI-LD notifications (#1905)
-
+[cygnus-ngsi-ld]
+[cygnus-common] Add new methods in class CKANBackendImpl for allowing the creation of the data store with ngsi-ld notifications
