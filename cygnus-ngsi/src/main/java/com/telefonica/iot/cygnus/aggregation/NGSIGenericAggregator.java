@@ -35,6 +35,11 @@ public abstract class NGSIGenericAggregator {
     protected LinkedHashMap<String, ArrayList<JsonElement>> aggregation;
 
     /**
+     * The Aggregation of processed entityes.
+     */
+    protected LinkedHashMap<String, ArrayList<JsonElement>> lastData;
+
+    /**
      * The Md aggregations for sinks who store on a diferent destination metadata.
      */
     protected Map<String, String> mdAggregations;
@@ -56,6 +61,7 @@ public abstract class NGSIGenericAggregator {
     private String hdfsFile;
     private String hiveFields;
     private String csvString;
+    private String lastDataTimestampKey;
     private boolean attrNativeTypes;
     private boolean enableGrouping;
     private boolean enableEncoding;
@@ -63,6 +69,7 @@ public abstract class NGSIGenericAggregator {
     private boolean enableGeoParse;
     private boolean attrMetadataStore;
     private boolean enableUTCRecvTime;
+    private boolean enableLastData;
 
     /**
      * Gets aggregation.
@@ -100,6 +107,41 @@ public abstract class NGSIGenericAggregator {
     public void setAggregation(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
         this.aggregation = aggregation;
     } //setAggregation
+
+    /**
+     * Gets last data.
+     *
+     * @return the last data
+     */
+    public LinkedHashMap<String, ArrayList<JsonElement>> getLastData() {
+        if (lastData == null) {
+            return new LinkedHashMap<>();
+        } else {
+            return lastData;
+        }
+    }
+
+    /**
+     * Sets last data.
+     *
+     * @param lastData the last data
+     */
+    public void setLastData(LinkedHashMap<String, ArrayList<JsonElement>> lastData) {
+        this.lastData = lastData;
+    }
+
+    /**
+     * Gets last data to persist.
+     *
+     * @return the last data to persist
+     */
+    public LinkedHashMap<String, ArrayList<JsonElement>> getLastDataToPersist() {
+        if (lastData == null) {
+            return new LinkedHashMap<>();
+        } else {
+            return NGSIUtils.linkedHashMapWithoutDefaultFields(lastData, attrMetadataStore);
+        }
+    }
 
     /**
      * Gets collection name.
@@ -145,6 +187,42 @@ public abstract class NGSIGenericAggregator {
     public void setCsvString(String csvString) {
         this.csvString = csvString;
     } //setCsvString
+
+    /**
+     * Gets last data timestamp key.
+     *
+     * @return the last value timestamp key
+     */
+    public String getLastDataTimestampKey() {
+        return lastDataTimestampKey;
+    }
+
+    /**
+     * Sets last data timestamp key.
+     *
+     * @param lastDataTimestampKey the last value timestamp key
+     */
+    public void setLastDataTimestampKey(String lastDataTimestampKey) {
+        this.lastDataTimestampKey = lastDataTimestampKey;
+    }
+
+    /**
+     * Is enable last data boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isEnableLastData() {
+        return enableLastData;
+    }
+
+    /**
+     * Sets enable last data.
+     *
+     * @param enableLastData the enable last data
+     */
+    public void setEnableLastData(boolean enableLastData) {
+        this.enableLastData = enableLastData;
+    }
 
     /**
      * Gets hdfs folder. For HDFS sink.
