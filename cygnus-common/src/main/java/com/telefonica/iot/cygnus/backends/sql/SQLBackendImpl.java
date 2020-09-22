@@ -66,7 +66,7 @@ public class SQLBackendImpl implements SQLBackend{
     } // SQLBackendImpl
 
     /**
-     * Constructor.
+     * Constructor. (invoked by ngsild sinks)
      *
      * @param sqlHost
      * @param sqlPort
@@ -79,7 +79,7 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlOptions
      */
     public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, String sqlOptions) {
-        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, sqlOptions, false, 0);
+        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, sqlOptions, true, 100);
     } // SQLBackendImpl
 
     /**
