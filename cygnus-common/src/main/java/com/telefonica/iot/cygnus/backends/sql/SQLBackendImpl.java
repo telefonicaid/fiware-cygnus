@@ -522,9 +522,9 @@ public class SQLBackendImpl implements SQLBackend{
 
         String query = "";
         if (sqlInstance.equals("mysql")) {
-            query = "delete from `" + errorTable + "` "  + "where timestamp not in (select timestamp from (select timestamp from `" + errorTable + "` "  + "order by timestamp desc limit " + limit + " ) foo )";
+            query = "delete from `" + errorTable + "` "  + "where timestamp not in (select timestamp from (select timestamp from `" + errorTable + "` "  + "order by timestamp desc limit " + limit + " ) purge )";
         } else {
-            query = "DELETE FROM " + destination + "." + errorTable + " "  + "WHERE timestamp NOT IN (SELECT timestamp FROM (SELECT timestamp FROM " + destination + "." + errorTable + " "  + "ORDER BY timestamp DESC LIMIT " + limit + " ) foo )";
+            query = "DELETE FROM " + destination + "." + errorTable + " "  + "WHERE timestamp NOT IN (SELECT timestamp FROM (SELECT timestamp FROM " + destination + "." + errorTable + " "  + "ORDER BY timestamp DESC LIMIT " + limit + " ) purge )";
         }
 
         try {
