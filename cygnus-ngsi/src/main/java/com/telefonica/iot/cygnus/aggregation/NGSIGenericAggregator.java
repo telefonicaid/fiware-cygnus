@@ -131,10 +131,13 @@ public abstract class NGSIGenericAggregator {
     }
 
     /**
-     * Gets last data to persist.
+     * Gets last data to persist.This means that the returned aggregation will not have metadata
+     * in case that attrMetadataStore is set to false. Also, added fields for processing purposes
+     * will be removed from the aggregation (like attrType on Column mode).
      *
-     * @return the last data to persist
+     * @return the last data
      */
+
     public LinkedHashMap<String, ArrayList<JsonElement>> getLastDataToPersist() {
         if (lastData == null) {
             return new LinkedHashMap<>();
