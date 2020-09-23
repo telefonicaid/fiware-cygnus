@@ -1,7 +1,7 @@
 package com.telefonica.iot.cygnus.utils;
 
 import com.google.gson.JsonElement;
-import org.mapdb.Atomic;
+import com.telefonica.iot.cygnus.log.CygnusLogger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,8 +13,51 @@ import java.util.Set;
 
 public class NGSISQLUtils {
 
+    private static final CygnusLogger LOGGER = new CygnusLogger(NGSISQLUtils.class);
+
     private static final String TEXT_MARK = "'";
     private static final String SEPARATION_MARK = ",";
+
+    public static PreparedStatement upsertStatement (LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
+                                            LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                            String tableName,
+                                            String tableSuffix,
+                                            String uniqueKey,
+                                            String timestampKey,
+                                            String timestampFormat,
+                                            String sqlInstance,
+                                            String destination,
+                                            Connection connection,
+                                            boolean attrNativeTypes) throws SQLException {
+
+
+        String query = sqlUpsertQuery(aggregation,
+                lastData,
+                tableName,
+                tableSuffix,
+                uniqueKey,
+                timestampKey,
+                timestampFormat,
+                sqlInstance,
+                destination).toString();
+
+        PreparedStatement previousStatement = connection.prepareStatement(query);
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = addJsonValues(previousStatement,
+                    query,
+                    lastData,
+                    attrNativeTypes);
+        } catch (SQLException e) {
+            LOGGER.error(sqlInstance + " SQLEXCEPTION Error creating upsert statement " + e);
+        } catch (Exception e) {
+            LOGGER.error(sqlInstance + " GENERICEXCEPTION Error creating upsert statement " + e);
+        }
+
+        return preparedStatement;
+
+    }
+
 
     /*
 
@@ -28,25 +71,6 @@ WHERE pruebapostmanx.subpruebapostman_5dde93a46c54998b7f89fb9d_wastecontainer_la
 AND to_timestamp(pruebapostmanx.subpruebapostman_5dde93a46c54998b7f89fb9d_wastecontainer_last_v.recvTime, 'YYYY-MM-DD HH24:MI:SS.MS') < to_timestamp(EXCLUDED.recvTime, 'YYYY-MM-DD HH24:MI:SS.MS')
 
      */
-
-    /*
-    public static PreparedStatement upsert (LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
-                                            LinkedHashMap<String, ArrayList<JsonElement>> lastData,
-                                            String tableName,
-                                            String tableSuffix,
-                                            String uniqueKey,
-                                            String timestampKey,
-                                            String timestampFormat,
-                                            String sqlInstance,
-                                            String destination,
-                                            Connection connection,
-                                            boolean attrNativeTypes) {
-
-        String query
-
-
-    }
-    */
 
     private static StringBuffer sqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                               LinkedHashMap<String, ArrayList<JsonElement>> lastData,
