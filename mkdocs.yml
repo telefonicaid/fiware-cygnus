@@ -73,6 +73,7 @@ pages:
           - 'Connecting Orion Context Broker and Cygnus': 'cygnus-ngsi/user_and_programmer_guide/connecting_orion.md'
           - 'Adding a new sink': 'cygnus-ngsi/user_and_programmer_guide/adding_new_sink.md'
           - 'Reporting issues and contact information': 'cygnus-ngsi/user_and_programmer_guide/issues_and_contact.md'
+          - 'Debugging Cygnus with IntelliJ & Docker': 'cygnus-ngsi/user_and_programmer_guide/debugging.md'
       - 'Flume extensions catalogue':
           - 'Introduction': 'cygnus-ngsi/flume_extensions_catalogue/introduction.md'
           - 'NGSIRestHandler': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_rest_handler.md'
