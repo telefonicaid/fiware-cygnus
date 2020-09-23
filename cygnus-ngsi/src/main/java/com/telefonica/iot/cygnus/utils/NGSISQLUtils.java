@@ -129,10 +129,10 @@ AND to_timestamp(pruebapostmanx.subpruebapostman_5dde93a46c54998b7f89fb9d_wastec
         Iterator<String> it = aggregation.keySet().iterator();
         while (it.hasNext()) {
             if (first) {
-                fieldsForInsert.append(TEXT_MARK).append((String) it.next()).append(TEXT_MARK);
+                fieldsForInsert.append(TEXT_MARK).append(it.next()).append(TEXT_MARK);
                 first = false;
             } else {
-                fieldsForInsert.append(SEPARATION_MARK).append(TEXT_MARK).append((String) it.next()).append(TEXT_MARK);
+                fieldsForInsert.append(SEPARATION_MARK).append(TEXT_MARK).append(it.next()).append(TEXT_MARK);
             } // if else
         } // while
         fieldsForInsert.append(")");

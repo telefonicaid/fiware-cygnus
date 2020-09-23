@@ -510,6 +510,18 @@ public class SQLBackendImpl implements SQLBackend{
         return driver.getConnection(destination);
     }
 
+    public void executePreparedStatement (PreparedStatement preparedStatement) throws SQLException, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
+        try {
+            preparedStatement.executeBatch();
+        } catch (SQLTimeoutException e) {
+            throw new CygnusPersistenceError(sqlInstance.toUpperCase() + " Data insertion error. Query: `" + preparedStatement, "SQLTimeoutException", e.getMessage());
+        } catch (SQLException e) {
+            throw new CygnusBadContextData(sqlInstance.toUpperCase() + " Data insertion error. Query: `" + preparedStatement, "SQLException", e.getMessage());
+        } finally {
+            closeSQLObjects(preparedStatement.getConnection(), preparedStatement);
+        } // try catch
+    }
+
     private void insertErrorLog(String destination, String errorQuery, Exception exception)
             throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError, SQLException {
         Statement stmt = null;
