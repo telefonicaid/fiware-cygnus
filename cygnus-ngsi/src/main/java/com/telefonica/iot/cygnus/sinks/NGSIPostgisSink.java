@@ -280,7 +280,7 @@ public class NGSIPostgisSink extends NGSISink {
                     + persistErrorsStr + ") -- Must be 'true' or 'false'");
         } // if else
 
-        String lastDataStr = context.getString("last_data", DEFAULT_LAST_DATA);
+        String lastDataStr = context.getString("enable_last_data", DEFAULT_LAST_DATA);
 
         if (lastDataStr.equals("true") || lastDataStr.equals("false")) {
             lastData = Boolean.parseBoolean(lastDataStr);
