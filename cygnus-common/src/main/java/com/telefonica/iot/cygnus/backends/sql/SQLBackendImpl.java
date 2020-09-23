@@ -506,6 +506,10 @@ public class SQLBackendImpl implements SQLBackend{
         cache.addTable(destination, errorTable);
     } // createErrorTable
 
+    public Connection getSQLConnection (String destination) throws CygnusPersistenceError, CygnusRuntimeError {
+        return driver.getConnection(destination);
+    }
+
     private void insertErrorLog(String destination, String errorQuery, Exception exception)
             throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError, SQLException {
         Statement stmt = null;
@@ -528,6 +532,7 @@ public class SQLBackendImpl implements SQLBackend{
         }
 
         PreparedStatement preparedStatement = con.prepareStatement(query);
+
         try {
             preparedStatement.setObject(1, java.sql.Timestamp.from(Instant.now()));
             preparedStatement.setString(2, exception.getMessage());
