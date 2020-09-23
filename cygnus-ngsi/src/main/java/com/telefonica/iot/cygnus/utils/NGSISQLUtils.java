@@ -1,6 +1,7 @@
 package com.telefonica.iot.cygnus.utils;
 
 import com.google.gson.JsonElement;
+import org.mapdb.Atomic;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +12,9 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 
 public class NGSISQLUtils {
+
+    private static final String TEXT_MARK = "'";
+    private static final String SEPARATION_MARK = ",";
 
     /*
 
@@ -44,7 +48,7 @@ AND to_timestamp(pruebapostmanx.subpruebapostman_5dde93a46c54998b7f89fb9d_wastec
     }
     */
 
-    private static String sqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
+    private static StringBuffer sqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                               LinkedHashMap<String, ArrayList<JsonElement>> lastData,
                                               String tableName,
                                               String tableSuffix,
@@ -54,48 +58,62 @@ AND to_timestamp(pruebapostmanx.subpruebapostman_5dde93a46c54998b7f89fb9d_wastec
                                               String sqlInstance,
                                               String destination) throws SQLException {
 
-        String fieldsForInsert = NGSIUtils.getFieldsForInsert(lastData);
-        String valuesForInsert = sqlQuestionValues(lastData.keySet());
-        String updateSet = "";
-        String postgisTempReference = "EXCLUDED";
-        String postgisDestination = destination + "." + tableName + tableSuffix;
-        String query = "";
+        StringBuffer fieldsForInsert = getFieldsForInsert(lastData);
+        StringBuffer valuesForInsert = sqlQuestionValues(lastData.keySet());
+        StringBuffer updateSet = new StringBuffer();
+        StringBuffer postgisTempReference = new StringBuffer("EXCLUDED");
+        StringBuffer postgisDestination = new StringBuffer(destination).append(".").append(tableName).append(tableSuffix);
+        StringBuffer query = new StringBuffer();
 
         for (String key : lastData.keySet()) {
             if (!key.equals(uniqueKey)) {
-                updateSet += key + "=" + postgisTempReference + "." + key + " ";
+                updateSet.append(key).append("=").append(postgisTempReference).append(".").append(key).append(" ");
             }
         }
 
         if (sqlInstance.equals("postgresql")) {
-            query = "INSERT INTO " + postgisDestination + " " + fieldsForInsert + " " +
-                    "VALUES " + valuesForInsert + " " +
-                    "ON CONFLICT " + "(" + uniqueKey + ")" +
-                    "DO " +
-                    "UPDATE SET " + updateSet + " " +
-                    "WHERE " + postgisDestination + "." + uniqueKey + "=" + postgisTempReference + "." + uniqueKey + " " +
-                    "AND " + "to_timestamp(" + postgisDestination + "." + timestampKey + ", '" + timestampFormat + "' " +
-                    "< " + "to_timestamp(" + postgisTempReference + "." + timestampKey + ", '" + timestampFormat + "'" + ")";
+            query.append("INSERT INTO ").append(postgisDestination).append(" ").append(fieldsForInsert).append(" ").
+                    append("VALUES ").append(valuesForInsert).append(" ").
+                    append("ON CONFLICT ").append("(").append(uniqueKey).append(")").
+                    append("DO ").
+                    append("UPDATE SET ").append(updateSet).append(" ").
+                    append("WHERE ").append(postgisDestination).append(".").append(uniqueKey).append("=").append(postgisTempReference).append(".").append(uniqueKey).append(" ").
+                    append("AND ").append("to_timestamp(").append(postgisDestination).append(".").append(timestampKey).append(", '").append(timestampFormat).append("' ").
+                    append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append(", '").append(timestampFormat).append("')");
         }
 
         return query;
     }
 
-    public static String sqlQuestionValues(Set<String> keyList) {
-        String questionValues = "(";
+    public static StringBuffer sqlQuestionValues(Set<String> keyList) {
+        StringBuffer questionValues = new StringBuffer("(");
         boolean first = true;
         for (String key : keyList) {
             if (first) {
-                questionValues += "?";
+                questionValues.append("?");
             } else {
-                questionValues += ", ?";
+                questionValues.append(", ?");
             }
         }
-        questionValues += ")";
+        questionValues.append(")");
         return questionValues;
     }
 
-
+    public static StringBuffer getFieldsForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        StringBuffer fieldsForInsert = new StringBuffer("(");
+        boolean first = true;
+        Iterator<String> it = aggregation.keySet().iterator();
+        while (it.hasNext()) {
+            if (first) {
+                fieldsForInsert.append(TEXT_MARK).append((String) it.next()).append(TEXT_MARK);
+                first = false;
+            } else {
+                fieldsForInsert.append(SEPARATION_MARK).append(TEXT_MARK).append((String) it.next()).append(TEXT_MARK);
+            } // if else
+        } // while
+        fieldsForInsert.append(")");
+        return fieldsForInsert;
+    } // getFieldsForInsert
 
     private static PreparedStatement addJsonValues (PreparedStatement previousStatement,
                                                    String query,
