@@ -11,6 +11,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+/**
+ * The type Ngsisql utils.
+ */
 public class NGSISQLUtils {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSISQLUtils.class);
@@ -19,6 +22,23 @@ public class NGSISQLUtils {
     private static final String MYSQL_FIELDS_MARK = "'";
     private static final String SEPARATION_MARK = ",";
 
+    /**
+     * Upsert statement prepared statement.
+     *
+     * @param aggregation     the aggregation
+     * @param lastData        the last data
+     * @param tableName       the table name
+     * @param tableSuffix     the table suffix
+     * @param uniqueKey       the unique key
+     * @param timestampKey    the timestamp key
+     * @param timestampFormat the timestamp format
+     * @param sqlInstance     the sql instance
+     * @param destination     the destination
+     * @param connection      the connection
+     * @param attrNativeTypes the attr native types
+     * @return the prepared statement
+     * @throws SQLException the sql exception
+     */
     public static PreparedStatement upsertStatement (LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                             LinkedHashMap<String, ArrayList<JsonElement>> lastData,
                                             String tableName,
@@ -58,6 +78,20 @@ public class NGSISQLUtils {
 
     }
 
+    /**
+     * Sql upsert query string buffer.
+     *
+     * @param aggregation     the aggregation
+     * @param lastData        the last data
+     * @param tableName       the table name
+     * @param tableSuffix     the table suffix
+     * @param uniqueKey       the unique key
+     * @param timestampKey    the timestamp key
+     * @param timestampFormat the timestamp format
+     * @param sqlInstance     the sql instance
+     * @param destination     the destination
+     * @return the string buffer
+     */
     protected static StringBuffer sqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                               LinkedHashMap<String, ArrayList<JsonElement>> lastData,
                                               String tableName,
@@ -100,6 +134,12 @@ public class NGSISQLUtils {
         return query;
     }
 
+    /**
+     * Sql question values string buffer.
+     *
+     * @param keyList the key list
+     * @return the string buffer
+     */
     public static StringBuffer sqlQuestionValues(Set<String> keyList) {
         StringBuffer questionValues = new StringBuffer("(");
         boolean first = true;
@@ -116,6 +156,13 @@ public class NGSISQLUtils {
         return questionValues;
     }
 
+    /**
+     * Gets fields for insert.
+     *
+     * @param keyList   the key list
+     * @param fieldMark the field mark
+     * @return the fields for insert
+     */
     public static StringBuffer getFieldsForInsert(Set<String> keyList, String fieldMark) {
         StringBuffer fieldsForInsert = new StringBuffer("(");
         boolean first = true;
@@ -133,6 +180,15 @@ public class NGSISQLUtils {
         return fieldsForInsert;
     } // getFieldsForInsert
 
+    /**
+     * Add json values prepared statement.
+     *
+     * @param previousStatement the previous statement
+     * @param aggregation       the aggregation
+     * @param attrNativeTypes   the attr native types
+     * @return the prepared statement
+     * @throws SQLException the sql exception
+     */
     protected static PreparedStatement addJsonValues (PreparedStatement previousStatement,
                                                    LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                    boolean attrNativeTypes) throws SQLException {
