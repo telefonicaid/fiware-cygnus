@@ -46,6 +46,7 @@ public class SQLBackendImpl implements SQLBackend{
     private final String sqlInstance;
     private final boolean persistErrors;
     private final int maxLatestErrors;
+    private static final String DEFAULT_ERROR_TABLE_SUFFIX = "_error_log";
 
     /**
      * Constructor.
@@ -468,7 +469,7 @@ public class SQLBackendImpl implements SQLBackend{
     public void createErrorTable(String destination)
             throws CygnusRuntimeError, CygnusPersistenceError {
         // the defaul table for error log will be called the same as the destination name
-        String errorTable = destination + "_error_log";
+        String errorTable = destination + DEFAULT_ERROR_TABLE_SUFFIX;
         if (cache.isCachedTable(destination, errorTable)) {
             LOGGER.debug(sqlInstance.toUpperCase() + " '" + errorTable + "' is cached, thus it is not created");
             return;
@@ -513,7 +514,7 @@ public class SQLBackendImpl implements SQLBackend{
     public void purgeErrorTable(String destination)
             throws CygnusRuntimeError, CygnusPersistenceError {
         // the default table for error log will be called the same as the destination name
-        String errorTable = destination + "_error_log";
+        String errorTable = destination + DEFAULT_ERROR_TABLE_SUFFIX;
         String limit = String.valueOf(maxLatestErrors);
 
         Statement stmt = null;
@@ -550,7 +551,7 @@ public class SQLBackendImpl implements SQLBackend{
         Statement stmt = null;
         java.util.Date date = new Date();
         Timestamp timestamp = new Timestamp(date.getTime());
-        String errorTable = destination + "_error_log";
+        String errorTable = destination + DEFAULT_ERROR_TABLE_SUFFIX;
         String fieldNames  = "(" +
                 "timestamp" +
                 ", error" +
