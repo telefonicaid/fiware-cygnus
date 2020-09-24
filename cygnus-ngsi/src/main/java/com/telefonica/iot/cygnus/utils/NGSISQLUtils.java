@@ -53,7 +53,7 @@ public class NGSISQLUtils {
         } catch (Exception e) {
             LOGGER.error(sqlInstance + " GENERICEXCEPTION Error creating upsert statement " + e);
         }
-
+        LOGGER.info("[NGSISQLUtils.upsertStatement] PreparedStatement for upsert created successfully, all batches added. " + query);
         return preparedStatement;
 
     }
@@ -66,7 +66,7 @@ public class NGSISQLUtils {
                                               String timestampKey,
                                               String timestampFormat,
                                               String sqlInstance,
-                                              String destination) throws SQLException {
+                                              String destination) {
 
         StringBuffer fieldsForInsert;
         StringBuffer valuesForInsert = sqlQuestionValues(lastData.keySet());
@@ -96,7 +96,7 @@ public class NGSISQLUtils {
                     append("AND ").append("to_timestamp(").append(postgisDestination).append(".").append(timestampKey).append(", '").append(timestampFormat).append("') ").
                     append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append(", '").append(timestampFormat).append("')");
         }
-
+        LOGGER.debug("[NGSISQLUtils.sqlUpsertQuery] Preparing Upsert query: " + query.toString());
         return query;
     }
 
@@ -112,6 +112,7 @@ public class NGSISQLUtils {
             }
         }
         questionValues.append(")");
+        LOGGER.debug("[NGSISQLUtils.sqlQuestionValues] Preparing question marks for statement query: " + questionValues.toString());
         return questionValues;
     }
 
@@ -128,6 +129,7 @@ public class NGSISQLUtils {
             } // if else
         } // while
         fieldsForInsert.append(")");
+        LOGGER.debug("[NGSISQLUtils.getFieldsForInsert] Preparing fields for insert for statement: " + fieldsForInsert.toString());
         return fieldsForInsert;
     } // getFieldsForInsert
 
@@ -147,26 +149,32 @@ public class NGSISQLUtils {
                 if (attrNativeTypes) {
                     if (value == null || value.isJsonNull()) {
                         preparedStatement.setString(position, "NULL");
+                        LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added NULL as String");
                     } else {
                         if (value.isJsonPrimitive()) {
                             if (value.getAsJsonPrimitive().isNumber()) {
                                 preparedStatement.setDouble(position, value.getAsDouble());
+                                LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + value.getAsDouble() + " as Number");
                                 position++;
                             } else if (value.getAsJsonPrimitive().isBoolean()) {
                                 preparedStatement.setBoolean(position, value.getAsBoolean());
+                                LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + value.getAsBoolean() + " as Boolean");
                                 position++;
                             } else {
                                 String stringValue = value.getAsString();
                                 if (stringValue.contains("ST_GeomFromGeoJSON") || stringValue.contains("ST_SetSRID")) {
                                     preparedStatement.setObject(position, stringValue);
+                                    LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
                                     position++;
                                 } else {
                                     preparedStatement.setString(position, stringValue);
+                                    LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + stringValue + " as String");
                                     position++;
                                 }
                             } // else
                         } else { // if (value.isJsonPrimitive())
                             preparedStatement.setString(position, value.toString());
+                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + value.toString() + " as String");
                             position++;
                         } // else
                     } // else
@@ -175,23 +183,28 @@ public class NGSISQLUtils {
                         String stringValue = value.getAsString();
                         if (stringValue.contains("ST_GeomFromGeoJSON") || stringValue.contains("ST_SetSRID")) {
                             preparedStatement.setObject(position, stringValue);
+                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
                             position++;
                         } else {
                             preparedStatement.setString(position, stringValue);
+                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + stringValue + " as String");
                             position++;
                         }
                     } else {
                         if (value == null){
                             preparedStatement.setString(position, "NULL");
+                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added NULL as String");
                             position++;
                         } else {
                             preparedStatement.setString(position, value.toString());
+                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + value.toString() + " as String");
                             position++;
                         }
                     }
                 }
             } // while
             preparedStatement.addBatch();
+            LOGGER.debug("[NGSISQLUtils.addJsonValues] Batch added");
         } // for
         return preparedStatement;
     }

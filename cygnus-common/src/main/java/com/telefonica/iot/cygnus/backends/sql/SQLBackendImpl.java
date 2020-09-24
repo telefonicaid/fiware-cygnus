@@ -38,6 +38,9 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 
+/**
+ * The type Sql backend.
+ */
 public class SQLBackendImpl implements SQLBackend{
 
     private static final CygnusLogger LOGGER = new CygnusLogger(SQLBackendImpl.class);
@@ -506,9 +509,28 @@ public class SQLBackendImpl implements SQLBackend{
         cache.addTable(destination, errorTable);
     } // createErrorTable
 
+    /**
+     * Gets an SQL connection from the driver
+     *
+     * @param destination the destination
+     * @return the sql connection
+     * @throws CygnusPersistenceError the cygnus persistence error
+     * @throws CygnusRuntimeError     the cygnus runtime error
+     */
+
     public Connection getSQLConnection (String destination) throws CygnusPersistenceError, CygnusRuntimeError {
         return driver.getConnection(destination);
     }
+
+    /**
+     * Execute prepared statement.
+     *
+     * @param preparedStatement the prepared statement
+     * @throws SQLException           the sql exception
+     * @throws CygnusPersistenceError the cygnus persistence error
+     * @throws CygnusRuntimeError     the cygnus runtime error
+     * @throws CygnusBadContextData   the cygnus bad context data
+     */
 
     public void executePreparedStatement (PreparedStatement preparedStatement) throws SQLException, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         try {
