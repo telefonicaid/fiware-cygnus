@@ -40,7 +40,7 @@ This means that all aggregated events will be stored on a Map wich contains list
      +------------+----------------------------+-------------------+----------+
      | 1429535774 | 2015-04-20T12:13:22.41.124 | 4wheels           | null     |
      | 1429535775 | 2015-04-20T12:13:22.41.125 | 4wheels           | null     |
-     | 1429535776 | 2015-04-20T12:13:22.41.126 | 4wheels           | car1     |
+     | 1429535773 | 2015-04-20T12:13:22.41.126 | 4wheels           | car1     |
      +------------+----------------------------+-------------------+----------+ 
      
 ### Last Data aggretation
@@ -63,6 +63,28 @@ If any of those cases are true. Then starts the aggregation_last_data process.
 - A new `key - ArrayList<JsonElement>` relation is created.
 - The last element of all of the `usual_aggregation` collection lists is added to the new list created in the previous step.
 - Per each one of the keys processed on the `for each` loop the relation `key - ArrayList<JsonElement>` is added to the `last_data` collection.
+
+This means that the event stored into the `last_data` collection will **not** contain NULL values in case other events procesed in the batch contain columns that the newest entitys doesnt.
+
+Take this exapmple.
+
+In case the `usual_aggregation` collection contains:
+
+     +------------+----------------------------+-------------------+----------+
+     | recvTimeTs | recvTime                   | fiwareServicePath | entityId |
+     +------------+----------------------------+-------------------+----------+
+     | 1429535774 | 2015-04-20T12:13:22.41.124 | 4wheels           | null     |
+     | 1429535775 | 2015-04-20T12:13:22.41.125 | 4wheels           | null     |
+     | 1429535773 | 2015-04-20T12:13:22.41.126 | 4wheels           | car1     |
+     +------------+----------------------------+-------------------+----------+ 
+     
+The `last_data` collection should contain:
+
+     +------------+----------------------------+-------------------+
+     | recvTimeTs | recvTime                   | fiwareServicePath |
+     +------------+----------------------------+-------------------+
+     | 1429535775 | 2015-04-20T12:13:22.41.125 | 4wheels           |
+     +------------+----------------------------+-------------------+     
  
 All this process happens per each NGSIEvent aggregated. 
 
@@ -102,3 +124,38 @@ By default PostgreSQL references the conflicting values as `EXCLUDED`.
 `< to_timestamp(EXCLUDED.recvTime, 'YYYY-MM-DD HH24:MI:SS.MS')`
 
 This line casts the conflictive timestamp value and compares it with the stored one.
+
+**Notice that if the previous stored event contain data in a column that the intended values to insert not contain. The previous values stores in those columns will remain after the update**
+
+Take this exapmple.
+
+In case the table contains:
+
+     +------------+----------------------------+-------------------+----------+
+     | recvTimeTs | recvTime                   | fiwareServicePath | entityId |
+     +------------+----------------------------+-------------------+----------+
+     | 1429535774 | 2015-04-20T12:13:22.41.124 | 4wheels1          | null     |
+     | 1429535775 | 2015-04-20T12:13:22.41.125 | 4wheels2          | null     |
+     | 1429535773 | 2015-04-20T12:13:22.41.126 | 4wheels3          | car1     |
+     +------------+----------------------------+-------------------+----------+ 
+     
+And Cygnus tryes to upsert the following 
+
+     +------------+----------------------------+----------+
+     | recvTimeTs | recvTime                   | entityId |
+     +------------+----------------------------+----------+
+     | 1429535775 | 2015-04-20T12:13:22.41.125 | car2     |
+     +------------+----------------------------+----------+
+     
+The table updated would be:     
+
+     +------------+----------------------------+-------------------+----------+
+     | recvTimeTs | recvTime                   | fiwareServicePath | entityId |
+     +------------+----------------------------+-------------------+----------+
+     | 1429535774 | 2015-04-20T12:13:22.41.124 | 4wheels1          | null     |
+     | 1429535775 | 2015-04-20T12:13:22.41.125 | 4wheels2          | car2     |
+     | 1429535773 | 2015-04-20T12:13:22.41.126 | 4wheels3          | car1     |
+     +------------+----------------------------+-------------------+----------+ 
+     
+     
+Notice the value `4wheels2` on the column `fiwareServicePath` remained after the update because it was not updated.
