@@ -1,3 +1,4 @@
+[cygnus-ngsi][PosgtgreSQLSink, PostgisSink] Add upsert function. (#1806)
 [cygnus-common][SQLBackendImpl] Add configuration option to persist errors in SQL sinks (#1928)
 [cygnus-ngsi-ld] Creation of the new PostGIS sink for persisting NGSI-LD notifications (#1905)
 [cygnus-ngsi][MysqlSink] Quoted Sql field names to avoid naming problems. (#1863)
