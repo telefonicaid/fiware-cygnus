@@ -30,10 +30,11 @@ import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.NGSICharsets;
-import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.NGSIUtils;
+import com.telefonica.iot.cygnus.utils.*;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import org.apache.flume.Context;
 
@@ -344,7 +345,7 @@ public class NGSIPostgisSink extends NGSISink {
 
     @Override
     void persistBatch(NGSIBatch batch)
-        throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
+            throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -445,6 +446,27 @@ public class NGSIPostgisSink extends NGSISink {
                 LOGGER.debug("[" + this.getName() + "] no values for insert");
             } else {
                 postgisPersistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
+                if (lastData && !rowAttrPersistence) {
+                    try {
+                        Connection connection = postgisPersistenceBackend.getSQLConnection(schemaName);
+                        PreparedStatement preparedStatement = NGSISQLUtils.upsertStatement(aggregator.getAggregationToPersist(),
+                                aggregator.getLastDataToPersist(),
+                                tableName,
+                                lastDataTableSuffix,
+                                lastDataUniqueKey,
+                                lastDataTimeStampKey,
+                                lastDataSQLTimestampFormat,
+                                POSTGIS_INSTANCE_NAME,
+                                schemaName,
+                                connection,
+                                aggregator.isAttrNativeTypes());
+                        postgisPersistenceBackend.executePreparedStatement(preparedStatement);
+                    } catch (SQLException sqlException) {
+                        LOGGER.error("PostgisSink SQLEXCEPTION error when upserting " + sqlException.getMessage() );
+                    } catch (Exception e) {
+                        LOGGER.error("PostgisSink GENERIC error when upserting " + e.getMessage() );
+                    }
+                }
             }
     } // persistAggregation
 
