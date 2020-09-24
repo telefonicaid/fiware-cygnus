@@ -150,7 +150,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             } // if
         } // for
         setAggregation(aggregation);
-        if (isEnableLastData()) {
+        if (isEnableLastData()) { // More detail in doc/cygnus-ngsi/flume_extensions_catalogue/last_data_function.md
             boolean updateLastData = false;
             LinkedHashMap<String, ArrayList<JsonElement>> lastData = getLastData();
             if (numPreviousValues > 0) {
