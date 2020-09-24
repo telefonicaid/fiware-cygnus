@@ -154,8 +154,14 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             boolean updateLastData = false;
             LinkedHashMap<String, ArrayList<JsonElement>> lastData = getLastData();
             if (numPreviousValues > 0) {
-                long storedTS = (CommonUtils.getTimeInstantFromString(getLastData().get(getLastDataTimestampKey()).get(0).getAsString())).longValue();
-                long currentTS = (CommonUtils.getTimeInstantFromString(aggregation.get(getLastDataTimestampKey()).get(aggregation.get(getLastDataTimestampKey()).size() - 1).getAsString())).longValue();
+                long storedTS = 0;
+                long currentTS = 0;
+                try {
+                    storedTS = (CommonUtils.getTimeInstantFromString(getLastData().get(getLastDataTimestampKey()).get(0).getAsString())).longValue();
+                    currentTS = (CommonUtils.getTimeInstantFromString(aggregation.get(getLastDataTimestampKey()).get(aggregation.get(getLastDataTimestampKey()).size() - 1).getAsString())).longValue();
+                } catch (Exception e) {
+                    LOGGER.error("[NGSIGenericColumnAggregator] Error when trying to parse Timestamps for last data aggregation " + e.getMessage());
+                }
                 if ( storedTS < recvTimeTs) {
                     lastData = new LinkedHashMap<>();
                     if (storedTS < currentTS) {

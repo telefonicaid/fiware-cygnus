@@ -446,7 +446,7 @@ public class NGSIPostgisSink extends NGSISink {
                 LOGGER.debug("[" + this.getName() + "] no values for insert");
             } else {
                 postgisPersistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
-                if (lastData && !rowAttrPersistence) {
+                if (lastData && !rowAttrPersistence && (aggregator.getLastDataToPersist().get(DEFAULT_LAST_DATA_UNIQUE_KEY).size() > 0)) {
                     try {
                         Connection connection = postgisPersistenceBackend.getSQLConnection(schemaName);
                         PreparedStatement preparedStatement = NGSISQLUtils.upsertStatement(aggregator.getAggregationToPersist(),
