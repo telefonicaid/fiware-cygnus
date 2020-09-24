@@ -47,6 +47,7 @@ public class SQLBackendImpl implements SQLBackend{
     private final boolean persistErrors;
     private final int maxLatestErrors;
     private static final String DEFAULT_ERROR_TABLE_SUFFIX = "_error_log";
+    private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
 
     /**
      * Constructor.
@@ -80,7 +81,7 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlOptions
      */
     public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, String sqlOptions) {
-        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, sqlOptions, true, 100);
+        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, sqlOptions, true, DEFAULT_MAX_LATEST_ERRORS);
     } // SQLBackendImpl
 
     /**
