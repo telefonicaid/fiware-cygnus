@@ -1,6 +1,11 @@
 # Last Data functionality.
 
-Cygnus is capable to perform an `upsert` operation on given SQL Sinks.  This Operation doesn't overrides the usual inserts on the usual way.
+Cygnus is capable to perform an `upsert` operation on the following Sinks.
+
+- PostgisSink
+- PostgreSQLSink  
+  
+This Operation doesn't overrides the usual inserts on the usual way.
 
 In order to perform this operation Cygnus needs four keys.
 
