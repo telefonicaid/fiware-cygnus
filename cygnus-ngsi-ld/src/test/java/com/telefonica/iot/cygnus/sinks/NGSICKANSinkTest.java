@@ -570,10 +570,7 @@ public class NGSICKANSinkTest {
             throw e;
         } // try catch
     } // testBuildOrgNameEncoding
-    
 
-
-    
     /**
      * [NGSICKANSink.buildResName] -------- When no encoding, the CKAN resource name is the encoding of the
      * concatenation of the notified \<entity_id\> and \<entity_type\>.
@@ -832,55 +829,6 @@ public class NGSICKANSinkTest {
         context.put("ssl", ssl);
         return context;
     } // createContext
-
-   /* private NotifyContextRequestLD.ContextElement createContextElement() {
-        NotifyContextRequestLD notifyContextRequest = new NotifyContextRequestLD();
-        NotifyContextRequestLD.ContextAttribute contextAttribute1 = new NotifyContextRequestLD.ContextAttribute();
-        contextAttribute1.setName("someName1");
-        contextAttribute1.setType("someType1");
-        contextAttribute1.setContextValue(new JsonPrimitive("-3.7167, 40.3833"));
-        contextAttribute1.setContextMetadata(metadata);
-        NotifyContextRequest.ContextAttribute contextAttribute2 = new NotifyContextRequest.ContextAttribute();
-        contextAttribute2.setName("someName2");
-        contextAttribute2.setType("someType2");
-        contextAttribute2.setContextValue(new JsonPrimitive("someValue2"));
-        contextAttribute2.setContextMetadata(null);
-        ArrayList<NotifyContextRequestLD.ContextAttribute> attributes = new ArrayList<>();
-        attributes.add(contextAttribute1);
-        attributes.add(contextAttribute2);
-        NotifyContextRequestLD.ContextElement contextElement = new NotifyContextRequestLD.ContextElement();
-        contextElement.setId("someId");
-        contextElement.setType("someType");
-        contextElement.setIsPattern("false");
-        contextElement.setAttributes(attributes);
-        return contextElement;
-    } // createContextElement
-
-
-
-    public NGSILDBatch prepaireBatch() {
-        String timestamp = "1461136795801";
-        String correlatorId = "123456789";
-        String transactionId = "123456789";
-        String originalService = "someService";
-        String originalServicePath = "somePath";
-        String mappedService = "newService";
-        String mappedServicePath = "newPath";
-        String destination = "someDestination";
-        Map<String, String> headers = new HashMap<>();
-        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
-        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
-        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
-        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
-        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
-        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
-        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        NotifyContextRequestLD.ContextElement contextElement2 = createContextElement();
-        NGSILDEvent ngsiEvent2 = new NGSILDEvent(headers, contextElement2.toString().getBytes(), contextElement2);
-        NGSILDBatch batch = new NGSILDBatch();
-        batch.addEvent(destination, ngsiEvent2);
-        return batch;
-    }*/
 
     /**
      * [NGSICKANSink.buildOrgName] -------- When encoding, the org name is equals to the encoding of the
