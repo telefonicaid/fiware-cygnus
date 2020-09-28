@@ -66,6 +66,7 @@ public class NGSIPostgisSink extends NGSISink {
     private static final String DEFAULT_LAST_DATA_UNIQUE_KEY = NGSIConstants.ENTITY_ID;
     private static final String DEFAULT_LAST_DATA_TIMESTAMP_KEY = NGSIConstants.RECV_TIME;
     private static final String DEFAULT_LAST_DATA_SQL_TS_FORMAT = "YYYY-MM-DD HH24:MI:SS.MS";
+    private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgisSink.class);
     private String postgisHost;
@@ -87,6 +88,7 @@ public class NGSIPostgisSink extends NGSISink {
     private String lastDataUniqueKey;
     private String lastDataTimeStampKey;
     private String lastDataSQLTimestampFormat;
+    private int maxLatestErrors;
 
     /**
      * Constructor.
@@ -309,6 +311,9 @@ public class NGSIPostgisSink extends NGSISink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_sql_timestamp_format="
                 + lastDataSQLTimestampFormat + ")");
 
+        maxLatestErrors = context.getInteger("max_latest_errors", DEFAULT_MAX_LATEST_ERRORS);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (max_latest_errors=" + maxLatestErrors + ")");
+
     } // configure
 
     @Override
@@ -321,7 +326,7 @@ public class NGSIPostgisSink extends NGSISink {
     public void start() {
         try {
             if (buildDBName(null) != null) {
-                createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, buildDBName(null), postgisOptions, persistErrors);
+                createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, buildDBName(null), postgisOptions, persistErrors, maxLatestErrors);
             }
         } catch (Exception e) {
             LOGGER.error("Error while creating the Postgis persistence backend. Details="
@@ -335,9 +340,9 @@ public class NGSIPostgisSink extends NGSISink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions, boolean persistErrors) {
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
         if (postgisPersistenceBackend == null) {
-            postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, defaultSQLDataBase, sqlOptions, persistErrors);
+            postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, defaultSQLDataBase, sqlOptions, persistErrors, maxLatestErrors);
         } else {
             LOGGER.info("The database name will be created on runtime, so if there is an specified database on the agent properties and you expect it to be read on startup, then you shoul look for the data model you are using. Maybe it's not the correct one");
         }
@@ -429,7 +434,7 @@ public class NGSIPostgisSink extends NGSISink {
         }
 
         if (postgisPersistenceBackend == null) {
-            createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgisOptions, persistErrors);
+            createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgisOptions, persistErrors, maxLatestErrors);
         }
 
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgisSink. Schema ("

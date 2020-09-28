@@ -63,6 +63,7 @@ public class NGSIMySQLSink extends NGSISink {
     private static final String DEFAULT_LAST_DATA_UNIQUE_KEY = NGSIConstants.ENTITY_ID;
     private static final String DEFAULT_LAST_DATA_TIMESTAMP_KEY = NGSIConstants.RECV_TIME;
     private static final String DEFAULT_LAST_DATA_SQL_TS_FORMAT = "YYYY-MM-DD HH24:MI:SS.MS";
+    private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIMySQLSink.class);
     private String mysqlHost;
@@ -81,6 +82,7 @@ public class NGSIMySQLSink extends NGSISink {
     private String lastDataUniqueKey;
     private String lastDataTimeStampKey;
     private String lastDataSQLTimestampFormat;
+    private int maxLatestErrors;
 
     /**
      * Constructor.
@@ -265,13 +267,16 @@ public class NGSIMySQLSink extends NGSISink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_sql_timestamp_format="
                 + lastDataSQLTimestampFormat + ")");
 
+        maxLatestErrors = context.getInteger("max_latest_errors", DEFAULT_MAX_LATEST_ERRORS);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (max_latest_errors=" + maxLatestErrors + ")");
+
         super.configure(context);
     } // configure
 
     @Override
     public void start() {
         try {
-            createPersistenceBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize, mysqlOptions, persistErrors);
+            createPersistenceBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize, mysqlOptions, persistErrors, maxLatestErrors);
             LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the MySQL persistence backend. Details="
@@ -290,9 +295,9 @@ public class NGSIMySQLSink extends NGSISink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlOptions, boolean persistErrors) {
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
         if (mySQLPersistenceBackend == null) {
-            mySQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null, sqlOptions, persistErrors);
+            mySQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null, sqlOptions, persistErrors, maxLatestErrors);
         }
     }
 
