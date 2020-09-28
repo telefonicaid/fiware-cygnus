@@ -284,7 +284,13 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             LOGGER.debug("[nmi] Reading name mappings, Json purged");
 
             // Pre-compile the regular expressions
-            nameMappings.compilePatterns();
+            try {
+                nameMappings.compilePatterns();
+            } catch (Exception e) {
+                LOGGER.warn("[nmi] Compile patterns error (" + e.getMessage() + ") with namemapping " + jsonStr);
+                nameMappings = null;
+                return;
+            } // try catch
             LOGGER.debug("[nmi] Reading name mappings, regular expressions pre-compiled");
         }
     } // loadNameMappings

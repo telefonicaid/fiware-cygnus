@@ -168,6 +168,37 @@ public class NGSINameMappingsInterceptorTest {
             + "\"isPattern\" : \"false\"," + "\"id\" : \"House1_new\"" + "}";
     private final String expectedServiceConfig4 = "service_new";
 
+    private final String nameMappingsError = ""
+            + "{"
+            + "   \"serviceMappings\": ["
+            + "      {"
+            + "         \"originalService\": \"s3\","
+            + "         \"newService\": \"new_s3\","
+            + "         \"servicePathMappings\": ["
+            + "            {"
+            + "               \"originalServicePath\": \"/sp3\","
+            + "               \"newServicePath\": \"/new_sp3\","
+            + "               \"entityMappings\": ["
+            + "                  {"
+            + "                     \"originalEntityId\": \"Room1\","
+            + "                     \"originalEntityType\": \"Room\","
+            + "                     \"newEntityId\": \"new_Room1\","
+            + "                     \"newEntityType\": \"new_Room\","
+            + "                     \"attributeMappings\": ["
+            + "                        {"
+            + "                           \"originalAttributeType\": \"geox:json\","
+            + "                           \"newAttributeType\": \"geo:json\""
+            + "                        }"
+            + "                     ]"
+            + "                  }"
+            + "               ]"
+            + "            }"
+            + "         ]"
+            + "      }"
+            + "   ]"
+            + "}";
+
+
     /**
      * Constructor.
      */
@@ -724,5 +755,24 @@ public class NGSINameMappingsInterceptorTest {
             throw e;
         } // try catch
     } // testDoMapConfig4
+
+
+    /*
+     * [NGSINameMappingsInterceptorTest.loadNameMappingsError] -------- Load a name mappings with error.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testLoadNameMappingsError() throws Exception {
+        System.out.println(getTestTraceHead("[NGSINameMappingsInterceptor.loadNameMappingsError]")
+                + "-------- Load name mappings with error");
+        NGSINameMappingsInterceptor nameMappingsInterceptor = new NGSINameMappingsInterceptor(null, false);
+        try {
+            nameMappingsInterceptor.loadNameMappings(nameMappingsError);
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSINameMappingsInterceptor.loadNameMappingsError]")
+                    + "- FAIL - There was some problem when loading nameMappingsError");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+    } // testLoadNameMappingsError
 
 } // NGSINameMappingsInterceptorTest
