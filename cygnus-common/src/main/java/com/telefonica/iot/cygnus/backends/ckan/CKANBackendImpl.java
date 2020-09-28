@@ -85,7 +85,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         if (!createEnabled) {
             resId= resourceLookupOrCreateDynamicFields(orgName, pkgName, resName,records);
         } else {
-        resId = resourceLookupOrCreate(orgName, pkgName, resName, createEnabled);
+            resId = resourceLookupOrCreate(orgName, pkgName, resName, createEnabled);
         }
         if (resId == null) {
             throw new CygnusPersistenceError("Cannot persist the data (orgName=" + orgName + ", pkgName=" + pkgName
@@ -97,6 +97,14 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         } // if else
     } // persist
 
+    /**
+     * Lookup or create resources used by cygnus-ngsi-ld and create the datastore with the fields available in the records parameter.
+     * @param orgName The organization in which datastore the record is going to be inserted
+     * @param pkgName The package name to be created or lookup to
+     * @param resName The resource name to be created or lookup to
+     * @param records Te records to be inserted and used to create the datastore fields
+     * @throws Exception
+     */
     private String resourceLookupOrCreateDynamicFields(String orgName, String pkgName, String resName, String records)
             throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         if (!cache.isCachedOrg(orgName)) {
@@ -155,7 +163,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
         return cache.getResId(orgName, pkgName, resName);
     } // resourceLookupOrCreate
-    
+
     private String resourceLookupOrCreate(String orgName, String pkgName, String resName, boolean createEnabled)
         throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
         if (!cache.isCachedOrg(orgName)) {
