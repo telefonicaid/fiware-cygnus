@@ -38,6 +38,9 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 
+/**
+ * The type Sql backend.
+ */
 public class SQLBackendImpl implements SQLBackend{
 
     private static final CygnusLogger LOGGER = new CygnusLogger(SQLBackendImpl.class);
@@ -512,6 +515,41 @@ public class SQLBackendImpl implements SQLBackend{
         cache.addTable(destination, errorTable);
     } // createErrorTable
 
+    /**
+     * Gets an SQL connection from the driver
+     *
+     * @param destination the destination
+     * @return the sql connection
+     * @throws CygnusPersistenceError the cygnus persistence error
+     * @throws CygnusRuntimeError     the cygnus runtime error
+     */
+
+    public Connection getSQLConnection (String destination) throws CygnusPersistenceError, CygnusRuntimeError {
+        return driver.getConnection(destination);
+    }
+
+    /**
+     * Execute prepared statement.
+     *
+     * @param preparedStatement the prepared statement
+     * @throws SQLException           the sql exception
+     * @throws CygnusPersistenceError the cygnus persistence error
+     * @throws CygnusRuntimeError     the cygnus runtime error
+     * @throws CygnusBadContextData   the cygnus bad context data
+     */
+
+    public void executePreparedStatement (PreparedStatement preparedStatement) throws SQLException, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
+        try {
+            preparedStatement.executeBatch();
+        } catch (SQLTimeoutException e) {
+            throw new CygnusPersistenceError(sqlInstance.toUpperCase() + " Data insertion error. Query: `" + preparedStatement, "SQLTimeoutException", e.getMessage());
+        } catch (SQLException e) {
+            throw new CygnusBadContextData(sqlInstance.toUpperCase() + " Data insertion error. Query: `" + preparedStatement, "SQLException", e.getMessage());
+        } finally {
+            closeSQLObjects(preparedStatement.getConnection(), preparedStatement);
+        } // try catch
+    }
+
     public void purgeErrorTable(String destination)
             throws CygnusRuntimeError, CygnusPersistenceError {
         // the default table for error log will be called the same as the destination name
@@ -569,6 +607,7 @@ public class SQLBackendImpl implements SQLBackend{
         }
 
         PreparedStatement preparedStatement = con.prepareStatement(query);
+
         try {
             preparedStatement.setObject(1, java.sql.Timestamp.from(Instant.now()));
             preparedStatement.setString(2, exception.getMessage());

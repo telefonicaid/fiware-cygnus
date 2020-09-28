@@ -27,6 +27,7 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -149,6 +150,35 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             } // if
         } // for
         setAggregation(aggregation);
+        if (isEnableLastData()) { // More detail in doc/cygnus-ngsi/flume_extensions_catalogue/last_data_function.md
+            boolean updateLastData = false;
+            LinkedHashMap<String, ArrayList<JsonElement>> lastData = getLastData();
+            if (numPreviousValues > 0) {
+                long storedTS = 0;
+                long currentTS = 0;
+                try {
+                    storedTS = (CommonUtils.getTimeInstantFromString(getLastData().get(getLastDataTimestampKey()).get(0).getAsString())).longValue();
+                    currentTS = (CommonUtils.getTimeInstantFromString(aggregation.get(getLastDataTimestampKey()).get(aggregation.get(getLastDataTimestampKey()).size() - 1).getAsString())).longValue();
+                } catch (Exception e) {
+                    LOGGER.error("[NGSIGenericColumnAggregator] Error when trying to parse Timestamps for last data aggregation " + e.getMessage());
+                }
+                if ( storedTS < recvTimeTs) {
+                    lastData = new LinkedHashMap<>();
+                    if (storedTS < currentTS) {
+                        updateLastData = true;
+                    }
+                }
+            }
+            if (updateLastData || (numPreviousValues == 0)) {
+                for (String key : aggregation.keySet()) {
+                    lastData.put(key, new ArrayList<JsonElement>());
+                    ArrayList<JsonElement> valueLastData = new ArrayList<JsonElement>();
+                    valueLastData.add(aggregation.get(key).get(aggregation.get(key).size() - 1));
+                    lastData.put(key, valueLastData);
+                } // for
+                setLastData(lastData);
+            }
+        }
     }
 
     private String getName() {
