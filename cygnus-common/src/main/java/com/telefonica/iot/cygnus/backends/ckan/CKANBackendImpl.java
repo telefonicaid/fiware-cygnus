@@ -82,7 +82,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         LOGGER.debug("Going to lookup for the resource id, the cache may be updated during the process (orgName="
                 + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
         String resId = "";
-        if (!createEnabled){
+        if (!createEnabled) {
             resId= resourceLookupOrCreateDynamicFields(orgName, pkgName, resName,records);
         } else {
         resId = resourceLookupOrCreate(orgName, pkgName, resName, createEnabled);
