@@ -16,7 +16,7 @@
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
-package com.telefonica.iot.cygnus.utils;
+package com.telefonica.iot.cygnus.backends.sql;
 
 import com.google.gson.JsonElement;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
@@ -32,9 +32,9 @@ import java.util.Set;
 /**
  * The type Ngsisql utils.
  */
-public class NGSISQLUtils {
+public class SQLQueryUtils {
 
-    private static final CygnusLogger LOGGER = new CygnusLogger(NGSISQLUtils.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(SQLQueryUtils.class);
 
     private static final String POSTGRES_FIELDS_MARK = "";
     private static final String MYSQL_FIELDS_MARK = "'";
@@ -212,7 +212,7 @@ public class NGSISQLUtils {
                                                    boolean attrNativeTypes) throws SQLException {
 
         PreparedStatement preparedStatement = previousStatement;
-        int numEvents = NGSIUtils.collectionSizeOnLinkedHashMap(aggregation);
+        int numEvents = collectionSizeOnLinkedHashMap(aggregation);
         for (int i = 0; i < numEvents; i++) {
             Iterator<String> it = aggregation.keySet().iterator();
             int position = 1;
@@ -281,6 +281,17 @@ public class NGSISQLUtils {
             LOGGER.debug("[NGSISQLUtils.addJsonValues] Batch added");
         } // for
         return preparedStatement;
+    }
+
+    /**
+     * Collection size on linked hash map int.
+     *
+     * @param aggregation the aggregation
+     * @return the number of attributes contained on the aggregation object.
+     */
+    private static int collectionSizeOnLinkedHashMap(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        ArrayList<ArrayList<JsonElement>> list = new ArrayList<>(aggregation.values());
+        return list.get(0).size();
     }
 
 }

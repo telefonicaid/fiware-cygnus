@@ -21,6 +21,7 @@ package com.telefonica.iot.cygnus.sinks;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
+import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
@@ -454,7 +455,7 @@ public class NGSIPostgisSink extends NGSISink {
                 if (lastData && !rowAttrPersistence && (aggregator.getLastDataToPersist().get(DEFAULT_LAST_DATA_UNIQUE_KEY).size() > 0)) {
                     try {
                         Connection connection = postgisPersistenceBackend.getSQLConnection(schemaName);
-                        PreparedStatement preparedStatement = NGSISQLUtils.upsertStatement(aggregator.getAggregationToPersist(),
+                        PreparedStatement preparedStatement = SQLQueryUtils.upsertStatement(aggregator.getAggregationToPersist(),
                                 aggregator.getLastDataToPersist(),
                                 tableName,
                                 lastDataTableSuffix,
