@@ -131,7 +131,7 @@ public class SQLQueryUtilsTest {
     }// getValueFields
 
     @Test
-    public void testSQLUpsertQuerySingleBatch() throws SQLException {
+    public void testSQLUpsertQuerySingleBatch() {
         String tableName = "exampleTable";
         String tableSuffix = "_last_data";
         String uniqueKey = "entityId";
@@ -171,7 +171,7 @@ public class SQLQueryUtilsTest {
     }
 
     @Test
-    public void testSQLUpsertQueryMultipleBatch() throws SQLException {
+    public void testSQLUpsertQueryMultipleBatch() {
         String tableName = "exampleTable";
         String tableSuffix = "_last_data";
         String uniqueKey = "entityId";
@@ -203,6 +203,56 @@ public class SQLQueryUtilsTest {
         try {
             assertEquals(sqlupsertQuery.toString(), correctQuery);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testSQLUpsertQueryMultipleBatch]")
+                    + "-  OK  - testSQLUpsertQueryMultipleBatch");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void testSQLInsertQuerySingleBatch() {
+        String tableName = "exampleTable";
+        String sqlInstance = "postgresql";
+        String destination = "example";
+        StringBuffer sqlupsertQuery;
+        sqlupsertQuery = SQLQueryUtils.sqlInsertQuery(getValueFieldsSingleBatch(),
+                tableName,
+                sqlInstance,
+                destination);
+
+        String correctQuery = "INSERT INTO example.exampleTable " +
+                "(recvTime,recvTimeS,fiwareServicePath,entityId,entityType,loadStr,loadBool,loadNumber,load_md) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+
+        try {
+            assertEquals(sqlupsertQuery.toString(), correctQuery);
+            System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testSQLInsertQuerySingleBatch]")
+                    + "-  OK  - testSQLUpsertQuerySingleBatch");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void testSQLInsertQueryMultipleBatch() {
+        String tableName = "exampleTable";
+        String sqlInstance = "postgresql";
+        String destination = "example";
+        StringBuffer sqlupsertQuery;
+        sqlupsertQuery = SQLQueryUtils.sqlInsertQuery(getValueFieldsMultipleBatch(),
+                tableName,
+                sqlInstance,
+                destination);
+
+        String correctQuery = "INSERT INTO example.exampleTable " +
+                "(recvTime,recvTimeS,fiwareServicePath,entityId,entityType,loadStr,loadBool,loadNumber,load_md) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+
+        try {
+            assertEquals(sqlupsertQuery.toString(), correctQuery);
+            System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testSQLInsertQueryMultipleBatch]")
                     + "-  OK  - testSQLUpsertQueryMultipleBatch");
         } catch (Exception e) {
             e.printStackTrace();
