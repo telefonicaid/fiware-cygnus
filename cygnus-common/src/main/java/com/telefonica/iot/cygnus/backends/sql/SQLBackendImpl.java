@@ -18,6 +18,7 @@
 
 package com.telefonica.iot.cygnus.backends.sql;
 
+import com.google.gson.JsonElement;
 import com.sun.rowset.CachedRowSetImpl;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
@@ -35,8 +36,10 @@ import javax.sql.rowset.CachedRowSet;
 import java.sql.*;
 import java.text.ParseException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * The type Sql backend.
@@ -451,23 +454,45 @@ public class SQLBackendImpl implements SQLBackend{
      */
     private void closeSQLObjects(Connection con, Statement stmt) throws CygnusRuntimeError {
         LOGGER.debug(sqlInstance.toUpperCase() + " Closing SQL connection objects.");
-        if (stmt != null) {
+        closeStatement(stmt);
+        closeConnection(con);
+    } // closeSQLObjects
+
+    /**
+     * Close SQL objects previously opened by doCreateTable and
+     * doQuery.
+     *
+     * @param statement
+     * @return True if the SQL objects have been closed, false otherwise.
+     */
+
+    private void closeStatement (Statement statement) {
+        if (statement != null) {
             try {
-                stmt.close();
+                statement.close();
             } catch (SQLException e) {
                 LOGGER.warn(sqlInstance.toUpperCase() + " error closing invalid statement: " + e.getMessage());
             } // try catch
         } // if
+    }
 
-        if (con != null) {
+    /**
+     * Close SQL objects previously opened by doCreateTable and
+     * doQuery.
+     *
+     * @param connection
+     * @return True if the SQL objects have been closed, false otherwise.
+     */
+
+    private void closeConnection (Connection connection) {
+        if (connection != null) {
             try {
-                con.close();
+                connection.close();
             } catch (SQLException e) {
                 LOGGER.warn(sqlInstance.toUpperCase() + " error closing invalid connection: " + e.getMessage());
             } // try catch
         } // if
-
-    } // closeSQLObjects
+    }
 
 
     public void createErrorTable(String destination)
@@ -516,38 +541,91 @@ public class SQLBackendImpl implements SQLBackend{
     } // createErrorTable
 
     /**
-     * Gets an SQL connection from the driver
+     * Upsert transaction.
      *
-     * @param destination the destination
-     * @return the sql connection
+     * @param aggregation     the aggregation
+     * @param lastData        the last data
+     * @param destination     the destination
+     * @param tableName       the table name
+     * @param tableSuffix     the table suffix
+     * @param uniqueKey       the unique key
+     * @param timestampKey    the timestamp key
+     * @param timestampFormat the timestamp format
+     * @param attrNativeTypes the attr native types
      * @throws CygnusPersistenceError the cygnus persistence error
+     * @throws CygnusBadContextData   the cygnus bad context data
      * @throws CygnusRuntimeError     the cygnus runtime error
+     * @throws CygnusPersistenceError the cygnus persistence error
      */
+    public void upsertTransaction (LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
+                                   LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                   String destination,
+                                   String tableName,
+                                   String tableSuffix,
+                                   String uniqueKey,
+                                   String timestampKey,
+                                   String timestampFormat,
+                                   boolean attrNativeTypes) throws CygnusPersistenceError, CygnusBadContextData, CygnusRuntimeError,  CygnusPersistenceError{
 
-    public Connection getSQLConnection (String destination) throws CygnusPersistenceError, CygnusRuntimeError {
-        return driver.getConnection(destination);
+        Connection connection = null;
+        PreparedStatement upsertPreparedStatement = null;
+        PreparedStatement insertPreparedStatement = null;
+
+        int insertedRows[];
+
+        try {
+
+            connection = driver.getConnection(destination);
+            connection.setAutoCommit(false);
+
+            String insertQuery = SQLQueryUtils.sqlInsertQuery(aggregation,
+                    tableName,
+                    sqlInstance,
+                    destination).toString();
+
+            PreparedStatement insertStatement = null;
+            insertStatement = connection.prepareStatement(insertQuery);
+            insertPreparedStatement = SQLQueryUtils.addJsonValues(insertStatement, aggregation, attrNativeTypes);
+            insertedRows = insertPreparedStatement.executeBatch();
+
+            String upsertQuery = SQLQueryUtils.sqlUpsertQuery(aggregation,
+                    lastData,
+                    tableName,
+                    tableSuffix,
+                    uniqueKey,
+                    timestampKey,
+                    timestampFormat,
+                    sqlInstance,
+                    destination).toString();
+
+            PreparedStatement upsertStatement = null;
+            upsertStatement = connection.prepareStatement(upsertQuery);
+            upsertPreparedStatement = SQLQueryUtils.addJsonValues(upsertStatement, lastData, attrNativeTypes);
+            upsertPreparedStatement.executeBatch();
+
+            connection.commit();
+            LOGGER.info("Finished transaction: \n" + upsertPreparedStatement + "\n Inserted ROWS: " + insertedRows.length + " " + insertPreparedStatement);
+
+        } catch (SQLTimeoutException e) {
+            cygnusSQLRollback(connection);
+            throw new CygnusPersistenceError(sqlInstance.toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + connection, "SQLTimeoutException", e.getMessage());
+        } catch (SQLException e) {
+            cygnusSQLRollback(connection);
+            throw new CygnusBadContextData(sqlInstance.toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + connection, "SQLException", e.getMessage());
+        } finally {
+            closeStatement(insertPreparedStatement);
+            closeStatement(upsertPreparedStatement);
+            closeConnection(connection);
+        } // try catch
+
     }
 
-    /**
-     * Execute prepared statement.
-     *
-     * @param preparedStatement the prepared statement
-     * @throws SQLException           the sql exception
-     * @throws CygnusPersistenceError the cygnus persistence error
-     * @throws CygnusRuntimeError     the cygnus runtime error
-     * @throws CygnusBadContextData   the cygnus bad context data
-     */
-
-    public void executePreparedStatement (PreparedStatement preparedStatement) throws SQLException, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
+    private void cygnusSQLRollback (Connection connection) {
         try {
-            preparedStatement.executeBatch();
-        } catch (SQLTimeoutException e) {
-            throw new CygnusPersistenceError(sqlInstance.toUpperCase() + " Data insertion error. Query: `" + preparedStatement, "SQLTimeoutException", e.getMessage());
+            connection.rollback();
         } catch (SQLException e) {
-            throw new CygnusBadContextData(sqlInstance.toUpperCase() + " Data insertion error. Query: `" + preparedStatement, "SQLException", e.getMessage());
-        } finally {
-            closeSQLObjects(preparedStatement.getConnection(), preparedStatement);
-        } // try catch
+            LOGGER.error("Error when rollingback transaction " + e.getMessage());
+        }
     }
 
     public void purgeErrorTable(String destination)
