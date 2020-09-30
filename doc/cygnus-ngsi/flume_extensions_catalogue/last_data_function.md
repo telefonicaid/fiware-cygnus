@@ -5,7 +5,7 @@ Cygnus is capable to perform an `upsert` operation on the following Sinks.
 - PostgisSink
 - PostgreSQLSink  
   
-This Operation doesn't overrides the usual inserts on the usual way.
+**This operation performs a transaction where runs both insert and upsert querys, if any one of them fails, then the other one is rollbacked. This means Both have to be run successfully by Cygnus to store on the database.**
 
 In order to perform this operation Cygnus needs four keys.
 
