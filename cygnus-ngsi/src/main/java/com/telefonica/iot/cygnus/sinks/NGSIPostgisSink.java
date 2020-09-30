@@ -442,38 +442,29 @@ public class NGSIPostgisSink extends NGSISink {
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
                 + valuesForInsert + ")");
 
-            if (aggregator instanceof NGSIGenericRowAggregator) {
-                postgisPersistenceBackend.createDestination(schemaName);
-                postgisPersistenceBackend.createTable(schemaName, tableName, fieldsForCreate);
-            } // if
-            // creating the database and the table has only sense if working in row mode, in column node
-            // everything must be provisioned in advance
-            if (valuesForInsert.equals("")) {
-                LOGGER.debug("[" + this.getName() + "] no values for insert");
+        if (aggregator instanceof NGSIGenericRowAggregator) {
+            postgisPersistenceBackend.createDestination(schemaName);
+            postgisPersistenceBackend.createTable(schemaName, tableName, fieldsForCreate);
+        } // if
+        // creating the database and the table has only sense if working in row mode, in column node
+        // everything must be provisioned in advance
+        if (valuesForInsert.equals("")) {
+            LOGGER.debug("[" + this.getName() + "] no values for insert");
+        } else {
+            if (lastData && !rowAttrPersistence ) {
+                postgisPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
+                        aggregator.getLastDataToPersist(),
+                        schemaName,
+                        tableName,
+                        lastDataTableSuffix,
+                        lastDataUniqueKey,
+                        lastDataTimeStampKey,
+                        lastDataSQLTimestampFormat,
+                        attrNativeTypes);
             } else {
                 postgisPersistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
-                if (lastData && !rowAttrPersistence && (aggregator.getLastDataToPersist().get(DEFAULT_LAST_DATA_UNIQUE_KEY).size() > 0)) {
-                    try {
-                        Connection connection = postgisPersistenceBackend.getSQLConnection(schemaName);
-                        PreparedStatement preparedStatement = SQLQueryUtils.upsertStatement(aggregator.getAggregationToPersist(),
-                                aggregator.getLastDataToPersist(),
-                                tableName,
-                                lastDataTableSuffix,
-                                lastDataUniqueKey,
-                                lastDataTimeStampKey,
-                                lastDataSQLTimestampFormat,
-                                POSTGIS_INSTANCE_NAME,
-                                schemaName,
-                                connection,
-                                aggregator.isAttrNativeTypes());
-                        postgisPersistenceBackend.executePreparedStatement(preparedStatement);
-                    } catch (SQLException sqlException) {
-                        LOGGER.error("PostgisSink SQLEXCEPTION error when upserting " + sqlException.getMessage() );
-                    } catch (Exception e) {
-                        LOGGER.error("PostgisSink GENERIC error when upserting " + e.getMessage() );
-                    }
-                }
             }
+        }
     } // persistAggregation
 
     /**

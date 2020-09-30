@@ -440,27 +440,18 @@ public class NGSIPostgreSQLSink extends NGSISink {
             if (valuesForInsert.equals("")) {
                 LOGGER.debug("[" + this.getName() + "] no values for insert");
             } else {
-                postgreSQLPersistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
-                if (lastData && !rowAttrPersistence && (aggregator.getLastDataToPersist().get(DEFAULT_LAST_DATA_UNIQUE_KEY).size() > 0)) {
-                    try {
-                        Connection connection = postgreSQLPersistenceBackend.getSQLConnection(schemaName);
-                        PreparedStatement preparedStatement = SQLQueryUtils.upsertStatement(aggregator.getAggregationToPersist(),
-                                aggregator.getLastDataToPersist(),
-                                tableName,
-                                lastDataTableSuffix,
-                                lastDataUniqueKey,
-                                lastDataTimeStampKey,
-                                lastDataSQLTimestampFormat,
-                                POSTGRESQL_INSTANCE_NAME,
-                                schemaName,
-                                connection,
-                                aggregator.isAttrNativeTypes());
-                        postgreSQLPersistenceBackend.executePreparedStatement(preparedStatement);
-                    } catch (SQLException sqlException) {
-                        LOGGER.error("PostgisSink SQLEXCEPTION error when upserting " + sqlException.getMessage() );
-                    } catch (Exception e) {
-                        LOGGER.error("PostgisSink GENERIC error when upserting " + e.getMessage() );
-                    }
+                if (lastData && !rowAttrPersistence ) {
+                    postgreSQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
+                            aggregator.getLastDataToPersist(),
+                            schemaName,
+                            tableName,
+                            lastDataTableSuffix,
+                            lastDataUniqueKey,
+                            lastDataTimeStampKey,
+                            lastDataSQLTimestampFormat,
+                            attrNativeTypes);
+                } else {
+                    postgreSQLPersistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
                 }
             }
         } catch (Exception e) {
