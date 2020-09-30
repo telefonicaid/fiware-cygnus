@@ -604,7 +604,7 @@ public class SQLBackendImpl implements SQLBackend{
             upsertPreparedStatement.executeBatch();
 
             connection.commit();
-            LOGGER.info("Finished transaction: \n" + upsertPreparedStatement + "\n Inserted ROWS: " + insertedRows.length + " " + upsertQuery);
+            LOGGER.info("Finished transaction: \n" + upsertPreparedStatement + "\n Also, " + insertedRows.length + " where Inserted. THE LAS ONE WAS: " + " " + upsertQuery);
 
         } catch (SQLTimeoutException e) {
             cygnusSQLRollback(connection);
