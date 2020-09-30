@@ -16,7 +16,7 @@
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
-package com.telefonica.iot.cygnus.utils;
+package com.telefonica.iot.cygnus.backends.sql;
 
 import com.google.gson.JsonElement;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
@@ -32,9 +32,9 @@ import java.util.Set;
 /**
  * The type Ngsisql utils.
  */
-public class NGSISQLUtils {
+public class SQLQueryUtils {
 
-    private static final CygnusLogger LOGGER = new CygnusLogger(NGSISQLUtils.class);
+    private static final CygnusLogger LOGGER = new CygnusLogger(SQLQueryUtils.class);
 
     private static final String POSTGRES_FIELDS_MARK = "";
     private static final String MYSQL_FIELDS_MARK = "'";
@@ -120,8 +120,6 @@ public class NGSISQLUtils {
                                               String sqlInstance,
                                               String destination) {
 
-        StringBuffer fieldsForInsert;
-        StringBuffer valuesForInsert = sqlQuestionValues(lastData.keySet());
         StringBuffer updateSet = new StringBuffer();
         StringBuffer postgisTempReference = new StringBuffer("EXCLUDED");
         StringBuffer postgisDestination = new StringBuffer(destination).append(".").append(tableName).append(tableSuffix);
@@ -137,10 +135,13 @@ public class NGSISQLUtils {
             }
         }
 
+        StringBuffer insertQuery = sqlInsertQuery(lastData,
+                tableName.concat(tableSuffix),
+                sqlInstance,
+                destination);
+
         if (sqlInstance.equals("postgresql")) {
-            fieldsForInsert = getFieldsForInsert(lastData.keySet(), POSTGRES_FIELDS_MARK);
-            query.append("INSERT INTO ").append(postgisDestination).append(" ").append(fieldsForInsert).append(" ").
-                    append("VALUES ").append(valuesForInsert).append(" ").
+            query.append(insertQuery).
                     append("ON CONFLICT ").append("(").append(uniqueKey).append(") ").
                     append("DO ").
                     append("UPDATE SET ").append(updateSet).append(" ").
@@ -153,12 +154,52 @@ public class NGSISQLUtils {
     }
 
     /**
+     * Sql insert query string buffer.
+     *
+     * @param aggregation     the aggregation
+     * @param tableName       the table name
+     * @param sqlInstance     the sql instance
+     * @param destination     the destination
+     * @return the string buffer
+     */
+    protected static StringBuffer sqlInsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
+                                                 String tableName,
+                                                 String sqlInstance,
+                                                 String destination) {
+
+        StringBuffer fieldsForInsert;
+        StringBuffer valuesForInsert = sqlQuestionValues(aggregation.keySet());
+        StringBuffer updateSet = new StringBuffer();
+        StringBuffer postgisTempReference = new StringBuffer("EXCLUDED");
+        StringBuffer postgisDestination = new StringBuffer(destination).append(".").append(tableName);
+        StringBuffer query = new StringBuffer();
+        boolean first = true;
+
+        for (String key : aggregation.keySet()) {
+            if (!key.equals(aggregation) && first) {
+                updateSet.append(key).append("=").append(postgisTempReference).append(".").append(key);
+                first = false;
+            } else if (!key.equals(aggregation)) {
+                updateSet.append(", ").append(key).append("=").append(postgisTempReference).append(".").append(key);
+            }
+        }
+
+        if (sqlInstance.equals("postgresql")) {
+            fieldsForInsert = getFieldsForInsert(aggregation.keySet(), POSTGRES_FIELDS_MARK);
+            query.append("INSERT INTO ").append(postgisDestination).append(" ").append(fieldsForInsert).append(" ").
+                    append("VALUES ").append(valuesForInsert).append(" ");
+        }
+        LOGGER.debug("[NGSISQLUtils.sqlInsertQuery] Preparing Insert query: " + query.toString());
+        return query;
+    }
+
+    /**
      * Sql question values string buffer.
      *
      * @param keyList the key list
      * @return the string buffer
      */
-    public static StringBuffer sqlQuestionValues(Set<String> keyList) {
+    protected static StringBuffer sqlQuestionValues(Set<String> keyList) {
         StringBuffer questionValues = new StringBuffer("(");
         boolean first = true;
         for (String key : keyList) {
@@ -181,7 +222,7 @@ public class NGSISQLUtils {
      * @param fieldMark the field mark
      * @return the fields for insert
      */
-    public static StringBuffer getFieldsForInsert(Set<String> keyList, String fieldMark) {
+    protected static StringBuffer getFieldsForInsert(Set<String> keyList, String fieldMark) {
         StringBuffer fieldsForInsert = new StringBuffer("(");
         boolean first = true;
         Iterator<String> it = keyList.iterator();
@@ -212,7 +253,7 @@ public class NGSISQLUtils {
                                                    boolean attrNativeTypes) throws SQLException {
 
         PreparedStatement preparedStatement = previousStatement;
-        int numEvents = NGSIUtils.collectionSizeOnLinkedHashMap(aggregation);
+        int numEvents = collectionSizeOnLinkedHashMap(aggregation);
         for (int i = 0; i < numEvents; i++) {
             Iterator<String> it = aggregation.keySet().iterator();
             int position = 1;
@@ -281,6 +322,17 @@ public class NGSISQLUtils {
             LOGGER.debug("[NGSISQLUtils.addJsonValues] Batch added");
         } // for
         return preparedStatement;
+    }
+
+    /**
+     * Collection size on linked hash map int.
+     *
+     * @param aggregation the aggregation
+     * @return the number of attributes contained on the aggregation object.
+     */
+    protected static int collectionSizeOnLinkedHashMap(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        ArrayList<ArrayList<JsonElement>> list = new ArrayList<>(aggregation.values());
+        return list.get(0).size();
     }
 
 }

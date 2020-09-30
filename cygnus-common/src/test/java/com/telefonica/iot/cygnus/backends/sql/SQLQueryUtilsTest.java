@@ -16,10 +16,11 @@
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
 
-package com.telefonica.iot.cygnus.utils;
+package com.telefonica.iot.cygnus.backends.sql;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
+import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,7 +37,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-public class NGSISQLUtilsTest {
+public class SQLQueryUtilsTest {
 
     Connection connection = mock(Connection.class);
 
@@ -130,7 +131,7 @@ public class NGSISQLUtilsTest {
     }// getValueFields
 
     @Test
-    public void testSQLUpsertQuerySingleBatch() throws SQLException {
+    public void testSQLUpsertQuerySingleBatch() {
         String tableName = "exampleTable";
         String tableSuffix = "_last_data";
         String uniqueKey = "entityId";
@@ -139,7 +140,7 @@ public class NGSISQLUtilsTest {
         String sqlInstance = "postgresql";
         String destination = "example";
         StringBuffer sqlupsertQuery;
-        sqlupsertQuery = NGSISQLUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
+        sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
                 getValueFieldsSingleBatch(),
                 tableName,
                 tableSuffix,
@@ -170,7 +171,7 @@ public class NGSISQLUtilsTest {
     }
 
     @Test
-    public void testSQLUpsertQueryMultipleBatch() throws SQLException {
+    public void testSQLUpsertQueryMultipleBatch() {
         String tableName = "exampleTable";
         String tableSuffix = "_last_data";
         String uniqueKey = "entityId";
@@ -179,7 +180,7 @@ public class NGSISQLUtilsTest {
         String sqlInstance = "postgresql";
         String destination = "example";
         StringBuffer sqlupsertQuery;
-        sqlupsertQuery = NGSISQLUtils.sqlUpsertQuery(getValueFieldsMultipleBatch(),
+        sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(getValueFieldsMultipleBatch(),
                 getValueFieldsSingleBatch(),
                 tableName,
                 tableSuffix,
@@ -210,11 +211,61 @@ public class NGSISQLUtilsTest {
     }
 
     @Test
+    public void testSQLInsertQuerySingleBatch() {
+        String tableName = "exampleTable";
+        String sqlInstance = "postgresql";
+        String destination = "example";
+        StringBuffer sqlupsertQuery;
+        sqlupsertQuery = SQLQueryUtils.sqlInsertQuery(getValueFieldsSingleBatch(),
+                tableName,
+                sqlInstance,
+                destination);
+
+        String correctQuery = "INSERT INTO example.exampleTable " +
+                "(recvTime,recvTimeS,fiwareServicePath,entityId,entityType,loadStr,loadBool,loadNumber,load_md) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+
+        try {
+            assertEquals(sqlupsertQuery.toString(), correctQuery);
+            System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testSQLInsertQuerySingleBatch]")
+                    + "-  OK  - testSQLUpsertQuerySingleBatch");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void testSQLInsertQueryMultipleBatch() {
+        String tableName = "exampleTable";
+        String sqlInstance = "postgresql";
+        String destination = "example";
+        StringBuffer sqlupsertQuery;
+        sqlupsertQuery = SQLQueryUtils.sqlInsertQuery(getValueFieldsMultipleBatch(),
+                tableName,
+                sqlInstance,
+                destination);
+
+        String correctQuery = "INSERT INTO example.exampleTable " +
+                "(recvTime,recvTimeS,fiwareServicePath,entityId,entityType,loadStr,loadBool,loadNumber,load_md) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+
+        try {
+            assertEquals(sqlupsertQuery.toString(), correctQuery);
+            System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testSQLInsertQueryMultipleBatch]")
+                    + "-  OK  - testSQLUpsertQueryMultipleBatch");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
     public void testSQLQuestionMultipleValues() {
         Set<String> keyList = getValueFieldsMultipleBatch().keySet();
         String multipleList = "(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
-            StringBuffer questionValues = NGSISQLUtils.sqlQuestionValues(keyList);
+            StringBuffer questionValues = SQLQueryUtils.sqlQuestionValues(keyList);
             assertEquals(questionValues.toString(), multipleList);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testSQLQuestionMultipleValues]")
                     + "-  OK  - testSQLQuestionMultipleValues");
@@ -229,7 +280,7 @@ public class NGSISQLUtilsTest {
         keyList.add("value");
         String multipleList = "(?)";
         try {
-            StringBuffer questionValues = NGSISQLUtils.sqlQuestionValues(keyList);
+            StringBuffer questionValues = SQLQueryUtils.sqlQuestionValues(keyList);
             assertEquals(questionValues.toString(), multipleList);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testSQLQuestionSingleValue]")
                     + "-  OK  - testSQLQuestionSingleValue");
@@ -243,7 +294,7 @@ public class NGSISQLUtilsTest {
         Set<String> keyList = new HashSet<>();
         String multipleList = "()";
         try {
-            StringBuffer questionValues = NGSISQLUtils.sqlQuestionValues(keyList);
+            StringBuffer questionValues = SQLQueryUtils.sqlQuestionValues(keyList);
             assertEquals(questionValues.toString(), multipleList);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testSQLQuestionSingleValue]")
                     + "-  OK  - testSQLQuestionSingleValue");
@@ -257,7 +308,7 @@ public class NGSISQLUtilsTest {
         Set<String> keyList = getValueFieldsMultipleBatch().keySet();
         String multipleList = "(recvTime,recvTimeS,fiwareServicePath,entityId,entityType,loadStr,loadBool,loadNumber,load_md)";
         try {
-            StringBuffer questionValues = NGSISQLUtils.getFieldsForInsert(keyList, "");
+            StringBuffer questionValues = SQLQueryUtils.getFieldsForInsert(keyList, "");
             assertEquals(questionValues.toString(), multipleList);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testGetFieldsForInsertMultiple]")
                     + "-  OK  - testGetFieldsForInsertMultiple");
@@ -272,7 +323,7 @@ public class NGSISQLUtilsTest {
         keyList.add("value");
         String multipleList = "(value)";
         try {
-            StringBuffer questionValues = NGSISQLUtils.getFieldsForInsert(keyList, "");
+            StringBuffer questionValues = SQLQueryUtils.getFieldsForInsert(keyList, "");
             assertEquals(questionValues.toString(), multipleList);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testGetFieldsForInsertSingle]")
                     + "-  OK  - testGetFieldsForInsertSingle");
@@ -286,7 +337,7 @@ public class NGSISQLUtilsTest {
         Set<String> keyList = new HashSet<>();
         String multipleList = "()";
         try {
-            StringBuffer questionValues = NGSISQLUtils.getFieldsForInsert(keyList, "");
+            StringBuffer questionValues = SQLQueryUtils.getFieldsForInsert(keyList, "");
             assertEquals(questionValues.toString(), multipleList);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testGetFieldsForInsertNone]")
                     + "-  OK  - testGetFieldsForInsertNone");
@@ -304,7 +355,7 @@ public class NGSISQLUtilsTest {
         PreparedStatement previousStatement = connection.prepareStatement(query);
         PreparedStatement preparedStatement;
         try {
-            preparedStatement = NGSISQLUtils.addJsonValues(previousStatement,
+            preparedStatement = SQLQueryUtils.addJsonValues(previousStatement,
                     getValueFieldsSingleBatch(),
                     attrNativeTypes);
             verify(preparedStatement).setDouble(1, Long.parseLong("1461136795801"));
@@ -327,7 +378,7 @@ public class NGSISQLUtilsTest {
         PreparedStatement previousStatement = connection.prepareStatement(query);
         PreparedStatement preparedStatement;
         try {
-            preparedStatement = NGSISQLUtils.addJsonValues(previousStatement,
+            preparedStatement = SQLQueryUtils.addJsonValues(previousStatement,
                     getValueFieldsSingleBatch(),
                     attrNativeTypes);
             verify(preparedStatement).setString(1, "1461136795801");
@@ -350,7 +401,7 @@ public class NGSISQLUtilsTest {
         PreparedStatement previousStatement = connection.prepareStatement(query);
         PreparedStatement preparedStatement;
         try {
-            preparedStatement = NGSISQLUtils.addJsonValues(previousStatement,
+            preparedStatement = SQLQueryUtils.addJsonValues(previousStatement,
                     getValueFieldsMultipleBatch(),
                     attrNativeTypes);
             verify(preparedStatement).setDouble(1, Long.parseLong("1461136795801"));
@@ -377,7 +428,7 @@ public class NGSISQLUtilsTest {
         PreparedStatement previousStatement = connection.prepareStatement(query);
         PreparedStatement preparedStatement;
         try {
-            preparedStatement = NGSISQLUtils.addJsonValues(previousStatement,
+            preparedStatement = SQLQueryUtils.addJsonValues(previousStatement,
                     getValueFieldsMultipleBatch(),
                     attrNativeTypes);
             verify(preparedStatement).setString(1, "1461136795801");
