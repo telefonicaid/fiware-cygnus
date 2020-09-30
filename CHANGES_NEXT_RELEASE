@@ -1,4 +1,4 @@
-[cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink] Create upsert transaction (#1806)
+[cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink] Create upsert transaction (#1806, #1936)
 [cygnus-common][NameMappingInterceptor] Catch and log Compile error namemapping (#1924)
 [cygnus-ngsi][PosgtgreSQLSink, PostgisSink] Add upsert function. (#1806)
 [cygnus-common][SQLBackendImpl] Add configuration option to persist errors in SQL sinks (#1928)
