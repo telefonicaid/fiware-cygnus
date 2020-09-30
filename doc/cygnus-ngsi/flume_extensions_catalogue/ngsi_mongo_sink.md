@@ -306,7 +306,7 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 | mongo\_username | no | <i>empty</i> | If empty, no authentication is done. |
 | mongo\_password | no | <i>empty</i> | If empty, no authentication is done. |
 | mongo\_auth_source | no | <i>empty</i> | Auth source database use to authenticate the user. Usually could be `admin`. |
-| mongo\_replica_set | no | <i>empty</i> | Replica Set name. Usually could be `replica`. |
+| mongo\_replica_set | no | <i>empty</i> | Replica Set name. Note that this parameter is optional because Cygnus is able to connect to a MongoDB replica set without needing to specify its name.|
 | db\_prefix | no | sth_ ||
 | collection\_prefix | no | sth_ | `system.` is not accepted. |
 | batch\_size | no | 1 | Number of events accumulated before persistence. |

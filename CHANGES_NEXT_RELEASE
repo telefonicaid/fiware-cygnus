@@ -1,0 +1,1 @@
+- Add: set the replica set name for the mongodb connection with the environment variable CYGNUS_MONGO_REPLICA_SET
