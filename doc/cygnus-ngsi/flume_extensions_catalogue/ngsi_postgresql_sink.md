@@ -259,6 +259,11 @@ Coming soon.
 | enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
+| enable\_last\_data | no | false | <i>true</i> or <i>false</i>, to enable last data functionality. Check this [link](./last_data_function.md) for more details. |
+| last\_data\_table\_suffix | no | false | This suffix will be added to the table name in order to know where Cygnus will store the last record of an entity. Check this [link](./last_data_function.md) for more details. |
+| last\_data\_unique\_key | no | entityId | This must be a unique key on the database to find when a previous record exists. Check this [link](./last_data_function.md) for more details. |
+| last\_data\_timestamp\_key | no | recvTime | This must be a timestamp key on the aggregation to know which record is older. Check this [link](./last_data_function.md) for more details. |
+| last\_data\_sql_timestamp\_format | no | YYYY-MM-DD HH24:MI:SS.MS | This must be a timestamp format to cast SQL Text to timestamp. Check this [link](./last_data_function.md) for more details. |
 | data\_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i> or <i>dm-by-entity-type</i> or <i>dm-by-entity-database</i> or <i>dm-by-entity-database-schema</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | postgresql\_host | no | localhost | FQDN/IP address where the PostgreSQL server runs. |
 | postgresql\_port | no | 5432 ||
@@ -274,6 +279,7 @@ Coming soon.
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 | batch\_retry\_intervals | no | 5000 | Comma-separated list of intervals (in miliseconds) at which the retries regarding not persisted batches will be done. First retry will be done as many miliseconds after as the first value, then the second retry will be done as many miliseconds after as second value, and so on. If the batch\_ttl is greater than the number of intervals, the last interval is repeated. |
 | backend.enable\_cache | no | false | <i>true</i> or <i>false</i>, <i>true</i> enables the creation of a Cache, <i>false</i> disables the creation of a Cache. |
+| persist\_errors | no | true | if there is an exception when trying to persist data into storage then error is persisted into a table |
 
 A configuration example could be:
 
@@ -300,6 +306,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
     cygnus-ngsi.sinks.postgresql-sink.batch_retry_intervals = 5000
     cygnus-ngsi.sinks.postgresql.backend.enable_cache = false
+    cygnus-ngsi.sinks.postgresql-sink.persist_errors = true
 
 [Top](#top)
 

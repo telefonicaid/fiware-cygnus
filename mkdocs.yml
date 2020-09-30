@@ -73,6 +73,7 @@ pages:
           - 'Connecting Orion Context Broker and Cygnus': 'cygnus-ngsi/user_and_programmer_guide/connecting_orion.md'
           - 'Adding a new sink': 'cygnus-ngsi/user_and_programmer_guide/adding_new_sink.md'
           - 'Reporting issues and contact information': 'cygnus-ngsi/user_and_programmer_guide/issues_and_contact.md'
+          - 'Debugging Cygnus with IntelliJ & Docker': 'cygnus-ngsi/user_and_programmer_guide/debugging.md'
       - 'Flume extensions catalogue':
           - 'Introduction': 'cygnus-ngsi/flume_extensions_catalogue/introduction.md'
           - 'NGSIRestHandler': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_rest_handler.md'
@@ -92,6 +93,7 @@ pages:
           - 'NGSITestSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_test_sink.md'
           - 'NGSIGroupingInterceptor': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md'
           - 'NGSINameMappingsInterceptor': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md'
+          - 'LastDataFunctionality': 'cygnus-ngsi/flume_extensions_catalogue/last_data_function.md'
           - 'RoundRobinChannelSelector': 'cygnus-ngsi/flume_extensions_catalogue/round_robin_channel_selector.md'
           - 'Reporting issues and contact information': 'cygnus-ngsi/flume_extensions_catalogue/issues_and_contact.md'
       - 'Integration examples':
@@ -128,7 +130,8 @@ pages:
               - 'Introduction': 'cygnus-ngsi-ld/flume_extensions_catalogue/introduction.md'
               - 'NGSIRestHandler': 'cygnus-ngsi-ld/flume_extensions_catalogue/ngsi_rest_handler.md'
               - 'NGSIPostgreSQLSink': 'cygnus-ngsi-ld/flume_extensions_catalogue/ngsi_postgresql_sink.md'
+              - 'NGSIPostGISSink': 'cygnus-ngsi-ld/flume_extensions_catalogue/ngsi_postgis_sink.md'
               - 'Reporting issues and contact information': 'cygnus-ngsi-ld/flume_extensions_catalogue/issues_and_contact.md'
         - 'User and Programmer Guide':
-              - 'Programmer Guide': 'cygnus-ngsi-ld/user_and_programmer_guide/programmer_guide.md'
+              - 'Programmer Guide': 'cygnus-ngsi-ld/user_and_programmer_guide/README.md'
               - 'Reporting issues and contact information': 'cygnus-ngsi-ld/user_and_programmer_guide/issues_and_contact.md'
