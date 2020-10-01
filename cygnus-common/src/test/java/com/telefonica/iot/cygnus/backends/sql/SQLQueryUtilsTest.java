@@ -20,7 +20,6 @@ package com.telefonica.iot.cygnus.backends.sql;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -140,7 +139,7 @@ public class SQLQueryUtilsTest {
         String sqlInstance = "postgresql";
         String destination = "example";
         StringBuffer sqlupsertQuery;
-        sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
+        sqlupsertQuery = SQLQueryUtils.postgreSqlUpsertQuery(getValueFieldsSingleBatch(),
                 getValueFieldsSingleBatch(),
                 tableName,
                 tableSuffix,
@@ -180,7 +179,7 @@ public class SQLQueryUtilsTest {
         String sqlInstance = "postgresql";
         String destination = "example";
         StringBuffer sqlupsertQuery;
-        sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(getValueFieldsMultipleBatch(),
+        sqlupsertQuery = SQLQueryUtils.postgreSqlUpsertQuery(getValueFieldsMultipleBatch(),
                 getValueFieldsSingleBatch(),
                 tableName,
                 tableSuffix,
@@ -215,11 +214,13 @@ public class SQLQueryUtilsTest {
         String tableName = "exampleTable";
         String sqlInstance = "postgresql";
         String destination = "example";
+        String stringMark = "";
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlInsertQuery(getValueFieldsSingleBatch(),
                 tableName,
                 sqlInstance,
-                destination);
+                destination,
+                stringMark);
 
         String correctQuery = "INSERT INTO example.exampleTable " +
                 "(recvTime,recvTimeS,fiwareServicePath,entityId,entityType,loadStr,loadBool,loadNumber,load_md) " +
@@ -240,11 +241,13 @@ public class SQLQueryUtilsTest {
         String tableName = "exampleTable";
         String sqlInstance = "postgresql";
         String destination = "example";
+        String stringMark = "";
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlInsertQuery(getValueFieldsMultipleBatch(),
                 tableName,
                 sqlInstance,
-                destination);
+                destination,
+                stringMark);
 
         String correctQuery = "INSERT INTO example.exampleTable " +
                 "(recvTime,recvTimeS,fiwareServicePath,entityId,entityType,loadStr,loadBool,loadNumber,load_md) " +

@@ -37,67 +37,11 @@ public class SQLQueryUtils {
     private static final CygnusLogger LOGGER = new CygnusLogger(SQLQueryUtils.class);
 
     private static final String POSTGRES_FIELDS_MARK = "";
-    private static final String MYSQL_FIELDS_MARK = "'";
+    private static final String MYSQL_FIELDS_MARK = "`";
     private static final String SEPARATION_MARK = ",";
 
     /**
-     * Upsert statement prepared statement.
-     *
-     * @param aggregation     the aggregation
-     * @param lastData        the last data
-     * @param tableName       the table name
-     * @param tableSuffix     the table suffix
-     * @param uniqueKey       the unique key
-     * @param timestampKey    the timestamp key
-     * @param timestampFormat the timestamp format
-     * @param sqlInstance     the sql instance
-     * @param destination     the destination
-     * @param connection      the connection
-     * @param attrNativeTypes the attr native types
-     * @return the prepared statement
-     * @throws SQLException the sql exception
-     */
-    public static PreparedStatement upsertStatement (LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
-                                            LinkedHashMap<String, ArrayList<JsonElement>> lastData,
-                                            String tableName,
-                                            String tableSuffix,
-                                            String uniqueKey,
-                                            String timestampKey,
-                                            String timestampFormat,
-                                            String sqlInstance,
-                                            String destination,
-                                            Connection connection,
-                                            boolean attrNativeTypes) throws SQLException {
-
-
-        String query = sqlUpsertQuery(aggregation,
-                lastData,
-                tableName,
-                tableSuffix,
-                uniqueKey,
-                timestampKey,
-                timestampFormat,
-                sqlInstance,
-                destination).toString();
-
-        PreparedStatement previousStatement = connection.prepareStatement(query);
-        PreparedStatement preparedStatement = null;
-        try {
-            preparedStatement = addJsonValues(previousStatement,
-                    lastData,
-                    attrNativeTypes);
-        } catch (SQLException e) {
-            LOGGER.error(sqlInstance + " SQLEXCEPTION Error creating upsert statement " + e);
-        } catch (Exception e) {
-            LOGGER.error(sqlInstance + " GENERICEXCEPTION Error creating upsert statement " + e);
-        }
-        LOGGER.info("[NGSISQLUtils.upsertStatement] PreparedStatement for upsert created successfully, all batches added. " + query);
-        return preparedStatement;
-
-    }
-
-    /**
-     * Sql upsert query string buffer.
+     * Sql upsert query for PostgresSQL string buffer.
      *
      * @param aggregation     the aggregation
      * @param lastData        the last data
@@ -110,15 +54,15 @@ public class SQLQueryUtils {
      * @param destination     the destination
      * @return the string buffer
      */
-    protected static StringBuffer sqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
-                                              LinkedHashMap<String, ArrayList<JsonElement>> lastData,
-                                              String tableName,
-                                              String tableSuffix,
-                                              String uniqueKey,
-                                              String timestampKey,
-                                              String timestampFormat,
-                                              String sqlInstance,
-                                              String destination) {
+    protected static StringBuffer postgreSqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
+                                                        LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                                        String tableName,
+                                                        String tableSuffix,
+                                                        String uniqueKey,
+                                                        String timestampKey,
+                                                        String timestampFormat,
+                                                        String sqlInstance,
+                                                        String destination) {
 
         StringBuffer updateSet = new StringBuffer();
         StringBuffer postgisTempReference = new StringBuffer("EXCLUDED");
@@ -138,17 +82,17 @@ public class SQLQueryUtils {
         StringBuffer insertQuery = sqlInsertQuery(lastData,
                 tableName.concat(tableSuffix),
                 sqlInstance,
-                destination);
+                destination,
+                POSTGRES_FIELDS_MARK);
 
-        if (sqlInstance.equals("postgresql")) {
-            query.append(insertQuery).
-                    append("ON CONFLICT ").append("(").append(uniqueKey).append(") ").
-                    append("DO ").
-                    append("UPDATE SET ").append(updateSet).append(" ").
-                    append("WHERE ").append(postgisDestination).append(".").append(uniqueKey).append("=").append(postgisTempReference).append(".").append(uniqueKey).append(" ").
-                    append("AND ").append("to_timestamp(").append(postgisDestination).append(".").append(timestampKey).append(", '").append(timestampFormat).append("') ").
-                    append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append(", '").append(timestampFormat).append("')");
-        }
+        query.append(insertQuery).
+                append("ON CONFLICT ").append("(").append(uniqueKey).append(") ").
+                append("DO ").
+                append("UPDATE SET ").append(updateSet).append(" ").
+                append("WHERE ").append(postgisDestination).append(".").append(uniqueKey).append("=").append(postgisTempReference).append(".").append(uniqueKey).append(" ").
+                append("AND ").append("to_timestamp(").append(postgisDestination).append(".").append(timestampKey).append(", '").append(timestampFormat).append("') ").
+                append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append(", '").append(timestampFormat).append("')");
+
         LOGGER.debug("[NGSISQLUtils.sqlUpsertQuery] Preparing Upsert query: " + query.toString());
         return query;
     }
@@ -165,24 +109,13 @@ public class SQLQueryUtils {
     protected static StringBuffer sqlInsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                  String tableName,
                                                  String sqlInstance,
-                                                 String destination) {
+                                                 String destination,
+                                                 String fieldMarks) {
 
         StringBuffer fieldsForInsert;
         StringBuffer valuesForInsert = sqlQuestionValues(aggregation.keySet());
-        StringBuffer updateSet = new StringBuffer();
-        StringBuffer postgisTempReference = new StringBuffer("EXCLUDED");
         StringBuffer postgisDestination = new StringBuffer(destination).append(".").append(tableName);
         StringBuffer query = new StringBuffer();
-        boolean first = true;
-
-        for (String key : aggregation.keySet()) {
-            if (!key.equals(aggregation) && first) {
-                updateSet.append(key).append("=").append(postgisTempReference).append(".").append(key);
-                first = false;
-            } else if (!key.equals(aggregation)) {
-                updateSet.append(", ").append(key).append("=").append(postgisTempReference).append(".").append(key);
-            }
-        }
 
         if (sqlInstance.equals("postgresql")) {
             fieldsForInsert = getFieldsForInsert(aggregation.keySet(), POSTGRES_FIELDS_MARK);
