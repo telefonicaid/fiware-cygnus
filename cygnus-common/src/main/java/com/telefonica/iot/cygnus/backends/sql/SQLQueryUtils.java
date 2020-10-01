@@ -82,8 +82,7 @@ public class SQLQueryUtils {
         StringBuffer insertQuery = sqlInsertQuery(lastData,
                 tableName.concat(tableSuffix),
                 sqlInstance,
-                destination,
-                POSTGRES_FIELDS_MARK);
+                destination);
 
         query.append(insertQuery).
                 append("ON CONFLICT ").append("(").append(uniqueKey).append(") ").
@@ -109,8 +108,7 @@ public class SQLQueryUtils {
     protected static StringBuffer sqlInsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                  String tableName,
                                                  String sqlInstance,
-                                                 String destination,
-                                                 String fieldMarks) {
+                                                 String destination) {
 
         StringBuffer fieldsForInsert;
         StringBuffer valuesForInsert = sqlQuestionValues(aggregation.keySet());
@@ -121,7 +119,12 @@ public class SQLQueryUtils {
             fieldsForInsert = getFieldsForInsert(aggregation.keySet(), POSTGRES_FIELDS_MARK);
             query.append("INSERT INTO ").append(postgisDestination).append(" ").append(fieldsForInsert).append(" ").
                     append("VALUES ").append(valuesForInsert).append(" ");
+        } else if (sqlInstance.equals("mysql")) {
+            fieldsForInsert = getFieldsForInsert(aggregation.keySet(), MYSQL_FIELDS_MARK);
+            query.append("INSERT INTO ").append(MYSQL_FIELDS_MARK).append(tableName).append(MYSQL_FIELDS_MARK).append(" ").append(fieldsForInsert).append(" ").
+                    append("VALUES ").append(valuesForInsert).append(" ");
         }
+
         LOGGER.debug("[NGSISQLUtils.sqlInsertQuery] Preparing Insert query: " + query.toString());
         return query;
     }

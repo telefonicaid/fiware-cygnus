@@ -581,8 +581,7 @@ public class SQLBackendImpl implements SQLBackend{
             String insertQuery = SQLQueryUtils.sqlInsertQuery(aggregation,
                     tableName,
                     sqlInstance,
-                    destination,
-                    sqlInstance).toString();
+                    destination).toString();
 
             PreparedStatement insertStatement = null;
             insertStatement = connection.prepareStatement(insertQuery);
