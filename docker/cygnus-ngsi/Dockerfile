@@ -62,6 +62,7 @@ ENV CYGNUS_MYSQL_OPTIONS ""
 ENV CYGNUS_MONGO_HOSTS ""
 # ENV CYGNUS_MONGO_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
 # ENV CYGNUS_MONGO_PASS "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+ENV CYGNUS_MONGO_REPLICA_SET ""
 ENV CYGNUS_MONGO_AUTH_SOURCE ""
 ENV CYGNUS_MONGO_SKIP_CONF_GENERATION ""
 ENV CYGNUS_MONGO_SERVICE_PORT "5051"
@@ -247,7 +248,7 @@ ENV CYGNUS_ELASTICSEARCH_CHARSET ""
 
 # ArcGis options
 ENV CYGNUS_ARCGIS_URL ""
-ENV CYGNUS_ARCGIS_USER "" 
+ENV CYGNUS_ARCGIS_USER ""
 ENV CYGNUS_ARCGIS_SERVICE_PORT "5059"
 ENV CYGNUS_ARCGIS_PASS ""
 ENV CYGNUS_ELASTICSEARCH_SKIP_CONF_GENERATION ""
@@ -338,9 +339,10 @@ RUN \
     build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf && echo "INFO: END build"
 
 
-COPY docker/cygnus-ngsi/cygnus-entrypoint.sh / 
-COPY docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/ 
+COPY docker/cygnus-ngsi/cygnus-entrypoint.sh /
+COPY docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/
 COPY docker/cygnus-ngsi/agent.conf ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf
+RUN true
 COPY docker/cygnus-ngsi/cartodb_keys.conf ${FLUME_HOME}/conf/
 
 # Define the entry point

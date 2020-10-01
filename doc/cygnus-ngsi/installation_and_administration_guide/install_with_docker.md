@@ -204,6 +204,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * The user for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
     * The pass for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_PASS environment variable.
     * CYGNUS_MONGO_AUTH_SOURCE: Mongo option to specify which common user database source to use for authentication. Usually could be `admin`.
+    * CYGNUS_MONGO_REPLICA_SET: Replica Set name. Note that this parameter is optional because Cygnus is able to connect to a MongoDB replica set without needing to specify its name.
     * CYGNUS_MONGO_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_MONGO_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_MONGO_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.

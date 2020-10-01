@@ -38,6 +38,7 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     protected String mongoUsername;
     protected String mongoPassword;
     protected String mongoAuthSource;
+    protected String mongoReplicaSet;
     protected String dbPrefix;
     protected String collectionPrefix;
     protected MongoBackendImpl backend;
@@ -75,6 +76,14 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     protected String getAuthSource() {
         return mongoAuthSource;
     } // getAuthSource
+
+    /**
+     * Gets the mongo replica_set. It is protected since it is used by the tests.
+     * @return
+     */
+    protected String getReplicaSet() {
+        return mongoReplicaSet;
+    } // getReplicaSet
 
     /**
      * Gets the database prefix. It is protected since it is used by the tests.
@@ -121,6 +130,8 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_password=" + mongoPassword + ")");
         mongoAuthSource = context.getString("mongo_auth_source", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_auth_source=" + mongoAuthSource + ")");
+        mongoReplicaSet = context.getString("mongo_replica_set", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_replica_set=" + mongoReplicaSet + ")");
 
         if (enableEncoding) {
             dbPrefix = NGSICharsets.encodeMongoDBDatabase(context.getString("db_prefix", "sth_"));
@@ -163,7 +174,7 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     @Override
     public void start() {
         try {
-            backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword, mongoAuthSource, dataModel);
+            backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword, mongoAuthSource, mongoReplicaSet, dataModel);
             LOGGER.debug("[" + this.getName() + "] MongoDB persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the MongoDB persistence backend. Details="
