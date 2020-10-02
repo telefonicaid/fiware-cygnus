@@ -41,6 +41,54 @@ public class SQLQueryUtils {
     private static final String SEPARATION_MARK = ",";
 
     /**
+     * Sql upsert string buffer.
+     *
+     * @param aggregation     the aggregation
+     * @param lastData        the last data
+     * @param tableName       the table name
+     * @param tableSuffix     the table suffix
+     * @param uniqueKey       the unique key
+     * @param timestampKey    the timestamp key
+     * @param timestampFormat the timestamp format
+     * @param sqlInstance     the sql instance
+     * @param destination     the destination
+     * @return the string buffer
+     */
+    protected static StringBuffer sqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
+                                                        LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                                        String tableName,
+                                                        String tableSuffix,
+                                                        String uniqueKey,
+                                                        String timestampKey,
+                                                        String timestampFormat,
+                                                        String sqlInstance,
+                                                        String destination) {
+
+        if (sqlInstance.equals("postgresql")) {
+            return postgreSqlUpsertQuery(aggregation,
+                    lastData,
+                    tableName,
+                    tableSuffix,
+                    uniqueKey,
+                    timestampKey,
+                    timestampFormat,
+                    sqlInstance,
+                    destination);
+        } else if (sqlInstance.equals("mysql")) {
+            return mySqlUpsertQuery(aggregation,
+                    lastData,
+                    tableName,
+                    tableSuffix,
+                    uniqueKey,
+                    timestampKey,
+                    timestampFormat,
+                    sqlInstance,
+                    destination);
+        }
+        return null;
+    }
+
+    /**
      * Sql upsert query for PostgresSQL string buffer.
      *
      * @param aggregation     the aggregation
@@ -91,6 +139,68 @@ public class SQLQueryUtils {
                 append("WHERE ").append(postgisDestination).append(".").append(uniqueKey).append("=").append(postgisTempReference).append(".").append(uniqueKey).append(" ").
                 append("AND ").append("to_timestamp(").append(postgisDestination).append(".").append(timestampKey).append(", '").append(timestampFormat).append("') ").
                 append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append(", '").append(timestampFormat).append("')");
+
+        LOGGER.debug("[NGSISQLUtils.sqlUpsertQuery] Preparing Upsert query: " + query.toString());
+        return query;
+    }
+
+    /**
+     * Sql upsert query for MySQL string buffer.
+     *
+     * @param aggregation     the aggregation
+     * @param lastData        the last data
+     * @param tableName       the table name
+     * @param tableSuffix     the table suffix
+     * @param uniqueKey       the unique key
+     * @param timestampKey    the timestamp key
+     * @param timestampFormat the timestamp format
+     * @param sqlInstance     the sql instance
+     * @param destination     the destination
+     * @return the string buffer
+     */
+    protected static StringBuffer mySqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
+                                                        LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                                        String tableName,
+                                                        String tableSuffix,
+                                                        String uniqueKey,
+                                                        String timestampKey,
+                                                        String timestampFormat,
+                                                        String sqlInstance,
+                                                        String destination) {
+
+        StringBuffer updateSet = new StringBuffer();
+        StringBuffer query = new StringBuffer();
+        boolean first = true;
+
+        for (String key : lastData.keySet()) {
+            if (!key.equals(uniqueKey) && first) {
+                first = false;
+            } else if (!key.equals(uniqueKey)) {
+                updateSet.append(", ");
+            }
+            if (!key.equals(uniqueKey)) {
+                updateSet.append(key).append("=").
+                        append("IF(").
+                        append("(").
+                        append("(").append(key).append("=").append("VALUES(").append(key).append(")").
+                        append(")").append(" AND ").
+                        append("(").append("STR_TO_DATE(").append(timestampKey).append(", '").append(timestampFormat).append("')").
+                        append("< ").
+                        append("(").append("STR_TO_DATE(VALUES(").append(timestampKey).append("), '").append(timestampFormat).append("')").append(")").
+                        append(")").
+                        append(", ").append("VALUES(").append(key).append(")").append(", ").append(key).
+                        append(")");
+            }
+        }
+
+        StringBuffer insertQuery = sqlInsertQuery(lastData,
+                tableName.concat(tableSuffix),
+                sqlInstance,
+                destination);
+
+        query.append(insertQuery).
+                append("ON DUPLICATE KEY ").
+                append("UPDATE ").append(updateSet);
 
         LOGGER.debug("[NGSISQLUtils.sqlUpsertQuery] Preparing Upsert query: " + query.toString());
         return query;

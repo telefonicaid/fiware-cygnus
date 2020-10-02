@@ -588,7 +588,7 @@ public class SQLBackendImpl implements SQLBackend{
             insertPreparedStatement = SQLQueryUtils.addJsonValues(insertStatement, aggregation, attrNativeTypes);
             insertedRows = insertPreparedStatement.executeBatch();
 
-            String upsertQuery = SQLQueryUtils.postgreSqlUpsertQuery(aggregation,
+            String upsertQuery = SQLQueryUtils.sqlUpsertQuery(aggregation,
                     lastData,
                     tableName,
                     tableSuffix,
