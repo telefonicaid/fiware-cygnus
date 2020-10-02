@@ -170,27 +170,29 @@ public class SQLQueryUtils {
 
         StringBuffer updateSet = new StringBuffer();
         StringBuffer query = new StringBuffer();
+        StringBuffer dateKeyUpdate = new StringBuffer();
         boolean first = true;
 
         for (String key : lastData.keySet()) {
-            if (!key.equals(uniqueKey) && first) {
-                first = false;
-            } else if (!key.equals(uniqueKey)) {
-                updateSet.append(", ");
+            if (!key.equals(timestampKey)) {
+                if (!key.equals(uniqueKey) && first) {
+                    first = false;
+                } else if (!key.equals(uniqueKey)) {
+                    updateSet.append(", ");
+                }
+                if (!key.equals(uniqueKey)) {
+                    updateSet.append(mySQLUpdateRecordQuery(key, uniqueKey, timestampKey, timestampFormat));
+                }
+            } else {
+                dateKeyUpdate.append(mySQLUpdateRecordQuery(key, uniqueKey, timestampKey, timestampFormat));
             }
-            if (!key.equals(uniqueKey)) {
-                updateSet.append(key).append("=").
-                        append("IF(").
-                        append("(").
-                        append("(").append(key).append("=").append("VALUES(").append(key).append(")").
-                        append(")").append(" AND ").
-                        append("(").append("STR_TO_DATE(").append(timestampKey).append(", '").append(timestampFormat).append("')").
-                        append("< ").
-                        append("(").append("STR_TO_DATE(VALUES(").append(timestampKey).append("), '").append(timestampFormat).append("')").append(")").
-                        append(")").
-                        append(", ").append("VALUES(").append(key).append(")").append(", ").append(key).
-                        append(")");
-            }
+        }
+        // The key that corresponds to the timestampKey must be updated at the end, if it is updated before any other key.
+        // The subsecuent timestamp validations will be allways false, because the date would already be updated.
+        if (first) {
+            updateSet.append(dateKeyUpdate);
+        } else {
+            updateSet.append(", ").append(dateKeyUpdate);
         }
 
         StringBuffer insertQuery = sqlInsertQuery(lastData,
@@ -204,6 +206,38 @@ public class SQLQueryUtils {
 
         LOGGER.debug("[NGSISQLUtils.sqlUpsertQuery] Preparing Upsert query: " + query.toString());
         return query;
+    }
+
+    /**
+     * Creates a update statement for an upsert query
+     *
+     * @param key     the table suffix
+     * @param uniqueKey       the unique key
+     * @param timestampKey    the timestamp key
+     * @param timestampFormat the timestamp format
+     * @return the string buffer like the following one
+     * recvTime=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTime), recvTime)
+     */
+
+    private static StringBuffer mySQLUpdateRecordQuery(String key,
+                                                       String uniqueKey,
+                                                       String timestampKey,
+                                                       String timestampFormat) {
+
+        StringBuffer updateSet = new StringBuffer();
+        updateSet.append(key).append("=").
+                append("IF").
+                append("(").
+                append("(").append(uniqueKey).append("=").append("VALUES(").append(uniqueKey).append(")").
+                append(")").append(" AND ").
+                append("(").append("STR_TO_DATE(").append(timestampKey).append(", '").append(timestampFormat).append("')").
+                append(" < ").
+                append("(").append("STR_TO_DATE(VALUES(").append(timestampKey).append("), '").append(timestampFormat).append("')").append(")").
+                append(")").
+                append(", ").append("VALUES(").append(key).append(")").append(", ").append(key).
+                append(")");
+        return updateSet;
+
     }
 
     /**
