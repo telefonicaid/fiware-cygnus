@@ -62,7 +62,7 @@ public class NGSIMySQLSink extends NGSISink {
     private static final String DEFAULT_LAST_DATA_TABLE_SUFFIX = "_last_data";
     private static final String DEFAULT_LAST_DATA_UNIQUE_KEY = NGSIConstants.ENTITY_ID;
     private static final String DEFAULT_LAST_DATA_TIMESTAMP_KEY = NGSIConstants.RECV_TIME;
-    private static final String DEFAULT_LAST_DATA_SQL_TS_FORMAT = "YYYY-MM-DD HH24:MI:SS.MS";
+    private static final String DEFAULT_LAST_DATA_SQL_TS_FORMAT = "%Y-%m-%d %H:%i:%s.%f";
     private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIMySQLSink.class);
@@ -430,7 +430,20 @@ public class NGSIMySQLSink extends NGSISink {
         if (valuesForInsert.equals("")) {
             LOGGER.debug("[" + this.getName() + "] no values for insert");
         } else {
-            mySQLPersistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
+
+            if (lastData && !rowAttrPersistence ) {
+                mySQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
+                        aggregator.getLastDataToPersist(),
+                        dbName,
+                        tableName,
+                        lastDataTableSuffix,
+                        lastDataUniqueKey,
+                        lastDataTimeStampKey,
+                        lastDataSQLTimestampFormat,
+                        attrNativeTypes);
+            } else {
+                mySQLPersistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
+            }
         }
     } // persistAggregation
     
