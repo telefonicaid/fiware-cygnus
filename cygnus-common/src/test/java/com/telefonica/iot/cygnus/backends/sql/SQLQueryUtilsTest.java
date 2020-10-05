@@ -18,7 +18,6 @@
 
 package com.telefonica.iot.cygnus.backends.sql;
 
-import com.amazonaws.services.dynamodbv2.xspec.L;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import org.junit.Before;

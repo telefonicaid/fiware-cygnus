@@ -21,7 +21,6 @@ package com.telefonica.iot.cygnus.backends.sql;
 import com.google.gson.JsonElement;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -55,14 +54,14 @@ public class SQLQueryUtils {
      * @return the string buffer
      */
     protected static StringBuffer sqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
-                                                        LinkedHashMap<String, ArrayList<JsonElement>> lastData,
-                                                        String tableName,
-                                                        String tableSuffix,
-                                                        String uniqueKey,
-                                                        String timestampKey,
-                                                        String timestampFormat,
-                                                        String sqlInstance,
-                                                        String destination) {
+                                                 LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                                 String tableName,
+                                                 String tableSuffix,
+                                                 String uniqueKey,
+                                                 String timestampKey,
+                                                 String timestampFormat,
+                                                 String sqlInstance,
+                                                 String destination) {
 
         if (sqlInstance.equals("postgresql")) {
             return postgreSqlUpsertQuery(aggregation,
@@ -159,14 +158,14 @@ public class SQLQueryUtils {
      * @return the string buffer
      */
     protected static StringBuffer mySqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
-                                                        LinkedHashMap<String, ArrayList<JsonElement>> lastData,
-                                                        String tableName,
-                                                        String tableSuffix,
-                                                        String uniqueKey,
-                                                        String timestampKey,
-                                                        String timestampFormat,
-                                                        String sqlInstance,
-                                                        String destination) {
+                                                   LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                                   String tableName,
+                                                   String tableSuffix,
+                                                   String uniqueKey,
+                                                   String timestampKey,
+                                                   String timestampFormat,
+                                                   String sqlInstance,
+                                                   String destination) {
 
         StringBuffer updateSet = new StringBuffer();
         StringBuffer query = new StringBuffer();
@@ -220,9 +219,9 @@ public class SQLQueryUtils {
      */
 
     protected static StringBuffer mySQLUpdateRecordQuery(String key,
-                                                       String uniqueKey,
-                                                       String timestampKey,
-                                                       String timestampFormat) {
+                                                         String uniqueKey,
+                                                         String timestampKey,
+                                                         String timestampFormat) {
 
         StringBuffer updateSet = new StringBuffer();
         updateSet.append(key).append("=").
@@ -329,8 +328,8 @@ public class SQLQueryUtils {
      * @throws SQLException the sql exception
      */
     protected static PreparedStatement addJsonValues (PreparedStatement previousStatement,
-                                                   LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
-                                                   boolean attrNativeTypes) throws SQLException {
+                                                      LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
+                                                      boolean attrNativeTypes) throws SQLException {
 
         PreparedStatement preparedStatement = previousStatement;
         int numEvents = collectionSizeOnLinkedHashMap(aggregation);
