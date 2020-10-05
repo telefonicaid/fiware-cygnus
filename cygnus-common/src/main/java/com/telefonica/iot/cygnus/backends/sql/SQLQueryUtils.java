@@ -219,7 +219,7 @@ public class SQLQueryUtils {
      * recvTime=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTime), recvTime)
      */
 
-    private static StringBuffer mySQLUpdateRecordQuery(String key,
+    protected static StringBuffer mySQLUpdateRecordQuery(String key,
                                                        String uniqueKey,
                                                        String timestampKey,
                                                        String timestampFormat) {
