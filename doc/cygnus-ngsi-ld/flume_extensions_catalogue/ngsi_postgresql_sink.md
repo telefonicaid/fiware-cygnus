@@ -38,7 +38,7 @@ Next sections will explain this in detail.
 ### <a name="section1.1"></a>Mapping NGSI-LD events to `NGSILDEvent` objects
 Notified NGSI-LD events (containing context data) are transformed into `NGSILDEvent` objects (for each context element a `NGSILDEvent` is created; such an event is a mix of certain headers and a `ContextElement` object), independently of the NGSI-LD data generator or the final backend where it is persisted.
 
-This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_ld_rest_handler.md). Once translated, the data (now, as `NGSIEvent` objects) is put into the internal channels for future consumption (see next section).
+This is done at the cygnus-ngsi-ld Http listeners (in Flume jergon, sources) thanks to [`NGSIRestHandler`](/ngsi_ld_rest_handler.md). Once translated, the data (now, as `NGSIEvent` objects) is put into the internal channels for future consumption (see next section).
 
 [Top](#top)
 
@@ -228,27 +228,27 @@ Coming soon.
 
 A configuration example could be:
 
-    cygnus-ngsi.sinks = postgresql-sink
-    cygnus-ngsi.channels = postgresql-channel
+    cygnus-ngsi-ld.sinks = postgresql-sink
+    cygnus-ngsi-ld.channels = postgresql-channel
     ...
-    cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSILDPostgreSQLSink
-    cygnus-ngsi.sinks.postgresql-sink.channel = postgresql-channel
-    cygnus-ngsi.sinks.postgresql-sink.enable_encoding = false
-    cygnus-ngsi.sinks.postgresql-sink.enable_grouping = false
-    cygnus-ngsi.sinks.postgresql-sink.enable_lowercase = false
-    cygnus-ngsi.sinks.postgresql-sink.enable_name_mappings = false
-    cygnus-ngsi.sinks.postgresql-sink.data_model = dm-by-entity
-    cygnus-ngsi.sinks.postgresql-sink.postgresql_host = 192.168.80.34
-    cygnus-ngsi.sinks.postgresql-sink.postgresql_port = 5432
-    cygnus-ngsi.sinks.postgresql-sink.postgresql_database = mydatabase
-    cygnus-ngsi.sinks.postgresql-sink.postgresql_username = myuser
-    cygnus-ngsi.sinks.postgresql-sink.postgresql_password = mypassword
-    cygnus-ngsi.sinks.postgresql-sink.attr_persistence = row
-    cygnus-ngsi.sinks.postgresql-sink.batch_size = 100
-    cygnus-ngsi.sinks.postgresql-sink.batch_timeout = 30
-    cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
-    cygnus-ngsi.sinks.postgresql-sink.batch_retry_intervals = 5000
-    cygnus-ngsi.sinks.postgresql.backend.enable_cache = false
+    cygnus-ngsi-ld.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSILDPostgreSQLSink
+    cygnus-ngsi-ld.sinks.postgresql-sink.channel = postgresql-channel
+    cygnus-ngsi-ld.sinks.postgresql-sink.enable_encoding = false
+    cygnus-ngsi-ld.sinks.postgresql-sink.enable_grouping = false
+    cygnus-ngsi-ld.sinks.postgresql-sink.enable_lowercase = false
+    cygnus-ngsi-ld.sinks.postgresql-sink.enable_name_mappings = false
+    cygnus-ngsi-ld.sinks.postgresql-sink.data_model = dm-by-entity
+    cygnus-ngsi-ld.sinks.postgresql-sink.postgresql_host = 192.168.80.34
+    cygnus-ngsi-ld.sinks.postgresql-sink.postgresql_port = 5432
+    cygnus-ngsi-ld.sinks.postgresql-sink.postgresql_database = mydatabase
+    cygnus-ngsi-ld.sinks.postgresql-sink.postgresql_username = myuser
+    cygnus-ngsi-ld.sinks.postgresql-sink.postgresql_password = mypassword
+    cygnus-ngsi-ld.sinks.postgresql-sink.attr_persistence = row
+    cygnus-ngsi-ld.sinks.postgresql-sink.batch_size = 100
+    cygnus-ngsi-ld.sinks.postgresql-sink.batch_timeout = 30
+    cygnus-ngsi-ld.sinks.postgresql-sink.batch_ttl = 10
+    cygnus-ngsi-ld.sinks.postgresql-sink.batch_retry_intervals = 5000
+    cygnus-ngsi-ld.sinks.postgresql.backend.enable_cache = false
 
 [Top](#top)
 

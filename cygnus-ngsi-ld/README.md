@@ -15,9 +15,9 @@ Content:
 * [Reporting issues and contact information](#section5)
 
 ## <a name="section1"></a>Welcome to Cygnus NGSI
-Cygnus NGSI-LD is a connector in charge of persisting [Orion-LD](https://github.com/FIWARE/context.Orion-LD) context data in certain configured third-party storages, creating a historical view of such data. In other words, Orion only stores the last value regarding an entity's attribute, and if an older value is required then you will have to persist it in other storage, value by value, using Cygnus NGSI-LD.
+Cygnus NGSI-LD is a connector in charge of persisting updates on context information managed through a Context Broker supporting NGSI-LD  context data in certain configured third-party storages, creating a historical view of such data. In other words, Orion only stores the last value regarding an entity's attribute, and if an older value is required then you will have to persist it in other storage, value by value, using Cygnus NGSI-LD.
 
-Cygnus NGSI-LD uses the subscription/notification feature of Orion-LD. A subscription is made in Orion on behalf of Cygnus NGSI-LD, detailing which entities we want to be notified when an update occurs on any of those entities attributes.
+Cygnus NGSI-LD uses the subscription/notification feature of any NGSI-LD Context broker like [Orion-LD](https://github.com/FIWARE/context.Orion-LD) . A subscription is made in the Context Broker on behalf of Cygnus NGSI-LD, detailing which entities we want to be notified when an update occurs on any of those entities attributes.
 
 Internally, Cygnus NGSI-LD is based on [Apache Flume](http://flume.apache.org/), which is used through **cygnus-common** and which Cygnus NGSI-LD depends on. In fact, Cygnus NGSI-LD is a Flume agent, which is basically composed of a source in charge of receiving the data, a channel where the source puts the data once it has been transformed into a Flume event, and a sink, which takes Flume events from the channel in order to persist the data within its body into a third-party storage.
 
