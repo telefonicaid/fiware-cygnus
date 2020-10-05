@@ -18,6 +18,9 @@
 
 package com.telefonica.iot.cygnus.backends.ckan;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -26,7 +29,6 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -410,20 +412,28 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         org.json.JSONObject jsonContent = new org.json.JSONObject(records);
         Iterator<String> keys = jsonContent.keys();
         ArrayList <String> fields = new ArrayList<>();
+        Gson gson = new Gson();
+        DataStore dataStore = new DataStore();
+        ArrayList<JsonElement> jsonArray = new ArrayList<>();
+
         while (keys.hasNext()) {
             String key = keys.next();
             fields.add(key);
         }
-        String jsonString = "{ \"resource_id\": \"" + resId
-                + "\", \"fields\": [ ";
-        String content2="";
-        for (int i=0;i<fields.size()-1;i++){
-            content2 += "{ \"id\": \"" + fields.get(i) + "\", \"type\": \"text\"},";
+
+        for (int i=0;i<fields.size();i++){
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("id",fields.get(i));
+            jsonObject.addProperty("type","text");
+            jsonArray.add((jsonObject.getAsJsonObject()));
         }
-        content2 += "{ \"id\": \"" + fields.get(fields.size()-1) + "\", \"type\": \"text\"}"
-                + "], "
-                + "\"force\": \"true\" }";
-        jsonString += content2;
+
+        dataStore.setResource_id(resId);
+        dataStore.setFields(jsonArray);
+        dataStore.setForce("true");
+        String jsonString = gson.toJson(dataStore);
+
+        LOGGER.debug("Successful datastore creation jsonString=" + jsonString + "");
 
         // create the CKAN request URL
         String urlPath = "/api/3/action/datastore_create";
@@ -680,5 +690,46 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         headers.add(new BasicHeader("Content-Type", "application/json; charset=utf-8"));
         return doRequest(method, urlPath, true, headers, new StringEntity(jsonString, "UTF-8"));
     } // doCKANRequest
+
+    public class DataStore{
+        private String resource_id;
+        private ArrayList<JsonElement> fields;
+        private String force;
+
+        public  DataStore(){}
+
+        public ArrayList<JsonElement> getFields() {
+            return fields;
+        }
+
+        public void setFields(ArrayList<JsonElement> fields) {
+            this.fields = fields;
+        }
+
+        public String getResource_id() {
+            return resource_id;
+        }
+
+        public void setResource_id(String resource_id) {
+            this.resource_id = resource_id;
+        }
+
+        public String getForce() {
+            return force;
+        }
+
+        public void setForce(String force) {
+            this.force = force;
+        }
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "\"resource_id\":" + "\"" +resource_id + "\"" +
+                    ", \"fields\":" + "\""+fields+ "\""+
+                    ", \"force\":"+"\"" + force + "\"" +
+                    '}';
+        }
+    }
 
 } // CKANBackendImpl
