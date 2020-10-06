@@ -24,7 +24,8 @@ Internally, Cygnus NGSI-LD is based on [Apache Flume](http://flume.apache.org/),
 Current stable release is able to persist Orion context data in:
 
 * [PostgreSQL](http://www.postgresql.org/), the well-know relational database manager.
-
+* [PostGIS](http://postgis.net/), a spatial database extender for PostgreSQL object-relational database.
+* [CKAN](http://ckan.org/), an Open Data platform.
 You may consider to visit [Cygnus NGSI-LD Quick Start Guide](../doc/cygnus-ngsi-ld/quick_start_guide.md) before going deep into the details.
 
 [Top](#top)

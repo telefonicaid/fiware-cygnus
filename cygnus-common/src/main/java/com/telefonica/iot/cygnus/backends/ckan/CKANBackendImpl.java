@@ -721,15 +721,6 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         public void setForce(String force) {
             this.force = force;
         }
-
-        @Override
-        public String toString() {
-            return "{" +
-                    "\"resource_id\":" + "\"" +resource_id + "\"" +
-                    ", \"fields\":" + "\""+fields+ "\""+
-                    ", \"force\":"+"\"" + force + "\"" +
-                    '}';
-        }
     }
 
 } // CKANBackendImpl
