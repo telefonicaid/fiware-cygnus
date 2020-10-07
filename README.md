@@ -67,7 +67,7 @@ Cygnus (more specifically, cygnus-ngsi agent) plays the role of a connector betw
 ![FIWARE architecture](doc/images/fiware_architecture.png)
 
 ## Install
-Fiware/Cygnus has three sub-modules [cygnus-common](cygnus-common#welcome-to-cygnus-common), [cygnus-ngsi](cygnus-ngsi#welcome-to-cygnus-ngsi) and [cygnus-twitter](cygnus-twitter#welcome-to-cygnus-twitter). Information about how to install these modules can be found at the corresponding section of Installation.
+Fiware/Cygnus has four sub-modules [cygnus-common](cygnus-common#welcome-to-cygnus-common), [cygnus-ngsi](cygnus-ngsi#welcome-to-cygnus-ngsi) and [cygnus-twitter](cygnus-twitter#welcome-to-cygnus-twitter), [cygnus-ngsi-ld](cygnus-ngsi-ld#welcome-to-cygnus-ngsi). Information about how to install these modules can be found at the corresponding section of Installation.
 
 Following are the links of install section of Fiware/Cygnus sub-modules:
 * cygnus-common:
