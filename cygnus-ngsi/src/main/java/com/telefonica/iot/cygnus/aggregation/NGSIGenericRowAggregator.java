@@ -88,7 +88,7 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
             LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                     + attrType + ")");
             // aggregate the attribute information
-            aggregation.get(NGSIConstants.RECV_TIME_TS).add(new JsonPrimitive(Long.toString(recvTimeTs)));
+            aggregation.get(NGSIConstants.RECV_TIME_TS).add(new JsonPrimitive(Long.toString(getRecvTimeTsValue(event))));
             aggregation.get(NGSIConstants.RECV_TIME).add(new JsonPrimitive(recvTime));
             aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(new JsonPrimitive(getServicePathForData()));
             aggregation.get(NGSIConstants.ENTITY_ID).add(new JsonPrimitive(entityId));
@@ -102,7 +102,7 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
     } // aggregate
 
     private String getName() {
-        return "NGSIUtils.GenericColumnAggregator";
+        return "NGSIUtils.GenericRowAggregator";
     }
 
 }

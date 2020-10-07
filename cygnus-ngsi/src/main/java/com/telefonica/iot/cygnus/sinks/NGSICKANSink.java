@@ -342,9 +342,17 @@ public class NGSICKANSink extends NGSISink {
         } // try catch
     } // truncateByTime
 
+    private class NGSICKANRowAggregator extends NGSIGenericRowAggregator {
+		@Override
+		public long getRecvTimeTsValue(NGSIEvent cygnusEvent) {
+			return cygnusEvent.getRecvTimeTs() / 1000;
+		}
+    	
+    }
+
     protected NGSIGenericAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
-            return new NGSIGenericRowAggregator();
+            return new NGSICKANRowAggregator();
         } else {
             return new NGSIGenericColumnAggregator();
         } // if else
