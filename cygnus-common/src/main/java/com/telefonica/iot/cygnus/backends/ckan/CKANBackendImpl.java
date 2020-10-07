@@ -21,6 +21,7 @@ package com.telefonica.iot.cygnus.backends.ckan;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.telefonica.iot.cygnus.backends.ckan.model.DataStore;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -690,37 +691,5 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         headers.add(new BasicHeader("Content-Type", "application/json; charset=utf-8"));
         return doRequest(method, urlPath, true, headers, new StringEntity(jsonString, "UTF-8"));
     } // doCKANRequest
-
-    public class DataStore{
-        private String resource_id;
-        private ArrayList<JsonElement> fields;
-        private String force;
-
-        public  DataStore(){}
-
-        public ArrayList<JsonElement> getFields() {
-            return fields;
-        }
-
-        public void setFields(ArrayList<JsonElement> fields) {
-            this.fields = fields;
-        }
-
-        public String getResource_id() {
-            return resource_id;
-        }
-
-        public void setResource_id(String resource_id) {
-            this.resource_id = resource_id;
-        }
-
-        public String getForce() {
-            return force;
-        }
-
-        public void setForce(String force) {
-            this.force = force;
-        }
-    }
 
 } // CKANBackendImpl
