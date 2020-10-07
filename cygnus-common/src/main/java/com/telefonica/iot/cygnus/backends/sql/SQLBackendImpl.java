@@ -18,6 +18,7 @@
 
 package com.telefonica.iot.cygnus.backends.sql;
 
+import com.google.gson.JsonElement;
 import com.sun.rowset.CachedRowSetImpl;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
@@ -35,9 +36,14 @@ import javax.sql.rowset.CachedRowSet;
 import java.sql.*;
 import java.text.ParseException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
+/**
+ * The type Sql backend.
+ */
 public class SQLBackendImpl implements SQLBackend{
 
     private static final CygnusLogger LOGGER = new CygnusLogger(SQLBackendImpl.class);
@@ -45,6 +51,9 @@ public class SQLBackendImpl implements SQLBackend{
     private final SQLCache cache;
     private final String sqlInstance;
     private final boolean persistErrors;
+    private final int maxLatestErrors;
+    private static final String DEFAULT_ERROR_TABLE_SUFFIX = "_error_log";
+    private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
 
     /**
      * Constructor.
@@ -58,13 +67,14 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlDriverName
      * @param defaultSQLDataBase
      * @param persistErrors
+     * @param maxLatestErrors
      */
-    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, boolean persistErrors) {
-        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, null, persistErrors);
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, boolean persistErrors, int maxLatestErrors) {
+        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, null, persistErrors, maxLatestErrors);
     } // SQLBackendImpl
 
     /**
-     * Constructor.
+     * Constructor. (invoked by ngsild sinks)
      *
      * @param sqlHost
      * @param sqlPort
@@ -77,7 +87,7 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlOptions
      */
     public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, String sqlOptions) {
-        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, sqlOptions, false);
+        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, sqlOptions, true, DEFAULT_MAX_LATEST_ERRORS);
     } // SQLBackendImpl
 
     /**
@@ -93,12 +103,14 @@ public class SQLBackendImpl implements SQLBackend{
      * @param defaultSQLDataBase
      * @param sqlOptions
      * @param persistErrors
+     * @param maxLatestErrors
      */
-    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, String sqlOptions, boolean persistErrors) {
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlInstance, String sqlDriverName, String defaultSQLDataBase, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
         driver = new SQLBackendImpl.SQLDriver(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, defaultSQLDataBase, sqlOptions);
         cache = new SQLCache();
         this.sqlInstance = sqlInstance;
         this.persistErrors = persistErrors;
+        this.maxLatestErrors = maxLatestErrors;
     } // SQLBackendImpl
 
     /**
@@ -442,29 +454,51 @@ public class SQLBackendImpl implements SQLBackend{
      */
     private void closeSQLObjects(Connection con, Statement stmt) throws CygnusRuntimeError {
         LOGGER.debug(sqlInstance.toUpperCase() + " Closing SQL connection objects.");
-        if (stmt != null) {
+        closeStatement(stmt);
+        closeConnection(con);
+    } // closeSQLObjects
+
+    /**
+     * Close SQL objects previously opened by doCreateTable and
+     * doQuery.
+     *
+     * @param statement
+     * @return True if the SQL objects have been closed, false otherwise.
+     */
+
+    private void closeStatement (Statement statement) {
+        if (statement != null) {
             try {
-                stmt.close();
+                statement.close();
             } catch (SQLException e) {
                 LOGGER.warn(sqlInstance.toUpperCase() + " error closing invalid statement: " + e.getMessage());
             } // try catch
         } // if
+    }
 
-        if (con != null) {
+    /**
+     * Close SQL objects previously opened by doCreateTable and
+     * doQuery.
+     *
+     * @param connection
+     * @return True if the SQL objects have been closed, false otherwise.
+     */
+
+    private void closeConnection (Connection connection) {
+        if (connection != null) {
             try {
-                con.close();
+                connection.close();
             } catch (SQLException e) {
                 LOGGER.warn(sqlInstance.toUpperCase() + " error closing invalid connection: " + e.getMessage());
             } // try catch
         } // if
-
-    } // closeSQLObjects
+    }
 
 
     public void createErrorTable(String destination)
             throws CygnusRuntimeError, CygnusPersistenceError {
         // the defaul table for error log will be called the same as the destination name
-        String errorTable = destination + "_error_log";
+        String errorTable = destination + DEFAULT_ERROR_TABLE_SUFFIX;
         if (cache.isCachedTable(destination, errorTable)) {
             LOGGER.debug(sqlInstance.toUpperCase() + " '" + errorTable + "' is cached, thus it is not created");
             return;
@@ -506,12 +540,135 @@ public class SQLBackendImpl implements SQLBackend{
         cache.addTable(destination, errorTable);
     } // createErrorTable
 
+    /**
+     * Upsert transaction.
+     *
+     * @param aggregation     the aggregation
+     * @param lastData        the last data
+     * @param destination     the destination
+     * @param tableName       the table name
+     * @param tableSuffix     the table suffix
+     * @param uniqueKey       the unique key
+     * @param timestampKey    the timestamp key
+     * @param timestampFormat the timestamp format
+     * @param attrNativeTypes the attr native types
+     * @throws CygnusPersistenceError the cygnus persistence error
+     * @throws CygnusBadContextData   the cygnus bad context data
+     * @throws CygnusRuntimeError     the cygnus runtime error
+     * @throws CygnusPersistenceError the cygnus persistence error
+     */
+    public void upsertTransaction (LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
+                                   LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                   String destination,
+                                   String tableName,
+                                   String tableSuffix,
+                                   String uniqueKey,
+                                   String timestampKey,
+                                   String timestampFormat,
+                                   boolean attrNativeTypes) throws CygnusPersistenceError, CygnusBadContextData, CygnusRuntimeError,  CygnusPersistenceError{
+
+        Connection connection = null;
+        PreparedStatement upsertPreparedStatement = null;
+        PreparedStatement insertPreparedStatement = null;
+
+        int insertedRows[];
+
+        try {
+
+            connection = driver.getConnection(destination);
+            connection.setAutoCommit(false);
+
+            String insertQuery = SQLQueryUtils.sqlInsertQuery(aggregation,
+                    tableName,
+                    sqlInstance,
+                    destination).toString();
+
+            PreparedStatement insertStatement = null;
+            insertStatement = connection.prepareStatement(insertQuery);
+            insertPreparedStatement = SQLQueryUtils.addJsonValues(insertStatement, aggregation, attrNativeTypes);
+            insertedRows = insertPreparedStatement.executeBatch();
+
+            String upsertQuery = SQLQueryUtils.sqlUpsertQuery(aggregation,
+                    lastData,
+                    tableName,
+                    tableSuffix,
+                    uniqueKey,
+                    timestampKey,
+                    timestampFormat,
+                    sqlInstance,
+                    destination).toString();
+
+            PreparedStatement upsertStatement = null;
+            upsertStatement = connection.prepareStatement(upsertQuery);
+            upsertPreparedStatement = SQLQueryUtils.addJsonValues(upsertStatement, lastData, attrNativeTypes);
+            upsertPreparedStatement.executeBatch();
+
+            connection.commit();
+            LOGGER.info("Finished transaction: \n" + upsertPreparedStatement + "\n Also, " + insertedRows.length + " where Inserted. THE LAS ONE WAS: " + " " + insertQuery);
+
+        } catch (SQLTimeoutException e) {
+            cygnusSQLRollback(connection);
+            throw new CygnusPersistenceError(sqlInstance.toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + connection, "SQLTimeoutException", e.getMessage());
+        } catch (SQLException e) {
+            cygnusSQLRollback(connection);
+            throw new CygnusBadContextData(sqlInstance.toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + connection, "SQLException", e.getMessage());
+        } finally {
+            closeStatement(insertPreparedStatement);
+            closeStatement(upsertPreparedStatement);
+            closeConnection(connection);
+        } // try catch
+
+    }
+
+    private void cygnusSQLRollback (Connection connection) {
+        try {
+            connection.rollback();
+        } catch (SQLException e) {
+            LOGGER.error("Error when rollingback transaction " + e.getMessage());
+        }
+    }
+
+    public void purgeErrorTable(String destination)
+            throws CygnusRuntimeError, CygnusPersistenceError {
+        // the default table for error log will be called the same as the destination name
+        String errorTable = destination + DEFAULT_ERROR_TABLE_SUFFIX;
+        String limit = String.valueOf(maxLatestErrors);
+
+        Statement stmt = null;
+        // get a connection to the given destination
+        Connection con = driver.getConnection(destination);
+
+        String query = "";
+        if (sqlInstance.equals("mysql")) {
+            query = "delete from `" + errorTable + "` "  + "where timestamp not in (select timestamp from (select timestamp from `" + errorTable + "` "  + "order by timestamp desc limit " + limit + " ) purge )";
+        } else {
+            query = "DELETE FROM " + destination + "." + errorTable + " "  + "WHERE timestamp NOT IN (SELECT timestamp FROM (SELECT timestamp FROM " + destination + "." + errorTable + " "  + "ORDER BY timestamp DESC LIMIT " + limit + " ) purge )";
+        }
+
+        try {
+            stmt = con.createStatement();
+        } catch (SQLException e) {
+            closeSQLObjects(con, stmt);
+            throw new CygnusRuntimeError(sqlInstance.toUpperCase() + " Purge error table error", "SQLException", e.getMessage());
+        } // try catch
+
+        try {
+            LOGGER.debug(sqlInstance.toUpperCase() + " Executing SQL query '" + query + "'");
+            stmt.executeUpdate(query);
+        } catch (SQLException e) {
+            closeSQLObjects(con, stmt);
+            throw new CygnusPersistenceError(sqlInstance.toUpperCase() + " Purge error table error", "SQLException", e.getMessage());
+        } // try catch
+
+        closeSQLObjects(con, stmt);
+    }
+
     private void insertErrorLog(String destination, String errorQuery, Exception exception)
             throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError, SQLException {
         Statement stmt = null;
         java.util.Date date = new Date();
         Timestamp timestamp = new Timestamp(date.getTime());
-        String errorTable = destination + "_error_log";
+        String errorTable = destination + DEFAULT_ERROR_TABLE_SUFFIX;
         String fieldNames  = "(" +
                 "timestamp" +
                 ", error" +
@@ -528,6 +685,7 @@ public class SQLBackendImpl implements SQLBackend{
         }
 
         PreparedStatement preparedStatement = con.prepareStatement(query);
+
         try {
             preparedStatement.setObject(1, java.sql.Timestamp.from(Instant.now()));
             preparedStatement.setString(2, exception.getMessage());
@@ -552,13 +710,14 @@ public class SQLBackendImpl implements SQLBackend{
             if (persistErrors) {
                 createErrorTable(destination);
                 insertErrorLog(destination, query, exception);
+                purgeErrorTable(destination);
             }
             return;
         } catch (CygnusBadContextData cygnusBadContextData) {
-            LOGGER.debug(sqlInstance.toUpperCase() + " failed to persist error on database/scheme " + destination + "_error_log" + cygnusBadContextData);
+            LOGGER.debug(sqlInstance.toUpperCase() + " failed to persist error on database/scheme " + destination + DEFAULT_ERROR_TABLE_SUFFIX + cygnusBadContextData);
             createErrorTable(destination);
         } catch (Exception e) {
-            LOGGER.debug(sqlInstance.toUpperCase() + " failed to persist error on database/scheme " + destination + "_error_log" + e);
+            LOGGER.debug(sqlInstance.toUpperCase() + " failed to persist error on database/scheme " + destination + DEFAULT_ERROR_TABLE_SUFFIX + e);
         }
     }
 

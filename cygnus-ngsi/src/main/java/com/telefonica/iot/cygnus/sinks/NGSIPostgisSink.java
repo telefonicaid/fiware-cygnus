@@ -21,6 +21,7 @@ package com.telefonica.iot.cygnus.sinks;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
+import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
@@ -30,10 +31,11 @@ import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.NGSICharsets;
-import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.NGSIUtils;
+import com.telefonica.iot.cygnus.utils.*;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import org.apache.flume.Context;
 
@@ -60,6 +62,12 @@ public class NGSIPostgisSink extends NGSISink {
     private static final String POSTGIS_INSTANCE_NAME = "postgresql";
     private static final String DEFAULT_FIWARE_SERVICE = "default";
     private static final String ESCAPED_DEFAULT_FIWARE_SERVICE = "default_service";
+    private static final String DEFAULT_LAST_DATA = "false";
+    private static final String DEFAULT_LAST_DATA_TABLE_SUFFIX = "_last_data";
+    private static final String DEFAULT_LAST_DATA_UNIQUE_KEY = NGSIConstants.ENTITY_ID;
+    private static final String DEFAULT_LAST_DATA_TIMESTAMP_KEY = NGSIConstants.RECV_TIME;
+    private static final String DEFAULT_LAST_DATA_SQL_TS_FORMAT = "YYYY-MM-DD HH24:MI:SS.MS";
+    private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgisSink.class);
     private String postgisHost;
@@ -76,6 +84,12 @@ public class NGSIPostgisSink extends NGSISink {
     private boolean attrMetadataStore;
     private String postgisOptions;
     private boolean persistErrors;
+    private boolean lastData;
+    private String lastDataTableSuffix;
+    private String lastDataUniqueKey;
+    private String lastDataTimeStampKey;
+    private String lastDataSQLTimestampFormat;
+    private int maxLatestErrors;
 
     /**
      * Constructor.
@@ -270,6 +284,37 @@ public class NGSIPostgisSink extends NGSISink {
                     + persistErrorsStr + ") -- Must be 'true' or 'false'");
         } // if else
 
+        String lastDataStr = context.getString("enable_last_data", DEFAULT_LAST_DATA);
+
+        if (lastDataStr.equals("true") || lastDataStr.equals("false")) {
+            lastData = Boolean.parseBoolean(lastDataStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data="
+                    + lastDataStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (last_data="
+                    + lastDataStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
+        lastDataTableSuffix = context.getString("last_data_table_suffix", DEFAULT_LAST_DATA_TABLE_SUFFIX);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_table_suffix="
+                + lastDataTableSuffix + ")");
+
+        lastDataUniqueKey = context.getString("last_data_unique_key", DEFAULT_LAST_DATA_UNIQUE_KEY);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_unique_key="
+                + lastDataUniqueKey + ")");
+
+        lastDataTimeStampKey = context.getString("last_data_timestamp_key", DEFAULT_LAST_DATA_TIMESTAMP_KEY);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_timestamp_key="
+                + lastDataTimeStampKey + ")");
+
+        lastDataSQLTimestampFormat = context.getString("last_data_sql_timestamp_format", DEFAULT_LAST_DATA_SQL_TS_FORMAT);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_sql_timestamp_format="
+                + lastDataSQLTimestampFormat + ")");
+
+        maxLatestErrors = context.getInteger("max_latest_errors", DEFAULT_MAX_LATEST_ERRORS);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (max_latest_errors=" + maxLatestErrors + ")");
+
     } // configure
 
     @Override
@@ -282,7 +327,7 @@ public class NGSIPostgisSink extends NGSISink {
     public void start() {
         try {
             if (buildDBName(null) != null) {
-                createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, buildDBName(null), postgisOptions, persistErrors);
+                createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, buildDBName(null), postgisOptions, persistErrors, maxLatestErrors);
             }
         } catch (Exception e) {
             LOGGER.error("Error while creating the Postgis persistence backend. Details="
@@ -296,9 +341,9 @@ public class NGSIPostgisSink extends NGSISink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions, boolean persistErrors) {
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
         if (postgisPersistenceBackend == null) {
-            postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, defaultSQLDataBase, sqlOptions, persistErrors);
+            postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, defaultSQLDataBase, sqlOptions, persistErrors, maxLatestErrors);
         } else {
             LOGGER.info("The database name will be created on runtime, so if there is an specified database on the agent properties and you expect it to be read on startup, then you shoul look for the data model you are using. Maybe it's not the correct one");
         }
@@ -306,7 +351,7 @@ public class NGSIPostgisSink extends NGSISink {
 
     @Override
     void persistBatch(NGSIBatch batch)
-        throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
+            throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -338,8 +383,9 @@ public class NGSIPostgisSink extends NGSISink {
             aggregator.setAttrMetadataStore(attrMetadataStore);
             aggregator.setEnableGeoParse(true);
             aggregator.setEnableNameMappings(enableNameMappings);
+            aggregator.setEnableLastData(lastData);
+            aggregator.setLastDataTimestampKey(lastDataTimeStampKey);
             aggregator.initialize(events.get(0));
-
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
@@ -389,24 +435,36 @@ public class NGSIPostgisSink extends NGSISink {
         }
 
         if (postgisPersistenceBackend == null) {
-            createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgisOptions, persistErrors);
+            createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgisOptions, persistErrors, maxLatestErrors);
         }
 
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgisSink. Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
                 + valuesForInsert + ")");
 
-            if (aggregator instanceof NGSIGenericRowAggregator) {
-                postgisPersistenceBackend.createDestination(schemaName);
-                postgisPersistenceBackend.createTable(schemaName, tableName, fieldsForCreate);
-            } // if
-            // creating the database and the table has only sense if working in row mode, in column node
-            // everything must be provisioned in advance
-            if (valuesForInsert.equals("")) {
-                LOGGER.debug("[" + this.getName() + "] no values for insert");
+        if (aggregator instanceof NGSIGenericRowAggregator) {
+            postgisPersistenceBackend.createDestination(schemaName);
+            postgisPersistenceBackend.createTable(schemaName, tableName, fieldsForCreate);
+        } // if
+        // creating the database and the table has only sense if working in row mode, in column node
+        // everything must be provisioned in advance
+        if (valuesForInsert.equals("")) {
+            LOGGER.debug("[" + this.getName() + "] no values for insert");
+        } else {
+            if (lastData && !rowAttrPersistence ) {
+                postgisPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
+                        aggregator.getLastDataToPersist(),
+                        schemaName,
+                        tableName,
+                        lastDataTableSuffix,
+                        lastDataUniqueKey,
+                        lastDataTimeStampKey,
+                        lastDataSQLTimestampFormat,
+                        attrNativeTypes);
             } else {
                 postgisPersistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
             }
+        }
     } // persistAggregation
 
     /**

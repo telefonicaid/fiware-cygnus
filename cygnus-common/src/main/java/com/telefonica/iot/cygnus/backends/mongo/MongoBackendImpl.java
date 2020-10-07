@@ -57,6 +57,7 @@ public class MongoBackendImpl implements MongoBackend {
     private final String mongoUsername;
     private final String mongoPassword;
     private final String mongoAuthSource;
+    private final String mongoReplicaSet;
     private final DataModel dataModel;
     private static final CygnusLogger LOGGER = new CygnusLogger(MongoBackendImpl.class);
 
@@ -66,15 +67,17 @@ public class MongoBackendImpl implements MongoBackend {
      * @param mongoUsername
      * @param mongoPassword
      * @param mongoAuthSource
+     * @param mongoReplicaSet
      * @param dataModel
      */
     public MongoBackendImpl(String mongoHosts, String mongoUsername, String mongoPassword,
-            String mongoAuthSource, DataModel dataModel) {
+            String mongoAuthSource, String mongoReplicaSet, DataModel dataModel) {
         client = null;
         this.mongoHosts = mongoHosts;
         this.mongoUsername = mongoUsername;
         this.mongoPassword = mongoPassword;
         this.mongoAuthSource = mongoAuthSource;
+        this.mongoReplicaSet = mongoReplicaSet;
         this.dataModel = dataModel;
     } // MongoBackendImpl
 
@@ -508,7 +511,12 @@ public class MongoBackendImpl implements MongoBackend {
                 // @deprecated Prefer {@link #MongoClient(List, MongoCredential, MongoClientOptions)}
                 client = new MongoClient(servers, Arrays.asList(credential));
                 ****/
-                client = new MongoClient(servers, credential, new MongoClientOptions.Builder().build());
+                if ((mongoReplicaSet!= null) && !mongoReplicaSet.isEmpty()) {
+                    client = new MongoClient(servers, credential, new MongoClientOptions.Builder().
+                            requiredReplicaSetName(mongoReplicaSet).build());
+                } else {
+                    client = new MongoClient(servers, credential, new MongoClientOptions.Builder().build());
+                }
             } else {
                 client = new MongoClient(servers);
             } // if else
