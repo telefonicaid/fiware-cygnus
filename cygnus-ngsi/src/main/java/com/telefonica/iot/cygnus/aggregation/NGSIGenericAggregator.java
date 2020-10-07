@@ -702,4 +702,14 @@ public abstract class NGSIGenericAggregator {
     public long getRecvTimeTsValue(NGSIEvent cygnusEvent) {
     	return cygnusEvent.getRecvTimeTs();
     }
+    
+	/**
+	 * Returns a possible adapted value for attribute value. 
+	 * @param attrValue The input
+	 * @return the adapted output. Default unchanged, same object.
+	 */
+    public JsonElement adaptAttrValue(JsonElement attrValue) {
+    	// Default: No adaptation.
+    	return attrValue;
+    }
 }
