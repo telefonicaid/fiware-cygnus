@@ -40,7 +40,7 @@ services:
   cygnus-ld:
     hostname: cygnus-ld
     container_name: cygnus-ld
-    image: ging/fiware-cygnus
+    image: fiware/cygnus-ngsi-ld
     environment:
       CYGNUS_POSTGRESQL_HOST: postgres-db
       CYGNUS_POSTGRESQL_PASS: example
