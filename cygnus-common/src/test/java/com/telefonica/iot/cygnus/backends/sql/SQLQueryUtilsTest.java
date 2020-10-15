@@ -138,6 +138,7 @@ public class SQLQueryUtilsTest {
         String timestampFormat = "YYYY-MM-DD HH24:MI:SS.MS";
         String sqlInstance = "postgresql";
         String destination = "example";
+        boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
                 getValueFieldsSingleBatch(),
@@ -147,16 +148,16 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination);
+                destination,
+                attrNativeTypes);
 
         String correctQuery = "INSERT INTO example.exampleTable_last_data " +
                 "(recvTime,recvTimeS,fiwareServicePath,entityId,entityType,loadStr,loadBool,loadNumber,load_md) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) " +
-                "ON CONFLICT (entityId) " +
-                "DO UPDATE SET recvTime=EXCLUDED.recvTime, recvTimeS=EXCLUDED.recvTimeS, fiwareServicePath=EXCLUDED.fiwareServicePath, " +
-                "entityType=EXCLUDED.entityType, loadStr=EXCLUDED.loadStr, loadBool=EXCLUDED.loadBool, loadNumber=EXCLUDED.loadNumber, load_md=EXCLUDED.load_md " +
-                "WHERE example.exampleTable_last_data.entityId=EXCLUDED.entityId " +
-                "AND to_timestamp(example.exampleTable_last_data.recvTimeS, 'YYYY-MM-DD HH24:MI:SS.MS') " +
+                "VALUES (1461136795801,'2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1',TRUE,1,'load_md') " +
+                "ON CONFLICT (entityId) DO UPDATE SET recvTime=EXCLUDED.recvTime, recvTimeS=EXCLUDED.recvTimeS, " +
+                "fiwareServicePath=EXCLUDED.fiwareServicePath, entityType=EXCLUDED.entityType, loadStr=EXCLUDED.loadStr, " +
+                "loadBool=EXCLUDED.loadBool, loadNumber=EXCLUDED.loadNumber, load_md=EXCLUDED.load_md " +
+                "WHERE example.exampleTable_last_data.entityId=EXCLUDED.entityId AND to_timestamp(example.exampleTable_last_data.recvTimeS, 'YYYY-MM-DD HH24:MI:SS.MS') " +
                 "< to_timestamp(EXCLUDED.recvTimeS, 'YYYY-MM-DD HH24:MI:SS.MS')";
 
         try {
@@ -178,6 +179,7 @@ public class SQLQueryUtilsTest {
         String timestampFormat = "YYYY-MM-DD HH24:MI:SS.MS";
         String sqlInstance = "postgresql";
         String destination = "example";
+        boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(getValueFieldsMultipleBatch(),
                 getValueFieldsMultipleBatch(),
@@ -187,16 +189,17 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination);
+                destination,
+                attrNativeTypes);
 
         String correctQuery = "INSERT INTO example.exampleTable_last_data " +
-                "(recvTime,recvTimeS,fiwareServicePath,entityId,entityType,loadStr,loadBool,loadNumber,load_md) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) " +
-                "ON CONFLICT (entityId) " +
-                "DO UPDATE SET recvTime=EXCLUDED.recvTime, recvTimeS=EXCLUDED.recvTimeS, fiwareServicePath=EXCLUDED.fiwareServicePath, " +
+                "(recvTime,recvTimeS,fiwareServicePath,entityId,entityType,loadStr,loadBool,loadNumber,load_md) VALUES " +
+                "(1461136795801,'2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1',TRUE,1,'load_md')," +
+                "(1461136795802,'2016-04-20 07:19:55.802','somePath2','entityId1','entityType','load2',FALSE,23,'load_md')," +
+                "(1461136795800,'2016-04-20 07:19:55.800','somePath3','entityId1','entityType','load3',FALSE,8,'load_md') " +
+                "ON CONFLICT (entityId) DO UPDATE SET recvTime=EXCLUDED.recvTime, recvTimeS=EXCLUDED.recvTimeS, fiwareServicePath=EXCLUDED.fiwareServicePath, " +
                 "entityType=EXCLUDED.entityType, loadStr=EXCLUDED.loadStr, loadBool=EXCLUDED.loadBool, loadNumber=EXCLUDED.loadNumber, load_md=EXCLUDED.load_md " +
-                "WHERE example.exampleTable_last_data.entityId=EXCLUDED.entityId " +
-                "AND to_timestamp(example.exampleTable_last_data.recvTimeS, 'YYYY-MM-DD HH24:MI:SS.MS') " +
+                "WHERE example.exampleTable_last_data.entityId=EXCLUDED.entityId AND to_timestamp(example.exampleTable_last_data.recvTimeS, 'YYYY-MM-DD HH24:MI:SS.MS') " +
                 "< to_timestamp(EXCLUDED.recvTimeS, 'YYYY-MM-DD HH24:MI:SS.MS')";
 
         try {
@@ -218,6 +221,7 @@ public class SQLQueryUtilsTest {
         String timestampFormat = "YYYY-MM-DD HH24:MI:SS.MS";
         String sqlInstance = "postgresql";
         String destination = "example";
+        boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(new LinkedHashMap<>(),
                 new LinkedHashMap<>(),
@@ -227,11 +231,12 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination);
+                destination,
+                attrNativeTypes);
 
-        String correctQuery = "INSERT INTO example.exampleTable_last_data () VALUES () ON CONFLICT (entityId) DO UPDATE SET  " +
-                "WHERE example.exampleTable_last_data.entityId=EXCLUDED.entityId AND to_timestamp(example.exampleTable_last_data.recvTimeS, " +
-                "'YYYY-MM-DD HH24:MI:SS.MS') < to_timestamp(EXCLUDED.recvTimeS, 'YYYY-MM-DD HH24:MI:SS.MS')";
+        String correctQuery = "INSERT INTO example.exampleTable_last_data () VALUES  ON CONFLICT (entityId) DO UPDATE SET  WHERE " +
+                "example.exampleTable_last_data.entityId=EXCLUDED.entityId AND to_timestamp(example.exampleTable_last_data.recvTimeS, 'YYYY-MM-DD HH24:MI:SS.MS') " +
+                "< to_timestamp(EXCLUDED.recvTimeS, 'YYYY-MM-DD HH24:MI:SS.MS')";
 
         try {
             assertEquals(sqlupsertQuery.toString(), correctQuery);
@@ -252,6 +257,7 @@ public class SQLQueryUtilsTest {
         String timestampFormat = "%Y-%m-%d %H:%i:%s.%f";
         String sqlInstance = "mysql";
         String destination = "example";
+        boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(getValueFieldsMultipleBatch(),
                 getValueFieldsMultipleBatch(),
@@ -261,28 +267,28 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination);
+                destination,
+                attrNativeTypes);
 
         String correctQuery = "INSERT INTO `exampleTable_last_data` " +
                 "(`recvTime`,`recvTimeS`,`fiwareServicePath`,`entityId`,`entityType`,`loadStr`,`loadBool`,`loadNumber`,`load_md`) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) " +
+                "VALUES (1461136795801,'2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1',TRUE,1,'load_md')," +
+                "(1461136795802,'2016-04-20 07:19:55.802','somePath2','entityId1','entityType','load2',FALSE,23,'load_md')," +
+                "(1461136795800,'2016-04-20 07:19:55.800','somePath3','entityId1','entityType','load3',FALSE,8,'load_md') " +
                 "ON DUPLICATE KEY UPDATE " +
-                "recvTime=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTime), recvTime), " +
-                "fiwareServicePath=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(fiwareServicePath), fiwareServicePath), " +
-                "entityType=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(entityType), entityType), " +
-                "loadStr=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(loadStr), loadStr), " +
-                "loadBool=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(loadBool), loadBool), " +
-                "loadNumber=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(loadNumber), loadNumber), " +
-                "load_md=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(load_md), load_md), " +
-                "recvTimeS=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTimeS), recvTimeS)";
+                "recvTime=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') " +
+                "< (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTime), recvTime), fiwareServicePath=IF((entityId=VALUES(entityId)) " +
+                "AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(fiwareServicePath), " +
+                "fiwareServicePath), entityType=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') " +
+                "< (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(entityType), entityType), loadStr=IF((entityId=VALUES(entityId)) " +
+                "AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(loadStr), loadStr), " +
+                "loadBool=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') " +
+                "< (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(loadBool), loadBool), loadNumber=IF((entityId=VALUES(entityId)) " +
+                "AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(loadNumber), loadNumber), " +
+                "load_md=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') " +
+                "< (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(load_md), load_md), " +
+                "recvTimeS=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') " +
+                "< (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTimeS), recvTimeS)";
         try {
             assertEquals(sqlupsertQuery.toString(), correctQuery);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testMySQLUpsertQueryMultipleBatch]")
@@ -301,6 +307,7 @@ public class SQLQueryUtilsTest {
         String timestampFormat = "%Y-%m-%d %H:%i:%s.%f";
         String sqlInstance = "mysql";
         String destination = "example";
+        boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
                 getValueFieldsSingleBatch(),
@@ -310,28 +317,24 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination);
+                destination,
+                attrNativeTypes);
 
         String correctQuery = "INSERT INTO `exampleTable_last_data` " +
                 "(`recvTime`,`recvTimeS`,`fiwareServicePath`,`entityId`,`entityType`,`loadStr`,`loadBool`,`loadNumber`,`load_md`) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) " +
-                "ON DUPLICATE KEY UPDATE " +
-                "recvTime=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTime), recvTime), " +
-                "fiwareServicePath=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(fiwareServicePath), fiwareServicePath), " +
-                "entityType=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(entityType), entityType), " +
-                "loadStr=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(loadStr), loadStr), " +
-                "loadBool=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(loadBool), loadBool), " +
-                "loadNumber=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(loadNumber), loadNumber), " +
-                "load_md=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(load_md), load_md), " +
-                "recvTimeS=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < " +
-                "(STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTimeS), recvTimeS)";
+                "VALUES (1461136795801,'2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1',TRUE,1,'load_md') " +
+                "ON DUPLICATE KEY UPDATE recvTime=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') " +
+                "< (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTime), recvTime), fiwareServicePath=IF((entityId=VALUES(entityId))" +
+                " AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(fiwareServicePath), " +
+                "fiwareServicePath), entityType=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f')" +
+                " < (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(entityType), entityType), loadStr=IF((entityId=VALUES(entityId)) " +
+                "AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(loadStr), loadStr), " +
+                "loadBool=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') " +
+                "< (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(loadBool), loadBool), loadNumber=IF((entityId=VALUES(entityId)) " +
+                "AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(loadNumber), loadNumber), " +
+                "load_md=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') " +
+                "< (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(load_md), load_md), recvTimeS=IF((entityId=VALUES(entityId)) " +
+                "AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTimeS), recvTimeS)";
         try {
             assertEquals(sqlupsertQuery.toString(), correctQuery);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testMySQLUpsertQuerySingleBatch]")
@@ -350,6 +353,7 @@ public class SQLQueryUtilsTest {
         String timestampFormat = "%Y-%m-%d %H:%i:%s.%f";
         String sqlInstance = "mysql";
         String destination = "example";
+        boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(new LinkedHashMap<>(),
                 new LinkedHashMap<>(),
@@ -359,9 +363,10 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination);
+                destination,
+                attrNativeTypes);
 
-        String correctQuery = "INSERT INTO `exampleTable_last_data` () VALUES () ON DUPLICATE KEY UPDATE";
+        String correctQuery = "INSERT INTO `exampleTable_last_data` () VALUES  ON DUPLICATE KEY UPDATE";
         try {
             assertEquals(sqlupsertQuery.toString().trim(), correctQuery);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testMySQLUpsertQueryEmptyBatch]")
@@ -399,18 +404,20 @@ public class SQLQueryUtilsTest {
         String tableName = "exampleTable";
         String sqlInstance = "postgresql";
         String destination = "example";
+        boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlInsertQuery(getValueFieldsSingleBatch(),
                 tableName,
                 sqlInstance,
-                destination);
+                destination,
+                attrNativeTypes);
 
         String correctQuery = "INSERT INTO example.exampleTable " +
                 "(recvTime,recvTimeS,fiwareServicePath,entityId,entityType,loadStr,loadBool,loadNumber,load_md) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+                "VALUES (1461136795801,'2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1',TRUE,1,'load_md')";
 
         try {
-            assertEquals(sqlupsertQuery.toString(), correctQuery);
+            assertEquals(sqlupsertQuery.toString().trim(), correctQuery);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testPostgreSQLInsertQuerySingleBatch]")
                     + "-  OK  - testPostgreSQLInsertQuerySingleBatch");
         } catch (Exception e) {
@@ -425,17 +432,19 @@ public class SQLQueryUtilsTest {
         String sqlInstance = "mysql";
         String destination = "example";
         StringBuffer sqlupsertQuery;
+        boolean attrNativeTypes = false;
         sqlupsertQuery = SQLQueryUtils.sqlInsertQuery(getValueFieldsSingleBatch(),
                 tableName,
                 sqlInstance,
-                destination);
+                destination,
+                attrNativeTypes);
 
         String correctQuery = "INSERT INTO `exampleTable` " +
                 "(`recvTime`,`recvTimeS`,`fiwareServicePath`,`entityId`,`entityType`,`loadStr`,`loadBool`,`loadNumber`,`load_md`) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+                "VALUES ('1461136795801','2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1','true','1','load_md')";
 
         try {
-            assertEquals(sqlupsertQuery.toString(), correctQuery);
+            assertEquals(sqlupsertQuery.toString().trim(), correctQuery);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testMySQLInsertQuerySingleBatch]")
                     + "-  OK  - testPostgreSQLInsertQuerySingleBatch");
         } catch (Exception e) {
@@ -449,18 +458,22 @@ public class SQLQueryUtilsTest {
         String tableName = "exampleTable";
         String sqlInstance = "postgresql";
         String destination = "example";
+        boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlInsertQuery(getValueFieldsMultipleBatch(),
                 tableName,
                 sqlInstance,
-                destination);
+                destination,
+                attrNativeTypes);
 
         String correctQuery = "INSERT INTO example.exampleTable " +
                 "(recvTime,recvTimeS,fiwareServicePath,entityId,entityType,loadStr,loadBool,loadNumber,load_md) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+                "VALUES (1461136795801,'2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1',TRUE,1,'load_md')," +
+                "(1461136795802,'2016-04-20 07:19:55.802','somePath2','entityId1','entityType','load2',FALSE,23,'load_md')," +
+                "(1461136795800,'2016-04-20 07:19:55.800','somePath3','entityId1','entityType','load3',FALSE,8,'load_md')";
 
         try {
-            assertEquals(sqlupsertQuery.toString(), correctQuery);
+            assertEquals(sqlupsertQuery.toString().trim(), correctQuery);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testPostgreSQLInsertQueryMultipleBatch]")
                     + "-  OK  - testPostgreSQLInsertQueryMultipleBatch");
         } catch (Exception e) {
@@ -474,18 +487,22 @@ public class SQLQueryUtilsTest {
         String tableName = "exampleTable";
         String sqlInstance = "mysql";
         String destination = "example";
+        boolean attrNativeTypes = false;
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlInsertQuery(getValueFieldsMultipleBatch(),
                 tableName,
                 sqlInstance,
-                destination);
+                destination,
+                attrNativeTypes);
 
         String correctQuery = "INSERT INTO `exampleTable` " +
                 "(`recvTime`,`recvTimeS`,`fiwareServicePath`,`entityId`,`entityType`,`loadStr`,`loadBool`,`loadNumber`,`load_md`) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+                "VALUES ('1461136795801','2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1','true','1','load_md')," +
+                "('1461136795802','2016-04-20 07:19:55.802','somePath2','entityId1','entityType','load2','false','23','load_md')," +
+                "('1461136795800','2016-04-20 07:19:55.800','somePath3','entityId1','entityType','load3','false','8','load_md')";
 
         try {
-            assertEquals(sqlupsertQuery.toString(), correctQuery);
+            assertEquals(sqlupsertQuery.toString().trim(), correctQuery);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testMySQLInsertQueryMultipleBatch]")
                     + "-  OK  - testMySQLInsertQueryMultipleBatch");
         } catch (Exception e) {
