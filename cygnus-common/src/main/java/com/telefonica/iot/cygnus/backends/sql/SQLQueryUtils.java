@@ -61,7 +61,8 @@ public class SQLQueryUtils {
                                                  String timestampKey,
                                                  String timestampFormat,
                                                  String sqlInstance,
-                                                 String destination) {
+                                                 String destination,
+                                                 boolean attrNativeTypes) {
 
         if (sqlInstance.equals("postgresql")) {
             return postgreSqlUpsertQuery(aggregation,
@@ -72,7 +73,8 @@ public class SQLQueryUtils {
                     timestampKey,
                     timestampFormat,
                     sqlInstance,
-                    destination);
+                    destination,
+                    attrNativeTypes);
         } else if (sqlInstance.equals("mysql")) {
             return mySqlUpsertQuery(aggregation,
                     lastData,
@@ -82,7 +84,8 @@ public class SQLQueryUtils {
                     timestampKey,
                     timestampFormat,
                     sqlInstance,
-                    destination);
+                    destination,
+                    attrNativeTypes);
         }
         return null;
     }
@@ -109,7 +112,8 @@ public class SQLQueryUtils {
                                                         String timestampKey,
                                                         String timestampFormat,
                                                         String sqlInstance,
-                                                        String destination) {
+                                                        String destination,
+                                                        boolean attrNativeTypes) {
 
         StringBuffer updateSet = new StringBuffer();
         StringBuffer postgisTempReference = new StringBuffer("EXCLUDED");
@@ -129,7 +133,8 @@ public class SQLQueryUtils {
         StringBuffer insertQuery = sqlInsertQuery(lastData,
                 tableName.concat(tableSuffix),
                 sqlInstance,
-                destination);
+                destination,
+                attrNativeTypes);
 
         query.append(insertQuery).
                 append("ON CONFLICT ").append("(").append(uniqueKey).append(") ").
@@ -165,7 +170,8 @@ public class SQLQueryUtils {
                                                    String timestampKey,
                                                    String timestampFormat,
                                                    String sqlInstance,
-                                                   String destination) {
+                                                   String destination,
+                                                   boolean attrNativeTypes) {
 
         StringBuffer updateSet = new StringBuffer();
         StringBuffer query = new StringBuffer();
@@ -197,7 +203,8 @@ public class SQLQueryUtils {
         StringBuffer insertQuery = sqlInsertQuery(lastData,
                 tableName.concat(tableSuffix),
                 sqlInstance,
-                destination);
+                destination,
+                attrNativeTypes);
 
         query.append(insertQuery).
                 append("ON DUPLICATE KEY ").
@@ -251,10 +258,21 @@ public class SQLQueryUtils {
     protected static StringBuffer sqlInsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                  String tableName,
                                                  String sqlInstance,
-                                                 String destination) {
+                                                 String destination,
+                                                 boolean attrNativeTypes) {
 
         StringBuffer fieldsForInsert;
+        /*
+
+        FIXME
+
+        Add SQLSafe values with native PreparedStatement methods
+
         StringBuffer valuesForInsert = sqlQuestionValues(aggregation.keySet());
+
+        */
+        StringBuffer valuesForInsert = new StringBuffer(getValuesForInsert(aggregation, attrNativeTypes));
+
         StringBuffer postgisDestination = new StringBuffer(destination).append(".").append(tableName);
         StringBuffer query = new StringBuffer();
 
@@ -414,7 +432,10 @@ public class SQLQueryUtils {
      */
     protected static int collectionSizeOnLinkedHashMap(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
         ArrayList<ArrayList<JsonElement>> list = new ArrayList<>(aggregation.values());
-        return list.get(0).size();
+        if (list.size() > 0)
+            return list.get(0).size();
+        else
+            return 0;
     }
 
     /**
