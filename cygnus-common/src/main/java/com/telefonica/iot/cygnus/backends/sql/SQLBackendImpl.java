@@ -241,6 +241,7 @@ public class SQLBackendImpl implements SQLBackend{
         try {
             LOGGER.debug(sqlInstance.toUpperCase() + " Executing SQL query '" + query + "'");
             stmt.executeUpdate(query);
+            LOGGER.info(sqlInstance.toUpperCase() + " Executed SQL query '" + query + "'");
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(sqlInstance.toUpperCase() + " Data insertion error. Query insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {

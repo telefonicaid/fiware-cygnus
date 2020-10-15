@@ -1,4 +1,5 @@
 [cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Remove PreparedStatement building, to use String query (walkaround for #1959)
+[cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Log info about persisted data (#1939)
 [cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Create upsert transaction (#1806, #1936)
 [cygnus-common][NameMappingInterceptor] Catch and log Compile error namemapping (#1924)
 [cygnus-ngsi][PosgtgreSQLSink, PostgisSink] Add upsert function. (#1806)
