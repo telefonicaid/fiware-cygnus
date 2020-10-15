@@ -595,7 +595,7 @@ public class SQLBackendImpl implements SQLBackend{
             insertPreparedStatement = SQLQueryUtils.addJsonValues(insertStatement, aggregation, attrNativeTypes);
 
             */
-            insertedRows = insertStatement.executeBatch();
+            insertStatement.executeUpdate();
 
             String upsertQuery = SQLQueryUtils.sqlUpsertQuery(aggregation,
                     lastData,
@@ -620,10 +620,10 @@ public class SQLBackendImpl implements SQLBackend{
             upsertPreparedStatement = SQLQueryUtils.addJsonValues(upsertStatement, lastData, attrNativeTypes);
 
             */
-            upsertStatement.executeBatch();
+            upsertStatement.executeUpdate();
 
             connection.commit();
-            LOGGER.info("Finished transaction: \n" + upsertPreparedStatement + "\n Also, some where Inserted. QUERY: " + insertQuery);
+            LOGGER.info("Finished transaction: \n" + upsertQuery + "\n Also, some where Inserted. QUERY: " + insertQuery);
 
         } catch (SQLTimeoutException e) {
             cygnusSQLRollback(connection);
