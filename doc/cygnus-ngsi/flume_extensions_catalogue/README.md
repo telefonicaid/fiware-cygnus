@@ -11,6 +11,7 @@
     * [NGSIHDFSSink](./ngsi_hdfs_sink.md)
     * [NGSIMongoSink](./ngsi_mongo_sink.md)
     * [NGSIMySQLSink](./ngsi_mysql_sink.md)
+        * [Last Data Functionality](./last_data_function.md)
     * [NGSIPostgreSQLSink](./ngsi_postgresql_sink.md)
         * [Last Data Functionality](./last_data_function.md)
     * [NGSIPostGISSink](./ngsi_postgis_sink.md)

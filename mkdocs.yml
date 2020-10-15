@@ -131,6 +131,7 @@ pages:
               - 'NGSIRestHandler': 'cygnus-ngsi-ld/flume_extensions_catalogue/ngsi_rest_handler.md'
               - 'NGSIPostgreSQLSink': 'cygnus-ngsi-ld/flume_extensions_catalogue/ngsi_postgresql_sink.md'
               - 'NGSIPostGISSink': 'cygnus-ngsi-ld/flume_extensions_catalogue/ngsi_postgis_sink.md'
+              - 'NGSICKANSink': 'cygnus-ngsi-ld/flume_extensions_catalogue/ngsi_ckan_sink.md'
               - 'Reporting issues and contact information': 'cygnus-ngsi-ld/flume_extensions_catalogue/issues_and_contact.md'
         - 'User and Programmer Guide':
               - 'Programmer Guide': 'cygnus-ngsi-ld/user_and_programmer_guide/README.md'

@@ -227,6 +227,11 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
+| enable\_last\_data | no | false | <i>true</i> or <i>false</i>, to enable last data functionality. Check this [link](./last_data_function.md) for more details. |
+| last\_data\_table\_suffix | no | false | This suffix will be added to the table name in order to know where Cygnus will store the last record of an entity. Check this [link](./last_data_function.md) for more details. |
+| last\_data\_unique\_key | no | entityId | This must be a unique key on the database to find when a previous record exists. Check this [link](./last_data_function.md) for more details. |
+| last\_data\_timestamp\_key | no | recvTime | This must be a timestamp key on the aggregation to know which record is older. Check this [link](./last_data_function.md) for more details. |
+| last\_data\_sql_timestamp\_format | no | YYYY-MM-DD HH24:MI:SS.MS | This must be a timestamp format to cast [SQL Text to timestamp](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html). Check this [link](./last_data_function.md) for more details. |
 | data\_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <i>dm-by-entity-type</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | mysql\_host | no | localhost | FQDN/IP address where the MySQL server runs |
 | mysql\_port | no | 3306 ||

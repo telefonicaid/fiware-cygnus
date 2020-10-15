@@ -438,7 +438,7 @@ public class NGSIPostgisSink extends NGSISink {
             createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgisOptions, persistErrors, maxLatestErrors);
         }
 
-        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgisSink. Schema ("
+        LOGGER.debug("[" + this.getName() + "] Persisting data at NGSIPostgisSink. Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
                 + valuesForInsert + ")");
 

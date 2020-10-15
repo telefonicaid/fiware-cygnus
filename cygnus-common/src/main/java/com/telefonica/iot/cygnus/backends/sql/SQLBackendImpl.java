@@ -241,6 +241,7 @@ public class SQLBackendImpl implements SQLBackend{
         try {
             LOGGER.debug(sqlInstance.toUpperCase() + " Executing SQL query '" + query + "'");
             stmt.executeUpdate(query);
+            LOGGER.info(sqlInstance.toUpperCase() + " Executed SQL query '" + query + "'");
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(sqlInstance.toUpperCase() + " Data insertion error. Query insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
@@ -604,7 +605,7 @@ public class SQLBackendImpl implements SQLBackend{
             upsertPreparedStatement.executeBatch();
 
             connection.commit();
-            LOGGER.info("Finished transaction: \n" + upsertPreparedStatement + "\n Also, " + insertedRows.length + " where Inserted. THE LAS ONE WAS: " + " " + upsertQuery);
+            LOGGER.info("Finished transaction: \n" + upsertPreparedStatement + "\n Also, " + insertedRows.length + " where Inserted. THE LAS ONE WAS: " + " " + insertQuery);
 
         } catch (SQLTimeoutException e) {
             cygnusSQLRollback(connection);

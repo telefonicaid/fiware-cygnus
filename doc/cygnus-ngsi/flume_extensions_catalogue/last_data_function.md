@@ -97,7 +97,11 @@ All this process happens per each NGSIEvent aggregated.
 
 Once the aggregation is processed, then a query is created to upsert a single record with a PreparedStatement.
 
+**Notice that in both cases MySQL and PostgreSQL this function always expects to find timestamp keys into Text format.**
+
 A query like this one is executed
+
+### POSTGRESQL
 
 `INSERT INTO pruebapostmanx.subpruebapostman_5dde9_wastecontainer_last_data 
 (recvTime,fiwareServicePath,entityId,entityType,fillingLevel,fillingLevel_md) VALUES (?, ?, ?, ?, ?, ?) 
@@ -164,3 +168,57 @@ The table updated would be:
      
      
 Notice the value `4wheels2` on the column `fiwareServicePath` remained after the update because it was not updated.
+
+
+
+### MYSQL
+
+`INSERT INTO sub_5dde9_last_data 
+(recvTime,fiwareServicePath,entityId,entityType,fillingLevel,fillingLevel_md) 
+VALUES (?, ?, ?, ?, ?, ?)  
+ON DUPLICATE KEY UPDATE 
+fiwareServicePath=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < 
+(STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(fiwareServicePath), fiwareServicePath), 
+entityType=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < 
+(STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(entityType), entityType), 
+fillingLevel=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < 
+(STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(fillingLevel), fillingLevel), 
+fillingLevel_md=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < 
+(STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(fillingLevel_md), fillingLevel_md), 
+recvTime=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < 
+(STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTime), recvTime)`
+
+In general the syntax is very similar to PostgreSQL query. The first part executes a usual INSERT query.
+
+`INSERT INTO sub_5dde9_last_data 
+             (recvTime,fiwareServicePath,entityId,entityType,fillingLevel,fillingLevel_md) 
+             VALUES (?, ?, ?, ?, ?, ?`
+             
+Notice that on the table name the `last_data_table_suffix` is added at the end of the usual table name. So in this case, the usual insert is made to `sub_5dde9_wastecontainer`.             
+
+`ON DUPLICATE KEY UPDATE`
+
+This line indicates the expected behaviour when the insert query finds any trouble when inserting data with the unique column. 
+
+`fiwareServicePath=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < 
+(STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(fiwareServicePath), fiwareServicePath)`
+
+This defines the behaviour that mySQL will follow when finds any key previously inserted into the database.
+
+As you can see on that statement. The record `fiwareServicePath` will be updated `IF`
+
+`IF((key=VALUES(key)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(key), key)`
+
+`key=VALUES(key)`
+
+The record previously inserted has the same key that the one that is trying to be inserted (referred as `VALUES(key)`)
+
+`AND`
+
+`(STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))`
+
+`STR_TO_DATE(last_data_timestamp_key, 'last_data_sql_timestamp_format')`
+
+This line casts to a timestamp the indicated key `last_data_timestamp_key` with the format `last_data_sql_timestamp_format` and then compares it with the timestampof the record that is beeing tried to insert (referred as `VALUES(recvTime)`) also casted to timestamp.
+
+**Notice that if the previous stored event contain data in a column that the intended values to insert not contain. The previous values stores in those columns will remain after the update**
