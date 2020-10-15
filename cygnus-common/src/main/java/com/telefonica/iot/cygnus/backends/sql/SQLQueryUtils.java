@@ -264,7 +264,7 @@ public class SQLQueryUtils {
         StringBuffer fieldsForInsert;
         /*
 
-        FIXME
+        FIXME https://github.com/telefonicaid/fiware-cygnus/issues/1959
 
         Add SQLSafe values with native PreparedStatement methods
 

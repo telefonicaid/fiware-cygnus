@@ -588,7 +588,7 @@ public class SQLBackendImpl implements SQLBackend{
             insertStatement = connection.prepareStatement(insertQuery);
             /*
 
-            FIXME
+            FIXME https://github.com/telefonicaid/fiware-cygnus/issues/1959
 
             Add SQLSafe values with native PreparedStatement methods
 
@@ -613,7 +613,7 @@ public class SQLBackendImpl implements SQLBackend{
 
             /*
 
-            FIXME
+            FIXME https://github.com/telefonicaid/fiware-cygnus/issues/1959
 
             Add SQLSafe values with native PreparedStatement methods
 
