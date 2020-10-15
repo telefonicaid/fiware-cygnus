@@ -294,6 +294,9 @@ public class SQLQueryUtils {
         return questionValues;
     }
 
+
+    // INSERT INTO database (recvtime, location) VALUES ('valor', )
+
     /**
      * Gets fields for insert.
      *
@@ -361,8 +364,8 @@ public class SQLQueryUtils {
                                     LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
                                     position++;
                                 } else {
-                                    preparedStatement.setString(position, stringValue);
-                                    LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + stringValue + " as String");
+                                    preparedStatement.setObject(position, stringValue);
+                                    LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + stringValue + " as Object");
                                     position++;
                                 }
                             } // else
@@ -380,17 +383,17 @@ public class SQLQueryUtils {
                             LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
                             position++;
                         } else {
-                            preparedStatement.setString(position, stringValue);
+                            preparedStatement.setObject(position, stringValue);
                             LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + stringValue + " as String");
                             position++;
                         }
                     } else {
                         if (value == null){
-                            preparedStatement.setString(position, "NULL");
+                            preparedStatement.setObject(position, "NULL");
                             LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added NULL as String");
                             position++;
                         } else {
-                            preparedStatement.setString(position, value.toString());
+                            preparedStatement.setObject(position, value.toString());
                             LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + value.toString() + " as String");
                             position++;
                         }
@@ -413,5 +416,87 @@ public class SQLQueryUtils {
         ArrayList<ArrayList<JsonElement>> list = new ArrayList<>(aggregation.values());
         return list.get(0).size();
     }
+
+    /**
+     * Gets string value from json element.
+     *
+     * @param value           the value to process
+     * @param quotationMark   the quotation mark
+     * @param attrNativeTypes the attr native types
+     * @return the string value from json element
+     */
+    protected static String getStringValueFromJsonElement(JsonElement value, String quotationMark, boolean attrNativeTypes) {
+        String stringValue;
+        if (attrNativeTypes) {
+            if (value == null || value.isJsonNull()) {
+                stringValue = "NULL";
+            } else if (value.isJsonPrimitive()) {
+                if (value.getAsJsonPrimitive().isBoolean()) {
+                    stringValue = value.getAsString().toUpperCase();
+                } else if (value.getAsJsonPrimitive().isNumber()) {
+                    stringValue = value.getAsString();
+                }else {
+                    if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
+                        stringValue = value.getAsString().replace("\\", "");
+                    } else {
+                        stringValue = quotationMark + value.getAsString() + quotationMark;
+                    }
+                }
+            } else {
+                stringValue = quotationMark + value.toString() + quotationMark;
+            }
+        } else {
+            if (value != null && value.isJsonPrimitive()) {
+                if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
+                    stringValue = value.getAsString().replace("\\", "");
+                } else {
+                    stringValue = quotationMark + value.getAsString() + quotationMark;
+                }
+            } else {
+                if (value == null){
+                    stringValue = quotationMark + "NULL" + quotationMark;
+                } else {
+                    stringValue = quotationMark + value.toString() + quotationMark;
+                }
+            }
+        }
+        return stringValue;
+    }
+
+    /**
+     * Gets values for insert.
+     *
+     * @param aggregation     the aggregation
+     * @param attrNativeTypes the attr native types
+     * @return a String with all VALUES in SQL query format.
+     */
+    protected static String getValuesForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, boolean attrNativeTypes) {
+        String valuesForInsert = "";
+        int numEvents = collectionSizeOnLinkedHashMap(aggregation);
+
+        for (int i = 0; i < numEvents; i++) {
+            if (i == 0) {
+                valuesForInsert += "(";
+            } else {
+                valuesForInsert +=  ",(";
+            } // if else
+            boolean first = true;
+            Iterator<String> it = aggregation.keySet().iterator();
+            while (it.hasNext()) {
+                String entry = (String) it.next();
+                ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
+                JsonElement value = values.get(i);
+                String stringValue = getStringValueFromJsonElement(value, "'", attrNativeTypes);
+                if (first) {
+                    valuesForInsert += stringValue;
+                    first = false;
+                } else {
+                    valuesForInsert += "," + stringValue;
+                } // if else
+            } // while
+            valuesForInsert += ")";
+        } // for
+        return valuesForInsert;
+    } // getValuesForInsert
 
 }

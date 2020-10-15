@@ -524,6 +524,62 @@ public class SQLQueryUtilsTest {
     }
 
     @Test
+    public void testGetValuesForInsertMultipleValuesNativeTypes() {
+        String multipleList = "(1461136795801,'2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1',TRUE,1,'load_md'),(1461136795802,'2016-04-20 07:19:55.802','somePath2','entityId1','entityType','load2',FALSE,23,'load_md'),(1461136795800,'2016-04-20 07:19:55.800','somePath3','entityId1','entityType','load3',FALSE,8,'load_md')";
+        boolean nativeTypes = true;
+        try {
+            String valuesForInsert = SQLQueryUtils.getValuesForInsert(getValueFieldsMultipleBatch(), nativeTypes);
+            assertEquals(valuesForInsert, multipleList);
+            System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testGetValuesForInsertMultipleValuesNativeTypes]")
+                    + "-  OK  - testGetValuesForInsertMultipleValuesNativeTypes");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testGetValuesForInsertMultipleValuesNoNativeTypes() {
+        String multipleList = "('1461136795801','2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1','true','1','load_md'),('1461136795802','2016-04-20 07:19:55.802','somePath2','entityId1','entityType','load2','false','23','load_md'),('1461136795800','2016-04-20 07:19:55.800','somePath3','entityId1','entityType','load3','false','8','load_md')";
+        boolean nativeTypes = false;
+        try {
+            String valuesForInsert = SQLQueryUtils.getValuesForInsert(getValueFieldsMultipleBatch(), nativeTypes);
+            assertEquals(valuesForInsert, multipleList);
+            System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testGetValuesForInsertMultipleValuesNoNativeTypes]")
+                    + "-  OK  - testGetValuesForInsertMultipleValuesNoNativeTypes");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testGetValuesForInsertSingleValuesNativeTypes() {
+        String singleList = "(1461136795801,'2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1',TRUE,1,'load_md')";
+        boolean nativeTypes = true;
+        try {
+            String valuesForInsert = SQLQueryUtils.getValuesForInsert(getValueFieldsSingleBatch(), nativeTypes);
+            assertEquals(valuesForInsert, singleList);
+            System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testGetValuesForInsertSingleValuesNativeTypes]")
+                    + "-  OK  - testGetValuesForInsertSingleValuesNativeTypes");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testGetValuesForInsertSingleValuesNoNativeTypes() {
+        String singleList = "('1461136795801','2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1','true','1','load_md')";
+        boolean nativeTypes = false;
+        try {
+            String valuesForInsert = SQLQueryUtils.getValuesForInsert(getValueFieldsSingleBatch(), nativeTypes);
+            assertEquals(valuesForInsert, singleList);
+            System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testGetValuesForInsertSingleValuesNoNativeTypes]")
+                    + "-  OK  - testGetValuesForInsertSingleValuesNoNativeTypes");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
     public void testSQLQuestionNoneValue() {
         Set<String> keyList = new HashSet<>();
         String multipleList = "()";
