@@ -581,12 +581,21 @@ public class SQLBackendImpl implements SQLBackend{
             String insertQuery = SQLQueryUtils.sqlInsertQuery(aggregation,
                     tableName,
                     sqlInstance,
-                    destination).toString();
+                    destination,
+                    attrNativeTypes).toString();
 
-            PreparedStatement insertStatement = null;
+            PreparedStatement insertStatement;
             insertStatement = connection.prepareStatement(insertQuery);
+            /*
+
+            FIXME
+
+            Add SQLSafe values with native PreparedStatement methods
+
             insertPreparedStatement = SQLQueryUtils.addJsonValues(insertStatement, aggregation, attrNativeTypes);
-            insertedRows = insertPreparedStatement.executeBatch();
+
+            */
+            insertedRows = insertStatement.executeBatch();
 
             String upsertQuery = SQLQueryUtils.sqlUpsertQuery(aggregation,
                     lastData,
@@ -596,15 +605,25 @@ public class SQLBackendImpl implements SQLBackend{
                     timestampKey,
                     timestampFormat,
                     sqlInstance,
-                    destination).toString();
+                    destination,
+                    attrNativeTypes).toString();
 
-            PreparedStatement upsertStatement = null;
+            PreparedStatement upsertStatement;
             upsertStatement = connection.prepareStatement(upsertQuery);
+
+            /*
+
+            FIXME
+
+            Add SQLSafe values with native PreparedStatement methods
+
             upsertPreparedStatement = SQLQueryUtils.addJsonValues(upsertStatement, lastData, attrNativeTypes);
-            upsertPreparedStatement.executeBatch();
+
+            */
+            upsertStatement.executeBatch();
 
             connection.commit();
-            LOGGER.info("Finished transaction: \n" + upsertPreparedStatement + "\n Also, " + insertedRows.length + " where Inserted. THE LAS ONE WAS: " + " " + insertQuery);
+            LOGGER.info("Finished transaction: \n" + upsertPreparedStatement + "\n Also, some where Inserted. QUERY: " + insertQuery);
 
         } catch (SQLTimeoutException e) {
             cygnusSQLRollback(connection);
