@@ -109,7 +109,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         System.arraycopy(originalCEBytes, 0, newBody, 0, originalCEBytes.length);
         System.arraycopy(mappedCEBytes, 0, newBody, originalCEBytes.length, mappedCEBytes.length);
         ngsiEvent.setBody(newBody);
-        LOGGER.debug("[nmi] New body: " + new String(newBody));
+        LOGGER.debug("[nmi] newBody: " + new String(newBody));
 
         // Add the mapped service and service path to the headers
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, map.getLeft());
@@ -306,6 +306,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
     public ImmutableTriple<String, String, ContextElement> doMap(String originalService, String originalServicePath,
             ContextElement originalCE) {
         if (nameMappings == null) {
+            LOGGER.info("[nmi] no namemappings to map entity " + originalCE.toString());
             return new ImmutableTriple(originalService, originalServicePath, originalCE);
         } // if
 
@@ -440,6 +441,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
         if (entityMapping == null) {
             LOGGER.debug("[nmi] Entity not found: " + originalEntityId + ", " + originalEntityType);
+            LOGGER.info("[nmi] Entity " + originalCE.toString() + " no matched");
             return new ImmutableTriple(newService, newServicePath, newCE);
         } // if
 
@@ -507,6 +509,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             LOGGER.debug("[nmi] newCA: " + newCA.toString());
         } // for
         LOGGER.debug("[nmi] newCE: " + newCE.toString());
+        LOGGER.info("[nmi] Entity " + originalCE.toString() + " mapped to: " + newCE.toString() + " by matched with " + entityMapping);
         return new ImmutableTriple(newService, newServicePath, newCE);
     } // map
 
