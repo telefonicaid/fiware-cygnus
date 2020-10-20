@@ -67,7 +67,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
     public void initialize() {
         if (!invalidConfiguration) {
             loadNameMappings();
-            LOGGER.info("[nmi] Name mappings loaded");
+            LOGGER.info("[nmi] Name mappings loaded");
 
             // Create and start a periodical name mappings reader
             periodicalNameMappingsReader = new PeriodicalNameMappingsReader(30000);
@@ -241,7 +241,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             jsonStr = JsonUtils.readJsonFile(nameMappingsConfFile);
             LOGGER.debug("[nmi] Reading name mappings, Json read: " + jsonStr);
         } catch (Exception e) {
-            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
+            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
             nameMappings = null;
             return;
         } // try catch
@@ -257,7 +257,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
      */
     protected void loadNameMappings(String jsonStr) {
         if (jsonStr == null) {
-            LOGGER.debug("[nmi] Reding name mappings, no file to read");
+            LOGGER.debug("[nmi] Reading name mappings, no file to read");
             nameMappings = null;
             return;
         } // if
@@ -269,7 +269,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             nameMappings = gson.fromJson(jsonStr, NameMappings.class);
             LOGGER.debug("[nmi] Reading attribute mappings, Json parsed");
         } catch (JsonIOException e) {
-            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
+            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
             nameMappings = null;
             return;
         } catch (JsonSyntaxException e) {
@@ -306,7 +306,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
     public ImmutableTriple<String, String, ContextElement> doMap(String originalService, String originalServicePath,
             ContextElement originalCE) {
         if (nameMappings == null) {
-            LOGGER.info("[nmi] no namemappings to map entity " + originalCE.toString());
+            LOGGER.info("[nmi] No namemappings to map entity " + originalCE.toString());
             return new ImmutableTriple(originalService, originalServicePath, originalCE);
         } // if
 
