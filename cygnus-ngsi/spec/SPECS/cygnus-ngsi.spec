@@ -99,6 +99,16 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Tue Oct 20 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.5.0
+- [cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Remove PreparedStatement building, to use String query (walkaround for #1959)
+- [cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Log info about persisted data (#1939)
+- [cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Create upsert transaction (#1806, #1936)
+- [cygnus-ngsi][NameMappingInterceptor] Log info about how namemapping applied (#1937)
+- [cygnus-ngsi][NGSIRestHandler] Log about "Starting internal transaction" moved from INFO to DEBUG (#1940)
+- [cygnus-ngsi][PosgtgreSQLSink, PostgisSink] Add upsert function. (#1806)
+- [cygnus-ngsi][MysqlSink] Quoted Sql field names to avoid naming problems. (#1863)
+- [cygnus-ngsi][mongoSinkl, sthSink] set the replica set name for the mongodb connection with the environment variable CYGNUS_MONGO_REPLICA_SET
+
 * Fri Sep 04 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.4.0
 - [cygnus-ngsi][RowAggregator] Handle metadata as json. This is to upgrade json-like sinks behaviour (#1902)
 - [cygnus-ngsi][ColumnAggregator] Fix attribute type key to make it unique (#1904)
