@@ -440,7 +440,6 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         } // for
 
         if (entityMapping == null) {
-            LOGGER.debug("[nmi] Entity not found: " + originalEntityId + ", " + originalEntityType);
             LOGGER.info("[nmi] Entity " + originalCE.toString() + " no matched");
             return new ImmutableTriple(newService, newServicePath, newCE);
         } // if
@@ -508,8 +507,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             newCA.setType(newAttributeType);
             LOGGER.debug("[nmi] newCA: " + newCA.toString());
         } // for
-        LOGGER.debug("[nmi] newCE: " + newCE.toString());
-        LOGGER.info("[nmi] Entity " + originalCE.toString() + " mapped to: " + newCE.toString() + " by matched with " + entityMapping);
+        LOGGER.info("[nmi] Entity " + originalCE.toString() + " mapped to: " + newCE.toString() + " by matched with " + entityMapping.toString());
         return new ImmutableTriple(newService, newServicePath, newCE);
     } // map
 
