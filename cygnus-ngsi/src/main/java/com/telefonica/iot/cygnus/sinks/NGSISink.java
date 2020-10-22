@@ -564,52 +564,59 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             if (accumulator.getAccIndex() != 0) {
                 LOGGER.debug("Batch completed");
                 NGSIBatch batch = accumulator.getBatch();
-
-                try {
-                    persistBatch(batch);
-                } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
-                    updateServiceMetrics(batch, true);
-                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-                    accumulator.initialize(new Date().getTime());
-                    txn.commit();
-                    setMDCToNA();
-                    return Status.READY;
-                } catch (CygnusPersistenceError e) {
-                    updateServiceMetrics(batch, true);
-                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-                    doRollback(accumulator.clone()); // the global accumulator has to be cloned for rollbacking purposes
-                    accumulator.initialize(new Date().getTime());
-                    txn.commit();
-                    setMDCToNA();
-                    return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
-                } catch (Exception e) {
-                    updateServiceMetrics(batch, true);
-                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-                    doRollback(accumulator.clone()); // the global accumulator has to be cloned for rollbacking purposes
+                NGSIBatch rollbackBatch = new NGSIBatch();
+                NGSIBatch batchToPersist = new NGSIBatch();
+                batch.startIterator();
+                while (batch.hasNext()) {
+                    String destination = batch.getNextDestination();
+                    StringBuffer transactionIds = new StringBuffer();
+                    ArrayList<NGSIEvent> events = batch.getNextEvents();
+                    for (NGSIEvent event : events) {
+                        batchToPersist.addEvent(destination, event);
+                        transactionIds.append(event.getHeaders().get(CommonConstants.HEADER_CORRELATOR_ID)).append(", ");
+                    }
+                    try {
+                        persistBatch(batchToPersist);
+                        updateServiceMetrics(batchToPersist, false);
+                        if (persistencePolicyMaxRecords > -1) {
+                            try {
+                                capRecords(batchToPersist, persistencePolicyMaxRecords);
+                            } catch (CygnusCappingError e) {
+                                LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                            } // try
+                        } // if
+                        numPersistedEvents += batchToPersist.getNumEvents();
+                        LOGGER.info("Finishing internal transaction (" + transactionIds + ")");
+                    } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
+                        updateServiceMetrics(batchToPersist, true);
+                        LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                    } catch (Exception e) {
+                        updateServiceMetrics(batchToPersist, true);
+                        LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                        for (NGSIEvent event : batchToPersist.getNextEvents()) {
+                            rollbackBatch.addEvent(destination, event);
+                        }
+                    } finally {
+                        batch.setNextPersisted(true);
+                    }
+                }
+                if (rollbackBatch.getNumEvents() > 0) {
+                    Accumulator rollbackAccumulator = new Accumulator();
+                    rollbackAccumulator.initialize(accumulator.getAccStartDate());
+                    for (NGSIEvent event : rollbackBatch.getNextEvents()) {
+                        rollbackAccumulator.accumulate(event);
+                    }
+                    doRollback(rollbackAccumulator.clone());
                     accumulator.initialize(new Date().getTime());
                     txn.commit();
                     setMDCToNA();
                     return Status.BACKOFF;
-                } // try catch
+                } else {
+                    accumulator.initialize(new Date().getTime());
+                    txn.commit();
+                }
 
-                if (persistencePolicyMaxRecords > -1) {
-                    try {
-                        capRecords(batch, persistencePolicyMaxRecords);
-                    } catch (CygnusCappingError e) {
-                        LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-                    } // try
-                } // if
-            
-                updateServiceMetrics(batch, false);
             } // if
-
-            if (!accumulator.getAccTransactionIds().isEmpty()) {
-                LOGGER.info("Finishing internal transaction (" + accumulator.getAccTransactionIds() + ")");
-            } // if
-
-            numPersistedEvents += accumulator.getBatch().getNumEvents();
-            accumulator.initialize(new Date().getTime());
-            txn.commit();
         } catch (ChannelException ex) {
             LOGGER.info("Rollback transaction by ChannelException  (" + ex.getMessage() + ")");
             txn.rollback();
