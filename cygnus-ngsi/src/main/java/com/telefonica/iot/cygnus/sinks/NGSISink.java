@@ -561,15 +561,16 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             accumulator.setAccIndex(currentIndex);
 
             // Persist the accumulation
+
             if (accumulator.getAccIndex() != 0) {
                 LOGGER.debug("Batch completed");
                 NGSIBatch batch = accumulator.getBatch();
                 NGSIBatch rollbackBatch = new NGSIBatch();
-                NGSIBatch batchToPersist = new NGSIBatch();
+                StringBuffer transactionIds = new StringBuffer();
                 batch.startIterator();
                 while (batch.hasNext()) {
+                    NGSIBatch batchToPersist = new NGSIBatch();
                     String destination = batch.getNextDestination();
-                    StringBuffer transactionIds = new StringBuffer();
                     ArrayList<NGSIEvent> events = batch.getNextEvents();
                     for (NGSIEvent event : events) {
                         batchToPersist.addEvent(destination, event);
@@ -603,20 +604,22 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 if (rollbackBatch.getNumEvents() > 0) {
                     Accumulator rollbackAccumulator = new Accumulator();
                     rollbackAccumulator.initialize(accumulator.getAccStartDate());
-                    for (NGSIEvent event : rollbackBatch.getNextEvents()) {
-                        rollbackAccumulator.accumulate(event);
+                    rollbackBatch.startIterator();
+                    while (rollbackBatch.hasNext()) {
+                        for (NGSIEvent event : rollbackBatch.getNextEvents()) {
+                            rollbackAccumulator.accumulate(event);
+                        }
                     }
                     doRollback(rollbackAccumulator.clone());
                     accumulator.initialize(new Date().getTime());
                     txn.commit();
                     setMDCToNA();
                     return Status.BACKOFF;
-                } else {
-                    accumulator.initialize(new Date().getTime());
-                    txn.commit();
                 }
 
             } // if
+            accumulator.initialize(new Date().getTime());
+            txn.commit();
         } catch (ChannelException ex) {
             LOGGER.info("Rollback transaction by ChannelException  (" + ex.getMessage() + ")");
             txn.rollback();
