@@ -435,11 +435,13 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 }
             }
             doRollbackAgain(rollbackAccumulator);
-            rollbackedAccumulations.set(0, rollbackAccumulator);
+            if (rollbackedAccumulations.size() > rollbackedAccumulationsIndex) {
+                rollbackedAccumulations.set(rollbackedAccumulationsIndex, rollbackAccumulator);
+            }
             setMDCToNA();
             return Status.BACKOFF;
         }
-        rollbackedAccumulations.remove(0);
+        rollbackedAccumulations.remove(rollbackedAccumulationsIndex);
         numPersistedEvents += rollbackedAccumulation.getBatch().getNumEvents();
         setMDCToNA();
         return Status.READY;
@@ -452,9 +454,9 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     protected Accumulator getRollbackedAccumulationForRetry() {
         Accumulator rollbackedAccumulation = null;
 
+        for (int i = 0 ; i < rollbackedAccumulations.size() ; i++) {
 
-
-        for (Accumulator rollbackedAcc : rollbackedAccumulations) {
+            Accumulator rollbackedAcc = rollbackedAccumulations.get(i);
             rollbackedAccumulation = rollbackedAcc;
             
             // Check the last retry
@@ -466,6 +468,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             
             if (rollbackedAccumulation.getLastRetry() + batchRetryIntervals[retryIntervalIndex]
                     <= new Date().getTime()) {
+                rollbackedAccumulationsIndex = i;
                 break;
             } // if
             
@@ -490,6 +493,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + "), "
                     + "this was retry #" + (batchTTL - rollbackedAccumulation.getTTL()));
         } else {
+            rollbackedAccumulations.remove(rollbackedAccumulationsIndex);
             if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
                 LOGGER.info("Finishing internal transaction ("
                         + rollbackedAccumulation.getAccTransactionIds() + "), this was retry #" + batchTTL);
