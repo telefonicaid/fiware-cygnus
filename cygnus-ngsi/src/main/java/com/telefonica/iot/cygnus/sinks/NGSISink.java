@@ -89,6 +89,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     private final Accumulator accumulator;
     // Rollback queues
     private ArrayList<Accumulator> rollbackedAccumulations;
+    // Rollback queues
+    private int rollbackedAccumulationsIndex;
     // Expiration thread
     private ExpirationTimeChecker expirationTimeChecker;
 
@@ -383,49 +385,60 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             setMDCToNA();
             return Status.READY; // No rollbacked batch was ready for retry, so we are ready to process new batches
         } // if
-            
-        // Try persisting the rollbacked accumulation
+
         NGSIBatch batch = rollbackedAccumulation.getBatch();
-        
-        try {
-            if (MDC.get(CommonConstants.LOG4J_CORR).equals(CommonConstants.NA)) {
-                String correlatorIdArray[] = rollbackedAccumulation.getAccTransactionIds().split(",");
-                MDC.put(CommonConstants.LOG4J_CORR, correlatorIdArray[correlatorIdArray.length - 1]);
+        NGSIBatch rollbackBatch = new NGSIBatch();
+        StringBuffer transactionIds = new StringBuffer();
+        batch.startIterator();
+        while (batch.hasNext()) {
+            NGSIBatch batchToPersist = new NGSIBatch();
+            String destination = batch.getNextDestination();
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
+            for (NGSIEvent event : events) {
+                batchToPersist.addEvent(destination, event);
+                transactionIds.append(event.getHeaders().get(CommonConstants.HEADER_CORRELATOR_ID)).append(", ");
             }
-            persistBatch(batch);
-        } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
-            updateServiceMetrics(batch, true);
-            LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-            setMDCToNA();
-            return Status.READY;
-        } catch (CygnusPersistenceError e) {
-            updateServiceMetrics(batch, true);
-            LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-            doRollbackAgain(rollbackedAccumulation);
-            setMDCToNA();
-            return Status.BACKOFF; // Slow down the sink since there are problems with the persistence backend
-        } catch (Exception e) {
-            updateServiceMetrics(batch, true);
-            LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-            doRollbackAgain(rollbackedAccumulation);
+            try {
+                persistBatch(batchToPersist);
+                updateServiceMetrics(batchToPersist, false);
+                if (persistencePolicyMaxRecords > -1) {
+                    try {
+                        capRecords(batchToPersist, persistencePolicyMaxRecords);
+                    } catch (CygnusCappingError e) {
+                        LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                    } // try
+                } // if
+                numPersistedEvents += batchToPersist.getNumEvents();
+                LOGGER.info("Finishing internal transaction (" + transactionIds + ")");
+            } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
+                updateServiceMetrics(batchToPersist, true);
+                LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+            } catch (Exception e) {
+                updateServiceMetrics(batchToPersist, true);
+                LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                for (NGSIEvent event : batchToPersist.getNextEvents()) {
+                    rollbackBatch.addEvent(destination, event);
+                }
+            } finally {
+                batch.setNextPersisted(true);
+            }
+        }
+        if (rollbackBatch.getNumEvents() > 0) {
+            Accumulator rollbackAccumulator = new Accumulator();
+            rollbackAccumulator.initialize(rollbackedAccumulation.getAccStartDate());
+            rollbackAccumulator.setTTL(rollbackedAccumulation.ttl);
+            rollbackAccumulator.setLastRetry(rollbackedAccumulation.lastRetry);
+            rollbackBatch.startIterator();
+            while (rollbackBatch.hasNext()) {
+                for (NGSIEvent event : rollbackBatch.getNextEvents()) {
+                    rollbackAccumulator.accumulate(event);
+                }
+            }
+            doRollbackAgain(rollbackAccumulator);
+            rollbackedAccumulations.set(0, rollbackAccumulator);
             setMDCToNA();
             return Status.BACKOFF;
-        } // try catch
-
-        if (persistencePolicyMaxRecords > -1) {
-            try {
-                capRecords(batch, persistencePolicyMaxRecords);
-            } catch (CygnusCappingError e) {
-                LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-            } // try catch
-        } // if
-        
-        updateServiceMetrics(batch, false);
-
-        if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
-            LOGGER.info("Finishing internal transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
-        } // if
-
+        }
         rollbackedAccumulations.remove(0);
         numPersistedEvents += rollbackedAccumulation.getBatch().getNumEvents();
         setMDCToNA();
@@ -438,7 +451,9 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
      */
     protected Accumulator getRollbackedAccumulationForRetry() {
         Accumulator rollbackedAccumulation = null;
-        
+
+
+
         for (Accumulator rollbackedAcc : rollbackedAccumulations) {
             rollbackedAccumulation = rollbackedAcc;
             
@@ -475,8 +490,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + "), "
                     + "this was retry #" + (batchTTL - rollbackedAccumulation.getTTL()));
         } else {
-            rollbackedAccumulations.remove(rollbackedAccumulation);
-
             if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
                 LOGGER.info("Finishing internal transaction ("
                         + rollbackedAccumulation.getAccTransactionIds() + "), this was retry #" + batchTTL);
