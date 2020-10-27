@@ -70,6 +70,7 @@ public abstract class NGSIGenericAggregator {
     private boolean attrMetadataStore;
     private boolean enableUTCRecvTime;
     private boolean enableLastData;
+    private long lastDataTiemstamp;
 
     /**
      * Gets aggregation.
@@ -334,6 +335,24 @@ public abstract class NGSIGenericAggregator {
     public void setEnableGeoParse(boolean enableGeoParse) {
         this.enableGeoParse = enableGeoParse;
     } //setEnableGeoParse
+
+    /**
+     * Gets long timestamp of the record stored on the last data collection
+     *
+     * @return lastDataTiemstamp the long
+     */
+
+    public long getLastDataTiemstamp() { return lastDataTiemstamp; }
+
+    /**
+     * Sets long timestamp of the record stored on the last data collection
+     *
+     * @param lastDataTiemstamp the timestamp of the record on the last data collection
+     */
+
+    public void setLastDataTiemstamp(long lastDataTiemstamp) { this.lastDataTiemstamp = lastDataTiemstamp; }
+
+
 
     /**
      * Sets collection name.

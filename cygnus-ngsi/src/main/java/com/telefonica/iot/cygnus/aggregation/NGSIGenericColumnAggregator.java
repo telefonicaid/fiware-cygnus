@@ -80,6 +80,10 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         int numPreviousValues = getAggregation().get(NGSIConstants.FIWARE_SERVICE_PATH).size();
         // Get the event headers
         long recvTimeTs = event.getRecvTimeTs();
+        long currentTS = 0;
+        if (isEnableLastData() && (getLastDataTimestampKey().equalsIgnoreCase(NGSIConstants.RECV_TIME))) {
+            currentTS = recvTimeTs;
+        }
         String recvTime = CommonUtils.getHumanReadable(recvTimeTs, isEnableUTCRecvTime());
         // get the event body
         NotifyContextRequest.ContextElement contextElement = event.getContextElement();
@@ -108,6 +112,9 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             String attrName = contextAttribute.getName();
             String attrType = contextAttribute.getType();
             JsonElement attrValue = contextAttribute.getValue();
+            if (isEnableLastData() && (getLastDataTimestampKey().equalsIgnoreCase(attrName))) {
+                currentTS = (CommonUtils.getTimeInstantFromString(attrValue.getAsString())).longValue();
+            }
             String attrMetadata = contextAttribute.getContextMetadata();
             JsonParser jsonParser = new JsonParser();
             JsonArray jsonAttrMetadata = (JsonArray) jsonParser.parse(attrMetadata);
@@ -154,22 +161,13 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             boolean updateLastData = false;
             LinkedHashMap<String, ArrayList<JsonElement>> lastData = getLastData();
             if (numPreviousValues > 0) {
-                long storedTS = 0;
-                long currentTS = 0;
-                try {
-                    storedTS = (CommonUtils.getTimeInstantFromString(getLastData().get(getLastDataTimestampKey()).get(0).getAsString())).longValue();
-                    currentTS = (CommonUtils.getTimeInstantFromString(aggregation.get(getLastDataTimestampKey()).get(aggregation.get(getLastDataTimestampKey()).size() - 1).getAsString())).longValue();
-                } catch (Exception e) {
-                    LOGGER.error("[NGSIGenericColumnAggregator] Error when trying to parse Timestamps for last data aggregation " + e.getMessage());
-                }
-                if ( storedTS < recvTimeTs) {
+                if (getLastDataTiemstamp() < currentTS) {
                     lastData = new LinkedHashMap<>();
-                    if (storedTS < currentTS) {
-                        updateLastData = true;
-                    }
+                    updateLastData = true;
                 }
             }
             if (updateLastData || (numPreviousValues == 0)) {
+                setLastDataTiemstamp(currentTS);
                 for (String key : aggregation.keySet()) {
                     lastData.put(key, new ArrayList<JsonElement>());
                     ArrayList<JsonElement> valueLastData = new ArrayList<JsonElement>();
