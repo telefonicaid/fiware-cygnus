@@ -257,8 +257,8 @@ public class SQLQueryUtilsTest {
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
-        upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
-                getValueFieldsSingleBatch(),
+        upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsMultipleBatch(),
+                getValueFieldsMultipleBatch(),
                 tableName,
                 tableSuffix,
                 uniqueKey,
@@ -267,12 +267,10 @@ public class SQLQueryUtilsTest {
                 sqlInstance,
                 destination,
                 attrNativeTypes);
-        sqlupsertQuery = upsertList.get(0);
+        sqlupsertQuery = upsertList.get(1);
         String correctQuery = "INSERT INTO `exampleTable_last_data` " +
                 "(`recvTime`,`recvTimeS`,`fiwareServicePath`,`entityId`,`entityType`,`loadStr`,`loadBool`,`loadNumber`,`load_md`) " +
-                "VALUES (1461136795801,'2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1',TRUE,1,'load_md')," +
-                "(1461136795802,'2016-04-20 07:19:55.802','somePath2','entityId1','entityType','load2',FALSE,23,'load_md')," +
-                "(1461136795800,'2016-04-20 07:19:55.800','somePath3','entityId1','entityType','load3',FALSE,8,'load_md') " +
+                "VALUES (1461136795802,'2016-04-20 07:19:55.802','somePath2','entityId1','entityType','load2',FALSE,23,'load_md') " +
                 "ON DUPLICATE KEY UPDATE " +
                 "recvTime=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTimeS, '%Y-%m-%d %H:%i:%s.%f') " +
                 "< (STR_TO_DATE(VALUES(recvTimeS), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTime), recvTime), fiwareServicePath=IF((entityId=VALUES(entityId)) " +
@@ -356,8 +354,8 @@ public class SQLQueryUtilsTest {
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
-        upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
-                getValueFieldsSingleBatch(),
+        upsertList = SQLQueryUtils.sqlUpsertQuery(new LinkedHashMap<>(),
+                new LinkedHashMap<>(),
                 tableName,
                 tableSuffix,
                 uniqueKey,
@@ -366,10 +364,8 @@ public class SQLQueryUtilsTest {
                 sqlInstance,
                 destination,
                 attrNativeTypes);
-        sqlupsertQuery = upsertList.get(0);
-        String correctQuery = "INSERT INTO `exampleTable_last_data` () VALUES  ON DUPLICATE KEY UPDATE";
         try {
-            assertEquals(sqlupsertQuery.toString().trim(), correctQuery);
+            assertEquals(new ArrayList<>(), upsertList);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testMySQLUpsertQueryEmptyBatch]")
                     + "-  OK  - testMySQLUpsertQueryEmptyBatch");
         } catch (Exception e) {
