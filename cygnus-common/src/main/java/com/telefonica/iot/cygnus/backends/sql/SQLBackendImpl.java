@@ -572,7 +572,7 @@ public class SQLBackendImpl implements SQLBackend{
         PreparedStatement upsertPreparedStatement = null;
         PreparedStatement insertPreparedStatement = null;
         String insertQuery = new String();
-        String upsertQuery = new String();
+        String upsertQuerys = new String();
 
         int insertedRows[];
 
@@ -599,8 +599,7 @@ public class SQLBackendImpl implements SQLBackend{
 
             */
             insertStatement.executeUpdate();
-
-            upsertQuery = SQLQueryUtils.sqlUpsertQuery(aggregation,
+            ArrayList<StringBuffer> upsertQuerysList = SQLQueryUtils.sqlUpsertQuery(aggregation,
                     lastData,
                     tableName,
                     tableSuffix,
@@ -609,42 +608,34 @@ public class SQLBackendImpl implements SQLBackend{
                     timestampFormat,
                     sqlInstance,
                     destination,
-                    attrNativeTypes).toString();
-
-            PreparedStatement upsertStatement;
-            upsertStatement = connection.prepareStatement(upsertQuery);
-
-            /*
-
-            FIXME https://github.com/telefonicaid/fiware-cygnus/issues/1959
-
-            Add SQLSafe values with native PreparedStatement methods
-
-            upsertPreparedStatement = SQLQueryUtils.addJsonValues(upsertStatement, lastData, attrNativeTypes);
-
-            */
-            upsertStatement.executeUpdate();
-
+                    attrNativeTypes);
+            for (StringBuffer query : upsertQuerysList) {
+                PreparedStatement upsertStatement;
+                upsertStatement = connection.prepareStatement(query.toString());
+                // FIXME https://github.com/telefonicaid/fiware-cygnus/issues/1959
+                upsertStatement.executeUpdate();
+                upsertQuerys = upsertQuerys + " " + query;
+            }
             connection.commit();
-            LOGGER.info("Finished transaction: \n" + upsertQuery + "\n Also, some where Inserted. QUERY: " + insertQuery);
+            LOGGER.info("Finished transaction: \n" + upsertQuerys + "\n Also, some where Inserted. QUERY: " + insertQuery);
 
         } catch (SQLTimeoutException e) {
             cygnusSQLRollback(connection);
-            if (upsertQuery.isEmpty() && insertQuery.isEmpty()) {
+            if (upsertQuerys.isEmpty() && insertQuery.isEmpty()) {
                 throw new CygnusPersistenceError(sqlInstance.toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + connection, "SQLTimeoutException", e.getMessage());
             } else if (insertQuery.isEmpty()){
-                throw new CygnusPersistenceError(sqlInstance.toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + upsertQuery, "SQLTimeoutException", e.getMessage());
-            } else if (upsertQuery.isEmpty()) {
+                throw new CygnusPersistenceError(sqlInstance.toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + upsertQuerys, "SQLTimeoutException", e.getMessage());
+            } else if (upsertQuerys.isEmpty()) {
                 throw new CygnusPersistenceError(sqlInstance.toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + insertQuery, "SQLTimeoutException", e.getMessage());
             }
         } catch (SQLException e) {
             cygnusSQLRollback(connection);
 
-            if (upsertQuery.isEmpty() && insertQuery.isEmpty()) {
+            if (upsertQuerys.isEmpty() && insertQuery.isEmpty()) {
                 throw new CygnusBadContextData(sqlInstance.toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + connection, "SQLException", e.getMessage());
             } else if (insertQuery.isEmpty()){
-                throw new CygnusBadContextData(sqlInstance.toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + upsertQuery, "SQLException", e.getMessage());
-            } else if (upsertQuery.isEmpty()) {
+                throw new CygnusBadContextData(sqlInstance.toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + upsertQuerys, "SQLException", e.getMessage());
+            } else if (upsertQuerys.isEmpty()) {
                 throw new CygnusBadContextData(sqlInstance.toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + insertQuery, "SQLException", e.getMessage());
             }
         } finally {
