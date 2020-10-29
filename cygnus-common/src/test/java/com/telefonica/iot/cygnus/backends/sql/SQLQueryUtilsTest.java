@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -140,7 +141,8 @@ public class SQLQueryUtilsTest {
         String destination = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
-        sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
+        ArrayList<StringBuffer> upsertList = new ArrayList<>();
+        upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
                 getValueFieldsSingleBatch(),
                 tableName,
                 tableSuffix,
@@ -150,7 +152,7 @@ public class SQLQueryUtilsTest {
                 sqlInstance,
                 destination,
                 attrNativeTypes);
-
+        sqlupsertQuery = upsertList.get(0);
         String correctQuery = "INSERT INTO example.exampleTable_last_data " +
                 "(recvTime,recvTimeS,fiwareServicePath,entityId,entityType,loadStr,loadBool,loadNumber,load_md) " +
                 "VALUES (1461136795801,'2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1',TRUE,1,'load_md') " +
@@ -181,7 +183,8 @@ public class SQLQueryUtilsTest {
         String destination = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
-        sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(getValueFieldsMultipleBatch(),
+        ArrayList<StringBuffer> upsertList = new ArrayList<>();
+        upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsMultipleBatch(),
                 getValueFieldsMultipleBatch(),
                 tableName,
                 tableSuffix,
@@ -191,12 +194,10 @@ public class SQLQueryUtilsTest {
                 sqlInstance,
                 destination,
                 attrNativeTypes);
-
+        sqlupsertQuery = upsertList.get(0);
         String correctQuery = "INSERT INTO example.exampleTable_last_data " +
                 "(recvTime,recvTimeS,fiwareServicePath,entityId,entityType,loadStr,loadBool,loadNumber,load_md) VALUES " +
-                "(1461136795801,'2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1',TRUE,1,'load_md')," +
-                "(1461136795802,'2016-04-20 07:19:55.802','somePath2','entityId1','entityType','load2',FALSE,23,'load_md')," +
-                "(1461136795800,'2016-04-20 07:19:55.800','somePath3','entityId1','entityType','load3',FALSE,8,'load_md') " +
+                "(1461136795801,'2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1',TRUE,1,'load_md') " +
                 "ON CONFLICT (entityId) DO UPDATE SET recvTime=EXCLUDED.recvTime, recvTimeS=EXCLUDED.recvTimeS, fiwareServicePath=EXCLUDED.fiwareServicePath, " +
                 "entityType=EXCLUDED.entityType, loadStr=EXCLUDED.loadStr, loadBool=EXCLUDED.loadBool, loadNumber=EXCLUDED.loadNumber, load_md=EXCLUDED.load_md " +
                 "WHERE example.exampleTable_last_data.entityId=EXCLUDED.entityId AND to_timestamp(example.exampleTable_last_data.recvTimeS, 'YYYY-MM-DD HH24:MI:SS.MS') " +
@@ -223,7 +224,8 @@ public class SQLQueryUtilsTest {
         String destination = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
-        sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(new LinkedHashMap<>(),
+        ArrayList<StringBuffer> upsertList = new ArrayList<>();
+        upsertList = SQLQueryUtils.sqlUpsertQuery(new LinkedHashMap<>(),
                 new LinkedHashMap<>(),
                 tableName,
                 tableSuffix,
@@ -233,13 +235,8 @@ public class SQLQueryUtilsTest {
                 sqlInstance,
                 destination,
                 attrNativeTypes);
-
-        String correctQuery = "INSERT INTO example.exampleTable_last_data () VALUES  ON CONFLICT (entityId) DO UPDATE SET  WHERE " +
-                "example.exampleTable_last_data.entityId=EXCLUDED.entityId AND to_timestamp(example.exampleTable_last_data.recvTimeS, 'YYYY-MM-DD HH24:MI:SS.MS') " +
-                "< to_timestamp(EXCLUDED.recvTimeS, 'YYYY-MM-DD HH24:MI:SS.MS')";
-
         try {
-            assertEquals(sqlupsertQuery.toString(), correctQuery);
+            assertEquals(new ArrayList<>(), upsertList);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testPostgreSQLUpsertQueryEmptyBatch]")
                     + "-  OK  - testPostgreSQLUpsertQueryEmptyBatch");
         } catch (Exception e) {
@@ -259,8 +256,9 @@ public class SQLQueryUtilsTest {
         String destination = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
-        sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(getValueFieldsMultipleBatch(),
-                getValueFieldsMultipleBatch(),
+        ArrayList<StringBuffer> upsertList = new ArrayList<>();
+        upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
+                getValueFieldsSingleBatch(),
                 tableName,
                 tableSuffix,
                 uniqueKey,
@@ -269,7 +267,7 @@ public class SQLQueryUtilsTest {
                 sqlInstance,
                 destination,
                 attrNativeTypes);
-
+        sqlupsertQuery = upsertList.get(0);
         String correctQuery = "INSERT INTO `exampleTable_last_data` " +
                 "(`recvTime`,`recvTimeS`,`fiwareServicePath`,`entityId`,`entityType`,`loadStr`,`loadBool`,`loadNumber`,`load_md`) " +
                 "VALUES (1461136795801,'2016-04-20 07:19:55.801','somePath1','entityId1','entityType','load1',TRUE,1,'load_md')," +
@@ -309,7 +307,8 @@ public class SQLQueryUtilsTest {
         String destination = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
-        sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
+        ArrayList<StringBuffer> upsertList = new ArrayList<>();
+        upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
                 getValueFieldsSingleBatch(),
                 tableName,
                 tableSuffix,
@@ -319,6 +318,7 @@ public class SQLQueryUtilsTest {
                 sqlInstance,
                 destination,
                 attrNativeTypes);
+        sqlupsertQuery = upsertList.get(0);
 
         String correctQuery = "INSERT INTO `exampleTable_last_data` " +
                 "(`recvTime`,`recvTimeS`,`fiwareServicePath`,`entityId`,`entityType`,`loadStr`,`loadBool`,`loadNumber`,`load_md`) " +
@@ -355,8 +355,9 @@ public class SQLQueryUtilsTest {
         String destination = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
-        sqlupsertQuery = SQLQueryUtils.sqlUpsertQuery(new LinkedHashMap<>(),
-                new LinkedHashMap<>(),
+        ArrayList<StringBuffer> upsertList = new ArrayList<>();
+        upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
+                getValueFieldsSingleBatch(),
                 tableName,
                 tableSuffix,
                 uniqueKey,
@@ -365,7 +366,7 @@ public class SQLQueryUtilsTest {
                 sqlInstance,
                 destination,
                 attrNativeTypes);
-
+        sqlupsertQuery = upsertList.get(0);
         String correctQuery = "INSERT INTO `exampleTable_last_data` () VALUES  ON DUPLICATE KEY UPDATE";
         try {
             assertEquals(sqlupsertQuery.toString().trim(), correctQuery);
