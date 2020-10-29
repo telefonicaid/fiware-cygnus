@@ -62,6 +62,7 @@ public abstract class NGSIGenericAggregator {
     private String hiveFields;
     private String csvString;
     private String lastDataTimestampKey;
+    private String lastDataUniqueKey;
     private boolean attrNativeTypes;
     private boolean enableGrouping;
     private boolean enableEncoding;
@@ -71,6 +72,8 @@ public abstract class NGSIGenericAggregator {
     private boolean enableUTCRecvTime;
     private boolean enableLastData;
     private long lastDataTiemstamp;
+    private String lastDataTiemstampKeyOnAggregation;
+    private String lastDataUniqueKeyOnAggragation;
 
     /**
      * Gets aggregation.
@@ -227,6 +230,48 @@ public abstract class NGSIGenericAggregator {
     public void setEnableLastData(boolean enableLastData) {
         this.enableLastData = enableLastData;
     }
+
+    /**
+     * Gets last data unique key.
+     *
+     * @return the last data unique key
+     */
+    public String getLastDataUniqueKey() { return lastDataUniqueKey; }
+
+    /**
+     * Sets last data unique key.
+     *
+     * @param lastDataUniqueKey the last data unique key
+     */
+    public void setLastDataUniqueKey(String lastDataUniqueKey) { this.lastDataUniqueKey = lastDataUniqueKey; }
+
+    /**
+     * Gets last data tiemstamp key on aggregation.
+     *
+     * @return the last data tiemstamp key on aggregation
+     */
+    public String getLastDataTiemstampKeyOnAggregation() { return lastDataTiemstampKeyOnAggregation; }
+
+    /**
+     * Sets last data tiemstamp key on aggregation.
+     *
+     * @param lastDataTiemstampKeyOnAggregation the last data tiemstamp key on aggregation
+     */
+    public void setLastDataTiemstampKeyOnAggregation(String lastDataTiemstampKeyOnAggregation) { this.lastDataTiemstampKeyOnAggregation = lastDataTiemstampKeyOnAggregation; }
+
+    /**
+     * Gets last data key on aggragation.
+     *
+     * @return the last data key on aggragation
+     */
+    public String getLastDataUniqueKeyOnAggragation() { return lastDataUniqueKeyOnAggragation; }
+
+    /**
+     * Sets last data key on aggragation.
+     *
+     * @param lastDataUniqueKeyOnAggragation the last data key on aggragation
+     */
+    public void setLastDataUniqueKeyOnAggragation(String lastDataUniqueKeyOnAggragation) { this.lastDataUniqueKeyOnAggragation = lastDataUniqueKeyOnAggragation; }
 
     /**
      * Gets hdfs folder. For HDFS sink.
