@@ -334,6 +334,7 @@ public class NGSIMySQLSink extends NGSISink {
             aggregator.setAttrMetadataStore(attrMetadataStore);
             aggregator.setEnableNameMappings(enableNameMappings);
             aggregator.setEnableLastData(lastData);
+            aggregator.setLastDataUniqueKey(lastDataUniqueKey);
             aggregator.setLastDataTimestampKey(lastDataTimeStampKey);
             aggregator.initialize(events.get(0));
             for (NGSIEvent event : events) {

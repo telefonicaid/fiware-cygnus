@@ -27,7 +27,6 @@ import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -81,14 +80,20 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         // Get the event headers
         long recvTimeTs = event.getRecvTimeTs();
         long currentTS = 0;
+        String currentEntityId = new String();
         if (isEnableLastData() && (getLastDataTimestampKey().equalsIgnoreCase(NGSIConstants.RECV_TIME))) {
             currentTS = recvTimeTs;
+            setLastDataTiemstampKeyOnAggregation(NGSIConstants.RECV_TIME);
         }
         String recvTime = CommonUtils.getHumanReadable(recvTimeTs, isEnableUTCRecvTime());
         // get the event body
         NotifyContextRequest.ContextElement contextElement = event.getContextElement();
         NotifyContextRequest.ContextElement mappedContextElement = event.getMappedCE();
         String entityId = contextElement.getId();
+        if (isEnableLastData() && (getLastDataUniqueKey().equalsIgnoreCase(NGSIConstants.ENTITY_ID))) {
+            setLastDataUniqueKeyOnAggragation(NGSIConstants.ENTITY_ID);
+            currentEntityId = entityId;
+        }
         String entityType = contextElement.getType();
         LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type=" + entityType + ")");
         // Iterate on all this context element attributes, if there are attributes
@@ -114,6 +119,16 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             JsonElement attrValue = contextAttribute.getValue();
             if (isEnableLastData() && (getLastDataTimestampKey().equalsIgnoreCase(attrName))) {
                 currentTS = (CommonUtils.getTimeInstantFromString(attrValue.getAsString())).longValue();
+            }
+            if (isEnableLastData()){
+                if ((getLastDataTiemstampKeyOnAggregation() == null) && (getLastDataTimestampKey().equalsIgnoreCase(attrName))) {
+                    setLastDataTiemstampKeyOnAggregation(attrName);
+                    currentTS = CommonUtils.getTimeInstantFromString(attrValue.getAsString());
+                }
+                if ((getLastDataUniqueKeyOnAggragation() == null) && (getLastDataUniqueKey().equalsIgnoreCase(attrName))) {
+                    setLastDataUniqueKeyOnAggragation(attrName);
+                    currentEntityId = attrName;
+                }
             }
             String attrMetadata = contextAttribute.getContextMetadata();
             JsonParser jsonParser = new JsonParser();
@@ -161,16 +176,40 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             boolean updateLastData = false;
             LinkedHashMap<String, ArrayList<JsonElement>> lastData = getLastData();
             if (numPreviousValues > 0) {
-                if (getLastDataTiemstamp() < currentTS) {
-                    lastData = new LinkedHashMap<>();
+                if (lastData.containsKey(getLastDataUniqueKeyOnAggragation())) {
+                    ArrayList<JsonElement> list = lastData.get(getLastDataUniqueKeyOnAggragation());
+                    for (int i = 0 ; i < list.size() ; i++) {
+                        if (list.get(i).getAsString().equals(currentEntityId)) {
+                            long storedTS = CommonUtils.getTimeInstantFromString(
+                                    lastData.get(getLastDataTiemstampKeyOnAggregation()).
+                                    get(i).getAsString());
+                            if (storedTS < currentTS) {
+                                ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
+                                for (int j = 0 ; j < keys.size() ; j++) {
+                                    lastData.get(keys.get(j)).remove(i);
+                                }
+                                updateLastData = true;
+                                break;
+                            } else {
+                                updateLastData = false;
+                                break;
+                            }
+                        }
+                        updateLastData = true;
+                    }
+                } else {
                     updateLastData = true;
                 }
             }
             if (updateLastData || (numPreviousValues == 0)) {
                 setLastDataTiemstamp(currentTS);
                 for (String key : aggregation.keySet()) {
-                    lastData.put(key, new ArrayList<JsonElement>());
-                    ArrayList<JsonElement> valueLastData = new ArrayList<JsonElement>();
+                    ArrayList<JsonElement> valueLastData = new ArrayList<>();
+                    if (lastData.containsKey(key)) {
+                        valueLastData = lastData.get(key);
+                    } else if (!lastData.containsKey(key)){
+                        valueLastData = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
+                    }
                     valueLastData.add(aggregation.get(key).get(aggregation.get(key).size() - 1));
                     lastData.put(key, valueLastData);
                 } // for

@@ -53,7 +53,7 @@ public class SQLQueryUtils {
      * @param destination     the destination
      * @return the string buffer
      */
-    protected static StringBuffer sqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
+    protected static ArrayList<StringBuffer> sqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                  LinkedHashMap<String, ArrayList<JsonElement>> lastData,
                                                  String tableName,
                                                  String tableSuffix,
@@ -104,7 +104,7 @@ public class SQLQueryUtils {
      * @param destination     the destination
      * @return the string buffer
      */
-    protected static StringBuffer postgreSqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
+    protected static ArrayList<StringBuffer> postgreSqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                         LinkedHashMap<String, ArrayList<JsonElement>> lastData,
                                                         String tableName,
                                                         String tableSuffix,
@@ -115,37 +115,45 @@ public class SQLQueryUtils {
                                                         String destination,
                                                         boolean attrNativeTypes) {
 
-        StringBuffer updateSet = new StringBuffer();
+        ArrayList<StringBuffer> upsertList = new ArrayList<>();
         StringBuffer postgisTempReference = new StringBuffer("EXCLUDED");
         StringBuffer postgisDestination = new StringBuffer(destination).append(".").append(tableName).append(tableSuffix);
-        StringBuffer query = new StringBuffer();
-        boolean first = true;
 
-        for (String key : lastData.keySet()) {
-            if (!key.equals(uniqueKey) && first) {
-                updateSet.append(key).append("=").append(postgisTempReference).append(".").append(key);
-                first = false;
-            } else if (!key.equals(uniqueKey)) {
-                updateSet.append(", ").append(key).append("=").append(postgisTempReference).append(".").append(key);
+        for (int i = 0 ; i < collectionSizeOnLinkedHashMap(lastData) ; i++) {
+            StringBuffer query = new StringBuffer();
+            StringBuffer values = new StringBuffer("(");
+            StringBuffer fields = new StringBuffer("(");
+            StringBuffer updateSet = new StringBuffer();
+            ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
+            for (int j = 0 ; j < keys.size() ; j++) {
+                if (lastData.get(keys.get(j)).get(i) != null) {
+                    JsonElement value = lastData.get(keys.get(j)).get(i);
+                    if (j == 0) {
+                        values.append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
+                        fields.append(keys.get(j));
+                        if (!keys.get(j).equals(uniqueKey)) {
+                            updateSet.append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
+                        }
+                    } else {
+                        values.append(",").append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
+                        fields.append(",").append(keys.get(j));
+                        if (!keys.get(j).equals(uniqueKey)) {
+                            updateSet.append(", ").append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
+                        }
+                    }
+                }
             }
+            query.append("INSERT INTO ").append(postgisDestination).append(" ").append(fields).append(") ").
+                    append("VALUES ").append(values).append(") ");
+            query.append("ON CONFLICT ").append("(").append(uniqueKey).append(") ").
+                    append("DO ").
+                    append("UPDATE SET ").append(updateSet).append(" ").
+                    append("WHERE ").append(postgisDestination).append(".").append(uniqueKey).append("=").append(postgisTempReference).append(".").append(uniqueKey).append(" ").
+                    append("AND ").append("to_timestamp(").append(postgisDestination).append(".").append(timestampKey).append(", '").append(timestampFormat).append("') ").
+                    append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append(", '").append(timestampFormat).append("')");
+            upsertList.add(query);
         }
-
-        StringBuffer insertQuery = sqlInsertQuery(lastData,
-                tableName.concat(tableSuffix),
-                sqlInstance,
-                destination,
-                attrNativeTypes);
-
-        query.append(insertQuery).
-                append("ON CONFLICT ").append("(").append(uniqueKey).append(") ").
-                append("DO ").
-                append("UPDATE SET ").append(updateSet).append(" ").
-                append("WHERE ").append(postgisDestination).append(".").append(uniqueKey).append("=").append(postgisTempReference).append(".").append(uniqueKey).append(" ").
-                append("AND ").append("to_timestamp(").append(postgisDestination).append(".").append(timestampKey).append(", '").append(timestampFormat).append("') ").
-                append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append(", '").append(timestampFormat).append("')");
-
-        LOGGER.debug("[NGSISQLUtils.sqlUpsertQuery] Preparing Upsert query: " + query.toString());
-        return query;
+        return upsertList;
     }
 
     /**
@@ -162,7 +170,7 @@ public class SQLQueryUtils {
      * @param destination     the destination
      * @return the string buffer
      */
-    protected static StringBuffer mySqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
+    protected static ArrayList<StringBuffer> mySqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                    LinkedHashMap<String, ArrayList<JsonElement>> lastData,
                                                    String tableName,
                                                    String tableSuffix,
@@ -173,45 +181,52 @@ public class SQLQueryUtils {
                                                    String destination,
                                                    boolean attrNativeTypes) {
 
-        StringBuffer updateSet = new StringBuffer();
-        StringBuffer query = new StringBuffer();
-        StringBuffer dateKeyUpdate = new StringBuffer();
-        boolean first = true;
+        ArrayList<StringBuffer> upsertList = new ArrayList<>();
 
-        for (String key : lastData.keySet()) {
-            if (!key.equals(timestampKey)) {
-                if (!key.equals(uniqueKey) && first) {
-                    first = false;
-                } else if (!key.equals(uniqueKey)) {
-                    updateSet.append(", ");
+        for (int i = 0 ; i < collectionSizeOnLinkedHashMap(lastData) ; i++) {
+            StringBuffer query = new StringBuffer();
+            StringBuffer dateKeyUpdate = new StringBuffer();
+            StringBuffer values = new StringBuffer("(");
+            StringBuffer fields = new StringBuffer("(");
+            StringBuffer updateSet = new StringBuffer();
+            ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
+            for (int j = 0 ; j < keys.size() ; j++) {
+                if (lastData.get(keys.get(j)).get(i) != null) {
+                    JsonElement value = lastData.get(keys.get(j)).get(i);
+                    if (j == 0) {
+                        values.append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
+                        fields.append(MYSQL_FIELDS_MARK).append(keys.get(j)).append(MYSQL_FIELDS_MARK);
+                        if (!keys.get(j).equals(uniqueKey)) {
+                            if (keys.get(j).equalsIgnoreCase(timestampKey)) {
+                                dateKeyUpdate.append(mySQLUpdateRecordQuery(keys.get(j), uniqueKey, timestampKey, timestampFormat));
+                            } else {
+                                updateSet.append(mySQLUpdateRecordQuery(keys.get(j), uniqueKey, timestampKey, timestampFormat));
+                            }
+                        }
+                    } else {
+                        values.append(",").append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
+                        fields.append(",").append(MYSQL_FIELDS_MARK).append(keys.get(j)).append(MYSQL_FIELDS_MARK);
+                        if (!keys.get(j).equals(uniqueKey)) {
+                            if (keys.get(j).equalsIgnoreCase(timestampKey)) {
+                                dateKeyUpdate.append(mySQLUpdateRecordQuery(keys.get(j), uniqueKey, timestampKey, timestampFormat));
+                            } else {
+                                if (!(updateSet.length() == 0)) {
+                                    updateSet.append(", ");
+                                }
+                                updateSet.append(mySQLUpdateRecordQuery(keys.get(j), uniqueKey, timestampKey, timestampFormat));
+                            }
+                        }
+                    }
                 }
-                if (!key.equals(uniqueKey)) {
-                    updateSet.append(mySQLUpdateRecordQuery(key, uniqueKey, timestampKey, timestampFormat));
-                }
-            } else {
-                dateKeyUpdate.append(mySQLUpdateRecordQuery(key, uniqueKey, timestampKey, timestampFormat));
             }
+            query.append("INSERT INTO ").append(MYSQL_FIELDS_MARK).append(tableName.concat(tableSuffix)).append(MYSQL_FIELDS_MARK).append(" ").append(fields).append(") ").
+                    append("VALUES ").append(values).append(") ");
+            query.append("ON DUPLICATE KEY ").
+                    append("UPDATE ").append(updateSet).append(", ").append(dateKeyUpdate);
+            upsertList.add(query);
         }
-        // The key that corresponds to the timestampKey must be updated at the end, if it is updated before any other key.
-        // The subsecuent timestamp validations will be allways false, because the date would already be updated.
-        if (first) {
-            updateSet.append(dateKeyUpdate);
-        } else {
-            updateSet.append(", ").append(dateKeyUpdate);
-        }
-
-        StringBuffer insertQuery = sqlInsertQuery(lastData,
-                tableName.concat(tableSuffix),
-                sqlInstance,
-                destination,
-                attrNativeTypes);
-
-        query.append(insertQuery).
-                append("ON DUPLICATE KEY ").
-                append("UPDATE ").append(updateSet);
-
-        LOGGER.debug("[NGSISQLUtils.sqlUpsertQuery] Preparing Upsert query: " + query.toString());
-        return query;
+        LOGGER.debug("[NGSISQLUtils.sqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
+        return upsertList;
     }
 
     /**

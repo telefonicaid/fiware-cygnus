@@ -385,6 +385,7 @@ public class NGSIPostgisSink extends NGSISink {
             aggregator.setEnableNameMappings(enableNameMappings);
             aggregator.setEnableLastData(lastData);
             aggregator.setLastDataTimestampKey(lastDataTimeStampKey);
+            aggregator.setLastDataUniqueKey(lastDataUniqueKey);
             aggregator.initialize(events.get(0));
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
