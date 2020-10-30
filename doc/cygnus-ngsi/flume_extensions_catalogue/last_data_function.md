@@ -52,21 +52,25 @@ This means that all aggregated events will be stored on a Map wich contains list
 
 When last data is enabled. Cygnus will create a second `LinkedHashMap<String, ArrayList<JsonElement>>` collection on the `NGSIGenericColumnAggregator` class. 
 
-This collection doesn't have it's own aggregate function. The reason for that is that for optimization, it's cheaper to fill up the collection on the fly while the usual aggregation collection is filled up. Since the last_data collection will only store the oldest record.
+This collection doesn't have it's own aggregate function. The reason for that is that for optimization, it's cheaper to fill up the collection on the fly while the usual aggregation collection is filled up. Since the last_data collection will only store the oldest record per each one of the values of the Unique Key Row.
 
 There are two events which trigger the `last_data` collection storing.
 
 - When the `last_data` collection is empty.
-- When the last event aggregated is newer than the stored on the `last_data` collection.
+- When the `last_data_unique_key` value of the aggregated object doesn't exists on the collection.
+- When the `last_data_unique_key` already exists on the collection and `last_data_timestamp_key` is newer than the stored on the `last_data` collection.
 
 To know that. Cygnus transforms the `last_data_timestamp_key` to a long value, and compares if the long value that corresponds to the stored on the `last_data` collection is older than the last event aggregated.
 
+Getting a little deeper on the third case. As the aggregation process flows, each one of the processed records is compared on the `last_data_unique_key`. 
+If it already exists on the collection, then it's compared the `last_data_timestamp_key` of the processed record with the element on the collection with the same `last_data_unique_key`, it the new record has a newer timestamp, then the previous record on the collection is removed and the trigger is enabled to aggregate the processed record to the collection. 
+
 If any of those cases are true. Then starts the aggregation_last_data process.
 
-- First the `last_data` collection is initialized as a new one. This means that all previous data will be removed.
 - Then, a `for each` loop is started with all keys of the `usual_aggregation` collection. 
 - A new `key - ArrayList<JsonElement>` relation is created.
 - The last element of all of the `usual_aggregation` collection lists is added to the new list created in the previous step.
+- If the key already exists on the `last_data` collection then the new value it's added at the end, if it's a new key. Then it's created a new list with null values. As much as events are stored on the `last_data` collection.
 - Per each one of the keys processed on the `for each` loop the relation `key - ArrayList<JsonElement>` is added to the `last_data` collection.
 
 This means that the event stored into the `last_data` collection will **not** contain NULL values in case other events procesed in the batch contain columns that the newest entitys doesnt.
