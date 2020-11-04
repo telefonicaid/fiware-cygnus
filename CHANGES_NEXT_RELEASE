@@ -1,3 +1,0 @@
-[cygnus-ngsi][SQLSinks] Fix batch Upsert to build one query for each one of the different unique key values.
-[cygnus-ngsi][NGSISink] Fix batch managing to fix data losing when an event of the batch fails (#1967).
-[cygnus-common][SQLBackendImpl] Avoid use word `purge` as tmp when purge mysql error table due is a reserved word in mysql
