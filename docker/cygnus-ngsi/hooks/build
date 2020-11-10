@@ -24,11 +24,3 @@ docker image build --build-arg SOURCE_BRANCH=$SOURCE_BRANCH \
 	-f docker/cygnus-ngsi/Dockerfile \
 	-t $IMAGE_NAME \
 	.
-
-docker image build --build-arg SOURCE_BRANCH=$SOURCE_BRANCH \
-	--label "org.opencontainers.image.created"=$(date +%Y-%m-%d) \
-	--label "org.opencontainers.image.revision"=$SOURCE_COMMIT \
-	--label "org.opencontainers.image.version"=$DOCKER_TAG \
-	-f docker/cygnus-ngsi-ld/Dockerfile \
-	-t $IMAGE_NAME-ld \
-	.
