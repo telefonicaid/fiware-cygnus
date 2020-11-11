@@ -17,8 +17,8 @@
 #
 
 FROM centos:centos7.6.1810
-
-MAINTAINER Andres Muñoz <joseandres.munoz@upm.es>
+ARG GITHUB_ACCOUNT=telefonicaid
+ARG GITHUB_REPOSITORY=fiware-cygnus
 
 # Environment variables
 ENV CYGNUS_USER "cygnus"
@@ -345,4 +345,14 @@ ENTRYPOINT ["/cygnus-entrypoint.sh"]
 
 # Ports used by cygnus-ngsi
 EXPOSE ${CYGNUS_SERVICE_PORT} ${CYGNUS_API_PORT}
+
+LABEL "maintainer"="Cygnus Team. Telefónica I+D"
+LABEL "org.opencontainers.image.authors"="iot_support@tid.es"
+LABEL "org.opencontainers.image.documentation"="https://fiware-cygnus.rtfd.io/"
+LABEL "org.opencontainers.image.vendor"="Telefónica Investigación y Desarrollo, S.A.U"
+LABEL "org.opencontainers.image.licenses"="AGPL-3.0-only"
+LABEL "org.opencontainers.image.title"="Cygnus-LD Data Persistence"
+LABEL "org.opencontainers.image.description"="A connector in charge of persisting context linked data sources into other third-party databases and storage systems, creating a historical view of the context"
+LABEL "org.opencontainers.image.source"=https://github.com/${GITHUB_ACCOUNT}/${GITHUB_REPOSITORY}
+
 
