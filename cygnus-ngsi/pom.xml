@@ -15,21 +15,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>arcgis</id>
-            <url>https://esri.bintray.com/arcgis</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>arcgis-plugin</id>
-            <url>https://esri.bintray.com/arcgis</url>
-        </pluginRepository>
-    </pluginRepositories>
-
-
     <dependencies>
+        <!-- Required by any agent -->
+        <dependency>
+            <groupId>com.telefonica.iot</groupId>
+            <artifactId>cygnus-common</artifactId>
+            <version>2.0.0_SNAPSHOT</version>
+        </dependency>
         <!-- Required for testing -->
         <dependency>
             <groupId>org.mockito</groupId>
@@ -66,27 +58,6 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
         </dependency>
-        <!-- Required by any agent -->
-        <dependency>
-            <groupId>com.telefonica.iot</groupId>
-            <artifactId>cygnus-common</artifactId>
-            <version>2.0.0_SNAPSHOT</version>
-        </dependency>
-        <!-- libreria arcgis -->
-        <dependency>
-            <groupId>com.esri.arcgisruntime</groupId>
-            <artifactId>arcgis-java</artifactId>
-            <version>100.4.0</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>es.aytosantander.smartcity</groupId>
-            <artifactId>ArcgisUtils</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/ArcgisUtils-0.0.1-SNAPSHOT.jar</systemPath>
-        </dependency>
-        
     </dependencies>
 
     <build>
@@ -109,7 +80,7 @@
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
-                        <compilerArgument></compilerArgument>
+				        <compilerArgument></compilerArgument>
                         <fork>true</fork>
                     </configuration>
                 </plugin>

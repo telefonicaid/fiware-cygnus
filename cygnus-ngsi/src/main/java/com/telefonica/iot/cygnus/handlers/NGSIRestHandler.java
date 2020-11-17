@@ -281,8 +281,8 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         if (!target.equals(notificationTarget)) {
             serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
-            LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (" + target + " target not supported)");
-            throw new HTTPBadRequestException(target + " target not supported");
+            LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (" + target + " target not supported, " + notificationTarget + " expected.)");
+            throw new HTTPBadRequestException(target + " target not supported, " + notificationTarget + " expected.");
         } // if
 
         // Check if received content type is null
