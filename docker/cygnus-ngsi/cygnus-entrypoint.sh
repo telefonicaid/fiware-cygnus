@@ -173,6 +173,9 @@ elif [ "$CYGNUS_MYSQL_HOST" != "" ]; then
     if [ "$CYGNUS_MYSQL_BATCH_TTL" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.batch_ttl/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.batch_ttl = '${CYGNUS_MYSQL_BATCH_TTL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
+    if [ "$CYGNUS_MYSQL_OPTIONS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_options/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.mysql_options = '${CYGNUS_MYSQL_OPTIONS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
 
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         if [ "$CYGNUS_MONITORING_TYPE" != "" ]; then
@@ -235,10 +238,12 @@ elif [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_username/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_username = '${CYGNUS_MONGO_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_password/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_password = '${CYGNUS_MONGO_PASS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_auth_source/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_auth_source = '${CYGNUS_MONGO_AUTH_SOURCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_replica_set/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.mongo_replica_set = '${CYGNUS_MONGO_REPLICA_SET} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_hosts/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_hosts = '${CYGNUS_MONGO_HOSTS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_username/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_username = '${CYGNUS_MONGO_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_password/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_password = '${CYGNUS_MONGO_PASS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_auth_source/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_auth_source = '${CYGNUS_MONGO_AUTH_SOURCE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_replica_set/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.mongo_replica_set = '${CYGNUS_MONGO_REPLICA_SET} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     # The following are optional and disabled by default
     if [ "$CYGNUS_MONGO_ENABLE_ENCODING" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_encoding = '${CYGNUS_MONGO_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -596,6 +601,9 @@ elif [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_username/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_username = '${CYGNUS_POSTGRESQL_USER} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_password/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_password = '${CYGNUS_POSTGRESQL_PASS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     # The following are optional and disabled by default
+    if [ "$CYGNUS_POSTGRESQL_DATABASE" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_database/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_database = '${CYGNUS_POSTGRESQL_DATABASE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
     if [ "$CYGNUS_POSTGRESQL_ENABLE_ENCODING" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_encoding = '${CYGNUS_POSTGRESQL_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
@@ -628,6 +636,9 @@ elif [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     fi
     if [ "$CYGNUS_POSTGRESQL_ENABLE_CACHE" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.backend.enable_cache/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.backend.enable_cache = '${CYGNUS_POSTGRESQL_ENABLE_CACHE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGRESQL_OPTIONS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_options/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.postgresql_options = '${CYGNUS_POSTGRESQL_OPTIONS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
 
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
@@ -754,7 +765,7 @@ elif [ "$CYGNUS_ORION_HOST" != "" ]; then
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.keystone_port/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.keystone_port = '${CYGNUS_ORION_KEYSTONE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.keystone_ssl/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.keystone_ssl = '${CYGNUS_ORION_KEYSTONE_SSL} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_fiware/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_fiware = '${CYGNUS_ORION_FIWARE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_fiware_path/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_fiware_path = '${CYGNUS_ORION_FIWARE_PATH} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}    
+    sed -i '/'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_fiware_path/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.orion_fiware_path = '${CYGNUS_ORION_FIWARE_PATH} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     # The following are optional and disabled by default
     if [ "$CYGNUS_ORION_ENABLE_ENCODING" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_encoding = '${CYGNUS_ORION_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -882,6 +893,9 @@ elif [ "$CYGNUS_POSTGIS_HOST" != "" ]; then
     fi
     if [ "$CYGNUS_POSTGIS_ENABLE_CACHE" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.backend.enable_cache/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.backend.enable_cache = '${CYGNUS_POSTGIS_ENABLE_CACHE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
+    fi
+    if [ "$CYGNUS_POSTGIS_OPTIONS" != "" ]; then
+        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.postgis_options/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.postgis_options = '${CYGNUS_POSTGIS_OPTIONS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
 
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
@@ -1060,8 +1074,8 @@ if [ "${CYGNUS_MULTIAGENT,,}" == "false" ]; then
     PIDS="$PIDS $!"
 fi
 
-touch /var/log/cygnus/cygnus.log && tail -f /var/log/cygnus/cygnus.log &
-PIDS="$PIDS $!"
+touch /var/log/cygnus/cygnus.log
+ln -snf /dev/stdout /var/log/cygnus/cygnus.log & PIDS="$PIDS $!"
 
 wait $PIDS
 trap - TERM INT

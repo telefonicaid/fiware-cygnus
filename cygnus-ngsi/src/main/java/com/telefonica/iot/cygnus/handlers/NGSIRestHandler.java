@@ -303,7 +303,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         // by the whole source code.
         MDC.put(CommonConstants.LOG4J_CORR, corrId);
         MDC.put(CommonConstants.LOG4J_TRANS, transId);
-        LOGGER.info("[NGSIRestHandler] Starting internal transaction (" + transId + ")");
+        LOGGER.debug("[NGSIRestHandler] Starting internal transaction (" + transId + ")");
         
         // Get the data content
         String data = "";

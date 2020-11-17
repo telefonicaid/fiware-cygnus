@@ -195,6 +195,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_MYSQL_BATCH_SIZE: number of notifications to be included within a processing batch.
     * CYGNUS_MYSQL_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_MYSQL_BATCH_TTL: number of retries upon persistence error.
+    * CYGNUS_MYSQL_OPTIONS: the jdbc optional parameters string which concatinates to jdbc url.
 
 * Mongo and STH:
     * Mongo only works for building historical context data in Mongo.
@@ -203,6 +204,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * The user for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
     * The pass for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_PASS environment variable.
     * CYGNUS_MONGO_AUTH_SOURCE: Mongo option to specify which common user database source to use for authentication. Usually could be `admin`.
+    * CYGNUS_MONGO_REPLICA_SET: Replica Set name. Note that this parameter is optional because Cygnus is able to connect to a MongoDB replica set without needing to specify its name.
     * CYGNUS_MONGO_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_MONGO_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_MONGO_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
@@ -282,9 +284,10 @@ As seen above, the default configuration distributed with the image is tied to c
 * PostgreSQL:
     * It only works for building historical context data in PostgreSQL.
     * The endpoint for PostgreSQL is `iot-postgresql` but can be changed through the CYGNUS_POSTGRESQL_HOST environment variable.
-    * The port for PostgreSQL is `3306` but can be changed through the CYGNUS_POSTGRESQL_PORT environment variable.
+    * The port for PostgreSQL is `5432` but can be changed through the CYGNUS_POSTGRESQL_PORT environment variable.
     * The user for PostgreSQL is `postgresql` but can be changed through the CYGNUS_POSTGRESQL_USER environment variable.
     * The pass for PostgreSQL is `postgresql` but can be changed through the CYGNUS_POSTGRESQL_PASS environment variable.
+    * The database for PostgreSQL is `postgres` but can be changed through the CYGNUS_POSTGRESQL_DATABASE environment variable.
     * CYGNUS_POSTGRESQL_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_POSTGRESQL_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_POSTGRESQL_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
@@ -297,6 +300,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_POSTGRESQL_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_POSTGRESQL_BATCH_TTL: number of retries upon persistence error.
     * CYGNUS_POSTGRESQL_DATA_MODEL: select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type.
+    * CYGNUS_POSTGRESQL_OPTIONS: the jdbc optional parameters string which concatinates to jdbc url.
 
 * Carto:
     * It only works for building historical context data in Carto.
@@ -328,7 +332,7 @@ As seen above, the default configuration distributed with the image is tied to c
 * Postgis:
     * It only works for building historical context data in Postgis.
     * The endpoint for Postgis is `iot-postgresql` but can be changed through the CYGNUS_POSTGIS_HOST environment variable.
-    * The port for Postgis is `3306` but can be changed through the CYGNUS_POSTGIS_PORT environment variable.
+    * The port for Postgis is `5432` but can be changed through the CYGNUS_POSTGIS_PORT environment variable.
     * The user for Postgis is `postgresql` but can be changed through the CYGNUS_POSTGIS_USER environment variable.
     * The pass for Postgis is `postgresql` but can be changed through the CYGNUS_POSTGIS_PASS environment variable.
     * CYGNUS_POSTGIS_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
@@ -343,6 +347,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_POSTGIS_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_POSTGIS_BATCH_TTL: number of retries upon persistence error.
     * CYGNUS_POSTGIS_DATA_MODEL: select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type.
+    * CYGNUS_POSTGIS_OPTIONS: the jdbc optional parameters string which concatinates to jdbc url.
 
 * Elasticsearch:
     * It only works for building historical context data in Elasticsearch.

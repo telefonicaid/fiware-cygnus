@@ -18,7 +18,9 @@
 
 package com.telefonica.iot.cygnus.aggregation;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
@@ -60,13 +62,18 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
         String recvTime = CommonUtils.getHumanReadable(recvTimeTs, isEnableUTCRecvTime());
         // get the getRecvTimeTs body
         NotifyContextRequest.ContextElement contextElement = event.getContextElement();
+        NotifyContextRequest.ContextElement mappedContextElement = event.getMappedCE();
         String entityId = contextElement.getId();
         String entityType = contextElement.getType();
         LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
                 + entityType + ")");
-        // iterate on all this context element attributes, if there are attributes
-        ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = contextElement.getAttributes();
-        if (contextAttributes == null || contextAttributes.isEmpty()) {
+        // Iterate on all this context element attributes, if there are attributes
+        ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = null;
+        if (isEnableNameMappings() && mappedContextElement != null && mappedContextElement.getAttributes() != null && !mappedContextElement.getAttributes().isEmpty()) {
+            contextAttributes = mappedContextElement.getAttributes();
+        } else if (contextElement!= null && contextElement.getAttributes() != null && !contextElement.getAttributes().isEmpty()) {
+            contextAttributes = event.getContextElement().getAttributes();
+        } else {
             LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
                     + ", type=" + entityType + ")");
             return;
@@ -76,6 +83,8 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
             String attrType = contextAttribute.getType();
             JsonElement attrValue = contextAttribute.getValue();
             String attrMetadata = contextAttribute.getContextMetadata();
+            JsonParser jsonParser = new JsonParser();
+            JsonArray jsonAttrMetadata = (JsonArray) jsonParser.parse(attrMetadata);
             LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                     + attrType + ")");
             // aggregate the attribute information
@@ -87,7 +96,7 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
             aggregation.get(NGSIConstants.ATTR_NAME).add(new JsonPrimitive(attrName));
             aggregation.get(NGSIConstants.ATTR_TYPE).add(new JsonPrimitive(attrType));
             aggregation.get(NGSIConstants.ATTR_VALUE).add(attrValue);
-            aggregation.get(NGSIConstants.ATTR_MD).add(new JsonPrimitive(attrMetadata));
+            aggregation.get(NGSIConstants.ATTR_MD).add(jsonAttrMetadata);
         } // for
         setAggregation(aggregation);
     } // aggregate

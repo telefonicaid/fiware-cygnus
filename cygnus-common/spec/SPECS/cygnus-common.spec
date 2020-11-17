@@ -171,6 +171,28 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Thu Nov 4 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.6.0
+- [cygnus-common][SQLBackendImpl] Avoid use word `purge` as tmp when purge mysql error table due is a reserved word in mysql
+
+* Tue Oct 20 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.5.0
+- [cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Remove PreparedStatement building, to use String query (walkaround for #1959)
+- [cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Log info about persisted data (#1939)
+- [cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Create upsert transaction (#1806, #1936)
+- [cygnus-common][NameMappingInterceptor] Catch and log Compile error namemapping (#1924)
+- [cygnus-common][SQLBackendImpl] Add configuration option to persist errors in SQL sinks (#1928)
+- [cygnus-common][SQLBackendImpl] Purge automatically persistence error logs table, keeping latest errors (max_latest_errors setting) (#1929)
+- [cygnus-common] Add new methods in class CKANBackendImpl for allowing the creation of the data store with ngsi-ld notifications
+
+* Fri Sep 04 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.4.0
+- [cygnus-common][SQLBackendImpl] Exception handle for connection/statement SQL objects (#1907)
+
+* Wed Jul 15 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.3.0
+
+* Tue Jun 23 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.2.0
+
+* Thu May 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.1.0
+- [cygnus-common][cygnus-ngsi] Add following parameters (and environment variables for docker) to be able to connect to sql database with SSL/TLS: "mysql_options" (`CYGNUS_MYSQL_OPTIONS`), "postgresql_options" (`CYGNUS_POSTGRESQL_OPTIONS`) and "postgis_options" (`CYGNUS_POSTGIS_OPTIONS`) (#1867)
+
 * Thu Apr 16 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.0.0
 - [cygnus-common][PostgreSQL, MySQL] Refactor code to use a SQL generic backend for all SQL-based sinks (#1836)
 - [cygnus-common][PostgreSQL, MySQL] Lazy singleton to share pool connections of SQL backends among instances on JVM (#1836)

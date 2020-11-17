@@ -73,6 +73,7 @@ pages:
           - 'Connecting Orion Context Broker and Cygnus': 'cygnus-ngsi/user_and_programmer_guide/connecting_orion.md'
           - 'Adding a new sink': 'cygnus-ngsi/user_and_programmer_guide/adding_new_sink.md'
           - 'Reporting issues and contact information': 'cygnus-ngsi/user_and_programmer_guide/issues_and_contact.md'
+          - 'Debugging Cygnus with IntelliJ & Docker': 'cygnus-ngsi/user_and_programmer_guide/debugging.md'
       - 'Flume extensions catalogue':
           - 'Introduction': 'cygnus-ngsi/flume_extensions_catalogue/introduction.md'
           - 'NGSIRestHandler': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_rest_handler.md'
@@ -92,6 +93,7 @@ pages:
           - 'NGSITestSink': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_test_sink.md'
           - 'NGSIGroupingInterceptor': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md'
           - 'NGSINameMappingsInterceptor': 'cygnus-ngsi/flume_extensions_catalogue/ngsi_name_mappings_interceptor.md'
+          - 'LastDataFunctionality': 'cygnus-ngsi/flume_extensions_catalogue/last_data_function.md'
           - 'RoundRobinChannelSelector': 'cygnus-ngsi/flume_extensions_catalogue/round_robin_channel_selector.md'
           - 'Reporting issues and contact information': 'cygnus-ngsi/flume_extensions_catalogue/issues_and_contact.md'
       - 'Integration examples':
@@ -116,3 +118,21 @@ pages:
           - 'TwitterHDFSink': 'cygnus-twitter/flume_extensions_catalogue/twitter_hdfs_sink.md'
           - 'Reporting issues and contact information': 'cygnus-twitter/flume_extensions_catalogue/issues_and_contact.md'
       - 'Quick Start Guide': 'cygnus-twitter/quick_start_guide.md'
+  - 'cygnus-ngsi-ld agent':
+        - 'Quick Start Guide': 'cygnus-ngsi-ld/quick_start_guide.md'
+        - 'Installation and Administration Guide':
+              - 'Introduction': 'cygnus-ngsi-ld/installation_and_administration_guide/introduction.md'
+              - 'Installation via docker': 'cygnus-ngsi-ld/installation_and_administration_guide/install_with_docker.md'
+              - 'Installation from sources': 'cygnus-ngsi-ld/installation_and_administration_guide/install_from_sources.md'
+              - 'NGSI-LD agent configuration': 'cygnus-ngsi-ld/installation_and_administration_guide/ngsi_agent_conf.md'
+              - 'Testing': 'cygnus-ngsi-ld/installation_and_administration_guide/testing.md'
+        - 'Flume extensions catalogue':
+              - 'Introduction': 'cygnus-ngsi-ld/flume_extensions_catalogue/introduction.md'
+              - 'NGSIRestHandler': 'cygnus-ngsi-ld/flume_extensions_catalogue/ngsi_rest_handler.md'
+              - 'NGSIPostgreSQLSink': 'cygnus-ngsi-ld/flume_extensions_catalogue/ngsi_postgresql_sink.md'
+              - 'NGSIPostGISSink': 'cygnus-ngsi-ld/flume_extensions_catalogue/ngsi_postgis_sink.md'
+              - 'NGSICKANSink': 'cygnus-ngsi-ld/flume_extensions_catalogue/ngsi_ckan_sink.md'
+              - 'Reporting issues and contact information': 'cygnus-ngsi-ld/flume_extensions_catalogue/issues_and_contact.md'
+        - 'User and Programmer Guide':
+              - 'Programmer Guide': 'cygnus-ngsi-ld/user_and_programmer_guide/README.md'
+              - 'Reporting issues and contact information': 'cygnus-ngsi-ld/user_and_programmer_guide/issues_and_contact.md'

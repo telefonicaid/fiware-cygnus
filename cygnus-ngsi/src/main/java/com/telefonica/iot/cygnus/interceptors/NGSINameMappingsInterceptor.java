@@ -84,7 +84,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
     public void initialize() {
         if (!invalidConfiguration) {
             loadNameMappings();
-            LOGGER.info("[nmi] Name mappings loaded");
+            LOGGER.info("[nmi] Name mappings loaded");
 
             // Create and start a periodical name mappings reader
             periodicalNameMappingsReader = new PeriodicalNameMappingsReader(30000);
@@ -126,7 +126,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         System.arraycopy(originalCEBytes, 0, newBody, 0, originalCEBytes.length);
         System.arraycopy(mappedCEBytes, 0, newBody, originalCEBytes.length, mappedCEBytes.length);
         ngsiEvent.setBody(newBody);
-        LOGGER.debug("[nmi] New body: " + new String(newBody));
+        LOGGER.debug("[nmi] newBody: " + new String(newBody));
 
         // Add the mapped service and service path to the headers
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, map.getLeft());
@@ -259,7 +259,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             jsonStr = JsonUtils.readJsonFile(nameMappingsConfFile);
             LOGGER.debug("[nmi] Reading name mappings, Json read: " + jsonStr);
         } catch (Exception e) {
-            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
+            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
             nameMappings = null;
             return;
         } // try catch
@@ -275,7 +275,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
      */
     protected void loadNameMappings(String jsonStr) {
         if (jsonStr == null) {
-            LOGGER.debug("[nmi] Reding name mappings, no file to read");
+            LOGGER.debug("[nmi] Reading name mappings, no file to read");
             nameMappings = null;
             return;
         } // if
@@ -287,7 +287,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             nameMappings = gson.fromJson(jsonStr, NameMappings.class);
             LOGGER.debug("[nmi] Reading attribute mappings, Json parsed");
         } catch (JsonIOException e) {
-            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
+            LOGGER.error("[nmi] Runtime error (" + e.getMessage() + ")");
             nameMappings = null;
             return;
         } catch (JsonSyntaxException e) {
@@ -302,7 +302,13 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             LOGGER.debug("[nmi] Reading name mappings, Json purged");
 
             // Pre-compile the regular expressions
-            nameMappings.compilePatterns();
+            try {
+                nameMappings.compilePatterns();
+            } catch (Exception e) {
+                LOGGER.warn("[nmi] Compile patterns error (" + e.getMessage() + ") with namemapping " + jsonStr + " which will be ignored");
+                nameMappings = null;
+                return;
+            } // try catch
             LOGGER.debug("[nmi] Reading name mappings, regular expressions pre-compiled");
         }
     } // loadNameMappings
@@ -318,6 +324,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
     public ImmutableTriple<String, String, ContextElement> doMap(String originalService,String originalServicePath,
             ContextElement originalCE) {
         if (nameMappings == null) {
+            LOGGER.info("[nmi] No namemappings to map entity " + originalCE.toString());
             return new ImmutableTriple(originalService, originalServicePath, originalCE);
         } // if
 
@@ -451,7 +458,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         } // for
 
         if (entityMapping == null) {
-            LOGGER.debug("[nmi] Entity not found: " + originalEntityId + ", " + originalEntityType);
+            LOGGER.info("[nmi] Entity " + originalCE.toString() + " no matched");
             return new ImmutableTriple(newService, newServicePath, newCE);
         } // if
 
@@ -543,10 +550,11 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
         } // for
 
-        // Add new Attributes
+      // Add new Attributes
         newCE.getAttributes().addAll(newAttributes);
 
-        LOGGER.debug("[nmi] newCE: " + newCE.toString());
+        LOGGER.info("[nmi] Entity " + originalCE.toString() + " mapped to: " + newCE.toString() + " by matched with " + entityMapping.toString());
+
         return new ImmutableTriple(newService, newServicePath, newCE);
     } // map
 
