@@ -1,2 +1,2 @@
-[cygnus-ngsi][ArcGis] New sink (rework) to persist Arcgis data (#1672)
+[cygnus-ngsi][NGSIArcgisFeatureTableSink] New sink to persist Arcgis data, removing the old ArgGis sink (#1672)
 [cygnus-common][ArcGis] New Rest based backend to persist Arcgis data (#1672)
