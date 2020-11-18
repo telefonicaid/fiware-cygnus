@@ -249,7 +249,7 @@ public class NameMappingsTest {
             + "               \"newServicePath\": \"/new_default\","
             + "               \"entityMappings\": ["
             + "                  {"
-            + "                     \"originalEntityId\": \"Room([0-9]*)\","
+            + "                     \"originalEntityId\": \"Room\\.(\\d*)\","
             + "                     \"originalEntityType\": \"Room\","
             + "                     \"newEntityId\": \"new_Room1\","
             + "                     \"newEntityType\": \"new_Room\","

@@ -1,3 +1,2 @@
 [cygnus-ngsi][ArcgisFeatureTableSink]New sink to persist Arcgis data. (#1672)
 [cygnus-arcgis][new backend]New Rest based backend to persist Arcgis data. (#1672)
-[cygnus-ngsi][NGSINameMappingsInterceptor] Now JsonPath expressions are allowed while mapping attributes, Interceptor can be configured to don't stop on first match. (#1856)

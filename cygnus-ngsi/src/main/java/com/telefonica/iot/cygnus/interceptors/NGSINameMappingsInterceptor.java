@@ -17,18 +17,7 @@
  */
 package com.telefonica.iot.cygnus.interceptors;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-import org.apache.flume.Context;
-import org.apache.flume.Event;
-import org.apache.flume.interceptor.Interceptor;
-
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.telefonica.iot.cygnus.containers.NameMappings;
@@ -42,6 +31,14 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.JsonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.flume.Context;
+import org.apache.flume.Event;
+import org.apache.flume.interceptor.Interceptor;
 
 /**
  *
@@ -51,7 +48,6 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSINameMappingsInterceptor.class);
     private final String nameMappingsConfFile;
-    private final boolean stopOnFirstAttrMatch;
     private final boolean invalidConfiguration;
     private NameMappings nameMappings;
     private PeriodicalNameMappingsReader periodicalNameMappingsReader;
@@ -60,24 +56,11 @@ public class NGSINameMappingsInterceptor implements Interceptor {
      * Constructor.
      * 
      * @param nameMappingsConfFile
-     * @param stopOnFirstAttrMatch
-     * @param invalidConfiguration
-     */
-    public NGSINameMappingsInterceptor(String nameMappingsConfFile, boolean stopOnFirstAttrMatch,
-            boolean invalidConfiguration) {
-        this.nameMappingsConfFile = nameMappingsConfFile;
-        this.stopOnFirstAttrMatch = stopOnFirstAttrMatch;
-        this.invalidConfiguration = invalidConfiguration;
-    } // NGSINameMappingsInterceptor
-
-    /**
-     * Constructor.
-     * 
-     * @param nameMappingsConfFile
      * @param invalidConfiguration
      */
     public NGSINameMappingsInterceptor(String nameMappingsConfFile, boolean invalidConfiguration) {
-        this(nameMappingsConfFile, true, invalidConfiguration);
+        this.nameMappingsConfFile = nameMappingsConfFile;
+        this.invalidConfiguration = invalidConfiguration;
     } // NGSINameMappingsInterceptor
 
     @Override
@@ -167,12 +150,10 @@ public class NGSINameMappingsInterceptor implements Interceptor {
     public static class Builder implements Interceptor.Builder {
         private boolean invalidConfiguration;
         private String nameMappingsConfFile;
-        private Boolean stopOnFirstAttrMatch;
 
         @Override
         public void configure(Context context) {
             nameMappingsConfFile = context.getString("name_mappings_conf_file");
-            stopOnFirstAttrMatch = context.getBoolean("stop_on_first_attr_match", true);
 
             if (nameMappingsConfFile == null) {
                 invalidConfiguration = true;
@@ -187,7 +168,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
         @Override
         public Interceptor build() {
-            return new NGSINameMappingsInterceptor(nameMappingsConfFile, stopOnFirstAttrMatch, invalidConfiguration);
+            return new NGSINameMappingsInterceptor(nameMappingsConfFile, invalidConfiguration);
         } // build
 
         protected boolean getInvalidConfiguration() {
@@ -197,7 +178,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
     } // Builder
 
     /**
-     * Class in charge or periodically reading the NGSINameMappingsInterceptor configuration file.
+     * Class in charge or periodically reading the NGSINameMappingsInterceptor
+     * configuration file.
      */
     private class PeriodicalNameMappingsReader extends Thread {
 
@@ -268,8 +250,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
     } // loadNameMappings
 
     /**
-     * Loads the Name Mappings given a Json string. It is protected since it only can be used by this class and test
-     * classes.
+     * Loads the Name Mappings given a Json string. It is protected since it
+     * only can be used by this class and test classes.
      * 
      * @param jsonStr
      */
@@ -321,7 +303,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
      * @param originalCE
      * @return The input NotifyContextRequest object with maps applied
      */
-    public ImmutableTriple<String, String, ContextElement> doMap(String originalService,String originalServicePath,
+    public ImmutableTriple<String, String, ContextElement> doMap(String originalService, String originalServicePath,
             ContextElement originalCE) {
         if (nameMappings == null) {
             LOGGER.info("[nmi] No namemappings to map entity " + originalCE.toString());
@@ -348,7 +330,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
             if (serviceMapping.getNewService() != null) {
                 newService = originalService.replaceAll(serviceMapping.getOriginalServicePattern().toString(),
-                        serviceMapping.getNewService());
+                                                        serviceMapping.getNewService());
                 LOGGER.debug("[nmi] FIWARE new service obtained: " + newService);
             } // if
 
@@ -379,8 +361,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                         continue;
                     } else {
                         if (spm.getNewServicePath() != null) {
-                            newServicePath = originalServicePath.replaceAll(
-                                    spm.getOriginalServicePathPattern().toString(), spm.getNewServicePath());
+                            newServicePath = originalServicePath.replaceAll(spm.getOriginalServicePathPattern().toString(),
+                                                                            spm.getNewServicePath());
                         }
                         LOGGER.debug("[nmi] FIWARE new service path obtained: " + newServicePath);
                         servicePathMapping = spm;
@@ -389,7 +371,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                 } else {
                     if (spm.getNewServicePath() != null) {
                         newServicePath = originalServicePath.replaceAll(spm.getOriginalServicePathPattern().toString(),
-                                spm.getNewServicePath());
+                                                                        spm.getNewServicePath());
                     }
                     LOGGER.debug("[nmi] FIWARE new service path obtained: " + newServicePath);
                     servicePathMapping = spm;
@@ -434,8 +416,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     LOGGER.debug("[nmi] " + entityMapping.getOriginalEntityId() + " matches " + newCE.getId());
                 }
             }
-            if (!entityMapping.getOriginalEntityIdPattern().matcher(originalEntityId).matches()
-                    || !entityMapping.getOriginalEntityTypePattern().matcher(originalEntityType).matches()) {
+            if (!entityMapping.getOriginalEntityIdPattern().matcher(originalEntityId).matches() ||
+                !entityMapping.getOriginalEntityTypePattern().matcher(originalEntityType).matches()) {
                 LOGGER.debug("[nmi] not matches both type and entityId");
                 entityMapping = null;
                 continue;
@@ -464,19 +446,14 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
         newCE.setId(newEntityId);
         newCE.setType(newEntityType);
-        List<ContextAttribute> newAttributes = new ArrayList<ContextAttribute>();
 
         for (ContextAttribute newCA : newCE.getAttributes()) {
             LOGGER.debug("[nmi] checking with CA: " + newCA.toString());
-            JsonElement originalCAValue = newCA.getValue();
             String originalAttributeName = newCA.getName();
             String originalAttributeType = newCA.getType();
             String newAttributeName = originalAttributeName;
             String newAttributeType = originalAttributeType;
             AttributeMapping attributeMapping = null;
-
-            boolean firstMatch = true;
-            boolean attributeFound = false;
 
             for (AttributeMapping am : entityMapping.getAttributeMappings()) {
                 attributeMapping = am;
@@ -501,16 +478,14 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     }
                 }
 
-                if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches()
-                        || !attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType)
-                                .matches()) {
+                if (!attributeMapping.getOriginalAttributeNamePattern().matcher(originalAttributeName).matches() ||
+                    !attributeMapping.getOriginalAttributeTypePattern().matcher(originalAttributeType).matches()) {
                     LOGGER.debug("[nmi] not matches both attribute type and name");
                     attributeMapping = null;
                     continue;
                 } // if
 
                 LOGGER.debug("[nmi] Attribute found: " + originalAttributeName + ", " + originalAttributeType);
-                attributeFound = true;
 
                 if (attributeMapping.getNewAttributeName() != null) {
                     newAttributeName = attributeMapping.getNewAttributeName();
@@ -520,41 +495,19 @@ public class NGSINameMappingsInterceptor implements Interceptor {
                     newAttributeType = attributeMapping.getNewAttributeType();
                 } // if
 
-                // Modify context data, or add a new attribute to the list.
-                if (firstMatch) {
-                    newCA.setName(newAttributeName);
-                    newCA.setType(newAttributeType);
-                    newCA.setContextValue(attributeMapping.getMappedValue(newCA.getValue()));
-                    LOGGER.debug("[nmi] newCA: " + newCA.toString());
-
-                    if (this.stopOnFirstAttrMatch) {
-                        break;
-                    } else {
-                        firstMatch = false;
-                    }
-                } else {
-                    ContextAttribute otherCA = newCA.deepCopy();
-                    otherCA.setName(newAttributeName);
-                    otherCA.setType(newAttributeType);
-                    otherCA.setContextValue(attributeMapping.getMappedValue(originalCAValue));
-                    LOGGER.debug("[nmi] brand newCA: " + otherCA.toString());
-
-                    newAttributes.add(otherCA);
-                }
-
+                break;
             } // for
 
-            if (!attributeFound) {
+            if (attributeMapping == null) {
                 LOGGER.debug("[nmi] Attribute not found: " + originalAttributeName + ", " + originalAttributeType);
-            }
+                continue;
+            } // if
 
+            newCA.setName(newAttributeName);
+            newCA.setType(newAttributeType);
+            LOGGER.debug("[nmi] newCA: " + newCA.toString());
         } // for
-
-      // Add new Attributes
-        newCE.getAttributes().addAll(newAttributes);
-
         LOGGER.info("[nmi] Entity " + originalCE.toString() + " mapped to: " + newCE.toString() + " by matched with " + entityMapping.toString());
-
         return new ImmutableTriple(newService, newServicePath, newCE);
     } // map
 
