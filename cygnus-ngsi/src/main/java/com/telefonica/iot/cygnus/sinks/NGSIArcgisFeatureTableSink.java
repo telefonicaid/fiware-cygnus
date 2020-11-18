@@ -62,7 +62,7 @@ import jodd.util.URLDecoder;
  * @author dmartinez
  * 
  *         Detailed documentation can be found at:
- *         https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/ngsi_arcgis_sink.md
+ *         https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/ngsi_arcgis_featuretable_sink.md
  */
 public class NGSIArcgisFeatureTableSink extends NGSISink {
     
