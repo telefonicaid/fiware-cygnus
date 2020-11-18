@@ -18,20 +18,6 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Map;
-
-import org.apache.flume.Channel;
-import org.apache.flume.ChannelException;
-import org.apache.flume.Context;
-import org.apache.flume.Event;
-import org.apache.flume.EventDeliveryException;
-import org.apache.flume.Transaction;
-import org.apache.flume.conf.Configurable;
-import org.apache.log4j.MDC;
-
 import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
@@ -44,8 +30,25 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYATTRIBUTE;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITY;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYSERVICE;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYSERVICEPATH;
+import java.util.Map;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import org.apache.flume.Channel;
+import org.apache.flume.Context;
+import org.apache.flume.Event;
+import org.apache.flume.EventDeliveryException;
+import org.apache.flume.Sink.Status;
+import org.apache.flume.Transaction;
+import org.apache.flume.ChannelException;
+import org.apache.flume.conf.Configurable;
+import org.apache.log4j.MDC;
 
 /**
  *
