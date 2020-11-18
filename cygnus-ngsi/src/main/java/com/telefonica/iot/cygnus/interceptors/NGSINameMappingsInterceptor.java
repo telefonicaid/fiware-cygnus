@@ -172,7 +172,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         @Override
         public void configure(Context context) {
             nameMappingsConfFile = context.getString("name_mappings_conf_file");
-            stopOnFirstAttrMatch = context.getBoolean("stop_on_first_attr_match", true);
+            stopOnFirstAttrMatch = context.getBoolean("stop_on_first_attr_match", false);
 
             if (nameMappingsConfFile == null) {
                 invalidConfiguration = true;
@@ -550,8 +550,10 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
         } // for
 
-      // Add new Attributes
-        newCE.getAttributes().addAll(newAttributes);
+        // Add new Attributes
+        if (newAttributes.size() > 0) {
+            newCE.getAttributes().addAll(newAttributes);
+        }
 
         LOGGER.info("[nmi] Entity " + originalCE.toString() + " mapped to: " + newCE.toString() + " by matched with " + entityMapping.toString());
 
