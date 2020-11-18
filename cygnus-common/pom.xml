@@ -141,6 +141,15 @@
         </resources>
         <pluginManagement>
             <plugins>
+                <!-- SKIP TEST -->
+	        <plugin>
+	          <groupId>org.apache.maven.plugins</groupId>
+	          <artifactId>maven-surefire-plugin</artifactId>
+	          <version>2.12.4</version>
+	          <configuration>
+		    <skipTests>true</skipTests>
+	          </configuration>
+	        </plugin>
                 <!-- Explicit Java version declaration in needed in some systems in which Maven seems not  -->
                 <!-- being able to find itself the right version. Many systems don't need this declaration -->
                 <!-- but it doesn't use to hurt anyway                                                     -->
