@@ -19,7 +19,7 @@
     * [NGSISTHSink](./ngsi_sth_sink.md)
     * [NGSIOrionSink](./ngsi_orion_sink.md)
     * [NGSIElasticsearchSink](./ngsi_elasticsearch_sink.md)
-    * [NGSIArcGisSink](./ngsi_arcgis_sink.md)
+    * [NGSIArcgisFeatureTableSink](./ngsi_arcgis_featuretable_sink.md)
     * [NGSITestSink](./ngsi_test_sink.md)
 * Interceptors
     * [GroupingInterceptor](./ngsi_grouping_interceptor.md)
