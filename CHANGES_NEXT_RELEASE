@@ -1,1 +1,1 @@
-- Upgrade Dockerfile base image from centos7.7.1908 to centos7.9.2009
+- Upgrade Dockerfile base image from 7.6.1810 to centos7.9.2009
