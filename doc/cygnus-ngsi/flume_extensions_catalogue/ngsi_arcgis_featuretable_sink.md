@@ -184,4 +184,3 @@ A complete configuration as the described above is read from the given `Context`
 Current implementation of `NGSIArcgisFeatureTableSink` relies on the username and password credentials created at the ArcGis endpoint.
 
 [Top](#top)
-
