@@ -12,11 +12,11 @@ Content:
     * [Important notes](#section2.2)
         * [About batching](#section2.2.1)
 * [Programmers guide](#section3)
-    * [`NGSIArcGisSink` class](#section3.1)
+    * [`NGSIArcgisFeatureTableSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
 
 ## <a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.NGSIArcGisSink` is a sink designed to persist NGSI-like context data events within an [ArcGis] (https://www.arcgis.com/home/index.html) feature table. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.NGSIArcgisFeatureTableSink` is a sink designed to persist NGSI-like context data events within an [ArcGis] (https://www.arcgis.com/home/index.html) feature table. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific ArcGis structures.
 
@@ -109,7 +109,7 @@ Feature table unique field:
 
 ## <a name="section2"></a>Administration guide
 ### <a name="section2.1"></a>Configuration
-`NGSIArcGisSink` is configured through the following parameters:
+`NGSIArcgisFeatureTableSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
@@ -132,7 +132,7 @@ A configuration example could be:
     cygnus-ngsi.sinks = arcgis-sink
     cygnus-ngsi.channels = arcgis-channel
     ...
-    cygnus-ngsi.sinks.arcgis-sink.type = com.telefonica.iot.cygnus.sinks.NGSIArcGisSink
+    cygnus-ngsi.sinks.arcgis-sink.type = com.telefonica.iot.cygnus.sinks.NGSIArcgisFeatureTableSink
     cygnus-ngsi.sinks.arcgis-sink.channel = arcgis-channel
     cygnus-ngsi.sinks.arcgis-sink.enable_name_mappings = true
     cygnus-ngsi.sinks.arcgis-sink.enable_name_mappings = false
@@ -172,7 +172,7 @@ A `Batch` contains a set of `NGSIEvent` objects, which are the result of parsing
 
     public void start();
 
-This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSIArcGisSink()` (contructor), `configure()` and `start()`.
+This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSIArcgisFeatureTableSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
 
