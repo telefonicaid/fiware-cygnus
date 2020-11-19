@@ -132,7 +132,7 @@ A configuration example could be:
     cygnus-ngsi.sinks = arcgis-sink
     cygnus-ngsi.channels = arcgis-channel
     ...
-    cygnus-ngsi.sinks.arcgis-sink.type = com.telefonica.iot.cygnus.sinks.NGSIArcGisSink
+    cygnus-ngsi.sinks.arcgis-sink.type = com.telefonica.iot.cygnus.sinks.NGSIArcgisFeatureTableSink
     cygnus-ngsi.sinks.arcgis-sink.channel = arcgis-channel
     cygnus-ngsi.sinks.arcgis-sink.enable_name_mappings = true
     cygnus-ngsi.sinks.arcgis-sink.enable_name_mappings = false
@@ -184,4 +184,3 @@ A complete configuration as the described above is read from the given `Context`
 Current implementation of `NGSIArcgisFeatureTableSink` relies on the username and password credentials created at the ArcGis endpoint.
 
 [Top](#top)
-
