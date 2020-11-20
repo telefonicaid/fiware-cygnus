@@ -1,4 +1,4 @@
-# <a name="top"></a>NGSIArcGisSink
+# <a name="top"></a>NGSIArcgisFeatureTableSink
 Content:
 
 * [Functionality](#section1)
@@ -12,11 +12,11 @@ Content:
     * [Important notes](#section2.2)
         * [About batching](#section2.2.1)
 * [Programmers guide](#section3)
-    * [`NGSIArcGisSink` class](#section3.1)
+    * [`NGSIArcgisFeatureTableSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
 
 ## <a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.NGSIArcGisSink` is a sink designed to persist NGSI-like context data events within a [ArcGis](https://www.arcgis.com/home/index.html). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.NGSIArcgisFeatureTableSink` is a sink designed to persist NGSI-like context data events within an [ArcGis] (https://www.arcgis.com/home/index.html) feature table. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific ArcGis structures.
 
@@ -32,12 +32,34 @@ This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks
 [Top](#top)
 
 ### <a name="section1.2"></a>Mapping `NGSIEvent`s to ArcGis
-ArcGis saves the data in its databases and you can watch this information in the Arcgis's maps, Such organization is exploited by `NGSIArcGisSink` each time a `NGSIEvent` is going to be persisted.
+ArcGis stores data in it's  own databases using it's own data organization, you can checkout this info Reading Feature Table details at Argis server, Such organization is exploited by `NGSIArcgisFeatureTableSink` each time a `NGSIEvent` is going to be persisted.
+Argis feature tables must be provisioned before sending entities.
 
 [Top](#top)
 
 #### <a name="section1.2.1"></a>ArcGis databases naming conventions
-A layers named as the notified `fiware-service-path` header value, you must create it before sending entities.
+Each entity type needs an url and an unique field to be persisted into the feature table.
+
+NGSIArcgisFeatureTableSink composes each table's url with entitie's `service` and `service path`, to provide multiple tables access. 
+
+Unique field is provided to allow `NGSIArcgisFeatureTableSink` to update existant entities. NGSI `entity type` will be used as unique field name.
+
+All this parameters, can be customized using Cygnus mapping capabilities.
+
+Let's see an example:	
+
+##### Agent.conf file:
+
+	agent.arcgis-sink.arcgis_service_url = https://arcgis.com/{hash}/arcgis/rest/services
+##### Entity data:
+
+	service = vehicles
+	service-path = /4wheels
+	entity-type = car
+##### result
+
+	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/4wheels
+	Table's unique field: car
 
 [Top](#top)
 
@@ -75,23 +97,32 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 	    }
     }
 
+Resultant service url:
+
+	https://arcgis.com/{hash}/arcgis/rest/services/vehicles/4wheels
+Feature table unique field:
+
+	Unique field name: car
+	Unique field value: car1
+
 [Top](#top)
 
 ## <a name="section2"></a>Administration guide
 ### <a name="section2.1"></a>Configuration
-`NGSIArcGisSink` is configured through the following parameters:
+`NGSIArcgisFeatureTableSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
-| type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIArcGisSink</i> |
+| type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIArcgisFeatureTableSink</i> |
 | channel | yes | N/A ||
-| enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
+| enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
 | enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
-| arcgis\_url | yes | N/A | https://{url\_host}/{id\_arcgis}/arcgis/rest/services|
+| arcgis\_service\_url | yes | N/A | https://{url\_host}/{id\_arcgis}/arcgis/rest/services|
 | arcgis\_username | yes | N/A |  |
 | arcgis\_password | yes | N/A |  |
-| batch\_size | no | 1 | Number of events accumulated before persistence. |
+| arcgis\_gettoken\_url | yes | N/A |https://{url\_host}/sharing/generateToken|
+| arcgis\_maxBatchSize | no | 10 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 
@@ -101,18 +132,15 @@ A configuration example could be:
     cygnus-ngsi.sinks = arcgis-sink
     cygnus-ngsi.channels = arcgis-channel
     ...
-    cygnus-ngsi.sinks.arcgis-sink.type = com.telefonica.iot.cygnus.sinks.NGSIArcGisSink
+    cygnus-ngsi.sinks.arcgis-sink.type = com.telefonica.iot.cygnus.sinks.NGSIArcgisFeatureTableSink
     cygnus-ngsi.sinks.arcgis-sink.channel = arcgis-channel
-    cygnus-ngsi.sinks.arcgis-sink.enable_encoding = false
-    cygnus-ngsi.sinks.arcgis-sink.enable_grouping = false
-    cygnus-ngsi.sinks.arcgis-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.arcgis-sink.enable_name_mappings = true
     cygnus-ngsi.sinks.arcgis-sink.enable_name_mappings = false
-    cygnus-ngsi.sinks.arcgis-sink.arcgis_host = https://arcgis.com/UsuarioArcgis/arcgis/rest/services
+    cygnus-ngsi.sinks.arcgis-sink.arcgis_service_url = https://arcgis.com/UsuarioArcgis/arcgis/rest/services
     cygnus-ngsi.sinks.arcgis-sink.arcgis_username = myuser
     cygnus-ngsi.sinks.arcgis-sink.arcgis_password = mypassword
-    cygnus-ngsi.sinks.arcgis-sink.batch_size = 10
-    cygnus-ngsi.sinks.arcgis-sink.batch_timeout = 30
-    cygnus-ngsi.sinks.arcgis-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.arcgis-sink.arcgis_gettoken_url = https://arcgis.com/sharing/generateToken
+    cygnus-ngsi.sinks.arcgis-sink.arcgis_maxBatchSize = 10
 
 [Top](#top)
 
@@ -120,7 +148,7 @@ A configuration example could be:
 
 
 #### <a name="section2.2.1"></a>About batching
-As explained in the [programmers guide](#section3), `NGSIArcGisSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
+As explained in the [programmers guide](#section3), `NGSIArcgisFeatureTableSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
 What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 10 `NGSIEvent`s. In the best case, all these events regard to the same type of entity, which means all the data within them will be persisted in the same ArcGis layer. If processing the events one by one, we would need 10 inserts into ArcGis; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique type of entity, and many entities may be involved within a batch. 
 
@@ -128,14 +156,14 @@ The batch mechanism adds an accumulation timeout to prevent the sink stays in an
 
 Regarding the retries of not persisted batches, a couple of parameters is used. On the one hand, a Time-To-Live (TTL) is used, specifing the number of retries Cygnus will do before definitely dropping the event. On the other hand, a list of retry intervals can be configured. Such a list defines the first retry interval, then se second retry interval, and so on; if the TTL is greater than the length of the list, then the last retry interval is repeated as many times as necessary.
 
-By default, `NGSIArcGisSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
+By default, `NGSIArcgisFeatureTableSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
 
 [Top](#top)
 
 
 ## <a name="section3"></a>Programmers guide
-### <a name="section3.1"></a>`NGSIArcGisSink` class
-As any other NGSI-like sink, `NGSIArcGisSink` extends the base `NGSISink`. The methods that are extended are:
+### <a name="section3.1"></a>`NGSIArcgisFeatureTableSink` class
+As any other NGSI-like sink, `NGSIArcgisFeatureTableSink` extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration,
           CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError;
@@ -144,7 +172,7 @@ A `Batch` contains a set of `NGSIEvent` objects, which are the result of parsing
 
     public void start();
 
-This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSIArcGisSink()` (contructor), `configure()` and `start()`.
+This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSIArcgisFeatureTableSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
 
@@ -153,6 +181,6 @@ A complete configuration as the described above is read from the given `Context`
 [Top](#top)
 
 ### <a name="section3.2"></a>Authentication and authorization
-Current implementation of `NGSIArcGisSink` relies on the username and password credentials created at the ArcGis endpoint.
+Current implementation of `NGSIArcgisFeatureTableSink` relies on the username and password credentials created at the ArcGis endpoint.
 
 [Top](#top)
