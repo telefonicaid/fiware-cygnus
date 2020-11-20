@@ -18,6 +18,11 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackendImpl;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackend;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
@@ -35,8 +40,10 @@ import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.derby.agg.Aggregator;
 import org.apache.flume.Context;
 
 /**
@@ -54,6 +61,7 @@ public class NGSICKANSink extends NGSISink {
     private String ckanPort;
     private String orionUrl;
     private boolean rowAttrPersistence;
+    private boolean attrMetadataStore;
     private boolean ssl;
     private int backendMaxConns;
     private int backendMaxConnsPerRoute;
@@ -182,6 +190,19 @@ public class NGSICKANSink extends NGSISink {
                 + attrPersistenceStr + ") -- Must be 'row' or 'column'");
         }  // if else
 
+
+        String attrMetadataStoreStr = context.getString("attr_metadata_store", "true");
+
+        if (attrMetadataStoreStr.equals("true") || attrMetadataStoreStr.equals("false")) {
+            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_metadata_store="
+                    + attrMetadataStore + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
+                    + attrMetadataStoreStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
         String sslStr = context.getString("ssl", "false");
         
         if (sslStr.equals("true") || sslStr.equals("false")) {
@@ -203,10 +224,6 @@ public class NGSICKANSink extends NGSISink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (ckan_viewer=" + ckanViewer + ")");
 
         super.configure(context);
-        
-        // Techdebt: allow this sink to work with all the data models
-        dataModel = DataModel.DMBYENTITY;
-    
         // CKAN requires all the names written in lower case
         enableLowercase = true;
     } // configure
@@ -249,8 +266,20 @@ public class NGSICKANSink extends NGSISink {
             String servicePath = firstEvent.getServicePathForData();
 
             // Get an aggregator for this entity and initialize it based on the first event
-            CKANAggregator aggregator = getAggregator(this.rowAttrPersistence);
-            aggregator.initialize(firstEvent);
+            NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
+            aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
+            aggregator.setServicePathForData(events.get(0).getServicePathForData());
+            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
+            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
+            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
+            aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
+            aggregator.setEnableUTCRecvTime(true);
+            aggregator.setOrgName(buildOrgName(aggregator.getService()));
+            aggregator.setPkgName(buildPkgName(aggregator.getService(), aggregator.getServicePathForNaming(), events.get(0).getContextElement().getId()));
+            aggregator.setResName(buildResName(aggregator.getEntityForNaming(), events.get(0).getContextElement().getId()));
+            aggregator.setAttrMetadataStore(attrMetadataStore);
+            aggregator.setEnableNameMappings(enableNameMappings);
+            aggregator.initialize(events.get(0));
 
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
@@ -283,11 +312,10 @@ public class NGSICKANSink extends NGSISink {
             String service = event.getServiceForNaming(enableNameMappings);
             String servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
             String entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-
             try {
                 String orgName = buildOrgName(service);
-                String pkgName = buildPkgName(service, servicePathForNaming);
-                String resName = buildResName(entityForNaming);
+                String pkgName = buildPkgName(service, servicePathForNaming, events.get(0).getContextElement().getId());
+                String resName = buildResName(entityForNaming, events.get(0).getContextElement().getId());
                 LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",orgName="
                         + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
                 persistenceBackend.capRecords(orgName, pkgName, resName, maxRecords);
@@ -314,202 +342,25 @@ public class NGSICKANSink extends NGSISink {
         } // try catch
     } // truncateByTime
 
-    /**
-     * Class for aggregating fieldValues.
-     */
-    private abstract class CKANAggregator {
-
-        // string containing the data records
-        protected String records;
-
-        protected String service;
-        protected String servicePathForData;
-        protected String servicePathForNaming;
-        protected String entityForNaming;
-        protected String orgName;
-        protected String pkgName;
-        protected String resName;
-        protected String resId;
-
-        public CKANAggregator() {
-            records = "";
-        } // CKANAggregator
-
-        public String getAggregation() {
-            return records;
-        } // getAggregation
-
-        public String getOrgName(boolean enableLowercase) {
-            if (enableLowercase) {
-                return orgName.toLowerCase();
-            } else {
-                return orgName;
-            } // if else
-        } // getOrgName
-
-        public String getPkgName(boolean enableLowercase) {
-            if (enableLowercase) {
-                return pkgName.toLowerCase();
-            } else {
-                return pkgName;
-            } // if else
-        } // getPkgName
-
-        public String getResName(boolean enableLowercase) {
-            if (enableLowercase) {
-                return resName.toLowerCase();
-            } else {
-                return resName;
-            } // if else
-        } // getResName
-
-        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
-            service = event.getServiceForNaming(enableNameMappings);
-            servicePathForData = event.getServicePathForData();
-            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            orgName = buildOrgName(service);
-            pkgName = buildPkgName(service, servicePathForNaming);
-            resName = buildResName(entityForNaming);
-        } // initialize
-
-        public abstract void aggregate(NGSIEvent cygnusEvent);
-
-    } // CKANAggregator
-
-    /**
-     * Class for aggregating batches in row mode.
-     */
-    private class RowAggregator extends CKANAggregator {
-
-        @Override
-        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
-            super.initialize(event);
-        } // initialize
-
-        @Override
-        public void aggregate(NGSIEvent event) {
-            // get the getRecvTimeTs headers
-            long recvTimeTs = event.getRecvTimeTs();
-            String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
-
-            // get the getRecvTimeTs body
-            NotifyContextRequest.ContextElement contextElement = event.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
-            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
-                    + entityType + ")");
-
-            // iterate on all this context element attributes, if there are attributes
-            ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = contextElement.getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-                        + ", type=" + entityType + ")");
-                return;
-            } // if
-
-            for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(true);
-                String attrMetadata = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
-                        + attrType + ")");
-
-                // create a column and aggregate it
-                String record = "{\"" + NGSIConstants.RECV_TIME_TS + "\": \"" + recvTimeTs / 1000 + "\","
-                    + "\"" + NGSIConstants.RECV_TIME + "\": \"" + recvTime + "\","
-                    + "\"" + NGSIConstants.FIWARE_SERVICE_PATH + "\": \"" + servicePathForData + "\","
-                    + "\"" + NGSIConstants.ENTITY_ID + "\": \"" + entityId + "\","
-                    + "\"" + NGSIConstants.ENTITY_TYPE + "\": \"" + entityType + "\","
-                    + "\"" + NGSIConstants.ATTR_NAME + "\": \"" + attrName + "\","
-                    + "\"" + NGSIConstants.ATTR_TYPE + "\": \"" + attrType + "\""
-                    + (isSpecialValue(attrValue) ? "" : ",\"" + NGSIConstants.ATTR_VALUE + "\": " + attrValue)
-                    + (isSpecialMetadata(attrMetadata) ? "" : ",\"" + NGSIConstants.ATTR_MD + "\": " + attrMetadata)
-                    + "}";
-
-                if (records.isEmpty()) {
-                    records += record;
-                } else {
-                    records += "," + record;
-                } // if else
-            } // for
-        } // aggregate
-
-    } // RowAggregator
-
-    /**
-     * Class for aggregating batches in column mode.
-     */
-    private class ColumnAggregator extends CKANAggregator {
-
-        @Override
-        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
-            super.initialize(event);
-        } // initialize
-
-        @Override
-        public void aggregate(NGSIEvent event) {
-            // get the getRecvTimeTs headers
-            long recvTimeTs = event.getRecvTimeTs();
-            String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
-
-            // get the getRecvTimeTs body
-            NotifyContextRequest.ContextElement contextElement = event.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
-            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
-                    + entityType + ")");
-
-            // iterate on all this context element attributes, if there are attributes
-            ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = contextElement.getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-                        + ", type=" + entityType + ")");
-                return;
-            } // if
-
-            String record = "{\"" + NGSIConstants.RECV_TIME + "\": \"" + recvTime + "\","
-                    + "\"" + NGSIConstants.FIWARE_SERVICE_PATH + "\": \"" + servicePathForData + "\","
-                    + "\"" + NGSIConstants.ENTITY_ID + "\": \"" + entityId + "\","
-                    + "\"" + NGSIConstants.ENTITY_TYPE + "\": \"" + entityType + "\"";
-
-            for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(true);
-                String attrMetadata = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
-                        + attrType + ")");
-
-                // create part of the column with the current attribute (a.k.a. a column)
-                record += (isSpecialValue(attrValue) ? "" : ",\"" + attrName + "\": " + attrValue)
-                        + (isSpecialMetadata(attrMetadata) ? "" : ",\"" + attrName + "_md\": " + attrMetadata);
-            } // for
-
-            // now, aggregate the column
-            if (records.isEmpty()) {
-                records += record + "}";
-            } else {
-                records += "," + record + "}";
-            } // if else
-        } // aggregate
-
-    } // ColumnAggregator
-
-    private CKANAggregator getAggregator(boolean rowAttrPersistence) {
+    protected NGSIGenericAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
-            return new RowAggregator();
+            return new NGSIGenericRowAggregator();
         } else {
-            return new ColumnAggregator();
+            return new NGSIGenericColumnAggregator();
         } // if else
     } // getAggregator
 
-    private void persistAggregation(CKANAggregator aggregator, String service, String servicePath)
+    private void persistAggregation(NGSIGenericAggregator aggregator, String service, String servicePath)
         throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
-        String aggregation = aggregator.getAggregation();
+        ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonListWithOutEmptyMD(aggregator.getAggregationToPersist());
+        String aggregation = "";
+        for (JsonObject jsonObject : jsonObjects) {
+            if (aggregation.isEmpty()) {
+                aggregation = jsonObject.toString();
+            } else {
+                aggregation += "," + jsonObject;
+            }
+        }
         String orgName = aggregator.getOrgName(enableLowercase);
         String pkgName = aggregator.getPkgName(enableLowercase);
         String resName = aggregator.getResName(enableLowercase);
@@ -521,7 +372,7 @@ public class NGSICKANSink extends NGSISink {
         
         // Do try-catch only for metrics gathering purposes... after that, re-throw
         try {
-            if (aggregator instanceof RowAggregator) {
+            if (aggregator instanceof NGSIGenericRowAggregator) {
                 persistenceBackend.persist(orgName, pkgName, resName, aggregation, true);
             } else {
                 persistenceBackend.persist(orgName, pkgName, resName, aggregation, false);
@@ -545,19 +396,30 @@ public class NGSICKANSink extends NGSISink {
     public String buildOrgName(String fiwareService) throws CygnusBadConfiguration {
         String orgName;
         
-        if (enableEncoding) {
-            orgName = NGSICharsets.encodeCKAN(fiwareService);
-        } else {
-            orgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);
-        } // if else
+        switch(dataModel) {
+            case DMBYENTITYID:
+                //FIXME
+                //note that if we enable encode() and/or encodeCKAN() in this datamodel we could have problems, although it need to be analyzed in deep
+                orgName=fiwareService;
+                break;
+            case DMBYENTITY:
+                if (enableEncoding) {
+                    orgName = NGSICharsets.encodeCKAN(fiwareService);
+                } else {
+                    orgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);
+                } // if else
 
-        if (orgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building organization name '" + orgName + "' and its length is "
-                    + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
-        } else if (orgName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building organization name '" + orgName + "' and its length is "
-                    + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
-        } // if else if
+                if (orgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
+                    throw new CygnusBadConfiguration("Building organization name '" + orgName + "' and its length is "
+                        + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
+                } else if (orgName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
+                    throw new CygnusBadConfiguration("Building organization name '" + orgName + "' and its length is "
+                        + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
+                } // if else if
+                break;
+            default:
+                throw new CygnusBadConfiguration("Not supported Data Model for CKAN Sink: " + dataModel);
+        }
             
         return orgName;
     } // buildOrgName
@@ -570,29 +432,39 @@ public class NGSICKANSink extends NGSISink {
      * @return Package name
      * @throws CygnusBadConfiguration
      */
-    public String buildPkgName(String fiwareService, String fiwareServicePath) throws CygnusBadConfiguration {
+    public String buildPkgName(String fiwareService, String fiwareServicePath, String entityId) throws CygnusBadConfiguration {
         String pkgName;
         
-        if (enableEncoding) {
-            pkgName = NGSICharsets.encodeCKAN(fiwareService)
-                    + CommonConstants.CONCATENATOR
-                    + NGSICharsets.encodeCKAN(fiwareServicePath);
-        } else {
-            if (fiwareServicePath.equals("/")) {
-                pkgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);
-            } else {
-                pkgName = (NGSIUtils.encode(fiwareService, false, true)
-                        + NGSIUtils.encode(fiwareServicePath, false, true)).toLowerCase(Locale.ENGLISH);
-            } // if else
-        } // if else
-
-        if (pkgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
-                    + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
-        } else if (pkgName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
-                    + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
-        } // if else if
+        switch(dataModel) {
+            case DMBYENTITYID:
+                //FIXME
+                //note that if we enable encode() and/or encodeCKAN() in this datamodel we could have problems, although it need to be analyzed in deep
+                pkgName=entityId;
+                break;
+            case DMBYENTITY:
+                if (enableEncoding) {
+                    pkgName = NGSICharsets.encodeCKAN(fiwareService)
+                        + CommonConstants.CONCATENATOR
+                        + NGSICharsets.encodeCKAN(fiwareServicePath);
+                } else {
+                    if (fiwareServicePath.equals("/")) {
+                        pkgName = NGSIUtils.encode(fiwareService, false, true).toLowerCase(Locale.ENGLISH);
+                    } else {
+                        pkgName = (NGSIUtils.encode(fiwareService, false, true)
+                            + NGSIUtils.encode(fiwareServicePath, false, true)).toLowerCase(Locale.ENGLISH);
+                    } // if else
+                } // if else
+                if (pkgName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
+                    throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
+                            + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
+                } else if (pkgName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
+                    throw new CygnusBadConfiguration("Building package name '" + pkgName + "' and its length is "
+                            + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
+                } // if else if
+                break;
+            default:
+                throw new CygnusBadConfiguration("Not supported Data Model for CKAN Sink: " + dataModel);
+        }
 
         return pkgName;
     } // buildPkgName
@@ -603,22 +475,32 @@ public class NGSICKANSink extends NGSISink {
      * @return Resource name
      * @throws CygnusBadConfiguration
      */
-    public String buildResName(String entity) throws CygnusBadConfiguration {
+    public String buildResName(String entity, String entityId) throws CygnusBadConfiguration {
         String resName;
-        
-        if (enableEncoding) {
-            resName = NGSICharsets.encodeCKAN(entity);
-        } else {
-            resName = NGSIUtils.encode(entity, false, true).toLowerCase(Locale.ENGLISH);
-        } // if else
+        switch(dataModel) {
+            case DMBYENTITYID:
+                //FIXME
+                //note that if we enable encode() and/or encodeCKAN() in this datamodel we could have problems, although it need to be analyzed in deep
+            	resName=entityId;
+                break;
+            case DMBYENTITY:
+                if (enableEncoding) {
+                    resName = NGSICharsets.encodeCKAN(entity);
+                } else {
+                    resName = NGSIUtils.encode(entity, false, true).toLowerCase(Locale.ENGLISH);
+                } // if else
 
-        if (resName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
-                    + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
-        } else if (resName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
-                    + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
-        } // if else if
+                if (resName.length() > NGSIConstants.CKAN_MAX_NAME_LEN) {
+                    throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
+                            + "greater than " + NGSIConstants.CKAN_MAX_NAME_LEN);
+                } else if (resName.length() < NGSIConstants.CKAN_MIN_NAME_LEN) {
+                    throw new CygnusBadConfiguration("Building resource name '" + resName + "' and its length is "
+                            + "lower than " + NGSIConstants.CKAN_MIN_NAME_LEN);
+                } // if else if
+                break;
+            default:
+                throw new CygnusBadConfiguration("Not supported Data Model for CKAN Sink: " + dataModel);
+        }
 
         return resName;
     } // buildResName

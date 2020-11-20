@@ -1,5 +1,5 @@
 
-#<a name="top"></a>Adding new twitter sinks development guide
+# <a name="top"></a>Adding new twitter sinks development guide
 Content:
 
 * [Introduction](#section1)
@@ -15,14 +15,14 @@ Content:
 * [Backend convenience classes](#section4)
 * [Naming and placing the new sink](#section5)
 
-##<a name="section1"></a>Introduction
+## <a name="section1"></a>Introduction
 `cygnus-twitter` allows for twitter context data persistence in certain storages by means of Flume sinks. As long as the current collection of sinks could be limited for your purposes, you can add your own sinks regarding a persistence technology of your choice and become an official `cygnus-twitter` contributor!
 
 This document tries to guide you on the development of such alternative sinks, by giving you guidelines about how to write the sink code, but also how the different classes must be called, the backends that can be used, etc.
 
 [Top](#top)
 
-##<a name="section2"></a>Base `TwitterSink` class
+## <a name="section2"></a>Base `TwitterSink` class
 `TwitterSink` is the base class all the sinks within `cygnus-twitter` extend. It is an abstract class which extends from `CygnusSink` class at `cygnus-common` (which, by its side, extends Flume's native `AbstractSink`).
 
 `TwitterSink` provides most of the logic required by any Twitter-like sink:
@@ -38,7 +38,7 @@ You find this class at the following path:
     
 [Top](#top)
     
-###<a name="section2.1"></a>Inherited configuration
+### <a name="section2.1"></a>Inherited configuration
 All the sinks extending `TwitterSink` inherit the following configuration parameters:
 
 | Parameter | Mandatory | Default value | Comments |
@@ -52,12 +52,12 @@ These parameters are read (and defaulted, when required) in the `configure(Conte
 
 [Top](#top)
 
-###<a name="section2.2"></a>Inherited starting and stoping
+### <a name="section2.2"></a>Inherited starting and stoping
 TBD
 
 [Top](#top)
 
-###<a name="section2.3"></a>Inherited events consumption    
+### <a name="section2.3"></a>Inherited events consumption    
 The most important part of `TwitterSink` is where the events are consumed in a batch-like approach. This is done in the `process()` method inherited from `AbstractSink`, which is overwritten.
 
 Such events processing is done by opening a Flume transaction and reading events as specified in the `batch_size` parameter (if no enough events are available, the accumulation ends when the `batch_timeout` is reached). For each event read, the transaction is committed. Once the accumulations ends the transaction is closed.
@@ -73,7 +73,7 @@ Specific persistence logic is implemented by overwritting the only abstract meth
 
 [Top](#top)
 
-###<a name="section2.4"></a>Inherited counters
+### <a name="section2.4"></a>Inherited counters
 Because `TwitterSink` extends `CygnusSink` the following counters are already available for retrieving statistics of any sink extending `TwitterSink`:
 
 * Number of processed events, i.e. the number of events taken from the channel and accumulated in a batch for persistence.
@@ -81,25 +81,25 @@ Because `TwitterSink` extends `CygnusSink` the following counters are already av
 
 [Top](#top)
 
-##<a name="section3"></a>New sink class
-###<a name="section3.1"></a>Specific configuration
+## <a name="section3"></a>New sink class
+### <a name="section3.1"></a>Specific configuration
 The `configure(Context)` method of `TwitterSink` can be extended with specific configuration parameters reading (and defaulting, when required).
 
 [Top](#top)
 
 
-###<a name="section3.2"></a>Fitting to the specific data structures
+### <a name="section3.2"></a>Fitting to the specific data structures
 To store tweets in HDFS, we have added the properties `hdfs_folder` and `hdfs_files` in the configuration file `agent_<id>.conf` to specify the place of storage. For other types of sinks, the required properties should be added in the configuration file and the code of the sink should treat this information in an appropriate way.
 
 
 [Top](#top)
  
-##<a name="section4"></a>Backend convenience classes
+## <a name="section4"></a>Backend convenience classes
 Sometimes all the necessary logic to persist the notified context data cannot be coded in the `persist` abstract method. In this case, you may want to create a backend class or set of classes wrapping the detailed interactions with the final backend. Nevertheless, these classes should not be located at `cygnus-twitter` but at `cygnus-common`.
     
 [Top](#top)
     
-##<a name="section5"></a>Naming and placing the new classes
+## <a name="section5"></a>Naming and placing the new classes
 New sink classes must be called `Twitter<technology>Sink`, being <i>technology</i> the name of the persistence backend. An example is the already existent sink `TwitterHDFSSink`.
 
 Regarding the new sink class location, it must be:

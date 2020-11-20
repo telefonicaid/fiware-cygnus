@@ -80,6 +80,8 @@
         "mongo_port": "27017",
         "mongo_user": "",
         "mongo_password": "",
+        "mongo_auth_source": "",
+        "mongo_replica_set": "",
         "mongo_database": "sth",
         "mongo_channel_capacity": "1000",
         "mongo_channel_transaction_capacity": "100",

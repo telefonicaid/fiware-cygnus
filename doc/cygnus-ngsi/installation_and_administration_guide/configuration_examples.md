@@ -351,11 +351,11 @@ cygnus-ngsi.sources.src-all.type = http
 cygnus-ngsi.sources.src-all.channels = ch-svc-1 ch-svc-2 ... ch-svc-N ch-def
 cygnus-ngsi.sources.src-all.selector.type = multiplexing
 cygnus-ngsi.sources.src-all.selector.header = fiware-service
-cygnus-ngsi.sources.src-all.selector.mappings.<svc-1> = ch-svc-1
-cygnus-ngsi.sources.src-all.selector.mappings.<svc-2> = ch-svc-2
+cygnus-ngsi.sources.src-all.selector.mapping.<svc-1> = ch-svc-1
+cygnus-ngsi.sources.src-all.selector.mapping.<svc-2> = ch-svc-2
 ...
-cygnus-ngsi.sources.src-all.selector.mappings.<svc-N> = ch-svc-N
-cygnus-ngsi.sources.src-all.selector.mappings.default = ch-def
+cygnus-ngsi.sources.src-all.selector.mapping.<svc-N> = ch-svc-N
+cygnus-ngsi.sources.src-all.selector.default = ch-def
 cygnus-ngsi.sources.src-all.port = 5050
 
 cygnus-ngsi.sources.src-all...
@@ -501,6 +501,64 @@ The single Cygnus agent multiplexes the notified NGSI context data based on the 
 |       +----------|    ch-def    |-----|    sink-def    |  |
 |                  +--------------+     +----------------+  |
 +-----------------------------------------------------------+
+```
+
+I.e. using this agent configuration:
+
+```
+$ cat /usr/cygnus/conf/agent_all.conf
+# declarations
+cygnus-ngsi.sources = src-all
+cygnus-ngsi.sinks = sink-svc-1 sink-svc-2 ... sink-svc-N sink-def
+cygnus-ngsi.channels = ch-svc-1 ch-svc-2 ... ch-svc-N ch-def
+
+# sources
+cygnus-ngsi.sources.src-all.type = http
+cygnus-ngsi.sources.src-all.channels = ch-svc-1 ch-svc-2 ... ch-svc-N ch-def
+cygnus-ngsi.sources.src-all.selector.type = multiplexing
+cygnus-ngsi.sources.src-all.selector.header = fiware-servicepath
+cygnus-ngsi.sources.src-all.selector.mapping.</svc-1> = ch-svc-1
+cygnus-ngsi.sources.src-all.selector.mapping.</svc-2> = ch-svc-2
+...
+cygnus-ngsi.sources.src-all.selector.mapping.</svc-N> = ch-svc-N
+cygnus-ngsi.sources.src-all.selector.default = ch-def
+cygnus-ngsi.sources.src-all.port = 5050
+
+cygnus-ngsi.sources.src-all...
+
+# sinks
+cygnus-ngsi.sinks.sink-svc-1.type = ...
+cygnus-ngsi.sinks.sink-svc-1.channel = ch-svc-1
+cygnus-ngsi.sinks.sink-svc-1...
+
+cygnus-ngsi.sinks.sink-svc-2.type = ...
+cygnus-ngsi.sinks.sink-svc-2.channel = ch-svc-2
+cygnus-ngsi.sinks.sink-svc-2...
+
+...
+
+cygnus-ngsi.sinks.sink-svc-N.type = ...
+cygnus-ngsi.sinks.sink-svc-N.channel = ch-svc-N
+cygnus-ngsi.sinks.sink-svc-N...
+
+cygnus-ngsi.sinks.sink-def.type = ...
+cygnus-ngsi.sinks.sink-def.channel = ch-def
+cygnus-ngsi.sinks.sink-def...
+
+# channels
+cygnus-ngsi.channels.ch-svc-1.type = ...
+cygnus-ngsi.channels.ch-svc-1...
+
+cygnus-ngsi.channels.ch-svc-2.type = ...
+cygnus-ngsi.channels.ch-svc-2...
+
+...
+
+cygnus-ngsi.channels.ch-svc-N.type = ...
+cygnus-ngsi.channels.ch-svc-N...
+
+cygnus-ngsi.channels.ch-def.type = ...
+cygnus-ngsi.channels.ch-def...
 ```
 
 [Top](#top)

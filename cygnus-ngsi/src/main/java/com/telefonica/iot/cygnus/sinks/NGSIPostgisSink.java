@@ -18,9 +18,11 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
-import com.telefonica.iot.cygnus.backends.postgresql.PostgreSQLBackendImpl;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
+import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
+import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
@@ -29,13 +31,12 @@ import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.CommonUtils;
-import com.telefonica.iot.cygnus.utils.NGSICharsets;
-import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.NGSIUtils;
+import com.telefonica.iot.cygnus.utils.*;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.flume.Context;
 
 /**
@@ -57,6 +58,16 @@ public class NGSIPostgisSink extends NGSISink {
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
     private static final String DEFAULT_POSTGIS_TYPE = "geometry";
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
+    private static final String POSTGIS_DRIVER_NAME = "org.postgresql.Driver";
+    private static final String POSTGIS_INSTANCE_NAME = "postgresql";
+    private static final String DEFAULT_FIWARE_SERVICE = "default";
+    private static final String ESCAPED_DEFAULT_FIWARE_SERVICE = "default_service";
+    private static final String DEFAULT_LAST_DATA = "false";
+    private static final String DEFAULT_LAST_DATA_TABLE_SUFFIX = "_last_data";
+    private static final String DEFAULT_LAST_DATA_UNIQUE_KEY = NGSIConstants.ENTITY_ID;
+    private static final String DEFAULT_LAST_DATA_TIMESTAMP_KEY = NGSIConstants.RECV_TIME;
+    private static final String DEFAULT_LAST_DATA_SQL_TS_FORMAT = "YYYY-MM-DD HH24:MI:SS.MS";
+    private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgisSink.class);
     private String postgisHost;
@@ -66,10 +77,19 @@ public class NGSIPostgisSink extends NGSISink {
     private String postgisPassword;
     private boolean rowAttrPersistence;
     private int maxPoolSize;
-    private PostgreSQLBackendImpl persistenceBackend;
+    private SQLBackendImpl postgisPersistenceBackend;
     private boolean enableCache;
     private boolean swapCoordinates;
     private boolean attrNativeTypes;
+    private boolean attrMetadataStore;
+    private String postgisOptions;
+    private boolean persistErrors;
+    private boolean lastData;
+    private String lastDataTableSuffix;
+    private String lastDataUniqueKey;
+    private String lastDataTimeStampKey;
+    private String lastDataSQLTimestampFormat;
+    private int maxLatestErrors;
 
     /**
      * Constructor.
@@ -136,6 +156,14 @@ public class NGSIPostgisSink extends NGSISink {
     } // getRowAttrPersistence
 
     /**
+     * Gets the Postgis options. It is protected due to it is only required for testing purposes.
+     * @return The Postgis options
+     */
+    protected String getPostgisOptions() {
+        return postgisOptions;
+    } // getPostgisOptions
+
+    /**
      * Returns if the attribute value will be native or stringfy. It will be stringfy due to backward compatibility
      * purposes.
      * @return True if the attribute value will be native, false otherwise
@@ -148,16 +176,16 @@ public class NGSIPostgisSink extends NGSISink {
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
-    protected PostgreSQLBackendImpl getPersistenceBackend() {
-        return persistenceBackend;
+    protected SQLBackendImpl getPersistenceBackend() {
+        return postgisPersistenceBackend;
     } // getPersistenceBackend
 
     /**
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
-     * @param persistenceBackend
+     * @param postgisPersistenceBackend
      */
-    protected void setPersistenceBackend(PostgreSQLBackendImpl persistenceBackend) {
-        this.persistenceBackend = persistenceBackend;
+    protected void setPersistenceBackend(SQLBackendImpl postgisPersistenceBackend) {
+        this.postgisPersistenceBackend = postgisPersistenceBackend;
     } // setPersistenceBackend
 
     @Override
@@ -228,13 +256,79 @@ public class NGSIPostgisSink extends NGSISink {
             LOGGER.warn("[" + this.getName() + "] Invalid configuration (attr_native_types="
                 + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
         } // if else
-        
+
+        String attrMetadataStoreStr = context.getString("attr_metadata_store", "true");
+
+        if (attrMetadataStoreStr.equals("true") || attrMetadataStoreStr.equals("false")) {
+            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_metadata_store="
+                    + attrMetadataStore + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
+                    + attrMetadataStoreStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
+        postgisOptions = context.getString("postgis_options", null);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_options=" + postgisOptions + ")");
+
+        String persistErrorsStr = context.getString("persist_errors", "true");
+
+        if (persistErrorsStr.equals("true") || persistErrorsStr.equals("false")) {
+            persistErrors = Boolean.parseBoolean(persistErrorsStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (persist_errors="
+                    + persistErrors + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (persist_errors="
+                    + persistErrorsStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
+        String lastDataStr = context.getString("enable_last_data", DEFAULT_LAST_DATA);
+
+        if (lastDataStr.equals("true") || lastDataStr.equals("false")) {
+            lastData = Boolean.parseBoolean(lastDataStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data="
+                    + lastDataStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (last_data="
+                    + lastDataStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
+        lastDataTableSuffix = context.getString("last_data_table_suffix", DEFAULT_LAST_DATA_TABLE_SUFFIX);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_table_suffix="
+                + lastDataTableSuffix + ")");
+
+        lastDataUniqueKey = context.getString("last_data_unique_key", DEFAULT_LAST_DATA_UNIQUE_KEY);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_unique_key="
+                + lastDataUniqueKey + ")");
+
+        lastDataTimeStampKey = context.getString("last_data_timestamp_key", DEFAULT_LAST_DATA_TIMESTAMP_KEY);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_timestamp_key="
+                + lastDataTimeStampKey + ")");
+
+        lastDataSQLTimestampFormat = context.getString("last_data_sql_timestamp_format", DEFAULT_LAST_DATA_SQL_TS_FORMAT);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_sql_timestamp_format="
+                + lastDataSQLTimestampFormat + ")");
+
+        maxLatestErrors = context.getInteger("max_latest_errors", DEFAULT_MAX_LATEST_ERRORS);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (max_latest_errors=" + maxLatestErrors + ")");
+
     } // configure
+
+    @Override
+    public void stop() {
+        super.stop();
+        if (postgisPersistenceBackend != null) postgisPersistenceBackend.close();
+    } // stop
 
     @Override
     public void start() {
         try {
-            persistenceBackend = new PostgreSQLBackendImpl(postgisHost, postgisPort, postgisDatabase, postgisUsername, postgisPassword, maxPoolSize);
+            if (buildDBName(null) != null) {
+                createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, buildDBName(null), postgisOptions, persistErrors, maxLatestErrors);
+            }
         } catch (Exception e) {
             LOGGER.error("Error while creating the Postgis persistence backend. Details="
                     + e.getMessage());
@@ -244,9 +338,20 @@ public class NGSIPostgisSink extends NGSISink {
         LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
 
+    /**
+     * Initialices a lazy singleton to share among instances on JVM
+     */
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
+        if (postgisPersistenceBackend == null) {
+            postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, defaultSQLDataBase, sqlOptions, persistErrors, maxLatestErrors);
+        } else {
+            LOGGER.info("The database name will be created on runtime, so if there is an specified database on the agent properties and you expect it to be read on startup, then you shoul look for the data model you are using. Maybe it's not the correct one");
+        }
+    }
+
     @Override
     void persistBatch(NGSIBatch batch)
-        throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
+            throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
@@ -264,12 +369,29 @@ public class NGSIPostgisSink extends NGSISink {
             ArrayList<NGSIEvent> events = batch.getNextEvents();
 
             // get an aggregator for this destination and initialize it
-            PostgisAggregator aggregator = getAggregator(rowAttrPersistence);
+            NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
+            aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
+            aggregator.setServicePathForData(events.get(0).getServicePathForData());
+            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
+            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
+            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
+            aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
+            aggregator.setSchemeName(buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
+            aggregator.setDbName(buildDBName(events.get(0).getServiceForNaming(enableNameMappings)));
+            aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
+            aggregator.setAttrNativeTypes(attrNativeTypes);
+            aggregator.setAttrMetadataStore(attrMetadataStore);
+            aggregator.setEnableGeoParse(true);
+            aggregator.setEnableNameMappings(enableNameMappings);
+            aggregator.setEnableLastData(lastData);
+            aggregator.setLastDataTimestampKey(lastDataTimeStampKey);
+            aggregator.setLastDataUniqueKey(lastDataUniqueKey);
             aggregator.initialize(events.get(0));
-
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
+            LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" + NGSIUtils.getFieldsForInsert(aggregator.getAggregation())+ ", values="
+                    + NGSIUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes) + ")");
 
             // persist the fieldValues
             persistAggregation(aggregator);
@@ -283,324 +405,132 @@ public class NGSIPostgisSink extends NGSISink {
 
     @Override
     public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
+        LOGGER.debug("[" + this.getName() + "] Expirating records (time=" + expirationTime + ")");
+        try {
+            postgisPersistenceBackend.expirateRecordsCache(expirationTime);
+        } catch (CygnusRuntimeError e) {
+            throw new CygnusExpiratingError("Data expiration error", "CygnusRuntimeError", e.getMessage());
+        } catch (CygnusPersistenceError e) {
+            throw new CygnusExpiratingError("Data expiration error", "CygnusPersistenceError", e.getMessage());
+        } // try catch
     } // expirateRecords
 
-    /**
-     * Class for aggregating fieldValues.
-     */
-    private abstract class PostgisAggregator {
-
-        // string containing the data fieldValues
-        protected String aggregation;
-
-        protected String service;
-        protected String servicePathForData;
-        protected String servicePathForNaming;
-        protected String entityForNaming;
-        protected String attributeForNaming;
-        protected String schemaName;
-        protected String tableName;
-        protected String typedFieldNames;
-        protected String fieldNames;
-
-        public PostgisAggregator() {
-            aggregation = "";
-        } // PostgisAggregator
-
-        public String getAggregation() {
-            return aggregation;
-        } // getAggregation
-
-        public String getSchemaName(boolean enableLowercase) {
-            if (enableLowercase) {
-                return schemaName.toLowerCase();
-            } else {
-                return schemaName;
-            } // if else
-        } // getSchemaDbName
-
-        public String getTableName(boolean enableLowercase) {
-            if (enableLowercase) {
-                return tableName.toLowerCase();
-            } else {
-                return tableName;
-            } // if else
-        } // getTableName
-
-        public String getTypedFieldNames() {
-            return typedFieldNames;
-        } // getTypedFieldNames
-
-        public String getFieldNames() {
-            return fieldNames;
-        } // getFieldNames
-
-        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
-            service = event.getServiceForNaming(enableNameMappings);
-            servicePathForData = event.getServicePathForData();
-            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            attributeForNaming = event.getAttributeForNaming(enableNameMappings);
-            schemaName = buildSchemaName(service);
-            tableName = buildTableName(servicePathForNaming, entityForNaming, attributeForNaming);
-        } // initialize
-
-        public abstract void aggregate(NGSIEvent cygnusEvent);
-
-    } // PostgisAggregator
-
-    /**
-     * Class for aggregating batches in row mode.
-     */
-    protected class RowAggregator extends PostgisAggregator {
-
-        @Override
-        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
-            super.initialize(cygnusEvent);
-            typedFieldNames = "("
-                    + NGSIConstants.RECV_TIME_TS + " bigint,"
-                    + NGSIConstants.RECV_TIME + " text,"
-                    + NGSIConstants.FIWARE_SERVICE_PATH + " text,"
-                    + NGSIConstants.ENTITY_ID + " text,"
-                    + NGSIConstants.ENTITY_TYPE + " text,"
-                    + NGSIConstants.ATTR_NAME + " text,"
-                    + NGSIConstants.ATTR_TYPE + " text,"
-                    + NGSIConstants.ATTR_VALUE + " text,"
-                    + NGSIConstants.ATTR_MD + " text"
-                    + ")";
-            fieldNames = "("
-                    + NGSIConstants.RECV_TIME_TS + ","
-                    + NGSIConstants.RECV_TIME + ","
-                    + NGSIConstants.FIWARE_SERVICE_PATH + ","
-                    + NGSIConstants.ENTITY_ID + ","
-                    + NGSIConstants.ENTITY_TYPE + ","
-                    + NGSIConstants.ATTR_NAME + ","
-                    + NGSIConstants.ATTR_TYPE + ","
-                    + NGSIConstants.ATTR_VALUE + ","
-                    + NGSIConstants.ATTR_MD
-                    + ")";
-        } // initialize
-
-        @Override
-        public void aggregate(NGSIEvent event) {
-            // get the getRecvTimeTs headers
-            long recvTimeTs = event.getRecvTimeTs();
-            String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
-
-            // get the getRecvTimeTs body
-            ContextElement contextElement = event.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
-            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
-                    + entityType + ")");
-
-            // iterate on all this context element attributes, if there are attributes
-            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-                        + ", type=" + entityType + ")");
-                return;
-            } // if
-
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
-                String attrMetadata = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
-                        + attrType + ")");
-                ImmutablePair<String, Boolean> location =
-                    NGSIUtils.getGeometry(attrValue,
-                                          attrType,
-                                          attrMetadata,
-                                          swapCoordinates);
-
-                // create a column and aggregate it
-                String row = "('"
-                    + recvTimeTs + "','"
-                    + recvTime + "','"
-                    + servicePathForData + "','"
-                    + entityId + "','"
-                    + entityType + "','"
-                    + attrName + "','";
-
-                if (location.right) {
-                    LOGGER.debug("location=" + location.getLeft());
-                    row += DEFAULT_POSTGIS_TYPE + "','" + location.getLeft() + "','"  + attrMetadata + "')";
-                } else {
-                    if (attrNativeTypes && attrType.equals("Number")) {
-                        row += attrType + "'," + attrValue + ",'"  + attrMetadata + "')";
-                    } else {
-                        row += attrType + "','" + attrValue + "','"  + attrMetadata + "')";
-                    }
-                }
-
-                if (aggregation.isEmpty()) {
-                    aggregation += row;
-                } else {
-                    aggregation += "," + row;
-                } // if else
-            } // for
-        } // aggregate
-
-    } // RowAggregator
-
-    /**
-     * Class for aggregating batches in column mode.
-     */
-    protected class ColumnAggregator extends PostgisAggregator {
-
-        @Override
-        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
-            super.initialize(cygnusEvent);
-
-            // particulat initialization
-            typedFieldNames = "(" + NGSIConstants.RECV_TIME + " text,"
-                    + NGSIConstants.FIWARE_SERVICE_PATH + " text,"
-                    + NGSIConstants.ENTITY_ID + " text,"
-                    + NGSIConstants.ENTITY_TYPE + " text";
-            fieldNames = "(" + NGSIConstants.RECV_TIME + ","
-                    + NGSIConstants.FIWARE_SERVICE_PATH + ","
-                    + NGSIConstants.ENTITY_ID + ","
-                    + NGSIConstants.ENTITY_TYPE;
-
-            // iterate on all this context element attributes, if there are attributes
-            ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                return;
-            } // if
-
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
-                String attrMetadata = contextAttribute.getContextMetadata();
-
-                if (!NGSIUtils.getGeometry(attrValue,
-                                           attrType,
-                                           attrMetadata,
-                                           swapCoordinates).getRight()) {
-                    typedFieldNames += "," + attrName + " text," + attrName + "_md text";
-                    fieldNames += "," + attrName + "," + attrName + "_md";
-                } else {
-                    typedFieldNames += "," + attrName + " " + DEFAULT_POSTGIS_TYPE + "," + attrName + "_md text";
-                    fieldNames += "," + attrName + "," + attrName + "_md";
-                }
-            } // for
-
-            typedFieldNames += ")";
-            fieldNames += ")";
-        } // initialize
-
-        @Override
-        public void aggregate(NGSIEvent cygnusEvent) {
-            // get the getRecvTimeTs headers
-            long recvTimeTs = cygnusEvent.getRecvTimeTs();
-            String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
-
-            // get the getRecvTimeTs body
-            ContextElement contextElement = cygnusEvent.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
-            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
-                    + entityType + ")");
-
-            // iterate on all this context element attributes, if there are attributes
-            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-                        + ", type=" + entityType + ")");
-                return;
-            } // if
-
-            String column = "('" + recvTime + "','" + servicePathForData + "','" + entityId + "','" + entityType + "'";
-
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
-                String attrMetadata = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
-                        + attrType + ")");
-                ImmutablePair<String, Boolean> location =
-                    NGSIUtils.getGeometry(attrValue,
-                                          attrType,
-                                          attrMetadata,
-                                          swapCoordinates);
-
-                if (location.right) {
-                    LOGGER.debug("location=" + location.getLeft());
-                    column += "," + location.getLeft() + ",'"  + attrMetadata + "'";
-
-                } else {
-                    // create part of the column with the current attribute (a.k.a. a column)
-                    if (attrNativeTypes && attrType.equals("Number")) {
-                        column += "," + attrValue + ",'"  + attrMetadata + "'";
-                    } else {
-                        column += ",'" + attrValue + "','"  + attrMetadata + "'";
-                    }
-                }
-            } // for
-
-            // now, aggregate the column
-            if (aggregation.isEmpty()) {
-                aggregation += column + ")";
-            } else {
-                aggregation += "," + column + ")";
-            } // if else
-        } // aggregate
-
-    } // ColumnAggregator
-
-    private PostgisAggregator getAggregator(boolean rowAttrPersistence) {
+    protected NGSIGenericAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
-            return new RowAggregator();
+            return new NGSIGenericRowAggregator();
         } else {
-            return new ColumnAggregator();
+            return new NGSIGenericColumnAggregator();
         } // if else
     } // getAggregator
 
-    private void persistAggregation(PostgisAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
-        String typedFieldNames = aggregator.getTypedFieldNames();
-        String fieldNames = aggregator.getFieldNames();
-        String fieldValues = aggregator.getAggregation();
-        String schemaName = aggregator.getSchemaName(enableLowercase);
+    private void persistAggregation(NGSIGenericAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
+        String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+        String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist());
+        String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
+        String schemaName = aggregator.getSchemeName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 
-        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgisSink. Schema ("
-                + schemaName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
-                + fieldValues + ")");
-        
-        if (aggregator instanceof RowAggregator) {
-            persistenceBackend.createSchema(schemaName);
-            persistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+        // Escape a syntax error in SQL
+        if (schemaName.equals(DEFAULT_FIWARE_SERVICE)) {
+            schemaName = ESCAPED_DEFAULT_FIWARE_SERVICE;
+        }
+
+        if (postgisPersistenceBackend == null) {
+            createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgisOptions, persistErrors, maxLatestErrors);
+        }
+
+        LOGGER.debug("[" + this.getName() + "] Persisting data at NGSIPostgisSink. Schema ("
+                + schemaName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
+                + valuesForInsert + ")");
+
+        if (aggregator instanceof NGSIGenericRowAggregator) {
+            postgisPersistenceBackend.createDestination(schemaName);
+            postgisPersistenceBackend.createTable(schemaName, tableName, fieldsForCreate);
         } // if
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
-        if (fieldValues.equals("")) {
+        if (valuesForInsert.equals("")) {
             LOGGER.debug("[" + this.getName() + "] no values for insert");
         } else {
-            persistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
+            if (lastData && !rowAttrPersistence ) {
+                postgisPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
+                        aggregator.getLastDataToPersist(),
+                        schemaName,
+                        tableName,
+                        lastDataTableSuffix,
+                        lastDataUniqueKey,
+                        lastDataTimeStampKey,
+                        lastDataSQLTimestampFormat,
+                        attrNativeTypes);
+            } else {
+                postgisPersistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
+            }
         }
     } // persistAggregation
-    
+
     /**
      * Creates a Postgis DB name given the FIWARE service.
      * @param service
      * @return The Postgis DB name
      * @throws CygnusBadConfiguration
      */
-    public String buildSchemaName(String service) throws CygnusBadConfiguration {
+    public String buildDBName(String service) throws CygnusBadConfiguration {
+        String name = null;
+
+        if (enableEncoding) {
+            switch(dataModel) {
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
+                    if (service != null)
+                        name = NGSICharsets.encodePostgreSQL(service);
+                    break;
+                default:
+                    name = postgisDatabase;
+            }
+        } else {
+            switch(dataModel) {
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
+                    if (service != null)
+                        name = NGSIUtils.encode(service, false, true);
+                    break;
+                default:
+                    name = postgisDatabase;
+            }
+        } // if else
+        if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building DB name '" + name
+                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_NAME_LEN);
+        } // if
+
+        return name;
+    } // buildSchemaName
+
+    /**
+     * Creates a Postgis scheme name given the FIWARE service.
+     * @param service
+     * @return The Postgis scheme name
+     * @throws CygnusBadConfiguration
+     */
+    public String buildSchemaName(String service, String subService) throws CygnusBadConfiguration {
         String name;
         
         if (enableEncoding) {
-            name = NGSICharsets.encodePostgreSQL(service);
+            switch(dataModel) {
+                case DMBYENTITYDATABASESCHEMA:
+                    name = NGSICharsets.encodePostgreSQL(subService);
+                    break;
+                default:
+                    name = NGSICharsets.encodePostgreSQL(service);
+            }
         } else {
-            name = NGSIUtils.encode(service, false, true);
+            switch(dataModel) {
+                case DMBYENTITYDATABASESCHEMA:
+                    name = NGSIUtils.encode(subService, false, true);
+                    break;
+                default:
+                    name = NGSIUtils.encode(service, false, true);
+            }
         } // if else
 
         if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
@@ -619,7 +549,7 @@ public class NGSIPostgisSink extends NGSISink {
      * @return The Postgis table name
      * @throws CygnusBadConfiguration
      */
-    public String buildTableName(String servicePath, String entity, String attribute) throws CygnusBadConfiguration {
+    public String buildTableName(String servicePath, String entity, String entityType, String attribute) throws CygnusBadConfiguration {
         String name;
 
         if (enableEncoding) {
@@ -627,10 +557,17 @@ public class NGSIPostgisSink extends NGSISink {
                 case DMBYSERVICEPATH:
                     name = NGSICharsets.encodePostgreSQL(servicePath);
                     break;
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITY:
                     name = NGSICharsets.encodePostgreSQL(servicePath)
                             + CommonConstants.CONCATENATOR
                             + NGSICharsets.encodePostgreSQL(entity);
+                    break;
+                case DMBYENTITYTYPE:
+                    name = NGSICharsets.encodeMySQL(servicePath)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodeMySQL(entityType);
                     break;
                 case DMBYATTRIBUTE:
                     name = NGSICharsets.encodePostgreSQL(servicePath)
@@ -653,10 +590,17 @@ public class NGSIPostgisSink extends NGSISink {
                     
                     name = NGSIUtils.encode(servicePath, true, false);
                     break;
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITY:
                     String truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
                             + NGSIUtils.encode(entity, false, true);
+                    break;
+                case DMBYENTITYTYPE:
+                    truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
+                    name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
+                            + NGSIUtils.encode(entityType, false, true);
                     break;
                 case DMBYATTRIBUTE:
                     truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
@@ -666,7 +610,7 @@ public class NGSIPostgisSink extends NGSISink {
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY or DMBYATTRIBUTE");
+                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY, DMBYENTITYTYPE or DMBYATTRIBUTE");
             } // switch
         } // if else
 

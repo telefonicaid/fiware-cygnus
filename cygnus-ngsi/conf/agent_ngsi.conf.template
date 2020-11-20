@@ -197,7 +197,8 @@ cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPos
 #cygnus-ngsi.sinks.postgresql-sink.batch_timeout = 30
 # number of retries upon persistence error
 #cygnus-ngsi.sinks.postgresql-sink.batch_ttl = 10
-
+# true if errors are persisted for this sink, false otherwise
+#cygnus-ngsi.sinks.postgresql-sink.persist_errors = true
 
 # ============================================
 # NGSIPostgisSink configuration
@@ -233,6 +234,8 @@ cygnus-ngsi.sinks.postgis-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgi
 #cygnus-ngsi.sinks.postgis-sink.batch_timeout = 30
 # number of retries upon persistence error
 #cygnus-ngsi.sinks.postgis-sink.batch_ttl = 10
+# true if errors are persisted for this sink, false otherwise
+#cygnus-ngsi.sinks.postgis-sink.persist_errors = true
 
 # ============================================
 # NGSIMySQLSink configuration
@@ -268,6 +271,8 @@ cygnus-ngsi.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSin
 #cygnus-ngsi.sinks.mysql-sink.batch_ttl = 10
 # true enables cache, false disables cache
 #cygnus-ngsi.sinks.mysql-sink.backend.enable_cache = false
+# true if errors are persisted for this sink, false otherwise
+#cygnus-ngsi.sinks.mysql-sink.persist_errors = true
 
 # ============================================
 # NGSIMongoSink configuration
@@ -289,6 +294,10 @@ cygnus-ngsi.sinks.mongo-sink.channel = mongo-channel
 #cygnus-ngsi.sinks.mongo-sink.mongo_username = mongo_username
 # password for the user above (or empty if authentication is not enabled in MongoDB)
 #cygnus-ngsi.sinks.mongo-sink.mongo_password = xxxxxxxx
+# Mongo option to specify which common user database source to use for authentication
+#cygnus-ngsi.sinks.mongo-sink.mongo_auth_source = admin
+# Mongo option to specify the name of the replica set
+#cygnus-ngsi.sinks.mongo-sink.replica_set =
 # prefix for the MongoDB databases
 #cygnus-ngsi.sinks.mongo-sink.db_prefix = sth_
 # prefix for the MongoDB collections
@@ -336,6 +345,8 @@ cygnus-ngsi.sinks.sth-sink.channel = sth-channel
 #cygnus-ngsi.sinks.sth-sink.mongo_username = mongo_username
 # password for the user above (or empty if authentication is not enabled in MongoDB)
 #cygnus-ngsi.sinks.sth-sink.mongo_password = xxxxxxxx
+# Mongo option to specify which common user database source to use for authentication
+#cygnus-ngsi.sinks.sth-sink.mongo_auth_source = admin
 # prefix for the MongoDB databases
 #cygnus-ngsi.sinks.sth-sink.db_prefix = sth_
 # prefix for the MongoDB collections

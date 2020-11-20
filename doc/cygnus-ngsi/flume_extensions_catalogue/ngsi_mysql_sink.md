@@ -8,6 +8,7 @@ Content:
         * [MySQL tables naming conventions](#section1.2.2)
         * [Row-like storing](#section1.2.3)
         * [Column-like storing](#section1.2.4)
+        * [Native attribute type](#section1.2.5)
     * [Example](#section1.3)
         * [`NGSIEvent`](#section1.3.1)
         * [Database and table names](#section1.3.2)
@@ -26,6 +27,7 @@ Content:
 * [Programmers guide](#section3)
     * [`NGSIMySQLSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
+    * [SSL/TLS connection](#section3.3)
 
 ## <a name="section1"></a>Functionality
 `com.iot.telefonica.cygnus.sinks.NGSIMySQLSink`, or simply `NGSIMySQLSink` is a sink designed to persist NGSI-like context data events within a [MySQL server](https://www.mysql.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
@@ -97,7 +99,7 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 * `attrName`: Notified attribute name.
 * `attrType`: Notified attribute type.
 * `attrValue`: In its simplest form, this value is just a string, but since Orion 0.11.0 it can be Json object or Json array.
-* `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted).
+* `attrMd`: It contains a string serialization of the metadata array for the attribute in Json (if the attribute hasn't metadata, an empty array `[]` is inserted). Will be stored only if it was configured to (attr_metadata_store set to true in the configuration file ngsi_agent.conf). It is a Json object.
 
 [Top](#top)
 
@@ -110,6 +112,25 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 * `entityType`: Notified entity type.
 *  For each notified attribute, a field named as the attribute is considered. This field will store the attribute values along the time.
 *  For each notified attribute, a field named as the concatenation of the attribute name and `_md` is considered. This field will store the attribute's metadata values along the time.
+
+[Top](#top)
+
+
+
+#### <a name="section1.2.5">Native types
+
+Regarding the specific data stored within the above table, if `attr_native_types` parameter is set to `true` then attribute is inserted using its native type (according with the following table), if `false` then will be stringify.
+
+Type json     | Type
+------------- | --------------------------------------- 
+string        | text
+number        | double, precision, real, others (numeric, decimal)
+boolean       | boolean (TRUE, FALSE, NULL)
+DateTime      | timestamp, timestamp with time zone, timestamp without time zone
+json          | text o json - it`s treated as String
+null          | NULL
+
+This only applies to Column mode.
 
 [Top](#top)
 
@@ -206,13 +227,20 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
+| enable\_last\_data | no | false | <i>true</i> or <i>false</i>, to enable last data functionality. Check this [link](./last_data_function.md) for more details. |
+| last\_data\_table\_suffix | no | false | This suffix will be added to the table name in order to know where Cygnus will store the last record of an entity. Check this [link](./last_data_function.md) for more details. |
+| last\_data\_unique\_key | no | entityId | This must be a unique key on the database to find when a previous record exists. Check this [link](./last_data_function.md) for more details. |
+| last\_data\_timestamp\_key | no | recvTime | This must be a timestamp key on the aggregation to know which record is older. Check this [link](./last_data_function.md) for more details. |
+| last\_data\_sql_timestamp\_format | no | YYYY-MM-DD HH24:MI:SS.MS | This must be a timestamp format to cast [SQL Text to timestamp](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html). Check this [link](./last_data_function.md) for more details. |
 | data\_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <i>dm-by-entity-type</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | mysql\_host | no | localhost | FQDN/IP address where the MySQL server runs |
 | mysql\_port | no | 3306 ||
 | mysql\_username | no | root | `root` is the default username that is created automatically |
 | mysql\_password | no | N/A | Empty value as default (no password is created automatically) |
 | mysql\_maxPoolSize | no | 3 | Max number of connections per database pool |
+| mysql\_options | no | N/A | optional connection parameter(s) concatinated to jdbc url if necessary<br/>When `useSSL=true&requireSSL=false` is set to `mysql_options`, jdbc url will become like <b>jdbc:mysql://mysql.example.com:3306/fiwareservice?useSSL=true&requireSSL=false</b>|
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>
+| attr\_metadata\_store | no | false | <i>true</i> or <i>false</i>. |
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
@@ -220,7 +248,8 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | persistence\_policy.max_records | no | -1 | Maximum number of records allowed for a table before it is capped. `-1` disables this policy. |
 | persistence\_policy.expiration_time | no | -1 | Maximum number of seconds a record is maintained in a table before expiration. `-1` disables this policy. |
 | persistence\_policy.checking_time | no | 3600 | Frequency (in seconds) at which the sink checks for record expiration. |
-| attr\_native\_types | no | false | if the attribute value will be native <i>true</i> or stringfy or <i>false</i>. |
+| attr\_native\_types | no | false | if the attribute value will be native <i>true</i> or stringfy or <i>false</i>. When set to true, in case batch option is activated, insert null values for those attributes that doesn't exist in some of the entities to be inserted. If set to false, '' value is inserted for missing attributes. |
+| persist\_errors | no | true | if there is an exception when trying to persist data into storage then error is persisted into a table |
 
 A configuration example could be:
 
@@ -239,6 +268,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.mysql-sink.mysql_username = myuser
     cygnus-ngsi.sinks.mysql-sink.mysql_password = mypassword
     cygnus-ngsi.sinks.mysql-sink.mysql_maxPoolSize = 3
+    cygnus-ngsi.sinks.mysql-sink.mysql_options = useSSL=true&requireSSL=false
     cygnus-ngsi.sinks.mysql-sink.attr_persistence = row
     cygnus-ngsi.sinks.mysql-sink.attr_native_types = false
     cygnus-ngsi.sinks.mysql-sink.batch_size = 100
@@ -248,6 +278,7 @@ A configuration example could be:
     cygnus-ngsi.sinks.mysql-sink.persistence_policy.max_records = 5
     cygnus-ngsi.sinks.mysql-sink.persistence_policy.expiration_time = 86400
     cygnus-ngsi.sinks.mysql-sink.persistence_policy.checking_time = 600
+    cygnus-ngsi.sinks.mysql-sink.persist_errors = true
 
 [Top](#top)
 
@@ -349,5 +380,8 @@ A complete configuration as the described above is read from the given `Context`
 
 ### <a name="section3.2"></a>Authentication and authorization
 Current implementation of `NGSIMySQLSink` relies on the username and password credentials created at the MySQL endpoint.
+
+### <a name="section3.3"></a>SSL/TLS connection
+When `NGSIMySQLSink` want to connect MySQL Server by using SSL or TLS, please set `mysql_options` configuration parameter to configure jdbc.
 
 [Top](#top)

@@ -18,15 +18,35 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.sinks.NGSIHDFSSink.BackendImpl;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+
+import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.junit.Test;
+
+import java.util.*;
 
 /**
  *
@@ -68,10 +88,11 @@ public class NGSIHDFSSinkTest {
         String krb5 = null; // default value
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
             assertEquals(BackendImpl.REST, sink.getBackendImpl());
@@ -271,11 +292,12 @@ public class NGSIHDFSSinkTest {
         String hive = null;
         String krb5 = null;
         String token = "mytoken";
+        String periodicity = null;
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
             assertEquals(25, sink.getBackendMaxConns());
@@ -315,10 +337,11 @@ public class NGSIHDFSSinkTest {
         String krb5 = null;
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
             assertEquals(3, sink.getBackendMaxConnsPerRoute());
@@ -358,10 +381,11 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -401,10 +425,11 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -445,10 +470,11 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -488,10 +514,11 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -532,10 +559,11 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -576,10 +604,11 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -622,10 +651,11 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/somePath";
         String entity = "someId=someType";
@@ -682,10 +712,11 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/somePath";
         String entity = "someId=someType";
@@ -742,10 +773,11 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/";
         String entity = "someId=someType";
@@ -802,10 +834,11 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/";
         String entity = "someId=someType";
@@ -862,16 +895,18 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/somePath";
         String entity = "someId=someType";
+        GregorianCalendar calendar = null;
         
         try {
-            String buildFolderPath = sink.buildFilePath(service, servicePath, entity);
+            String buildFolderPath = sink.buildFilePath(service, servicePath, entity, calendar);
             String expectedFolderPath = "someService/somePath/someId_someType/someId_someType.txt";
         
             try {
@@ -891,6 +926,73 @@ public class NGSIHDFSSinkTest {
             throw e;
         } // try catch
     } // testBuildFilePathNonRootServicePathNoEncoding
+
+    /**
+     * [NGSIHDFSSinkTest.buildFilePath] -------- When no encoding and when a non root service-path is notified/defaulted
+     * the HDFS file path is the encoding of \<service\>/\<service-path\>/\<entity\>/\<entity\>.txt.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildHourlyFilePathNonRootServicePathNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                + "-------- When no encoding and when a non root service-path is notified/defaulted the HDFS file path "
+                + "is the encoding of <service>/<service-path>/<entity>/<entity>.txt");
+        String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "false";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String periodicity = "hourly";
+        String serviceAsNamespace  = null; // default value
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+        String service = "someService";
+        String servicePath = "/somePath";
+        String entity = "someId=someType";
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String separationPrefix =
+                ((String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)).length() ==  1) ? "0" +  String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)) : String.valueOf(calendar.get(Calendar.HOUR_OF_DAY))) +
+                        ((String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)).length() ==  1) ? "0" +  String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)) : String.valueOf(calendar.get(Calendar.DAY_OF_MONTH))) +
+                        ((String.valueOf(calendar.get(Calendar.MONTH) + 1).length() ==  1) ? "0" +  String.valueOf(calendar.get(Calendar.MONTH) + 1) : String.valueOf(calendar.get(Calendar.MONTH) + 1)) +
+                        String.valueOf(calendar.get(Calendar.YEAR));
+        try {
+            String buildFolderPath = sink.buildFilePath(service, servicePath, entity, calendar);
+            String expectedFolderPath = "someService/somePath/someId_someType/someId_someType_" + separationPrefix + ".txt";
+
+            try {
+                assertEquals(expectedFolderPath, buildFolderPath);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "-  OK  - '" + buildFolderPath + "' is equals to "
+                        + "<service>/<service-path>/<entity>/<entity>.txt");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "- FAIL - '" + buildFolderPath + "' is not equals to "
+                        + "<service>/<service-path>/<entity>/<entity>.txt");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildHourlyFilePathNonRootServicePathNoEncoding
     
     /**
      * [NGSIHDFSSinkTest.buildFilePath] -------- When encoding and when a non root service-path is notified/defaulted
@@ -922,16 +1024,18 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/somePath";
         String entity = "someId=someType";
+        GregorianCalendar calendar = null;
         
         try {
-            String buildFolderPath = sink.buildFilePath(service, servicePath, entity);
+            String buildFolderPath = sink.buildFilePath(service, servicePath, entity, calendar);
             String expectedFolderPath = "someService/somePath/someIdxffffsomeType/someIdxffffsomeType.txt";
         
             try {
@@ -951,6 +1055,72 @@ public class NGSIHDFSSinkTest {
             throw e;
         } // try catch
     } // testBuildFilePathNonRootServicePathEncoding
+
+    /**
+     * [NGSIHDFSSinkTest.buildFilePath] -------- When encoding and when a non root service-path is notified/defaulted
+     * the HDFS file path is the encoding of \<service\>/\<service-path\>/\<entity\>/\<entity\>.txt.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildDailyFilePathNonRootServicePathEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                + "-------- When encoding and when a non root service-path is notified/defaulted the HDFS file path "
+                + "is the encoding of <service>/<service-path>/<entity>/<entity>.txt");
+        String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "true";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        String periodicity = "daily";
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+        String service = "someService";
+        String servicePath = "/somePath";
+        String entity = "someId=someType";
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String separationPrefix =
+                ((String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)).length() ==  1) ? "0" +  String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)) : String.valueOf(calendar.get(Calendar.DAY_OF_MONTH))) +
+                        ((String.valueOf(calendar.get(Calendar.MONTH) + 1).length() ==  1) ? "0" +  String.valueOf(calendar.get(Calendar.MONTH) + 1) : String.valueOf(calendar.get(Calendar.MONTH) + 1)) +
+                        String.valueOf(calendar.get(Calendar.YEAR));
+        try {
+            String buildFolderPath = sink.buildFilePath(service, servicePath, entity, calendar);
+            String expectedFolderPath = "someService/somePath/someIdxffffsomeType/someIdxffffsomeType_" + separationPrefix + ".txt";
+
+            try {
+                assertEquals(expectedFolderPath, buildFolderPath);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "-  OK  - '" + buildFolderPath + "' is equals to the encoding of "
+                        + "<service>/<service-path>/<entity>/<entity>.txt");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "- FAIL - '" + buildFolderPath + "' is not equals to the encoding of "
+                        + "<service>/<service-path>/<entity>/<entity>.txt");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildDailyFilePathNonRootServicePathEncoding
 
     /**
      * [NGSIHDFSSinkTest.buildTableName] -------- When no encoding and when a root service-path is notified/defaulted
@@ -982,16 +1152,18 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/";
         String entity = "someId=someType";
+        GregorianCalendar calendar = null;
         
         try {
-            String builtTableName = sink.buildFilePath(service, servicePath, entity);
+            String builtTableName = sink.buildFilePath(service, servicePath, entity, calendar);
             String expecetedTableName = "someService/someId_someType/someId_someType.txt";
         
             try {
@@ -1011,6 +1183,71 @@ public class NGSIHDFSSinkTest {
             throw e;
         } // try catch
     } // testBuildFilePathRootServicePathNoEncoding
+
+    /**
+     * [NGSIHDFSSinkTest.buildTableName] -------- When no encoding and when a root service-path is notified/defaulted
+     * the HDFS file path is the encoding of \<service\>/\<entity\>/\<entity\>.txt.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildMonthlyFilePathRootServicePathNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                + "-------- When no encoding and when a root service-path is notified/defaulted the HDFS file path is "
+                + "the encoding of <service>/<entity>/<entity>.txt");
+        String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "false";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        String periodicity = "monthly";
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+        String service = "someService";
+        String servicePath = "/";
+        String entity = "someId=someType";
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String separationPrefix = ((String.valueOf(calendar.get(Calendar.MONTH) + 1).length() ==  1) ? "0" +  String.valueOf(calendar.get(Calendar.MONTH) + 1) : String.valueOf(calendar.get(Calendar.MONTH) + 1)) +
+                String.valueOf(calendar.get(Calendar.YEAR));
+
+        try {
+            String builtTableName = sink.buildFilePath(service, servicePath, entity, calendar);
+            String expecetedTableName = "someService/someId_someType/someId_someType_" + separationPrefix + ".txt";
+
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "-  OK  - '" + builtTableName + "' is equals to "
+                        + "<service>/<entity>/<entity>.txt");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to "
+                        + "<service>/<entity>/<entity>.txt");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildMonthlyFilePathRootServicePathNoEncoding
     
     /**
      * [NGSIHDFSSinkTest.buildTableName] -------- When encoding and when a root service-path is notified/defaulted the
@@ -1042,16 +1279,18 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/";
         String entity = "someId=someType";
+        GregorianCalendar calendar = null;
         
         try {
-            String builtTableName = sink.buildFilePath(service, servicePath, entity);
+            String builtTableName = sink.buildFilePath(service, servicePath, entity, calendar);
             String expecetedTableName = "someService/someIdxffffsomeType/someIdxffffsomeType.txt";
         
             try {
@@ -1071,6 +1310,70 @@ public class NGSIHDFSSinkTest {
             throw e;
         } // try catch
     } // testBuildFilePathRootServicePathEncoding
+
+    /**
+     * [NGSIHDFSSinkTest.buildTableName] -------- When encoding and when a root service-path is notified/defaulted the
+     * HDFS file path is the encoding of \<service\>/\<entity\>/\<entity\>.txt.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildYearlyFilePathRootServicePathEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                + "-------- When encoding and when a root service-path is notified/defaulted the HDFS file path is the "
+                + "encoding of <service>/<entity>/<entity>.txt");
+        String backendImpl = null; // default value
+        String backendMaxConns = null; // default value
+        String backendMaxConnsPerRoute = null; // default value
+        String batchSize = null; // default value
+        String batchTime = null; // default value
+        String batchTTL = null; // default value
+        String csvSeparator = null; // default value
+        String dataModel = null; // default value
+        String enableEncoding = "true";
+        String enableGrouping = null; // default value
+        String enableLowercase = null; // default value
+        String fileFormat = null; // default value
+        String host = null; // default value
+        String password = "mypassword";
+        String port = null; // default value
+        String username = "myuser";
+        String hive = "false";
+        String krb5 = "false";
+        String token = "mytoken";
+        String serviceAsNamespace  = null; // default value
+        String periodicity = "yearly";
+        NGSIHDFSSink sink = new NGSIHDFSSink();
+        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
+        String service = "someService";
+        String servicePath = "/";
+        String entity = "someId=someType";
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String separationPrefix = String.valueOf(calendar.get(Calendar.YEAR));
+
+        try {
+            String builtTableName = sink.buildFilePath(service, servicePath, entity, calendar);
+            String expecetedTableName = "someService/someIdxffffsomeType/someIdxffffsomeType_" + separationPrefix + ".txt";
+
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of "
+                        + "<service>/<entity>/<entity>.txt");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of "
+                        + "<service>/<entity>/<entity>.txt");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.buildFilePath]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildYearlyFilePathRootServicePathEncoding
     
     /**
      * [NGSIHDFSSink.buildFolderPath] -------- A folder path length greater than 255 characters is detected.
@@ -1100,10 +1403,11 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogService";
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
         String destination = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogDestination";
@@ -1148,16 +1452,18 @@ public class NGSIHDFSSinkTest {
         String krb5 = "false";
         String token = "mytoken";
         String serviceAsNamespace  = null; // default value
+        String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
                 batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace));
+                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogService";
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
         String destination = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogDestination";
-        
+        GregorianCalendar calendar = null;
+
         try {
-            sink.buildFilePath(service, servicePath, destination);
+            sink.buildFilePath(service, servicePath, destination, calendar);
             System.out.println(getTestTraceHead("[NGSIHDFSSink.buildFilePath]")
                     + "- FAIL - A file path length greater than 255 characters has not been detected");
             assertTrue(false);
@@ -1167,12 +1473,12 @@ public class NGSIHDFSSinkTest {
                     + "-  OK  - A file path length greater than 255 characters has been detected");
         } // try catch
     } // testBuildFilePathLength
-    
+
     private Context createContext(String backendImpl, String backendMaxConns, String backendMaxConnsPerRoute,
-            String batchSize, String batchTime, String batchTTL, String csvSeparator, String dataModel,
-            String enableEncoding, String enableGrouping, String enableLowercase, String fileFormat, String host,
-            String password, String port, String username, String hive, String krb5, String token,
-            String serviceAsNamespace) {
+                                  String batchSize, String batchTime, String batchTTL, String csvSeparator, String dataModel,
+                                  String enableEncoding, String enableGrouping, String enableLowercase, String fileFormat, String host,
+                                  String password, String port, String username, String hive, String krb5, String token,
+                                  String serviceAsNamespace, String periodicity) {
         Context context = new Context();
         context.put("backend.impl", backendImpl);
         context.put("backend.max_conns", backendMaxConns);
@@ -1194,7 +1500,508 @@ public class NGSIHDFSSinkTest {
         context.put("krb5_auth", krb5);
         context.put("oauth2_token", token);
         context.put("service_as_namespace", serviceAsNamespace);
+        context.put("periodicity_of_file_separation", periodicity);
         return context;
     } // createContext
-    
+
+    private NotifyContextRequest.ContextElement createContextElement() {
+        NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
+        NotifyContextRequest.ContextMetadata contextMetadata = new NotifyContextRequest.ContextMetadata();
+        contextMetadata.setName("location");
+        contextMetadata.setType("string");
+        contextMetadata.setContextMetadata(new JsonPrimitive("WGS84"));
+        ArrayList<NotifyContextRequest.ContextMetadata> metadata = new ArrayList<>();
+        metadata.add(contextMetadata);
+        NotifyContextRequest.ContextAttribute contextAttribute1 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute1.setName("someName1");
+        contextAttribute1.setType("someType1");
+        contextAttribute1.setContextValue(new JsonPrimitive("-3.7167, 40.3833"));
+        contextAttribute1.setContextMetadata(metadata);
+        NotifyContextRequest.ContextAttribute contextAttribute2 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute2.setName("someName2");
+        contextAttribute2.setType("someType2");
+        contextAttribute2.setContextValue(new JsonPrimitive("someValue2"));
+        contextAttribute2.setContextMetadata(null);
+        ArrayList<NotifyContextRequest.ContextAttribute> attributes = new ArrayList<>();
+        attributes.add(contextAttribute1);
+        attributes.add(contextAttribute2);
+        NotifyContextRequest.ContextElement contextElement = new NotifyContextRequest.ContextElement();
+        contextElement.setId("someId");
+        contextElement.setType("someType");
+        contextElement.setIsPattern("false");
+        contextElement.setAttributes(attributes);
+        return contextElement;
+    } // createContextElement
+
+    private Context createContextforNativeTypes(String backendImpl, String backendMaxConns, String backendMaxConnsPerRoute,
+                                                String batchSize, String batchTime, String batchTTL, String csvSeparator, String dataModel,
+                                                String enableEncoding, String enableGrouping, String enableLowercase, String fileFormat, String host,
+                                                String password, String port, String username, String hive, String krb5, String token,
+                                                String serviceAsNamespace, String attrNativeTypes, String metadata) {
+        Context context = new Context();
+        context.put("backend.impl", backendImpl);
+        context.put("backend.max_conns", backendMaxConns);
+        context.put("backend.max_conns_per_route", backendMaxConnsPerRoute);
+        context.put("batchSize", batchSize);
+        context.put("batchTime", batchTime);
+        context.put("batchTTL", batchTTL);
+        context.put("csv_separator", csvSeparator);
+        context.put("data_model", dataModel);
+        context.put("enable_encoding", enableEncoding);
+        context.put("enable_grouping", enableGrouping);
+        context.put("enable_grouping", enableLowercase);
+        context.put("file_format", fileFormat);
+        context.put("hdfs_host", host);
+        context.put("hdfs_password", password);
+        context.put("hdfs_port", port);
+        context.put("hdfs_username", username);
+        context.put("hive", hive);
+        context.put("krb5_auth", krb5);
+        context.put("oauth2_token", token);
+        context.put("service_as_namespace", serviceAsNamespace);
+        context.put("attr_native_types", attrNativeTypes);
+        context.put("attr_metadata_store", metadata);
+        return context;
+    } // createContext
+
+    private NotifyContextRequest.ContextElement createContextElementForNativeTypes() {
+        NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
+        NotifyContextRequest.ContextMetadata contextMetadata = new NotifyContextRequest.ContextMetadata();
+        contextMetadata.setName("someString");
+        contextMetadata.setType("string");
+        ArrayList<NotifyContextRequest.ContextMetadata> metadata = new ArrayList<>();
+        metadata.add(contextMetadata);
+        NotifyContextRequest.ContextAttribute contextAttribute1 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute1.setName("someNumber");
+        contextAttribute1.setType("number");
+        contextAttribute1.setContextValue(new JsonPrimitive(2));
+        contextAttribute1.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute2 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute2.setName("somneBoolean");
+        contextAttribute2.setType("Boolean");
+        contextAttribute2.setContextValue(new JsonPrimitive(true));
+        contextAttribute2.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute3 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute3.setName("someDate");
+        contextAttribute3.setType("DateTime");
+        contextAttribute3.setContextValue(new JsonPrimitive("2016-09-21T01:23:00.00Z"));
+        contextAttribute3.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute4 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute4.setName("someGeoJson");
+        contextAttribute4.setType("geo:json");
+        contextAttribute4.setContextValue(new JsonPrimitive("{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}"));
+        contextAttribute4.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute5 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute5.setName("someJson");
+        contextAttribute5.setType("json");
+        contextAttribute5.setContextValue(new JsonPrimitive("{\"String\": \"string\"}"));
+        contextAttribute5.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute6 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute6.setName("someString");
+        contextAttribute6.setType("string");
+        contextAttribute6.setContextValue(new JsonPrimitive("foo"));
+        contextAttribute6.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute7 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute7.setName("someString2");
+        contextAttribute7.setType("string");
+        contextAttribute7.setContextValue(new JsonPrimitive(""));
+        contextAttribute7.setContextMetadata(null);
+        ArrayList<NotifyContextRequest.ContextAttribute> attributes = new ArrayList<>();
+        attributes.add(contextAttribute1);
+        attributes.add(contextAttribute2);
+        attributes.add(contextAttribute3);
+        attributes.add(contextAttribute4);
+        attributes.add(contextAttribute5);
+        attributes.add(contextAttribute6);
+        attributes.add(contextAttribute7);
+        NotifyContextRequest.ContextElement contextElement = new NotifyContextRequest.ContextElement();
+        contextElement.setId("someId");
+        contextElement.setType("someType");
+        contextElement.setIsPattern("false");
+        contextElement.setAttributes(attributes);
+        return contextElement;
+    } // createContextElementForNativeTypes
+
+    public NGSIBatch prepaireBatch() {
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        String destination = "someDestination";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
+        NotifyContextRequest.ContextElement contextElement2 = createContextElement();
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
+        NGSIEvent ngsiEvent2 = new NGSIEvent(headers, contextElement2.toString().getBytes(), contextElement2, null);
+        NGSIBatch batch = new NGSIBatch();
+        batch.addEvent(destination, ngsiEvent);
+        batch.addEvent(destination, ngsiEvent2);
+        return batch;
+    }
+
+    @Test
+    public void testNativeTypeColumnBatchCsv() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        NGSIBatch batch = prepaireBatch();
+        String destination = "someDestination";
+        String file_format = "csv-column";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        try {
+            batch.startIterator();
+            NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
+            GregorianCalendar calendar = new GregorianCalendar();
+            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
+                aggregator.setAttrMetadataStore(true);
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                }
+            }
+            aggregator = ngsihdfsSink.processCSVFields(aggregator);
+            aggregator.setHiveFields(ngsihdfsSink.getHiveFields(aggregator.getAggregationToPersist()));
+            if (aggregator.getMdAggregations().keySet().size() == 1) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnBatchCsv]") + "-  OK ");
+            } else {
+                fail();
+            }
+        } catch (Exception e) {
+            fail();
+        }
+    } // testNativeTypeColumnBatchCsv
+
+    @Test
+    public void testNativeTypeColumnBatchCsvNotMetadata() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        NGSIBatch batch = prepaireBatch();
+        String destination = "someDestination";
+        String file_format = "csv-column";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        try {
+            batch.startIterator();
+            NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
+            GregorianCalendar calendar = new GregorianCalendar();
+            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
+                aggregator.setAttrMetadataStore(false);
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                }
+            }
+            aggregator = ngsihdfsSink.processCSVFields(aggregator);
+            aggregator.setHiveFields(ngsihdfsSink.getHiveFields(aggregator.getAggregationToPersist()));
+            if (aggregator.getMdAggregations().keySet().size() == 0) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnBatchCsvNotMetadata]") + "-  OK ");
+            } else {
+                fail();
+            }
+        } catch (Exception e) {
+            fail();
+        }
+    } // testNativeTypeColumnBatchCsvNotMetadata
+
+    @Test
+    public void testNativeTypeColumnBatchJson() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        NGSIBatch batch = prepaireBatch();
+        String destination = "someDestination";
+        String file_format = "json-column";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        try {
+            batch.startIterator();
+            NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
+            GregorianCalendar calendar = new GregorianCalendar();
+            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
+                aggregator.setAttrMetadataStore(true);
+                aggregator.setEnableUTCRecvTime(true);
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                }
+            }
+            String correctBatch = "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"someNumber\":2,\"someNumber_md\":[],\"somneBoolean\":true,\"somneBoolean_md\":[],\"someDate\":\"2016-09-21T01:23:00.00Z\",\"someDate_md\":[],\"someGeoJson\":\"{\"type\":\"Point\",\"coordinates\":[-0.036177,39.986159]}\",\"someGeoJson_md\":[],\"someJson\":\"{\"String\":\"string\"}\",\"someJson_md\":[],\"someString\":\"foo\",\"someString_md\":[],\"someString2\":\"\",\"someString2_md\":[]}\n" +
+                    "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"someName1\":\"-3.7167,40.3833\",\"someName1_md\":[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}],\"someName2\":\"someValue2\",\"someName2_md\":[]}";
+            if (ngsihdfsSink.jsonToPersist(aggregator.getAggregationToPersist()).replace(" ", "").equals(correctBatch.replace(" ", ""))) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnBatchJson]") + "-  OK ");
+            } else {
+                fail();
+            }
+        } catch (Exception e) {
+            fail();
+        }
+    } // testNativeTypeColumnBatchJson
+
+    @Test
+    public void testNativeTypeColumnBatchJsonNotMetadata() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        NGSIBatch batch = prepaireBatch();
+        String destination = "someDestination";
+        String file_format = "json-column";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        try {
+            batch.startIterator();
+            NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
+            GregorianCalendar calendar = new GregorianCalendar();
+            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
+                aggregator.setAttrMetadataStore(false);
+                aggregator.setEnableUTCRecvTime(true);
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                }
+            }
+            String correctBatch = "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\", \"someNumber\":2, \"somneBoolean\":true, \"someDate\":\"2016-09-21T01:23:00.00Z\", \"someGeoJson\":\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\", \"someJson\":\"{\"String\": \"string\"}\", \"someString\":\"foo\", \"someString2\":\"\"}\n" +
+                    "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\", \"someName1\":\"-3.7167, 40.3833\", \"someName2\":\"someValue2\"}";
+            if (ngsihdfsSink.jsonToPersist(aggregator.getAggregationToPersist()).replace(" ", "").equals(correctBatch.replace(" ", ""))) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeColumnBatchJsonNotMetadata]") + "-  OK ");
+            } else {
+                fail();
+            }
+        } catch (Exception e) {
+            fail();
+        }
+    } // testNativeTypeColumnBatchJsonNotMetadata
+
+    @Test
+    public void testNativeTypeRowBatchCsv() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        NGSIBatch batch = prepaireBatch();
+        String destination = "someDestination";
+        String file_format = "csv-row";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        try {
+            batch.startIterator();
+            NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
+            GregorianCalendar calendar = new GregorianCalendar();
+            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
+                aggregator.setAttrMetadataStore(true);
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                }
+            }
+            aggregator = ngsihdfsSink.processCSVFields(aggregator);
+            aggregator.setHiveFields(ngsihdfsSink.getHiveFields(aggregator.getAggregationToPersist()));
+            if (aggregator.getMdAggregations().keySet().size() == 1) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeRowBatchCsv]") + "-  OK ");
+            } else {
+                fail();
+            }
+        } catch (Exception e) {
+            fail();
+        }
+    } // testNativeTypeRowBatchCsv
+
+    @Test
+    public void testNativeTypeRowBatchCsvNotMetadata() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        NGSIBatch batch = prepaireBatch();
+        String destination = "someDestination";
+        String file_format = "csv-row";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        try {
+            batch.startIterator();
+            NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
+            GregorianCalendar calendar = new GregorianCalendar();
+            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
+                aggregator.setAttrMetadataStore(false);
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                }
+            }
+            aggregator = ngsihdfsSink.processCSVFields(aggregator);
+            aggregator.setHiveFields(ngsihdfsSink.getHiveFields(aggregator.getAggregationToPersist()));
+            if (aggregator.getMdAggregations().keySet().size() == 0) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeRowBatchCsvNotMetadata]") + "-  OK ");
+            } else {
+                fail();
+            }
+        } catch (Exception e) {
+            fail();
+        }
+    } // testNativeTypeRowBatchCsvNotMetadata
+
+    @Test
+    public void testNativeTypeRowBatchJson() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        NGSIBatch batch = prepaireBatch();
+        String destination = "someDestination";
+        String file_format = "json-row";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        try {
+            batch.startIterator();
+            NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
+            GregorianCalendar calendar = new GregorianCalendar();
+            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
+                aggregator.setAttrMetadataStore(true);
+                aggregator.setEnableUTCRecvTime(true);
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                }
+            }
+            String correctBatch = "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someNumber\",\"attrType\":\"number\",\"attrValue\":2,\"attrMd\":[]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"somneBoolean\",\"attrType\":\"Boolean\",\"attrValue\":true,\"attrMd\":[]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someDate\",\"attrType\":\"DateTime\",\"attrValue\":\"2016-09-21T01:23:00.00Z\",\"attrMd\":[]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someGeoJson\",\"attrType\":\"geo:json\",\"attrValue\":\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\",\"attrMd\":[]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someJson\",\"attrType\":\"json\",\"attrValue\":\"{\"String\": \"string\"}\",\"attrMd\":[]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString\",\"attrType\":\"string\",\"attrValue\":\"foo\",\"attrMd\":[]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString2\",\"attrType\":\"string\",\"attrValue\":\"\",\"attrMd\":[]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someName1\",\"attrType\":\"someType1\",\"attrValue\":\"-3.7167, 40.3833\",\"attrMd\":[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someName2\",\"attrType\":\"someType2\",\"attrValue\":\"someValue2\",\"attrMd\":[]}";
+            if (ngsihdfsSink.jsonToPersist(aggregator.getAggregationToPersist()).equals(correctBatch)) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeRowBatchJson]") + "-  OK ");
+            } else {
+                fail();
+            }
+        } catch (Exception e) {
+            fail();
+        }
+    } // testNativeTypeRowBatchJson
+
+
+
+    @Test
+    public void testNativeTypeRowBatchJsonNotMetadata() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        NGSIBatch batch = prepaireBatch();
+        String destination = "someDestination";
+        String file_format = "json-row";
+        NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        try {
+            batch.startIterator();
+            NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
+            GregorianCalendar calendar = new GregorianCalendar();
+            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
+                aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
+                aggregator.setAttrMetadataStore(false);
+                aggregator.setEnableUTCRecvTime(true);
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                }
+            }
+            String correctBatch = "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someNumber\",\"attrType\":\"number\",\"attrValue\":2}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"somneBoolean\",\"attrType\":\"Boolean\",\"attrValue\":true}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someDate\",\"attrType\":\"DateTime\",\"attrValue\":\"2016-09-21T01:23:00.00Z\"}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someGeoJson\",\"attrType\":\"geo:json\",\"attrValue\":\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someJson\",\"attrType\":\"json\",\"attrValue\":\"{\"String\": \"string\"}\"}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString\",\"attrType\":\"string\",\"attrValue\":\"foo\"}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString2\",\"attrType\":\"string\",\"attrValue\":\"\"}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someName1\",\"attrType\":\"someType1\",\"attrValue\":\"-3.7167, 40.3833\"}\n" +
+                    "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someName2\",\"attrType\":\"someType2\",\"attrValue\":\"someValue2\"}";
+            if (ngsihdfsSink.jsonToPersist(aggregator.getAggregationToPersist()).equals(correctBatch)) {
+                assertTrue(true);
+                System.out.println(getTestTraceHead("[NGSIHDFSSink.testNativeTypeRowBatchJsonNotMetadata]") + "-  OK ");
+            } else {
+                fail();
+            }
+        } catch (Exception e) {
+            fail();
+        }
+    } // testNativeTypeRowBatchJsonNotMetadata
 } // NGSIHDFSSinkTest

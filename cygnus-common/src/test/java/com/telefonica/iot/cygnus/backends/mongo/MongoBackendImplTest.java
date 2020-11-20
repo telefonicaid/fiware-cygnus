@@ -31,14 +31,14 @@ import org.junit.Test;
  * @author frb
  */
 public class MongoBackendImplTest {
-    
+
     /**
      * Constructor.
      */
     public MongoBackendImplTest() {
         LogManager.getRootLogger().setLevel(Level.FATAL);
     } // MongoBackendImplTest
-    
+
     /**
      * [MongoBackendImpl.getRange] -------- Given a resolution, its related range is correctly returned.
      */
@@ -46,9 +46,9 @@ public class MongoBackendImplTest {
     public void testGetRange() {
         System.out.println(getTestTraceHead("[MongoBackendImpl.getRange]")
                 + "-------- Given a resolution, its related range is correctly returned");
-        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null);
-        
-        
+        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, null);
+
+
         try {
             assertEquals("minute", backend.getRange(MongoBackendImpl.Resolution.SECOND));
             System.out.println(getTestTraceHead("[MongoBackendImpl.getRange]")
@@ -58,7 +58,7 @@ public class MongoBackendImplTest {
                     + "- FAIL - The related range for 'SECOND' resolution is not 'minute'");
             throw e;
         } // try catch
-        
+
         try {
             assertEquals("hour", backend.getRange(MongoBackendImpl.Resolution.MINUTE));
             System.out.println(getTestTraceHead("[MongoBackendImpl.getRange]")
@@ -68,7 +68,7 @@ public class MongoBackendImplTest {
                     + "- FAIL - The related range for 'MINUTE' resolution is not 'hour'");
             throw e;
         } // try catch
-        
+
         try {
             assertEquals("day", backend.getRange(MongoBackendImpl.Resolution.HOUR));
             System.out.println(getTestTraceHead("[MongoBackendImpl.getRange]")
@@ -78,7 +78,7 @@ public class MongoBackendImplTest {
                     + "- FAIL - The related range for 'HOUR' resolution is not 'day'");
             throw e;
         } // try catch
-        
+
         try {
             assertEquals("month", backend.getRange(MongoBackendImpl.Resolution.DAY));
             System.out.println(getTestTraceHead("[MongoBackendImpl.getRange]")
@@ -88,7 +88,7 @@ public class MongoBackendImplTest {
                     + "- FAIL - The related range for 'DAY' resolution is not 'month'");
             throw e;
         } // try catch
-        
+
         try {
             assertEquals("year", backend.getRange(MongoBackendImpl.Resolution.MONTH));
             System.out.println(getTestTraceHead("[MongoBackendImpl.getRange]")
@@ -99,7 +99,7 @@ public class MongoBackendImplTest {
             throw e;
         } // try catch
     } // testGetRange
-    
+
     /**
      * [MongoBackendImpl.getOrigin] -------- Given a calendar and a resolution, its related origin is correctly
      * returned.
@@ -108,9 +108,9 @@ public class MongoBackendImplTest {
     public void testGetOrigin() {
         System.out.println(getTestTraceHead("[MongoBackendImpl.getOrigin]")
                 + "-------- Given a calendar and a resolution, its related origin is correctly returned");
-        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null);
+        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, null);
         GregorianCalendar calendar = new GregorianCalendar(2017, 4, 5, 11, 46, 13);
-        
+
         try {
             GregorianCalendar gc = new GregorianCalendar(2017, 4, 5, 11, 46, 0);
             gc.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -124,7 +124,7 @@ public class MongoBackendImplTest {
                     + "'2017-04-05T11:46:00'");
             throw e;
         } // try catch
-        
+
         try {
             GregorianCalendar gc = new GregorianCalendar(2017, 4, 5, 11, 0, 0);
             gc.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -138,7 +138,7 @@ public class MongoBackendImplTest {
                     + "'2017-04-05T11:00:00'");
             throw e;
         } // try catch
-        
+
         try {
             GregorianCalendar gc = new GregorianCalendar(2017, 4, 5, 0, 0, 0);
             gc.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -152,7 +152,7 @@ public class MongoBackendImplTest {
                     + "'2017-04-05T00:00:00'");
             throw e;
         } // try catch
-        
+
         try {
             GregorianCalendar gc = new GregorianCalendar(2017, 4, 1, 0, 0, 0);
             gc.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -166,7 +166,7 @@ public class MongoBackendImplTest {
                     + "'2017-04-01T00:00:00'");
             throw e;
         } // try catch
-        
+
         try {
             // The month has to be zero since GregorianCalendar builds dates considering months start by zero
             GregorianCalendar gc = new GregorianCalendar(2017, 0, 1, 0, 0, 0);
@@ -182,7 +182,7 @@ public class MongoBackendImplTest {
             throw e;
         } // try catch
     } // testGetOrigin
-    
+
     /**
      * [MongoBackendImpl.getOffset] -------- Given a calendar and a resolution, its related offset is correctly
      * returned.
@@ -191,9 +191,9 @@ public class MongoBackendImplTest {
     public void testGetOffset() {
         System.out.println(getTestTraceHead("[MongoBackendImpl.getOffset]")
                 + "-------- Given a calendar and a resolution, its related offset is correctly returned");
-        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null);
+        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, null);
         GregorianCalendar calendar = new GregorianCalendar(2017, 3, 5, 11, 46, 13); // month 3 is April
-        
+
         try {
             assertEquals(13, backend.getOffset(calendar, MongoBackendImpl.Resolution.SECOND));
             System.out.println(getTestTraceHead("[MongoBackendImpl.getOffset]")
@@ -203,7 +203,7 @@ public class MongoBackendImplTest {
                     + "- FAIL - The related offset for '2017-04-05T11:46:13' and 'SECOND' resolution is '13'");
             throw e;
         } // try catch
-        
+
         try {
             assertEquals(46, backend.getOffset(calendar, MongoBackendImpl.Resolution.MINUTE));
             System.out.println(getTestTraceHead("[MongoBackendImpl.getOffset]")
@@ -213,7 +213,7 @@ public class MongoBackendImplTest {
                     + "- FAIL - The related offset for '2017-04-05T11:46:13' and 'MINUTE' resolution is '46'");
             throw e;
         } // try catch
-        
+
         try {
             assertEquals(11, backend.getOffset(calendar, MongoBackendImpl.Resolution.HOUR));
             System.out.println(getTestTraceHead("[MongoBackendImpl.getOffset]")
@@ -223,7 +223,7 @@ public class MongoBackendImplTest {
                     + "- FAIL - The related offset for '2017-04-05T11:46:13' and 'HOUR' resolution is '11'");
             throw e;
         } // try catch
-        
+
         try {
             assertEquals(5, backend.getOffset(calendar, MongoBackendImpl.Resolution.DAY));
             System.out.println(getTestTraceHead("[MongoBackendImpl.getOffset]")
@@ -233,7 +233,7 @@ public class MongoBackendImplTest {
                     + "- FAIL - The related offset for '2017-04-05T11:46:13' and 'DAY' resolution is '5'");
             throw e;
         } // try catch
-        
+
         try {
             assertEquals(4, backend.getOffset(calendar, MongoBackendImpl.Resolution.MONTH));
             System.out.println(getTestTraceHead("[MongoBackendImpl.getOffset]")
@@ -244,7 +244,7 @@ public class MongoBackendImplTest {
             throw e;
         } // try catch
     } // testGetOffset
-    
+
     /**
      * [MongoBackendImpl.buildQueryForInsertAggregated] -------- Given a calendar, a resolution, an entity ID and type
      * and a attribute name, a query for insert if built
@@ -259,14 +259,15 @@ public class MongoBackendImplTest {
         String entityType = "someType";
         String attrName = "someName";
         GregorianCalendar calendar = new GregorianCalendar(2017, 3, 5, 11, 46, 13); // month 3 is April
-        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, DataModel.DMBYSERVICEPATH);
-        String queryForInsertAggregated = "{ \"_id\" : { \"entityId\" : \"someId\" , \"entityType\" : \"someType\" , "
-                + "\"attrName\" : \"someName\" , \"origin\" : { \"$date\" : \"2017-04-05T11:46:00.000Z\"} , "
-                + "\"resolution\" : \"second\" , \"range\" : \"minute\"} , \"points.offset\" : 13}";
+        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, DataModel.DMBYSERVICEPATH);
+        String queryForInsertAggregated = "{\"_id\": {\"entityId\": \"someId\", \"entityType\": \"someType\", "
+                + "\"attrName\": \"someName\", \"origin\": {\"$date\": 1491392760000}, "
+                + "\"resolution\": \"second\", \"range\": \"minute\"}, \"points.offset\": 13}";
 
         try {
-            assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
-                    entityType, attrName, MongoBackendImpl.Resolution.SECOND).toString());
+            String query = backend.buildQueryForInsertAggregated(calendar, entityId,
+                    entityType, attrName, MongoBackendImpl.Resolution.SECOND).toString();
+            assertEquals(queryForInsertAggregated, query);
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildQueryForInsertAggregated]")
                     + "-  OK  - The related query for '2017-04-05T11:46:13', 'SECOND' resolution and 'DMBYENTITY' "
                     + "data mode is '" + queryForInsertAggregated + "'");
@@ -276,11 +277,11 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"entityId\" : \"someId\" , \"entityType\" : \"someType\" , "
-                + "\"attrName\" : \"someName\" , \"origin\" : { \"$date\" : \"2017-04-05T11:00:00.000Z\"} , "
-                + "\"resolution\" : \"minute\" , \"range\" : \"hour\"} , \"points.offset\" : 46}";
-        
+
+        queryForInsertAggregated = "{\"_id\": {\"entityId\": \"someId\", \"entityType\": \"someType\", "
+                + "\"attrName\": \"someName\", \"origin\": {\"$date\": 1491390000000}, "
+                + "\"resolution\": \"minute\", \"range\": \"hour\"}, \"points.offset\": 46}";
+
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
                     entityType, attrName, MongoBackendImpl.Resolution.MINUTE).toString());
@@ -293,11 +294,11 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"entityId\" : \"someId\" , \"entityType\" : \"someType\" , "
-                + "\"attrName\" : \"someName\" , \"origin\" : { \"$date\" : \"2017-04-05T00:00:00.000Z\"} , "
-                + "\"resolution\" : \"hour\" , \"range\" : \"day\"} , \"points.offset\" : 11}";
-        
+
+        queryForInsertAggregated = "{\"_id\": {\"entityId\": \"someId\", \"entityType\": \"someType\", "
+                + "\"attrName\": \"someName\", \"origin\": {\"$date\": 1491350400000}, "
+                + "\"resolution\": \"hour\", \"range\": \"day\"}, \"points.offset\": 11}";
+
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
                     entityType, attrName, MongoBackendImpl.Resolution.HOUR).toString());
@@ -310,11 +311,11 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"entityId\" : \"someId\" , \"entityType\" : \"someType\" , "
-                + "\"attrName\" : \"someName\" , \"origin\" : { \"$date\" : \"2017-04-01T00:00:00.000Z\"} , "
-                + "\"resolution\" : \"day\" , \"range\" : \"month\"} , \"points.offset\" : 5}";
-        
+
+        queryForInsertAggregated = "{\"_id\": {\"entityId\": \"someId\", \"entityType\": \"someType\", "
+                + "\"attrName\": \"someName\", \"origin\": {\"$date\": 1491004800000}, "
+                + "\"resolution\": \"day\", \"range\": \"month\"}, \"points.offset\": 5}";
+
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
                     entityType, attrName, MongoBackendImpl.Resolution.DAY).toString());
@@ -327,11 +328,11 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"entityId\" : \"someId\" , \"entityType\" : \"someType\" , "
-                + "\"attrName\" : \"someName\" , \"origin\" : { \"$date\" : \"2017-01-01T00:00:00.000Z\"} , "
-                + "\"resolution\" : \"month\" , \"range\" : \"year\"} , \"points.offset\" : 4}";
-        
+
+        queryForInsertAggregated = "{\"_id\": {\"entityId\": \"someId\", \"entityType\": \"someType\", "
+                + "\"attrName\": \"someName\", \"origin\": {\"$date\": 1483228800000}, "
+                + "\"resolution\": \"month\", \"range\": \"year\"}, \"points.offset\": 4}";
+
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
                     entityType, attrName, MongoBackendImpl.Resolution.MONTH).toString());
@@ -344,11 +345,12 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        backend = new MongoBackendImpl(null, null, null, DataModel.DMBYENTITY);
-        queryForInsertAggregated = "{ \"_id\" : { \"attrName\" : \"someName\" , "
-                + "\"origin\" : { \"$date\" : \"2017-04-05T11:46:00.000Z\"} , \"resolution\" : \"second\" , "
-                + "\"range\" : \"minute\"} , \"points.offset\" : 13}";
+
+        backend = new MongoBackendImpl(null, null, null, null, null, DataModel.DMBYENTITY);
+
+        queryForInsertAggregated = "{\"_id\": {\"attrName\": \"someName\", "
+                + "\"origin\": {\"$date\": 1491392760000}, \"resolution\": \"second\", "
+                + "\"range\": \"minute\"}, \"points.offset\": 13}";
 
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
@@ -362,11 +364,11 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"attrName\" : \"someName\" , "
-                + "\"origin\" : { \"$date\" : \"2017-04-05T11:00:00.000Z\"} , \"resolution\" : \"minute\" , "
-                + "\"range\" : \"hour\"} , \"points.offset\" : 46}";
-        
+
+        queryForInsertAggregated = "{\"_id\": {\"attrName\": \"someName\", "
+                + "\"origin\": {\"$date\": 1491390000000}, \"resolution\": \"minute\", "
+                + "\"range\": \"hour\"}, \"points.offset\": 46}";
+
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
                     entityType, attrName, MongoBackendImpl.Resolution.MINUTE).toString());
@@ -379,11 +381,11 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"attrName\" : \"someName\" , "
-                + "\"origin\" : { \"$date\" : \"2017-04-05T00:00:00.000Z\"} , \"resolution\" : \"hour\" , "
-                + "\"range\" : \"day\"} , \"points.offset\" : 11}";
-        
+
+        queryForInsertAggregated = "{\"_id\": {\"attrName\": \"someName\", "
+                + "\"origin\": {\"$date\": 1491350400000}, \"resolution\": \"hour\", "
+                + "\"range\": \"day\"}, \"points.offset\": 11}";
+
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
                     entityType, attrName, MongoBackendImpl.Resolution.HOUR).toString());
@@ -396,11 +398,11 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"attrName\" : \"someName\" , "
-                + "\"origin\" : { \"$date\" : \"2017-04-01T00:00:00.000Z\"} , \"resolution\" : \"day\" , "
-                + "\"range\" : \"month\"} , \"points.offset\" : 5}";
-        
+
+        queryForInsertAggregated = "{\"_id\": {\"attrName\": \"someName\", "
+                + "\"origin\": {\"$date\": 1491004800000}, \"resolution\": \"day\", "
+                + "\"range\": \"month\"}, \"points.offset\": 5}";
+
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
                     entityType, attrName, MongoBackendImpl.Resolution.DAY).toString());
@@ -413,11 +415,11 @@ public class MongoBackendImplTest {
                     + "data mode is not '" + queryForInsertAggregated + "'");
             throw e;
         } // try catch
-        
-        queryForInsertAggregated = "{ \"_id\" : { \"attrName\" : \"someName\" , "
-                + "\"origin\" : { \"$date\" : \"2017-01-01T00:00:00.000Z\"} , \"resolution\" : \"month\" , "
-                + "\"range\" : \"year\"} , \"points.offset\" : 4}";
-        
+
+        queryForInsertAggregated = "{\"_id\": {\"attrName\": \"someName\", "
+                + "\"origin\": {\"$date\": 1483228800000}, \"resolution\": \"month\", "
+                + "\"range\": \"year\"}, \"points.offset\": 4}";
+
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
                     entityType, attrName, MongoBackendImpl.Resolution.MONTH).toString());
@@ -431,7 +433,7 @@ public class MongoBackendImplTest {
             throw e;
         } // try catch
     } // testBuildQueryForInsertAggregated
-    
+
     /**
      * [MongoBackendImpl.buildUpdateForUpdate] -------- Given a calendar, an attribute type and pre-aggregated numerical
      * values, an aggregation update is created.
@@ -448,10 +450,10 @@ public class MongoBackendImplTest {
         double sum2 = 200;
         int numSamples = 2;
         GregorianCalendar calendar = new GregorianCalendar(2017, 3, 5, 11, 46, 13); // month 3 is April
-        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null);
-        String updateForUpdate = "{ \"$set\" : { \"attrType\" : \"someType\"} , "
-                + "\"$inc\" : { \"points.$.samples\" : 2 , \"points.$.sum\" : 20.0 , \"points.$.sum2\" : 200.0} , "
-                + "\"$min\" : { \"points.$.min\" : 0.0} , \"$max\" : { \"points.$.max\" : 10.0}}";
+        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null,null);
+        String updateForUpdate = "{\"$set\": {\"attrType\": \"someType\"}, "
+                + "\"$inc\": {\"points.$.samples\": 2, \"points.$.sum\": 20.0, \"points.$.sum2\": 200.0}, "
+                + "\"$min\": {\"points.$.min\": 0.0}, \"$max\": {\"points.$.max\": 10.0}}";
 
         try {
             assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, calendar, max, min, sum, sum2,
@@ -466,7 +468,7 @@ public class MongoBackendImplTest {
             throw e;
         } // try catch
     } // testBuildUpdateForUpdateNumerical
-    
+
     /**
      * [MongoBackendImpl.buildUpdateForUpdate] -------- Given a calendar, an attribute type and pre-aggregated string
      * values, an aggregation update is created.
@@ -480,9 +482,9 @@ public class MongoBackendImplTest {
         String value = "someString";
         int count = 2;
         GregorianCalendar calendar = new GregorianCalendar(2017, 3, 5, 11, 46, 13); // month 3 is April
-        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null);
-        String updateForUpdate = "{ \"$set\" : { \"attrType\" : \"someType\"} , "
-                + "\"$inc\" : { \"points.13.samples\" : 2 , \"points.13.occur.someString\" : 2}}";
+        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, null);
+        String updateForUpdate = "{\"$set\": {\"attrType\": \"someType\"}, "
+                + "\"$inc\": {\"points.13.samples\": 2, \"points.13.occur.someString\": 2}}";
 
         try {
             assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.SECOND,
@@ -496,9 +498,9 @@ public class MongoBackendImplTest {
                     + "preaggregation is not '" + updateForUpdate + "'");
             throw e;
         } // try catch
-        
-        updateForUpdate = "{ \"$set\" : { \"attrType\" : \"someType\"} , "
-                + "\"$inc\" : { \"points.46.samples\" : 2 , \"points.46.occur.someString\" : 2}}";
+
+        updateForUpdate = "{\"$set\": {\"attrType\": \"someType\"}, "
+                + "\"$inc\": {\"points.46.samples\": 2, \"points.46.occur.someString\": 2}}";
 
         try {
             assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.MINUTE,
@@ -512,9 +514,9 @@ public class MongoBackendImplTest {
                     + "preaggregation is not '" + updateForUpdate + "'");
             throw e;
         } // try catch
-        
-        updateForUpdate = "{ \"$set\" : { \"attrType\" : \"someType\"} , "
-                + "\"$inc\" : { \"points.11.samples\" : 2 , \"points.11.occur.someString\" : 2}}";
+
+        updateForUpdate ="{\"$set\": {\"attrType\": \"someType\"}, "
+                + "\"$inc\": {\"points.11.samples\": 2, \"points.11.occur.someString\": 2}}";
 
         try {
             assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.HOUR,
@@ -528,10 +530,10 @@ public class MongoBackendImplTest {
                     + "preaggregation is not '" + updateForUpdate + "'");
             throw e;
         } // try catch
-        
+
         // Offsets for days start by 0, this the fifth day is 4
-        updateForUpdate = "{ \"$set\" : { \"attrType\" : \"someType\"} , "
-                + "\"$inc\" : { \"points.4.samples\" : 2 , \"points.4.occur.someString\" : 2}}";
+        updateForUpdate = "{\"$set\": {\"attrType\": \"someType\"}, "
+                + "\"$inc\": {\"points.4.samples\": 2, \"points.4.occur.someString\": 2}}";
 
         try {
             assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.DAY,
@@ -545,10 +547,10 @@ public class MongoBackendImplTest {
                     + "preaggregation is not '" + updateForUpdate + "'");
             throw e;
         } // try catch
-        
+
         // Offsets for months start by 0, thus April is 3
-        updateForUpdate = "{ \"$set\" : { \"attrType\" : \"someType\"} , "
-                + "\"$inc\" : { \"points.3.samples\" : 2 , \"points.3.occur.someString\" : 2}}";
+        updateForUpdate = "{\"$set\": {\"attrType\": \"someType\"}, "
+                + "\"$inc\": {\"points.3.samples\": 2, \"points.3.occur.someString\": 2}}";
 
         try {
             assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.MONTH,
@@ -563,5 +565,5 @@ public class MongoBackendImplTest {
             throw e;
         } // try catch
     } // testBuildUpdateForUpdateString
-    
+
 } // MongoBackendImplTest

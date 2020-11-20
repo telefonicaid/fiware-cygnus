@@ -151,6 +151,7 @@ $ ./notification-json-simple.sh http://localhost:5050/notify myservice myservice
 > User-Agent: orion/0.10.0
 > Fiware-Service: myservice
 > Fiware-ServicePath: myservicepath
+> ngsiv2-attrsformat: normalized
 > Content-Length: 460
 >
 * upload completely sent off: 460 out of 460 bytes
@@ -162,8 +163,6 @@ $ ./notification-json-simple.sh http://localhost:5050/notify myservice myservice
 ```
 
 Or you can connect a real NGSI source such as [Orion Context Broker](https://github.com/telefonicaid/fiware-orion). Please, check the [User and Programmer Guide](../doc/cygnus-ngsi/user_and_programmer_guide/connecting_orion.md) for further details.
-
-Support for NGSIv2 notifications has been added from version above 1.17.1. For this purpose, it's been added a new dir [/NGSIv2](./resources/ngsi-examples/NGSIv2) which contains script files in order to emulate some NGSIv2 notification types. 
 
 [Top](#top)
 
@@ -260,6 +259,7 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
   <tr><td>Enable SSL</td><td>0.4.2</td></tr>
   <tr><td>Batching mechanism</td><td>0.11.0</td></tr>
   <tr><td>Capping and expiration</td><td>1.7.0</td></tr>
+  <tr><td>Possibility to select datamodel</td><td>2.2.0</td></tr>
   <tr><td>NGSIDynamoDBSink</td><td>First implementation</td><td>0.11.0</td></tr>
   <tr><td rowspan="2">NGSIKafkaSink</td><td>First implementation</td><td>0.9.0</td></tr>
   <tr><td>Batching mechanims</td><td>0.11.0</td></tr>
@@ -287,7 +287,7 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
   <tr><td>Raw-snapsot analysis</td><td>1.6.0</td></tr>
   <tr><td>NGSIOrionSink</td><td>First implementation</td><td>1.10.0</td></tr>
   <tr><td>NGSIElasticsearchSink</td><td>First implementation</td><td>1.15.0</td></tr>
-  <tr><td>NGSIArcGisSink</td><td>First implementation</td><td>1.16.0</td></tr>
+  <tr><td>NGSIArcgisFeatureTableSink</td><td>First implementation (as NGSIArcGisSink)</td><td>1.16.0</td></tr>
   <tr><td rowspan="2">NGSITestSink</td><td>First implementation</td><td>0.7.0</td></tr>
   <tr><td>Batching mechanism</td><td>0.12.0</td></tr>
   <tr><td rowspan="9">All sinks</td><td>Events TTL</td><td>0.4.1</td></tr>

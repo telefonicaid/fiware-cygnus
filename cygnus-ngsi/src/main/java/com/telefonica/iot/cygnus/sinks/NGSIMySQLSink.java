@@ -19,15 +19,17 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
+import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.NGSICharsets;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.flume.Context;
 
-import com.telefonica.iot.cygnus.backends.mysql.MySQLBackendImpl;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
-import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
@@ -36,11 +38,6 @@ import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.CommonUtils;
-import com.telefonica.iot.cygnus.utils.NGSICharsets;
-import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.NGSIUtils;
 
 /**
  *
@@ -51,6 +48,7 @@ import com.telefonica.iot.cygnus.utils.NGSIUtils;
  */
 public class NGSIMySQLSink extends NGSISink {
     
+    private static final String MYSQL_QUOTE_CHAR = "`";
     private static final String DEFAULT_ROW_ATTR_PERSISTENCE = "row";
     private static final String DEFAULT_PASSWORD = "";
     private static final String DEFAULT_PORT = "3306";
@@ -58,6 +56,14 @@ public class NGSIMySQLSink extends NGSISink {
     private static final String DEFAULT_USER_NAME = "root";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
+    private static final String MYSQL_DRIVER_NAME = "com.mysql.jdbc.Driver";
+    private static final String MYSQL_INSTANCE_NAME = "mysql";
+    private static final String DEFAULT_LAST_DATA = "false";
+    private static final String DEFAULT_LAST_DATA_TABLE_SUFFIX = "_last_data";
+    private static final String DEFAULT_LAST_DATA_UNIQUE_KEY = NGSIConstants.ENTITY_ID;
+    private static final String DEFAULT_LAST_DATA_TIMESTAMP_KEY = NGSIConstants.RECV_TIME;
+    private static final String DEFAULT_LAST_DATA_SQL_TS_FORMAT = "%Y-%m-%d %H:%i:%s.%f";
+    private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIMySQLSink.class);
     private String mysqlHost;
@@ -66,8 +72,17 @@ public class NGSIMySQLSink extends NGSISink {
     private String mysqlPassword;
     private int maxPoolSize;
     private boolean rowAttrPersistence;
-    private MySQLBackendImpl persistenceBackend;
+    private SQLBackendImpl mySQLPersistenceBackend;
     private boolean attrNativeTypes;
+    private boolean attrMetadataStore;
+    private String mysqlOptions;
+    private boolean persistErrors;
+    private boolean lastData;
+    private String lastDataTableSuffix;
+    private String lastDataUniqueKey;
+    private String lastDataTimeStampKey;
+    private String lastDataSQLTimestampFormat;
+    private int maxLatestErrors;
 
     /**
      * Constructor.
@@ -118,19 +133,27 @@ public class NGSIMySQLSink extends NGSISink {
     } // getRowAttrPersistence
 
     /**
+     * Gets the MySQL options. It is protected due to it is only required for testing purposes.
+     * @return The MySQL options
+     */
+    protected String getMySQLOptions() {
+        return mysqlOptions;
+    } // getMySQLOptions
+
+    /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
-    protected MySQLBackendImpl getPersistenceBackend() {
-        return persistenceBackend;
+    protected SQLBackendImpl getPersistenceBackend() {
+        return mySQLPersistenceBackend;
     } // getPersistenceBackend
     
     /**
      * Sets the persistence backend. It is protected due to it is only required for testing purposes.
      * @param persistenceBackend
      */
-    protected void setPersistenceBackend(MySQLBackendImpl persistenceBackend) {
-        this.persistenceBackend = persistenceBackend;
+    protected void setPersistenceBackend(SQLBackendImpl persistenceBackend) {
+        this.mySQLPersistenceBackend = persistenceBackend;
     } // setPersistenceBackend
 
 
@@ -149,7 +172,7 @@ public class NGSIMySQLSink extends NGSISink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_host=" + mysqlHost + ")");
         mysqlPort = context.getString("mysql_port", DEFAULT_PORT);
         int intPort = Integer.parseInt(mysqlPort);
-        
+
         if ((intPort <= 0) || (intPort > 65535)) {
             invalidConfiguration = true;
             LOGGER.warn("[" + this.getName() + "] Invalid configuration (mysql_port=" + mysqlPort + ") "
@@ -157,19 +180,19 @@ public class NGSIMySQLSink extends NGSISink {
         } else {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_port=" + mysqlPort + ")");
         }  // if else
-        
+
         mysqlUsername = context.getString("mysql_username", DEFAULT_USER_NAME);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_username=" + mysqlUsername + ")");
         // FIXME: mysqlPassword should be read encrypted and decoded here
         mysqlPassword = context.getString("mysql_password", DEFAULT_PASSWORD);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
-        
+
         maxPoolSize = context.getInteger("mysql_maxPoolSize", DEFAULT_MAX_POOL_SIZE);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_maxPoolSize=" + maxPoolSize + ")");
-        
+
         rowAttrPersistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE).equals("row");
         String persistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE);
-        
+
         if (persistence.equals("row") || persistence.equals("column")) {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_persistence="
                 + persistence + ")");
@@ -189,13 +212,71 @@ public class NGSIMySQLSink extends NGSISink {
                 + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
         } // if else
 
+        String attrMetadataStoreStr = context.getString("attr_metadata_store", "true");
+
+        if (attrMetadataStoreStr.equals("true") || attrMetadataStoreStr.equals("false")) {
+            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_metadata_store="
+                    + attrMetadataStore + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
+                    + attrMetadataStoreStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
+        mysqlOptions = context.getString("mysql_options", null);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_options=" + mysqlOptions + ")");
+
+        String persistErrorsStr = context.getString("persist_errors", "true");
+
+        if (persistErrorsStr.equals("true") || persistErrorsStr.equals("false")) {
+            persistErrors = Boolean.parseBoolean(persistErrorsStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (persist_errors="
+                    + persistErrors + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (persist_errors="
+                    + persistErrorsStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
+        String lastDataStr = context.getString("enable_last_data", DEFAULT_LAST_DATA);
+
+        if (lastDataStr.equals("true") || lastDataStr.equals("false")) {
+            lastData = Boolean.parseBoolean(lastDataStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data="
+                    + lastDataStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (last_data="
+                    + lastDataStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
+        lastDataTableSuffix = context.getString("last_data_table_suffix", DEFAULT_LAST_DATA_TABLE_SUFFIX);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_table_suffix="
+                + lastDataTableSuffix + ")");
+
+        lastDataUniqueKey = context.getString("last_data_unique_key", DEFAULT_LAST_DATA_UNIQUE_KEY);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_unique_key="
+                + lastDataUniqueKey + ")");
+
+        lastDataTimeStampKey = context.getString("last_data_timestamp_key", DEFAULT_LAST_DATA_TIMESTAMP_KEY);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_timestamp_key="
+                + lastDataTimeStampKey + ")");
+
+        lastDataSQLTimestampFormat = context.getString("last_data_sql_timestamp_format", DEFAULT_LAST_DATA_SQL_TS_FORMAT);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_sql_timestamp_format="
+                + lastDataSQLTimestampFormat + ")");
+
+        maxLatestErrors = context.getInteger("max_latest_errors", DEFAULT_MAX_LATEST_ERRORS);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (max_latest_errors=" + maxLatestErrors + ")");
+
         super.configure(context);
     } // configure
 
     @Override
     public void start() {
         try {
-            persistenceBackend = new MySQLBackendImpl(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize);
+            createPersistenceBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize, mysqlOptions, persistErrors, maxLatestErrors);
             LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the MySQL persistence backend. Details="
@@ -208,9 +289,18 @@ public class NGSIMySQLSink extends NGSISink {
     @Override
     public void stop() {
         super.stop();
-        if (persistenceBackend != null) persistenceBackend.close();
+        if (mySQLPersistenceBackend != null) mySQLPersistenceBackend.close();
     } // stop
-    
+
+    /**
+     * Initialices a lazy singleton to share among instances on JVM
+     */
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
+        if (mySQLPersistenceBackend == null) {
+            mySQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null, sqlOptions, persistErrors, maxLatestErrors);
+        }
+    }
+
     @Override
     void persistBatch(NGSIBatch batch)
         throws CygnusBadConfiguration, CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
@@ -231,9 +321,22 @@ public class NGSIMySQLSink extends NGSISink {
             ArrayList<NGSIEvent> events = batch.getNextEvents();
             
             // Get an aggregator for this destination and initialize it
-            MySQLAggregator aggregator = getAggregator(rowAttrPersistence);
+            NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
+            aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
+            aggregator.setServicePathForData(events.get(0).getServicePathForData());
+            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
+            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
+            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
+            aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
+            aggregator.setDbName(buildDbName(aggregator.getService()));
+            aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
+            aggregator.setAttrNativeTypes(attrNativeTypes);
+            aggregator.setAttrMetadataStore(attrMetadataStore);
+            aggregator.setEnableNameMappings(enableNameMappings);
+            aggregator.setEnableLastData(lastData);
+            aggregator.setLastDataUniqueKey(lastDataUniqueKey);
+            aggregator.setLastDataTimestampKey(lastDataTimeStampKey);
             aggregator.initialize(events.get(0));
-
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
@@ -273,7 +376,7 @@ public class NGSIMySQLSink extends NGSISink {
                 String tableName = buildTableName(servicePathForNaming, entity, entityType, attribute);
                 LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",dbName="
                         + dbName + ", tableName=" + tableName + ")");
-                persistenceBackend.capRecords(dbName, tableName, maxRecords);
+                mySQLPersistenceBackend.capRecords(dbName, tableName, maxRecords);
             } catch (CygnusBadConfiguration e) {
                 throw new CygnusCappingError("Data capping error", "CygnusBadConfiguration", e.getMessage());
             } catch (CygnusRuntimeError e) {
@@ -289,7 +392,7 @@ public class NGSIMySQLSink extends NGSISink {
         LOGGER.debug("[" + this.getName() + "] Expirating records (time=" + expirationTime + ")");
         
         try {
-            persistenceBackend.expirateRecordsCache(expirationTime);
+            mySQLPersistenceBackend.expirateRecordsCache(expirationTime);
         } catch (CygnusRuntimeError e) {
             throw new CygnusExpiratingError("Data expiration error", "CygnusRuntimeError", e.getMessage());
         } catch (CygnusPersistenceError e) {
@@ -297,385 +400,50 @@ public class NGSIMySQLSink extends NGSISink {
         } // try catch
     } // expirateRecords
     
-    /**
-     * Class for aggregating.
-     */
-    private abstract class MySQLAggregator {
-        
-        // object containing the aggregted data
-        private LinkedHashMap<String, ArrayList<String>> aggregation;
-
-        private String service;
-        private String servicePathForData;
-        private String servicePathForNaming;
-        private String entityForNaming;
-        private String entityType;
-        private String attribute;
-        private String dbName;
-        private String tableName;
-        
-        MySQLAggregator() {
-            aggregation = new LinkedHashMap<>();
-        } // MySQLAggregator
-        
-        protected LinkedHashMap<String, ArrayList<String>> getAggregation() {
-            return aggregation;
-        } //getAggregation
-
-        @SuppressWarnings("unused")
-        protected void setAggregation(LinkedHashMap<String, ArrayList<String>> aggregation) {
-            this.aggregation = aggregation;
-        } //setAggregation
-
-
-        @SuppressWarnings("unused")
-        protected String getService() {
-            return service;
-        } //getService
-
-
-        @SuppressWarnings("unused")
-        protected void setService(String service) {
-            this.service = service;
-        } //setService
-
-        protected String getServicePathForData() {
-            return servicePathForData;
-        } //getServicePathForData
-
-
-        @SuppressWarnings("unused")
-        protected void setServicePathForData(String servicePathForData) {
-            this.servicePathForData = servicePathForData;
-        } //setServicePathForData
-
-
-        @SuppressWarnings("unused")
-        protected String getServicePathForNaming() {
-            return servicePathForNaming;
-        } //getServicePathForNaming
-
-
-        @SuppressWarnings("unused")
-        protected void setServicePathForNaming(String servicePathForNaming) {
-            this.servicePathForNaming = servicePathForNaming;
-        } //setServicePathForNaming
-
-
-        @SuppressWarnings("unused")
-        protected String getTableName() {
-            return tableName;
-        } //getTableName
-
-        @SuppressWarnings("unused")
-        protected void setTableName(String tableName) {
-            this.tableName = tableName;
-        } //setTableName
-
-
-
-        public String getDbName(boolean enableLowercase) {
-            if (enableLowercase) {
-                return dbName.toLowerCase();
-            } else {
-                return dbName;
-            } // if else
-        } // getDbName
-        
-        public String getTableName(boolean enableLowercase) {
-            if (enableLowercase) {
-                return tableName.toLowerCase();
-            } else {
-                return tableName;
-            } // if else
-        } // getTableName
-        
-        public String getValuesForInsert() {
-            String valuesForInsert = "";
-            int numEvents = aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).size();
-            
-            for (int i = 0; i < numEvents; i++) {
-                if (i == 0) {
-                    valuesForInsert += "(";
-                } else {
-                    valuesForInsert += ",(";
-                } // if else
-                
-                boolean first = true;
-                Iterator<String> it = aggregation.keySet().iterator();
-            
-                while (it.hasNext()) {
-                    String entry = (String) it.next();
-                    ArrayList<String> values = (ArrayList<String>) aggregation.get(entry);
-                    String value = values.get(i);
-                    if (attrNativeTypes) {
-                        LOGGER.debug("[" + getName() + "] aggregation entry = "  + entry );
-                        if (value == null || value.equals("")) {
-                            value = "NULL";
-                        } else {
-                            value = "'" + value + "'";
-                        }
-                        LOGGER.debug("[" + getName() + "] native value = "  + value );
-                    } else {
-                        value = "'" + value + "'";
-                    }
-
-                    if (first) {
-                        valuesForInsert += value;
-                        first = false;
-                    } else {
-                        valuesForInsert += "," + value;
-                    } // if else
-                } // while
-
-                valuesForInsert += ")";
-            } // for
-            
-            return valuesForInsert;
-        } // getValuesForInsert
-        
-        public String getFieldsForCreate() {
-            String fieldsForCreate = "(";
-            boolean first = true;
-            Iterator<String> it = aggregation.keySet().iterator();
-            
-            while (it.hasNext()) {
-                if (first) {
-                    fieldsForCreate += (String) it.next() + " text";
-                    first = false;
-                } else {
-                    fieldsForCreate += "," + (String) it.next() + " text";
-                } // if else
-            } // while
-            
-            return fieldsForCreate + ")";
-        } // getFieldsForCreate
-        
-        public String getFieldsForInsert() {
-            String fieldsForInsert = "(";
-            boolean first = true;
-            Iterator<String> it = aggregation.keySet().iterator();
-            
-            while (it.hasNext()) {
-                if (first) {
-                    fieldsForInsert += (String) it.next();
-                    first = false;
-                } else {
-                    fieldsForInsert += "," + (String) it.next();
-                } // if else
-            } // while
-            
-            return fieldsForInsert + ")";
-        } // getFieldsForInsert
-        
-        public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
-            service = event.getServiceForNaming(enableNameMappings);
-            servicePathForData = event.getServicePathForData();
-            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
-            attribute = event.getAttributeForNaming(enableNameMappings);
-            dbName = buildDbName(service);
-            tableName = buildTableName(servicePathForNaming, entityForNaming, entityType, attribute);
-        } // initialize
-        
-        public abstract void aggregate(NGSIEvent cygnusEvent);
-        
-    } // MySQLAggregator
-    
-    /**
-     * Class for aggregating batches in row mode.
-     */
-    private class RowAggregator extends MySQLAggregator {
-        
-        @Override
-        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
-            super.initialize(cygnusEvent);
-            LinkedHashMap<String, ArrayList<String>> aggregation = getAggregation();
-            aggregation.put(NGSIConstants.RECV_TIME_TS, new ArrayList<String>());
-            aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<String>());
-            aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ATTR_NAME, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ATTR_TYPE, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ATTR_VALUE, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ATTR_MD, new ArrayList<String>());
-        } // initialize
-        
-        @Override
-        public void aggregate(NGSIEvent event) {
-            // get the getRecvTimeTs headers
-            long recvTimeTs = event.getRecvTimeTs();
-            String recvTime = CommonUtils.getHumanReadable(recvTimeTs, false);
-
-            // get the getRecvTimeTs body
-            ContextElement contextElement = event.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
-            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
-                    + entityType + ")");
-            
-            // iterate on all this context element attributes, if there are attributes
-            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-                        + ", type=" + entityType + ")");
-                return;
-            } // if
-            
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
-                String attrMetadata = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
-                        + attrType + ")");
-                
-                // aggregate the attribute information
-                LinkedHashMap<String, ArrayList<String>> aggregation = getAggregation();
-                aggregation.get(NGSIConstants.RECV_TIME_TS).add(Long.toString(recvTimeTs));
-                aggregation.get(NGSIConstants.RECV_TIME).add(recvTime);
-                aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(getServicePathForData());
-                aggregation.get(NGSIConstants.ENTITY_ID).add(entityId);
-                aggregation.get(NGSIConstants.ENTITY_TYPE).add(entityType);
-                aggregation.get(NGSIConstants.ATTR_NAME).add(attrName);
-                aggregation.get(NGSIConstants.ATTR_TYPE).add(attrType);
-                aggregation.get(NGSIConstants.ATTR_VALUE).add(attrValue);
-                aggregation.get(NGSIConstants.ATTR_MD).add(attrMetadata);
-            } // for
-        } // aggregate
-
-    } // RowAggregator
-    
-    /**
-     * Class for aggregating batches in column mode.
-     */
-    private class ColumnAggregator extends MySQLAggregator {
-
-        @Override
-        public void initialize(NGSIEvent cygnusEvent) throws CygnusBadConfiguration {
-            super.initialize(cygnusEvent);
-            
-            // particular initialization
-            LinkedHashMap<String, ArrayList<String>> aggregation = getAggregation();
-            aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<String>());
-            aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<String>());
-            aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<String>());
-            
-            // iterate on all this context element attributes, if there are attributes
-            ArrayList<ContextAttribute> contextAttributes = cygnusEvent.getContextElement().getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                return;
-            } // if
-            
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                aggregation.put(attrName, new ArrayList<String>());
-                aggregation.put(attrName + "_md", new ArrayList<String>());
-            } // for
-        } // initialize
-        
-        @Override
-        public void aggregate(NGSIEvent event) {
-            // Number of previous values
-            int numPreviousValues = getAggregation().get(NGSIConstants.FIWARE_SERVICE_PATH).size();
-            
-            // Get the event headers
-            long recvTimeTs = event.getRecvTimeTs();
-            String recvTime = CommonUtils.getHumanReadable(recvTimeTs, false);
-
-            // get the event body
-            ContextElement contextElement = event.getContextElement();
-            String entityId = contextElement.getId();
-            String entityType = contextElement.getType();
-            LOGGER.debug("[" + getName() + "] Processing context element (id=" + entityId + ", type="
-                    + entityType + ")");
-            
-            // Iterate on all this context element attributes, if there are attributes
-            ArrayList<ContextAttribute> contextAttributes = contextElement.getAttributes();
-
-            if (contextAttributes == null || contextAttributes.isEmpty()) {
-                LOGGER.warn("No attributes within the notified entity, nothing is done (id=" + entityId
-                        + ", type=" + entityType + ")");
-                return;
-            } // if
-
-            LinkedHashMap<String, ArrayList<String>> aggregation = getAggregation();
-            aggregation.get(NGSIConstants.RECV_TIME).add(recvTime);
-            aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(getServicePathForData());
-            aggregation.get(NGSIConstants.ENTITY_ID).add(entityId);
-            aggregation.get(NGSIConstants.ENTITY_TYPE).add(entityType);
-            
-            for (ContextAttribute contextAttribute : contextAttributes) {
-                String attrName = contextAttribute.getName();
-                String attrType = contextAttribute.getType();
-                String attrValue = contextAttribute.getContextValue(false);
-                String attrMetadata = contextAttribute.getContextMetadata();
-                LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
-                        + attrType + ")");
-                
-                // Check if the attribute already exists in the form of 2 columns (one for metadata); if not existing,
-                // add an empty value for all previous rows
-                if (aggregation.containsKey(attrName)) {
-                    aggregation.get(attrName).add(attrValue);
-                    aggregation.get(attrName + "_md").add(attrMetadata);
-                } else {
-                    ArrayList<String> values = new ArrayList<>(Collections.nCopies(numPreviousValues, ""));
-                    values.add(attrValue);
-                    aggregation.put(attrName, values);
-                    ArrayList<String> valuesMd = new ArrayList<>(Collections.nCopies(numPreviousValues, ""));
-                    valuesMd.add(attrMetadata);
-                    aggregation.put(attrName + "_md", valuesMd);
-                } // if else
-            } // for
-            
-            // Iterate on all the aggregations, checking for not updated attributes; add an empty value if missing
-            for (String key : aggregation.keySet()) {
-                ArrayList<String> values = aggregation.get(key);
-                
-                if (values.size() == numPreviousValues) {
-                    values.add("");
-                } // if
-            } // for
-        } // aggregate
-        
-    } // ColumnAggregator
-    
-    private MySQLAggregator getAggregator(boolean rowAttrPersistence) {
+    protected NGSIGenericAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
-            return new RowAggregator();
+            return new NGSIGenericRowAggregator();
         } else {
-            return new ColumnAggregator();
+            return new NGSIGenericColumnAggregator();
         } // if else
     } // getAggregator
     
-    private void persistAggregation(MySQLAggregator aggregator)
+    private void persistAggregation(NGSIGenericAggregator aggregator)
         throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
-        String fieldsForCreate = aggregator.getFieldsForCreate();
-        String fieldsForInsert = aggregator.getFieldsForInsert();
-        String valuesForInsert = aggregator.getValuesForInsert();
+        String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+        String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist(), MYSQL_QUOTE_CHAR);
+        String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
         String dbName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
         
-        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIMySQLSink. Database ("
+        LOGGER.debug("[" + this.getName() + "] Persisting data at NGSIMySQLSink. Database ("
                 + dbName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
                 + valuesForInsert + ")");
         
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
-        if (aggregator instanceof RowAggregator) {
-            persistenceBackend.createDatabase(dbName);
-            persistenceBackend.createTable(dbName, tableName, fieldsForCreate);
+        if (aggregator instanceof NGSIGenericRowAggregator) {
+            mySQLPersistenceBackend.createDestination(dbName);
+            mySQLPersistenceBackend.createTable(dbName, tableName, fieldsForCreate);
         } // if
 
         if (valuesForInsert.equals("")) {
             LOGGER.debug("[" + this.getName() + "] no values for insert");
         } else {
-            persistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
+
+            if (lastData && !rowAttrPersistence ) {
+                mySQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
+                        aggregator.getLastDataToPersist(),
+                        dbName,
+                        tableName,
+                        lastDataTableSuffix,
+                        lastDataUniqueKey,
+                        lastDataTimeStampKey,
+                        lastDataSQLTimestampFormat,
+                        attrNativeTypes);
+            } else {
+                mySQLPersistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
+            }
         }
     } // persistAggregation
     

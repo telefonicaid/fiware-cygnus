@@ -89,6 +89,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     private final Accumulator accumulator;
     // Rollback queues
     private ArrayList<Accumulator> rollbackedAccumulations;
+    // Rollback queues
+    private int rollbackedAccumulationsIndex;
     // Expiration thread
     private ExpirationTimeChecker expirationTimeChecker;
 
@@ -383,40 +385,63 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             setMDCToNA();
             return Status.READY; // No rollbacked batch was ready for retry, so we are ready to process new batches
         } // if
-            
-        // Try persisting the rollbacked accumulation
+
         NGSIBatch batch = rollbackedAccumulation.getBatch();
-        
-        try {
-            persistBatch(batch);
-        } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
-            updateServiceMetrics(batch, true);
-            LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-            setMDCToNA();
-            return Status.READY;
-        } catch (CygnusPersistenceError e) {
-            updateServiceMetrics(batch, true);
-            LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-            doRollbackAgain(rollbackedAccumulation);
-            setMDCToNA();
-            return Status.BACKOFF; // Slow down the sink since there are problems with the persistence backend
-        } // try catch
-
-        if (persistencePolicyMaxRecords > -1) {
+        NGSIBatch rollbackBatch = new NGSIBatch();
+        StringBuffer transactionIds = new StringBuffer();
+        batch.startIterator();
+        while (batch.hasNext()) {
+            NGSIBatch batchToPersist = new NGSIBatch();
+            String destination = batch.getNextDestination();
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
+            for (NGSIEvent event : events) {
+                batchToPersist.addEvent(destination, event);
+                transactionIds.append(event.getHeaders().get(CommonConstants.HEADER_CORRELATOR_ID)).append(", ");
+            }
             try {
-                capRecords(batch, persistencePolicyMaxRecords);
-            } catch (CygnusCappingError e) {
+                persistBatch(batchToPersist);
+                updateServiceMetrics(batchToPersist, false);
+                if (persistencePolicyMaxRecords > -1) {
+                    try {
+                        capRecords(batchToPersist, persistencePolicyMaxRecords);
+                    } catch (CygnusCappingError e) {
+                        LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                    } // try
+                } // if
+                numPersistedEvents += batchToPersist.getNumEvents();
+                LOGGER.info("Finishing internal transaction (" + transactionIds + ")");
+            } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
+                updateServiceMetrics(batchToPersist, true);
                 LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-            } // try catch
-        } // if
-        
-        updateServiceMetrics(batch, false);
-
-        if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
-            LOGGER.info("Finishing internal transaction (" + rollbackedAccumulation.getAccTransactionIds() + ")");
-        } // if
-
-        rollbackedAccumulations.remove(0);
+            } catch (Exception e) {
+                updateServiceMetrics(batchToPersist, true);
+                LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                for (NGSIEvent event : batchToPersist.getNextEvents()) {
+                    rollbackBatch.addEvent(destination, event);
+                }
+            } finally {
+                batch.setNextPersisted(true);
+            }
+        }
+        if (rollbackBatch.getNumEvents() > 0) {
+            Accumulator rollbackAccumulator = new Accumulator();
+            rollbackAccumulator.initialize(rollbackedAccumulation.getAccStartDate());
+            rollbackAccumulator.setTTL(rollbackedAccumulation.ttl);
+            rollbackAccumulator.setLastRetry(rollbackedAccumulation.lastRetry);
+            rollbackBatch.startIterator();
+            while (rollbackBatch.hasNext()) {
+                for (NGSIEvent event : rollbackBatch.getNextEvents()) {
+                    rollbackAccumulator.accumulate(event);
+                }
+            }
+            doRollbackAgain(rollbackAccumulator);
+            if (rollbackedAccumulations.size() > rollbackedAccumulationsIndex) {
+                rollbackedAccumulations.set(rollbackedAccumulationsIndex, rollbackAccumulator);
+            }
+            setMDCToNA();
+            return Status.BACKOFF;
+        }
+        rollbackedAccumulations.remove(rollbackedAccumulationsIndex);
         numPersistedEvents += rollbackedAccumulation.getBatch().getNumEvents();
         setMDCToNA();
         return Status.READY;
@@ -428,8 +453,10 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
      */
     protected Accumulator getRollbackedAccumulationForRetry() {
         Accumulator rollbackedAccumulation = null;
-        
-        for (Accumulator rollbackedAcc : rollbackedAccumulations) {
+
+        for (int i = 0 ; i < rollbackedAccumulations.size() ; i++) {
+
+            Accumulator rollbackedAcc = rollbackedAccumulations.get(i);
             rollbackedAccumulation = rollbackedAcc;
             
             // Check the last retry
@@ -441,6 +468,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             
             if (rollbackedAccumulation.getLastRetry() + batchRetryIntervals[retryIntervalIndex]
                     <= new Date().getTime()) {
+                rollbackedAccumulationsIndex = i;
                 break;
             } // if
             
@@ -465,8 +493,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + "), "
                     + "this was retry #" + (batchTTL - rollbackedAccumulation.getTTL()));
         } else {
-            rollbackedAccumulations.remove(rollbackedAccumulation);
-
+            rollbackedAccumulations.remove(rollbackedAccumulationsIndex);
             if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
                 LOGGER.info("Finishing internal transaction ("
                         + rollbackedAccumulation.getAccTransactionIds() + "), this was retry #" + batchTTL);
@@ -551,45 +578,63 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             accumulator.setAccIndex(currentIndex);
 
             // Persist the accumulation
+
             if (accumulator.getAccIndex() != 0) {
                 LOGGER.debug("Batch completed");
                 NGSIBatch batch = accumulator.getBatch();
-
-                try {
-                    persistBatch(batch);
-                } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
-                    updateServiceMetrics(batch, true);
-                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-                    accumulator.initialize(new Date().getTime());
-                    txn.commit();
-                    setMDCToNA();
-                    return Status.READY;
-                } catch (CygnusPersistenceError e) {
-                    updateServiceMetrics(batch, true);
-                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-                    doRollback(accumulator.clone()); // the global accumulator has to be cloned for rollbacking purposes
-                    accumulator.initialize(new Date().getTime());
-                    txn.commit();
-                    setMDCToNA();
-                    return Status.BACKOFF; // slow down the sink since there are problems with the persistence backend
-                } // try catch
-
-                if (persistencePolicyMaxRecords > -1) {
+                NGSIBatch rollbackBatch = new NGSIBatch();
+                StringBuffer transactionIds = new StringBuffer();
+                batch.startIterator();
+                while (batch.hasNext()) {
+                    NGSIBatch batchToPersist = new NGSIBatch();
+                    String destination = batch.getNextDestination();
+                    ArrayList<NGSIEvent> events = batch.getNextEvents();
+                    for (NGSIEvent event : events) {
+                        batchToPersist.addEvent(destination, event);
+                        transactionIds.append(event.getHeaders().get(CommonConstants.HEADER_CORRELATOR_ID)).append(", ");
+                    }
                     try {
-                        capRecords(batch, persistencePolicyMaxRecords);
-                    } catch (CygnusCappingError e) {
+                        persistBatch(batchToPersist);
+                        updateServiceMetrics(batchToPersist, false);
+                        if (persistencePolicyMaxRecords > -1) {
+                            try {
+                                capRecords(batchToPersist, persistencePolicyMaxRecords);
+                            } catch (CygnusCappingError e) {
+                                LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                            } // try
+                        } // if
+                        numPersistedEvents += batchToPersist.getNumEvents();
+                        LOGGER.info("Finishing internal transaction (" + transactionIds + ")");
+                    } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
+                        updateServiceMetrics(batchToPersist, true);
                         LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-                    } // try
-                } // if
-            
-                updateServiceMetrics(batch, false);
-            } // if
+                    } catch (Exception e) {
+                        updateServiceMetrics(batchToPersist, true);
+                        LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                        for (NGSIEvent event : batchToPersist.getNextEvents()) {
+                            rollbackBatch.addEvent(destination, event);
+                        }
+                    } finally {
+                        batch.setNextPersisted(true);
+                    }
+                }
+                if (rollbackBatch.getNumEvents() > 0) {
+                    Accumulator rollbackAccumulator = new Accumulator();
+                    rollbackAccumulator.initialize(accumulator.getAccStartDate());
+                    rollbackBatch.startIterator();
+                    while (rollbackBatch.hasNext()) {
+                        for (NGSIEvent event : rollbackBatch.getNextEvents()) {
+                            rollbackAccumulator.accumulate(event);
+                        }
+                    }
+                    doRollback(rollbackAccumulator.clone());
+                    accumulator.initialize(new Date().getTime());
+                    txn.commit();
+                    setMDCToNA();
+                    return Status.BACKOFF;
+                }
 
-            if (!accumulator.getAccTransactionIds().isEmpty()) {
-                LOGGER.info("Finishing internal transaction (" + accumulator.getAccTransactionIds() + ")");
             } // if
-
-            numPersistedEvents += accumulator.getBatch().getNumEvents();
             accumulator.initialize(new Date().getTime());
             txn.commit();
         } catch (ChannelException ex) {
@@ -733,6 +778,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 case DMBYSERVICEPATH:
                     accumulateByServicePath(event);
                     break;
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITY:
                     accumulateByEntity(event);
                     break;
@@ -741,6 +788,9 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     break;
                 case DMBYATTRIBUTE:
                     accumulateByAttribute(event);
+                    break;
+                case DMBYENTITYID:
+                    accumulateByEntityId(event);
                     break;
                 default:
                     LOGGER.error("Unknown data model. Details=" + dataModel.toString());
@@ -852,6 +902,37 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
             batch.addEvent(destination, event);
         } // accumulateByEntityType
+
+        private void accumulateByEntityId(NGSIEvent event) {
+        	   Map<String, String> headers = event.getHeaders();
+            ContextElement originalCE = event.getOriginalCE();
+            ContextElement mappedCE = event.getMappedCE();
+            String destination;
+            
+            if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
+                String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
+                
+                if (enableGrouping) {
+                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH)
+                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY);
+                } else {
+                    destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH)
+                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY);
+                } // if else
+            } else {
+                if (enableNameMappings) {
+                    destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
+                            + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH) + "_"
+                            + mappedCE.getId() + "_" + mappedCE.getType();
+                } else {
+                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
+                            + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
+                            + originalCE.getId() + "_" + originalCE.getType();
+                } // if else
+            } // if else
+
+            batch.addEvent(destination, event);
+        } // accumulateByServicePath
 
         private void accumulateByAttribute(NGSIEvent event) {
             Map<String, String> headers = event.getHeaders();

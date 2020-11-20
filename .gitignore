@@ -1,3 +1,4 @@
+.metadata
 target/
 # IntelliJ local files
 *.idea
@@ -7,3 +8,10 @@ maven-deps/
 .DS_Store
 archived/
 cygnus-ngsi/ignore
+cygnus-ngsi/bin
+cygnus-common/bin
+cygnus-twitter/bin
+.classpath
+.project
+.factorypath
+*/.settings

@@ -114,9 +114,10 @@ $ ./notification.sh http://172.17.0.13:5050/notify
 > Host: 172.17.0.13:5050
 > Content-Type: application/json
 > Accept: application/json
-> User-Agent: orion/0.10.0
+> User-Agent: orion/2.2.0
 > Fiware-Service: default
 > Fiware-ServicePath: /
+> ngsiv2-attrsformat: normalized
 > Content-Length: 460
 >
 < HTTP/1.1 200 OK
@@ -149,8 +150,6 @@ $ docker stop 9ce0f09f5676
 $ docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 ```
-
-Support for NGSIv2 notifications has been added from version above 1.17.1. For this purpose, it's been added a new dir [/NGSIv2](./resources/ngsi-examples/NGSIv2) which contains script files in order to emulate some NGSIv2 notification types. 
 
 [Top](#top)
 
@@ -196,6 +195,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_MYSQL_BATCH_SIZE: number of notifications to be included within a processing batch.
     * CYGNUS_MYSQL_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_MYSQL_BATCH_TTL: number of retries upon persistence error.
+    * CYGNUS_MYSQL_OPTIONS: the jdbc optional parameters string which concatinates to jdbc url.
 
 * Mongo and STH:
     * Mongo only works for building historical context data in Mongo.
@@ -203,6 +203,8 @@ As seen above, the default configuration distributed with the image is tied to c
     * The endpoint for Mongo and STH, containing host and port, is `iot-mongo:27017` but can be changed through the CYGNUS_MONGO_HOSTS environment variable.
     * The user for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_USER environment variable.
     * The pass for Mongo and STH is `mongo` but can be changed through the CYGNUS_MONGO_PASS environment variable.
+    * CYGNUS_MONGO_AUTH_SOURCE: Mongo option to specify which common user database source to use for authentication. Usually could be `admin`.
+    * CYGNUS_MONGO_REPLICA_SET: Replica Set name. Note that this parameter is optional because Cygnus is able to connect to a MongoDB replica set without needing to specify its name.
     * CYGNUS_MONGO_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_MONGO_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_MONGO_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
@@ -282,9 +284,10 @@ As seen above, the default configuration distributed with the image is tied to c
 * PostgreSQL:
     * It only works for building historical context data in PostgreSQL.
     * The endpoint for PostgreSQL is `iot-postgresql` but can be changed through the CYGNUS_POSTGRESQL_HOST environment variable.
-    * The port for PostgreSQL is `3306` but can be changed through the CYGNUS_POSTGRESQL_PORT environment variable.
+    * The port for PostgreSQL is `5432` but can be changed through the CYGNUS_POSTGRESQL_PORT environment variable.
     * The user for PostgreSQL is `postgresql` but can be changed through the CYGNUS_POSTGRESQL_USER environment variable.
     * The pass for PostgreSQL is `postgresql` but can be changed through the CYGNUS_POSTGRESQL_PASS environment variable.
+    * The database for PostgreSQL is `postgres` but can be changed through the CYGNUS_POSTGRESQL_DATABASE environment variable.
     * CYGNUS_POSTGRESQL_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_POSTGRESQL_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
     * CYGNUS_POSTGRESQL_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
@@ -296,6 +299,8 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_POSTGRESQL_BATCH_SIZE: number of notifications to be included within a processing batch.
     * CYGNUS_POSTGRESQL_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_POSTGRESQL_BATCH_TTL: number of retries upon persistence error.
+    * CYGNUS_POSTGRESQL_DATA_MODEL: select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type.
+    * CYGNUS_POSTGRESQL_OPTIONS: the jdbc optional parameters string which concatinates to jdbc url.
 
 * Carto:
     * It only works for building historical context data in Carto.
@@ -327,7 +332,7 @@ As seen above, the default configuration distributed with the image is tied to c
 * Postgis:
     * It only works for building historical context data in Postgis.
     * The endpoint for Postgis is `iot-postgresql` but can be changed through the CYGNUS_POSTGIS_HOST environment variable.
-    * The port for Postgis is `3306` but can be changed through the CYGNUS_POSTGIS_PORT environment variable.
+    * The port for Postgis is `5432` but can be changed through the CYGNUS_POSTGIS_PORT environment variable.
     * The user for Postgis is `postgresql` but can be changed through the CYGNUS_POSTGIS_USER environment variable.
     * The pass for Postgis is `postgresql` but can be changed through the CYGNUS_POSTGIS_PASS environment variable.
     * CYGNUS_POSTGIS_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
@@ -341,6 +346,8 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_POSTGIS_BATCH_SIZE: number of notifications to be included within a processing batch.
     * CYGNUS_POSTGIS_BATCH_TIMEOUT: timeout for batch accumulation in seconds.
     * CYGNUS_POSTGIS_BATCH_TTL: number of retries upon persistence error.
+    * CYGNUS_POSTGIS_DATA_MODEL: select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type.
+    * CYGNUS_POSTGIS_OPTIONS: the jdbc optional parameters string which concatinates to jdbc url.
 
 * Elasticsearch:
     * It only works for building historical context data in Elasticsearch.
@@ -357,6 +364,7 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_ELASTICSEARCH_CACHE_FLASH_INTERVAL_SEC: 0 if notified data will be persisted to Elasticsearch immediately. positive integer if notified data are cached on container's memory and will be persisted to Elasticsearch periodically every `CYGNUS_ELASTICSEARCH_CACHE_FLASH_INTERVAL_SEC`. Default is `0`. (see [the document of NGSIElasticsearchSink](/doc/cygnus-ngsi/flume_extensions_catalogue/ngsi_elasticsearch_sink.md#section2.3.1) because there are some points to consider.)
     * CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONNS: Maximum number of connections allowed for a Http-based Elasticsearch backend. Default is `500`.
     * CYGNUS_ELASTICSEARCH_BACKEND_MAX_CONSS_PER_ROUTE: Maximum number of connections per route allowed for a Http-based Elasticsearch backend. Default is `100`.
+    * CYGNUS_ELASTICSEARCH_CHARSET: The charset name used to encode attribute values when sending them to Elasticsearch. You have to set a valid charset name which is defined in "java.nio.charset.Charset". Default is `UTF-8`.
 
 
 * ArcGis:

@@ -19,14 +19,34 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import static org.junit.Assert.*; // this is required by "fail" like assertions
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
+import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
+import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
+import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
+import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
+
+import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -597,6 +617,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -605,7 +626,7 @@ public class NGSICKANSinkTest {
         String servicePath = "/someServicePath";
         
         try {
-            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String builtPkgName = sink.buildPkgName(service, servicePath, entityId);
             String expectedPkgName = "someservice_someservicepath";
         
             try {
@@ -653,6 +674,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -661,7 +683,7 @@ public class NGSICKANSinkTest {
         String servicePath = "/someServicePath";
         
         try {
-            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String builtPkgName = sink.buildPkgName(service, servicePath, entityId);
             String expectedPkgName = "somex0053ervicexffffx002fsomex0053ervicex0050ath";
         
             try {
@@ -709,6 +731,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -717,7 +740,7 @@ public class NGSICKANSinkTest {
         String servicePath = "/";
         
         try {
-            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String builtPkgName = sink.buildPkgName(service, servicePath, entityId);
             String expectedPkgName = "someservice";
         
             try {
@@ -765,6 +788,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -773,7 +797,7 @@ public class NGSICKANSinkTest {
         String servicePath = "/";
         
         try {
-            String builtPkgName = sink.buildPkgName(service, servicePath);
+            String builtPkgName = sink.buildPkgName(service, servicePath, entityId);
             String expectedPkgName = "somex0053ervicexffffx002f";
         
             try {
@@ -819,6 +843,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -826,7 +851,7 @@ public class NGSICKANSinkTest {
         String entity = "someId=someType";
         
         try {
-            String builtResName = sink.buildResName(entity);
+            String builtResName = sink.buildResName(entity, entityId);
             String expecetedResName = "someid_sometype";
         
             try {
@@ -871,6 +896,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -878,7 +904,7 @@ public class NGSICKANSinkTest {
         String entity = "someId=someType";
         
         try {
-            String builtResName = sink.buildResName(entity);
+            String builtResName = sink.buildResName(entity, entityId);
             String expecetedResName = "somex0049dxffffsomex0054ype";
         
             try {
@@ -963,6 +989,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -973,7 +1000,7 @@ public class NGSICKANSinkTest {
                 + "ooooooooogServicePath";
         
         try {
-            sink.buildPkgName(service, servicePath);
+            sink.buildPkgName(service, servicePath, entityId);
             System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
                     + "- FAIL - A package name length greater than 100 characters has not been detected");
             assertTrue(false);
@@ -1007,6 +1034,7 @@ public class NGSICKANSinkTest {
         String port = null; // default
         String ssl = null; // default
         String viewer = null; // default
+        String entityId = ""; //defalut
         NGSICKANSink sink = new NGSICKANSink();
         sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
                 batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
@@ -1015,7 +1043,7 @@ public class NGSICKANSinkTest {
                 + "ooooogEntity";
         
         try {
-            sink.buildResName(entity);
+            sink.buildResName(entity, entityId);
             System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
                     + "- FAIL - A resource name length greater than 100 characters has not been detected");
             assertTrue(false);
@@ -1048,5 +1076,400 @@ public class NGSICKANSinkTest {
         context.put("ssl", ssl);
         return context;
     } // createContext
+
+    private NotifyContextRequest.ContextElement createContextElement() {
+        NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
+        NotifyContextRequest.ContextMetadata contextMetadata = new NotifyContextRequest.ContextMetadata();
+        contextMetadata.setName("location");
+        contextMetadata.setType("string");
+        contextMetadata.setContextMetadata(new JsonPrimitive("WGS84"));
+        ArrayList<NotifyContextRequest.ContextMetadata> metadata = new ArrayList<>();
+        metadata.add(contextMetadata);
+        NotifyContextRequest.ContextAttribute contextAttribute1 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute1.setName("someName1");
+        contextAttribute1.setType("someType1");
+        contextAttribute1.setContextValue(new JsonPrimitive("-3.7167, 40.3833"));
+        contextAttribute1.setContextMetadata(metadata);
+        NotifyContextRequest.ContextAttribute contextAttribute2 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute2.setName("someName2");
+        contextAttribute2.setType("someType2");
+        contextAttribute2.setContextValue(new JsonPrimitive("someValue2"));
+        contextAttribute2.setContextMetadata(null);
+        ArrayList<NotifyContextRequest.ContextAttribute> attributes = new ArrayList<>();
+        attributes.add(contextAttribute1);
+        attributes.add(contextAttribute2);
+        NotifyContextRequest.ContextElement contextElement = new NotifyContextRequest.ContextElement();
+        contextElement.setId("someId");
+        contextElement.setType("someType");
+        contextElement.setIsPattern("false");
+        contextElement.setAttributes(attributes);
+        return contextElement;
+    } // createContextElement
+
+    private Context createContextforNativeTypes(String backendImpl, String backendMaxConns, String backendMaxConnsPerRoute,
+                                                String batchSize, String batchTime, String batchTTL, String csvSeparator, String dataModel,
+                                                String enableEncoding, String enableGrouping, String enableLowercase, String fileFormat, String host,
+                                                String password, String port, String username, String hive, String krb5, String token,
+                                                String serviceAsNamespace, String attrNativeTypes, String metadata) {
+        Context context = new Context();
+        context.put("backend.impl", backendImpl);
+        context.put("backend.max_conns", backendMaxConns);
+        context.put("backend.max_conns_per_route", backendMaxConnsPerRoute);
+        context.put("batchSize", batchSize);
+        context.put("batchTime", batchTime);
+        context.put("batchTTL", batchTTL);
+        context.put("csv_separator", csvSeparator);
+        context.put("data_model", dataModel);
+        context.put("enable_encoding", enableEncoding);
+        context.put("enable_grouping", enableGrouping);
+        context.put("enable_grouping", enableLowercase);
+        context.put("file_format", fileFormat);
+        context.put("hdfs_host", host);
+        context.put("hdfs_password", password);
+        context.put("hdfs_port", port);
+        context.put("hdfs_username", username);
+        context.put("hive", hive);
+        context.put("krb5_auth", krb5);
+        context.put("oauth2_token", token);
+        context.put("service_as_namespace", serviceAsNamespace);
+        context.put("attr_native_types", attrNativeTypes);
+        context.put("attr_metadata_store", metadata);
+        return context;
+    } // createContext
+
+    private NotifyContextRequest.ContextElement createContextElementForNativeTypes() {
+        NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
+        NotifyContextRequest.ContextMetadata contextMetadata = new NotifyContextRequest.ContextMetadata();
+        contextMetadata.setName("someString");
+        contextMetadata.setType("string");
+        ArrayList<NotifyContextRequest.ContextMetadata> metadata = new ArrayList<>();
+        metadata.add(contextMetadata);
+        NotifyContextRequest.ContextAttribute contextAttribute1 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute1.setName("someNumber");
+        contextAttribute1.setType("number");
+        contextAttribute1.setContextValue(new JsonPrimitive(2));
+        contextAttribute1.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute2 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute2.setName("somneBoolean");
+        contextAttribute2.setType("Boolean");
+        contextAttribute2.setContextValue(new JsonPrimitive(true));
+        contextAttribute2.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute3 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute3.setName("someDate");
+        contextAttribute3.setType("DateTime");
+        contextAttribute3.setContextValue(new JsonPrimitive("2016-09-21T01:23:00.00Z"));
+        contextAttribute3.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute4 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute4.setName("someGeoJson");
+        contextAttribute4.setType("geo:json");
+        contextAttribute4.setContextValue(new JsonPrimitive("{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}"));
+        contextAttribute4.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute5 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute5.setName("someJson");
+        contextAttribute5.setType("json");
+        contextAttribute5.setContextValue(new JsonPrimitive("{\"String\": \"string\"}"));
+        contextAttribute5.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute6 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute6.setName("someString");
+        contextAttribute6.setType("string");
+        contextAttribute6.setContextValue(new JsonPrimitive("foo"));
+        contextAttribute6.setContextMetadata(null);
+        NotifyContextRequest.ContextAttribute contextAttribute7 = new NotifyContextRequest.ContextAttribute();
+        contextAttribute7.setName("someString2");
+        contextAttribute7.setType("string");
+        contextAttribute7.setContextValue(new JsonPrimitive(""));
+        contextAttribute7.setContextMetadata(null);
+        ArrayList<NotifyContextRequest.ContextAttribute> attributes = new ArrayList<>();
+        attributes.add(contextAttribute1);
+        attributes.add(contextAttribute2);
+        attributes.add(contextAttribute3);
+        attributes.add(contextAttribute4);
+        attributes.add(contextAttribute5);
+        attributes.add(contextAttribute6);
+        attributes.add(contextAttribute7);
+        NotifyContextRequest.ContextElement contextElement = new NotifyContextRequest.ContextElement();
+        contextElement.setId("someId");
+        contextElement.setType("someType");
+        contextElement.setIsPattern("false");
+        contextElement.setAttributes(attributes);
+        return contextElement;
+    } // createContextElementForNativeTypes
+
+    public NGSIBatch prepaireBatch() {
+        String timestamp = "1461136795801";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        String destination = "someDestination";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
+        NotifyContextRequest.ContextElement contextElement2 = createContextElement();
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
+        NGSIEvent ngsiEvent2 = new NGSIEvent(headers, contextElement2.toString().getBytes(), contextElement2, null);
+        NGSIBatch batch = new NGSIBatch();
+        batch.addEvent(destination, ngsiEvent);
+        batch.addEvent(destination, ngsiEvent2);
+        return batch;
+    }
+
+    @Test
+    public void testNativeTypeColumnBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        NGSICKANSink ngsickanSink= new NGSICKANSink();
+        ngsickanSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+        NGSIBatch batch = prepaireBatch();
+        String destination = "someDestination";
+        String entityId = ""; //default
+        try {
+            batch.startIterator();
+            NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setEnableUTCRecvTime(true);
+                aggregator.setOrgName(ngsickanSink.buildOrgName(aggregator.getService()));
+                aggregator.setPkgName(ngsickanSink.buildPkgName(aggregator.getService(), aggregator.getServicePathForNaming(), entityId));
+                aggregator.setResName(ngsickanSink.buildResName(aggregator.getEntityForNaming(), entityId));
+                aggregator.initialize(events.get(0));
+                aggregator.setAttrMetadataStore(true);
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                } // for
+            }
+            ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonListWithOutEmptyMD(aggregator.getAggregationToPersist());
+            String aggregation = "";
+            for (JsonObject jsonObject : jsonObjects) {
+                if (aggregation.isEmpty()) {
+                    aggregation = jsonObject.toString();
+                } else {
+                    aggregation += "," + jsonObject;
+                }
+            }
+            System.out.println(aggregation);
+            String correctBatch = "{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"someNumber\":2,\"somneBoolean\":true,\"someDate\":\"2016-09-21T01:23:00.00Z\",\"someGeoJson\":\"{\\\"type\\\": \\\"Point\\\",\\\"coordinates\\\": [-0.036177,39.986159]}\",\"someJson\":\"{\\\"String\\\": \\\"string\\\"}\",\"someString\":\"foo\",\"someString2\":\"\"},{\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"someName1\":\"-3.7167, 40.3833\",\"someName1_md\":[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}],\"someName2\":\"someValue2\"}";
+            assertEquals(aggregation, correctBatch);
+        } catch (Exception e) {
+            fail();
+        }
+    } // testNativeTypeColumnBatch
+
+    /**
+     * [NGSICKANSink.buildOrgName] -------- When encoding, the org name is equals to the encoding of the
+     * notified/defaulted service.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildOrgNamePkgByEntity() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                + "-------- When confOrganization, the org name is equals to subservice/fiwareServicePath");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; //default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        String viewer = null; // default
+        String entityId = "entityId";
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
+        sink.dataModel=DataModel.DMBYENTITYID;
+        
+        String subService = "someSubService";
+        
+        try {
+            String builtOrgName = sink.buildOrgName(subService); 
+            String expectedOrgName = "someSubService";
+        
+            try {
+                assertEquals(expectedOrgName, builtOrgName);
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                        + "-  OK  - '" + expectedOrgName + "' is equals to the subservice");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                        + "- FAIL - '" + expectedOrgName + "' is not equals to the subservice");
+                throw e;
+            } // try catch // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildOrgName]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildOrgNamePkgByEntity
     
+    /**
+     * [NGSICKANSink.buildPkgName] -------- When confOrganization, the pkgName is equals to entityId
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildPkgNamePkgByEntity() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                + "-------- When confOrganization, the pkgName is equals to entityId");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        String viewer = null; // default
+        String entityId = "entityId";
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
+        sink.dataModel=DataModel.DMBYENTITYID;
+        String service = "someService";
+        String servicePath = "/someServicePath";
+        
+        try {
+            String builtPkgName = sink.buildPkgName(service, servicePath, entityId);
+            String expectedPkgName = "entityId";
+        
+            try {
+                assertEquals(expectedPkgName, builtPkgName);
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                        + "-  OK  - '" + expectedPkgName + "' is equals to the entityId");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                        + "- FAIL - '" + expectedPkgName + "' is not equals to the entityId");
+                throw e;
+            } // try catch // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildPkgNamePkgByEntity
+    
+    /**
+     * [NGSICKANSink.buildPkgName] -------- When confOrganization, the resource name is equals to entityId
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildResourceNamePkgByEntity() throws Exception {
+        System.out.println(getTestTraceHead("[NGSICKANSink.buildPkgName]")
+                + "-------- When confOrganization, the resourceName is equals to entityId");
+        String apiKey = null; // default
+        String attrPersistence = null; // default
+        String backendMaxConns = null; // default
+        String backendMaxConnsPerRoute = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = null; // default
+        String enableEncoding = null; // default
+        String enableGrouping = null; // default
+        String enableLowercase = null; // default
+        String host = null; // default
+        String port = null; // default
+        String ssl = null; // default
+        String viewer = null; // default
+        String entityId = "entityId";
+        NGSICKANSink sink = new NGSICKANSink();
+        sink.configure(createContext(apiKey, attrPersistence, backendMaxConns, backendMaxConnsPerRoute, batchSize,
+                batchTime, batchTTL, dataModel, enableEncoding, enableGrouping, enableLowercase, host, port, ssl,
+                viewer));
+        sink.dataModel=DataModel.DMBYENTITYID;
+        String service = "someService";
+        String servicePath = "/someServicePath";
+        
+        try {
+            String builtPkgName = sink.buildPkgName(service, servicePath, entityId);
+            String expectedPkgName = "entityId";
+        
+            try {
+                assertEquals(expectedPkgName, builtPkgName);
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                        + "-  OK  - '" + expectedPkgName + "' is equals to the entityId");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                        + "- FAIL - '" + expectedPkgName + "' is not equals to the entityId");
+                throw e;
+            } // try catch // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSICKANSink.buildResName]")
+                    + "- FAIL - There was some problem when building the DB name");
+            throw e;
+        } // try catch
+    } // testBuildResourceNamePkgByEntity
+
+    @Test
+    public void testNativeTypeRowBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
+        NGSICKANSink ngsickanSink= new NGSICKANSink();
+        ngsickanSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+        NGSIBatch batch = prepaireBatch();
+        String destination = "someDestination";
+        String entityId = "";
+        try {
+            batch.startIterator();
+            NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setEnableUTCRecvTime(true);
+                aggregator.setOrgName(ngsickanSink.buildOrgName(aggregator.getService()));
+                aggregator.setPkgName(ngsickanSink.buildPkgName(aggregator.getService(), aggregator.getServicePathForNaming(), entityId));
+                aggregator.setResName(ngsickanSink.buildResName(aggregator.getEntityForNaming(), entityId));
+                aggregator.initialize(events.get(0));
+                aggregator.setAttrMetadataStore(true);
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                } // for
+            }
+            ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonListWithOutEmptyMD(aggregator.getAggregationToPersist());
+            String aggregation = "";
+            for (JsonObject jsonObject : jsonObjects) {
+                if (aggregation.isEmpty()) {
+                    aggregation = jsonObject.toString();
+                } else {
+                    aggregation += "," + jsonObject;
+                }
+            }
+            System.out.println(aggregation);
+            String correctBatch = "{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someNumber\",\"attrType\":\"number\",\"attrValue\":2},{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"somneBoolean\",\"attrType\":\"Boolean\",\"attrValue\":true},{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someDate\",\"attrType\":\"DateTime\",\"attrValue\":\"2016-09-21T01:23:00.00Z\"},{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someGeoJson\",\"attrType\":\"geo:json\",\"attrValue\":\"{\\\"type\\\": \\\"Point\\\",\\\"coordinates\\\": [-0.036177,39.986159]}\"},{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someJson\",\"attrType\":\"json\",\"attrValue\":\"{\\\"String\\\": \\\"string\\\"}\"},{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString\",\"attrType\":\"string\",\"attrValue\":\"foo\"},{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someString2\",\"attrType\":\"string\",\"attrValue\":\"\"},{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someName1\",\"attrType\":\"someType1\",\"attrValue\":\"-3.7167, 40.3833\",\"attrMd\":[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]},{\"recvTimeTs\":\"1461136795801\",\"recvTime\":\"2016-04-20T07:19:55.801Z\",\"fiwareServicePath\":\"somePath\",\"entityId\":\"someId\",\"entityType\":\"someType\",\"attrName\":\"someName2\",\"attrType\":\"someType2\",\"attrValue\":\"someValue2\"}";
+            assertEquals(correctBatch, aggregation);
+        } catch (Exception e) {
+            fail();
+        }
+    } // testNativeTypeRowBatch
+
+
 } // NGSICKANSinkTest

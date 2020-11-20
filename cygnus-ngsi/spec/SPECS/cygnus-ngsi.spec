@@ -99,6 +99,70 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Thu Nov 4 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.6.0
+- [cygnus-ngsi][SQLSinks] Fix batch Upsert to build one query for each one of the different unique key values.
+- [cygnus-ngsi][NGSISink] Fix batch managing to fix data losing when an event of the batch fails (#1967).
+
+* Tue Oct 20 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.5.0
+- [cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Remove PreparedStatement building, to use String query (walkaround for #1959)
+- [cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Log info about persisted data (#1939)
+- [cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Create upsert transaction (#1806, #1936)
+- [cygnus-ngsi][NameMappingInterceptor] Log info about how namemapping applied (#1937)
+- [cygnus-ngsi][NGSIRestHandler] Log about "Starting internal transaction" moved from INFO to DEBUG (#1940)
+- [cygnus-ngsi][PosgtgreSQLSink, PostgisSink] Add upsert function. (#1806)
+- [cygnus-ngsi][MysqlSink] Quoted Sql field names to avoid naming problems. (#1863)
+- [cygnus-ngsi][mongoSinkl, sthSink] set the replica set name for the mongodb connection with the environment variable CYGNUS_MONGO_REPLICA_SET
+
+* Fri Sep 04 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.4.0
+- [cygnus-ngsi][RowAggregator] Handle metadata as json. This is to upgrade json-like sinks behaviour (#1902)
+- [cygnus-ngsi][ColumnAggregator] Fix attribute type key to make it unique (#1904)
+- [cygnus-ngsi][PostgisSink, PostgreSQLSink] Implement records expiration for Postgis and PostgreSQL sinks (#1915)
+- [cygnus-ngsi][ColumnAggregator] Handle metadata as json. This is to upgrade json-like sinks behaviour (#1902)
+- [cygnus-ngsi][CKANSink] Fix bug about bad service name used by CKAN orgName with a name mapping (#1910)
+- [cygnus-ngsi][CKANSink] Add flag option to disable metatada in CKAN (#1912)
+
+* Wed Jul 15 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.3.0
+- [cygnus-ngsi][Generic Aggregation] Add name mappings flag to all sinks who uses generic aggregation
+
+* Tue Jun 23 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.2.0
+- [cygnus-ngsi][MySQLSink, PostgreSQLSink, PostgisSQLSink] Remove SQLBackend singleton, thus allowing two sinks of the same SQL-type in the same Cygnus instance
+- [cygnus-ngsi][CKANSink] New datamodel for CKAN (dm-by-entity-id) implementing mapping: subservice -> org, entityId -> dataset, entityId -> resource (#1792)
+- [cygnus-ngsi][PostgisSQLSink, PostgreSQLSink] Add dm-by-entity-database and dm-by-entity-database-schema.
+- [cygnus-ngsi][Generic Aggregation] If name mappings is enabled, then the aggregation will take all attributes from the mapped element on the event
+- [cygnus-ngsi] Update entrypoint to create a symlink from the logfile to stdout, and remove tail execution to stream logfile
+
+* Thu May 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.1.0
+- [cygnus-ngsi][NGSIPostgreSQLSink][Docker] Add new env var CYGNUS_POSTGRESQL_DATABASE to set Postgresql database in Docker
+- [cygnus-ngsi][NGSIPostgreSQLSink][NGSIPostGISSink] Remove \" in value handled by getGeometry
+
+* Thu Apr 16 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.0.0
+- [cygnus-ngsi][PostgisSink, PostGRESQLSink] Enable datamodel by entity type (dm-by-entity-type) (#1684)
+- [cygnus-ngsi] Add correlatorId rollbacked transactions (#1770)
+- [cygnus-ngsi][PostGRESQLSink] Fix schemaName when inserting data into DB
+- [cygnus-ngsi][PostgisSink] Enable postgis functions without native types flag on
+- [cygnus-ngsi][RestHandler] Add a not null validation for ngsiVersion header of request
+- [cygnus-ngsi][HDFSSink] Separate files by property periodicity (#1830)
+- [cygnus-ngsi][NGSISink] Handle generic exception to manage all scenarios when persisting batch (#1844)
+- [cygnus-ngsi][Elasticsearch] Fix a bug that non-Latin characters such as Japanese are garbled.(#1839)
+- [cygnus-ngsi][MongoSink] Fix on mongo collection name asignation (#1845)
+- [cygnus-ngsi][MongoSink] Fix on mongo recvTime Date format
+- [cygnus-ngsi][MongoSink][STHSink] Add a new mongoAuthSource parameter to create the Mongo backend
+- [cygnus-ngsi][MongoSink] Search for metadata even if metadata persistence is not enabled
+
+* Fri Feb 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.18.0
+- [cygnus-ngsi] Support for NGSIv2 notifications (#953)
+- [cygnus-ngsi][ArcGIS] Fix classpath for instantation of arcgis sink (#1741)
+- [cygnus-ngsi][PostGIS, PostGRESQL] Insert right SQL types values (Null), non stringify (#1661)
+- [cygnus-ngsi][PostgisSink] Alignement with PostgresqlSink: add try catch for row aggregator
+- [cygnus-ngsi][PostgisSink, PostGRESQLSink] Support for native Postgres and Postgis types (#1780)
+- [cygnus-ngsi][PostgisSink, PostGRESQLSink, MySQL] Add generic aggregation for SQL sinks. This generic aggregation also handles null empty columns for batch purposes (#1787)
+- [cygnus-ngsi][MySQL] Support for native MySQL types (#1780)
+- [cygnus-ngsi][HDFS] Dissable metadata files creation when they are empty (#1805)
+- [cygnus-ngsi][HDFS] Dissable metadata persistance (empty or not empty) by flag (#1706)
+- [cygnus-ngsi] Make CygnusPersistenceError more descriptive (#1768)
+- [cygnus-ngsi] Changed log level for some events (#1769)
+- [cygnus-ngsi] Unattach dockerfile from git 
+
 * Tue Oct 29 2019 Fermin Galan <fermin.galanmarquez@telefonica.com> 1.17.0
 - [cygnus-ngsi][NGSISink] Catch generic exception and rollback in transacation
 

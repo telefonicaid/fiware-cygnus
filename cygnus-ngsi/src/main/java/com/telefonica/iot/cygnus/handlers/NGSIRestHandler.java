@@ -281,8 +281,8 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         if (!target.equals(notificationTarget)) {
             serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
-            LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (" + target + " target not supported)");
-            throw new HTTPBadRequestException(target + " target not supported");
+            LOGGER.warn("[NGSIRestHandler] Bad HTTP notification (" + target + " target not supported, " + notificationTarget + " expected.)");
+            throw new HTTPBadRequestException(target + " target not supported, " + notificationTarget + " expected.");
         } // if
 
         // Check if received content type is null
@@ -303,7 +303,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         // by the whole source code.
         MDC.put(CommonConstants.LOG4J_CORR, corrId);
         MDC.put(CommonConstants.LOG4J_TRANS, transId);
-        LOGGER.info("[NGSIRestHandler] Starting internal transaction (" + transId + ")");
+        LOGGER.debug("[NGSIRestHandler] Starting internal transaction (" + transId + ")");
         
         // Get the data content
         String data = "";
@@ -389,9 +389,11 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
             headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transId);
             LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
                     + NGSIConstants.FLUME_HEADER_TRANSACTION_ID + ": " + transId + ")");
-            headers.put(CommonConstants.HEADER_NGSI_VERSION, ngsiVersion);
-            LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
-                    + CommonConstants.HEADER_NGSI_VERSION + ": " + ngsiVersion+ ")");
+            if (ngsiVersion != null) {
+                headers.put(CommonConstants.HEADER_NGSI_VERSION, ngsiVersion);
+                LOGGER.debug("[NGSIRestHandler] Header added to NGSI event ("
+                        + CommonConstants.HEADER_NGSI_VERSION + ": " + ngsiVersion + ")");
+            }
             // Create the NGSI event and add it to the list
             NGSIEvent ngsiEvent = new NGSIEvent(
                     // Headers
