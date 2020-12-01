@@ -1,3 +1,4 @@
+[cygnus-ngsi][NGSISink] Set srv and subsrv logs N/A in proccesBatch (#1983)
 [cygnus-ngsi][NGSIArcgisFeatureTableSink] New sink to persist Arcgis data, removing the old ArgGis sink (#1672)
 [cygnus-common][ArcGis] New Rest based backend to persist Arcgis data (#1672)
 [cygnus-common][cygnus-ngsi][cygnus-ngsi-ld][cygnus-twitter] Upgrade Dockerfile base image from 7.6.1810 to centos7.9.2009
