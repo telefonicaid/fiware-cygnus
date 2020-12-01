@@ -564,10 +564,9 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                         ngsiEvent.getHeaders().get(CommonConstants.HEADER_CORRELATOR_ID));
                 MDC.put(CommonConstants.LOG4J_TRANS,
                         ngsiEvent.getHeaders().get(NGSIConstants.FLUME_HEADER_TRANSACTION_ID));
-                MDC.put(CommonConstants.LOG4J_SVC,
-                        ngsiEvent.getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE));
-                MDC.put(CommonConstants.LOG4J_SUBSVC,
-                        ngsiEvent.getHeaders().get(CommonConstants.HEADER_FIWARE_SERVICE_PATH));
+                // One batch is able to handle/process several events from different srv/subsrvs (#1983)
+                MDC.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
+                MDC.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
 
                 // Accumulate the event
                 accumulator.accumulate(ngsiEvent);
@@ -904,7 +903,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         } // accumulateByEntityType
 
         private void accumulateByEntityId(NGSIEvent event) {
-        	   Map<String, String> headers = event.getHeaders();
+            Map<String, String> headers = event.getHeaders();
             ContextElement originalCE = event.getOriginalCE();
             ContextElement mappedCE = event.getMappedCE();
             String destination;
