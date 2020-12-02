@@ -69,3 +69,8 @@ jobs:
         run: |
           cd "${GITHUB_WORKSPACE}"/cygnus-ngsi-ld
           mvn -q test
+      # FIXME: placeholder for future cygnus-twitter tests    
+      #- name: 'cygnus-twitter Unit Tests (Java ${{ matrix.java-version }})'
+      #  run: |
+      #    cd "${GITHUB_WORKSPACE}"/cygnus-twitter
+      #    mvn -q test          
