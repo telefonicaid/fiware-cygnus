@@ -38,14 +38,22 @@ jobs:
   unit-test:
     name: Unit Tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java-version:
+          - 8
+        # FIXME: something in the current build (pom.xml?) precludes Java>8 to work).
+        #  - 9
+        #  - 10
+        #  - 11
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
-      - name: Use Java 8
+      - name: 'Use Java ${{ matrix.java-version }}'
         uses: actions/setup-java@v1
         with:
-          java-version: 8
-      - name: 'cygnus-common Unit Tests'
+          java-version: '${{ matrix.java-version }}'
+      - name: 'cygnus-common Unit Tests (Java ${{ matrix.java-version }})'
         run: |
           cd "${GITHUB_WORKSPACE}"/cygnus-common
           mvn -q test
@@ -53,11 +61,11 @@ jobs:
           mvn -q clean compile exec:exec assembly:single
           VERSION=$(cat pom.xml | grep version | sed -n '1p' | sed -ne '/<version>/s#\s*<[^>]*>\s*##gp' | sed 's/ //g')
           mvn -q install:install-file -Dfile=target/cygnus-common-$VERSION-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=$VERSION -Dpackaging=jar -DgeneratePom=true
-      - name: 'cygnus-ngsi Unit Tests'
+      - name: 'cygnus-ngsi Unit Tests (Java ${{ matrix.java-version }})'
         run: |
           cd "${GITHUB_WORKSPACE}"/cygnus-ngsi
           mvn -q test
-      - name: 'cygnus-ngsi-ld Unit Tests'
+      - name: 'cygnus-ngsi-ld Unit Tests (Java ${{ matrix.java-version }})'
         run: |
           cd "${GITHUB_WORKSPACE}"/cygnus-ngsi-ld
           mvn -q test
