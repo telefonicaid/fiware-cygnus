@@ -1,0 +1,76 @@
+name: CI
+'on':
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  # FIXME: hadolint won't work since the docker file has not been updated.
+  # lint-dockerfile:
+  #   name: Lint Dockerfile
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Git checkout
+  #       uses: actions/checkout@v2
+  #     - name: Run Hadolint Dockerfile Linter (Common)
+  #       uses: burdzwastaken/hadolint-action@master
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         HADOLINT_ACTION_DOCKERFILE_FOLDER: docker/cygnus-common
+  #     - name: Run Hadolint Dockerfile Linter (NGSI)
+  #       uses: burdzwastaken/hadolint-action@master
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         HADOLINT_ACTION_DOCKERFILE_FOLDER: docker/cygnus-ngsi
+  #     - name: Run Hadolint Dockerfile Linter (NGSI-LD)
+  #       uses: burdzwastaken/hadolint-action@master
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         HADOLINT_ACTION_DOCKERFILE_FOLDER: docker/cygnus-ngsi-ld
+  #     - name: Run Hadolint Dockerfile Linter (Twitter)
+  #       uses: burdzwastaken/hadolint-action@master
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         HADOLINT_ACTION_DOCKERFILE_FOLDER: docker/cygnus-twitter
+  
+  unit-test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java-version:
+          - 8
+        # FIXME: something in the current build (pom.xml?) precludes Java>8 to work).
+        #  - 9
+        #  - 10
+        #  - 11
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: 'Use Java ${{ matrix.java-version }}'
+        uses: actions/setup-java@v1
+        with:
+          java-version: '${{ matrix.java-version }}'
+      - name: 'cygnus-common Unit Tests (Java ${{ matrix.java-version }})'
+        run: |
+          cd "${GITHUB_WORKSPACE}"/cygnus-common
+          mvn -q test
+          # Build and install cygnus-common, this is necessary because it is a dependency for cygnus-ngsi and others
+          mvn -q clean compile exec:exec assembly:single
+          VERSION=$(cat pom.xml | grep version | sed -n '1p' | sed -ne '/<version>/s#\s*<[^>]*>\s*##gp' | sed 's/ //g')
+          mvn -q install:install-file -Dfile=target/cygnus-common-$VERSION-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=$VERSION -Dpackaging=jar -DgeneratePom=true
+      - name: 'cygnus-ngsi Unit Tests (Java ${{ matrix.java-version }})'
+        run: |
+          cd "${GITHUB_WORKSPACE}"/cygnus-ngsi
+          mvn -q test
+      - name: 'cygnus-ngsi-ld Unit Tests (Java ${{ matrix.java-version }})'
+        run: |
+          cd "${GITHUB_WORKSPACE}"/cygnus-ngsi-ld
+          mvn -q test
+      # FIXME: placeholder for future cygnus-twitter tests    
+      #- name: 'cygnus-twitter Unit Tests (Java ${{ matrix.java-version }})'
+      #  run: |
+      #    cd "${GITHUB_WORKSPACE}"/cygnus-twitter
+      #    mvn -q test          

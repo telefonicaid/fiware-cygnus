@@ -7,7 +7,7 @@
 [![Support badge]( https://img.shields.io/badge/support-askbot-yellowgreen.svg)](https://ask.fiware.org/questions/scope%3Aall/tags%3Acygnus/)
 <br/>
 [![Documentation badge](https://readthedocs.org/projects/fiware-cygnus/badge/?version=latest)](http://fiware-cygnus.rtfd.io)
-[![Build badge](https://img.shields.io/travis/telefonicaid/fiware-cygnus.svg)](https://travis-ci.org/telefonicaid/fiware-cygnus/)
+[![CI](https://github.com/telefonicaid/fiware-cygnus/workflows/CI/badge.svg)](https://github.com/telefonicaid/fiware-cygnus/actions?query=workflow%3ACI)
 ![Status](https://nexus.lab.fiware.org/static/badges/statuses/cygnus.svg)
 
 Cygnus is a connector in charge of persisting context data sources into other third-party databases and storage systems, creating a historical view of the context. Internally, Cygnus is based on [Apache Flume](http://flume.apache.org/), Flume is a data flow system based on the concepts of flow-based programming. It supports powerful and scalable directed graphs of data routing, transformation, and system mediation logic. It was built to automate the flow of data between systems. While the term 'dataflow' can be used in a variety of contexts, we use it here to mean the automated and managed flow of information between systems.
@@ -116,17 +116,17 @@ version 3. You can find a [copy of this license in the repository](./LICENSE).
 
 ### Are there any legal issues with AGPL 3.0? Is it safe for me to use?
 
-There is absolutely no problem in using a product licensed under AGPL 3.0. Issues with GPL 
-(or AGPL) licenses are mostly related with the fact that different people assign different 
+There is absolutely no problem in using a product licensed under AGPL 3.0. Issues with GPL
+(or AGPL) licenses are mostly related with the fact that different people assign different
 interpretations on the meaning of the term “derivate work” used in these licenses. Due to this,
 some people believe that there is a risk in just _using_ software under GPL or AGPL licenses
 (even without _modifying_ it).
 
-For the avoidance of doubt, the owners of this software licensed under an AGPL 3.0 license  
+For the avoidance of doubt, the owners of this software licensed under an AGPL 3.0 license
 wish to make a clarifying public statement as follows:
 
 > Please note that software derived as a result of modifying the source code of this
-> software in order to fix a bug or incorporate enhancements is considered a derivative 
-> work of the product. Software that merely uses or aggregates (i.e. links to) an otherwise 
+> software in order to fix a bug or incorporate enhancements is considered a derivative
+> work of the product. Software that merely uses or aggregates (i.e. links to) an otherwise
 > unmodified version of existing software is not considered a derivative work, and therefore
 > it does not need to be released as under the same license, or even released as open source.
