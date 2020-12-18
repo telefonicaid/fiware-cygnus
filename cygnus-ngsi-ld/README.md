@@ -214,8 +214,8 @@ Detailed information regarding cygus-ngsi can be found in the [Installation and 
 ## <a name="section4"></a>Features summary
 <table>
   <tr><th>Component</th><th>Feature</th><th>From version</th></tr>
-  <tr><td>NGSIPostgreSQLSink</td><td>First implementation</td><td>2.1.0</d></tr>
-  <tr><td>NGSIPostgisLSink</td><td>First implementation</td><td>2.1.0</d></tr>
+  <tr><td>NGSIPostgreSQLSink</td><td>First implementation</td><td>2.1.0</td></tr>
+  <tr><td>NGSIPostgisLSink</td><td>First implementation</td><td>2.1.0</td></tr>
   <tr><td rowspan="4">NGSICKANSink</td><td>First implementation</td><td>2.1.0</td></tr>
   <tr><td rowspan="9">All sinks</td><td>Events TTL</td><td>2.1.0</td></tr>
   <tr><td>Infinite events TTL</td><td>2.1.0</td></tr>
