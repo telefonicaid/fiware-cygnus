@@ -6,14 +6,12 @@
     * [Installation from sources](./install_from_sources.md)
 * Configuration:
     * [NGSI agent configuration](./ngsi_agent_conf.md)
-    * [log4j configuration](../../installation_and_administration_guide/log4j_conf.md)
     * [Configuration examples](./configuration_examples.md)
 * Running:
     * [Running as a process](./running_as_process.md)
     * [Running as a service](./running_as_service.md)
 * Advanced topics:
     * [Testing](./testing.md)
-    * [Backends as short-term historics](./backends_as_sth.md)
 * [Sanity checks](./sanity_checks.md)
 * [Diagnosis procedures](./diagnosis_procedures.md)
 * [Reporting issues and contact information](./issues_and_contact.md)

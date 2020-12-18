@@ -9,13 +9,9 @@ Internally, cygnus-ngsi-ld is based on [Apache Flume](http://flume.apache.org/),
 
 Current stable release is able to persist Orion context data in:
 
-* [HDFS](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html), the [Hadoop](http://hadoop.apache.org/) distributed file system.
-* [MySQL](https://www.mysql.com/), the well-know relational database manager.
-* [CKAN](http://ckan.org/), an Open Data platform.
-* [MongoDB](https://www.mongodb.org/), the NoSQL document-oriented database.
-* [STH Comet](https://github.com/telefonicaid/IoT-STH), a Short-Term Historic database built on top of MongoDB.
-* [Kafka](http://kafka.apache.org/), the publish-subscribe messaging broker.
-* [DynamoDB](https://aws.amazon.com/dynamodb/), a cloud-based NoSQL database by [Amazon Web Services](https://aws.amazon.com/).
+* [PostgreSQL](http://www.postgresql.org/), the well-know relational database manager.
+* [PostGIS](http://postgis.net/), a spatial database extender for PostgreSQL object-relational database.
+* [CKAN](http://ckan.org/), an Open Data platform. 
 
 [Top](#top)
 
@@ -29,13 +25,22 @@ If your aim is to create a new sink for cygnus-ngsi-ld, or expand it in some way
 ## Structure of the document
 Apart from this introduction, this Installation and Administration Guide mainly contains sections about installing, configuring, running and testing cygnus-ngsi-ld. The FIWARE user will also find useful information regarding multitenancy or performance tips. In addition, sanity check procedures (useful to know wether the installation was successful or not) and diagnosis procedures (a set of tips aiming to help when an issue arises) are provided as well.
 
-It is very important to note that, for those topics not covered by this documentation, the related section in cygnus-common applies. Specifically:
 
-* Hardware requirements.
-* Flume environment configuration.
-* log4j configuration.
-* Running as a process.
-* Management interface.
-* Logs and alarms.
+* [Introduction](./introduction.md)
+* Installation:
+    * [Installation via docker](./install_with_docker.md)
+    * [Installation from sources](./install_from_sources.md)
+* Configuration:
+    * [NGSI agent configuration](./ngsi_agent_conf.md)
+    * [Configuration examples](./configuration_examples.md)
+* Running:
+    * [Running as a process](./running_as_process.md)
+    * [Running as a service](./running_as_service.md)
+* Advanced topics:
+    * [Testing](./testing.md)
+* [Sanity checks](./sanity_checks.md)
+* [Diagnosis procedures](./diagnosis_procedures.md)
+* [Reporting issues and contact information](./issues_and_contact.md)
+
 
 [Top](#top)
