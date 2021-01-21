@@ -25,8 +25,6 @@ If your aim is to create a new sink for cygnus-ngsi-ld, or expand it in some way
 ## Structure of the document
 Apart from this introduction, this Installation and Administration Guide mainly contains sections about installing, configuring, running and testing cygnus-ngsi-ld. The FIWARE user will also find useful information regarding multitenancy or performance tips. In addition, sanity check procedures (useful to know wether the installation was successful or not) and diagnosis procedures (a set of tips aiming to help when an issue arises) are provided as well.
 
-
-* [Introduction](./introduction.md)
 * Installation:
     * [Installation via docker](./install_with_docker.md)
     * [Installation from sources](./install_from_sources.md)
