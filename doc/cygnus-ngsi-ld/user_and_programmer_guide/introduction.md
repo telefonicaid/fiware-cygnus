@@ -5,7 +5,7 @@ This document describes how to use Cygnus once it has been [installed](../instal
 This documenttion is intended to be used by developers, if you want to only use this cygnus-ngsi-ld please go
 to the [Administration section](../installation_and_administration_guide/introduction.md). It describes how to program extensions for it as well.
 ## Structure of the document
-* [Introduction](./introduction.md)
+
 * User guide:
     * [Connecting Orion LD Context Broker and Cygnus](./connecting_orion.md)
 * Programmer guide:
