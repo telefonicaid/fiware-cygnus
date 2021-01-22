@@ -172,6 +172,15 @@ public class RestApi  {
             URL url = new java.net.URL(strUrl);
             conn = (java.net.HttpURLConnection) url.openConnection();
             conn.setRequestMethod(httpMethod.toString());
+ 
+            // Create all-trusting host name verifier
+            HostnameVerifier allHostsValid = new HostnameVerifier() {
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            };
+            // Install the all-trusting host verifier
+            conn.setDefaultHostnameVerifier(allHostsValid);
 
             // Si es necesario ponemos el body
             if (httpMethod != HttpMethod.GET) {
