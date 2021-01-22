@@ -33,7 +33,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.cert.X509Certificate;
+
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -176,6 +182,11 @@ public class RestApi  {
             conn = (java.net.HttpURLConnection) url.openConnection();
             conn.setRequestMethod(httpMethod.toString());
  
+            // Install the all-trusting trust manager
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            
             // Create all-trusting host name verifier
             HostnameVerifier allHostsValid = new HostnameVerifier() {
                 public boolean verify(String hostname, SSLSession session) {
@@ -183,7 +194,7 @@ public class RestApi  {
                 }
             };
             // Install the all-trusting host verifier
-            conn.setDefaultHostnameVerifier(allHostsValid);
+            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
 
             // Si es necesario ponemos el body
             if (httpMethod != HttpMethod.GET) {
