@@ -178,11 +178,6 @@ public class RestApi  {
             String strUrl = fullUrl(urlToRead, params);
             LOGGER.debug("requesting HTTP: " + strUrl);
 
-            URL url = new java.net.URL(strUrl);
-            conn = (java.net.HttpURLConnection) url.openConnection();
-            conn.setRequestMethod(httpMethod.toString());
- 
-            
             // Create a trust manager that does not validate certificate chains
             TrustManager[] trustAllCerts = new TrustManager[] {new X509TrustManager() {
                     public java.security.cert.X509Certificate[] getAcceptedIssuers() {
@@ -209,6 +204,10 @@ public class RestApi  {
             // Install the all-trusting host verifier
             HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
 
+            URL url = new java.net.URL(strUrl);
+            conn = (java.net.HttpURLConnection) url.openConnection();
+            conn.setRequestMethod(httpMethod.toString());
+ 
             // Si es necesario ponemos el body
             if (httpMethod != HttpMethod.GET) {
                 conn.setDoOutput(true);
