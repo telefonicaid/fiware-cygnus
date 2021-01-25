@@ -207,6 +207,7 @@ public class RestApi  {
             URL url = new java.net.URL(strUrl);
             conn = (java.net.HttpURLConnection) url.openConnection();
             conn.setRequestMethod(httpMethod.toString());
+
             // Si es necesario ponemos el body
             if (httpMethod != HttpMethod.GET) {
                 conn.setDoOutput(true);
