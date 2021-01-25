@@ -158,6 +158,8 @@ Regarding the retries of not persisted batches, a couple of parameters is used. 
 
 By default, `NGSIArcgisFeatureTableSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
 
+Connections to `cygnus-ngsi.sinks.arcgis-sink.arcgis_service_url` and `cygnus-ngsi.sinks.arcgis-sink.arcgis_service_url` are done without check certificate validation of Java SSL Connections.
+
 [Top](#top)
 
 
