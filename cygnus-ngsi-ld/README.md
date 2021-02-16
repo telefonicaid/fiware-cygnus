@@ -84,7 +84,7 @@ cygnusagent.channels.test-channel.capacity = 1000
 cygnusagent.channels.test-channel.transactionCapacity = 100
 ```
 
-Check the [Installation and Administration Guide](../doc/installation_and_administration_guide/introduction.md) for configurations involving real data storages.
+Check the [Installation and Administration Guide](../doc/cygnus-ngsi-ld/installation_and_administration_guide/introduction.md) for configurations involving real data storages.
 
 In addition, a `/usr/cygnus/conf/cygnus_instance_1.conf` file must be created if we want to run Cygnus NGSI-LD as a service (see next section):
 
@@ -200,6 +200,31 @@ $ curl -X GET "http://localhost:8081/v1/stats" | python -m json.tool
 }
 ```
 
+
+[Top](#top)
+
+## <a name="section3"></a>Advanced topics and further reading
+Detailed information regarding cygus-ngsi can be found in the [Installation and Administration Guide](../doc/cygnus-ngsi-ld/installation_and_administration_guide/introduction.md), the [User and Programmer Guide](../doc/cygnus-ngsi-ld/user_and_programmer_guide/introduction.md) and the [Flume extensions catalogue](../doc/cygnus-ngsi-ld/flume_extensions_catalogue/introduction.md). The following is just a list of shortcuts regarding the most popular topics:
+
+* [Installation with docker](../doc/cygnus-ngsi-ld/installation_and_administration_guide/install_with_docker.md). An alternative to RPM installation, docker is one of the main options when installing FIWARE components.
+* [Installation from sources](../doc/cygnus-ngsi-ld/installation_and_administration_guide/install_from_sources.md). Sometimes you will need to install from sources, particularly when some of the dependencies must be modified.
+
+[Top](#top)
+
+## <a name="section4"></a>Features summary
+<table>
+  <tr><th>Component</th><th>Feature</th><th>From version</th></tr>
+  <tr><td>NGSIPostgreSQLSink</td><td>First implementation</td><td>2.3.0</td></tr>
+  <tr><td>NGSIPostgisLSink</td><td>First implementation</td><td>2.3.0</td></tr>
+  <tr><td>NGSICKANSink</td><td>First implementation</td><td>2.3.0</td></tr>
+  <tr><td rowspan="9">All sinks</td><td>Events TTL</td><td>2.3.0</td></tr>
+  <tr><td>Infinite events TTL</td><td>2.3.0</td></tr>
+  <tr><td>Data model configuration</td><td>2.3.0</td></tr>
+  <tr><td>enable/disable forced lower case</td><td>2.3.0</td></tr>
+  <tr><td>New encoding</td><td>2.3.0</td></tr>
+  <tr><td>Agents and instances</td><td>2.3.0</td></tr>
+  <tr><td>Logs</td><td>2.3.0</td></tr>
+</table>
 
 [Top](#top)
 
