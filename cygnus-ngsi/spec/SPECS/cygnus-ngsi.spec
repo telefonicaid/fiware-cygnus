@@ -100,11 +100,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri March 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.7.0
-- [cygnus-common] Change log level of timeinstant parser chain (from error to debug)
 - [cygnus-ngsi][NGSISink] Set srv and subsrv logs N/A in proccesBatch (#1983)
 - [cygnus-ngsi][NGSIArcgisFeatureTableSink] New sink to persist Arcgis data, removing the old ArgGis sink (#1672)
-- [cygnus-common][ArcGis] New Rest based backend to persist Arcgis data (#1672)
-- [cygnus-common][cygnus-ngsi][cygnus-ngsi-ld][cygnus-twitter] Upgrade Dockerfile base image from 7.6.1810 to centos7.9.2009
 
 * Thu Nov 4 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.6.0
 - [cygnus-ngsi][SQLSinks] Fix batch Upsert to build one query for each one of the different unique key values.
