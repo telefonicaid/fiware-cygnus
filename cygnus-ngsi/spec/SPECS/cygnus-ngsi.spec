@@ -102,6 +102,7 @@ rm -rf $RPM_BUILD_ROOT
 * Fri March 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.7.0
 - [cygnus-ngsi][NGSISink] Set srv and subsrv logs N/A in proccesBatch (#1983)
 - [cygnus-ngsi][NGSIArcgisFeatureTableSink] New sink to persist Arcgis data, removing the old ArgGis sink (#1672)
+- [cygnus-ngsi] Upgrade Dockerfile base image from 7.6.1810 to centos7.9.2009
 
 * Thu Nov 4 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.6.0
 - [cygnus-ngsi][SQLSinks] Fix batch Upsert to build one query for each one of the different unique key values.
