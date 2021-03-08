@@ -1,2 +1,1 @@
-Fix: handle unitCode meta-property in NGSI-LD events received in cygnus-ngsi-ld module
-
+[cygnus-ngsi-ld] handle unitCode meta-property in NGSI-LD events received (#1997)
