@@ -479,10 +479,11 @@ public class NGSIPostgreSQLSink extends NGSILDSink {
                     for (Map.Entry<String, JsonElement> entry2 : y.entrySet()) {
                         String x2 = entry2.getKey();
                         Object y2 = entry2.getValue();
-                        if ("observedAt".contentEquals(x2)){
+                        if ("observedAt".contentEquals(x2) || "unitCode".contentEquals(x2)){
                             column += "," + "'"+entry2.getValue().getAsString()+"'";
                         }
-                        if (!"observedAt".contentEquals(x2) && !"type".contentEquals(x2) && !"value".contentEquals(x2) && !"object".contentEquals(x2)) {
+                        if (!"observedAt".contentEquals(x2) && !"unitCode".contentEquals(x2) && !"type".contentEquals(x2)
+                                && !"value".contentEquals(x2) && !"object".contentEquals(x2)) {
                             if (entry2.getValue().isJsonObject()){
                                 JsonObject subAttrJson = entry2.getValue().getAsJsonObject();
                                 subAttrType = subAttrJson.get("type").getAsString();
