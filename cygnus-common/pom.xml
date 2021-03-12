@@ -47,11 +47,11 @@
             <version>4.3.1</version>
         </dependency>
         <dependency>
-            <!-- Upgrade from 0.9.1 to 0.12.0 due to github vulnerabilities report.
+            <!-- Upgrade from 0.9.1 to 0.14.0 due to github vulnerabilities report.
                  Note this is a "blind update", we have not tested it -->
             <groupId>org.apache.thrift</groupId>
             <artifactId>libthrift</artifactId>
-            <version>0.12.0</version>
+            <version>0.14.0</version>
         </dependency>
         <!-- Required by the ManagementInterface -->
         <dependency>
