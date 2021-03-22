@@ -416,6 +416,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
         String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
         String schemaName = aggregator.getSchemeName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
+        String dbName = aggregator.getDbName(enableLowercase);
 
         // Escape a syntax error in SQL
         if (schemaName.equals(DEFAULT_FIWARE_SERVICE)) {
@@ -426,7 +427,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgresqlOptions, persistErrors, maxLatestErrors);
         }
 
-        LOGGER.debug("[" + this.getName() + "] Persisting data at NGSIPostgreSQLSink. Schema ("
+        LOGGER.debug("[" + this.getName() + "] Persisting data at NGSIPostgreSQLSink. DbName (" + dbName + "), Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
                 + valuesForInsert + ")");
         
