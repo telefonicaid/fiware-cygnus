@@ -133,7 +133,7 @@ public class SQLBackendImpl implements SQLBackend{
 
     @Override
     public void createDestination(String destination) throws CygnusRuntimeError, CygnusPersistenceError {
-        if (cache.isCachedDestination(destination)) {
+        if (cache.isCachedDataBase(destination)) {
             LOGGER.debug(sqlInstance.toUpperCase() + " '" + destination + "' is cached, thus it is not created");
             return;
         } // if
@@ -168,7 +168,7 @@ public class SQLBackendImpl implements SQLBackend{
         closeSQLObjects(con, stmt);
 
         LOGGER.debug(sqlInstance.toUpperCase() + " Trying to add '" + destination + "' to the cache after database/scheme creation");
-        cache.addDestination(destination);
+        cache.addDataBase(destination);
     } // createDestination
 
     // This method is an implementation for the method createDestination in order to make it easier to understand
@@ -259,7 +259,7 @@ public class SQLBackendImpl implements SQLBackend{
         } // try catch
 
         LOGGER.debug(sqlInstance.toUpperCase() + " Trying to add '" + destination + "' and '" + tableName + "' to the cache after insertion");
-        cache.addDestination(destination);
+        cache.addDataBase(destination);
         cache.addTable(destination, tableName);
     } // insertContextData
 
@@ -383,10 +383,10 @@ public class SQLBackendImpl implements SQLBackend{
     @Override
     public void expirateRecordsCache(long expirationTime) throws CygnusRuntimeError, CygnusPersistenceError {
         // Iterate on the cached resource IDs
-        cache.startDestinationIterator();
+        cache.startDataBaseIterator();
 
-        while (cache.hasNextDestination()) {
-            String destination = cache.nextDestination();
+        while (cache.hasNextDataBase()) {
+            String destination = cache.nextDataBase();
             cache.startTableIterator(destination);
 
             while (cache.hasNextTable(destination)) {
@@ -734,7 +734,7 @@ public class SQLBackendImpl implements SQLBackend{
         } // try catch
 
         LOGGER.debug(sqlInstance.toUpperCase() + " Trying to add '" + destination + "' and '" + errorTable + "' to the cache after insertion");
-        cache.addDestination(destination);
+        cache.addDataBase(destination);
         cache.addTable(destination, errorTable);
     } // insertErrorLog
 

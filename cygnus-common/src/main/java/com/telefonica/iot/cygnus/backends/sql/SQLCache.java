@@ -28,8 +28,8 @@ public class SQLCache {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(SQLCache.class);
     private final HashMap<String, ArrayList<String>> hierarchy;
-    private Iterator destinationEntries;
-    private Entry nextDestinationEntry;
+    private Iterator dataBaseEntries;
+    private Entry nextDataBaseEntry;
     private final HashMap<String, Iterator> tableEntries;
     private final HashMap<String, String> nextTableEntry;
 
@@ -43,29 +43,29 @@ public class SQLCache {
     } // SQLCache
     
     /**
-     * Adds a destination name to the cache.
-     * @param destination
-     * @return True if the destination is added, false otherwise.
+     * Adds a dataBase name to the cache.
+     * @param dataBase
+     * @return True if the dataBase is added, false otherwise.
      */
-    public boolean addDestination(String destination) {
-        if (hierarchy.containsKey(destination)) {
-            LOGGER.debug("'" + destination + "' not added to the cache, since already existing");
+    public boolean addDataBase(String dataBase) {
+        if (hierarchy.containsKey(dataBase)) {
+            LOGGER.debug("'" + dataBase + "' not added to the cache, since already existing");
             return false;
         } else {
-            hierarchy.put(destination, new ArrayList<String>());
-            LOGGER.debug("'" + destination + "' added to the cache");
+            hierarchy.put(dataBase, new ArrayList<String>());
+            LOGGER.debug("'" + dataBase + "' added to the cache");
             return true;
         } // if else
-    } // addDestination
+    } // addDataBase
     
     /**
-     * Adds a table name within in a destination name to the cache.
-     * @param destination
+     * Adds a table name within in a dataBase name to the cache.
+     * @param dataBase
      * @param tableName
      * @return True if the table is added, false otherwise
      */
-    public boolean addTable(String destination, String tableName) {
-        ArrayList<String> tables = hierarchy.get(destination);
+    public boolean addTable(String dataBase, String tableName) {
+        ArrayList<String> tables = hierarchy.get(dataBase);
         
         if (tables != null) {
             if (tables.contains(tableName)) {
@@ -77,28 +77,28 @@ public class SQLCache {
                 return true;
             } // if else
         } else {
-            LOGGER.debug("'" + destination + "' was not added to the cache, since database/scheme did not exist");
+            LOGGER.debug("'" + dataBase + "' was not added to the cache, since database/scheme did not exist");
             return false;
         } // if else
     } // addTable
     
     /**
-     * Gets if a destination name is cached.
-     * @param destination
-     * @return True if the destination name is cached, false otherwise.
+     * Gets if a dataBase name is cached.
+     * @param dataBase
+     * @return True if the dataBase name is cached, false otherwise.
      */
-    public boolean isCachedDestination(String destination) {
-        return hierarchy.containsKey(destination);
-    } // isCachedDestination
+    public boolean isCachedDataBase(String dataBase) {
+        return hierarchy.containsKey(dataBase);
+    } // isCachedDataBase
     
     /**
-     * Gets if a table name within a destination name is cached.
-     * @param destination
+     * Gets if a table name within a dataBase name is cached.
+     * @param dataBase
      * @param tableName
      * @return True if the table name is cached, false otherwise.
      */
-    public boolean isCachedTable(String destination, String tableName) {
-        ArrayList<String> tables = hierarchy.get(destination);
+    public boolean isCachedTable(String dataBase, String tableName) {
+        ArrayList<String> tables = hierarchy.get(dataBase);
         
         if (tables == null) {
             return false;
@@ -108,51 +108,51 @@ public class SQLCache {
     } // isCachedTable
     
     /**
-     * Starts an interator for all the destination objects.
+     * Starts an interator for all the dataBase objects.
      */
-    public void startDestinationIterator() {
-        destinationEntries = hierarchy.entrySet().iterator();
-    } // startDestinationIterator
+    public void startDataBaseIterator() {
+        dataBaseEntries = hierarchy.entrySet().iterator();
+    } // startDataBaseIterator
     
     /**
-     * Checks if there is a next destination for iteration.
-     * @return True if there is a next destination for iteration, false otherwise.
+     * Checks if there is a next dataBase for iteration.
+     * @return True if there is a next dataBase for iteration, false otherwise.
      */
-    public boolean hasNextDestination() {
-        if (destinationEntries.hasNext()) {
-            nextDestinationEntry = (Entry) destinationEntries.next();
+    public boolean hasNextDataBase() {
+        if (dataBaseEntries.hasNext()) {
+            nextDataBaseEntry = (Entry) dataBaseEntries.next();
             return true;
         } else {
             return false;
         } // if else
-    } // hasNextDestination
+    } // hasNextDataBase
     
     /**
-     * Gets the next destination for iteration.
-     * @return The next destination for iteration.
+     * Gets the next dataBase for iteration.
+     * @return The next dataBase for iteration.
      */
-    public String nextDestination() {
-        return (String) nextDestinationEntry.getKey();
-    } // nextDestination
+    public String nextDataBase() {
+        return (String) nextDataBaseEntry.getKey();
+    } // nextDataBase
     
     /**
-     * Starts an iterator for all the tables within the given destination.
-     * @param destination
+     * Starts an iterator for all the tables within the given dataBase.
+     * @param dataBase
      */
-    public void startTableIterator(String destination) {
-        tableEntries.put(destination, hierarchy.get(destination).iterator());
+    public void startTableIterator(String dataBase) {
+        tableEntries.put(dataBase, hierarchy.get(dataBase).iterator());
     } // startTableIterator
     
     /**
-     * Checks if there is a next table for iteration within the given destination.
-     * @param destination
+     * Checks if there is a next table for iteration within the given dataBase.
+     * @param dataBase
      * @return True if there is a next table for iteration, false otherwise.
      */
-    public boolean hasNextTable(String destination) {
-        Iterator it = tableEntries.get(destination);
+    public boolean hasNextTable(String dataBase) {
+        Iterator it = tableEntries.get(dataBase);
         
         if (it.hasNext()) {
-            nextTableEntry.put(destination, (String) it.next());
+            nextTableEntry.put(dataBase, (String) it.next());
             return true;
         } else {
             return false;
@@ -161,11 +161,11 @@ public class SQLCache {
     
     /**
      * Gets the next table for iteration.
-     * @param destination
+     * @param dataBase
      * @return The next table for iteration.
      */
-    public String nextTable(String destination) {
-        return (String) nextTableEntry.get(destination);
+    public String nextTable(String dataBase) {
+        return (String) nextTableEntry.get(dataBase);
     } // nextTable
     
 } // SQLCache
