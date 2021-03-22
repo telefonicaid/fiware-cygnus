@@ -429,6 +429,7 @@ public class NGSIPostgisSink extends NGSISink {
         String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
         String schemaName = aggregator.getSchemeName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
+        String dbName = aggregator.getDbName(enableLowercase);
 
         // Escape a syntax error in SQL
         if (schemaName.equals(DEFAULT_FIWARE_SERVICE)) {
@@ -439,7 +440,7 @@ public class NGSIPostgisSink extends NGSISink {
             createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgisOptions, persistErrors, maxLatestErrors);
         }
 
-        LOGGER.debug("[" + this.getName() + "] Persisting data at NGSIPostgisSink. Schema ("
+        LOGGER.debug("[" + this.getName() + "] Persisting data at NGSIPostgisSink. DbName(" + dbName + "), Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
                 + valuesForInsert + ")");
 
