@@ -59,6 +59,7 @@ public class SQLBackendImplTest {
     private final String password = "";
     private final String dbName1 = "db1";
     private final String dbName2 = "db2";
+    private final String schema = "schema";
     private final String tableName1 = "table1";
     private final String tableName2 = "table2";
     private final String fieldNames1 = "(a INT, b INT)";
@@ -137,7 +138,7 @@ public class SQLBackendImplTest {
 
         try {
             if (!runRealTest) backend.setDriver(mockDriverTableCreate);
-            backend.createTable(dbName1, tableName1, fieldNames1);
+            backend.createTable(dbName1, null, tableName1, fieldNames1);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -149,7 +150,7 @@ public class SQLBackendImplTest {
 
         try {
             backend.createDestination(dbName2);
-            backend.createTable(dbName2, tableName2, fieldNames2);
+            backend.createTable(dbName2, schema, tableName2, fieldNames2);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -168,7 +169,7 @@ public class SQLBackendImplTest {
         try {
             if (!runRealTest) backend.setDriver(mockDriverTableCreate);
 
-            backend.insertContextData(dbName1, tableName1, fieldNamesInsert1, fieldValues1);
+            backend.insertContextData(dbName1, null, tableName1, fieldNamesInsert1, fieldValues1);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -180,7 +181,7 @@ public class SQLBackendImplTest {
 
         try {
             backend.createDestination(dbName2);
-            backend.createTable(dbName2, tableName2, fieldNames2);
+            backend.createTable(dbName2, schema, tableName2, fieldNames2);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
