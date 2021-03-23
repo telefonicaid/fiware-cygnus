@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.backends.sql;
 
 import com.google.gson.JsonElement;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -60,11 +61,11 @@ public class SQLQueryUtils {
                                                  String uniqueKey,
                                                  String timestampKey,
                                                  String timestampFormat,
-                                                 String sqlInstance,
+                                                 SQLInstance sqlInstance,
                                                  String destination,
                                                  boolean attrNativeTypes) {
 
-        if (sqlInstance.equals("postgresql")) {
+    if (sqlInstance == SQLInstance.POSTGRESQL){
             return postgreSqlUpsertQuery(aggregation,
                     lastData,
                     tableName,
@@ -75,7 +76,7 @@ public class SQLQueryUtils {
                     sqlInstance,
                     destination,
                     attrNativeTypes);
-        } else if (sqlInstance.equals("mysql")) {
+        } else if (sqlInstance == SQLInstance.MYSQL) {
             return mySqlUpsertQuery(aggregation,
                     lastData,
                     tableName,
@@ -111,7 +112,7 @@ public class SQLQueryUtils {
                                                         String uniqueKey,
                                                         String timestampKey,
                                                         String timestampFormat,
-                                                        String sqlInstance,
+                                                        SQLInstance sqlInstance,
                                                         String destination,
                                                         boolean attrNativeTypes) {
 
@@ -177,7 +178,7 @@ public class SQLQueryUtils {
                                                    String uniqueKey,
                                                    String timestampKey,
                                                    String timestampFormat,
-                                                   String sqlInstance,
+                                                   SQLInstance sqlInstance,
                                                    String destination,
                                                    boolean attrNativeTypes) {
 
@@ -272,7 +273,7 @@ public class SQLQueryUtils {
      */
     protected static StringBuffer sqlInsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                  String tableName,
-                                                 String sqlInstance,
+                                                 SQLInstance sqlInstance,
                                                  String destination,
                                                  boolean attrNativeTypes) {
 
@@ -291,11 +292,11 @@ public class SQLQueryUtils {
         StringBuffer postgisDestination = new StringBuffer(destination).append(".").append(tableName);
         StringBuffer query = new StringBuffer();
 
-        if (sqlInstance.equals("postgresql")) {
+        if (sqlInstance == SQLInstance.POSTGRESQL){
             fieldsForInsert = getFieldsForInsert(aggregation.keySet(), POSTGRES_FIELDS_MARK);
             query.append("INSERT INTO ").append(postgisDestination).append(" ").append(fieldsForInsert).append(" ").
                     append("VALUES ").append(valuesForInsert).append(" ");
-        } else if (sqlInstance.equals("mysql")) {
+        } else if (sqlInstance == SQLInstance.MYSQL) {
             fieldsForInsert = getFieldsForInsert(aggregation.keySet(), MYSQL_FIELDS_MARK);
             query.append("INSERT INTO ").append(MYSQL_FIELDS_MARK).append(tableName).append(MYSQL_FIELDS_MARK).append(" ").append(fieldsForInsert).append(" ").
                     append("VALUES ").append(valuesForInsert).append(" ");

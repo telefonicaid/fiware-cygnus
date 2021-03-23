@@ -34,18 +34,19 @@ public interface SQLBackend {
 
     /**
      * Creates a table, given its name, if not exists in the given database.
-     * @param destination
+     * @param dataBase
      * @param tableName
      * @param fieldNames
      * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
      * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
      */
-    void createTable(String destination, String tableName, String fieldNames)
+    void createTable(String dataBase, String schema, String tableName, String fieldNames)
             throws CygnusRuntimeError, CygnusPersistenceError;
 
     /**
      * Insert already processed context data into the given table within the given database.
-     * @param destination
+     * @param dataBase
+     * @param schema
      * @param tableName
      * @param fieldNames
      * @param fieldValues
@@ -53,18 +54,18 @@ public interface SQLBackend {
      * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
      * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
      */
-    void insertContextData(String destination, String tableName, String fieldNames, String fieldValues)
+    void insertContextData(String dataBase, String schema, String tableName, String fieldNames, String fieldValues)
             throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError;
 
     /**
      * Caps records from the given table within the given database according to the given maximum number.
-     * @param destination
+     * @param dataBase
      * @param tableName
      * @param maxRecords
      * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
      * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
      */
-    void capRecords(String destination, String tableName, long maxRecords) throws CygnusRuntimeError, CygnusPersistenceError;
+    void capRecords(String dataBase, String tableName, long maxRecords) throws CygnusRuntimeError, CygnusPersistenceError;
 
     /**
      * Expirates records within all the cached tables based on the expiration time.
