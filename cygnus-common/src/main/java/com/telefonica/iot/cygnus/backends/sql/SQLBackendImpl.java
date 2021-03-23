@@ -252,14 +252,14 @@ public class SQLBackendImpl implements SQLBackend{
         } // try catch
 
         try {
-            LOGGER.debug(sqlInstance.toString().toUpperCase() + " Executing SQL query '" + query + "'");
+            LOGGER.debug(sqlInstance.toString().toUpperCase() + "Database: " + dataBase + " Executing SQL query '" + query + "'");
             stmt.executeUpdate(query);
-            LOGGER.info(sqlInstance.toString().toUpperCase() + " Executed SQL query '" + query + "'");
+            LOGGER.info(sqlInstance.toString().toUpperCase() + "Database: " + dataBase + " Executed SQL query '" + query + "'");
         } catch (SQLTimeoutException e) {
-            throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data insertion error. Query insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLTimeoutException", e.getMessage());
+            throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + "Database: " + dataBase + " Data insertion error. Query insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
             persistError(dataBase, query, e);
-            throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " Data insertion error. Query: insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLException", e.getMessage());
+            throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + "Database: " + dataBase + " Data insertion error. Query: insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLException", e.getMessage());
         } finally {
             closeSQLObjects(con, stmt);
         } // try catch
