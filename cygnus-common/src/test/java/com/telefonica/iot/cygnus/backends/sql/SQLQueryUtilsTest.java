@@ -138,7 +138,7 @@ public class SQLQueryUtilsTest {
         String timestampKey = "recvTimeS";
         String timestampFormat = "YYYY-MM-DD HH24:MI:SS.MS";
         SQLInstance sqlInstance = SQLInstance.POSTGRESQL;
-        String destination = "example";
+        String schema = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
@@ -150,7 +150,8 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination,
+                null,
+                schema,
                 attrNativeTypes);
         sqlupsertQuery = upsertList.get(0);
         String correctQuery = "INSERT INTO example.exampleTable_last_data " +
@@ -180,7 +181,7 @@ public class SQLQueryUtilsTest {
         String timestampKey = "recvTimeS";
         String timestampFormat = "YYYY-MM-DD HH24:MI:SS.MS";
         SQLInstance sqlInstance = SQLInstance.POSTGRESQL;
-        String destination = "example";
+        String schema = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
@@ -192,7 +193,8 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination,
+                null,
+                schema,
                 attrNativeTypes);
         sqlupsertQuery = upsertList.get(0);
         String correctQuery = "INSERT INTO example.exampleTable_last_data " +
@@ -221,7 +223,7 @@ public class SQLQueryUtilsTest {
         String timestampKey = "recvTimeS";
         String timestampFormat = "YYYY-MM-DD HH24:MI:SS.MS";
         SQLInstance sqlInstance = SQLInstance.POSTGRESQL;
-        String destination = "example";
+        String schema = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
@@ -233,7 +235,8 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination,
+                null,
+                schema,
                 attrNativeTypes);
         try {
             assertEquals(new ArrayList<>(), upsertList);
@@ -253,7 +256,7 @@ public class SQLQueryUtilsTest {
         String timestampKey = "recvTimeS";
         String timestampFormat = "%Y-%m-%d %H:%i:%s.%f";
         SQLInstance sqlInstance = SQLInstance.MYSQL;
-        String destination = "example";
+        String dataBase = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
@@ -265,7 +268,8 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination,
+                dataBase,
+                null,
                 attrNativeTypes);
         sqlupsertQuery = upsertList.get(1);
         String correctQuery = "INSERT INTO `exampleTable_last_data` " +
@@ -302,7 +306,7 @@ public class SQLQueryUtilsTest {
         String timestampKey = "recvTimeS";
         String timestampFormat = "%Y-%m-%d %H:%i:%s.%f";
         SQLInstance sqlInstance = SQLInstance.MYSQL;
-        String destination = "example";
+        String dataBase = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
@@ -314,7 +318,8 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination,
+                dataBase,
+                null,
                 attrNativeTypes);
         sqlupsertQuery = upsertList.get(0);
 
@@ -350,7 +355,7 @@ public class SQLQueryUtilsTest {
         String timestampKey = "recvTimeS";
         String timestampFormat = "%Y-%m-%d %H:%i:%s.%f";
         SQLInstance sqlInstance = SQLInstance.MYSQL;
-        String destination = "example";
+        String dataBase = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
@@ -362,7 +367,8 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination,
+                dataBase,
+                null,
                 attrNativeTypes);
         try {
             assertEquals(new ArrayList<>(), upsertList);

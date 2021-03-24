@@ -436,6 +436,7 @@ public class NGSIMySQLSink extends NGSISink {
                 mySQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
                         aggregator.getLastDataToPersist(),
                         dbName,
+                        null,
                         tableName,
                         lastDataTableSuffix,
                         lastDataUniqueKey,

@@ -574,6 +574,7 @@ public class SQLBackendImpl implements SQLBackend{
     public void upsertTransaction (LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                    LinkedHashMap<String, ArrayList<JsonElement>> lastData,
                                    String dataBase,
+                                   String schema,
                                    String tableName,
                                    String tableSuffix,
                                    String uniqueKey,
@@ -621,6 +622,7 @@ public class SQLBackendImpl implements SQLBackend{
                     timestampFormat,
                     sqlInstance,
                     dataBase,
+                    schema,
                     attrNativeTypes);
             for (StringBuffer query : upsertQuerysList) {
                 PreparedStatement upsertStatement;

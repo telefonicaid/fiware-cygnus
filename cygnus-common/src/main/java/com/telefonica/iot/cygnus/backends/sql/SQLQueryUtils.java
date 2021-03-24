@@ -62,7 +62,8 @@ public class SQLQueryUtils {
                                                  String timestampKey,
                                                  String timestampFormat,
                                                  SQLInstance sqlInstance,
-                                                 String destination,
+                                                 String dataBase,
+                                                 String schema,
                                                  boolean attrNativeTypes) {
 
     if (sqlInstance == SQLInstance.POSTGRESQL){
@@ -74,7 +75,7 @@ public class SQLQueryUtils {
                     timestampKey,
                     timestampFormat,
                     sqlInstance,
-                    destination,
+                    schema,
                     attrNativeTypes);
         } else if (sqlInstance == SQLInstance.MYSQL) {
             return mySqlUpsertQuery(aggregation,
@@ -85,7 +86,7 @@ public class SQLQueryUtils {
                     timestampKey,
                     timestampFormat,
                     sqlInstance,
-                    destination,
+                    dataBase,
                     attrNativeTypes);
         }
         return null;
@@ -102,7 +103,7 @@ public class SQLQueryUtils {
      * @param timestampKey    the timestamp key
      * @param timestampFormat the timestamp format
      * @param sqlInstance     the sql instance
-     * @param destination     the destination
+     * @param schema          the destination
      * @return the string buffer
      */
     protected static ArrayList<StringBuffer> postgreSqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
@@ -113,12 +114,12 @@ public class SQLQueryUtils {
                                                         String timestampKey,
                                                         String timestampFormat,
                                                         SQLInstance sqlInstance,
-                                                        String destination,
+                                                        String schema,
                                                         boolean attrNativeTypes) {
 
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         StringBuffer postgisTempReference = new StringBuffer("EXCLUDED");
-        StringBuffer postgisDestination = new StringBuffer(destination).append(".").append(tableName).append(tableSuffix);
+        StringBuffer postgisDestination = new StringBuffer(schema).append(".").append(tableName).append(tableSuffix);
 
         for (int i = 0 ; i < collectionSizeOnLinkedHashMap(lastData) ; i++) {
             StringBuffer query = new StringBuffer();

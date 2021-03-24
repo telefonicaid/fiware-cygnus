@@ -439,6 +439,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 if (lastData && !rowAttrPersistence ) {
                     postgreSQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
                             aggregator.getLastDataToPersist(),
+                            databaseName,
                             schemaName,
                             tableName,
                             lastDataTableSuffix,

@@ -445,6 +445,7 @@ public class NGSIPostgisSink extends NGSISink {
             if (lastData && !rowAttrPersistence ) {
                 postgisPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
                         aggregator.getLastDataToPersist(),
+                        dataBaseName,
                         schemaName,
                         tableName,
                         lastDataTableSuffix,
