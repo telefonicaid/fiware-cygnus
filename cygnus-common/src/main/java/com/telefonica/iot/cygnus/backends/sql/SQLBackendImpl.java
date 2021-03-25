@@ -632,7 +632,7 @@ public class SQLBackendImpl implements SQLBackend{
                 upsertQuerys = upsertQuerys + " " + query;
             }
             connection.commit();
-            LOGGER.info("Finished transactions into database: " + dataBase + " \n" + upsertQuerys + "\n Also, some where Inserted. QUERY: " + insertQuery);
+            LOGGER.info(sqlInstance.toString().toUpperCase() + " Finished transactions into database: " + dataBase + " \n" + upsertQuerys + "\n Also, some where Inserted. QUERY: " + insertQuery);
 
         } catch (SQLTimeoutException e) {
             cygnusSQLRollback(connection);
