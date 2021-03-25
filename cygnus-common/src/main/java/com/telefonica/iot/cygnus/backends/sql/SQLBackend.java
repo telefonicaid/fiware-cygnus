@@ -35,6 +35,7 @@ public interface SQLBackend {
     /**
      * Creates a table, given its name, if not exists in the given database.
      * @param dataBase
+     * @param schema
      * @param tableName
      * @param fieldNames
      * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
