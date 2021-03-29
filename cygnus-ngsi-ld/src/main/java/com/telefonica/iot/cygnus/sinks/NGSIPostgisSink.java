@@ -23,6 +23,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
+import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequestLD;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
@@ -59,7 +60,7 @@ public class NGSIPostgisSink extends NGSILDSink {
     private static final String DEFAULT_POSTGIS_TYPE = "geometry";
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
     private static final String POSTGIS_DRIVER_NAME = "org.postgresql.Driver";
-    private static final String POSTGIS_INSTANCE_NAME = "postgresql";
+    private static final SQLInstance POSTGIS_INSTANCE_NAME = SQLInstance.POSTGRESQL;
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgisSink.class);
     private String postgisHost;
@@ -268,9 +269,7 @@ public class NGSIPostgisSink extends NGSILDSink {
     @Override
     public void start() {
         try {
-            if (buildDBName(null) != null) {
-                createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, buildDBName(null), postgisOptions);
-            }
+            createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, postgisOptions);
         } catch (Exception e) {
             LOGGER.error("Error while creating the Postgis persistence backend. Details="
                     + e.getMessage());
@@ -283,9 +282,9 @@ public class NGSIPostgisSink extends NGSILDSink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions) {
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlOptions) {
         if (postgisPersistenceBackend == null) {
-            postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, defaultSQLDataBase, sqlOptions);
+            postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, sqlOptions);
         }
     }
 
@@ -342,6 +341,7 @@ public class NGSIPostgisSink extends NGSILDSink {
         String typedFieldNames = aggregator.getTypedFieldNames();
         String fieldNames = aggregator.getFieldNames();
         String fieldValues = aggregator.getAggregation();
+        String dataBaseName = aggregator.getDataBaseName(enableLowercase);
         String schemaName = aggregator.getSchemaName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 
@@ -352,15 +352,15 @@ public class NGSIPostgisSink extends NGSILDSink {
         try {
             if (aggregator instanceof NGSIPostgisSink.RowAggregator) {
                 postgisPersistenceBackend.createDestination(schemaName);
-                postgisPersistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+                postgisPersistenceBackend.createTable(dataBaseName, schemaName, tableName, typedFieldNames);
             } else if (aggregator instanceof NGSIPostgisSink.ColumnAggregator){
                 postgisPersistenceBackend.createDestination(schemaName);
-                postgisPersistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+                postgisPersistenceBackend.createTable(dataBaseName, schemaName, tableName, typedFieldNames);
             }// if
             // creating the database and the table has only sense if working in row mode, in column node
             // everything must be provisioned in advance
 
-            postgisPersistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
+            postgisPersistenceBackend.insertContextData(dataBaseName, schemaName, tableName, fieldNames, fieldValues);
         } catch (Exception e) {
             throw new CygnusPersistenceError("-, " + e.getMessage());
         } // try catch
@@ -488,6 +488,7 @@ public class NGSIPostgisSink extends NGSILDSink {
         protected String entityTypeForNaming;
         protected String attributeForNaming;
         protected String schemaName;
+        protected String dataBaseName;
         protected String tableName;
         protected String typedFieldNames;
         protected String fieldNames;
@@ -499,6 +500,14 @@ public class NGSIPostgisSink extends NGSILDSink {
         public String getAggregation() {
             return aggregation;
         } // getAggregation
+
+        public String getDataBaseName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return dataBaseName.toLowerCase();
+            } else {
+                return dataBaseName;
+            } // if else
+        } // getDbName
 
         public String getSchemaName(boolean enableLowercase) {
             if (enableLowercase) {
@@ -533,6 +542,7 @@ public class NGSIPostgisSink extends NGSILDSink {
             attributeForNaming = event.getAttributeForNaming();
             schemaName = buildSchemaName(service);
             tableName = buildTableName(entityForNaming, entityTypeForNaming);
+            dataBaseName = buildDBName(service);
         } // initialize
 
         public abstract void aggregate(NGSILDEvent cygnusEvent);

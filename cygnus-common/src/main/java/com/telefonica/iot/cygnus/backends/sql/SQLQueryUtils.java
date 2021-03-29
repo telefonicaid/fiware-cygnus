@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.backends.sql;
 
 import com.google.gson.JsonElement;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -60,11 +61,12 @@ public class SQLQueryUtils {
                                                  String uniqueKey,
                                                  String timestampKey,
                                                  String timestampFormat,
-                                                 String sqlInstance,
-                                                 String destination,
+                                                 SQLInstance sqlInstance,
+                                                 String dataBase,
+                                                 String schema,
                                                  boolean attrNativeTypes) {
 
-        if (sqlInstance.equals("postgresql")) {
+    if (sqlInstance == SQLInstance.POSTGRESQL){
             return postgreSqlUpsertQuery(aggregation,
                     lastData,
                     tableName,
@@ -73,9 +75,9 @@ public class SQLQueryUtils {
                     timestampKey,
                     timestampFormat,
                     sqlInstance,
-                    destination,
+                    schema,
                     attrNativeTypes);
-        } else if (sqlInstance.equals("mysql")) {
+        } else if (sqlInstance == SQLInstance.MYSQL) {
             return mySqlUpsertQuery(aggregation,
                     lastData,
                     tableName,
@@ -84,7 +86,7 @@ public class SQLQueryUtils {
                     timestampKey,
                     timestampFormat,
                     sqlInstance,
-                    destination,
+                    dataBase,
                     attrNativeTypes);
         }
         return null;
@@ -101,7 +103,7 @@ public class SQLQueryUtils {
      * @param timestampKey    the timestamp key
      * @param timestampFormat the timestamp format
      * @param sqlInstance     the sql instance
-     * @param destination     the destination
+     * @param schema          the destination
      * @return the string buffer
      */
     protected static ArrayList<StringBuffer> postgreSqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
@@ -111,13 +113,13 @@ public class SQLQueryUtils {
                                                         String uniqueKey,
                                                         String timestampKey,
                                                         String timestampFormat,
-                                                        String sqlInstance,
-                                                        String destination,
+                                                        SQLInstance sqlInstance,
+                                                        String schema,
                                                         boolean attrNativeTypes) {
 
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         StringBuffer postgisTempReference = new StringBuffer("EXCLUDED");
-        StringBuffer postgisDestination = new StringBuffer(destination).append(".").append(tableName).append(tableSuffix);
+        StringBuffer postgisDestination = new StringBuffer(schema).append(".").append(tableName).append(tableSuffix);
 
         for (int i = 0 ; i < collectionSizeOnLinkedHashMap(lastData) ; i++) {
             StringBuffer query = new StringBuffer();
@@ -177,7 +179,7 @@ public class SQLQueryUtils {
                                                    String uniqueKey,
                                                    String timestampKey,
                                                    String timestampFormat,
-                                                   String sqlInstance,
+                                                   SQLInstance sqlInstance,
                                                    String destination,
                                                    boolean attrNativeTypes) {
 
@@ -272,7 +274,7 @@ public class SQLQueryUtils {
      */
     protected static StringBuffer sqlInsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                  String tableName,
-                                                 String sqlInstance,
+                                                 SQLInstance sqlInstance,
                                                  String destination,
                                                  boolean attrNativeTypes) {
 
@@ -291,11 +293,11 @@ public class SQLQueryUtils {
         StringBuffer postgisDestination = new StringBuffer(destination).append(".").append(tableName);
         StringBuffer query = new StringBuffer();
 
-        if (sqlInstance.equals("postgresql")) {
+        if (sqlInstance == SQLInstance.POSTGRESQL){
             fieldsForInsert = getFieldsForInsert(aggregation.keySet(), POSTGRES_FIELDS_MARK);
             query.append("INSERT INTO ").append(postgisDestination).append(" ").append(fieldsForInsert).append(" ").
                     append("VALUES ").append(valuesForInsert).append(" ");
-        } else if (sqlInstance.equals("mysql")) {
+        } else if (sqlInstance == SQLInstance.MYSQL) {
             fieldsForInsert = getFieldsForInsert(aggregation.keySet(), MYSQL_FIELDS_MARK);
             query.append("INSERT INTO ").append(MYSQL_FIELDS_MARK).append(tableName).append(MYSQL_FIELDS_MARK).append(" ").append(fieldsForInsert).append(" ").
                     append("VALUES ").append(valuesForInsert).append(" ");

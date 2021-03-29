@@ -1,1 +1,4 @@
+[cygnus-ngsi] [PostgisSink] Fix PostgreSQL encoding when enabled.
+[cygnus-ngsi] [MysqlSink, PostgisSink, PosgreSQLSink] Update sinks to initialize persistance backend objects without database. (#2004)
+[cygnus-common] Remove database initialization on constructors. (#2004)
 [cygnus-ngsi-ld] handle unitCode meta-property in NGSI-LD events received (#1997)
