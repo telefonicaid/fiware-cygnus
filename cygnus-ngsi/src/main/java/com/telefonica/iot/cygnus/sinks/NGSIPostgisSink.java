@@ -33,6 +33,7 @@ import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import org.apache.flume.Context;
 
 /**
