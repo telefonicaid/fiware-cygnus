@@ -38,6 +38,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import org.apache.flume.Context;
 
 /**
@@ -318,8 +319,14 @@ public class NGSIPostgreSQLSink extends NGSISink {
             createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, postgresqlOptions, persistErrors, maxLatestErrors);
             LOGGER.debug("[" + this.getName() + "] Postgresql persistence backend created");
         } catch (Exception e) {
-            LOGGER.error("Error while creating the PostgreSQL persistence backend. Details="
-                    + e.getMessage());
+            String configParams = " postgresqlHost " + postgresqlHost + " postgresqlPort " + postgresqlPort +
+                "  postgresqlUsername " + postgresqlUsername + " postgresqlPassword " + postgresqlPassword +
+                " maxPoolSize " +  maxPoolSize + " postgresqlOptions " +
+                postgresqlOptions + " persistErrors " +  persistErrors + " maxLatestErrors " + maxLatestErrors;
+            LOGGER.error("Error while creating the Postgresql persistence backend. " +
+                         "Config params= " + configParams +
+                         "Details=" + e.getMessage() +
+                         "Stack trace: " + Arrays.toString(e.getStackTrace()));
         } // try catch
 
         super.start();
