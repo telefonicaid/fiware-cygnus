@@ -326,7 +326,7 @@ public class NGSIPostgisSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] POSTGIS persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the Postgis persistence backend. Details="
-                    + e.getMessage());
+                         + e.getMessage() + " Stack trace: " + Arrays.toString(e.getStackTrace()));
         } // try catch
 
         super.start();
