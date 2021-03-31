@@ -33,6 +33,7 @@ import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import org.apache.flume.Context;
 
 /**
@@ -325,8 +326,13 @@ public class NGSIPostgisSink extends NGSISink {
             createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, postgisOptions, persistErrors, maxLatestErrors);
             LOGGER.debug("[" + this.getName() + "] POSTGIS persistence backend created");
         } catch (Exception e) {
-            LOGGER.error("Error while creating the Postgis persistence backend. Details="
-                    + e.getMessage());
+            String configParams = " postgisHost " + postgisHost + " postgisPort " + postgisPort + "  postgisUsername " +
+                postgisUsername + " postgisPassword " + postgisPassword + " maxPoolSize " +  maxPoolSize + " postgisOptions " +
+                postgisOptions + " persistErrors " +  persistErrors + " maxLatestErrors " + maxLatestErrors;
+            LOGGER.error("Error while creating the Postgis persistence backend. " +
+                         "Config params= " + configParams +
+                         "Details=" + e.getMessage() +
+                         "Stack trace: " + Arrays.toString(e.getStackTrace()));
         } // try catch
 
         super.start();
