@@ -171,6 +171,13 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Mon Apr 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.8.0
+- [cygnus-ngsi] [PostgisSink,PostgreSQL,MySQL] Add stack trace and config options to error log about createPersistenceBackend
+- [cygnus-ngsi] [PostgisSink] Fix PostgreSQL encoding when enabled.
+- [cygnus-ngsi] [MysqlSink, PostgisSink, PosgreSQLSink] Update sinks to initialize persistance backend objects without database. (#2004)
+- [cygnus-common] Remove database initialization on constructors. (#2004)
+- [cygnus-ngsi-ld] handle unitCode meta-property in NGSI-LD events received (#1997)
+
 * Fri Mar 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.7.0
 - [cygnus-common] Change log level of timeinstant parser chain (from error to debug)
 - [cygnus-common][ArcGis] New Rest based backend to persist Arcgis data (#1672)
