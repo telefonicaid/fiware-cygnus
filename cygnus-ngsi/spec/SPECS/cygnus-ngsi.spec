@@ -99,6 +99,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Mon Apr 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.8.0
+- [cygnus-ngsi] [PostgisSink,PostgreSQL,MySQL] Add stack trace and config options to error log about createPersistenceBackend
+- [cygnus-ngsi] [PostgisSink] Fix PostgreSQL encoding when enabled
+- [cygnus-ngsi] [MysqlSink, PostgisSink, PosgreSQLSink] Update sinks to initialize persistance backend objects without database (#2004)
+
 * Fri Mar 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.7.0
 - [cygnus-ngsi][NGSISink] Set srv and subsrv logs N/A in proccesBatch (#1983)
 - [cygnus-ngsi][NGSIArcgisFeatureTableSink] New sink to persist Arcgis data, removing the old ArgGis sink (#1672)
