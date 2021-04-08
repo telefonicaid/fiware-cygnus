@@ -326,7 +326,7 @@ RUN \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
     cd ${CYGNUS_HOME}/cygnus-ngsi && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
-    rm -rf /root/.m2 && rm -rf ${MVN_HOME} && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz && \
+    rm -rf /root/.m2 && rm -rf ${MVN_HOME} && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz
     #echo "INFO: Java runtime not needs JAVA_HOME... Unsetting..." && \
     #unset JAVA_HOME && \
     #yum erase -y git java-${JAVA_VERSION}-openjdk-devel && \
