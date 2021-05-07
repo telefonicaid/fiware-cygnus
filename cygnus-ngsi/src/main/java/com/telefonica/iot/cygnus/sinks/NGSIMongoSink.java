@@ -217,6 +217,16 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         ArrayList<Document> aggregation = new ArrayList<>();
         for (int i = 0 ; i < jsonObjects.size() ; i++) {
             BasicDBObject basicDBObject = BasicDBObject.parse(jsonObjects.get(i).toString());
+            // check basicDBObject and convert DateTIme
+            for ( String key :  basicDBObject.keySet() ) {
+                LOGGER.debug("[" + this.getName() + "] key: " + key + " value: " +  basicDBObject.get(key));
+                try {
+                    Date date = new Date(CommonUtils.getTimeInstantFromString(basicDBObject.get(key)));
+                    basicDBObject.put(key, date);
+                } catch (Exception e) {
+                    // do nothing
+                }
+            }
             aggregation.add(new Document(basicDBObject.toMap()));
             if (rowAttrPersistence) {
                 Long timeInstant;
