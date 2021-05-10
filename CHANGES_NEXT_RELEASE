@@ -1,1 +1,1 @@
-- [cygnus-ngsi][MongoSink] Cast to mongo Date type all NGSI DateTime attributes in column mode (#2020)
+- [cygnus-ngsi][MongoSink] Cast to mongo Date type all NGSI DateTime attributes in column and row mode (#2020)
