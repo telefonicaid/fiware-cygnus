@@ -238,9 +238,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                 if ( (attType != null) &&
                      (attType.toString().contains("ISO8601") ||
                       attType.toString().contains("DateTime")) ) {
-                    for (String key : basicDBObject.keySet()) {
-                        basicDBObject = castDate(key, basicDBObject);
-                    }
+                    basicDBObject = castDate(NGSIConstants.ATTR_VALUE, basicDBObject);
                 }
             } else {
                 for (String key : basicDBObject.keySet()) {
