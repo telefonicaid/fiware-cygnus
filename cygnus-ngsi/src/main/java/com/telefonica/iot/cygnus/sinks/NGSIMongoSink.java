@@ -222,7 +222,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             LOGGER.error("[" + this.getName() + "] Casting to Date att with key: " + key + " value: "
                          + basicDBObject.get(key) + " Details=" + e.getMessage());
         }
-        return basicObject;
+        return basicDBObject;
     }
     
     private void persistAggregation(NGSIGenericAggregator aggregator) throws CygnusPersistenceError {
