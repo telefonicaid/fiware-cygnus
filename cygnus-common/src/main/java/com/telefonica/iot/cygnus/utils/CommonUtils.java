@@ -462,12 +462,12 @@ public final class CommonUtils {
         LOGGER.debug("Loading hadoop-core from " + myClassURL.toExternalForm());
         
         // trace the file containing the hive-exec library
-        //myClassURL = AbstractMapJoinOperator.class.getProtectionDomain().getCodeSource().getLocation();
-        //LOGGER.debug("Loading hive-exec from " + myClassURL.toExternalForm());
+        myClassURL = AbstractMapJoinOperator.class.getProtectionDomain().getCodeSource().getLocation();
+        LOGGER.debug("Loading hive-exec from " + myClassURL.toExternalForm());
         
-        //// trace the file containing the hive-jdbc library
-        myClassURL = HivePreparedStatement.class.getProtectionDomain().getCodeSource().getLocation();
-        LOGGER.debug("Loading hive-jdbc from " + myClassURL.toExternalForm());
+        // trace the file containing the hive-jdbc library
+        //myClassURL = HivePreparedStatement.class.getProtectionDomain().getCodeSource().getLocation();
+        //LOGGER.debug("Loading hive-jdbc from " + myClassURL.toExternalForm());
         
         // trace the file containing the mongodb-driver library
         myClassURL = AsyncReadWriteBinding.class.getProtectionDomain().getCodeSource().getLocation();
