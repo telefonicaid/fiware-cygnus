@@ -58,12 +58,13 @@
             <artifactId>cygnus-common</artifactId>
             <version>2.9.0</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.jodd/jodd -->
+             <!-- https://mvnrepository.com/artifact/org.jodd/jodd-util -->
         <dependency>
             <groupId>org.jodd</groupId>
-            <artifactId>jodd</artifactId>
-            <version>3.3.2</version>
-        </dependency>          
+            <artifactId>jodd-util</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+
              
     </dependencies>
 
