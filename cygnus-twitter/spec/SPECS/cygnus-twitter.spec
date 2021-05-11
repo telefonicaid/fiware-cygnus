@@ -99,6 +99,21 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Mon May 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.9.0
+
+* Mon Apr 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.8.0
+
+* Fri Mar 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.7.0
+- [cygnus-common][cygnus-ngsi][cygnus-ngsi-ld][cygnus-twitter] Upgrade Dockerfile base image from 7.6.1810 to centos7.9.2009
+
+* Thu Nov 4 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.6.0
+
+* Tue Oct 20 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.5.0
+
+* Fri Sep 04 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.4.0
+
+* Wed Jul 15 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.3.0
+
 * Tue Jun 23 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.2.0
 
 * Thu May 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.1.0
@@ -153,4 +168,3 @@ rm -rf $RPM_BUILD_ROOT
 - [cygnus-twitter][feature] Add cygnus-twitter (#1023)
 - [cygnus-twitter] [feature] Log time in UTC format (#1071)
 - [cygnus-twitter] Add documentation about logs and alarms (#1092)
-

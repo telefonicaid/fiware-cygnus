@@ -21,7 +21,9 @@ package com.telefonica.iot.cygnus.sinks;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
+import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
+import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
@@ -30,11 +32,13 @@ import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.CommonConstants;
-import com.telefonica.iot.cygnus.utils.NGSICharsets;
-import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import com.telefonica.iot.cygnus.utils.NGSIUtils;
+import com.telefonica.iot.cygnus.utils.*;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import org.apache.flume.Context;
 
 /**
@@ -54,9 +58,15 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
     private static final String POSTGRESQL_DRIVER_NAME = "org.postgresql.Driver";
-    private static final String POSTGRESQL_INSTANCE_NAME = "postgresql";
+    private static final SQLInstance POSTGRESQL_INSTANCE_NAME = SQLInstance.POSTGRESQL;
     private static final String DEFAULT_FIWARE_SERVICE = "default";
     private static final String ESCAPED_DEFAULT_FIWARE_SERVICE = "default_service";
+    private static final String DEFAULT_LAST_DATA = "false";
+    private static final String DEFAULT_LAST_DATA_TABLE_SUFFIX = "_last_data";
+    private static final String DEFAULT_LAST_DATA_UNIQUE_KEY = NGSIConstants.ENTITY_ID;
+    private static final String DEFAULT_LAST_DATA_TIMESTAMP_KEY = NGSIConstants.RECV_TIME;
+    private static final String DEFAULT_LAST_DATA_SQL_TS_FORMAT = "YYYY-MM-DD HH24:MI:SS.MS";
+    private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgreSQLSink.class);
     private String postgresqlHost;
@@ -71,6 +81,13 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
     private String postgresqlOptions;
+    private boolean persistErrors;
+    private boolean lastData;
+    private String lastDataTableSuffix;
+    private String lastDataUniqueKey;
+    private String lastDataTimeStampKey;
+    private String lastDataSQLTimestampFormat;
+    private int maxLatestErrors;
 
     /**
      * Constructor.
@@ -236,32 +253,80 @@ public class NGSIPostgreSQLSink extends NGSISink {
 
 
 
-        String attrMetadataStoreSrt = context.getString("attr_metadata_store", "true");
+        String attrMetadataStoreStr = context.getString("attr_metadata_store", "true");
 
-        if (attrMetadataStoreSrt.equals("true") || attrMetadataStoreSrt.equals("false")) {
-            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreSrt);
+        if (attrMetadataStoreStr.equals("true") || attrMetadataStoreStr.equals("false")) {
+            attrMetadataStore = Boolean.parseBoolean(attrMetadataStoreStr);
             LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_metadata_store="
                     + attrMetadataStore + ")");
         } else {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
-                    + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
+                    + attrMetadataStoreStr + ") -- Must be 'true' or 'false'");
         }
+
+        String lastDataStr = context.getString("enable_last_data", DEFAULT_LAST_DATA);
+
+        if (lastDataStr.equals("true") || lastDataStr.equals("false")) {
+            lastData = Boolean.parseBoolean(lastDataStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data="
+                    + lastDataStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (last_data="
+                    + lastDataStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
+        lastDataTableSuffix = context.getString("last_data_table_suffix", DEFAULT_LAST_DATA_TABLE_SUFFIX);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_table_suffix="
+                + lastDataTableSuffix + ")");
+
+        lastDataUniqueKey = context.getString("last_data_unique_key", DEFAULT_LAST_DATA_UNIQUE_KEY);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_unique_key="
+                + lastDataUniqueKey + ")");
+
+        lastDataTimeStampKey = context.getString("last_data_timestamp_key", DEFAULT_LAST_DATA_TIMESTAMP_KEY);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_timestamp_key="
+                + lastDataTimeStampKey + ")");
+
+        lastDataSQLTimestampFormat = context.getString("last_data_sql_timestamp_format", DEFAULT_LAST_DATA_SQL_TS_FORMAT);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_sql_timestamp_format="
+                + lastDataSQLTimestampFormat + ")");
 
         postgresqlOptions = context.getString("postgresql_options", null);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_options=" + postgresqlOptions + ")");
+
+        String persistErrorsStr = context.getString("persist_errors", "true");
+
+        if (persistErrorsStr.equals("true") || persistErrorsStr.equals("false")) {
+            persistErrors = Boolean.parseBoolean(persistErrorsStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (persist_errors="
+                    + persistErrors + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (persist_errors="
+                    + persistErrorsStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
+        maxLatestErrors = context.getInteger("max_latest_errors", DEFAULT_MAX_LATEST_ERRORS);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (max_latest_errors=" + maxLatestErrors + ")");
 
     } // configure
 
     @Override
     public void start() {
         try {
-            if (buildDBName(null) != null) {
-                createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, postgresqlDatabase, postgresqlOptions);
-            }
+            createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, postgresqlOptions, persistErrors, maxLatestErrors);
+            LOGGER.debug("[" + this.getName() + "] Postgresql persistence backend created");
         } catch (Exception e) {
-            LOGGER.error("Error while creating the PostgreSQL persistence backend. Details="
-                    + e.getMessage());
+            String configParams = " postgresqlHost " + postgresqlHost + " postgresqlPort " + postgresqlPort +
+                "  postgresqlUsername " + postgresqlUsername + " postgresqlPassword " + postgresqlPassword +
+                " maxPoolSize " +  maxPoolSize + " postgresqlOptions " +
+                postgresqlOptions + " persistErrors " +  persistErrors + " maxLatestErrors " + maxLatestErrors;
+            LOGGER.error("Error while creating the Postgresql persistence backend. " +
+                         "Config params= " + configParams +
+                         "Details=" + e.getMessage() +
+                         "Stack trace: " + Arrays.toString(e.getStackTrace()));
         } // try catch
 
         super.start();
@@ -271,11 +336,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions) {
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
         if (postgreSQLPersistenceBackend == null) {
-            postgreSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, defaultSQLDataBase, sqlOptions);
-        } else {
-            LOGGER.info("The database name will be created on runtime, so if there is an specified database on the agent properties and you expect it to be read on startup, then you shoul look for the data model you are using. Maybe it's not the correct one");
+            postgreSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, sqlOptions, persistErrors, maxLatestErrors);
         }
     }
 
@@ -308,10 +371,13 @@ public class NGSIPostgreSQLSink extends NGSISink {
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
             aggregator.setSchemeName(buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
             aggregator.setDbName(buildDBName(events.get(0).getServiceForNaming(enableNameMappings)));
-            aggregator.setSchemeName(buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
             aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
             aggregator.setAttrNativeTypes(attrNativeTypes);
             aggregator.setAttrMetadataStore(attrMetadataStore);
+            aggregator.setEnableNameMappings(enableNameMappings);
+            aggregator.setEnableLastData(lastData);
+            aggregator.setLastDataTimestampKey(lastDataTimeStampKey);
+            aggregator.setLastDataUniqueKey(lastDataUniqueKey);
             aggregator.initialize(events.get(0));
 
             for (NGSIEvent event : events) {
@@ -330,6 +396,14 @@ public class NGSIPostgreSQLSink extends NGSISink {
 
     @Override
     public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
+        LOGGER.debug("[" + this.getName() + "] Expirating records (time=" + expirationTime + ")");
+        try {
+            postgreSQLPersistenceBackend.expirateRecordsCache(expirationTime);
+        } catch (CygnusRuntimeError e) {
+            throw new CygnusExpiratingError("Data expiration error", "CygnusRuntimeError", e.getMessage());
+        } catch (CygnusPersistenceError e) {
+            throw new CygnusExpiratingError("Data expiration error", "CygnusPersistenceError", e.getMessage());
+        } // try catch
     } // expirateRecords
 
     protected NGSIGenericAggregator getAggregator(boolean rowAttrPersistence) {
@@ -345,6 +419,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
         String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist());
         String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
         String schemaName = aggregator.getSchemeName(enableLowercase);
+        String databaseName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
 
         // Escape a syntax error in SQL
@@ -352,18 +427,14 @@ public class NGSIPostgreSQLSink extends NGSISink {
             schemaName = ESCAPED_DEFAULT_FIWARE_SERVICE;
         }
 
-        if (postgreSQLPersistenceBackend == null) {
-            createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, aggregator.getDbName(enableLowercase), postgresqlOptions);
-        }
-
-        LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgreSQLSink. Schema ("
+        LOGGER.debug("[" + this.getName() + "] Persisting data at NGSIPostgreSQLSink. Database (" + databaseName + ")  Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
                 + valuesForInsert + ")");
         
         try {
             if (aggregator instanceof NGSIGenericRowAggregator) {
                 postgreSQLPersistenceBackend.createDestination(schemaName);
-                postgreSQLPersistenceBackend.createTable(schemaName, tableName, fieldsForCreate);
+                postgreSQLPersistenceBackend.createTable(databaseName, schemaName, tableName, fieldsForCreate);
             } // if
             // creating the database and the table has only sense if working in row mode, in column node
             // everything must be provisioned in advance
@@ -371,7 +442,20 @@ public class NGSIPostgreSQLSink extends NGSISink {
             if (valuesForInsert.equals("")) {
                 LOGGER.debug("[" + this.getName() + "] no values for insert");
             } else {
-                postgreSQLPersistenceBackend.insertContextData(schemaName, tableName, fieldsForInsert, valuesForInsert);
+                if (lastData && !rowAttrPersistence ) {
+                    postgreSQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
+                            aggregator.getLastDataToPersist(),
+                            databaseName,
+                            schemaName,
+                            tableName,
+                            lastDataTableSuffix,
+                            lastDataUniqueKey,
+                            lastDataTimeStampKey,
+                            lastDataSQLTimestampFormat,
+                            attrNativeTypes);
+                } else {
+                    postgreSQLPersistenceBackend.insertContextData(databaseName, schemaName, tableName, fieldsForInsert, valuesForInsert);
+                }
             }
         } catch (Exception e) {
             throw new CygnusPersistenceError("-, " + e.getMessage());

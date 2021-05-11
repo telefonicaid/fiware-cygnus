@@ -883,7 +883,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "x002fsomePathxffffsomeType";
+            String expecetedTableName = "x002fsomex0050athxffffsomex0054ype";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);
@@ -1183,7 +1183,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "x002fxffffsomeType";
+            String expecetedTableName = "x002fxffffsomex0054ype";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);
@@ -1598,7 +1598,7 @@ public class NGSIPostgisSinkTest {
         attributes.add(contextAttribute2);
         attributes.add(contextAttribute1);
         ContextElement contextElement = new ContextElement();
-        contextElement.setId("someId");
+        contextElement.setId("someId2");
         contextElement.setType("someType");
         contextElement.setIsPattern("false");
         contextElement.setAttributes(attributes);
@@ -1627,7 +1627,36 @@ public class NGSIPostgisSinkTest {
         attributes.add(contextAttribute1);
         attributes.add(contextAttribute2);
         ContextElement contextElement = new ContextElement();
-        contextElement.setId("someId");
+        contextElement.setId("someId2");
+        contextElement.setType("someType");
+        contextElement.setIsPattern("false");
+        contextElement.setAttributes(attributes);
+        return contextElement;
+    } // createContextElement
+
+    private ContextElement createMappedContextElement2() {
+        NotifyContextRequest notifyContextRequest = new NotifyContextRequest();
+        ContextMetadata contextMetadata = new ContextMetadata();
+        contextMetadata.setName("location");
+        contextMetadata.setType("string");
+        contextMetadata.setContextMetadata(new JsonPrimitive("NewWGS84"));
+        ArrayList<ContextMetadata> metadata = new ArrayList<>();
+        metadata.add(contextMetadata);
+        ContextAttribute contextAttribute1 = new ContextAttribute();
+        contextAttribute1.setName("someName1");
+        contextAttribute1.setType("geo:point");
+        contextAttribute1.setContextValue(new JsonPrimitive("-3.7167, 40.3833"));
+        contextAttribute1.setContextMetadata(metadata);
+        ContextAttribute contextAttribute2 = new ContextAttribute();
+        contextAttribute2.setName("someName2");
+        contextAttribute2.setType("someType2");
+        contextAttribute2.setContextValue(new JsonPrimitive("someValue2New"));
+        contextAttribute2.setContextMetadata(null);
+        ArrayList<ContextAttribute> attributes = new ArrayList<>();
+        attributes.add(contextAttribute1);
+        attributes.add(contextAttribute2);
+        ContextElement contextElement = new ContextElement();
+        contextElement.setId("someId2");
         contextElement.setType("someType");
         contextElement.setIsPattern("false");
         contextElement.setAttributes(attributes);
@@ -1709,16 +1738,55 @@ public class NGSIPostgisSinkTest {
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        String timestamp2 = "1461136795800";
+        String correlatorId2 = "123456789";
+        String transactionId2 = "123456789";
+        String originalService2 = "someService";
+        String originalServicePath2 = "somePath";
+        String mappedService2 = "newService";
+        String mappedServicePath2 = "newPath";
+        String destination2 = "someDestination";
+        Map<String, String> headers2 = new HashMap<>();
+        headers2.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp2);
+        headers2.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId2);
+        headers2.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId2);
+        headers2.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService2);
+        headers2.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath2);
+        headers2.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService2);
+        headers2.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath2);
         NotifyContextRequest.ContextElement contextElement = createContextElementForNativeTypes();
         NotifyContextRequest.ContextElement contextElement2 = createContextElement();
         NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
-        NGSIEvent ngsiEvent2 = new NGSIEvent(headers, contextElement2.toString().getBytes(), contextElement2, createMappedContextElement());
+        NGSIEvent ngsiEvent2 = new NGSIEvent(headers2, contextElement2.toString().getBytes(), contextElement2, createMappedContextElement());
         NGSIBatch batch = new NGSIBatch();
         batch.addEvent(destination, ngsiEvent);
-        batch.addEvent(destination, ngsiEvent2);
+        batch.addEvent(destination2, ngsiEvent2);
         return batch;
     }
 
+    public NGSIBatch setUpLastDataBatch() {
+        String timestamp = "1461136795802";
+        String correlatorId = "123456789";
+        String transactionId = "123456789";
+        String originalService = "someService";
+        String originalServicePath = "somePath";
+        String mappedService = "newService";
+        String mappedServicePath = "newPath";
+        String destination = "someDestination";
+        Map<String, String> headers = new HashMap<>();
+        headers.put(NGSIConstants.FLUME_HEADER_TIMESTAMP, timestamp);
+        headers.put(CommonConstants.HEADER_CORRELATOR_ID, correlatorId);
+        headers.put(NGSIConstants.FLUME_HEADER_TRANSACTION_ID, transactionId);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE, originalService);
+        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE, mappedService);
+        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
+        NotifyContextRequest.ContextElement contextElement = createMappedContextElement2();
+        NGSIEvent ngsiEvent = new NGSIEvent(headers, contextElement.toString().getBytes(), contextElement, null);
+        NGSIBatch batch = setUpBatch();
+        batch.addEvent(destination, ngsiEvent);
+        return batch;
+    }
 
     @Test
     public void testNativeTypeColumnBatch() throws CygnusBadConfiguration{
@@ -1750,10 +1818,58 @@ public class NGSIPostgisSinkTest {
                     aggregator.aggregate(event);
                 }
             }
-            String correctBatch = "('2016-04-20 07:19:55.801','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20 07:19:55.801','somePath','someId','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
+            String correctBatch = "('2016-04-20 07:19:55.801','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20 07:19:55.800','somePath','someId2','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
             String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
             if (valuesForInsert.equals(correctBatch)) {
                 System.out.println(getTestTraceHead("[NGSIMySQKSink.testNativeTypesColumnBatch]")
+                        + "-  OK  - NativeTypesOK");
+                assertTrue(true);
+            } else {
+                assertFalse(true);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            assertFalse(true);
+        }
+    }
+
+    @Test
+    public void testNativeTypeColumnBatchLastData() throws CygnusBadConfiguration{
+        String attr_native_types = "true";
+        NGSIBatch batch = setUpLastDataBatch();
+        String destination = "someDestination";
+        NGSIPostgisSink ngsiPostgisSink = new NGSIPostgisSink();
+        ngsiPostgisSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        try {
+            batch.startIterator();
+            NGSIGenericAggregator aggregator = ngsiPostgisSink.getAggregator(false);
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setDbName(ngsiPostgisSink.buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
+                aggregator.setTableName(ngsiPostgisSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
+                aggregator.setAttrNativeTypes(true);
+                aggregator.setEnableGeoParse(true);
+                aggregator.setAttrMetadataStore(true);
+                aggregator.setEnableNameMappings(true);
+                aggregator.setLastDataTimestampKey(NGSIConstants.RECV_TIME);
+                aggregator.setLastDataUniqueKey("entityid");
+                aggregator.setEnableLastData(true);
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                }
+            }
+            String correctBatch = "('2016-04-20 07:19:55.801','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20 07:19:55.802','somePath','someId2','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"NewWGS84\"}]','someValue2New','[]')";
+            String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getLastDataToPersist(), aggregator.isAttrNativeTypes());
+            if (valuesForInsert.equals(correctBatch)) {
+                System.out.println(getTestTraceHead("[NGSIMySQKSink.testNativeTypeColumnBatchLastData]")
                         + "-  OK  - NativeTypesOK");
                 assertTrue(true);
             } else {

@@ -16,14 +16,14 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
-FROM centos:centos7.6.1810
+FROM centos:centos7.9.2009
 
 MAINTAINER Javi Palanca <jpalanca@dsic.upv.es>
 
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "2.2.0_SNAPSHOT"
+ENV CYGNUS_VERSION "2.9.0_SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-twitter"

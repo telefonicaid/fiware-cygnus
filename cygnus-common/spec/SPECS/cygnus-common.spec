@@ -171,6 +171,34 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Mon May 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.9.0
+- [cygnus-ngsi][MongoSink] Cast to mongo Date type all NGSI DateTime attributes in column and row mode (#2020)
+
+* Mon Apr 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.8.0
+- [cygnus-common] Remove database initialization on constructors (#2004)
+
+* Fri Mar 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.7.0
+- [cygnus-common] Change log level of timeinstant parser chain (from error to debug)
+- [cygnus-common][ArcGis] New Rest based backend to persist Arcgis data (#1672)
+- [cygnus-common][cygnus-ngsi][cygnus-ngsi-ld][cygnus-twitter] Upgrade Dockerfile base image from 7.6.1810 to centos7.9.2009
+
+* Thu Nov 4 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.6.0
+- [cygnus-common][SQLBackendImpl] Avoid use word `purge` as tmp when purge mysql error table due is a reserved word in mysql
+
+* Tue Oct 20 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.5.0
+- [cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Remove PreparedStatement building, to use String query (walkaround for #1959)
+- [cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Log info about persisted data (#1939)
+- [cygnus-ngsi, cygnus-common][PosgtgreSQLSink, PostgisSink, MySQLSQLSink] Create upsert transaction (#1806, #1936)
+- [cygnus-common][NameMappingInterceptor] Catch and log Compile error namemapping (#1924)
+- [cygnus-common][SQLBackendImpl] Add configuration option to persist errors in SQL sinks (#1928)
+- [cygnus-common][SQLBackendImpl] Purge automatically persistence error logs table, keeping latest errors (max_latest_errors setting) (#1929)
+- [cygnus-common] Add new methods in class CKANBackendImpl for allowing the creation of the data store with ngsi-ld notifications
+
+* Fri Sep 04 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.4.0
+- [cygnus-common][SQLBackendImpl] Exception handle for connection/statement SQL objects (#1907)
+
+* Wed Jul 15 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.3.0
+
 * Tue Jun 23 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.2.0
 
 * Thu May 07 2020 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.1.0

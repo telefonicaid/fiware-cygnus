@@ -1606,6 +1606,7 @@ public class NGSIPostgreSQLSinkTest {
                 aggregator.setTableName(ngsiPostgreSQLSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
                 aggregator.setAttrNativeTypes(true);
                 aggregator.setAttrMetadataStore(true);
+                aggregator.setEnableNameMappings(true);
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);

@@ -16,14 +16,14 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
-FROM centos:centos7.6.1810
-
-MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
+FROM centos:centos7.9.2009
+ARG GITHUB_ACCOUNT=telefonicaid
+ARG GITHUB_REPOSITORY=fiware-cygnus
 
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "2.2.0_SNAPSHOT"
+ENV CYGNUS_VERSION "2.9.0_SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
@@ -62,6 +62,7 @@ ENV CYGNUS_MYSQL_OPTIONS ""
 ENV CYGNUS_MONGO_HOSTS ""
 # ENV CYGNUS_MONGO_USER "" # Warning: For development use only - Storing sensitive information in clear text is insecure
 # ENV CYGNUS_MONGO_PASS "" # Warning: For development use only - Storing sensitive information in clear text is insecure
+ENV CYGNUS_MONGO_REPLICA_SET ""
 ENV CYGNUS_MONGO_AUTH_SOURCE ""
 ENV CYGNUS_MONGO_SKIP_CONF_GENERATION ""
 ENV CYGNUS_MONGO_SERVICE_PORT "5051"
@@ -247,7 +248,7 @@ ENV CYGNUS_ELASTICSEARCH_CHARSET ""
 
 # ArcGis options
 ENV CYGNUS_ARCGIS_URL ""
-ENV CYGNUS_ARCGIS_USER "" 
+ENV CYGNUS_ARCGIS_USER ""
 ENV CYGNUS_ARCGIS_SERVICE_PORT "5059"
 ENV CYGNUS_ARCGIS_PASS ""
 ENV CYGNUS_ELASTICSEARCH_SKIP_CONF_GENERATION ""
@@ -310,7 +311,6 @@ RUN \
     cd ${CYGNUS_HOME}/cygnus-ngsi && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean compile exec:exec assembly:single && \
     cp target/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar ${FLUME_HOME}/plugins.d/cygnus/lib/ && \
-    cp ${CYGNUS_HOME}/cygnus-ngsi/src/main/resources/ArcgisUtils-0.0.1-SNAPSHOT.jar ${FLUME_HOME}/plugins.d/cygnus/lib/ && \
     echo "INFO: Install Cygnus Application script" && \
     cp ${CYGNUS_HOME}/cygnus-common/target/classes/cygnus-flume-ng ${FLUME_HOME}/bin/ && \
     chmod +x ${FLUME_HOME}/bin/cygnus-flume-ng && \
@@ -338,9 +338,10 @@ RUN \
     build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf && echo "INFO: END build"
 
 
-COPY docker/cygnus-ngsi/cygnus-entrypoint.sh / 
-COPY docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/ 
+COPY docker/cygnus-ngsi/cygnus-entrypoint.sh /
+COPY docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/
 COPY docker/cygnus-ngsi/agent.conf ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf
+RUN true
 COPY docker/cygnus-ngsi/cartodb_keys.conf ${FLUME_HOME}/conf/
 
 # Define the entry point
@@ -348,4 +349,13 @@ ENTRYPOINT ["/cygnus-entrypoint.sh"]
 
 # Ports used by cygnus-ngsi
 EXPOSE ${CYGNUS_SERVICE_PORT} ${CYGNUS_API_PORT}
+
+LABEL "maintainer"="Cygnus Team. Telefónica I+D"
+LABEL "org.opencontainers.image.authors"="iot_support@tid.es"
+LABEL "org.opencontainers.image.documentation"="https://fiware-cygnus.rtfd.io/"
+LABEL "org.opencontainers.image.vendor"="Telefónica Investigación y Desarrollo, S.A.U"
+LABEL "org.opencontainers.image.licenses"="AGPL-3.0-only"
+LABEL "org.opencontainers.image.title"="Cygnus Data Persistence"
+LABEL "org.opencontainers.image.description"="A connector in charge of persisting context data sources into other third-party databases and storage systems, creating a historical view of the context"
+LABEL "org.opencontainers.image.source"=https://github.com/${GITHUB_ACCOUNT}/${GITHUB_REPOSITORY}
 

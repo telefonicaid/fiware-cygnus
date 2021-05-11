@@ -19,6 +19,7 @@
 package com.telefonica.iot.cygnus.backends.sql;
 
 import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl.SQLDriver;
+import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,6 +59,7 @@ public class SQLBackendImplTest {
     private final String password = "";
     private final String dbName1 = "db1";
     private final String dbName2 = "db2";
+    private final String schema = "schema";
     private final String tableName1 = "table1";
     private final String tableName2 = "table2";
     private final String fieldNames1 = "(a INT, b INT)";
@@ -65,7 +67,9 @@ public class SQLBackendImplTest {
     private final String fieldValues1 = "(1,2)";
     private final String fieldNames2 = "c text, d text";
     private static final String MYSQL_DRIVER_NAME = "com.mysql.jdbc.Driver";
-    private static final String MYSQL_INSTANCE_NAME = "mysql";
+    private  SQLInstance MYSQL_INSTANCE_NAME = SQLInstance.MYSQL;
+    private final Boolean persistErrors = true;
+    private final int maxLatestErrors = 100;
 
     // True: real test, False: Mock test
     private final boolean runRealTest = false;
@@ -79,7 +83,7 @@ public class SQLBackendImplTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new SQLBackendImpl(host, port, user, password, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null);
+        backend = new SQLBackendImpl(host, port, user, password, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null, persistErrors, maxLatestErrors);
 
         // set up the behaviour of the mocked classes
         when(mockDriverDbCreate.getConnection(Mockito.anyString())).thenReturn(mockConnection);
@@ -134,7 +138,7 @@ public class SQLBackendImplTest {
 
         try {
             if (!runRealTest) backend.setDriver(mockDriverTableCreate);
-            backend.createTable(dbName1, tableName1, fieldNames1);
+            backend.createTable(dbName1, null, tableName1, fieldNames1);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -146,7 +150,7 @@ public class SQLBackendImplTest {
 
         try {
             backend.createDestination(dbName2);
-            backend.createTable(dbName2, tableName2, fieldNames2);
+            backend.createTable(dbName2, schema, tableName2, fieldNames2);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -165,7 +169,7 @@ public class SQLBackendImplTest {
         try {
             if (!runRealTest) backend.setDriver(mockDriverTableCreate);
 
-            backend.insertContextData(dbName1, tableName1, fieldNamesInsert1, fieldValues1);
+            backend.insertContextData(dbName1, null, tableName1, fieldNamesInsert1, fieldValues1);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -177,7 +181,7 @@ public class SQLBackendImplTest {
 
         try {
             backend.createDestination(dbName2);
-            backend.createTable(dbName2, tableName2, fieldNames2);
+            backend.createTable(dbName2, schema, tableName2, fieldNames2);
         } catch (Exception e) {
             fail(e.getMessage());
         } finally {
@@ -192,11 +196,11 @@ public class SQLBackendImplTest {
         System.out.println("Testing SQLBackendImpl.SQLDriver.generateJDBCUrl (sqlInstance:mysql)");
         String sqlHost = "localhost";
         String sqlPort = "3306";
-        String sqlInstance = "mysql";
+        SQLInstance sqlInstance = SQLInstance.MYSQL;
         String sqlDriverName = "com.mysql.jdbc.Driver";
         String destination = "dest";
 
-        SQLBackendImpl backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, null);
+        SQLBackendImpl backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, null, persistErrors, maxLatestErrors);
         SQLBackendImpl.SQLDriver driver = backend.getDriver();
 
         assertEquals(driver.generateJDBCUrl(destination), "jdbc:mysql://localhost:3306/dest");
@@ -207,12 +211,12 @@ public class SQLBackendImplTest {
         System.out.println("Testing SQLBackendImpl.SQLDriver.generateJDBCUrl (sqlInstance:postgresql)");
         String sqlHost = "localhost";
         String sqlPort = "5432";
-        String sqlInstance = "postgresql";
+        SQLInstance sqlInstance = SQLInstance.POSTGRESQL;
         String sqlDriverName = "org.postgresql.Driver";
         String destination = "dest";
         String defaultDataBase = "default";
 
-        SQLBackendImpl backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, defaultDataBase);
+        SQLBackendImpl backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, defaultDataBase, persistErrors, maxLatestErrors);
         SQLBackendImpl.SQLDriver driver = backend.getDriver();
 
         assertEquals(driver.generateJDBCUrl(destination), "jdbc:postgresql://localhost:5432/default");
@@ -223,12 +227,12 @@ public class SQLBackendImplTest {
         System.out.println("Testing SQLBackendImpl.SQLDriver.generateJDBCUrl (sqlInstance:mysql, options:useSSL=true&requireSSL=false)");
         String sqlHost = "localhost";
         String sqlPort = "3306";
-        String sqlInstance = "mysql";
+        SQLInstance sqlInstance = SQLInstance.MYSQL;
         String sqlDriverName = "com.mysql.jdbc.Driver";
         String destination = "dest";
         String sqlOptions = "useSSL=true&requireSSL=false";
 
-        SQLBackendImpl backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, null, sqlOptions);
+        SQLBackendImpl backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, sqlOptions, persistErrors, maxLatestErrors);
         SQLBackendImpl.SQLDriver driver = backend.getDriver();
 
         assertEquals(driver.generateJDBCUrl(destination), "jdbc:mysql://localhost:3306/dest?useSSL=true&requireSSL=false");
@@ -236,7 +240,7 @@ public class SQLBackendImplTest {
         System.out.println("Testing SQLBackendImpl.SQLDriver.generateJDBCUrl (sqlInstance:mysql, options:<white spaces>)");
         sqlOptions = " \t";
 
-        backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, null, sqlOptions);
+        backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, sqlOptions, persistErrors, maxLatestErrors);
         driver = backend.getDriver();
 
         assertEquals(driver.generateJDBCUrl(destination), "jdbc:mysql://localhost:3306/dest");
@@ -244,7 +248,7 @@ public class SQLBackendImplTest {
         System.out.println("Testing SQLBackendImpl.SQLDriver.generateJDBCUrl (sqlInstance:mysql, options:<empty>)");
         sqlOptions = "";
 
-        backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, null, sqlOptions);
+        backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, sqlOptions, persistErrors, maxLatestErrors);
         driver = backend.getDriver();
 
         assertEquals(driver.generateJDBCUrl(destination), "jdbc:mysql://localhost:3306/dest");
@@ -252,7 +256,7 @@ public class SQLBackendImplTest {
         System.out.println("Testing SQLBackendImpl.SQLDriver.generateJDBCUrl (sqlInstance:mysql, options:<null>)");
         sqlOptions = null;
 
-        backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, null, sqlOptions);
+        backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, sqlOptions, persistErrors, maxLatestErrors);
         driver = backend.getDriver();
 
         assertEquals(driver.generateJDBCUrl(destination), "jdbc:mysql://localhost:3306/dest");
@@ -263,13 +267,13 @@ public class SQLBackendImplTest {
         System.out.println("Testing SQLBackendImpl.SQLDriver.generateJDBCUrl (sqlInstance:postgresql, options:sslmode=require)");
         String sqlHost = "localhost";
         String sqlPort = "5432";
-        String sqlInstance = "postgresql";
+        SQLInstance sqlInstance = SQLInstance.POSTGRESQL;
         String sqlDriverName = "org.postgresql.Driver";
         String destination = "dest";
         String defaultDataBase = "default";
         String sqlOptions = "sslmode=require";
 
-        SQLBackendImpl backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, defaultDataBase, sqlOptions);
+        SQLBackendImpl backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, sqlOptions, persistErrors, maxLatestErrors);
         SQLBackendImpl.SQLDriver driver = backend.getDriver();
 
         assertEquals(driver.generateJDBCUrl(destination), "jdbc:postgresql://localhost:5432/default?sslmode=require");
@@ -277,7 +281,7 @@ public class SQLBackendImplTest {
         System.out.println("Testing SQLBackendImpl.SQLDriver.generateJDBCUrl (sqlInstance:postgresql, options:<white spaces)");
         sqlOptions = " \t";
 
-        backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, defaultDataBase, sqlOptions);
+        backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, sqlOptions, persistErrors, maxLatestErrors);
         driver = backend.getDriver();
 
         assertEquals(driver.generateJDBCUrl(destination), "jdbc:postgresql://localhost:5432/default");
@@ -285,7 +289,7 @@ public class SQLBackendImplTest {
         System.out.println("Testing SQLBackendImpl.SQLDriver.generateJDBCUrl (sqlInstance:postgresql, options:<empty>)");
         sqlOptions = "";
 
-        backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, defaultDataBase, sqlOptions);
+        backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, sqlOptions, persistErrors, maxLatestErrors);
         driver = backend.getDriver();
 
         assertEquals(driver.generateJDBCUrl(destination), "jdbc:postgresql://localhost:5432/default");
@@ -293,7 +297,7 @@ public class SQLBackendImplTest {
         System.out.println("Testing SQLBackendImpl.SQLDriver.generateJDBCUrl (sqlInstance:postgresql, options:<null>)");
         sqlOptions = null;
 
-        backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, defaultDataBase, sqlOptions);
+        backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, sqlOptions, persistErrors, maxLatestErrors);
         driver = backend.getDriver();
 
         assertEquals(driver.generateJDBCUrl(destination), "jdbc:postgresql://localhost:5432/default");

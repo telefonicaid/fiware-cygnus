@@ -31,13 +31,13 @@ import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
  * @author frb
  */
 public final class NGSIUtilsForTests {
-    
+
     /**
      * Constructor. It is private since utility classes should not have a public or default constructor.
      */
     private NGSIUtilsForTests() {
     } // NGSIUtilsForTests
-    
+
     /**
      * Creates a Flume context for Mongo/STH sinks.
      * @param collectionPrefix
@@ -66,13 +66,14 @@ public final class NGSIUtilsForTests {
         context.put("mongo_password", "");
         context.put("mongo_username", "");
         context.put("mongo_auth_source", "");
+        context.put("mongo_replica_set", "");
         return context;
     } // createContextForMongoSTH
-    
-    
+
+
     /**
      * Creates a Flume context for Orion sinks.
-     * 
+     *
      * @param orionHost
      * @param orionPort
      * @param orionHostKey
@@ -100,7 +101,7 @@ public final class NGSIUtilsForTests {
 
     /**
      * Creates a Flume context for Arcgis sinks.
-     * 
+     *
      * @param url
      * @param username
      * @param password
@@ -114,7 +115,7 @@ public final class NGSIUtilsForTests {
         context.put("arcgis_password", password);
         return context;
     } // createContextForArcGis
-	
+
     /**
      * Creates a Json-based NotifyContextRequest given the string representation of such Json.
      * @param jsonStr
@@ -185,7 +186,7 @@ public final class NGSIUtilsForTests {
                 mappedCE);
     } // createInterceptedNGSIEvent
 
-    
+
     /**
      * Creates a Json-based ContextElement given the string representation of such Json.
      * @param jsonStr
@@ -196,5 +197,5 @@ public final class NGSIUtilsForTests {
         Gson gson = new Gson();
         return gson.fromJson(jsonStr, NotifyContextRequest.ContextElement.class);
     } // createJsonContextElement
-    
+
 } // NGSIUtilsForTests
