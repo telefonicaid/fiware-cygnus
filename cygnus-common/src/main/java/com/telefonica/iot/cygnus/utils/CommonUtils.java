@@ -51,7 +51,7 @@ import org.apache.hadoop.metrics.spi.AbstractMetricsContext;
 import org.apache.http.impl.DefaultBHttpServerConnection;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.log4j.pattern.SequenceNumberPatternConverter;
-import org.codehaus.groovy.control.ErrorCollector;
+//import org.codehaus.groovy.control.ErrorCollector;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -425,8 +425,8 @@ public final class CommonUtils {
         LOGGER.debug("Loading httpcore from " + myClassURL.toExternalForm());
         
         // trace the file containing the junit library
-        myClassURL = ErrorCollector.class.getProtectionDomain().getCodeSource().getLocation();
-        LOGGER.debug("Loading junit from " + myClassURL.toExternalForm());
+        //myClassURL = ErrorCollector.class.getProtectionDomain().getCodeSource().getLocation();
+        //LOGGER.debug("Loading junit from " + myClassURL.toExternalForm());
         
         // trace the file containing the flume-ng-node library
         myClassURL =
