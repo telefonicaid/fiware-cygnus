@@ -61,8 +61,8 @@
              <!-- https://mvnrepository.com/artifact/org.jodd/jodd-util -->
         <dependency>
             <groupId>org.jodd</groupId>
-            <artifactId>jodd-util</artifactId>
-            <version>6.0.0</version>
+            <artifactId>jodd-core</artifactId>
+            <version>3.6.8</version>
         </dependency>
 
              
