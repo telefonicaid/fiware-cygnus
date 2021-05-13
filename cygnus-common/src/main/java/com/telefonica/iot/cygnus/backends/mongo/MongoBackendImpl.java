@@ -229,7 +229,7 @@ public class MongoBackendImpl implements MongoBackend {
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(recvTimeTs);
 
-        insertContextDataAggregateForResolution(dbName, collectionName, calendar, entityId, entityType,
+        insertContextDataAggregatedForResolution(dbName, collectionName, calendar, entityId, entityType,
                                                  attrName, attrType, max, min, sum, sum2, numSamples, resolutions);
 
     } // insertContextDataAggregated
@@ -259,7 +259,7 @@ public class MongoBackendImpl implements MongoBackend {
         BasicDBObject query = buildQueryForInsertAggregated(calendar, entityId, entityType, attrName, resolutions);
 
         // Prepopulate if needed
-        BasicDBObject insert = buildInsertForPrepopulate(attrType, resolution, true);
+        BasicDBObject insert = buildInsertForPrepopulate(attrType, resolutions, true);
         UpdateResult res = collection.updateOne(query, insert, new UpdateOptions().upsert(true));
 
         if (res.getMatchedCount() == 0) {
@@ -285,7 +285,7 @@ public class MongoBackendImpl implements MongoBackend {
         BasicDBObject query = buildQueryForInsertAggregated(calendar, entityId, entityType, attrName, resolutions);
 
         // Prepopulate if needed
-        BasicDBObject insert = buildInsertForPrepopulate(attrType, resolution, false);
+        BasicDBObject insert = buildInsertForPrepopulate(attrType, resolutions, false);
         UpdateResult res = collection.updateOne(query, insert, new UpdateOptions().upsert(true));
 
         if (res.getMatchedCount() == 0) {
@@ -296,7 +296,7 @@ public class MongoBackendImpl implements MongoBackend {
         // Do the update
         for (String key : counts.keySet()) {
             int count = counts.get(key);
-            BasicDBObject update = buildUpdateForUpdate(attrType, resolution, calendar, key, count);
+            BasicDBObject update = buildUpdateForUpdate(attrType, resolutions, calendar, key, count);
             LOGGER.debug("Updating data, database=" + dbName + ", collection=" + collectionName + ", query="
                     + query.toString() + ", update=" + update.toString());
             collection.updateOne(query, update);
@@ -379,10 +379,32 @@ public class MongoBackendImpl implements MongoBackend {
      * @param isANumber
      * @return
      */
-    protected BasicDBObject buildInsertForPrepopulate(String attrType, Resolution resolution, boolean isANumber) {
+    protected BasicDBObject buildInsertForPrepopulate(String attrType,  boolean[] resolutions, boolean isANumber) {
         BasicDBObject update = new BasicDBObject();
-        update.append("$setOnInsert", new BasicDBObject("attrType", attrType)
-                .append("points", buildPrepopulatedPoints(resolution, isANumber)));
+        BasicDBObject updateAtt = new BasicDBObject("attrType", attrType);
+        for (int i = 0; i < resolutions.length; i++) {
+            if (resolutions[i]) {
+                switch (i) {
+                case 0:
+                    resolution = Resolution.SECOND;
+                    break;
+                case 1:
+                    resolution = Resolution.MINUTE;
+                    break;
+                case 2:
+                    resolution = Resolution.HOUR;
+                    break;
+                case 3:
+                    resolution = Resolution.DAY;
+                    break;
+                case 4:
+                    resolution = Resolution.MONTH;
+                    break;
+                } // switch (i)
+                updateAtt.append("points", buildPrepopulatedPoints(resolution, isANumber));
+            } // if
+        } // for
+        update.append("$setOnInsert", updateAtt);
         return update;
     } // buildInsertForPrepopulate
 
@@ -448,14 +470,36 @@ public class MongoBackendImpl implements MongoBackend {
                 .append("$max", new BasicDBObject("points.$.max", max));
     } // buildUpdateForUpdate
 
-    protected BasicDBObject buildUpdateForUpdate(String attrType, Resolution resolution, GregorianCalendar calendar,
+    protected BasicDBObject buildUpdateForUpdate(String attrType, boolean[] resolutions, GregorianCalendar calendar,
             String value, int numSamples) {
         BasicDBObject update = new BasicDBObject();
-        int offset = getOffset(calendar, resolution);
-        int modifiedOffset = offset - (resolution == Resolution.DAY || resolution == Resolution.MONTH ? 1 : 0);
-        update.append("$set", new BasicDBObject("attrType", attrType))
-                .append("$inc", new BasicDBObject("points." + modifiedOffset + ".samples", numSamples)
-                        .append("points." + modifiedOffset + ".occur." + value, numSamples));
+
+        for (int i = 0; i < resolutions.length; i++) {
+            if (resolutions[i]) {
+                switch (i) {
+                case 0:
+                    resolution = Resolution.SECOND;
+                    break;
+                case 1:
+                    resolution = Resolution.MINUTE;
+                    break;
+                case 2:
+                    resolution = Resolution.HOUR;
+                    break;
+                case 3:
+                    resolution = Resolution.DAY;
+                    break;
+                case 4:
+                    resolution = Resolution.MONTH;
+                    break;
+                } // switch (i)
+                int offset = getOffset(calendar, resolution);
+                int modifiedOffset = offset - (resolution == Resolution.DAY || resolution == Resolution.MONTH ? 1 : 0);
+                update.append("$set", new BasicDBObject("attrType", attrType))
+                    .append("$inc", new BasicDBObject("points." + modifiedOffset + ".samples", numSamples)
+                            .append("points." + modifiedOffset + ".occur." + value, numSamples));
+            } // if
+        } // for
         return update;
     } // buildUpdateForUpdate
 
