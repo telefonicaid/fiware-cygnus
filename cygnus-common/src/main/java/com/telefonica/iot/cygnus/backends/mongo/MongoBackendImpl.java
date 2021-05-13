@@ -229,7 +229,7 @@ public class MongoBackendImpl implements MongoBackend {
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(recvTimeTs);
 
-        insertContextDataAggregateForResolutions(dbName, collectionName, calendar, entityId, entityType,
+        insertContextDataAggregateForResolution(dbName, collectionName, calendar, entityId, entityType,
                                                  attrName, attrType, max, min, sum, sum2, numSamples, resolutions);
 
     } // insertContextDataAggregated
@@ -243,7 +243,7 @@ public class MongoBackendImpl implements MongoBackend {
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(recvTimeTs);
 
-        insertContextDataAggregatedForResolutions(dbName, collectionName, calendar, entityId, entityType,
+        insertContextDataAggregatedForResolution(dbName, collectionName, calendar, entityId, entityType,
                                                   attrName, attrType, counts, resolutions);
 
     } // insertContextDataAggregated
