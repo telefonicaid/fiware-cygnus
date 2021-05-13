@@ -229,8 +229,8 @@ public class MongoBackendImpl implements MongoBackend {
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(recvTimeTs);
 
-        insertContextDataAggregatedWithResoultions(dbName, collectionName, calendar, entityId, entityType,
-                                                   attrName, attrType, max, min, sum, sum2, numSamples, resolutions);
+        insertContextDataAggregateForResolutions(dbName, collectionName, calendar, entityId, entityType,
+                                                 attrName, attrType, max, min, sum, sum2, numSamples, resolutions);
 
     } // insertContextDataAggregated
 
@@ -243,12 +243,12 @@ public class MongoBackendImpl implements MongoBackend {
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(recvTimeTs);
 
-        insertContextDataAggregatedWithResolutions(dbName, collectionName, calendar, entityId, entityType,
-                                                   attrName, attrType, counts, resolutions);
+        insertContextDataAggregatedForResolutions(dbName, collectionName, calendar, entityId, entityType,
+                                                  attrName, attrType, counts, resolutions);
 
     } // insertContextDataAggregated
 
-    private void insertContextDataAggregatedForResoultion(String dbName, String collectionName,
+    private void insertContextDataAggregatedForResolution(String dbName, String collectionName,
             GregorianCalendar calendar, String entityId, String entityType, String attrName, String attrType,
             double max, double min, double sum, double sum2, int numSamples, boolean[] resolutions) {
         // Get database and collection
@@ -274,7 +274,7 @@ public class MongoBackendImpl implements MongoBackend {
         collection.updateOne(query, update);
     } // insertContextDataAggregated
 
-    private void insertContextDataAggregatedForResoultion(String dbName, String collectionName,
+    private void insertContextDataAggregatedForResolution(String dbName, String collectionName,
             GregorianCalendar calendar, String entityId, String entityType, String attrName, String attrType,
             HashMap<String, Integer> counts, boolean[] resolutions) {
         // Get database and collection
