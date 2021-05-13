@@ -2,6 +2,7 @@
 Content:
 
 * [Introduction](#section1)
+    * [Ground rules & expectations](#section1.1)  
 * [Adopted conventions](#section2)
 * [Contributing to the repository](#section3)
     * [Language of the main repository](#section3.1)
@@ -33,6 +34,21 @@ Within this document developers will find detailed guidelines regarding how to c
 Any doubt you may have, please refer to [here](https://github.com/telefonicaid/fiware-cygnus/blob/master/reporting_issues_and_contact.md).
 
 [Top](#top)
+
+### <a name="section1.1"></a> Ground rules & expectations
+
+Before we get started, here are a few things we expect from you (and that you should expect from others):
+
+* Be kind and thoughtful in your conversations around this project. We all come from different backgrounds and
+  projects, which means we likely have different perspectives on "how open source is done." Try to listen to others
+  rather than convince them that your way is correct.
+* Please ensure that your contribution passes all tests. If there are test failures, you will need to address them
+  before we can merge your contribution.
+* When adding content, please consider if it is widely valuable. Please don't add references or links to things you or
+  your employer have created as others will do so if they appreciate it.
+* When reporting a vulnerability on the software, please, put in contact with Orion repo maintainers in order to discuss it 
+  in a private way.
+  
 
 ## <a name="section2"></a>Adopted conventions
 1. This document uses the following guidelines with regard to the usage of MUST, SHOULD and MAY (and NOT) keywords:
