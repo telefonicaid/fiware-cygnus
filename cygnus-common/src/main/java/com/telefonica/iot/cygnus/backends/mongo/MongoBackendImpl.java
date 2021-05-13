@@ -404,8 +404,8 @@ public class MongoBackendImpl implements MongoBackend {
                 } // switch (i)
                 updateAtt.append("points", buildPrepopulatedPoints(resolution, isANumber));
             } // if
+            update.append("$setOnInsert", updateAtt);
         } // for
-        update.append("$setOnInsert", updateAtt);
         return update;
     } // buildInsertForPrepopulate
 
