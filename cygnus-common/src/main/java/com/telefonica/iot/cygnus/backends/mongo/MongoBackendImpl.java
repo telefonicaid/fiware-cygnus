@@ -317,7 +317,7 @@ public class MongoBackendImpl implements MongoBackend {
                                                           String attrName, boolean[] resolutions) {
         int offset;
         BasicDBObject query = new BasicDBObject();
-        Resolution resolution;
+        Resolution resolution = Resolution.SECOND;
         for (int i = 0; i < resolutions.length; i++) {
             if (resolutions[i]) {
                 switch (i) {
@@ -380,7 +380,7 @@ public class MongoBackendImpl implements MongoBackend {
      * @return
      */
     protected BasicDBObject buildInsertForPrepopulate(String attrType,  boolean[] resolutions, boolean isANumber) {
-        Resolution resolution;
+        Resolution resolution = Resolution.SECOND;
         BasicDBObject update = new BasicDBObject();
         BasicDBObject updateAtt = new BasicDBObject("attrType", attrType);
         for (int i = 0; i < resolutions.length; i++) {
@@ -473,9 +473,8 @@ public class MongoBackendImpl implements MongoBackend {
 
     protected BasicDBObject buildUpdateForUpdate(String attrType, boolean[] resolutions, GregorianCalendar calendar,
             String value, int numSamples) {
-        Resolution resolution;
+        Resolution resolution = Resolution.SECOND;
         BasicDBObject update = new BasicDBObject();
-
         for (int i = 0; i < resolutions.length; i++) {
             if (resolutions[i]) {
                 switch (i) {
