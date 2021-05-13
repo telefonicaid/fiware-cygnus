@@ -288,7 +288,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                 backend.insertContextDataRaw(dbName, collectionName, aggregation);
             } catch (Exception e2) {
                 try {
-                    // insert creating database an collection before
+                    // insert creating database and collection before
                     backend.createDatabase(dbName);
                     backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);
                     backend.insertContextDataRaw(dbName, collectionName, aggregation);
