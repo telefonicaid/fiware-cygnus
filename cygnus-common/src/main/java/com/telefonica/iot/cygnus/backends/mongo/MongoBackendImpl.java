@@ -380,6 +380,7 @@ public class MongoBackendImpl implements MongoBackend {
      * @return
      */
     protected BasicDBObject buildInsertForPrepopulate(String attrType,  boolean[] resolutions, boolean isANumber) {
+        Resolution resolution;
         BasicDBObject update = new BasicDBObject();
         BasicDBObject updateAtt = new BasicDBObject("attrType", attrType);
         for (int i = 0; i < resolutions.length; i++) {
@@ -472,6 +473,7 @@ public class MongoBackendImpl implements MongoBackend {
 
     protected BasicDBObject buildUpdateForUpdate(String attrType, boolean[] resolutions, GregorianCalendar calendar,
             String value, int numSamples) {
+        Resolution resolution;
         BasicDBObject update = new BasicDBObject();
 
         for (int i = 0; i < resolutions.length; i++) {
