@@ -229,31 +229,9 @@ public class MongoBackendImpl implements MongoBackend {
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(recvTimeTs);
 
-        // Insert the data in an aggregated fashion for each resolution type
-        if (resolutions[0]) {
-            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                    attrName, attrType, max, min, sum, sum2, numSamples, Resolution.SECOND);
-        } // if
+        insertContextDataAggregatedWithResoultions(dbName, collectionName, calendar, entityId, entityType,
+                                                   attrName, attrType, max, min, sum, sum2, numSamples, resolutions);
 
-        if (resolutions[1]) {
-            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                    attrName, attrType, max, min, sum, sum2, numSamples, Resolution.MINUTE);
-        } // if
-
-        if (resolutions[2]) {
-            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                    attrName, attrType, max, min, sum, sum2, numSamples, Resolution.HOUR);
-        } // if
-
-        if (resolutions[3]) {
-            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                    attrName, attrType, max, min, sum, sum2, numSamples, Resolution.DAY);
-        } // if
-
-        if (resolutions[4]) {
-            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                    attrName, attrType, max, min, sum, sum2, numSamples, Resolution.MONTH);
-        } // if
     } // insertContextDataAggregated
 
     @Override
@@ -265,42 +243,20 @@ public class MongoBackendImpl implements MongoBackend {
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         calendar.setTimeInMillis(recvTimeTs);
 
-        // Insert the data in an aggregated fashion for each resolution type
-        if (resolutions[0]) {
-            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                    attrName, attrType, counts, Resolution.SECOND);
-        } // if
+        insertContextDataAggregatedWithResolutions(dbName, collectionName, calendar, entityId, entityType,
+                                                   attrName, attrType, counts, resolutions);
 
-        if (resolutions[1]) {
-            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                    attrName, attrType, counts, Resolution.MINUTE);
-        } // if
-
-        if (resolutions[2]) {
-            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                    attrName, attrType, counts, Resolution.HOUR);
-        } // if
-
-        if (resolutions[3]) {
-            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                    attrName, attrType, counts, Resolution.DAY);
-        } // if
-
-        if (resolutions[4]) {
-            insertContextDataAggregatedForResoultion(dbName, collectionName, calendar, entityId, entityType,
-                    attrName, attrType, counts, Resolution.MONTH);
-        } // if
     } // insertContextDataAggregated
 
     private void insertContextDataAggregatedForResoultion(String dbName, String collectionName,
             GregorianCalendar calendar, String entityId, String entityType, String attrName, String attrType,
-            double max, double min, double sum, double sum2, int numSamples, Resolution resolution) {
+            double max, double min, double sum, double sum2, int numSamples, boolean[] resolutions) {
         // Get database and collection
         MongoDatabase db = getDatabase(dbName);
         MongoCollection collection = db.getCollection(collectionName);
 
         // Build the query
-        BasicDBObject query = buildQueryForInsertAggregated(calendar, entityId, entityType, attrName, resolution);
+        BasicDBObject query = buildQueryForInsertAggregated(calendar, entityId, entityType, attrName, resolutions);
 
         // Prepopulate if needed
         BasicDBObject insert = buildInsertForPrepopulate(attrType, resolution, true);
@@ -320,13 +276,13 @@ public class MongoBackendImpl implements MongoBackend {
 
     private void insertContextDataAggregatedForResoultion(String dbName, String collectionName,
             GregorianCalendar calendar, String entityId, String entityType, String attrName, String attrType,
-            HashMap<String, Integer> counts, Resolution resolution) {
+            HashMap<String, Integer> counts, boolean[] resolutions) {
         // Get database and collection
         MongoDatabase db = getDatabase(dbName);
         MongoCollection collection = db.getCollection(collectionName);
 
         // Build the query
-        BasicDBObject query = buildQueryForInsertAggregated(calendar, entityId, entityType, attrName, resolution);
+        BasicDBObject query = buildQueryForInsertAggregated(calendar, entityId, entityType, attrName, resolutions);
 
         // Prepopulate if needed
         BasicDBObject insert = buildInsertForPrepopulate(attrType, resolution, false);
@@ -358,37 +314,61 @@ public class MongoBackendImpl implements MongoBackend {
      * @return
      */
     protected BasicDBObject buildQueryForInsertAggregated(GregorianCalendar calendar, String entityId, String entityType,
-            String attrName, Resolution resolution) {
-        int offset = getOffset(calendar, resolution);
+                                                          String attrName, boolean[] resolutions) {
+        int offset;
         BasicDBObject query = new BasicDBObject();
+        Resolution resolution;
+        for (int i = 0; i < resolutions.length; i++) {
+            if (resolutions[i]) {
+                switch (i) {
+                case 0:
+                    resolution = Resolution.SECOND;
+                    break;
+                case 1:
+                    resolution = Resolution.MINUTE;
+                    break;
+                case 2:
+                    resolution = Resolution.HOUR;
+                    break;
+                case 3:
+                    resolution = Resolution.DAY;
+                    break;
+                case 4:
+                    resolution = Resolution.MONTH;
+                    break;
+                } // switch (i)
 
-        switch (dataModel) {
-            case DMBYSERVICEPATH:
-                query.append("_id", new BasicDBObject("entityId", entityId)
-                            .append("entityType", entityType)
-                            .append("attrName", attrName)
-                            .append("origin", getOrigin(calendar, resolution))
-                            .append("resolution", resolution.toString().toLowerCase())
-                            .append("range", getRange(resolution)))
-                        .append("points.offset", offset);
-                break;
-            case DMBYENTITY:
-                query.append("_id", new BasicDBObject("attrName", attrName)
-                            .append("origin", getOrigin(calendar, resolution))
-                            .append("resolution", resolution.toString().toLowerCase())
-                            .append("range", getRange(resolution)))
-                        .append("points.offset", offset);
-                break;
-            case DMBYATTRIBUTE:
-                query.append("_id", new BasicDBObject("origin", getOrigin(calendar, resolution))
-                            .append("resolution", resolution.toString().toLowerCase())
-                            .append("range", getRange(resolution)))
-                        .append("points.offset", offset);
-                break;
-            default:
-                // this will never be reached
-        } // switch
+                offset = getOffset(calendar, resolution);
 
+                switch (dataModel) {
+                case DMBYSERVICEPATH:
+                    query.append("_id", new BasicDBObject("entityId", entityId)
+                                 .append("entityType", entityType)
+                                 .append("attrName", attrName)
+                                 .append("origin", getOrigin(calendar, resolution))
+                                 .append("resolution", resolution.toString().toLowerCase())
+                                 .append("range", getRange(resolution)))
+                        .append("points.offset", offset);
+                    break;
+                case DMBYENTITY:
+                    query.append("_id", new BasicDBObject("attrName", attrName)
+                                 .append("origin", getOrigin(calendar, resolution))
+                                 .append("resolution", resolution.toString().toLowerCase())
+                                 .append("range", getRange(resolution)))
+                        .append("points.offset", offset);
+                    break;
+                case DMBYATTRIBUTE:
+                    query.append("_id", new BasicDBObject("origin", getOrigin(calendar, resolution))
+                                 .append("resolution", resolution.toString().toLowerCase())
+                                 .append("range", getRange(resolution)))
+                        .append("points.offset", offset);
+                    break;
+                default:
+                    // this will never be reached
+                } // switch (datamodel)
+
+            } // if
+        } // for
         return query;
     } // buildQueryForInsertAggregated
 
