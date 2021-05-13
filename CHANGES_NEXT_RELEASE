@@ -1,3 +1,4 @@
+[cygnus-ngsi][MongoSink][STHSink] Try to not create database and collection in each insertion (#2019)
 [cygnus-common][MySQL] Upgrade mysql-connector from 5.1.47 to 5.1.49
 [cygnus-common] remove hive-exec dependency (unneeded)
 [cygnus-ngsi] add jodd-core 3.6.8 dependency (previously included as transitive dependency of hive-exec in cygnus-common)
