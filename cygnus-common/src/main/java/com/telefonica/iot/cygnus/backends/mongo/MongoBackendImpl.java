@@ -23,6 +23,8 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.WriteModel;
+import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.result.UpdateResult;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
@@ -244,7 +246,7 @@ public class MongoBackendImpl implements MongoBackend {
         calendar.setTimeInMillis(recvTimeTs);
 
         insertContextDataAggregatedForResolution(dbName, collectionName, calendar, entityId, entityType,
-                                                  attrName, attrType, counts, resolutions);
+                                                 attrName, attrType, counts, resolutions);
 
     } // insertContextDataAggregated
 
@@ -256,22 +258,43 @@ public class MongoBackendImpl implements MongoBackend {
         MongoCollection collection = db.getCollection(collectionName);
 
         // Build the query
-        BasicDBObject query = buildQueryForInsertAggregated(calendar, entityId, entityType, attrName, resolutions);
+        //BasicDBObject query = buildQueryForInsertAggregated(calendar, entityId, entityType, attrName, resolutions);
+        ArrayList<BasicDBObject> queries = buildQueryForInsertAggregated(calendar, entityId, entityType, attrName, resolutions);
 
         // Prepopulate if needed
-        BasicDBObject insert = buildInsertForPrepopulate(attrType, resolutions, true);
-        UpdateResult res = collection.updateOne(query, insert, new UpdateOptions().upsert(true));
+        //BasicDBObject insert = buildInsertForPrepopulate(attrType, resolutions, true);
+        ArrayList<BasicDBObject> inserts = buildInsertForPrepopulate(attrType, resolutions, true);
+        //UpdateResult res = collection.updateOne(query, insert, new UpdateOptions().upsert(true));
+        List<WriteModel<Document>> writes = new ArrayList<WriteModel<Document>>();
+        for (int i = 0; i < queries.size(); i++) {
+            writes.add(
+                 new UpdateOneModel<Document>(
+                                              queries.get(i), // filter
+                                              inserts.get(i), // update
+                                              new UpdateOptions().upsert(true))
+                       );
+        }
+        com.mongodb.bulk.BulkWriteResult res = collection.bulkWrite(writes);
 
         if (res.getMatchedCount() == 0) {
-            LOGGER.debug("Prepopulating data, database=" + dbName + ", collection=" + collectionName + ", query="
-                    + query.toString() + ", insert=" + insert.toString());
+            LOGGER.debug("Prepopulating data, database=" + dbName + ", collection=" + collectionName + ", queries="
+                    + queries.toString() + ", inserts=" + inserts.toString());
         } // if
 
         // Do the update
         BasicDBObject update = buildUpdateForUpdate(attrType, calendar, max, min, sum, sum2, numSamples);
-        LOGGER.debug("Updating data, database=" + dbName + ", collection=" + collectionName + ", query="
-                + query.toString() + ", update=" + update.toString());
-        collection.updateOne(query, update);
+        LOGGER.debug("Updating data, database=" + dbName + ", collection=" + collectionName + ", queries="
+                + queries.toString() + ", update=" + update.toString());
+        //collection.updateOne(query, update);
+        writes = new ArrayList<WriteModel<Document>>();
+        for (int i = 0; i < queries.size(); i++) {
+            writes.add(
+                 new UpdateOneModel<Document>(
+                                              queries.get(i), // filter
+                                              update) // update
+                       );
+        }
+        collection.bulkWrite(writes);
     } // insertContextDataAggregated
 
     private void insertContextDataAggregatedForResolution(String dbName, String collectionName,
@@ -282,25 +305,46 @@ public class MongoBackendImpl implements MongoBackend {
         MongoCollection collection = db.getCollection(collectionName);
 
         // Build the query
-        BasicDBObject query = buildQueryForInsertAggregated(calendar, entityId, entityType, attrName, resolutions);
+        //BasicDBObject query = buildQueryForInsertAggregated(calendar, entityId, entityType, attrName, resolutions);
+        ArrayList<BasicDBObject> queries = buildQueryForInsertAggregated(calendar, entityId, entityType, attrName, resolutions);
 
         // Prepopulate if needed
-        BasicDBObject insert = buildInsertForPrepopulate(attrType, resolutions, false);
-        UpdateResult res = collection.updateOne(query, insert, new UpdateOptions().upsert(true));
+        //BasicDBObject insert = buildInsertForPrepopulate(attrType, resolutions, false);
+        ArrayList<BasicDBObject> inserts = buildInsertForPrepopulate(attrType, resolutions, false);
+        //UpdateResult res = collection.updateOne(query, insert, new UpdateOptions().upsert(true));
+        List<WriteModel<Document>> writes = new ArrayList<WriteModel<Document>>();
+        for (int i = 0; i < queries.size(); i++) {
+            writes.add(
+                 new UpdateOneModel<Document>(
+                                              queries.get(i), // filter
+                                              inserts.get(i), // update
+                                              new UpdateOptions().upsert(true))
+                       );
+        }
+        com.mongodb.bulk.BulkWriteResult res = collection.bulkWrite(writes);
 
         if (res.getMatchedCount() == 0) {
-            LOGGER.debug("Prepopulating data, database=" + dbName + ", collection=" + collectionName + ", query="
-                    + query.toString() + ", insert=" + insert.toString());
+            LOGGER.debug("Prepopulating data, database=" + dbName + ", collection=" + collectionName + ", queries="
+                    + queries.toString() + ", insert=" + inserts.toString());
         } // if
 
         // Do the update
+        writes = new ArrayList<WriteModel<Document>>();
         for (String key : counts.keySet()) {
             int count = counts.get(key);
-            BasicDBObject update = buildUpdateForUpdate(attrType, resolutions, calendar, key, count);
-            LOGGER.debug("Updating data, database=" + dbName + ", collection=" + collectionName + ", query="
-                    + query.toString() + ", update=" + update.toString());
-            collection.updateOne(query, update);
+            ArrayList<BasicDBObject> updates = buildUpdateForUpdate(attrType, resolutions, calendar, key, count);
+            LOGGER.debug("Updating data, database=" + dbName + ", collection=" + collectionName + ", queries="
+                    + queries.toString() + ", updates=" + updates.toString());
+            //collection.updateOne(query, update);
+            for (int i = 0; i < queries.size(); i++) {
+                writes.add(
+                     new UpdateOneModel<Document>(
+                                                  queries.get(i), // filter
+                                                  updates.get(i)) // update
+                           );
+            }
         } // for
+        collection.bulkWrite(writes);
     } // insertContextDataAggregated
 
     /**
@@ -313,13 +357,14 @@ public class MongoBackendImpl implements MongoBackend {
      * @param resolution
      * @return
      */
-    protected BasicDBObject buildQueryForInsertAggregated(GregorianCalendar calendar, String entityId, String entityType,
+    protected ArrayList<BasicDBObject> buildQueryForInsertAggregated(GregorianCalendar calendar, String entityId, String entityType,
                                                           String attrName, boolean[] resolutions) {
         int offset;
-        BasicDBObject query = new BasicDBObject();
+        ArrayList<BasicDBObject> queries = new ArrayList<BasicDBObject>();
         Resolution resolution = Resolution.SECOND;
         for (int i = 0; i < resolutions.length; i++) {
             if (resolutions[i]) {
+                BasicDBObject query = new BasicDBObject();
                 switch (i) {
                 case 0:
                     resolution = Resolution.SECOND;
@@ -366,10 +411,10 @@ public class MongoBackendImpl implements MongoBackend {
                 default:
                     // this will never be reached
                 } // switch (datamodel)
-
+                queries.add(query);
             } // if
         } // for
-        return query;
+        return queries;
     } // buildQueryForInsertAggregated
 
     /**
@@ -379,10 +424,11 @@ public class MongoBackendImpl implements MongoBackend {
      * @param isANumber
      * @return
      */
-    protected BasicDBObject buildInsertForPrepopulate(String attrType,  boolean[] resolutions, boolean isANumber) {
+    protected ArrayList<BasicDBObject> buildInsertForPrepopulate(String attrType,  boolean[] resolutions, boolean isANumber) {
         Resolution resolution = Resolution.SECOND;
-        BasicDBObject update = new BasicDBObject();
-        BasicDBObject updateAtt = new BasicDBObject("attrType", attrType);
+        ArrayList<BasicDBObject> updates = new ArrayList<BasicDBObject>();
+        // update.append("$setOnInsert", new BasicDBObject("attrType", attrType)
+        //  .append("points", buildPrepopulatedPoints(resolution, isANumber)));
         for (int i = 0; i < resolutions.length; i++) {
             if (resolutions[i]) {
                 switch (i) {
@@ -402,11 +448,14 @@ public class MongoBackendImpl implements MongoBackend {
                     resolution = Resolution.MONTH;
                     break;
                 } // switch (i)
-                updateAtt.append("points", buildPrepopulatedPoints(resolution, isANumber));
+                BasicDBObject update = new BasicDBObject();
+                update.append("$setOnInsert", new BasicDBObject("attrType", attrType)
+                              .append("points", buildPrepopulatedPoints(resolution, isANumber)));
+                updates.add(update);
             } // if
-            update.append("$setOnInsert", updateAtt);
         } // for
-        return update;
+        //return update;
+        return updates;
     } // buildInsertForPrepopulate
 
     /**
@@ -471,10 +520,15 @@ public class MongoBackendImpl implements MongoBackend {
                 .append("$max", new BasicDBObject("points.$.max", max));
     } // buildUpdateForUpdate
 
-    protected BasicDBObject buildUpdateForUpdate(String attrType, boolean[] resolutions, GregorianCalendar calendar,
+    protected ArrayList<BasicDBObject> buildUpdateForUpdate(String attrType, boolean[] resolutions, GregorianCalendar calendar,
             String value, int numSamples) {
+        ArrayList<BasicDBObject> updates = new ArrayList<BasicDBObject>();
+        // int offset = getOffset(calendar, resolution);
+        // int modifiedOffset = offset - (resolution == Resolution.DAY || resolution == Resolution.MONTH ? 1 : 0);
+        // update.append("$set", new BasicDBObject("attrType", attrType))
+        //         .append("$inc", new BasicDBObject("points." + modifiedOffset + ".samples", numSamples)
+        //                 .append("points." + modifiedOffset + ".occur." + value, numSamples))
         Resolution resolution = Resolution.SECOND;
-        BasicDBObject update = new BasicDBObject();
         for (int i = 0; i < resolutions.length; i++) {
             if (resolutions[i]) {
                 switch (i) {
@@ -494,14 +548,16 @@ public class MongoBackendImpl implements MongoBackend {
                     resolution = Resolution.MONTH;
                     break;
                 } // switch (i)
+                BasicDBObject update = new BasicDBObject();
                 int offset = getOffset(calendar, resolution);
                 int modifiedOffset = offset - (resolution == Resolution.DAY || resolution == Resolution.MONTH ? 1 : 0);
                 update.append("$set", new BasicDBObject("attrType", attrType))
                     .append("$inc", new BasicDBObject("points." + modifiedOffset + ".samples", numSamples)
                             .append("points." + modifiedOffset + ".occur." + value, numSamples));
+                updates.add(update);
             } // if
         } // for
-        return update;
+        return updates;
     } // buildUpdateForUpdate
 
     /**
