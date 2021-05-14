@@ -279,11 +279,23 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
                 + dbName + ", Collection: " + collectionName + ", Data: " + aggregation.toString());
         
         try {
-            backend.createDatabase(dbName);
-            backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);
+            // try insert without create database and collection before
             backend.insertContextDataRaw(dbName, collectionName, aggregation);
-        } catch (Exception e) {
-            throw new CygnusPersistenceError("-, " + e.getMessage());
+        } catch (Exception e1) {
+            try {
+                // try insert without create collection before
+                backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);
+                backend.insertContextDataRaw(dbName, collectionName, aggregation);
+            } catch (Exception e2) {
+                try {
+                    // insert creating database and collection before
+                    backend.createDatabase(dbName);
+                    backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);
+                    backend.insertContextDataRaw(dbName, collectionName, aggregation);
+                } catch (Exception e) {
+                    throw new CygnusPersistenceError("-, " + e.getMessage());
+                } // try catch
+            } // try catch
         } // try catch
     } // persistAggregation
 
