@@ -362,18 +362,6 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
         } // aggregate
         
         public void persist(String sinkName) throws CygnusBadConfiguration, CygnusPersistenceError {
-            try {
-                backend.createDatabase(dbName);
-            } catch (Exception e) {
-                throw new CygnusPersistenceError("-, " + e.getMessage());
-            } // try catch
-
-            try {
-                backend.createCollection(dbName, collectionName, dataExpiration);
-            } catch (Exception e) {
-                throw new CygnusPersistenceError("-, " + e.getMessage());
-            } // try catch
-                
             for (String key : numericAggrs.keySet()) {
                 STHNumericAggregation numericAggr = numericAggrs.get(key);
                 
@@ -385,12 +373,31 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
                         + "," + numericAggr.getNumSamples() + "]");
 
                 try {
+                    // try insert without create database and collection before
                     backend.insertContextDataAggregated(dbName, collectionName, lastRecvTimeTs,
                             entityId, entityType, numericAggr.getAttrName(), numericAggr.getAttrType(),
                             numericAggr.getMax(), numericAggr.getMin(), numericAggr.getSum(),
                             numericAggr.getSum2(), numericAggr.getNumSamples(), resolutions);
-                } catch (Exception e) {
-                    throw new CygnusPersistenceError("-, " + e.getMessage());
+                } catch (Exception e1) {
+                    try {
+                        // try insert without create collection before
+                        backend.createCollection(dbName, collectionName, dataExpiration);
+                        backend.insertContextDataAggregated(dbName, collectionName, lastRecvTimeTs,
+                            entityId, entityType, numericAggr.getAttrName(), numericAggr.getAttrType(),
+                            numericAggr.getMax(), numericAggr.getMin(), numericAggr.getSum(),
+                            numericAggr.getSum2(), numericAggr.getNumSamples(), resolutions);
+                    } catch (Exception e2) {
+                        try {
+                            // insert creating database and collection before
+                            backend.createCollection(dbName, collectionName, dataExpiration);
+                            backend.insertContextDataAggregated(dbName, collectionName, lastRecvTimeTs,
+                                    entityId, entityType, numericAggr.getAttrName(), numericAggr.getAttrType(),
+                                    numericAggr.getMax(), numericAggr.getMin(), numericAggr.getSum(),
+                                    numericAggr.getSum2(), numericAggr.getNumSamples(), resolutions);
+                        } catch (Exception e) {
+                            throw new CygnusPersistenceError("-, " + e.getMessage());
+                        } // try catch
+                    } // try catch
                 } // try catch
             } // for
 
