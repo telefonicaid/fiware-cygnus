@@ -46,7 +46,7 @@ Before we get started, here are a few things we expect from you (and that you sh
   before we can merge your contribution.
 * When adding content, please consider if it is widely valuable. Please don't add references or links to things you or
   your employer have created as others will do so if they appreciate it.
-* When reporting a vulnerability on the software, please, put in contact with Orion repo maintainers in order to discuss it 
+* When reporting a vulnerability on the software, please, put in contact with Cygnus repo maintainers in order to discuss it 
   in a private way.
   
 
