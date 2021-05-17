@@ -266,7 +266,7 @@ public class MongoBackendImplTest {
 
         try {
             String query = backend.buildQueryForInsertAggregated(calendar, entityId,
-                    entityType, attrName, MongoBackendImpl.Resolution.SECOND).toString();
+                                   entityType, attrName, new boolean[]{ true,false,false,false,false }).toString();
             assertEquals(queryForInsertAggregated, query);
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildQueryForInsertAggregated]")
                     + "-  OK  - The related query for '2017-04-05T11:46:13', 'SECOND' resolution and 'DMBYENTITY' "
@@ -284,7 +284,7 @@ public class MongoBackendImplTest {
 
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
-                    entityType, attrName, MongoBackendImpl.Resolution.MINUTE).toString());
+                              entityType, attrName, new boolean[]{ false,true,false,false,false }).toString());
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildQueryForInsertAggregated]")
                     + "-  OK  - The related query for '2017-04-05T11:46:13', 'MINUTE' resolution and 'DMBYENTITY' "
                     + "data mode is '" + queryForInsertAggregated + "'");
@@ -301,7 +301,7 @@ public class MongoBackendImplTest {
 
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
-                    entityType, attrName, MongoBackendImpl.Resolution.HOUR).toString());
+                              entityType, attrName, new boolean[]{ false,false,true,false,false }).toString());
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildQueryForInsertAggregated]")
                     + "-  OK  - The related query for '2017-04-05T11:46:13', 'HOUR' resolution and 'DMBYENTITY' "
                     + "data mode is '" + queryForInsertAggregated + "'");
@@ -318,7 +318,7 @@ public class MongoBackendImplTest {
 
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
-                    entityType, attrName, MongoBackendImpl.Resolution.DAY).toString());
+                              entityType, attrName, new boolean[]{ false,false,false,true,false }).toString());
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildQueryForInsertAggregated]")
                     + "-  OK  - The related query for '2017-04-05T11:46:13', 'DAY' resolution and 'DMBYENTITY' "
                     + "data mode is '" + queryForInsertAggregated + "'");
@@ -335,7 +335,7 @@ public class MongoBackendImplTest {
 
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
-                    entityType, attrName, MongoBackendImpl.Resolution.MONTH).toString());
+                              entityType, attrName, new boolean[]{ false,false,false,false,true }).toString());
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildQueryForInsertAggregated]")
                     + "-  OK  - The related query for '2017-04-05T11:46:13', 'MONTH' resolution and 'DMBYENTITY' "
                     + "data mode is '" + queryForInsertAggregated + "'");
@@ -354,7 +354,7 @@ public class MongoBackendImplTest {
 
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
-                    entityType, attrName, MongoBackendImpl.Resolution.SECOND).toString());
+                              entityType, attrName, new boolean[]{ true,false,false,false,false }).toString());
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildQueryForInsertAggregated]")
                     + "-  OK  - The related query for '2017-04-05T11:46:13', 'SECOND' resolution and 'DMBYENTITY' "
                     + "data mode is '" + queryForInsertAggregated + "'");
@@ -371,7 +371,7 @@ public class MongoBackendImplTest {
 
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
-                    entityType, attrName, MongoBackendImpl.Resolution.MINUTE).toString());
+                              entityType, attrName, new boolean[]{ false,true,false,false,false }).toString());
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildQueryForInsertAggregated]")
                     + "-  OK  - The related query for '2017-04-05T11:46:13', 'MINUTE' resolution and 'DMBYENTITY' "
                     + "data mode is '" + queryForInsertAggregated + "'");
@@ -388,7 +388,7 @@ public class MongoBackendImplTest {
 
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
-                    entityType, attrName, MongoBackendImpl.Resolution.HOUR).toString());
+                              entityType, attrName, new boolean[]{ false,false,true,false,false }).toString());
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildQueryForInsertAggregated]")
                     + "-  OK  - The related query for '2017-04-05T11:46:13', 'HOUR' resolution and 'DMBYENTITY' "
                     + "data mode is '" + queryForInsertAggregated + "'");
@@ -405,7 +405,7 @@ public class MongoBackendImplTest {
 
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
-                    entityType, attrName, MongoBackendImpl.Resolution.DAY).toString());
+                              entityType, attrName, new boolean[]{ false,false,false,true,false }).toString());
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildQueryForInsertAggregated]")
                     + "-  OK  - The related query for '2017-04-05T11:46:13', 'DAY' resolution and 'DMBYENTITY' "
                     + "data mode is '" + queryForInsertAggregated + "'");
@@ -422,7 +422,7 @@ public class MongoBackendImplTest {
 
         try {
             assertEquals(queryForInsertAggregated, backend.buildQueryForInsertAggregated(calendar, entityId,
-                    entityType, attrName, MongoBackendImpl.Resolution.MONTH).toString());
+                              entityType, attrName, new boolean[]{ false,false,false,false,true }).toString());
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildQueryForInsertAggregated]")
                     + "-  OK  - The related query for '2017-04-05T11:46:13', 'MONTH' resolution and 'DMBYENTITY' "
                     + "data mode is '" + queryForInsertAggregated + "'");
@@ -487,7 +487,7 @@ public class MongoBackendImplTest {
                 + "\"$inc\": {\"points.13.samples\": 2, \"points.13.occur.someString\": 2}}";
 
         try {
-            assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.SECOND,
+            assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, new boolean[]{ true,false,false,false,false},
                     calendar, value, count).toString());
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildUpdateForUpdate]")
                     + "-  OK  - The related update for '2017-04-05T11:46:13', resolution 'SECOND' and given "
@@ -503,7 +503,7 @@ public class MongoBackendImplTest {
                 + "\"$inc\": {\"points.46.samples\": 2, \"points.46.occur.someString\": 2}}";
 
         try {
-            assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.MINUTE,
+            assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, new boolean[]{ false,true,false,false,false },
                     calendar, value, count).toString());
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildUpdateForUpdate]")
                     + "-  OK  - The related update for '2017-04-05T11:46:13', resolution 'MINUTE' and given "
@@ -519,7 +519,7 @@ public class MongoBackendImplTest {
                 + "\"$inc\": {\"points.11.samples\": 2, \"points.11.occur.someString\": 2}}";
 
         try {
-            assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.HOUR,
+            assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, new boolean[]{ false,false,true,false,false },
                     calendar, value, count).toString());
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildUpdateForUpdate]")
                     + "-  OK  - The related update for '2017-04-05T11:46:13', resolution 'HOUR' and given "
@@ -536,7 +536,7 @@ public class MongoBackendImplTest {
                 + "\"$inc\": {\"points.4.samples\": 2, \"points.4.occur.someString\": 2}}";
 
         try {
-            assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.DAY,
+            assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, new boolean[]{ false,false,false,true,false},
                     calendar, value, count).toString());
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildUpdateForUpdate]")
                     + "-  OK  - The related update for '2017-04-05T11:46:13', resolution 'DAY' and given "
@@ -553,7 +553,7 @@ public class MongoBackendImplTest {
                 + "\"$inc\": {\"points.3.samples\": 2, \"points.3.occur.someString\": 2}}";
 
         try {
-            assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, MongoBackendImpl.Resolution.MONTH,
+            assertEquals(updateForUpdate, backend.buildUpdateForUpdate(attrType, new boolean[]{ false,false,false,false,true },
                     calendar, value, count).toString());
             System.out.println(getTestTraceHead("[MongoBackendImpl.buildUpdateForUpdate]")
                     + "-  OK  - The related update for '2017-04-05T11:46:13', resolution 'MONTH' and given "
