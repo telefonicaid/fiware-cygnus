@@ -271,18 +271,10 @@ public class MongoBackendImpl implements MongoBackend {
                                               new UpdateOptions().upsert(true))
                        );
         }
-        com.mongodb.bulk.BulkWriteResult res = collection.bulkWrite(writes);
-
-        if (res.getMatchedCount() == 0) {
-            LOGGER.debug("Prepopulating data, database=" + dbName + ", collection=" + collectionName + ", queries="
-                    + queries.toString() + ", inserts=" + inserts.toString());
-        } // if
-
         // Do the update
         BasicDBObject update = buildUpdateForUpdate(attrType, calendar, max, min, sum, sum2, numSamples);
         LOGGER.debug("Updating data, database=" + dbName + ", collection=" + collectionName + ", queries="
                 + queries.toString() + ", update=" + update.toString());
-        writes = new ArrayList<WriteModel<Document>>();
         for (int i = 0; i < queries.size(); i++) {
             writes.add(
                  new UpdateOneModel<Document>(
@@ -290,7 +282,12 @@ public class MongoBackendImpl implements MongoBackend {
                                               update) // update
                        );
         }
-        collection.bulkWrite(writes);
+        com.mongodb.bulk.BulkWriteResult res = collection.bulkWrite(writes);
+
+        if (res.getMatchedCount() == queries.size()) {
+            LOGGER.debug("Prepopulated data, database=" + dbName + ", collection=" + collectionName + ", queries="
+                    + queries.toString() + ", inserts=" + inserts.toString());
+        } // if
     } // insertContextDataAggregated
 
     private void insertContextDataAggregatedForResolution(String dbName, String collectionName,
@@ -314,15 +311,7 @@ public class MongoBackendImpl implements MongoBackend {
                                               new UpdateOptions().upsert(true))
                        );
         }
-        com.mongodb.bulk.BulkWriteResult res = collection.bulkWrite(writes);
-
-        if (res.getMatchedCount() == 0) {
-            LOGGER.debug("Prepopulating data, database=" + dbName + ", collection=" + collectionName + ", queries="
-                    + queries.toString() + ", insert=" + inserts.toString());
-        } // if
-
         // Do the update
-        writes = new ArrayList<WriteModel<Document>>();
         for (String key : counts.keySet()) {
             int count = counts.get(key);
             ArrayList<BasicDBObject> updates = buildUpdateForUpdate(attrType, resolutions, calendar, key, count);
@@ -336,7 +325,11 @@ public class MongoBackendImpl implements MongoBackend {
                            );
             }
         } // for
-        collection.bulkWrite(writes);
+        com.mongodb.bulk.BulkWriteResult res = collection.bulkWrite(writes);
+        if (res.getMatchedCount() == (counts.size() * queries.size())) {
+            LOGGER.debug("Prepopulated data, database=" + dbName + ", collection=" + collectionName + ", queries="
+                    + queries.toString() + ", insert=" + inserts.toString());
+        } // if
     } // insertContextDataAggregated
 
     /**
