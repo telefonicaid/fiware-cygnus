@@ -389,6 +389,7 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
                     } catch (Exception e2) {
                         try {
                             // insert creating database and collection before
+                            backend.createDatabase(dbName);
                             backend.createCollection(dbName, collectionName, dataExpiration);
                             backend.insertContextDataAggregated(dbName, collectionName, lastRecvTimeTs,
                                     entityId, entityType, numericAggr.getAttrName(), numericAggr.getAttrType(),
