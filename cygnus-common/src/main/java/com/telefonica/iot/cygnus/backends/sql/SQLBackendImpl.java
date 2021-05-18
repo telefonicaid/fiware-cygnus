@@ -644,8 +644,9 @@ public class SQLBackendImpl implements SQLBackend{
                 throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + insertQuery, "SQLTimeoutException", e.getMessage());
             }
         } catch (SQLException e) {
+            persistError(dataBase, insertQuery, e);
+            persistError(dataBase, upsertQuerys, e);
             cygnusSQLRollback(connection);
-
             if (upsertQuerys.isEmpty() && insertQuery.isEmpty()) {
                 throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + connection, "SQLException", e.getMessage());
             } else if (insertQuery.isEmpty()){
