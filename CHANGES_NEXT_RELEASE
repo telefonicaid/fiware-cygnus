@@ -1,3 +1,4 @@
+[cygnus-ngsi][MongoSink] Check access to element aggregation before cast to Date mongo type (#2038)
 [cygnus-common][MySQL, PostgreSQL, Postgis] Persit error about upsert
 [cygnus-common][Mongo] Use mongo bulkWriter for aggregated data (#2018)
 [cygnus-common] Upgrade mongodb-driver from 3.11.0 to 3.12.8
