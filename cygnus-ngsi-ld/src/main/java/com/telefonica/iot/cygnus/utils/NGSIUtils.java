@@ -21,7 +21,6 @@ package com.telefonica.iot.cygnus.utils;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.ivy.osgi.p2.P2Artifact;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
