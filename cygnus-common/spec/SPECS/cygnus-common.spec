@@ -171,6 +171,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed May 19 2021 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.9.1
+
+* Mon May 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.9.0
+- [cygnus-ngsi][MongoSink] Cast to mongo Date type all NGSI DateTime attributes in column and row mode (#2020)
+
 * Mon May 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.9.0
 - [cygnus-ngsi][MongoSink] Cast to mongo Date type all NGSI DateTime attributes in column and row mode (#2020)
 
