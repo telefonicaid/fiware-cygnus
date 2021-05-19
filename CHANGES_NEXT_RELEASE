@@ -1,0 +1,2 @@
+[cygnus-common] remove hive-exec dependency (unneeded)
+[cygnus-ngsi] add jodd-core 3.6.8 dependency (previously included as transitive dependency of hive-exec in cygnus-common)
