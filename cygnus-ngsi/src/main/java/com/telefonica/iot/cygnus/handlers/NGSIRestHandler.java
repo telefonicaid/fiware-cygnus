@@ -358,16 +358,15 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         // Split the notified service path and check if it matches the number of notified context responses
         String[] servicePaths = servicePath.split(",");
 
-        // Issue #2042: ngsiv2 initial notification may not includes all related subservices explicitly in servicePath header
+        // Issue #2042: ngsiv2 initial notification not includes al list of subservices explicitly in servicePath header
         // when subservice is /
         if (ngsiVersion != null && ngsiVersion.equals("normalized") ) {
-            if (servicePaths.length < ncr.getContextResponses().size()) {
+            if (servicePaths.length < ncr.getContextResponses().size() &&
+                servicePaths.length == 1 /*&& servicePath.equals("/")*/) {
+                LOGGER.debug("[NGSIRestHandler] normalizing servicePath  " + servicePath);
                 String[] newServicePaths = new String [ncr.getContextResponses().size()];
-                for (int i = 0; i < servicePaths.length; i++) {
-                    newServicePaths[i] = servicePaths[i];
-                }
-                for (int i = servicePaths.length; i < ncr.getContextResponses().size(); i++) {
-                    newServicePaths[i] = servicePaths[servicePaths.length-1];
+                for (int i = 0; i < ncr.getContextResponses().size(); i++) {
+                    newServicePaths[i] = servicePaths[0];
                 }
                 servicePaths = newServicePaths;
             }
