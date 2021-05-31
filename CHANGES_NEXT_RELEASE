@@ -1,3 +1,4 @@
+[cygnus-ngsi][STHSink] Fix aggregation of events with different entityId (#2048)
 [cygnus-common][Mongo] Check mongo uri format (#2046)
 [cygnus-ngsi][NGSIRestHandler] ngsiv2 initial notification not includes al list of subservices in servicePath header when is / (#2042)
 [cygnus-ngsi][MongoSink] Check access to element aggregation before cast to Date mongo type (#2038)
