@@ -100,7 +100,7 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
                 // Current STH Aggregator does not allow more than one event
                 // but an STH aggregation is big enough to be persited each time
                 STHAggregator aggregator = new STHAggregator();
-                aggregator.initialize(events.get(0));
+                aggregator.initialize(event);
                 aggregator.aggregate(event);
                 // Persist the aggregation
                 aggregator.persist(this.getName());
