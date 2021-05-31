@@ -95,22 +95,16 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
             // Get the events within the current sub-batch
             ArrayList<NGSIEvent> events = batch.getNextEvents();
             
-            //// Get an aggregator for this destination and initialize it
-            // STHAggregator aggregator = new STHAggregator();
-            // aggregator.initialize(events.get(0));
-
             // Iterate on the events within the sub-batch and aggregate them
             for (NGSIEvent event : events) {
-                // FIXME: current STH Aggregator does not allow different events (with different entityId)
+                // Current STH Aggregator does not allow more than one event
+                // but an STH aggregation is big enough to be persited each time
                 STHAggregator aggregator = new STHAggregator();
                 aggregator.initialize(events.get(0));
                 aggregator.aggregate(event);
                 // Persist the aggregation
                 aggregator.persist(this.getName());
             } // for
-            
-            // Persist the aggregation
-            // aggregator.persist(this.getName());
             
             // Set the sub-batch as persisted
             batch.setNextPersisted(true);
