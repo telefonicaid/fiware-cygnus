@@ -99,7 +99,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed Jun 02 2021 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.10.0
+- [cygnus-ngsi][MongoSink][STHSink] Try to not create database and collection in each insertion (#2019, #1975)
+- [cygnus-ngsi][STHSink] Fix aggregation of events with different entityId (#2048)
+- [cygnus-ngsi][MongoSink] Check access to element aggregation before cast to Date mongo type (#2038)
+- [cygnus-ngsi][NGSIRestHandler] NGSIv2 initial notification does not include a list of subservices in servicePath header when is / (#2042)
+- [cygnus-ngsi] Add jodd-core 3.6.8 dependency (previously included as transitive dependency of hive-exec in cygnus-common)
+
 * Mon May 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.9.0
+- [cygnus-ngsi][MongoSink] Cast to mongo Date type all NGSI DateTime attributes in column and row mode (#2020)
 
 * Mon Apr 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.8.0
 - [cygnus-ngsi] [PostgisSink,PostgreSQL,MySQL] Add stack trace and config options to error log about createPersistenceBackend
