@@ -102,7 +102,7 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
     } // aggregate
 
     private String getName() {
-        return "NGSIUtils.GenericColumnAggregator";
+        return "NGSIUtils.GenericRowAggregator";
     }
 
 }
