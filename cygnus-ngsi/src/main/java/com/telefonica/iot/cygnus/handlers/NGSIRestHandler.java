@@ -357,12 +357,27 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         // Split the notified service path and check if it matches the number of notified context responses
         String[] servicePaths = servicePath.split(",");
-        
+
+        // Issue #2042: ngsiv2 initial notification not includes al list of subservices explicitly in servicePath header
+        // when subservice is /
+        if (ngsiVersion != null && ngsiVersion.equals("normalized") ) {
+            if (servicePaths.length < ncr.getContextResponses().size() &&
+                servicePaths.length == 1 /*&& servicePath.equals("/")*/) {
+                LOGGER.debug("[NGSIRestHandler] normalizing servicePath  " + servicePath);
+                String[] newServicePaths = new String [ncr.getContextResponses().size()];
+                for (int i = 0; i < ncr.getContextResponses().size(); i++) {
+                    newServicePaths[i] = servicePaths[0];
+                }
+                servicePaths = newServicePaths;
+            }
+        }
         if (servicePaths.length != ncr.getContextResponses().size()) {
             serviceMetrics.add(service, servicePath, 1, request.getContentLength(), 0, 1, 0, 0, 0, 0, 0);
             LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('"
                     + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                    + "' header value does not match the number of notified context responses");
+                    + "' header value: " + servicePath
+                    + " does not match the number of notified context responses: " + ncr.getContextResponses().size()
+                    );
             throw new HTTPBadRequestException(
                     "'" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
                     + "' header value does not match the number of notified context responses");
