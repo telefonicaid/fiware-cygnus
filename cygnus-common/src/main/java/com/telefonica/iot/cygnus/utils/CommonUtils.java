@@ -46,12 +46,10 @@ import kafka.tools.KafkaMigrationTool;
 import org.I0Itec.zkclient.exception.ZkNoNodeException;
 import org.apache.flume.interceptor.RegexExtractorInterceptorMillisSerializer;
 import org.apache.hive.jdbc.HivePreparedStatement;
-import org.apache.hadoop.hive.ql.exec.AbstractMapJoinOperator;
 import org.apache.hadoop.metrics.spi.AbstractMetricsContext;
 import org.apache.http.impl.DefaultBHttpServerConnection;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.log4j.pattern.SequenceNumberPatternConverter;
-import org.codehaus.groovy.control.ErrorCollector;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -304,7 +302,7 @@ public final class CommonUtils {
         try {
             return FORMATTER1.parseDateTime(tsString);
         } catch (Exception e) {
-            LOGGER.error("parseStringWithFormats exception " + e.getMessage());
+            LOGGER.debug("parseStringWithFormats exception " + e.getMessage());
             return parseStringWithFormatPattern2(tsString);
         }
     }
@@ -313,7 +311,7 @@ public final class CommonUtils {
         try {
             return FORMATTER2.parseDateTime(tsString);
         } catch (Exception e) {
-            LOGGER.error("parseStringWithFormatPattern2 exception " + e.getMessage());
+            LOGGER.debug("parseStringWithFormatPattern2 exception " + e.getMessage());
             return parseStringWithFormatPattern2NoTZ(tsString);
         }
     }
@@ -324,7 +322,7 @@ public final class CommonUtils {
             String tsStringTruncated = tsString.substring(0, tsString.length() - 4) + "Z";
             return FORMATTER2.parseDateTime(tsStringTruncated);
         } catch (Exception e) {
-            LOGGER.error("parseStringWithFormatPattern2NoTZ exception " + e.getMessage());
+            LOGGER.debug("parseStringWithFormatPattern2NoTZ exception " + e.getMessage());
             return parseStringWithFormatPattern3(tsString);
         }
     }
@@ -333,7 +331,7 @@ public final class CommonUtils {
         try {
             return FORMATTER3.parseDateTime(tsString);
         } catch (Exception e) {
-            LOGGER.error("parseStringWithFormatPattern3 exception " + e.getMessage());
+            LOGGER.debug("parseStringWithFormatPattern3 exception " + e.getMessage());
             return parseStringWithFormatPattern4(tsString);
         }
     }
@@ -342,7 +340,7 @@ public final class CommonUtils {
         try {
             return FORMATTER4.parseDateTime(tsString);
         } catch (Exception e) {
-            LOGGER.error("parseStringWithFormatPattern4 exception " + e.getMessage());
+            LOGGER.debug("parseStringWithFormatPattern4 exception " + e.getMessage());
             return parseStringWithFormatPattern4NoTZ(tsString);
         }
     }
@@ -352,7 +350,7 @@ public final class CommonUtils {
             String tsStringTruncated = tsString.substring(0, tsString.length() - 3);
             return FORMATTER4.parseDateTime(tsStringTruncated);
         } catch (Exception e) {
-            LOGGER.error("parseStringWithFormatPattern4NoTZ exception " + e.getMessage());
+            LOGGER.debug("parseStringWithFormatPattern4NoTZ exception " + e.getMessage());
             return parseStringWithFormatPattern5(tsString);
         }
     }
@@ -361,7 +359,7 @@ public final class CommonUtils {
         try {
             return FORMATTER5.parseDateTime(tsString);
         } catch (Exception e) {
-            LOGGER.error("parseStringWithFormatPattern5 exception " + e.getMessage());
+            LOGGER.debug("parseStringWithFormatPattern5 exception " + e.getMessage());
             return parseStringWithFormatPattern6(tsString);
         }
     }
@@ -423,11 +421,7 @@ public final class CommonUtils {
         // trace the file containing the httpcore library
         myClassURL = DefaultBHttpServerConnection.class.getProtectionDomain().getCodeSource().getLocation();
         LOGGER.debug("Loading httpcore from " + myClassURL.toExternalForm());
-        
-        // trace the file containing the junit library
-        myClassURL = ErrorCollector.class.getProtectionDomain().getCodeSource().getLocation();
-        LOGGER.debug("Loading junit from " + myClassURL.toExternalForm());
-        
+     
         // trace the file containing the flume-ng-node library
         myClassURL =
                 RegexExtractorInterceptorMillisSerializer.class.getProtectionDomain().getCodeSource().getLocation();
@@ -460,11 +454,7 @@ public final class CommonUtils {
         // trace the file containing the hadoop-core library
         myClassURL = AbstractMetricsContext.class.getProtectionDomain().getCodeSource().getLocation();
         LOGGER.debug("Loading hadoop-core from " + myClassURL.toExternalForm());
-        
-        // trace the file containing the hive-exec library
-        myClassURL = AbstractMapJoinOperator.class.getProtectionDomain().getCodeSource().getLocation();
-        LOGGER.debug("Loading hive-exec from " + myClassURL.toExternalForm());
-        
+
         // trace the file containing the hive-jdbc library
         myClassURL = HivePreparedStatement.class.getProtectionDomain().getCodeSource().getLocation();
         LOGGER.debug("Loading hive-jdbc from " + myClassURL.toExternalForm());

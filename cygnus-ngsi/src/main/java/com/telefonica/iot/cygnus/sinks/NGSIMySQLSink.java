@@ -19,11 +19,13 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
 import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
+import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
@@ -57,7 +59,7 @@ public class NGSIMySQLSink extends NGSISink {
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
     private static final String MYSQL_DRIVER_NAME = "com.mysql.jdbc.Driver";
-    private static final String MYSQL_INSTANCE_NAME = "mysql";
+    private static final SQLInstance MYSQL_INSTANCE_NAME = SQLInstance.MYSQL;
     private static final String DEFAULT_LAST_DATA = "false";
     private static final String DEFAULT_LAST_DATA_TABLE_SUFFIX = "_last_data";
     private static final String DEFAULT_LAST_DATA_UNIQUE_KEY = NGSIConstants.ENTITY_ID;
@@ -279,8 +281,11 @@ public class NGSIMySQLSink extends NGSISink {
             createPersistenceBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize, mysqlOptions, persistErrors, maxLatestErrors);
             LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
         } catch (Exception e) {
-            LOGGER.error("Error while creating the MySQL persistence backend. Details="
-                    + e.getMessage());
+            String configParams = " mysqlHost " + mysqlHost + " mysqlPort " + mysqlPort + " mysqlUsername " + mysqlUsername + " mysqlPassword " + mysqlPassword + " maxPoolSize " + maxPoolSize + " mysqlOptions " + mysqlOptions + " persistErrors " + persistErrors + " maxLatestErrors " + maxLatestErrors;
+            LOGGER.error("Error while creating the MySQL persistence backend. " +
+                         "Config params= " + configParams +
+                         "Details=" + e.getMessage() +
+                         "Stack trace: " + Arrays.toString(e.getStackTrace()));
         } // try catch
         
         super.start();
@@ -297,7 +302,7 @@ public class NGSIMySQLSink extends NGSISink {
      */
     private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
         if (mySQLPersistenceBackend == null) {
-            mySQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null, sqlOptions, persistErrors, maxLatestErrors);
+            mySQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, sqlOptions, persistErrors, maxLatestErrors);
         }
     }
 
@@ -424,7 +429,7 @@ public class NGSIMySQLSink extends NGSISink {
         // everything must be provisioned in advance
         if (aggregator instanceof NGSIGenericRowAggregator) {
             mySQLPersistenceBackend.createDestination(dbName);
-            mySQLPersistenceBackend.createTable(dbName, tableName, fieldsForCreate);
+            mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
         } // if
 
         if (valuesForInsert.equals("")) {
@@ -435,6 +440,7 @@ public class NGSIMySQLSink extends NGSISink {
                 mySQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
                         aggregator.getLastDataToPersist(),
                         dbName,
+                        null,
                         tableName,
                         lastDataTableSuffix,
                         lastDataUniqueKey,
@@ -442,7 +448,7 @@ public class NGSIMySQLSink extends NGSISink {
                         lastDataSQLTimestampFormat,
                         attrNativeTypes);
             } else {
-                mySQLPersistenceBackend.insertContextData(dbName, tableName, fieldsForInsert, valuesForInsert);
+                mySQLPersistenceBackend.insertContextData(dbName, null, tableName, fieldsForInsert, valuesForInsert);
             }
         }
     } // persistAggregation
