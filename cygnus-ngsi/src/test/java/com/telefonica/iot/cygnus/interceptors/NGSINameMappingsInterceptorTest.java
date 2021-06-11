@@ -24,6 +24,8 @@ import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHe
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import java.util.Map;
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
@@ -743,7 +745,7 @@ public class NGSINameMappingsInterceptorTest {
             System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.doMapConfig4]")
                     + "-  ERROR  - The Service type is not equal to the expected one");
             equals = false;
-        } 
+        }
 
         try {
             assertTrue(equals);
@@ -755,7 +757,6 @@ public class NGSINameMappingsInterceptorTest {
             throw e;
         } // try catch
     } // testDoMapConfig4
-
 
     /*
      * [NGSINameMappingsInterceptorTest.loadNameMappingsError] -------- Load a name mappings with error.

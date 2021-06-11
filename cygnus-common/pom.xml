@@ -16,6 +16,12 @@
     </properties>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
+	<dependency>
+	  <groupId>com.jayway.jsonpath</groupId>
+	  <artifactId>json-path</artifactId>
+	  <version>2.4.0</version>
+	</dependency>
         <!-- Required for testing -->
         <dependency>
             <groupId>org.mockito</groupId>
@@ -144,6 +150,7 @@
                     <skipTests>true</skipTests>
                   </configuration>
                 </plugin>
+
                 <!-- Explicit Java version declaration in needed in some systems in which Maven seems not  -->
                 <!-- being able to find itself the right version. Many systems don't need this declaration -->
                 <!-- but it doesn't use to hurt anyway                                                     -->
