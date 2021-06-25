@@ -1,2 +1,3 @@
+-[cygnus-ngsi][NGSISink] Add destination to all log about batches
 -[cygnus-ngsi][GenericRowAggregator] Fix generic row aggregator name used in logs
 -[cygnus-commons] Upgrade httpclient dependency from 4.3.6 to 4.5.13 due to security vulnerability
