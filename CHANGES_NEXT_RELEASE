@@ -1,3 +1,4 @@
 -[cygnus-commons][MySQLBackend] Upgrade mysql-connector-java from 5.1.47 to 8.0.22 due to security vulnerability
+-[cygnus-ngsi][NGSISink] Add destination to all log about batches
 -[cygnus-ngsi][GenericRowAggregator] Fix generic row aggregator name used in logs
 -[cygnus-commons] Upgrade httpclient dependency from 4.3.6 to 4.5.13 due to security vulnerability
