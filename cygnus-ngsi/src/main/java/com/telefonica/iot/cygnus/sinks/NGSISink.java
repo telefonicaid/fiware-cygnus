@@ -606,6 +606,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                         LOGGER.info("Finishing internal transaction (" + transactionIds + ")" + " Destination: " + destination );
                     } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
                         updateServiceMetrics(batchToPersist, true);
+                        this.getPersistenceBackend().persistError(destination, "", e);
                         LOGGER.error(e.getMessage() + " Destination: " + destination + " Stack trace: " + Arrays.toString(e.getStackTrace()));
                     } catch (Exception e) {
                         updateServiceMetrics(batchToPersist, true);
