@@ -351,6 +351,12 @@ public class NGSIMySQLSink extends NGSISink {
             batch.setNextPersisted(true);
         } // for
     } // persistBatch
+
+    @Override
+    void persistError(String destination, Exception exception) throws CygnusPersistenceError,
+                                                                      CygnusRuntimeError {
+        this.getPersistenceBackend().persistError(destination, "", e);
+    }
     
     @Override
     public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {

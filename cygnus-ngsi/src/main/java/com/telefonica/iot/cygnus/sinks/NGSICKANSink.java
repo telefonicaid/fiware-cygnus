@@ -292,6 +292,11 @@ public class NGSICKANSink extends NGSISink {
     } // persistBatch
 
     @Override
+    void persistError(String destination, Exception exception) throws CygnusPersistenceError,
+                                                                      CygnusRuntimeError {
+    }
+
+    @Override
     public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
         if (batch == null) {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
@@ -481,7 +486,7 @@ public class NGSICKANSink extends NGSISink {
             case DMBYENTITYID:
                 //FIXME
                 //note that if we enable encode() and/or encodeCKAN() in this datamodel we could have problems, although it need to be analyzed in deep
-            	resName=entityId;
+                resName=entityId;
                 break;
             case DMBYENTITY:
                 if (enableEncoding) {

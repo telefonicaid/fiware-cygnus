@@ -486,6 +486,11 @@ public class NGSIElasticsearchSink extends NGSISink {
         } // for
     } // persistBatch
 
+    @Override
+    void persistError(String destination, Exception exception) throws CygnusPersistenceError,
+                                                                      CygnusRuntimeError {
+    }
+
     /**
      * Not implemented the size-based capping.
      *

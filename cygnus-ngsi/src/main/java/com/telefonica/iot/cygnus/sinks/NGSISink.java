@@ -606,7 +606,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                         LOGGER.info("Finishing internal transaction (" + transactionIds + ")" + " Destination: " + destination );
                     } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
                         updateServiceMetrics(batchToPersist, true);
-                        this.getPersistenceBackend().persistError(destination, "", e);
+                        persistError(destination, e);
                         LOGGER.error(e.getMessage() + " Destination: " + destination + " Stack trace: " + Arrays.toString(e.getStackTrace()));
                     } catch (Exception e) {
                         updateServiceMetrics(batchToPersist, true);
@@ -1075,6 +1075,9 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
      */
     abstract void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusBadContextData,
             CygnusRuntimeError, CygnusPersistenceError;
+
+    abstract void persistError(String destination, Exception exception) throws CygnusPersistenceError,
+                                                                               CygnusRuntimeError;
     
     /**
      * This is the method the classes extending this class must implement when dealing with size-based capping.

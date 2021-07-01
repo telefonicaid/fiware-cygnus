@@ -748,7 +748,7 @@ public class SQLBackendImpl implements SQLBackend{
         cache.addTable(dataBase, errorTable);
     } // insertErrorLog
 
-    private void persistError(String destination, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {
+    public void persistError(String destination, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {
         try {
             if (persistErrors) {
                 createErrorTable(destination);

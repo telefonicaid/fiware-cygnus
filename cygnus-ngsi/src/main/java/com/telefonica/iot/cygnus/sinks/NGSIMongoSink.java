@@ -150,7 +150,12 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
             batch.setNextPersisted(true);
         } // for
     } // persistBatch
-    
+
+    @Override
+    void persistError(String destination, Exception exception) throws CygnusPersistenceError,
+                                                                      CygnusRuntimeError {
+    }
+
     @Override
     public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
     } // capRecords
