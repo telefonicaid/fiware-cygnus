@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.sinks;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
 import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
