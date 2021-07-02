@@ -95,6 +95,11 @@ public class NGSISinkTest {
         } // persistBatch
 
         @Override
+        void persistError(String destination, Exception exception)
+            throws CygnusPersistenceError, CygnusRuntimeError {
+        }
+
+        @Override
         public void capRecords(NGSIBatch batch, long size) throws CygnusCappingError {
             throw new UnsupportedOperationException("Not supported yet.");
         } // capRecords
