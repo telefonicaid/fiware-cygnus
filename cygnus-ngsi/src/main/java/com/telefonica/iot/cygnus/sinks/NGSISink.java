@@ -610,6 +610,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                         LOGGER.error(e.getMessage() + " Destination: " + destination + " Stack trace: " + Arrays.toString(e.getStackTrace()));
                     } catch (Exception e) {
                         updateServiceMetrics(batchToPersist, true);
+                        persistError(destination, e);
                         LOGGER.error(e.getMessage() + " Destination: " + destination + " Stack trace: " + Arrays.toString(e.getStackTrace()));
                         for (NGSIEvent event : batchToPersist.getNextEvents()) {
                             rollbackBatch.addEvent(destination, event);
