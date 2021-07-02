@@ -23,6 +23,8 @@ import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribut
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
 import com.telefonica.iot.cygnus.errors.CygnusExpiratingError;
+import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
+import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
