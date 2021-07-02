@@ -393,7 +393,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     @Override
     void persistError(String destination, Exception exception) throws CygnusPersistenceError,
                                                                       CygnusRuntimeError {
-        this.getPersistenceBackend().persistError(destination, "", e);
+        this.getPersistenceBackend().persistError(destination, "", exception);
     }
     
     @Override

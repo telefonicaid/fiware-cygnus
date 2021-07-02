@@ -1076,9 +1076,15 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     abstract void persistBatch(NGSIBatch batch) throws CygnusBadConfiguration, CygnusBadContextData,
             CygnusRuntimeError, CygnusPersistenceError;
 
+    /**
+     * This is the method the classes extending this class must implement to persist all kind of sink configuration errors
+     * @param destination
+     * @param exception
+     * @throws CygnusPersistenceError, CygnusRuntimeError
+     */
     abstract void persistError(String destination, Exception exception) throws CygnusPersistenceError,
                                                                                CygnusRuntimeError;
-    
+
     /**
      * This is the method the classes extending this class must implement when dealing with size-based capping.
      * @param batch
