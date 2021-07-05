@@ -395,7 +395,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             String destination = batch.getNextDestination();
             ArrayList<NGSIEvent> events = batch.getNextEvents();
             for (NGSIEvent event : events) {
-
                 NGSIBatch batchToPersist = new NGSIBatch();
                 batchToPersist.addEvent(destination, event);
                 transactionIds.append(event.getHeaders().get(CommonConstants.HEADER_CORRELATOR_ID)).append(", ");
@@ -419,14 +418,12 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 } catch (Exception e) {
                     updateServiceMetrics(batchToPersist, true);
                     LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-                    for (NGSIEvent event : batchToPersist.getNextEvents()) {
-                        rollbackBatch.addEvent(destination, event);
-                    }
+                    rollbackBatch.addEvent(destination, event); // there is just one event
                 } finally {
                     batch.setNextPersisted(true);
                 }
-            } // for
-        }
+            } // for (NGSIEvent event : events)
+        } // while (batch.hasNext())
         if (rollbackBatch.getNumEvents() > 0) {
             Accumulator rollbackAccumulator = new Accumulator();
             rollbackAccumulator.initialize(rollbackedAccumulation.getAccStartDate());
@@ -620,7 +617,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     } finally {
                         batch.setNextPersisted(true);
                     }
-                }
+                } // while (batch.hasNext())
                 if (rollbackBatch.getNumEvents() > 0) {
                     Accumulator rollbackAccumulator = new Accumulator();
                     rollbackAccumulator.initialize(accumulator.getAccStartDate());
