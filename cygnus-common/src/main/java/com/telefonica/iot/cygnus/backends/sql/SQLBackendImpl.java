@@ -217,7 +217,7 @@ public class SQLBackendImpl implements SQLBackend{
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Table creation error. Query " + query, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            persistError(dataBase, query, e);
+            persistError(dataBase, schema, query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Table creation error", "SQLException", e.getMessage());
         } // try catch
 
@@ -258,7 +258,7 @@ public class SQLBackendImpl implements SQLBackend{
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + "Database: " + dataBase + " Data insertion error. Query insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
-            persistError(dataBase, query, e);
+            persistError(dataBase, schema, query, e);
             throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + "Database: " + dataBase + " Data insertion error. Query: insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLException", e.getMessage());
         } finally {
             closeSQLObjects(con, stmt);
@@ -301,7 +301,7 @@ public class SQLBackendImpl implements SQLBackend{
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data select error. Query " + query, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            persistError(dataBase, query, e);
+            persistError(dataBase, "", query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Querying error", "SQLException", e.getMessage());
         } // try catch
     } // select
@@ -328,7 +328,7 @@ public class SQLBackendImpl implements SQLBackend{
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data delete error. Query " + query, "SQLTimeoutException", e.getMessage());
         }catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            persistError(dataBase, query, e);
+            persistError(dataBase, "", query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Deleting error", "SQLException", e.getMessage());
         } // try catch
 
@@ -509,12 +509,15 @@ public class SQLBackendImpl implements SQLBackend{
     }
 
 
-    public void createErrorTable(String dataBase)
+    public void createErrorTable(String dataBase, String schema)
             throws CygnusRuntimeError, CygnusPersistenceError {
         // the defaul table for error log will be called the same as the destination name
-        String errorTable = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
-        if (cache.isCachedTable(dataBase, errorTable)) {
-            LOGGER.debug(sqlInstance.toString().toUpperCase() + " '" + errorTable + "' is cached, thus it is not created");
+        String errorTableName = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
+        if (sqlInstance == SQLInstance.POSTGRESQL){
+            errorTableName = schema + "." + dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
+        }
+        if (cache.isCachedTable(dataBase, errorTableName)) {
+            LOGGER.debug(sqlInstance.toString().toUpperCase() + " '" + errorTableName + "' is cached, thus it is not created");
             return;
         } // if
         String typedFieldNames = "(" +
@@ -528,9 +531,9 @@ public class SQLBackendImpl implements SQLBackend{
 
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
-            query = "create table if not exists `" + errorTable + "`" + typedFieldNames;
+            query = "create table if not exists `" + errorTableName + "`" + typedFieldNames;
         } else if (sqlInstance == SQLInstance.POSTGRESQL){
-            query = "create table if not exists " + dataBase + "." + errorTable + " " + typedFieldNames;
+            query = "create table if not exists " + errorTableName + " " + typedFieldNames;
         }
 
         try {
@@ -550,8 +553,8 @@ public class SQLBackendImpl implements SQLBackend{
 
         closeSQLObjects(con, stmt);
 
-        LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + errorTable + "' to the cache after table creation");
-        cache.addTable(dataBase, errorTable);
+        LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + errorTableName + "' to the cache after table creation");
+        cache.addTable(dataBase, errorTableName);
     } // createErrorTable
 
     /**
@@ -646,13 +649,13 @@ public class SQLBackendImpl implements SQLBackend{
         } catch (SQLException e) {
             cygnusSQLRollback(connection);
             if (upsertQuerys.isEmpty() && insertQuery.isEmpty()) {
-                persistError(dataBase, upsertQuerys, e);
+                persistError(dataBase, schema, upsertQuerys, e);
                 throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + connection, "SQLException", e.getMessage());
             } else if (insertQuery.isEmpty()){
-                persistError(dataBase, upsertQuerys, e);
+                persistError(dataBase, schema, upsertQuerys, e);
                 throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + upsertQuerys, "SQLException", e.getMessage());
             } else if (upsertQuerys.isEmpty()) {
-                persistError(dataBase, insertQuery, e);
+                persistError(dataBase, schema, insertQuery, e);
                 throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() + " Data insertion error. Query: `" + insertQuery, "SQLException", e.getMessage());
             }
         } finally {
@@ -671,10 +674,13 @@ public class SQLBackendImpl implements SQLBackend{
         }
     }
 
-    public void purgeErrorTable(String dataBase)
+    public void purgeErrorTable(String dataBase, String schema)
             throws CygnusRuntimeError, CygnusPersistenceError {
         // the default table for error log will be called the same as the destination name
-        String errorTable = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
+        String errorTableName = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
+        if (sqlInstance == SQLInstance.POSTGRESQL){
+            errorTableName = schema + "." + dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
+        }
         String limit = String.valueOf(maxLatestErrors);
 
         Statement stmt = null;
@@ -683,9 +689,9 @@ public class SQLBackendImpl implements SQLBackend{
 
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
-            query = "delete from `" + errorTable + "` "  + "where timestamp not in (select timestamp from (select timestamp from `" + errorTable + "` "  + "order by timestamp desc limit " + limit + " ) tmppurge )";
+            query = "delete from `" + errorTableName + "` "  + "where timestamp not in (select timestamp from (select timestamp from `" + errorTableName + "` "  + "order by timestamp desc limit " + limit + " ) tmppurge )";
         } else if (sqlInstance == SQLInstance.POSTGRESQL){
-            query = "DELETE FROM " + dataBase + "." + errorTable + " "  + "WHERE timestamp NOT IN (SELECT timestamp FROM (SELECT timestamp FROM " + dataBase + "." + errorTable + " "  + "ORDER BY timestamp DESC LIMIT " + limit + " ) tmppurge )";
+            query = "DELETE FROM " + errorTableName + " "  + "WHERE timestamp NOT IN (SELECT timestamp FROM (SELECT timestamp FROM " + errorTableName + " "  + "ORDER BY timestamp DESC LIMIT " + limit + " ) tmppurge )";
         }
 
         try {
@@ -706,12 +712,15 @@ public class SQLBackendImpl implements SQLBackend{
         closeSQLObjects(con, stmt);
     }
 
-    private void insertErrorLog(String dataBase, String errorQuery, Exception exception)
+    private void insertErrorLog(String dataBase, String schema, String errorQuery, Exception exception)
             throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError, SQLException {
         Statement stmt = null;
         java.util.Date date = new Date();
         Timestamp timestamp = new Timestamp(date.getTime());
-        String errorTable = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
+        String errorTableName = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
+        if (sqlInstance == SQLInstance.POSTGRESQL){
+            errorTableName = schema + "." + dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
+        }
         String fieldNames  = "(" +
                 "timestamp" +
                 ", error" +
@@ -722,9 +731,9 @@ public class SQLBackendImpl implements SQLBackend{
 
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
-            query = "insert into `" + errorTable + "` " + fieldNames + " values (?, ?, ?)";
+            query = "insert into `" + errorTableName + "` " + fieldNames + " values (?, ?, ?)";
         } else if (sqlInstance == SQLInstance.POSTGRESQL){
-            query = "INSERT INTO " + dataBase + "." + errorTable + " " + fieldNames + " VALUES (?, ?, ?)";
+            query = "INSERT INTO " + errorTableName + " " + fieldNames + " VALUES (?, ?, ?)";
         }
 
         PreparedStatement preparedStatement = con.prepareStatement(query);
@@ -743,24 +752,23 @@ public class SQLBackendImpl implements SQLBackend{
             closeSQLObjects(con, preparedStatement);
         } // try catch
 
-        LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + dataBase + "' and '" + errorTable + "' to the cache after insertion");
+        LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + dataBase + "' and '" + errorTableName + "' to the cache after insertion");
         cache.addDataBase(dataBase);
-        cache.addTable(dataBase, errorTable);
+        cache.addTable(dataBase, errorTableName);
     } // insertErrorLog
 
-    private void persistError(String destination, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {
+    private void persistError(String destination, String schema, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {
         try {
             if (persistErrors) {
-                createErrorTable(destination);
-                insertErrorLog(destination, query, exception);
-                purgeErrorTable(destination);
+                createErrorTable(destination, schema);
+                insertErrorLog(destination, schema, query, exception);
+                purgeErrorTable(destination, schema);
             }
             return;
         } catch (CygnusBadContextData cygnusBadContextData) {
-            LOGGER.debug(sqlInstance.toString().toUpperCase() + " failed to persist error on database/scheme " + destination + DEFAULT_ERROR_TABLE_SUFFIX + cygnusBadContextData);
-            createErrorTable(destination);
+            LOGGER.warn(sqlInstance.toString().toUpperCase() + " failed to persist error on database/scheme " + destination + DEFAULT_ERROR_TABLE_SUFFIX + " " + cygnusBadContextData);
         } catch (Exception e) {
-            LOGGER.debug(sqlInstance.toString().toUpperCase() + " failed to persist error on database/scheme " + destination + DEFAULT_ERROR_TABLE_SUFFIX + e);
+            LOGGER.warn(sqlInstance.toString().toUpperCase() + " failed to persist error on database/scheme " + destination + DEFAULT_ERROR_TABLE_SUFFIX + e);
         }
     }
 
