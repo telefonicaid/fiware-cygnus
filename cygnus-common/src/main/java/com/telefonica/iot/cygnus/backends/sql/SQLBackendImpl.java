@@ -301,7 +301,7 @@ public class SQLBackendImpl implements SQLBackend{
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data select error. Query " + query, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            persistError(dataBase, schema, query, e);
+            persistError(dataBase, "", query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Querying error", "SQLException", e.getMessage());
         } // try catch
     } // select
@@ -328,7 +328,7 @@ public class SQLBackendImpl implements SQLBackend{
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data delete error. Query " + query, "SQLTimeoutException", e.getMessage());
         }catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            persistError(dataBase, schema, query, e);
+            persistError(dataBase, "", query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Deleting error", "SQLException", e.getMessage());
         } // try catch
 
