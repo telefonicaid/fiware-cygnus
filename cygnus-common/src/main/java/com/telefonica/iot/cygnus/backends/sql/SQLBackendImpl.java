@@ -200,7 +200,7 @@ public class SQLBackendImpl implements SQLBackend{
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "create table if not exists `" + tableName + "`" + typedFieldNames;
         } else if (sqlInstance == SQLInstance.POSTGRESQL){
-            query = "CREATE TABLE IF NOT EXISTS " + schema + "." + table + " " + typedFieldNames;
+            query = "CREATE TABLE IF NOT EXISTS " + tableName + " " + typedFieldNames;
         }
 
         try {
@@ -241,7 +241,7 @@ public class SQLBackendImpl implements SQLBackend{
             query = "insert into `" + tableName + "` " + fieldNames + " values " + fieldValues;
         } else if (sqlInstance == SQLInstance.POSTGRESQL){
             tableName = schema + "." + table;
-            query = "INSERT INTO " + schema + "." + table + " " + fieldNames + " VALUES " + fieldValues;
+            query = "INSERT INTO " + tableName + " " + fieldNames + " VALUES " + fieldValues;
         }
 
         try {
