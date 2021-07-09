@@ -413,7 +413,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     numPersistedEvents += batchToPersist.getNumEvents();
                     LOGGER.info("Finishing internal transaction (" + transactionIds + ")");
                 } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
-                    updateServiceMetrics(batchToPersist, true);
+                    updateServiceMetrics(batchToPersist, true); // do not try again, is just one event
                     LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
                 } catch (Exception e) {
                     updateServiceMetrics(batchToPersist, true);
@@ -608,6 +608,12 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
                         updateServiceMetrics(batchToPersist, true);
                         LOGGER.error(e.getMessage() + " Destination: " + destination + " Stack trace: " + Arrays.toString(e.getStackTrace()));
+                        if (batchToPersist.getNumEvents() > 1) {
+                            // Maybe there are other events int batch that could finally get inserted
+                            for (NGSIEvent event : batchToPersist.getNextEvents()) {
+                                rollbackBatch.addEvent(destination, event);
+                            }
+                        }
                     } catch (Exception e) {
                         updateServiceMetrics(batchToPersist, true);
                         LOGGER.error(e.getMessage() + " Destination: " + destination + " Stack trace: " + Arrays.toString(e.getStackTrace()));
