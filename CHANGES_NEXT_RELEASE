@@ -1,3 +1,4 @@
--[cygnus-ngsi][NGSISink] Add destination to all log about batches
+-[cygnus-ngsi][NGSIPostgis, NGSIPostgreSQL] fix create error_log table (#2061)
+-[cygnus-ngsi][NGSISink] Add destination (which is composed using srv and subsrv fields) to all log about batches
 -[cygnus-ngsi][GenericRowAggregator] Fix generic row aggregator name used in logs
 -[cygnus-commons] Upgrade httpclient dependency from 4.3.6 to 4.5.13 due to security vulnerability
