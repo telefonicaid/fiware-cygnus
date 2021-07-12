@@ -1,3 +1,5 @@
+-[cygnus-ngsi][NGSISink] Perform batch retries one by one (#2059)
+-[cygnus-ngsi][NGSISink] Try retries when an event batch is in CygnusBadConfiguration, CygnusBadContextData, CygnusRuntimeError (#2059)
 -[cygnus-ngsi][NGSIPostgis, NGSIPostgreSQL] fix create error_log table (#2061)
 -[cygnus-ngsi][NGSISink] Add destination (which is composed using srv and subsrv fields) to all log about batches
 -[cygnus-ngsi][GenericRowAggregator] Fix generic row aggregator name used in logs
