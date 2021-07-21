@@ -391,38 +391,38 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         StringBuffer transactionIds = new StringBuffer();
         batch.startIterator();
         while (batch.hasNext()) {
-            NGSIBatch batchToPersist = new NGSIBatch();
             String destination = batch.getNextDestination();
             ArrayList<NGSIEvent> events = batch.getNextEvents();
             for (NGSIEvent event : events) {
+                NGSIBatch batchToPersist = new NGSIBatch();
                 batchToPersist.addEvent(destination, event);
                 transactionIds.append(event.getHeaders().get(CommonConstants.HEADER_CORRELATOR_ID)).append(", ");
-            }
-            try {
-                persistBatch(batchToPersist);
-                updateServiceMetrics(batchToPersist, false);
-                if (persistencePolicyMaxRecords > -1) {
-                    try {
-                        capRecords(batchToPersist, persistencePolicyMaxRecords);
-                    } catch (CygnusCappingError e) {
-                        LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-                    } // try
-                } // if
-                numPersistedEvents += batchToPersist.getNumEvents();
-                LOGGER.info("Finishing internal transaction (" + transactionIds + ")");
-            } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
-                updateServiceMetrics(batchToPersist, true);
-                LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-            } catch (Exception e) {
-                updateServiceMetrics(batchToPersist, true);
-                LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
-                for (NGSIEvent event : batchToPersist.getNextEvents()) {
-                    rollbackBatch.addEvent(destination, event);
+                //}
+                // force to persist a batch with just one element
+                try {
+                    persistBatch(batchToPersist);
+                    updateServiceMetrics(batchToPersist, false);
+                    if (persistencePolicyMaxRecords > -1) {
+                        try {
+                            capRecords(batchToPersist, persistencePolicyMaxRecords);
+                        } catch (CygnusCappingError e) {
+                            LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                        } // try
+                    } // if
+                    numPersistedEvents += batchToPersist.getNumEvents();
+                    LOGGER.info("Finishing internal transaction (" + transactionIds + ")");
+                } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
+                    updateServiceMetrics(batchToPersist, true); // do not try again, is just one event
+                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                } catch (Exception e) {
+                    updateServiceMetrics(batchToPersist, true);
+                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                    rollbackBatch.addEvent(destination, event); // there is just one event
+                } finally {
+                    batch.setNextPersisted(true);
                 }
-            } finally {
-                batch.setNextPersisted(true);
-            }
-        }
+            } // for (NGSIEvent event : events)
+        } // while (batch.hasNext())
         if (rollbackBatch.getNumEvents() > 0) {
             Accumulator rollbackAccumulator = new Accumulator();
             rollbackAccumulator.initialize(rollbackedAccumulation.getAccStartDate());
@@ -607,6 +607,12 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
                         updateServiceMetrics(batchToPersist, true);
                         LOGGER.error(e.getMessage() + " Sink: " + this.getClass().getName() + " Destination: " + destination + " Stack trace: " + Arrays.toString(e.getStackTrace()));
+                        if (batchToPersist.getNumEvents() > 1) {
+                            // Maybe there are other events int batch that could finally get inserted
+                            for (NGSIEvent event : batchToPersist.getNextEvents()) {
+                                rollbackBatch.addEvent(destination, event);
+                            }
+                        }
                     } catch (Exception e) {
                         updateServiceMetrics(batchToPersist, true);
                         LOGGER.error(e.getMessage() + " Sink: " + this.getClass().getName() + " Destination: " + destination + " Stack trace: " + Arrays.toString(e.getStackTrace()));
@@ -616,7 +622,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     } finally {
                         batch.setNextPersisted(true);
                     }
-                }
+                } // while (batch.hasNext())
                 if (rollbackBatch.getNumEvents() > 0) {
                     Accumulator rollbackAccumulator = new Accumulator();
                     rollbackAccumulator.initialize(accumulator.getAccStartDate());
