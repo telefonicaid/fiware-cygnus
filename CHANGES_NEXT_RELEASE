@@ -1,5 +1,7 @@
 -[cygnus-ngsi][NGSISink] Perform batch retries one by one (#2059)
 -[cygnus-ngsi][NGSISink] Try retries when an event batch is in CygnusBadConfiguration, CygnusBadContextData, CygnusRuntimeError (#2059)
+-[cygnus-commons][PostgreSQL, PostGIS] Upgrade posgresql driver from 9.4-1206-jdbc41 to 42.2.22
+-[cygnus-commons][MySQLBackend] Upgrade mysql-connector-java from 5.1.47 to 8.0.22 due to security vulnerability
 -[cygnus-ngsi][NGSIPostgis, NGSIPostgreSQL] fix create error_log table (#2061)
 -[cygnus-ngsi][NGSISink] Add sink class name to all log about batches
 -[cygnus-ngsi][NGSISink] Add destination (which is composed using srv and subsrv fields) to all log about batches

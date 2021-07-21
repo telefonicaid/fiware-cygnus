@@ -69,13 +69,13 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.49</version>
+            <version>8.0.22</version>
         </dependency>
         <!-- Required by PostgreSQLBackendImpl at runtime -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>9.4-1206-jdbc41</version>
+            <version>42.2.22</version>
             <type>jar</type>
         </dependency>
         <!-- Required for logging -->
