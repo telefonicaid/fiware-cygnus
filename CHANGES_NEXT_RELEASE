@@ -1,3 +1,4 @@
+-[cygnus-commons][MySQLBackend] Upgrade mysql-connector-java from 5.1.47 to 8.0.22 due to security vulnerability
 -[cygnus-ngsi][NGSIPostgis, NGSIPostgreSQL] fix create error_log table (#2061)
 -[cygnus-ngsi][NGSISink] Add sink class name to all log about batches
 -[cygnus-ngsi][NGSISink] Add destination (which is composed using srv and subsrv fields) to all log about batches
