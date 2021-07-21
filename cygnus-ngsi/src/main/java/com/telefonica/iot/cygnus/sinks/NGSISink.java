@@ -391,7 +391,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         StringBuffer transactionIds = new StringBuffer();
         batch.startIterator();
         while (batch.hasNext()) {
-            //NGSIBatch batchToPersist = new NGSIBatch();
             String destination = batch.getNextDestination();
             ArrayList<NGSIEvent> events = batch.getNextEvents();
             for (NGSIEvent event : events) {
