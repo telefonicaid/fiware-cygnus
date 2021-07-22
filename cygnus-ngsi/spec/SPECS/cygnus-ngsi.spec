@@ -99,6 +99,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Thu Jul 22 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.11.0
+-[cygnus-ngsi][NGSISink] Perform batch retries one by one (#2059)
+-[cygnus-ngsi][NGSISink] Try retries when an event batch is in CygnusBadConfiguration, CygnusBadContextData, CygnusRuntimeError (#2059)
+-[cygnus-ngsi][NGSIPostgis, NGSIPostgreSQL] fix create error_log table (#2061)
+-[cygnus-ngsi][NGSISink] Add sink class name to all log about batches
+-[cygnus-ngsi][NGSISink] Add destination (which is composed using srv and subsrv fields) to all log about batches
+-[cygnus-ngsi][GenericRowAggregator] Fix generic row aggregator name used in logs
+
 * Wed Jun 02 2021 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.10.0
 - [cygnus-ngsi][MongoSink][STHSink] Try to not create database and collection in each insertion (#2019, #1975)
 - [cygnus-ngsi][STHSink] Fix aggregation of events with different entityId (#2048)
