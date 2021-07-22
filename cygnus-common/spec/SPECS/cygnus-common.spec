@@ -171,6 +171,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+
+* Thu Jul 22 2021 Fermin Galan <alvaro.vegagarcia@telefonica.com> 2.11.0
+-[cygnus-commons][PostgreSQL, PostGIS] Upgrade posgresql driver from 9.4-1206-jdbc41 to 42.2.22
+-[cygnus-commons][MySQLBackend] Upgrade mysql-connector-java from 5.1.47 to 8.0.22 due to security vulnerability
+-[cygnus-commons] Upgrade httpclient dependency from 4.3.6 to 4.5.13 due to security vulnerability
+
 * Wed Jun 02 2021 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.10.0
 - [cygnus-common][Mongo] Check mongo uri format (#2046)
 - [cygnus-common][Mongo] Use mongo bulkWriter for aggregated data (#2018)

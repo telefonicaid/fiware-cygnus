@@ -23,7 +23,7 @@ MAINTAINER Javi Palanca <jpalanca@dsic.upv.es>
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "2.10.0_SNAPSHOT"
+ENV CYGNUS_VERSION "2.11.0"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-twitter"
@@ -35,7 +35,7 @@ ENV CYGNUS_JAVA_OPTS "-Xms2048m -Xmx4096m"
 # PR https://github.com/telefonicaid/fiware-cygnus/pull/1801 should be also done in this Dockerfile
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "master"
+ENV GIT_REV_CYGNUS "release/2.11.0"
 
 ENV MVN_VER "3.5.4"
 ENV MVN_TGZ "apache-maven-${MVN_VER}-bin.tar.gz"
