@@ -56,6 +56,7 @@ public class CKANBackendImplTest {
     private final String apiKey = "1a2b3c4d5e6f7g8h9i0j";
     private final String host = "localhost";
     private final String port = "80";
+    private final String path = "";
     private final String orionURL = "http://orion-vm:1026/";
     private final boolean ssl = false;
     private final String orgName = "rooms";
@@ -78,7 +79,7 @@ public class CKANBackendImplTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        backend = new CKANBackendImpl(apiKey, host, port, orionURL, ssl, maxConns, maxConnsPerRoute, viewer);
+        backend = new CKANBackendImpl(apiKey, host, port, path, orionURL, ssl, maxConns, maxConnsPerRoute, viewer);
 
         // set up the behaviour of the mocked classes
         when(mockCache.isCachedOrg(orgName)).thenReturn(true);
