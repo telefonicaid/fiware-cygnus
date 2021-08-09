@@ -693,6 +693,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         headers.add(new BasicHeader("Authorization", apiKey));
         headers.add(new BasicHeader("Content-Type", "application/json; charset=utf-8"));
         String fullPath = this.ckanPath + urlPath;
+        LOGGER.debug("doCKANRequest " + method + " to " + fullPath + " with body " + jsonString);
         return doRequest(method, fullPath, true, headers, new StringEntity(jsonString, "UTF-8"));
     } // doCKANRequest
 
