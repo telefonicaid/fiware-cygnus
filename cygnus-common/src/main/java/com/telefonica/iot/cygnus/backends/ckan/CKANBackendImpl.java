@@ -50,6 +50,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(CKANBackendImpl.class);
     private static final int RECORDSPERPAGE = 100;
+    private final String ckanPath;
     private final String orionUrl;
     private final String apiKey;
     private final String viewer;
@@ -60,17 +61,19 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
      * @param apiKey
      * @param ckanHost
      * @param ckanPort
+     * @param ckanPath
      * @param orionUrl
      * @param ssl
      * @param maxConns
      * @param maxConnsPerRoute
      * @param ckanViewer
      */
-    public CKANBackendImpl(String apiKey, String ckanHost, String ckanPort, String orionUrl,
-            boolean ssl, int maxConns, int maxConnsPerRoute, String ckanViewer) {
+    public CKANBackendImpl(String apiKey, String ckanHost, String ckanPort, String ckanPath,
+                           String orionUrl, boolean ssl, int maxConns, int maxConnsPerRoute, String ckanViewer) {
         super(ckanHost, ckanPort, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
         
         // this class attributes
+        this.ckanPath = ckanPath;
         this.apiKey = apiKey;
         this.orionUrl = orionUrl;
         this.viewer = ckanViewer;
@@ -689,7 +692,8 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
         headers.add(new BasicHeader("Content-Type", "application/json; charset=utf-8"));
-        return doRequest(method, urlPath, true, headers, new StringEntity(jsonString, "UTF-8"));
+        String fullPath = this.ckanPath + urlPath;
+        return doRequest(method, fullPath, true, headers, new StringEntity(jsonString, "UTF-8"));
     } // doCKANRequest
 
 } // CKANBackendImpl

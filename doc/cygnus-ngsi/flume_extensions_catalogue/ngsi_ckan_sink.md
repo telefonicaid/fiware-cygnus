@@ -137,31 +137,31 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
     ngsi-event={
         headers={
-	         content-type=application/json,
-	         timestamp=1429535775,
-	         transactionId=1429535775-308-0000000000,
-	         correlationId=1429535775-308-0000000000,
-	         fiware-service=vehicles,
-	         fiware-servicepath=/4wheels,
-	         <grouping_rules_interceptor_headers>,
-	         <name_mappings_interceptor_headers>
+             content-type=application/json,
+             timestamp=1429535775,
+             transactionId=1429535775-308-0000000000,
+             correlationId=1429535775-308-0000000000,
+             fiware-service=vehicles,
+             fiware-servicepath=/4wheels,
+             <grouping_rules_interceptor_headers>,
+             <name_mappings_interceptor_headers>
         },
         body={
-	        entityId=car1,
-	        entityType=car,
-	        attributes=[
-	            {
-	                attrName=speed,
-	                attrType=float,
-	                attrValue=112.9
-	            },
-	            {
-	                attrName=oil_level,
-	                attrType=float,
-	                attrValue=74.6
-	            }
-	        ]
-	    }
+            entityId=car1,
+            entityType=car,
+            attributes=[
+                {
+                    attrName=speed,
+                    attrType=float,
+                    attrValue=112.9
+                },
+                {
+                    attrName=oil_level,
+                    attrType=float,
+                    attrValue=74.6
+                }
+            ]
+        }
     }
 
 [Top](#top)
@@ -355,6 +355,7 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 | attr\_persistence | no | row | <i>row</i> or <i>column.</i>|
 | ckan\_host | no | localhost | FQDN/IP address where the CKAN server runs. ||
 | ckan\_port | no | 80 ||
+| ckan\_path | no | '' | URL path where CKAN is listening |
 | ckan\_viewer | no | recline\_grid\_view | Please check the [available](http://docs.ckan.org/en/latest/maintaining/data-viewer.html) viewers at CKAN documentation. |
 | ssl | no | false ||
 | api\_key | yes | N/A ||
