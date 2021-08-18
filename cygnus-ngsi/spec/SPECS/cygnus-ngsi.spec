@@ -99,6 +99,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed Aug 18 2021 Ivan Hernandez <ivan.hernandez@atlantida.es> 2.12.0
+-[cygnus-ngsi][NGSICkan] Add ckan path configuration option (#2072)
+
 * Thu Jul 22 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.11.0
 -[cygnus-ngsi][NGSISink] Perform batch retries one by one (#2059)
 -[cygnus-ngsi][NGSISink] Try retries when an event batch is in CygnusBadConfiguration, CygnusBadContextData, CygnusRuntimeError (#2059)
