@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.entity.StringEntity;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -41,6 +42,7 @@ public class CKANCache extends HttpBackend {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(CKANCache.class);
     private final String apiKey;
+    private final String ckanPath;
     private HashMap<String, HashMap<String, ArrayList<String>>> tree; // this cache only contain human readable names
     private HashMap<String, String> orgMap; // this cache contains the translation from organization name to identifier
     private HashMap<String, String> pkgMap; // this cache contains the translation from package name to identifier
@@ -517,11 +519,11 @@ public class CKANCache extends HttpBackend {
 
 
     private JsonResponse doCKANCacheRequest(String method, String urlPath, Boolean relative,
-                                            ArrayList<Header> headers, String jsonString)
+                                            ArrayList<Header> headers, StringEntity entity)
         throws CygnusRuntimeError, CygnusPersistenceError {
         String fullPath = this.ckanPath + urlPath;
-        LOGGER.debug("doCKACacheNRequest " + method + " to " + fullPath + " with body " + jsonString);
-        return doRequest(method, fullPath, relative, headers, jsonString);
+        LOGGER.debug("doCKACacheNRequest " + method + " to " + fullPath);
+        return doRequest(method, fullPath, relative, headers, entity);
     } // doCKANRequest
     
 } // CKANCache
