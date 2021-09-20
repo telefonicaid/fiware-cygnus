@@ -1,0 +1,1 @@
+[cygnus-common] Remove methods in class CKANBackendImpl for allowing the creation of the data store with ngsi-ld notifications due to break backward compatibilitgy ckan in column mode
