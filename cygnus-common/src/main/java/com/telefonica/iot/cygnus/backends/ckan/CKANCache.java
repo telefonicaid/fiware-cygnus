@@ -57,9 +57,10 @@ public class CKANCache extends HttpBackend {
      * @param maxConns
      * @param maxConnsPerRoute
      */
-    public CKANCache(String host, String port, boolean ssl, String apiKey, int maxConns, int maxConnsPerRoute) {
+    public CKANCache(String host, String port, String path, boolean ssl, String apiKey, int maxConns, int maxConnsPerRoute) {
         super(host, port, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
         this.apiKey = apiKey;
+        this.ckanPath = path;
         tree = new HashMap<>();
         orgMap = new HashMap<>();
         pkgMap = new HashMap<>();
@@ -177,7 +178,7 @@ public class CKANCache extends HttpBackend {
         String ckanURL = "/api/3/action/organization_show?id=" + orgName + "&include_datasets=true";
         ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
-        JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
+        JsonResponse res = doCKANCacheRequest("GET", ckanURL, true, headers, null);
 
         switch (res.getStatusCode()) {
             case 200:
@@ -236,7 +237,7 @@ public class CKANCache extends HttpBackend {
         String ckanURL = "/api/3/action/package_show?id=" + pkgName;
         ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
-        JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
+        JsonResponse res = doCKANCacheRequest("GET", ckanURL, true, headers, null);
 
         switch (res.getStatusCode()) {
             case 200:
@@ -303,7 +304,7 @@ public class CKANCache extends HttpBackend {
         String ckanURL = "/api/3/action/package_show?id=" + pkgName;
         ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
-        JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
+        JsonResponse res = doCKANCacheRequest("GET", ckanURL, true, headers, null);
 
         switch (res.getStatusCode()) {
             case 200:
@@ -441,7 +442,7 @@ public class CKANCache extends HttpBackend {
         String ckanURL = "/api/3/action/package_show?id=" + pkgName;
         ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
-        JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
+        JsonResponse res = doCKANCacheRequest("GET", ckanURL, true, headers, null);
 
         if (res.getStatusCode() == 200) {
             // get the resource and populate the resource map
@@ -513,5 +514,14 @@ public class CKANCache extends HttpBackend {
     public String getNextResId() {
         return (String) nextEntry.getValue();
     } // getNextResId
+
+
+    private JsonResponse doCKANCacheRequest(String method, String urlPath, Bollean relative,
+                                            Arraylist<Header> headers, String jsonString)
+        throws CygnusRuntimeError, CygnusPersistenceError {
+        String fullPath = this.ckanPath + urlPath;
+        LOGGER.debug("doCKACacheNRequest " + method + " to " + fullPath + " with body " + jsonString);
+        return doRequest(method, fullPath, relative, headers, jsonString);
+    } // doCKANRequest
     
 } // CKANCache
