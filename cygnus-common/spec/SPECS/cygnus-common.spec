@@ -171,6 +171,9 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Mon Sep 20 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.13.0
+- [cygnus-common] Use ckanPath in ckan cache
+- [cygnus-common] Remove methods in class CKANBackendImpl for allowing the creation of the data store with ngsi-ld notifications due to break backward compatibilitgy ckan in column mode
 
 * Wed Aug 18 2021 Ivan Hernandez <ivan.hernandez@atlantida.es> 2.12.0
 
