@@ -517,7 +517,7 @@ public class CKANCache extends HttpBackend {
 
 
     private JsonResponse doCKANCacheRequest(String method, String urlPath, Boolean relative,
-                                            Arraylist<Header> headers, String jsonString)
+                                            ArrayList<Header> headers, String jsonString)
         throws CygnusRuntimeError, CygnusPersistenceError {
         String fullPath = this.ckanPath + urlPath;
         LOGGER.debug("doCKACacheNRequest " + method + " to " + fullPath + " with body " + jsonString);
