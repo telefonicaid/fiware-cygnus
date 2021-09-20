@@ -74,7 +74,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         this.viewer = ckanViewer;
         
         // create the cache
-        cache = new CKANCache(ckanHost, ckanPort, ssl, apiKey, maxConns, maxConnsPerRoute);
+        cache = new CKANCache(ckanHost, ckanPort, ckanPath, ssl, apiKey, maxConns, maxConnsPerRoute);
     } // CKANBackendImpl
 
     @Override
