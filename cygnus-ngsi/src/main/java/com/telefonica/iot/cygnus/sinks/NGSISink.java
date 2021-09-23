@@ -94,6 +94,10 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     // Expiration thread
     private ExpirationTimeChecker expirationTimeChecker;
 
+    // Rollback Metrics
+    private int num_rollback_by_channel_exception;
+    private int num_rollback_by_exception;
+
     /**
      * Constructor.
      */
@@ -108,6 +112,10 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
         // Create the rollbacking queue
         rollbackedAccumulations = new ArrayList<>();
+
+        num_rollback_by_channel_exception = 0;
+        num_rollback_by_exception = 0;
+
     } // NGSISink
     
     protected String getBatchRetryIntervals() {
@@ -644,9 +652,19 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             txn.commit();
         } catch (ChannelException ex) {
             LOGGER.info("Rollback transaction by ChannelException  (" + ex.getMessage() + ")");
+            num_rollback_by_channel_exception++;
+            if (num_rollback_by_channel_exception >= NGSIConstants.ROLLBACK_CHANNEL_EXCEPTION_THRESHOLD) {
+                LOGGER.warn("Rollback (10 times) transaction by ChannelException  (" + ex.getMessage() + ")");
+                num_rollback_by_channel_exception = 0;
+            }
             txn.rollback();
         } catch (Exception ex) {
             LOGGER.info("Rollback transaction by Exception  (" + ex.getMessage() + ")");
+            num_rollback_by_exception++;
+            if (num_rollback_by_exception >= NGSIConstants.ROLLBACK_EXCEPTION_THRESHOLD) {
+                LOGGER.warn("Rollback (10 times) transaction by Exception  (" + ex.getMessage() + ")");
+                num_rollback_by_exception = 0;
+            }
             txn.rollback();
         } finally {
             txn.close();
