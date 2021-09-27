@@ -602,6 +602,7 @@ public class SQLBackendImpl implements SQLBackend{
                     tableName,
                     sqlInstance,
                     dataBase,
+                    schema,
                     attrNativeTypes).toString();
 
             PreparedStatement insertStatement;

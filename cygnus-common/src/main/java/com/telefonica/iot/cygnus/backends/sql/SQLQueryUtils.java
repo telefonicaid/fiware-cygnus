@@ -275,7 +275,8 @@ public class SQLQueryUtils {
     protected static StringBuffer sqlInsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                  String tableName,
                                                  SQLInstance sqlInstance,
-                                                 String destination,
+                                                 String database,
+                                                 String schema,
                                                  boolean attrNativeTypes) {
 
         StringBuffer fieldsForInsert;
@@ -290,7 +291,7 @@ public class SQLQueryUtils {
         */
         StringBuffer valuesForInsert = new StringBuffer(getValuesForInsert(aggregation, attrNativeTypes));
 
-        StringBuffer postgisDestination = new StringBuffer(destination).append(".").append(tableName);
+        StringBuffer postgisDestination = new StringBuffer(schema).append(".").append(tableName);
         StringBuffer query = new StringBuffer();
 
         if (sqlInstance == SQLInstance.POSTGRESQL){
