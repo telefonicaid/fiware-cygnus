@@ -211,7 +211,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             LOGGER.debug("Successful organization creation (orgName/OrgId=" + orgName + "/" + orgId + ")");
             return orgId;
         } else {
-            throw new CygnusPersistenceError("Could not create the orgnaization (orgName=" + orgName
+            throw new CygnusPersistenceError("Could not create the organization (orgName=" + orgName
                     + ", statusCode=" + res.getStatusCode() + ")");
         } // if else
     } // createOrganization
