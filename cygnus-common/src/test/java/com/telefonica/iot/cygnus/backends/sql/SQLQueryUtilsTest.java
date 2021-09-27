@@ -501,7 +501,7 @@ public class SQLQueryUtilsTest {
                 tableName,
                 sqlInstance,
                 destination,
-                null
+                null,
                 attrNativeTypes);
 
         String correctQuery = "INSERT INTO `exampleTable` " +
