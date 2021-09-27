@@ -643,10 +643,10 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             accumulator.initialize(new Date().getTime());
             txn.commit();
         } catch (ChannelException ex) {
-            LOGGER.info("Rollback transaction by ChannelException  (" + ex.getMessage() + ")");
+            LOGGER.info("Rollback transaction by ChannelException  (" + ex.getMessage() + ")  Sink: " + this.getClass().getName());
             txn.rollback();
         } catch (Exception ex) {
-            LOGGER.info("Rollback transaction by Exception  (" + ex.getMessage() + ")");
+            LOGGER.info("Rollback transaction by Exception  (" + ex.getMessage() + ")  Sink: " + this.getClass().getName());
             txn.rollback();
         } finally {
             txn.close();
