@@ -407,12 +407,14 @@ public class SQLQueryUtilsTest {
         String tableName = "exampleTable";
         SQLInstance sqlInstance = SQLInstance.POSTGRESQL;
         String destination = "example";
+        String schema = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlInsertQuery(getValueFieldsSingleBatch(),
                 tableName,
                 sqlInstance,
                 destination,
+                schema,
                 attrNativeTypes);
 
         String correctQuery = "INSERT INTO example.exampleTable " +
@@ -440,6 +442,7 @@ public class SQLQueryUtilsTest {
                 tableName,
                 sqlInstance,
                 destination,
+                null,
                 attrNativeTypes);
 
         String correctQuery = "INSERT INTO `exampleTable` " +
@@ -461,12 +464,14 @@ public class SQLQueryUtilsTest {
         String tableName = "exampleTable";
         SQLInstance sqlInstance = SQLInstance.POSTGRESQL;
         String destination = "example";
+        String schema = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlInsertQuery(getValueFieldsMultipleBatch(),
                 tableName,
                 sqlInstance,
                 destination,
+                schema,
                 attrNativeTypes);
 
         String correctQuery = "INSERT INTO example.exampleTable " +
@@ -496,6 +501,7 @@ public class SQLQueryUtilsTest {
                 tableName,
                 sqlInstance,
                 destination,
+                null,
                 attrNativeTypes);
 
         String correctQuery = "INSERT INTO `exampleTable` " +

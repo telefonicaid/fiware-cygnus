@@ -155,6 +155,7 @@ public class SQLQueryUtils {
                     append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append(", '").append(timestampFormat).append("')");
             upsertList.add(query);
         }
+        LOGGER.debug("[SQLQueryUtils.postgreSqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
         return upsertList;
     }
 
@@ -227,7 +228,7 @@ public class SQLQueryUtils {
                     append("UPDATE ").append(updateSet).append(", ").append(dateKeyUpdate);
             upsertList.add(query);
         }
-        LOGGER.debug("[NGSISQLUtils.sqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
+        LOGGER.debug("[SQLQueryUtils.mySqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
         return upsertList;
     }
 
@@ -275,7 +276,8 @@ public class SQLQueryUtils {
     protected static StringBuffer sqlInsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                  String tableName,
                                                  SQLInstance sqlInstance,
-                                                 String destination,
+                                                 String database,
+                                                 String schema,
                                                  boolean attrNativeTypes) {
 
         StringBuffer fieldsForInsert;
@@ -290,7 +292,7 @@ public class SQLQueryUtils {
         */
         StringBuffer valuesForInsert = new StringBuffer(getValuesForInsert(aggregation, attrNativeTypes));
 
-        StringBuffer postgisDestination = new StringBuffer(destination).append(".").append(tableName);
+        StringBuffer postgisDestination = new StringBuffer(schema).append(".").append(tableName);
         StringBuffer query = new StringBuffer();
 
         if (sqlInstance == SQLInstance.POSTGRESQL){
@@ -303,7 +305,7 @@ public class SQLQueryUtils {
                     append("VALUES ").append(valuesForInsert).append(" ");
         }
 
-        LOGGER.debug("[NGSISQLUtils.sqlInsertQuery] Preparing Insert query: " + query.toString());
+        LOGGER.debug("[SQLQueryUtils.sqlInsertQuery] Preparing Insert query: " + query.toString());
         return query;
     }
 
@@ -325,7 +327,7 @@ public class SQLQueryUtils {
             }
         }
         questionValues.append(")");
-        LOGGER.debug("[NGSISQLUtils.sqlQuestionValues] Preparing question marks for statement query: " + questionValues.toString());
+        LOGGER.debug("[SQLQueryUtils.sqlQuestionValues] Preparing question marks for statement query: " + questionValues.toString());
         return questionValues;
     }
 
@@ -352,7 +354,7 @@ public class SQLQueryUtils {
             } // if else
         } // while
         fieldsForInsert.append(")");
-        LOGGER.debug("[NGSISQLUtils.getFieldsForInsert] Preparing fields for insert for statement: " + fieldsForInsert.toString());
+        LOGGER.debug("[SQLQueryUtils.getFieldsForInsert] Preparing fields for insert for statement: " + fieldsForInsert.toString());
         return fieldsForInsert;
     } // getFieldsForInsert
 
@@ -381,32 +383,32 @@ public class SQLQueryUtils {
                 if (attrNativeTypes) {
                     if (value == null || value.isJsonNull()) {
                         preparedStatement.setString(position, "NULL");
-                        LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added NULL as String");
+                        LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added NULL as String");
                     } else {
                         if (value.isJsonPrimitive()) {
                             if (value.getAsJsonPrimitive().isNumber()) {
                                 preparedStatement.setDouble(position, value.getAsDouble());
-                                LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + value.getAsDouble() + " as Number");
+                                LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added " + value.getAsDouble() + " as Number");
                                 position++;
                             } else if (value.getAsJsonPrimitive().isBoolean()) {
                                 preparedStatement.setBoolean(position, value.getAsBoolean());
-                                LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + value.getAsBoolean() + " as Boolean");
+                                LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added " + value.getAsBoolean() + " as Boolean");
                                 position++;
                             } else {
                                 String stringValue = value.getAsString();
                                 if (stringValue.contains("ST_GeomFromGeoJSON") || stringValue.contains("ST_SetSRID")) {
                                     preparedStatement.setObject(position, stringValue);
-                                    LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
+                                    LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
                                     position++;
                                 } else {
                                     preparedStatement.setObject(position, stringValue);
-                                    LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + stringValue + " as Object");
+                                    LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added " + stringValue + " as Object");
                                     position++;
                                 }
                             } // else
                         } else { // if (value.isJsonPrimitive())
                             preparedStatement.setString(position, value.toString());
-                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + value.toString() + " as String");
+                            LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added " + value.toString() + " as String");
                             position++;
                         } // else
                     } // else
@@ -415,28 +417,28 @@ public class SQLQueryUtils {
                         String stringValue = value.getAsString();
                         if (stringValue.contains("ST_GeomFromGeoJSON") || stringValue.contains("ST_SetSRID")) {
                             preparedStatement.setObject(position, stringValue);
-                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
+                            LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
                             position++;
                         } else {
                             preparedStatement.setObject(position, stringValue);
-                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + stringValue + " as String");
+                            LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added " + stringValue + " as String");
                             position++;
                         }
                     } else {
                         if (value == null){
                             preparedStatement.setObject(position, "NULL");
-                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added NULL as String");
+                            LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added NULL as String");
                             position++;
                         } else {
                             preparedStatement.setObject(position, value.toString());
-                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + value.toString() + " as String");
+                            LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added " + value.toString() + " as String");
                             position++;
                         }
                     }
                 }
             } // while
             preparedStatement.addBatch();
-            LOGGER.debug("[NGSISQLUtils.addJsonValues] Batch added");
+            LOGGER.debug("[SQLQueryUtils.addJsonValues] Batch added");
         } // for
         return preparedStatement;
     }

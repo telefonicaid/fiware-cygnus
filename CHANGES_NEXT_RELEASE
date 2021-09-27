@@ -1,1 +1,1 @@
-
+- [cygnus-common] Fix: use schema for postgis destionation at sql insert query (#2085)
