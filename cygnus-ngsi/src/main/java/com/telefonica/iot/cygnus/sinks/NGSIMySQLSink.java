@@ -60,7 +60,7 @@ public class NGSIMySQLSink extends NGSISink {
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
     private static final String MYSQL_DRIVER_NAME = "com.mysql.jdbc.Driver";
     private static final SQLInstance MYSQL_INSTANCE_NAME = SQLInstance.MYSQL;
-    private static final String DEFAULT_LAST_DATA = "false";
+    private static final String DEFAULT_LAST_DATA_MODE = "upsert";
     private static final String DEFAULT_LAST_DATA_TABLE_SUFFIX = "_last_data";
     private static final String DEFAULT_LAST_DATA_UNIQUE_KEY = NGSIConstants.ENTITY_ID;
     private static final String DEFAULT_LAST_DATA_TIMESTAMP_KEY = NGSIConstants.RECV_TIME;

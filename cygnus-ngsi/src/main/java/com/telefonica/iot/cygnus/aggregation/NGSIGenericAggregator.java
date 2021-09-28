@@ -214,12 +214,21 @@ public abstract class NGSIGenericAggregator {
     }
 
     /**
+     * Get LastDataMode string
+     *
+     * @return the boolean
+     */
+    public String getLastDataMode() {
+        return lastDataMode;
+    }
+
+    /**
      * Is enable last data boolean.
      *
      * @return the boolean
      */
-    public boolean getLastDataMode() {
-        return lastDataMode;
+    public String isEnableLastData() {
+        return lastDataMode.equals("upsert") || lastDataMode.equals("both");
     }
 
     /**
@@ -227,7 +236,7 @@ public abstract class NGSIGenericAggregator {
      *
      * @param lastDataMode the last data mode to set
      */
-    public void setLastDataMode(boolean lastDataMode) {
+    public void setLastDataMode(String lastDataMode) {
         this.lastDataMode = lastDataMode;
     }
 
