@@ -590,7 +590,7 @@ public class SQLBackendImpl implements SQLBackend{
         PreparedStatement insertPreparedStatement = null;
         String insertQuery = new String();
         String upsertQuerys = new String();
-
+        String currentUpsertQuery = new String();
         int insertedRows[];
 
         try {
@@ -630,6 +630,7 @@ public class SQLBackendImpl implements SQLBackend{
                     attrNativeTypes);
             for (StringBuffer query : upsertQuerysList) {
                 PreparedStatement upsertStatement;
+                currentUpsertQuery = query.toString();
                 upsertStatement = connection.prepareStatement(query.toString());
                 // FIXME https://github.com/telefonicaid/fiware-cygnus/issues/1959
                 upsertStatement.executeUpdate();
@@ -641,23 +642,32 @@ public class SQLBackendImpl implements SQLBackend{
         } catch (SQLTimeoutException e) {
             cygnusSQLRollback(connection);
             if (upsertQuerys.isEmpty() && insertQuery.isEmpty()) {
-                throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() + " Data insertion error. connection: `" + connection, "SQLTimeoutException", e.getMessage());
-            } else if (insertQuery.isEmpty()){
-                throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() + " Data insertion error. upsertQuerys: `" + upsertQuerys, "SQLTimeoutException", e.getMessage());
-            } else if (upsertQuerys.isEmpty()) {
-                throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() + " Data insertion error. insertQuery: `" + insertQuery, "SQLTimeoutException", e.getMessage());
+                throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
+                                                 " Data insertion error. connection: " + connection,
+                                                 " SQLTimeoutException", e.getMessage());
+            } else {
+                throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
+                                                 " Data insertion error. insertQuery: " + insertQuery +
+                                                 " upsertQuerys: " + upsertQuerys +
+                                                 " currentUpsertQuery: " + currentUpsertQuery,
+                                                 " SQLTimeoutException", e.getMessage());
             }
         } catch (SQLException e) {
             cygnusSQLRollback(connection);
             if (upsertQuerys.isEmpty() && insertQuery.isEmpty()) {
-                persistError(dataBase, schema, upsertQuerys, e);
-                throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() + " Data insertion error. connection: `" + connection, "SQLException", e.getMessage());
-            } else if (insertQuery.isEmpty()){
-                persistError(dataBase, schema, upsertQuerys, e);
-                throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() + " Data insertion error. upsertQuerys: `" + upsertQuerys, "SQLException", e.getMessage());
-            } else if (upsertQuerys.isEmpty()) {
-                persistError(dataBase, schema, insertQuery, e);
-                throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() + " Data insertion error. insertQuery: `" + insertQuery, "SQLException", e.getMessage());
+                persistError(dataBase, schema, null, e);
+                throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
+                                               " Data insertion error. connection: `" + connection,
+                                               " SQLException", e.getMessage());
+
+            } else {
+                String allQueries = " insertQuery: " + insertQuery +
+                    " upsertQuerys: " + upsertQuerys +
+                    " currentUpsertQuery: " + currentUpsertQuery;
+                persistError(dataBase, schema, allQueries, e);
+                throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
+                                               " Data insertion error. " + allQueries,
+                                               " SQLException", e.getMessage());
             }
         } finally {
             closeStatement(insertPreparedStatement);
