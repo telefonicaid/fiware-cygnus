@@ -70,9 +70,9 @@ public abstract class NGSIGenericAggregator {
     private boolean enableGeoParse;
     private boolean attrMetadataStore;
     private boolean enableUTCRecvTime;
-    private boolean enableLastData;
-    private long lastDataTiemstamp;
-    private String lastDataTiemstampKeyOnAggregation;
+    private String lastDataMode;
+    private long lastDataTimestamp;
+    private String lastDataTimestampKeyOnAggregation;
     private String lastDataUniqueKeyOnAggragation;
 
     /**
@@ -218,17 +218,17 @@ public abstract class NGSIGenericAggregator {
      *
      * @return the boolean
      */
-    public boolean isEnableLastData() {
-        return enableLastData;
+    public boolean getLastDataMode() {
+        return lastDataMode;
     }
 
     /**
-     * Sets enable last data.
+     * Sets last data mode.
      *
-     * @param enableLastData the enable last data
+     * @param lastDataMode the last data mode to set
      */
-    public void setEnableLastData(boolean enableLastData) {
-        this.enableLastData = enableLastData;
+    public void setLastDataMode(boolean lastDataMode) {
+        this.lastDataMode = lastDataMode;
     }
 
     /**
@@ -250,14 +250,14 @@ public abstract class NGSIGenericAggregator {
      *
      * @return the last data tiemstamp key on aggregation
      */
-    public String getLastDataTiemstampKeyOnAggregation() { return lastDataTiemstampKeyOnAggregation; }
+    public String getLastDataTimestampKeyOnAggregation() { return lastDataTimestampKeyOnAggregation; }
 
     /**
      * Sets last data tiemstamp key on aggregation.
      *
-     * @param lastDataTiemstampKeyOnAggregation the last data tiemstamp key on aggregation
+     * @param lastDataTimestampKeyOnAggregation the last data tiemstamp key on aggregation
      */
-    public void setLastDataTiemstampKeyOnAggregation(String lastDataTiemstampKeyOnAggregation) { this.lastDataTiemstampKeyOnAggregation = lastDataTiemstampKeyOnAggregation; }
+    public void setLastDataTimestampKeyOnAggregation(String lastDataTimestampKeyOnAggregation) { this.lastDataTimestampKeyOnAggregation = lastDataTimestampKeyOnAggregation; }
 
     /**
      * Gets last data key on aggragation.
@@ -384,18 +384,18 @@ public abstract class NGSIGenericAggregator {
     /**
      * Gets long timestamp of the record stored on the last data collection
      *
-     * @return lastDataTiemstamp the long
+     * @return lastDataTimestamp the long
      */
 
-    public long getLastDataTiemstamp() { return lastDataTiemstamp; }
+    public long getLastDataTimestamp() { return lastDataTimestamp; }
 
     /**
      * Sets long timestamp of the record stored on the last data collection
      *
-     * @param lastDataTiemstamp the timestamp of the record on the last data collection
+     * @param lastDataTimestamp the timestamp of the record on the last data collection
      */
 
-    public void setLastDataTiemstamp(long lastDataTiemstamp) { this.lastDataTiemstamp = lastDataTiemstamp; }
+    public void setLastDataTimestamp(long lastDataTimestamp) { this.lastDataTimestamp = lastDataTimestamp; }
 
 
 
@@ -539,7 +539,7 @@ public abstract class NGSIGenericAggregator {
         this.entityType = entityType;
     } //setEntityType
 
-	/**
+        /**
      * Gets attribute.
      *
      * @return the attribute

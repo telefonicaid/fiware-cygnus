@@ -583,12 +583,10 @@ public class SQLBackendImpl implements SQLBackend{
                                    String uniqueKey,
                                    String timestampKey,
                                    String timestampFormat,
-                                   boolean attrNativeTypes) throws CygnusPersistenceError, CygnusBadContextData, CygnusRuntimeError,  CygnusPersistenceError{
+                                   boolean attrNativeTypes)
+        throws CygnusPersistenceError, CygnusBadContextData, CygnusRuntimeError,  CygnusPersistenceError{
 
         Connection connection = null;
-        PreparedStatement upsertPreparedStatement = null;
-        PreparedStatement insertPreparedStatement = null;
-        String insertQuery = new String();
         String upsertQuerys = new String();
         String currentUpsertQuery = new String();
         int insertedRows[];
@@ -598,25 +596,6 @@ public class SQLBackendImpl implements SQLBackend{
             connection = driver.getConnection(dataBase);
             connection.setAutoCommit(false);
 
-            insertQuery = SQLQueryUtils.sqlInsertQuery(aggregation,
-                    tableName,
-                    sqlInstance,
-                    dataBase,
-                    schema,
-                    attrNativeTypes).toString();
-
-            PreparedStatement insertStatement;
-            insertStatement = connection.prepareStatement(insertQuery);
-            /*
-
-            FIXME https://github.com/telefonicaid/fiware-cygnus/issues/1959
-
-            Add SQLSafe values with native PreparedStatement methods
-
-            insertPreparedStatement = SQLQueryUtils.addJsonValues(insertStatement, aggregation, attrNativeTypes);
-
-            */
-            insertStatement.executeUpdate();
             ArrayList<StringBuffer> upsertQuerysList = SQLQueryUtils.sqlUpsertQuery(aggregation,
                     lastData,
                     tableName,
@@ -628,41 +607,41 @@ public class SQLBackendImpl implements SQLBackend{
                     dataBase,
                     schema,
                     attrNativeTypes);
+
             for (StringBuffer query : upsertQuerysList) {
                 PreparedStatement upsertStatement;
                 currentUpsertQuery = query.toString();
-                upsertStatement = connection.prepareStatement(query.toString());
+                upsertStatement = connection.prepareStatement(currentUpsertQuery);
                 // FIXME https://github.com/telefonicaid/fiware-cygnus/issues/1959
                 upsertStatement.executeUpdate();
                 upsertQuerys = upsertQuerys + " " + query;
             }
             connection.commit();
-            LOGGER.info(sqlInstance.toString().toUpperCase() + " Finished transactions into database: " + dataBase + " \n" + upsertQuerys + "\n Also, some where Inserted. QUERY: " + insertQuery);
+            LOGGER.info(sqlInstance.toString().toUpperCase() + " Finished transactions into database: " +
+                        dataBase + " \n upsertQuerys: " + upsertQuerys);
 
         } catch (SQLTimeoutException e) {
             cygnusSQLRollback(connection);
-            if (upsertQuerys.isEmpty() && insertQuery.isEmpty()) {
+            if (upsertQuerys.isEmpty() && currentUpsertQuery.isEmpty()) {
                 throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
                                                  " Data insertion error. connection: " + connection,
                                                  " SQLTimeoutException", e.getMessage());
             } else {
                 throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
-                                                 " Data insertion error. insertQuery: " + insertQuery +
-                                                 " upsertQuerys: " + upsertQuerys +
+                                                 " Data insertion error. upsertQuerys: " + upsertQuerys +
                                                  " currentUpsertQuery: " + currentUpsertQuery,
                                                  " SQLTimeoutException", e.getMessage());
             }
         } catch (SQLException e) {
             cygnusSQLRollback(connection);
-            if (upsertQuerys.isEmpty() && insertQuery.isEmpty()) {
+            if (upsertQuerys.isEmpty() && currentUpsertQuery.isEmpty()) {
                 persistError(dataBase, schema, null, e);
                 throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
                                                " Data insertion error. connection: `" + connection,
                                                " SQLException", e.getMessage());
 
             } else {
-                String allQueries = " insertQuery: " + insertQuery +
-                    " upsertQuerys: " + upsertQuerys +
+                String allQueries = " upsertQuerys: " + upsertQuerys +
                     " currentUpsertQuery: " + currentUpsertQuery;
                 persistError(dataBase, schema, allQueries, e);
                 throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
@@ -670,8 +649,6 @@ public class SQLBackendImpl implements SQLBackend{
                                                " SQLException", e.getMessage());
             }
         } finally {
-            closeStatement(insertPreparedStatement);
-            closeStatement(upsertPreparedStatement);
             closeConnection(connection);
         } // try catch
 

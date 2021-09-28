@@ -59,7 +59,7 @@ public class NGSIPostgisSink extends NGSISink {
     private static final SQLInstance POSTGIS_INSTANCE_NAME = SQLInstance.POSTGRESQL;
     private static final String DEFAULT_FIWARE_SERVICE = "default";
     private static final String ESCAPED_DEFAULT_FIWARE_SERVICE = "default_service";
-    private static final String DEFAULT_LAST_DATA = "false";
+    private static final String DEFAULT_LAST_DATA_MODE = "upsert";
     private static final String DEFAULT_LAST_DATA_TABLE_SUFFIX = "_last_data";
     private static final String DEFAULT_LAST_DATA_UNIQUE_KEY = NGSIConstants.ENTITY_ID;
     private static final String DEFAULT_LAST_DATA_TIMESTAMP_KEY = NGSIConstants.RECV_TIME;
@@ -81,7 +81,7 @@ public class NGSIPostgisSink extends NGSISink {
     private boolean attrMetadataStore;
     private String postgisOptions;
     private boolean persistErrors;
-    private boolean lastData;
+    private String lastDataMode;
     private String lastDataTableSuffix;
     private String lastDataUniqueKey;
     private String lastDataTimeStampKey;
@@ -281,16 +281,15 @@ public class NGSIPostgisSink extends NGSISink {
                     + persistErrorsStr + ") -- Must be 'true' or 'false'");
         } // if else
 
-        String lastDataStr = context.getString("enable_last_data", DEFAULT_LAST_DATA);
+        String lastDataMode = context.getString("last_data_mode", DEFAULT_LAST_DATA_MODE);
 
-        if (lastDataStr.equals("true") || lastDataStr.equals("false")) {
-            lastData = Boolean.parseBoolean(lastDataStr);
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data="
-                    + lastDataStr + ")");
+        if (lastDataMode.equals("upsert") || lastDataMode.equals("insert") || lastDataMode.equals("both")) {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_mode="
+                    + lastDataMode + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (last_data="
-                    + lastDataStr + ") -- Must be 'true' or 'false'");
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (last_data_mode="
+                    + lastDataMode + ") -- Must be 'upsert', 'insert' or 'both'");
         } // if else
 
         lastDataTableSuffix = context.getString("last_data_table_suffix", DEFAULT_LAST_DATA_TABLE_SUFFIX);
@@ -382,7 +381,7 @@ public class NGSIPostgisSink extends NGSISink {
             aggregator.setAttrMetadataStore(attrMetadataStore);
             aggregator.setEnableGeoParse(true);
             aggregator.setEnableNameMappings(enableNameMappings);
-            aggregator.setEnableLastData(lastData);
+            aggregator.setLastDataMode(lastDataMode);
             aggregator.setLastDataTimestampKey(lastDataTimeStampKey);
             aggregator.setLastDataUniqueKey(lastDataUniqueKey);
             aggregator.initialize(events.get(0));
@@ -448,19 +447,28 @@ public class NGSIPostgisSink extends NGSISink {
         if (valuesForInsert.equals("")) {
             LOGGER.debug("[" + this.getName() + "] no values for insert");
         } else {
-            if (lastData && !rowAttrPersistence ) {
-                postgisPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
-                        aggregator.getLastDataToPersist(),
-                        dataBaseName,
-                        schemaName,
-                        tableName,
-                        lastDataTableSuffix,
-                        lastDataUniqueKey,
-                        lastDataTimeStampKey,
-                        lastDataSQLTimestampFormat,
-                        attrNativeTypes);
-            } else {
-                postgisPersistenceBackend.insertContextData(dataBaseName, schemaName, tableName, fieldsForInsert, valuesForInsert);
+            if (lastDataMode.equals("upsert") || lastDataMode.equals("both")) {
+                if (rowAttrPersistence) {
+                    LOGGER.warn("[" + this.getName() + "] no upsert due to row mode");
+                } else {
+                    postgisPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
+                                                                aggregator.getLastDataToPersist(),
+                                                                dataBaseName,
+                                                                schemaName,
+                                                                tableName,
+                                                                lastDataTableSuffix,
+                                                                lastDataUniqueKey,
+                                                                lastDataTimeStampKey,
+                                                                lastDataSQLTimestampFormat,
+                                                                attrNativeTypes);
+                }
+            }
+            if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
+                postgisPersistenceBackend.insertContextData(dataBaseName,
+                                                            schemaName,
+                                                            tableName,
+                                                            fieldsForInsert,
+                                                            valuesForInsert);
             }
         }
     } // persistAggregation
