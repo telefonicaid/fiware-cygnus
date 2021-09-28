@@ -227,7 +227,7 @@ public abstract class NGSIGenericAggregator {
      *
      * @return the boolean
      */
-    public String isEnableLastData() {
+    public boolean isEnableLastData() {
         return lastDataMode.equals("upsert") || lastDataMode.equals("both");
     }
 
