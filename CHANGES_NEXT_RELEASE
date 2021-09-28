@@ -1,1 +1,2 @@
+- [cygnus-common] [SQLBackendImpl] Force to cast to ::text to ensure to_timestamp upsert (#2087)
 - [cygnus-common] Fix: use schema for postgis destionation at sql insert query (#2085)
