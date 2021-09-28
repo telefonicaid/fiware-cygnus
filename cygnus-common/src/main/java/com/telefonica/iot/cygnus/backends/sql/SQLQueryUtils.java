@@ -151,8 +151,8 @@ public class SQLQueryUtils {
                     append("DO ").
                     append("UPDATE SET ").append(updateSet).append(" ").
                     append("WHERE ").append(postgisDestination).append(".").append(uniqueKey).append("=").append(postgisTempReference).append(".").append(uniqueKey).append(" ").
-                    append("AND ").append("to_timestamp(").append(postgisDestination).append(".").append(timestampKey).append(", '").append(timestampFormat).append("') ").
-                    append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append(", '").append(timestampFormat).append("')");
+                    append("AND ").append("to_timestamp(").append(postgisDestination).append(".").append(timestampKey).append("::text, '").append(timestampFormat).append("') ").
+                    append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append("::text, '").append(timestampFormat).append("')");
             upsertList.add(query);
         }
         LOGGER.debug("[SQLQueryUtils.postgreSqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
