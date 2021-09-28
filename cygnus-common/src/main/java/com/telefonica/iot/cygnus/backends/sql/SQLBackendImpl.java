@@ -628,7 +628,6 @@ public class SQLBackendImpl implements SQLBackend{
                     dataBase,
                     schema,
                     attrNativeTypes);
-            StringBuffer currentUpsertQuery;
             for (StringBuffer query : upsertQuerysList) {
                 PreparedStatement upsertStatement;
                 currentUpsertQuery = query.toString();
