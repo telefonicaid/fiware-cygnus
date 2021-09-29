@@ -225,6 +225,8 @@ public class NGSIMongoSinkTest {
                     aggregator.aggregate(event);
                 }
             }
+            System.out.println("[NGSIMongoSinkTest.testNativeTypeColumnBatch aggregation.isEnableLastData: " + aggregator.isEnableLastData);
+            System.out.println("[NGSIMongoSinkTest.testNativeTypeColumnBatch aggregation.getLastDataMode: " + aggregator.getLastDataMode());
             ArrayList<String> keysToCrop = ngsiMongoSink.getKeysToCrop(false);
             LinkedHashMap<String, ArrayList<JsonElement>> cropedAggregation = NGSIUtils.cropLinkedHashMap(aggregator.getAggregationToPersist(), keysToCrop);
             ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonList(cropedAggregation);
