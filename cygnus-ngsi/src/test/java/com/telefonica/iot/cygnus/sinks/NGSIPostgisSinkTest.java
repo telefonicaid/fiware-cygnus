@@ -1861,6 +1861,7 @@ public class NGSIPostgisSinkTest {
                 aggregator.setEnableNameMappings(true);
                 aggregator.setLastDataTimestampKey(NGSIConstants.RECV_TIME);
                 aggregator.setLastDataUniqueKey("entityid");
+                aggregator.setLastDataMode("upsert");
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
