@@ -220,7 +220,6 @@ public class NGSIMongoSinkTest {
                 aggregator.setDbName(ngsiMongoSink.buildDbName(aggregator.getService()));
                 aggregator.setAttrMetadataStore(true);
                 aggregator.setCollectionName(ngsiMongoSink.buildCollectionName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));
-                aggregator.setLastDataMode("insert");
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);

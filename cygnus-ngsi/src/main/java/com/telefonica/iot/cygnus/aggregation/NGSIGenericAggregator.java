@@ -228,7 +228,11 @@ public abstract class NGSIGenericAggregator {
      * @return the boolean
      */
     public boolean isEnableLastData() {
-        return lastDataMode.equals("upsert") || lastDataMode.equals("both");
+        if (lastDataMode.equals(null)) {
+            return false;
+        } else {
+            return lastDataMode.equals("upsert") || lastDataMode.equals("both");
+        }
     }
 
     /**
