@@ -1673,7 +1673,6 @@ public class NGSIHDFSSinkTest {
                 aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
                 aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
                 aggregator.setAttrMetadataStore(true);
-                aggregator.setLastDataMode("insert");
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
@@ -1716,7 +1715,6 @@ public class NGSIHDFSSinkTest {
                 aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
                 aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
                 aggregator.setAttrMetadataStore(false);
-                aggregator.setLastDataMode("insert");
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
@@ -1760,7 +1758,6 @@ public class NGSIHDFSSinkTest {
                 aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
                 aggregator.setAttrMetadataStore(true);
                 aggregator.setEnableUTCRecvTime(true);
-                aggregator.setLastDataMode("insert");
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
@@ -1804,7 +1801,6 @@ public class NGSIHDFSSinkTest {
                 aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
                 aggregator.setAttrMetadataStore(false);
                 aggregator.setEnableUTCRecvTime(true);
-                aggregator.setLastDataMode("insert");
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);

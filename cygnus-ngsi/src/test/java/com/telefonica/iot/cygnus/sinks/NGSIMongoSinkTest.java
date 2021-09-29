@@ -208,8 +208,6 @@ public class NGSIMongoSinkTest {
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
-            System.out.println("[NGSIMongoSinkTest.testNativeTypeColumnBatch aggregator.isEnableLastData(): " + aggregator.isEnableLastData());
-            System.out.println("[NGSIMongoSinkTest.testNativeTypeColumnBatch aggregator.getLastDataMode(): " + aggregator.getLastDataMode());            
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
