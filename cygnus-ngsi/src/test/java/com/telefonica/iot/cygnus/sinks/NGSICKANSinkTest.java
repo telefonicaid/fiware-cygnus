@@ -1245,6 +1245,7 @@ public class NGSICKANSinkTest {
                 aggregator.setOrgName(ngsickanSink.buildOrgName(aggregator.getService()));
                 aggregator.setPkgName(ngsickanSink.buildPkgName(aggregator.getService(), aggregator.getServicePathForNaming(), entityId));
                 aggregator.setResName(ngsickanSink.buildResName(aggregator.getEntityForNaming(), entityId));
+                aggregator.setLastDataMode("insert");
                 aggregator.initialize(events.get(0));
                 aggregator.setAttrMetadataStore(true);
                 for (NGSIEvent event : events) {
