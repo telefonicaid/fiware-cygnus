@@ -208,6 +208,8 @@ public class NGSIMongoSinkTest {
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
+            System.out.println("[NGSIMongoSinkTest.testNativeTypeColumnBatch aggregator.isEnableLastData(): " + aggregator.isEnableLastData());
+            System.out.println("[NGSIMongoSinkTest.testNativeTypeColumnBatch aggregator.getLastDataMode(): " + aggregator.getLastDataMode());            
             while (batch.hasNext()) {
                 destination = batch.getNextDestination();
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
@@ -225,8 +227,7 @@ public class NGSIMongoSinkTest {
                     aggregator.aggregate(event);
                 }
             }
-            System.out.println("[NGSIMongoSinkTest.testNativeTypeColumnBatch aggregation.isEnableLastData: " + aggregator.isEnableLastData());
-            System.out.println("[NGSIMongoSinkTest.testNativeTypeColumnBatch aggregation.getLastDataMode: " + aggregator.getLastDataMode());
+
             ArrayList<String> keysToCrop = ngsiMongoSink.getKeysToCrop(false);
             LinkedHashMap<String, ArrayList<JsonElement>> cropedAggregation = NGSIUtils.cropLinkedHashMap(aggregator.getAggregationToPersist(), keysToCrop);
             ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonList(cropedAggregation);
