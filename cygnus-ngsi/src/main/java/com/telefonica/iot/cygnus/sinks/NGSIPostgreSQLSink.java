@@ -265,7 +265,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     + attrMetadataStoreStr + ") -- Must be 'true' or 'false'");
         }
 
-        String lastDataMode = context.getString("last_data_mode", DEFAULT_LAST_DATA_MODE);
+        lastDataMode = context.getString("last_data_mode", DEFAULT_LAST_DATA_MODE);
 
         if (lastDataMode.equals("upsert") || lastDataMode.equals("insert") || lastDataMode.equals("both")) {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_mode="
