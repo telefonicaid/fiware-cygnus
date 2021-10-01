@@ -259,7 +259,7 @@ Coming soon.
 | enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
-| last\_data\_mode | no | upsert | <i>upsert</i> or <i>insert</i> or <i>both</i>, to set  last data mode. Check this [link](./last_data_function.md) for more details. |
+| last\_data\_mode | no | upsert | <i>upsert</i> or <i>insert</i> or <i>both</i>, to set last data mode. Check this [link](./last_data_function.md) for more details. |
 | last\_data\_table\_suffix | no | false | This suffix will be added to the table name in order to know where Cygnus will store the last record of an entity. Check this [link](./last_data_function.md) for more details. |
 | last\_data\_unique\_key | no | entityId | This must be a unique key on the database to find when a previous record exists. Check this [link](./last_data_function.md) for more details. |
 | last\_data\_timestamp\_key | no | recvTime | This must be a timestamp key on the aggregation to know which record is older. Check this [link](./last_data_function.md) for more details. |
