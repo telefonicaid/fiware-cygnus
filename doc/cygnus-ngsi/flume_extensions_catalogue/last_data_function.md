@@ -1,6 +1,6 @@
 # Last Data functionality.
 
-Cygnus is capable to perform a kind of `upsert` operation on the following Sinks.
+Cygnus is capable to perform a `upsert` operation on the following Sinks:
 
 - PostgisSink
 - PostgreSQLSink
@@ -8,7 +8,7 @@ Cygnus is capable to perform a kind of `upsert` operation on the following Sinks
   
 In order to perform this operation Cygnus needs five keys.
 
-- `last_data_mode` This is the mode of operation: `upsert`, `insert` or `both`. Default is `upsert` mode
+- `last_data_mode` This is the mode of operation: `upsert`, `insert` or `both`. Default is `insert` mode
 - `last_data_table_suffix` This is the suffix that will be added to the table name to perform the upsert operation.
 - `last_data_unique_key` This is the reference to indicate to the database engine which is the reference key to perform the upsert.
 - `last_data_timestamp_key` This is the timestamp reference to know which record is the newest.
@@ -18,7 +18,7 @@ In order to perform this operation Cygnus needs five keys.
 **The upsert mode performs a transaction where runs upsert querys, if any one of them fails, then the other one is rollbacked. This means they have to be run successfully by Cygnus to store on the database.**
 
 
-This `upsert` (running with `last_data_mode` to `upsert` or `both`  consists of two main stages:
+This `upsert` (running with `last_data_mode` to `upsert` or `both`) consists of two main stages:
 
 ## Batch latest record.
 
