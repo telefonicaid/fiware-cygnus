@@ -478,7 +478,7 @@ public class NGSIPostgreSQLSinkTest {
             System.out.println(getTestTraceHead("[NGSIPostgreSQLSink.testBuildDBNameOldEncoding]")
                     + "- FAIL - There was some problem when building the Schema name");
             throw e;
-        } // try catch	        } // try catch
+        } // try catch          } // try catch
     } // testBuildDBNameOldEncoding
 
     /**
@@ -1607,6 +1607,7 @@ public class NGSIPostgreSQLSinkTest {
                 aggregator.setAttrNativeTypes(true);
                 aggregator.setAttrMetadataStore(true);
                 aggregator.setEnableNameMappings(true);
+                aggregator.setLastDataMode("insert");
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);

@@ -225,6 +225,7 @@ public class NGSIMongoSinkTest {
                     aggregator.aggregate(event);
                 }
             }
+
             ArrayList<String> keysToCrop = ngsiMongoSink.getKeysToCrop(false);
             LinkedHashMap<String, ArrayList<JsonElement>> cropedAggregation = NGSIUtils.cropLinkedHashMap(aggregator.getAggregationToPersist(), keysToCrop);
             ArrayList<JsonObject> jsonObjects = NGSIUtils.linkedHashMapToJsonList(cropedAggregation);

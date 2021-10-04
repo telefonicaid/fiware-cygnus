@@ -1813,6 +1813,7 @@ public class NGSIPostgisSinkTest {
                 aggregator.setEnableGeoParse(true);
                 aggregator.setAttrMetadataStore(true);
                 aggregator.setEnableNameMappings(true);
+                aggregator.setLastDataMode("insert");
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
@@ -1860,7 +1861,7 @@ public class NGSIPostgisSinkTest {
                 aggregator.setEnableNameMappings(true);
                 aggregator.setLastDataTimestampKey(NGSIConstants.RECV_TIME);
                 aggregator.setLastDataUniqueKey("entityid");
-                aggregator.setEnableLastData(true);
+                aggregator.setLastDataMode("upsert");
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);

@@ -1347,6 +1347,7 @@ public class NGSIMySQLSinkTest {
                 aggregator.setAttrNativeTypes(true);
                 aggregator.setAttrMetadataStore(true);
                 aggregator.setEnableNameMappings(true);
+                aggregator.setLastDataMode("insert");
                 aggregator.initialize(events.get(0));
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);

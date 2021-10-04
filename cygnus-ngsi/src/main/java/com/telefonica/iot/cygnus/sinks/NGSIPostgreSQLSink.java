@@ -61,7 +61,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private static final SQLInstance POSTGRESQL_INSTANCE_NAME = SQLInstance.POSTGRESQL;
     private static final String DEFAULT_FIWARE_SERVICE = "default";
     private static final String ESCAPED_DEFAULT_FIWARE_SERVICE = "default_service";
-    private static final String DEFAULT_LAST_DATA = "false";
+    private static final String DEFAULT_LAST_DATA_MODE = "insert";
     private static final String DEFAULT_LAST_DATA_TABLE_SUFFIX = "_last_data";
     private static final String DEFAULT_LAST_DATA_UNIQUE_KEY = NGSIConstants.ENTITY_ID;
     private static final String DEFAULT_LAST_DATA_TIMESTAMP_KEY = NGSIConstants.RECV_TIME;
@@ -82,7 +82,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private boolean attrMetadataStore;
     private String postgresqlOptions;
     private boolean persistErrors;
-    private boolean lastData;
+    private String lastDataMode;
     private String lastDataTableSuffix;
     private String lastDataUniqueKey;
     private String lastDataTimeStampKey;
@@ -265,16 +265,15 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     + attrMetadataStoreStr + ") -- Must be 'true' or 'false'");
         }
 
-        String lastDataStr = context.getString("enable_last_data", DEFAULT_LAST_DATA);
+        lastDataMode = context.getString("last_data_mode", DEFAULT_LAST_DATA_MODE);
 
-        if (lastDataStr.equals("true") || lastDataStr.equals("false")) {
-            lastData = Boolean.parseBoolean(lastDataStr);
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data="
-                    + lastDataStr + ")");
+        if (lastDataMode.equals("upsert") || lastDataMode.equals("insert") || lastDataMode.equals("both")) {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_mode="
+                    + lastDataMode + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (last_data="
-                    + lastDataStr + ") -- Must be 'true' or 'false'");
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (last_data_mode="
+                    + lastDataMode + ") -- Must be 'upsert', 'insert' or 'both'");
         } // if else
 
         lastDataTableSuffix = context.getString("last_data_table_suffix", DEFAULT_LAST_DATA_TABLE_SUFFIX);
@@ -375,7 +374,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             aggregator.setAttrNativeTypes(attrNativeTypes);
             aggregator.setAttrMetadataStore(attrMetadataStore);
             aggregator.setEnableNameMappings(enableNameMappings);
-            aggregator.setEnableLastData(lastData);
+            aggregator.setLastDataMode(lastDataMode);
             aggregator.setLastDataTimestampKey(lastDataTimeStampKey);
             aggregator.setLastDataUniqueKey(lastDataUniqueKey);
             aggregator.initialize(events.get(0));
@@ -442,19 +441,28 @@ public class NGSIPostgreSQLSink extends NGSISink {
             if (valuesForInsert.equals("")) {
                 LOGGER.debug("[" + this.getName() + "] no values for insert");
             } else {
-                if (lastData && !rowAttrPersistence ) {
-                    postgreSQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
-                            aggregator.getLastDataToPersist(),
-                            databaseName,
-                            schemaName,
-                            tableName,
-                            lastDataTableSuffix,
-                            lastDataUniqueKey,
-                            lastDataTimeStampKey,
-                            lastDataSQLTimestampFormat,
-                            attrNativeTypes);
-                } else {
-                    postgreSQLPersistenceBackend.insertContextData(databaseName, schemaName, tableName, fieldsForInsert, valuesForInsert);
+                if (lastDataMode.equals("upsert") || lastDataMode.equals("both")) {
+                    if (rowAttrPersistence) {
+                        LOGGER.warn("[" + this.getName() + "] no upsert due to row mode");
+                    }  else {
+                        postgreSQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
+                                                                       aggregator.getLastDataToPersist(),
+                                                                       databaseName,
+                                                                       schemaName,
+                                                                       tableName,
+                                                                       lastDataTableSuffix,
+                                                                       lastDataUniqueKey,
+                                                                       lastDataTimeStampKey,
+                                                                       lastDataSQLTimestampFormat,
+                                                                       attrNativeTypes);
+                    }
+                }
+                if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
+                    postgreSQLPersistenceBackend.insertContextData(databaseName,
+                                                                   schemaName,
+                                                                   tableName,
+                                                                   fieldsForInsert,
+                                                                   valuesForInsert);
                 }
             }
         } catch (Exception e) {
