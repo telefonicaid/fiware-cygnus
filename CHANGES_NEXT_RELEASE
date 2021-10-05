@@ -1,4 +1,2 @@
-- [cygnus-ngsi][MySQL, PostgreSQL, Postgis sinks] Replace `enable_last_data` to `last data mode` conf option: (upsert,insert,both), default is insert
-- [cygnus-common][SQLBackendImpl] Fix: use all related queries when upsert error for logs, exception and persistError (#2088)
-- [cygnus-common][SQLBackendImpl] Fix: use schema for postgis destination at sql insert query (#2085)
-- [cygnus-common][SQLBackendImpl] Force to cast to ::text to ensure to_timestamp upsert (#2087)
+
+
