@@ -99,6 +99,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Tue Oct 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.14.0
+
 * Mon Sep 20 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.13.0
 
 * Wed Aug 18 2021 Ivan Hernandez <ivan.hernandez@atlantida.es> 2.12.0

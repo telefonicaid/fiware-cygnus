@@ -171,6 +171,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Tue Oct 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.14.0
+- [cygnus-common][SQLBackendImpl] Fix: use all related queries when upsert error for logs, exception and persistError (#2088)
+- [cygnus-common][SQLBackendImpl] Fix: use schema for postgis destination at sql insert query (#2085)
+- [cygnus-common][SQLBackendImpl] Force to cast to ::text to ensure to_timestamp upsert (#2087)
+
 * Mon Sep 20 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.13.0
 - [cygnus-common] Use ckanPath in ckan cache
 - [cygnus-common] Remove methods in class CKANBackendImpl for allowing the creation of the data store with ngsi-ld notifications due to break backward compatibilitgy ckan in column mode
