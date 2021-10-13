@@ -134,13 +134,13 @@ public class SQLQueryUtils {
                     if (j == 0) {
                         values.append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
                         fields.append(keys.get(j));
-                        if (!Arrays.asList(uniqueKey).contains(keys.get(j))) {
+                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
                             updateSet.append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
                         }
                     } else {
                         values.append(",").append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
                         fields.append(",").append(keys.get(j));
-                        if (!Arrays.asList(uniqueKey).contains(keys.get(j))) {
+                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
                             updateSet.append(", ").append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
                         }
                     }
@@ -153,7 +153,7 @@ public class SQLQueryUtils {
                     append("UPDATE SET ").append(updateSet).append(" ").
                     append("WHERE ");
             // for key in uniqueKey
-            String[] uniqueKeys = uniqueKey.split(",");
+            String[] uniqueKeys = uniqueKey.split("\\s*,\\s*");
             for (String uniKey : uniqueKeys) {
                 query.append(postgisDestination).append(".").append(uniKey).append("=").append(postgisTempReference).append(".").append(uniKey).append(" ").append("AND ");
             }
@@ -205,7 +205,7 @@ public class SQLQueryUtils {
                     if (j == 0) {
                         values.append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
                         fields.append(MYSQL_FIELDS_MARK).append(keys.get(j)).append(MYSQL_FIELDS_MARK);
-                        if (!Arrays.asList(uniqueKey).contains(keys.get(j))) {
+                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
                             if (keys.get(j).equalsIgnoreCase(timestampKey)) {
                                 dateKeyUpdate.append(mySQLUpdateRecordQuery(keys.get(j), uniqueKey, timestampKey, timestampFormat));
                             } else {
@@ -215,7 +215,7 @@ public class SQLQueryUtils {
                     } else {
                         values.append(",").append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
                         fields.append(",").append(MYSQL_FIELDS_MARK).append(keys.get(j)).append(MYSQL_FIELDS_MARK);
-                        if (!Arrays.asList(uniqueKey).contains(keys.get(j))) {
+                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
                             if (keys.get(j).equalsIgnoreCase(timestampKey)) {
                                 dateKeyUpdate.append(mySQLUpdateRecordQuery(keys.get(j), uniqueKey, timestampKey, timestampFormat));
                             } else {
@@ -259,7 +259,7 @@ public class SQLQueryUtils {
         updateSet.append(key).append("=").
                 append("IF").
                 append("(");
-        String[] uniqueKeys = uniqueKey.split(",");
+        String[] uniqueKeys = uniqueKey.split("\\s*,\\s*");
         for (String uniKey : uniqueKeys) {
             updateSet.append("(").append(uniKey).append("=").append("VALUES(").append(uniKey).append(")");
             updateSet.append(")").append(" AND ");
