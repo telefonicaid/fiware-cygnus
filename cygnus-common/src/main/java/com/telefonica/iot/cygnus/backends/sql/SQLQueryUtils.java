@@ -258,9 +258,7 @@ public class SQLQueryUtils {
         updateSet.append(key).append("=").
                 append("IF").
                 append("(");
-        // TBD for key in uniqueKey ?
-        updateSet.append("(").append(uniqueKey).append("=").append("VALUES(").append(uniqueKey).append(")");
-        ///
+        updateSet.append("((").append(uniqueKey).append(")=").append("VALUES(").append(uniqueKey).append(")");
         updateSet.append(")").append(" AND ").
                 append("(").append("STR_TO_DATE(").append(timestampKey).append(", '").append(timestampFormat).append("')").
                 append(" < ").
