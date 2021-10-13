@@ -247,6 +247,7 @@ public class SQLQueryUtils {
      * @param timestampFormat the timestamp format
      * @return the string buffer like the following one
      * recvTime=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTime), recvTime)
+     * recvTime=IF((entityId=VALUES(entityId)) AND (entityType=VALUES(entityType)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTime), recvTime)
      */
 
     protected static StringBuffer mySQLUpdateRecordQuery(String key,
@@ -258,9 +259,12 @@ public class SQLQueryUtils {
         updateSet.append(key).append("=").
                 append("IF").
                 append("(");
-        updateSet.append("((").append(uniqueKey).append(")=").append("VALUES(").append(uniqueKey).append(")");
-        updateSet.append(")").append(" AND ").
-                append("(").append("STR_TO_DATE(").append(timestampKey).append(", '").append(timestampFormat).append("')").
+        String[] uniqueKeys = uniqueKey.split(",");
+        for (String uniKey : uniqueKeys) {
+            updateSet.append("(").append(uniKey).append("=").append("VALUES(").append(uniKey).append(")");
+            updateSet.append(")").append(" AND ");
+        }
+        updateSet.append("(").append("STR_TO_DATE(").append(timestampKey).append(", '").append(timestampFormat).append("')").
                 append(" < ").
                 append("(").append("STR_TO_DATE(VALUES(").append(timestampKey).append("), '").append(timestampFormat).append("')").append(")").
                 append(")").
