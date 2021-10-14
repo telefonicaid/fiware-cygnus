@@ -25,6 +25,10 @@ import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.utils.NGSICharsets;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
+import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.DriverManagerConnectionFactory;
@@ -53,6 +57,7 @@ public class SQLBackendImpl implements SQLBackend{
     private final int maxLatestErrors;
     private static final String DEFAULT_ERROR_TABLE_SUFFIX = "_error_log";
     private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
+    private static final String MYSQL_QUOTE_CHAR = "`";
 
     /**
      * Constructor.
@@ -228,11 +233,31 @@ public class SQLBackendImpl implements SQLBackend{
     } // createTable
 
     @Override
-    public void insertContextData(String dataBase, String schema, String table, String fieldNames, String fieldValues)
+    public void insertContextData(NGSIGenericAggregator aggregator,
+                                  String dataBase,
+                                  String schema,
+                                  String table)
             throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError {
         Statement stmt = null;
 
         String tableName = table;
+
+        String fieldNames = null;
+        if (sqlInstance == SQLInstance.MYSQL) {
+            fieldNames = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist(), MYSQL_QUOTE_CHAR);
+        } else if (sqlInstance == SQLInstance.POSTGRESQL){
+            fieldNames = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist());
+        }
+        String fieldValues = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
+
+        LOGGER.debug("[" + this.getName() + "] Persisting data at " sqlInstance " + . Database ("
+                + dataBase + "), Schema ( " + schema + ") Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
+                + fieldValues + ")");
+
+        if (fieldValues.equals("")) {
+            LOGGER.debug("[" + this.getName() + "] no values for insert");
+            return;
+        }
 
         // get a connection to the given destination
         Connection con = driver.getConnection(dataBase);
@@ -568,22 +593,19 @@ public class SQLBackendImpl implements SQLBackend{
      * @param uniqueKey       the unique key
      * @param timestampKey    the timestamp key
      * @param timestampFormat the timestamp format
-     * @param attrNativeTypes the attr native types
      * @throws CygnusPersistenceError the cygnus persistence error
      * @throws CygnusBadContextData   the cygnus bad context data
      * @throws CygnusRuntimeError     the cygnus runtime error
      * @throws CygnusPersistenceError the cygnus persistence error
      */
-    public void upsertTransaction (LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
-                                   LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+    public void upsertTransaction (NGSIGenericAggregator aggregator,
                                    String dataBase,
                                    String schema,
                                    String tableName,
                                    String tableSuffix,
                                    String uniqueKey,
                                    String timestampKey,
-                                   String timestampFormat,
-                                   boolean attrNativeTypes)
+                                   String timestampFormat)
         throws CygnusPersistenceError, CygnusBadContextData, CygnusRuntimeError,  CygnusPersistenceError{
 
         Connection connection = null;
@@ -596,17 +618,15 @@ public class SQLBackendImpl implements SQLBackend{
             connection = driver.getConnection(dataBase);
             connection.setAutoCommit(false);
 
-            ArrayList<StringBuffer> upsertQuerysList = SQLQueryUtils.sqlUpsertQuery(aggregation,
-                    lastData,
-                    tableName,
-                    tableSuffix,
-                    uniqueKey,
-                    timestampKey,
-                    timestampFormat,
-                    sqlInstance,
-                    dataBase,
-                    schema,
-                    attrNativeTypes);
+            ArrayList<StringBuffer> upsertQuerysList = SQLQueryUtils.sqlUpsertQuery(aggregator,
+                                                                                    tableName,
+                                                                                    tableSuffix,
+                                                                                    uniqueKey,
+                                                                                    timestampKey,
+                                                                                    timestampFormat,
+                                                                                    sqlInstance,
+                                                                                    dataBase,
+                                                                                    schema);
 
             for (StringBuffer query : upsertQuerysList) {
                 PreparedStatement upsertStatement;

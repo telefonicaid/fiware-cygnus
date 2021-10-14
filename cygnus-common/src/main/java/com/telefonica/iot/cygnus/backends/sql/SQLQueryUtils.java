@@ -54,40 +54,34 @@ public class SQLQueryUtils {
      * @param destination     the destination
      * @return the string buffer
      */
-    protected static ArrayList<StringBuffer> sqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
-                                                 LinkedHashMap<String, ArrayList<JsonElement>> lastData,
-                                                 String tableName,
-                                                 String tableSuffix,
-                                                 String uniqueKey,
-                                                 String timestampKey,
-                                                 String timestampFormat,
-                                                 SQLInstance sqlInstance,
-                                                 String dataBase,
-                                                 String schema,
-                                                 boolean attrNativeTypes) {
+    protected static ArrayList<StringBuffer> sqlUpsertQuery(NGSIGenericAggregator aggregator,
+                                                            String tableName,
+                                                            String tableSuffix,
+                                                            String uniqueKey,
+                                                            String timestampKey,
+                                                            String timestampFormat,
+                                                            SQLInstance sqlInstance,
+                                                            String dataBase,
+                                                            String schema) {
 
-    if (sqlInstance == SQLInstance.POSTGRESQL){
-            return postgreSqlUpsertQuery(aggregation,
-                    lastData,
-                    tableName,
-                    tableSuffix,
-                    uniqueKey,
-                    timestampKey,
-                    timestampFormat,
-                    sqlInstance,
-                    schema,
-                    attrNativeTypes);
+        if (sqlInstance == SQLInstance.POSTGRESQL){
+            return postgreSqlUpsertQuery(aggregator,
+                                         tableName,
+                                         tableSuffix,
+                                         uniqueKey,
+                                         timestampKey,
+                                         timestampFormat,
+                                         sqlInstance,
+                                         schema);
         } else if (sqlInstance == SQLInstance.MYSQL) {
-            return mySqlUpsertQuery(aggregation,
-                    lastData,
-                    tableName,
-                    tableSuffix,
-                    uniqueKey,
-                    timestampKey,
-                    timestampFormat,
-                    sqlInstance,
-                    dataBase,
-                    attrNativeTypes);
+            return mySqlUpsertQuery(aggegator,
+                                    tableName,
+                                    tableSuffix,
+                                    uniqueKey,
+                                    timestampKey,
+                                    timestampFormat,
+                                    sqlInstance,
+                                    dataBase);
         }
         return null;
     }
@@ -106,17 +100,17 @@ public class SQLQueryUtils {
      * @param schema          the destination
      * @return the string buffer
      */
-    protected static ArrayList<StringBuffer> postgreSqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
-                                                        LinkedHashMap<String, ArrayList<JsonElement>> lastData,
-                                                        String tableName,
-                                                        String tableSuffix,
-                                                        String uniqueKey,
-                                                        String timestampKey,
-                                                        String timestampFormat,
-                                                        SQLInstance sqlInstance,
-                                                        String schema,
-                                                        boolean attrNativeTypes) {
+    protected static ArrayList<StringBuffer> postgreSqlUpsertQuery(NGSIGenericAggregator aggregator,
+                                                                   String tableName,
+                                                                   String tableSuffix,
+                                                                   String uniqueKey,
+                                                                   String timestampKey,
+                                                                   String timestampFormat,
+                                                                   SQLInstance sqlInstance,
+                                                                   String schema) {
 
+        LinkedHashMap<String, ArrayList<JsonElement>> aggregation = aggregator.getAggregationToPersist();
+        LinkedHashMap<String, ArrayList<JsonElement>> lastData = aggregator.getLastDataToPersist();
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         StringBuffer postgisTempReference = new StringBuffer("EXCLUDED");
         StringBuffer postgisDestination = new StringBuffer(schema).append(".").append(tableName).append(tableSuffix);
@@ -131,13 +125,13 @@ public class SQLQueryUtils {
                 if (lastData.get(keys.get(j)).get(i) != null) {
                     JsonElement value = lastData.get(keys.get(j)).get(i);
                     if (j == 0) {
-                        values.append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
+                        values.append(getStringValueFromJsonElement(value, "'", aggregator.isAttrNativeTypes()));
                         fields.append(keys.get(j));
                         if (!keys.get(j).equals(uniqueKey)) {
                             updateSet.append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
                         }
                     } else {
-                        values.append(",").append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
+                        values.append(",").append(getStringValueFromJsonElement(value, "'", aggregator.isAttrNativeTypes()));
                         fields.append(",").append(keys.get(j));
                         if (!keys.get(j).equals(uniqueKey)) {
                             updateSet.append(", ").append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
@@ -173,17 +167,17 @@ public class SQLQueryUtils {
      * @param destination     the destination
      * @return the string buffer
      */
-    protected static ArrayList<StringBuffer> mySqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
-                                                   LinkedHashMap<String, ArrayList<JsonElement>> lastData,
-                                                   String tableName,
-                                                   String tableSuffix,
-                                                   String uniqueKey,
-                                                   String timestampKey,
-                                                   String timestampFormat,
-                                                   SQLInstance sqlInstance,
-                                                   String destination,
-                                                   boolean attrNativeTypes) {
+    protected static ArrayList<StringBuffer> mySqlUpsertQuery(NGSIGenericAggregator aggregator,
+                                                              String tableName,
+                                                              String tableSuffix,
+                                                              String uniqueKey,
+                                                              String timestampKey,
+                                                              String timestampFormat,
+                                                              SQLInstance sqlInstance,
+                                                              String destination) {
 
+        LinkedHashMap<String, ArrayList<JsonElement>> aggregation = aggregator.getAggregationToPersist();
+        LinkedHashMap<String, ArrayList<JsonElement>> lastData = aggregator.getLastDataToPersist();
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
 
         for (int i = 0 ; i < collectionSizeOnLinkedHashMap(lastData) ; i++) {
@@ -197,7 +191,7 @@ public class SQLQueryUtils {
                 if (lastData.get(keys.get(j)).get(i) != null) {
                     JsonElement value = lastData.get(keys.get(j)).get(i);
                     if (j == 0) {
-                        values.append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
+                        values.append(getStringValueFromJsonElement(value, "'", aggregator.isAttrNativeTypes()));
                         fields.append(MYSQL_FIELDS_MARK).append(keys.get(j)).append(MYSQL_FIELDS_MARK);
                         if (!keys.get(j).equals(uniqueKey)) {
                             if (keys.get(j).equalsIgnoreCase(timestampKey)) {
@@ -207,7 +201,7 @@ public class SQLQueryUtils {
                             }
                         }
                     } else {
-                        values.append(",").append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
+                        values.append(",").append(getStringValueFromJsonElement(value, "'", aggregator.isAttrNativeTypes()));
                         fields.append(",").append(MYSQL_FIELDS_MARK).append(keys.get(j)).append(MYSQL_FIELDS_MARK);
                         if (!keys.get(j).equals(uniqueKey)) {
                             if (keys.get(j).equalsIgnoreCase(timestampKey)) {
