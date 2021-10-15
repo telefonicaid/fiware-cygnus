@@ -158,28 +158,6 @@ public final class NGSIUtils {
     } // getGeometry
 
     /**
-     * Gets fields for create.
-     *
-     * @param aggregation the aggregation
-     * @return the fields (column names) for create in SQL format.
-     */
-    public static String getFieldsForCreate(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
-        String fieldsForCreate = "(";
-        boolean first = true;
-        Iterator<String> it = aggregation.keySet().iterator();
-        while (it.hasNext()) {
-            if (first) {
-                fieldsForCreate += (String) it.next() + " text";
-                first = false;
-            } else {
-                fieldsForCreate += "," + (String) it.next() + " text";
-            } // if else
-        } // while
-
-        return fieldsForCreate + ")";
-    } // getFieldsForCreate
-
-    /**
      * Linked hash map to json list array list.
      *
      * @param aggregation the aggregation

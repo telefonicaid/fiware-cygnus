@@ -21,6 +21,7 @@ package com.telefonica.iot.cygnus.sinks;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
+import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
 import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -388,9 +389,8 @@ public class NGSIPostgisSink extends NGSISink {
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
-            LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" + NGSIUtils.getFieldsForInsert(aggregator.getAggregation())+ ", values="
-                    + NGSIUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes) + ")");
-
+            LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" + SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation())+ ", values="
+                    + SQLQueryUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes) + ")");
             // persist the fieldValues
             persistAggregation(aggregator);
             batch.setNextPersisted(true);
@@ -433,7 +433,7 @@ public class NGSIPostgisSink extends NGSISink {
         }
 
         if (aggregator instanceof NGSIGenericRowAggregator) {
-            String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+            String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
             postgisPersistenceBackend.createDestination(schemaName);
             postgisPersistenceBackend.createTable(dataBaseName, schemaName, tableName, fieldsForCreate);
         } // if

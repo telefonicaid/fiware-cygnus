@@ -24,6 +24,7 @@ import java.util.Arrays;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
+import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
 import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -344,7 +345,8 @@ public class NGSIMySQLSink extends NGSISink {
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
-            
+            LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" + SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation())+ ", values="
+                    + SQLQueryUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes) + ")");
             // Persist the aggregation
             persistAggregation(aggregator);
             batch.setNextPersisted(true);
@@ -421,7 +423,7 @@ public class NGSIMySQLSink extends NGSISink {
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
         if (aggregator instanceof NGSIGenericRowAggregator) {
-            String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+            String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
             mySQLPersistenceBackend.createDestination(dbName);
             mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
         } // if

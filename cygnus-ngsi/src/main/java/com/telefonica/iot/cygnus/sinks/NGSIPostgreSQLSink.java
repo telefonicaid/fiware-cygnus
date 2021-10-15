@@ -382,7 +382,8 @@ public class NGSIPostgreSQLSink extends NGSISink {
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
-
+            LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" + SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation())+ ", values="
+                    + SQLQueryUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes) + ")");
             // persist the fieldValues
             persistAggregation(aggregator);
             batch.setNextPersisted(true);
@@ -425,7 +426,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
         }
 
         if (aggregator instanceof NGSIGenericRowAggregator) {
-            String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+            String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
             postgreSQLPersistenceBackend.createDestination(schemaName);
             postgreSQLPersistenceBackend.createTable(databaseName, schemaName, tableName, fieldsForCreate);
         } // if
