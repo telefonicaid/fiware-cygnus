@@ -389,8 +389,9 @@ public class NGSIPostgisSink extends NGSISink {
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
-            LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" + SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation())+ ", values="
-                    + SQLQueryUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes) + ")");
+            LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" +
+                         SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation(), SQLQueryUtils.POSTGRES_FIELDS_MARK) + ", values=" +
+                         SQLQueryUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes) + ")");
             // persist the fieldValues
             persistAggregation(aggregator);
             batch.setNextPersisted(true);

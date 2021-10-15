@@ -36,9 +36,9 @@ public class SQLQueryUtils {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(SQLQueryUtils.class);
 
-    private static final String POSTGRES_FIELDS_MARK = "";
-    private static final String MYSQL_FIELDS_MARK = "`";
-    private static final String SEPARATION_MARK = ",";
+    public static final String POSTGRES_FIELDS_MARK = "";
+    public static final String MYSQL_FIELDS_MARK = "`";
+    public static final String SEPARATION_MARK = ",";
 
     /**
      * Sql upsert string buffer.
