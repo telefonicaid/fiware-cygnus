@@ -295,6 +295,11 @@ public class SQLQueryUtils {
         StringBuffer postgisDestination = new StringBuffer(schema).append(".").append(tableName);
         StringBuffer query = new StringBuffer();
 
+        if (valuesForInsert.equals("")) {
+            LOGGER.debug("[" + this.getName() + "] no values for insert");
+            return query;
+        }
+
         if (sqlInstance == SQLInstance.POSTGRESQL){
             fieldsForInsert = getFieldsForInsert(aggregation.keySet(), POSTGRES_FIELDS_MARK);
             query.append("INSERT INTO ").append(postgisDestination).append(" ").append(fieldsForInsert).append(" ").

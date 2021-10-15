@@ -158,88 +158,6 @@ public final class NGSIUtils {
     } // getGeometry
 
     /**
-     * Gets string value from json element.
-     *
-     * @param value           the value to process
-     * @param quotationMark   the quotation mark
-     * @param attrNativeTypes the attr native types
-     * @return the string value from json element
-     */
-    public static String getStringValueFromJsonElement(JsonElement value, String quotationMark, boolean attrNativeTypes) {
-        String stringValue;
-        if (attrNativeTypes) {
-            if (value == null || value.isJsonNull()) {
-                stringValue = "NULL";
-            } else if (value.isJsonPrimitive()) {
-                if (value.getAsJsonPrimitive().isBoolean()) {
-                    stringValue = value.getAsString().toUpperCase();
-                } else if (value.getAsJsonPrimitive().isNumber()) {
-                    stringValue = value.getAsString();
-                }else {
-                    if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
-                        stringValue = value.getAsString().replace("\\", "");
-                    } else {
-                        stringValue = quotationMark + value.getAsString() + quotationMark;
-                    }
-                }
-            } else {
-                stringValue = quotationMark + value.toString() + quotationMark;
-            }
-        } else {
-            if (value != null && value.isJsonPrimitive()) {
-                if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
-                    stringValue = value.getAsString().replace("\\", "");
-                } else {
-                    stringValue = quotationMark + value.getAsString() + quotationMark;
-                }
-            } else {
-                if (value == null){
-                    stringValue = quotationMark + "NULL" + quotationMark;
-                } else {
-                    stringValue = quotationMark + value.toString() + quotationMark;
-                }
-            }
-        }
-        return stringValue;
-    }
-
-    /**
-     * Gets values for insert.
-     *
-     * @param aggregation     the aggregation
-     * @param attrNativeTypes the attr native types
-     * @return a String with all VALUES in SQL query format.
-     */
-    public static String getValuesForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, boolean attrNativeTypes) {
-        String valuesForInsert = "";
-        int numEvents = collectionSizeOnLinkedHashMap(aggregation);
-
-        for (int i = 0; i < numEvents; i++) {
-            if (i == 0) {
-                valuesForInsert += "(";
-            } else {
-                valuesForInsert +=  ",(";
-            } // if else
-            boolean first = true;
-            Iterator<String> it = aggregation.keySet().iterator();
-            while (it.hasNext()) {
-                String entry = (String) it.next();
-                ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
-                JsonElement value = values.get(i);
-                String stringValue = getStringValueFromJsonElement(value, "'", attrNativeTypes);
-                if (first) {
-                    valuesForInsert += stringValue;
-                    first = false;
-                } else {
-                    valuesForInsert += "," + stringValue;
-                } // if else
-            } // while
-            valuesForInsert += ")";
-        } // for
-        return valuesForInsert;
-    } // getValuesForInsert
-
-    /**
      * Gets fields for create.
      *
      * @param aggregation the aggregation
@@ -260,38 +178,6 @@ public final class NGSIUtils {
 
         return fieldsForCreate + ")";
     } // getFieldsForCreate
-
-    /**
-     * Gets fields for insert.
-     *
-     * @param aggregation the aggregation
-     * @return the fields (column names) for insert in SQL format.
-     */
-    public static String getFieldsForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
-        return getFieldsForInsert(aggregation, "");
-    }
-    
-    /**
-     * Gets fields for insert.
-     * 
-     * @param aggregation the aggregation
-     * @param quoteChar char to quote field names
-     * @return he fields (column names) for insert in SQL format.
-     */
-    public static String getFieldsForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, String quoteChar) {
-        String fieldsForInsert = "(";
-        boolean first = true;
-        Iterator<String> it = aggregation.keySet().iterator();
-        while (it.hasNext()) {
-            if (first) {
-                fieldsForInsert += quoteChar + (String) it.next() + quoteChar;
-                first = false;
-            } else {
-                fieldsForInsert += "," + quoteChar + (String) it.next() + quoteChar;
-            } // if else
-        } // while
-        return fieldsForInsert + ")";
-    } // getFieldsForInsert
 
     /**
      * Linked hash map to json list array list.

@@ -414,50 +414,42 @@ public class NGSIMySQLSink extends NGSISink {
     
     private void persistAggregation(NGSIGenericAggregator aggregator)
         throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
-        String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
-        String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist(), MYSQL_QUOTE_CHAR);
-        String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
+
         String dbName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
-        
-        LOGGER.debug("[" + this.getName() + "] Persisting data at NGSIMySQLSink. Database ("
-                + dbName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
-                + valuesForInsert + ")");
         
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
         if (aggregator instanceof NGSIGenericRowAggregator) {
+            String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
             mySQLPersistenceBackend.createDestination(dbName);
             mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
         } // if
 
-        if (valuesForInsert.equals("")) {
-            LOGGER.debug("[" + this.getName() + "] no values for insert");
-        } else {
-            if (lastDataMode.equals("upsert") || lastDataMode.equals("both")) {
-                if (rowAttrPersistence) {
-                    LOGGER.warn("[" + this.getName() + "] no upsert due to row mode");                    
-                } else {
-                    mySQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
-                                                              aggregator.getLastDataToPersist(),
-                                                              dbName,
-                                                              null,
-                                                              tableName,
-                                                              lastDataTableSuffix,
-                                                              lastDataUniqueKey,
-                                                              lastDataTimeStampKey,
-                                                              lastDataSQLTimestampFormat,
-                                                              attrNativeTypes);
-                }
-            }
-            if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
-                mySQLPersistenceBackend.insertContextData(dbName,
-                                                          null,
+        if (lastDataMode.equals("upsert") || lastDataMode.equals("both")) {
+            if (rowAttrPersistence) {
+                LOGGER.warn("[" + this.getName() + "] no upsert due to row mode");
+            } else {
+                mySQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
+                                                          aggregator.getLastDataToPersist(),
+                                                          dbName,
+                                                          null, // no schema in mysql
                                                           tableName,
-                                                          fieldsForInsert,
-                                                          valuesForInsert);
+                                                          lastDataTableSuffix,
+                                                          lastDataUniqueKey,
+                                                          lastDataTimeStampKey,
+                                                          lastDataSQLTimestampFormat,
+                                                          attrNativeTypes);
             }
         }
+        if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
+            mySQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                      dbName,
+                                                      null, // no schema in mysql
+                                                      tableName,
+                                                      attrNativeTypes);
+        }
+
     } // persistAggregation
     
     /**

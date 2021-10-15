@@ -654,6 +654,74 @@ public class SQLBackendImpl implements SQLBackend{
 
     }
 
+
+    public void insertTransaction (LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
+                                   String dataBase,
+                                   String schema,
+                                   String tableName,
+                                   boolean attrNativeTypes)
+        throws CygnusPersistenceError, CygnusBadContextData, CygnusRuntimeError,  CygnusPersistenceError{
+
+        Connection connection = null;
+        String insertQuery = new String();
+
+        try {
+
+            connection = driver.getConnection(dataBase);
+            connection.setAutoCommit(false);
+
+            insertQuery = SQLQueryUtils.sqlInsertQuery(aggregation,
+                                                       tableName,
+                                                       sqlInstance,
+                                                       dataBase,
+                                                       attrNativeTypes).toString();
+
+            PreparedStatement insertStatement;
+            insertStatement = connection.prepareStatement(insertQuery);
+            /*
+            FIXME https://github.com/telefonicaid/fiware-cygnus/issues/1959
+            Add SQLSafe values with native PreparedStatement methods
+            insertPreparedStatement = SQLQueryUtils.addJsonValues(insertStatement, aggregation, attrNativeTypes);
+            */
+            insertStatement.executeUpdate();
+
+            connection.commit();
+            Logger.info(sqlInstance.toString().toUpperCase() + " Finished transactions into database: " +
+                        dataBase + " \n insertQuery: " + insertQuery);
+
+        } catch (SQLTimeoutException e) {
+            cygnusSQLRollback(connection);
+            if (insertQuery.isEmpty()) {
+                throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
+                                                 " Data insertion error. connection: " + connection,
+                                                 " SQLTimeoutException", e.getMessage());
+            } else {
+                throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
+                                                 " Data insertion error. insertQuery: " + insertQuery +
+                                                 " SQLTimeoutException", e.getMessage());
+            }
+        } catch (SQLException e) {
+            cygnusSQLRollback(connection);
+            if (insertQuery.isEmpty()) {
+                persistError(dataBase, schema, null, e);
+                throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
+                                               " Data insertion error. connection: `" + connection,
+                                               " SQLException", e.getMessage());
+
+            } else {
+                String allQueries = " insertQuery: " + insertQuery;
+                persistError(dataBase, schema, allQueries, e);
+                throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
+                                               " Data insertion error. " + allQueries,
+                                               " SQLException", e.getMessage());
+            }
+        } finally {
+            closeConnection(connection);
+        } // try catch
+
+    }
+
+
     private void cygnusSQLRollback (Connection connection) {
         try {
             connection.rollback();
