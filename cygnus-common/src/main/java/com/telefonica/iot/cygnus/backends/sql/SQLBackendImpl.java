@@ -674,6 +674,7 @@ public class SQLBackendImpl implements SQLBackend{
                                                        tableName,
                                                        sqlInstance,
                                                        dataBase,
+                                                       schema,
                                                        attrNativeTypes).toString();
 
             PreparedStatement insertStatement;
@@ -686,7 +687,7 @@ public class SQLBackendImpl implements SQLBackend{
             insertStatement.executeUpdate();
 
             connection.commit();
-            Logger.info(sqlInstance.toString().toUpperCase() + " Finished transactions into database: " +
+            LOGGER.info(sqlInstance.toString().toUpperCase() + " Finished transactions into database: " +
                         dataBase + " \n insertQuery: " + insertQuery);
 
         } catch (SQLTimeoutException e) {
@@ -697,7 +698,7 @@ public class SQLBackendImpl implements SQLBackend{
                                                  " SQLTimeoutException", e.getMessage());
             } else {
                 throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
-                                                 " Data insertion error. insertQuery: " + insertQuery +
+                                                 " Data insertion error. insertQuery: " + insertQuery,
                                                  " SQLTimeoutException", e.getMessage());
             }
         } catch (SQLException e) {
