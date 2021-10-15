@@ -383,7 +383,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 aggregator.aggregate(event);
             } // for
             LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" +
-                         SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation(), SQLQueryUtils.POSTGRES_FIELDS_MARK) + ", values=" +
+                         SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation().keySet(), SQLQueryUtils.POSTGRES_FIELDS_MARK) + ", values=" +
                          SQLQueryUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes) + ")");
             // persist the fieldValues
             persistAggregation(aggregator);

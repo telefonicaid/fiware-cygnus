@@ -346,7 +346,7 @@ public class SQLQueryUtils {
      * @param fieldMark the field mark
      * @return the fields for insert
      */
-    protected static StringBuffer getFieldsForInsert(Set<String> keyList, String fieldMark) {
+    public static StringBuffer getFieldsForInsert(Set<String> keyList, String fieldMark) {
         StringBuffer fieldsForInsert = new StringBuffer("(");
         boolean first = true;
         Iterator<String> it = keyList.iterator();
@@ -515,7 +515,7 @@ public class SQLQueryUtils {
      * @param attrNativeTypes the attr native types
      * @return a String with all VALUES in SQL query format.
      */
-    protected static String getValuesForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, boolean attrNativeTypes) {
+    public static String getValuesForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, boolean attrNativeTypes) {
         String valuesForInsert = "";
         int numEvents = collectionSizeOnLinkedHashMap(aggregation);
 

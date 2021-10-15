@@ -346,7 +346,7 @@ public class NGSIMySQLSink extends NGSISink {
                 aggregator.aggregate(event);
             } // for
             LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" +
-                         SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation(), SQLQueryUtils.MYSQL_FIELDS_MARK) + ", values=" +
+                         SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation().keySet(), SQLQueryUtils.MYSQL_FIELDS_MARK) + ", values=" +
                          SQLQueryUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes) + ")");
             // Persist the aggregation
             persistAggregation(aggregator);
