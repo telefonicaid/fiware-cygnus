@@ -250,12 +250,12 @@ public class SQLBackendImpl implements SQLBackend{
         }
         String fieldValues = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
 
-        LOGGER.debug("[" + this.getName() + "] Persisting data at " sqlInstance " + . Database ("
+        LOGGER.debug("[" + this.getName() + "] Persisting data at " + sqlInstance.toString().toUpperCase() + " . Database ("
                 + dataBase + "), Schema ( " + schema + ") Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
                 + fieldValues + ")");
 
         if (fieldValues.equals("")) {
-            LOGGER.debug("[" + this.getName() + "] no values for insert");
+            LOGGER.debug("[" + this.getName() + "] no values for insert at "  + sqlInstance.toString().toUpperCase());
             return;
         }
 
