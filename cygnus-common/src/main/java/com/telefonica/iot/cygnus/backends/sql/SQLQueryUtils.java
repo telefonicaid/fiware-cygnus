@@ -296,7 +296,7 @@ public class SQLQueryUtils {
         StringBuffer query = new StringBuffer();
 
         if (valuesForInsert.equals("")) {
-            LOGGER.debug("[" + this.getName() + "] no values for insert");
+            LOGGER.debug("[SQLQueryUtils.sqlInsertQuery] no values for insert");
             return query;
         }
 
