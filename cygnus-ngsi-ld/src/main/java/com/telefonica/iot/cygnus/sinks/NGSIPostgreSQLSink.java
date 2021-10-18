@@ -557,7 +557,11 @@ public class NGSIPostgreSQLSink extends NGSILDSink {
             // creating the database and the table has only sense if working in row mode, in column node
             // everything must be provisioned in advance
 
-            postgreSQLPersistenceBackend.insertContextData(dataBaseName, schemaName, tableName, fieldNames, fieldValues);
+            postgreSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                           databaseName,
+                                                           schemaName,
+                                                           tableName,
+                                                           attrNativeTypes);
         } catch (Exception e) {
             throw new CygnusPersistenceError("-, " + e.getMessage());
         } // try catch

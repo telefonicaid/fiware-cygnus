@@ -360,7 +360,11 @@ public class NGSIPostgisSink extends NGSILDSink {
             // creating the database and the table has only sense if working in row mode, in column node
             // everything must be provisioned in advance
 
-            postgisPersistenceBackend.insertContextData(dataBaseName, schemaName, tableName, fieldNames, fieldValues);
+            postgisPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                        dataBaseName,
+                                                        schemaName,
+                                                        tableName,
+                                                        attrNativeTypes);
         } catch (Exception e) {
             throw new CygnusPersistenceError("-, " + e.getMessage());
         } // try catch
