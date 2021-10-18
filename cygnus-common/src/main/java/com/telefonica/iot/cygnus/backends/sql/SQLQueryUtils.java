@@ -292,7 +292,7 @@ public class SQLQueryUtils {
         */
         StringBuffer valuesForInsert = new StringBuffer(getValuesForInsert(aggregation, attrNativeTypes));
 
-        StringBuffer postgisDestination = new StringBuffer(schema).append(".").append(tableName);
+
         StringBuffer query = new StringBuffer();
 
         if (valuesForInsert.equals("")) {
@@ -301,6 +301,7 @@ public class SQLQueryUtils {
         }
 
         if (sqlInstance == SQLInstance.POSTGRESQL){
+            StringBuffer postgisDestination = new StringBuffer(schema).append(".").append(tableName);            
             fieldsForInsert = getFieldsForInsert(aggregation.keySet(), POSTGRES_FIELDS_MARK);
             query.append("INSERT INTO ").append(postgisDestination).append(" ").append(fieldsForInsert).append(" ").
                     append("VALUES ").append(valuesForInsert).append(" ");
