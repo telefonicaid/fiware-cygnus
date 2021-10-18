@@ -160,37 +160,6 @@ public class SQLBackendImplTest {
         } // try catch finally
     } // testCreateTable
 
-    /**
-     * Test of insertContextData method, of class SQLBackendImpl.
-     */
-    @Test
-    public void testInsertContextData() {
-        System.out.println("Testing SQLBackendImpl.insertContextData");
-        try {
-            if (!runRealTest) backend.setDriver(mockDriverTableCreate);
-
-            backend.insertContextData(dbName1, null, tableName1, fieldNamesInsert1, fieldValues1);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(backend.getDriver().isConnectionCreated(""));
-            assertTrue(backend.getDriver().isConnectionCreated(dbName1));
-        } // try catch finally
-
-        System.out.println("Testing SQLBackendImpl.createTable (within second database");
-
-        try {
-            backend.createDestination(dbName2);
-            backend.createTable(dbName2, schema, tableName2, fieldNames2);
-        } catch (Exception e) {
-            fail(e.getMessage());
-        } finally {
-            assertTrue(backend.getDriver().isConnectionCreated(""));
-            assertTrue(backend.getDriver().isConnectionCreated(dbName1));
-            assertTrue(backend.getDriver().isConnectionCreated(dbName2));
-        } // try catch finally
-    } // testInsertContextData
-
     @Test
     public void testJDBCUrlMySQL() {
         System.out.println("Testing SQLBackendImpl.SQLDriver.generateJDBCUrl (sqlInstance:mysql)");
