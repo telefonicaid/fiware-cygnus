@@ -227,6 +227,48 @@ public class SQLBackendImpl implements SQLBackend{
         cache.addTable(dataBase, tableName);
     } // createTable
 
+    @Override
+    public void insertContextData(String dataBase, String schema, String table, String fieldNames, String fieldValues)
+            throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError {
+        Statement stmt = null;
+
+        String tableName = table;
+
+        // get a connection to the given destination
+        Connection con = driver.getConnection(dataBase);
+        String query = "";
+        if (sqlInstance == SQLInstance.MYSQL) {
+            query = "insert into `" + tableName + "` " + fieldNames + " values " + fieldValues;
+        } else if (sqlInstance == SQLInstance.POSTGRESQL){
+            tableName = schema + "." + table;
+            query = "INSERT INTO " + tableName + " " + fieldNames + " VALUES " + fieldValues;
+        }
+
+        try {
+            stmt = con.createStatement();
+        } catch (SQLException e) {
+            closeSQLObjects(con, stmt);
+            throw new CygnusRuntimeError(sqlInstance.toString().toUpperCase() + " Data insertion error", "SQLException", e.getMessage());
+        } // try catch
+
+        try {
+            LOGGER.debug(sqlInstance.toString().toUpperCase() + "Database: " + dataBase + " Executing SQL query '" + query + "'");
+            stmt.executeUpdate(query);
+            LOGGER.info(sqlInstance.toString().toUpperCase() + "Database: " + dataBase + " Executed SQL query '" + query + "'");
+        } catch (SQLTimeoutException e) {
+            throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + "Database: " + dataBase + " Data insertion error. Query insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLTimeoutException", e.getMessage());
+        } catch (SQLException e) {
+            persistError(dataBase, schema, query, e);
+            throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + "Database: " + dataBase + " Data insertion error. Query: insert into `" + tableName + "` " + fieldNames + " values " + fieldValues, "SQLException", e.getMessage());
+        } finally {
+            closeSQLObjects(con, stmt);
+        } // try catch
+
+        LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + dataBase + "' and '" + tableName + "' to the cache after insertion");
+        cache.addDataBase(dataBase);
+        cache.addTable(dataBase, tableName);
+    } // insertContextData
+
     private CachedRowSet select(String dataBase, String tableName, String selection)
             throws CygnusRuntimeError, CygnusPersistenceError {
         Statement stmt = null;

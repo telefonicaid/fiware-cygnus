@@ -45,6 +45,20 @@ public interface SQLBackend {
             throws CygnusRuntimeError, CygnusPersistenceError;
 
     /**
+     * Insert already processed context data into the given table within the given database.
+     * @param dataBase
+     * @param schema
+     * @param tableName
+     * @param fieldNames
+     * @param fieldValues
+     * @throws com.telefonica.iot.cygnus.errors.CygnusBadContextData
+     * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
+     * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
+     */
+    void insertContextData(String dataBase, String schema, String tableName, String fieldNames, String fieldValues)
+            throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError;
+
+    /**
      * Caps records from the given table within the given database according to the given maximum number.
      * @param dataBase
      * @param tableName
