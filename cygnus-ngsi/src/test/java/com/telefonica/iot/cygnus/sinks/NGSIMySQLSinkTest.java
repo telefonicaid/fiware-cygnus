@@ -22,7 +22,7 @@ import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-
+import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
