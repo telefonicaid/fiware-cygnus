@@ -24,6 +24,7 @@ import java.util.Arrays;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
+import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
 import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
@@ -344,7 +345,9 @@ public class NGSIMySQLSink extends NGSISink {
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
-            
+            LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" +
+                         SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation().keySet(), SQLQueryUtils.MYSQL_FIELDS_MARK) + ", values=" +
+                         SQLQueryUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes) + ")");
             // Persist the aggregation
             persistAggregation(aggregator);
             batch.setNextPersisted(true);
@@ -414,50 +417,42 @@ public class NGSIMySQLSink extends NGSISink {
     
     private void persistAggregation(NGSIGenericAggregator aggregator)
         throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
-        String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
-        String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist(), MYSQL_QUOTE_CHAR);
-        String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
+
         String dbName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
-        
-        LOGGER.debug("[" + this.getName() + "] Persisting data at NGSIMySQLSink. Database ("
-                + dbName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
-                + valuesForInsert + ")");
         
         // creating the database and the table has only sense if working in row mode, in column node
         // everything must be provisioned in advance
         if (aggregator instanceof NGSIGenericRowAggregator) {
+            String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
             mySQLPersistenceBackend.createDestination(dbName);
             mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
         } // if
 
-        if (valuesForInsert.equals("")) {
-            LOGGER.debug("[" + this.getName() + "] no values for insert");
-        } else {
-            if (lastDataMode.equals("upsert") || lastDataMode.equals("both")) {
-                if (rowAttrPersistence) {
-                    LOGGER.warn("[" + this.getName() + "] no upsert due to row mode");                    
-                } else {
-                    mySQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
-                                                              aggregator.getLastDataToPersist(),
-                                                              dbName,
-                                                              null,
-                                                              tableName,
-                                                              lastDataTableSuffix,
-                                                              lastDataUniqueKey,
-                                                              lastDataTimeStampKey,
-                                                              lastDataSQLTimestampFormat,
-                                                              attrNativeTypes);
-                }
-            }
-            if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
-                mySQLPersistenceBackend.insertContextData(dbName,
-                                                          null,
+        if (lastDataMode.equals("upsert") || lastDataMode.equals("both")) {
+            if (rowAttrPersistence) {
+                LOGGER.warn("[" + this.getName() + "] no upsert due to row mode");
+            } else {
+                mySQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
+                                                          aggregator.getLastDataToPersist(),
+                                                          dbName,
+                                                          null, // no schema in mysql
                                                           tableName,
-                                                          fieldsForInsert,
-                                                          valuesForInsert);
+                                                          lastDataTableSuffix,
+                                                          lastDataUniqueKey,
+                                                          lastDataTimeStampKey,
+                                                          lastDataSQLTimestampFormat,
+                                                          attrNativeTypes);
             }
         }
+        if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
+            mySQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                      dbName,
+                                                      null, // no schema in mysql
+                                                      tableName,
+                                                      attrNativeTypes);
+        }
+
     } // persistAggregation
     
     /**

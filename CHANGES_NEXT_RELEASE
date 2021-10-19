@@ -1,1 +1,3 @@
 - [cygnus-common] [SQLImpl] Allow multiple fileds in last_data_unique_key (#2016)
+- [ngsi-common][SQLBackendImpl][SQLSinks] Refactor persist aggregation sql sinks and utils (#2097)
+
