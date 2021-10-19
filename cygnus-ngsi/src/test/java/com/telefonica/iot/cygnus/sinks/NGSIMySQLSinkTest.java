@@ -22,7 +22,7 @@ import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-
+import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
@@ -1353,7 +1353,7 @@ public class NGSIMySQLSinkTest {
                     aggregator.aggregate(event);
                 }
                 String correctBatch = "('2016-04-20 07:19:55.801','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]','{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}','[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20 07:19:55.801','somePath','someId','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'-3.7167, 40.3833','[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
-                String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
+                String valuesForInsert = SQLQueryUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
                 if (valuesForInsert.equals(correctBatch)) {
                     System.out.println(getTestTraceHead("[NGSIMySQKSink.testNativeTypesColumnBatch]")
                             + "-  OK  - NativeTypesOK");
@@ -1398,7 +1398,7 @@ public class NGSIMySQLSinkTest {
                     aggregator.aggregate(event);
                 } // for
                 String correctBatch = "('1461136795801','2016-04-20 07:19:55.801','somePath','someId','someType','someNumber','number','2','[]'),('1461136795801','2016-04-20 07:19:55.801','somePath','someId','someType','somneBoolean','Boolean','true','[]'),('1461136795801','2016-04-20 07:19:55.801','somePath','someId','someType','someDate','DateTime','2016-09-21T01:23:00.00Z','[]'),('1461136795801','2016-04-20 07:19:55.801','somePath','someId','someType','someGeoJson','geo:json','{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}','[]'),('1461136795801','2016-04-20 07:19:55.801','somePath','someId','someType','someJson','json','{\"String\": \"string\"}','[]'),('1461136795801','2016-04-20 07:19:55.801','somePath','someId','someType','someString','string','foo','[]'),('1461136795801','2016-04-20 07:19:55.801','somePath','someId','someType','someString2','string','','[]'),('1461136795801','2016-04-20 07:19:55.801','somePath','someId','someType','someName1','someType1','-3.7167, 40.3833','[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]'),('1461136795801','2016-04-20 07:19:55.801','somePath','someId','someType','someName2','someType2','someValue2','[]')";
-                String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
+                String valuesForInsert = SQLQueryUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
                 if (valuesForInsert.equals(correctBatch)) {
                     System.out.println(getTestTraceHead("[NGSIMySQKSink.testNativeTypesRowBatch]")
                             + "-  OK  - NativeTypesOK");

@@ -382,7 +382,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
-
+            LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" +
+                         SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation().keySet(), SQLQueryUtils.POSTGRES_FIELDS_MARK) + ", values=" +
+                         SQLQueryUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes) + ")");
             // persist the fieldValues
             persistAggregation(aggregator);
             batch.setNextPersisted(true);
@@ -414,9 +416,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
     } // getAggregator
 
     private void persistAggregation(NGSIGenericAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
-        String fieldsForCreate = NGSIUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
-        String fieldsForInsert = NGSIUtils.getFieldsForInsert(aggregator.getAggregationToPersist());
-        String valuesForInsert = NGSIUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
+
         String schemaName = aggregator.getSchemeName(enableLowercase);
         String databaseName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
@@ -426,48 +426,36 @@ public class NGSIPostgreSQLSink extends NGSISink {
             schemaName = ESCAPED_DEFAULT_FIWARE_SERVICE;
         }
 
-        LOGGER.debug("[" + this.getName() + "] Persisting data at NGSIPostgreSQLSink. Database (" + databaseName + ")  Schema ("
-                + schemaName + "), Table (" + tableName + "), Fields (" + fieldsForInsert + "), Values ("
-                + valuesForInsert + ")");
-        
-        try {
-            if (aggregator instanceof NGSIGenericRowAggregator) {
-                postgreSQLPersistenceBackend.createDestination(schemaName);
-                postgreSQLPersistenceBackend.createTable(databaseName, schemaName, tableName, fieldsForCreate);
-            } // if
-            // creating the database and the table has only sense if working in row mode, in column node
-            // everything must be provisioned in advance
-
-            if (valuesForInsert.equals("")) {
-                LOGGER.debug("[" + this.getName() + "] no values for insert");
-            } else {
-                if (lastDataMode.equals("upsert") || lastDataMode.equals("both")) {
-                    if (rowAttrPersistence) {
-                        LOGGER.warn("[" + this.getName() + "] no upsert due to row mode");
-                    }  else {
-                        postgreSQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
-                                                                       aggregator.getLastDataToPersist(),
-                                                                       databaseName,
-                                                                       schemaName,
-                                                                       tableName,
-                                                                       lastDataTableSuffix,
-                                                                       lastDataUniqueKey,
-                                                                       lastDataTimeStampKey,
-                                                                       lastDataSQLTimestampFormat,
-                                                                       attrNativeTypes);
-                    }
-                }
-                if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
-                    postgreSQLPersistenceBackend.insertContextData(databaseName,
-                                                                   schemaName,
-                                                                   tableName,
-                                                                   fieldsForInsert,
-                                                                   valuesForInsert);
-                }
+        if (aggregator instanceof NGSIGenericRowAggregator) {
+            String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+            postgreSQLPersistenceBackend.createDestination(schemaName);
+            postgreSQLPersistenceBackend.createTable(databaseName, schemaName, tableName, fieldsForCreate);
+        } // if
+        // creating the database and the table has only sense if working in row mode, in column node
+        // everything must be provisioned in advance
+        if (lastDataMode.equals("upsert") || lastDataMode.equals("both")) {
+            if (rowAttrPersistence) {
+                LOGGER.warn("[" + this.getName() + "] no upsert due to row mode");
+            }  else {
+                postgreSQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
+                                                               aggregator.getLastDataToPersist(),
+                                                               databaseName,
+                                                               schemaName,
+                                                               tableName,
+                                                               lastDataTableSuffix,
+                                                               lastDataUniqueKey,
+                                                               lastDataTimeStampKey,
+                                                               lastDataSQLTimestampFormat,
+                                                               attrNativeTypes);
             }
-        } catch (Exception e) {
-            throw new CygnusPersistenceError("-, " + e.getMessage());
-        } // try catch
+        }
+        if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
+            postgreSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                           databaseName,
+                                                           schemaName,
+                                                           tableName,
+                                                           attrNativeTypes);
+        }
     } // persistAggregation
 
     /**
