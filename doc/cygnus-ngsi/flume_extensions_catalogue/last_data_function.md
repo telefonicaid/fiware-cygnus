@@ -10,7 +10,7 @@ In order to perform this operation Cygnus needs five keys.
 
 - `last_data_mode` This is the mode of operation: `upsert`, `insert` or `both`. Default is `insert` mode
 - `last_data_table_suffix` This is the suffix that will be added to the table name to perform the upsert operation.
-- `last_data_unique_key` This is the reference to indicate to the database engine which is the reference key to perform the upsert.
+- `last_data_unique_key` This is the reference to indicate to the database engine which is the reference key (or list of keys separed by a comma) to perform the upsert.
 - `last_data_timestamp_key` This is the timestamp reference to know which record is the newest.
 - `last_data_sql_timestamp_format` This is the timestamp format to indicate to the database how to cast the text timestamp to know if the stored record is older than the one trying to insert.
 

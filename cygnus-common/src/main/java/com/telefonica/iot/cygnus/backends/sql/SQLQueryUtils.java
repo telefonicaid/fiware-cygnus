@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
+import java.util.Arrays;
 
 /**
  * The type Ngsisql utils.
@@ -133,13 +134,13 @@ public class SQLQueryUtils {
                     if (j == 0) {
                         values.append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
                         fields.append(keys.get(j));
-                        if (!keys.get(j).equals(uniqueKey)) {
+                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
                             updateSet.append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
                         }
                     } else {
                         values.append(",").append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
                         fields.append(",").append(keys.get(j));
-                        if (!keys.get(j).equals(uniqueKey)) {
+                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
                             updateSet.append(", ").append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
                         }
                     }
@@ -150,8 +151,13 @@ public class SQLQueryUtils {
             query.append("ON CONFLICT ").append("(").append(uniqueKey).append(") ").
                     append("DO ").
                     append("UPDATE SET ").append(updateSet).append(" ").
-                    append("WHERE ").append(postgisDestination).append(".").append(uniqueKey).append("=").append(postgisTempReference).append(".").append(uniqueKey).append(" ").
-                    append("AND ").append("to_timestamp(").append(postgisDestination).append(".").append(timestampKey).append("::text, '").append(timestampFormat).append("') ").
+                    append("WHERE ");
+            // for key in uniqueKey
+            String[] uniqueKeys = uniqueKey.split("\\s*,\\s*");
+            for (String uniKey : uniqueKeys) {
+                query.append(postgisDestination).append(".").append(uniKey).append("=").append(postgisTempReference).append(".").append(uniKey).append(" ").append("AND ");
+            }
+            query.append("to_timestamp(").append(postgisDestination).append(".").append(timestampKey).append("::text, '").append(timestampFormat).append("') ").
                     append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append("::text, '").append(timestampFormat).append("')");
             upsertList.add(query);
         }
@@ -199,7 +205,7 @@ public class SQLQueryUtils {
                     if (j == 0) {
                         values.append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
                         fields.append(MYSQL_FIELDS_MARK).append(keys.get(j)).append(MYSQL_FIELDS_MARK);
-                        if (!keys.get(j).equals(uniqueKey)) {
+                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
                             if (keys.get(j).equalsIgnoreCase(timestampKey)) {
                                 dateKeyUpdate.append(mySQLUpdateRecordQuery(keys.get(j), uniqueKey, timestampKey, timestampFormat));
                             } else {
@@ -209,7 +215,7 @@ public class SQLQueryUtils {
                     } else {
                         values.append(",").append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
                         fields.append(",").append(MYSQL_FIELDS_MARK).append(keys.get(j)).append(MYSQL_FIELDS_MARK);
-                        if (!keys.get(j).equals(uniqueKey)) {
+                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
                             if (keys.get(j).equalsIgnoreCase(timestampKey)) {
                                 dateKeyUpdate.append(mySQLUpdateRecordQuery(keys.get(j), uniqueKey, timestampKey, timestampFormat));
                             } else {
@@ -241,6 +247,7 @@ public class SQLQueryUtils {
      * @param timestampFormat the timestamp format
      * @return the string buffer like the following one
      * recvTime=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTime), recvTime)
+     * recvTime=IF((entityId=VALUES(entityId)) AND (entityType=VALUES(entityType)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTime), recvTime)
      */
 
     protected static StringBuffer mySQLUpdateRecordQuery(String key,
@@ -251,10 +258,13 @@ public class SQLQueryUtils {
         StringBuffer updateSet = new StringBuffer();
         updateSet.append(key).append("=").
                 append("IF").
-                append("(").
-                append("(").append(uniqueKey).append("=").append("VALUES(").append(uniqueKey).append(")").
-                append(")").append(" AND ").
-                append("(").append("STR_TO_DATE(").append(timestampKey).append(", '").append(timestampFormat).append("')").
+                append("(");
+        String[] uniqueKeys = uniqueKey.split("\\s*,\\s*");
+        for (String uniKey : uniqueKeys) {
+            updateSet.append("(").append(uniKey).append("=").append("VALUES(").append(uniKey).append(")");
+            updateSet.append(")").append(" AND ");
+        }
+        updateSet.append("(").append("STR_TO_DATE(").append(timestampKey).append(", '").append(timestampFormat).append("')").
                 append(" < ").
                 append("(").append("STR_TO_DATE(VALUES(").append(timestampKey).append("), '").append(timestampFormat).append("')").append(")").
                 append(")").
