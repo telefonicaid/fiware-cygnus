@@ -651,18 +651,24 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             accumulator.initialize(new Date().getTime());
             txn.commit();
         } catch (ChannelException ex) {
-            LOGGER.info("Rollback transaction by ChannelException  (" + ex.getMessage() + ")  Sink: " + this.getClass().getName());                
+            LOGGER.info("Rollback transaction by ChannelException  (" + ex.getMessage() + ")  Sink: " +
+                        this.getClass().getName());
             num_rollback_by_channel_exception++;
             if (num_rollback_by_channel_exception >= NGSIConstants.ROLLBACK_CHANNEL_EXCEPTION_THRESHOLD) {
-                LOGGER.warn("Rollback (10 times) transaction by ChannelException  (" + ex.getMessage() + ")");
+                LOGGER.warn("Rollback (" + num_rollback_by_channel_exception +
+                            " times) transaction by ChannelException  (" + ex.getMessage() + ")  Sink: " +
+                        this.getClass().getName());
                 num_rollback_by_channel_exception = 0;
             }
             txn.rollback();
         } catch (Exception ex) {
-            LOGGER.info("Rollback transaction by Exception  (" + ex.getMessage() + ")  Sink: " + this.getClass().getName());            
+            LOGGER.info("Rollback transaction by Exception  (" + ex.getMessage() + ")  Sink: " +
+                        this.getClass().getName());            
             num_rollback_by_exception++;
             if (num_rollback_by_exception >= NGSIConstants.ROLLBACK_EXCEPTION_THRESHOLD) {
-                LOGGER.warn("Rollback (10 times) transaction by Exception  (" + ex.getMessage() + ")");
+                LOGGER.warn("Rollback (" + num_rollback_by_exception +
+                            " times) transaction by Exception  (" + ex.getMessage() + ")  Sink: " +
+                        this.getClass().getName());
                 num_rollback_by_exception = 0;
             }
             txn.rollback();
