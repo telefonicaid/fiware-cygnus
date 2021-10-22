@@ -1,0 +1,22 @@
+{
+    "enabler": "CanisMajor - FIWARE DLT Adaptor",
+    "chapter": "core",
+    "academy": "core/cygnus",
+    "readthedocs": "fiware-cygnus",
+    "helpdesk": "",
+    "coveralls": "",
+    "github": ["telefonicaid/fiware-cygnus"],
+    "dockerregistry": ["hub.docker.com"],
+    "docker": ["telefonicaiot/fiware-cygnus", "telefonicaiot/fiware-cygnus-ld"],
+    "email": "",
+    "status": "full",
+    "compose": "",
+    "exclude": [""],
+    "stackexchange": ["fiware-cygnus"],
+    "unit-test": "",
+    "smoke-test": "",
+    "dockerfile": [
+      "https://github.com/telefonicaid/fiware-cygnus/blob/master/docker/cygnus-ngsi/Dockerfile"
+      "https://github.com/telefonicaid/fiware-cygnus/blob/master/docker/cygnus-ngsi-ld/Dockerfile",
+    ]
+}
