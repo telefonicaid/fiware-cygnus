@@ -414,17 +414,17 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                         try {
                             capRecords(batchToPersist, persistencePolicyMaxRecords);
                         } catch (CygnusCappingError e) {
-                            LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                            LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()) + " Sink: " + this.getClass().getName() + " Destination: " + destination );
                         } // try
                     } // if
                     numPersistedEvents += batchToPersist.getNumEvents();
                     LOGGER.info("Finishing internal transaction (" + transactionIds + ")" + " Sink: " + this.getClass().getName() + " Destination: " + destination);
                 } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
                     updateServiceMetrics(batchToPersist, true); // do not try again, is just one event
-                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()) + " Sink: " + this.getClass().getName() + " Destination: " + destination);
                 } catch (Exception e) {
                     updateServiceMetrics(batchToPersist, true);
-                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()));
+                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()) + " Sink: " + this.getClass().getName() + " Destination: " + destination);
                     rollbackBatch.addEvent(destination, event); // there is just one event
                 } finally {
                     batch.setNextPersisted(true);
@@ -822,7 +822,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     accumulateByEntityId(event);
                     break;
                 default:
-                    LOGGER.error("Unknown data model. Details=" + dataModel.toString());
+                    LOGGER.error("Unknown data model. Details=" + dataModel.toString() + " Sink: " + this.getClass().getName());
             } // switch
         } // accumulate
 
