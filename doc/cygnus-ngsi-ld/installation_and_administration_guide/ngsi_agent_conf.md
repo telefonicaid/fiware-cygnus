@@ -3,7 +3,7 @@ cygnus-ngsi-ld, as any other Cygnus agent, follows the multi-instance configurat
 
 The file `agent_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/agent_ngsi.conf.template`.
 
-```Java
+```java
 #=============================================
 # To be put in APACHE_FLUME_HOME/conf/cygnus.conf
 #
@@ -96,7 +96,7 @@ cygnus-ngsi-ld.channels.postgresql-channel.type = memory
 cygnus-ngsi-ld.channels.postgresql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnus-ngsi-ld.channels.postgresql-channel.transactionCapacity = 100
-
+```
 
 
 [Top](#top)
