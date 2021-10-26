@@ -176,7 +176,7 @@ cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPos
 # the database name of PostgreSQL
 #cygnus-ngsi.sinks.postgresql-sink.attr_persistence = column
 # select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type
-#cygnus-ngsi.sinks.postgresql-sink.data_model = by-service-path
+#cygnus-ngsi.sinks.postgresql-sink.data_model = dm-by-service-path
 # number of notifications to be included within a processing batch
 #cygnus-ngsi.sinks.postgresql-sink.batch_size = 100
 # timeout for batch accumulation
