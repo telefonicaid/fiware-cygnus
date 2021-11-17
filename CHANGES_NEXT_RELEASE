@@ -2,4 +2,4 @@
 - [cygnus-common] Upgrade gson dep from 2.2.4 to 2.6.2 (#1922)
 - [cygnus-common][SQLImpl] Allow multiple fields in last_data_unique_key (#2016)
 - [ngsi-common][SQLBackendImpl][SQLSinks] Refactor persist aggregation sql sinks and utils (#2092)
-- [cygnus-common][cygnus-ngsi][cygnus-ngsi-ld][cygnus-twitter] Upgrade Dockerfile base image from centos7.9.2009 to centos8.4.2105 (#1981)
+- [cygnus-common][cygnus-ngsi][cygnus-ngsi-ld][cygnus-twitter] Upgrade Dockerfile base image from centos7.9.2009 to centos8.4.2105 (#1996)
