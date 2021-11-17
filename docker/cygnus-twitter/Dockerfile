@@ -16,7 +16,7 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
-FROM centos:centos7.9.2009
+FROM centos:centos8.4.2105
 
 MAINTAINER Javi Palanca <jpalanca@dsic.upv.es>
 
