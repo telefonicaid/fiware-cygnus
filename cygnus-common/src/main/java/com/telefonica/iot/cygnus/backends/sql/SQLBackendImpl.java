@@ -624,12 +624,12 @@ public class SQLBackendImpl implements SQLBackend{
             cygnusSQLRollback(connection);
             if (upsertQuerys.isEmpty() && currentUpsertQuery.isEmpty()) {
                 throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
-                                                 " Data insertion error. database: " + database +
+                                                 " Data insertion error. database: " + dataBase +
                                                  " connection: " + connection,
                                                  " SQLTimeoutException", e.getMessage());
             } else {
                 throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
-                                                 " Data insertion error. database: " + database +
+                                                 " Data insertion error. database: " + dataBase +
                                                  " upsertQuerys: " + upsertQuerys +
                                                  " currentUpsertQuery: " + currentUpsertQuery,
                                                  " SQLTimeoutException", e.getMessage());
@@ -639,7 +639,7 @@ public class SQLBackendImpl implements SQLBackend{
             if (upsertQuerys.isEmpty() && currentUpsertQuery.isEmpty()) {
                 persistError(dataBase, schema, null, e);
                 throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
-                                               " Data insertion error. database: " + database +
+                                               " Data insertion error. database: " + dataBase +
                                                " connection: `" + connection,
                                                " SQLException", e.getMessage());
 
@@ -648,7 +648,7 @@ public class SQLBackendImpl implements SQLBackend{
                     " currentUpsertQuery: " + currentUpsertQuery;
                 persistError(dataBase, schema, allQueries, e);
                 throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
-                                               " Data insertion error. database: " + database + allQueries,
+                                               " Data insertion error. database: " + dataBase + allQueries,
                                                " SQLException", e.getMessage());
             }
         } finally {
