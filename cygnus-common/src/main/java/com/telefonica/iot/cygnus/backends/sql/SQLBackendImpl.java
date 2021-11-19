@@ -640,7 +640,7 @@ public class SQLBackendImpl implements SQLBackend{
                 persistError(dataBase, schema, null, e);
                 throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
                                                " Data insertion error. database: " + dataBase +
-                                               " connection: `" + connection,
+                                               " connection: " + connection,
                                                " SQLException", e.getMessage());
 
             } else {
@@ -837,7 +837,7 @@ public class SQLBackendImpl implements SQLBackend{
         } catch (CygnusBadContextData cygnusBadContextData) {
             LOGGER.warn(sqlInstance.toString().toUpperCase() + " failed to persist error on database/scheme " + destination + DEFAULT_ERROR_TABLE_SUFFIX + " " + cygnusBadContextData);
         } catch (Exception e) {
-            LOGGER.warn(sqlInstance.toString().toUpperCase() + " failed to persist error on database/scheme " + destination + DEFAULT_ERROR_TABLE_SUFFIX + e);
+            LOGGER.warn(sqlInstance.toString().toUpperCase() + " failed to persist error on database/scheme " + destination + DEFAULT_ERROR_TABLE_SUFFIX + " " + e);
         }
     }
 
