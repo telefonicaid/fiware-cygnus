@@ -414,17 +414,17 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                         try {
                             capRecords(batchToPersist, persistencePolicyMaxRecords);
                         } catch (CygnusCappingError e) {
-                            LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()) + " Sink: " + this.getClass().getName() + " Destination: " + destination );
+                            LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()) + " Sink: " + this.getName() + " Destination: " + destination );
                         } // try
                     } // if
                     numPersistedEvents += batchToPersist.getNumEvents();
-                    LOGGER.info("Finishing internal transaction (" + transactionIds + ")" + " Sink: " + this.getClass().getName() + " Destination: " + destination);
+                    LOGGER.info("Finishing internal transaction (" + transactionIds + ")" + " Sink: " + this.getName() + " Destination: " + destination);
                 } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
                     updateServiceMetrics(batchToPersist, true); // do not try again, is just one event
-                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()) + " Sink: " + this.getClass().getName() + " Destination: " + destination);
+                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()) + " Sink: " + this.getName() + " Destination: " + destination);
                 } catch (Exception e) {
                     updateServiceMetrics(batchToPersist, true);
-                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()) + " Sink: " + this.getClass().getName() + " Destination: " + destination);
+                    LOGGER.error(e.getMessage() + "Stack trace: " + Arrays.toString(e.getStackTrace()) + " Sink: " + this.getName() + " Destination: " + destination);
                     rollbackBatch.addEvent(destination, event); // there is just one event
                 } finally {
                     batch.setNextPersisted(true);
@@ -494,17 +494,17 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         if (rollbackedAccumulation.getTTL() == -1) {
             rollbackedAccumulation.setLastRetry(new Date().getTime());
             LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + "), "
-                    + "infinite batch TTL" + " Sink: " + this.getClass().getName());
+                    + "infinite batch TTL" + " Sink: " + this.getName());
         } else if (rollbackedAccumulation.getTTL() > 1) {
             rollbackedAccumulation.setLastRetry(new Date().getTime());
             rollbackedAccumulation.setTTL(rollbackedAccumulation.getTTL() - 1);
             LOGGER.info("Rollbacking again (" + rollbackedAccumulation.getAccTransactionIds() + "), "
-                        + "this was retry #" + (batchTTL - rollbackedAccumulation.getTTL()) + " Sink: " + this.getClass().getName());
+                        + "this was retry #" + (batchTTL - rollbackedAccumulation.getTTL()) + " Sink: " + this.getName());
         } else {
             rollbackedAccumulations.remove(rollbackedAccumulationsIndex);
             if (!rollbackedAccumulation.getAccTransactionIds().isEmpty()) {
                 LOGGER.info("Finishing internal transaction ("
-                        + rollbackedAccumulation.getAccTransactionIds() + "), this was retry #" + batchTTL + " Sink: " + this.getClass().getName());
+                        + rollbackedAccumulation.getAccTransactionIds() + "), this was retry #" + batchTTL + " Sink: " + this.getName());
             } // if
         } // if else
     } // doRollbackAgain
@@ -607,14 +607,14 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                             try {
                                 capRecords(batchToPersist, persistencePolicyMaxRecords);
                             } catch (CygnusCappingError e) {
-                                LOGGER.error(e.getMessage() + " Sink: " + this.getClass().getName() + " Destination: " + destination + " Stack trace: " + Arrays.toString(e.getStackTrace()));
+                                LOGGER.error(e.getMessage() + " Sink: " + this.getName() + " Destination: " + destination + " Stack trace: " + Arrays.toString(e.getStackTrace()));
                             } // try
                         } // if
                         numPersistedEvents += batchToPersist.getNumEvents();
-                        LOGGER.info("Finishing internal transaction (" + transactionIds + ")" + " Sink: " + this.getClass().getName() + " Destination: " + destination );
+                        LOGGER.info("Finishing internal transaction (" + transactionIds + ")" + " Sink: " + this.getName() + " Destination: " + destination );
                     } catch (CygnusBadConfiguration | CygnusBadContextData | CygnusRuntimeError e) {
                         updateServiceMetrics(batchToPersist, true);
-                        LOGGER.error(e.getMessage() + " Sink: " + this.getClass().getName() + " Destination: " + destination + " Stack trace: " + Arrays.toString(e.getStackTrace()));
+                        LOGGER.error(e.getMessage() + " Sink: " + this.getName() + " Destination: " + destination + " Stack trace: " + Arrays.toString(e.getStackTrace()));
                         if (batchToPersist.getNumEvents() > 1) {
                             // Maybe there are other events int batch that could finally get inserted
                             for (NGSIEvent event : batchToPersist.getNextEvents()) {
@@ -623,7 +623,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                         }
                     } catch (Exception e) {
                         updateServiceMetrics(batchToPersist, true);
-                        LOGGER.error(e.getMessage() + " Sink: " + this.getClass().getName() + " Destination: " + destination + " Stack trace: " + Arrays.toString(e.getStackTrace()));
+                        LOGGER.error(e.getMessage() + " Sink: " + this.getName() + " Destination: " + destination + " Stack trace: " + Arrays.toString(e.getStackTrace()));
                         for (NGSIEvent event : batchToPersist.getNextEvents()) {
                             rollbackBatch.addEvent(destination, event);
                         }
@@ -652,23 +652,23 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             txn.commit();
         } catch (ChannelException ex) {
             LOGGER.info("Rollback transaction by ChannelException  (" + ex.getMessage() + ")  Sink: " +
-                        this.getClass().getName());
+                        this.getName());
             num_rollback_by_channel_exception++;
             if (num_rollback_by_channel_exception >= NGSIConstants.ROLLBACK_CHANNEL_EXCEPTION_THRESHOLD) {
                 LOGGER.warn("Rollback (" + num_rollback_by_channel_exception +
                             " times) transaction by ChannelException  (" + ex.getMessage() + ")  Sink: " +
-                        this.getClass().getName());
+                        this.getName());
                 num_rollback_by_channel_exception = 0;
             }
             txn.rollback();
         } catch (Exception ex) {
             LOGGER.info("Rollback transaction by Exception  (" + ex.getMessage() + ")  Sink: " +
-                        this.getClass().getName());            
+                        this.getName());
             num_rollback_by_exception++;
             if (num_rollback_by_exception >= NGSIConstants.ROLLBACK_EXCEPTION_THRESHOLD) {
                 LOGGER.warn("Rollback (" + num_rollback_by_exception +
                             " times) transaction by Exception  (" + ex.getMessage() + ")  Sink: " +
-                        this.getClass().getName());
+                        this.getName());
                 num_rollback_by_exception = 0;
             }
             txn.rollback();
@@ -699,16 +699,16 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             accumulator.setLastRetry(new Date().getTime());
             rollbackedAccumulations.add(accumulator);
             LOGGER.info("Rollbacking (" + accumulator.getAccTransactionIds() + "), "
-                    + "infinite batch TTL" + " Sink: " + this.getClass().getName());
+                    + "infinite batch TTL" + " Sink: " + this.getName());
         } else if (accumulator.getTTL() > 0) {
             accumulator.setLastRetry(new Date().getTime());
             rollbackedAccumulations.add(accumulator);
             LOGGER.info("Rollbacking (" + accumulator.getAccTransactionIds() + "), "
-                    + batchTTL + " retries will be done" + " Sink: " + this.getClass().getName());
+                    + batchTTL + " retries will be done" + " Sink: " + this.getName());
         } else {
             if (!accumulator.getAccTransactionIds().isEmpty()) {
                 LOGGER.info("Finishing internal transaction ("
-                        + accumulator.getAccTransactionIds() + "), 0 retries will be done" + " Sink: " + this.getClass().getName());
+                        + accumulator.getAccTransactionIds() + "), 0 retries will be done" + " Sink: " + this.getName());
             } // if
         } // if else
     } // doRollback
@@ -822,7 +822,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     accumulateByEntityId(event);
                     break;
                 default:
-                    LOGGER.error("Unknown data model. Details=" + dataModel.toString() + " Sink: " + this.getClass().getName());
+                    LOGGER.error("Unknown data model. Details=" + dataModel.toString() + " Sink: " + this.getName());
             } // switch
         } // accumulate
 
