@@ -278,14 +278,14 @@ RUN ls -lsrt
 RUN \
     # Add Cygnus user
     adduser ${CYGNUS_USER} && \
-    yum -y install nc java-${JAVA_VERSION}-openjdk-devel git && \
+    yum -y install nc java-${JAVA_VERSION}-openjdk-devel git python2 && \
     export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk && \
     export MAVEN_OPTS="-Xmx2048M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:+CMSClassUnloadingEnabled" && \
     export MAVEN_ARGS="-B -T8" && \
     # For debug Maven
     # export MAVEN_ARGS="${MAVEN_ARGS} -X -e -Dmaven.compiler.verbose=true" && \
     echo "INFO: Getting apache preferred site and obtain URLs for Maven and Flume..." && \
-    APACHE_DOMAIN="$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | python -c 'import json,sys;obj=json.load(sys.stdin);print obj["preferred"]')" \
+    APACHE_DOMAIN="$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | python2 -c 'import json,sys;obj=json.load(sys.stdin);print obj["preferred"]')" \
       || APACHE_DOMAIN="http://archive.apache.org/dist/" && \
     MVN_URL="${APACHE_DOMAIN}maven/maven-3/${MVN_VER}/binaries/apache-maven-${MVN_VER}-bin.tar.gz" && \
     FLUME_URL="${APACHE_DOMAIN}flume/${FLUME_VER}/apache-flume-${FLUME_VER}-bin.tar.gz" && \
@@ -327,9 +327,10 @@ RUN \
     rm -rf /root/.m2 && rm -rf ${MVN_HOME} && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz && \
     echo "INFO: Java runtime not needs JAVA_HOME... Unsetting..." && \
     unset JAVA_HOME && \
-    yum erase -y git java-${JAVA_VERSION}-openjdk-devel && \
+    yum erase -y git java-${JAVA_VERSION}-openjdk-devel python2 && \
     rpm -qa redhat-logos gtk2 pulseaudio-libs libvorbis jpackage* groff alsa* atk cairo libX* | xargs -r rpm -e --nodeps && \
-    yum clean all && rpm --rebuilddb && rm -rf /var/lib/yum/yumdb && rm -rf /var/lib/yum/history && \
+    # FIXME #2113: disabled step 'rpm --rebuilddb', doesn't work in CentOS8 ?
+    yum clean all && rm -rf /var/lib/yum/yumdb && rm -rf /var/lib/yum/history && \
     find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en_US' ! -name 'locale.alias' | xargs -r rm -r && rm -f /var/log/*log && \
     bash -c 'localedef --list-archive | grep -v -e "en_US" | xargs localedef --delete-from-archive' && \
     /bin/cp -f /usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.tmpl && \
