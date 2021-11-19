@@ -822,7 +822,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     accumulateByEntityId(event);
                     break;
                 default:
-                    LOGGER.error("Unknown data model. Details=" + dataModel.toString() + " Sink: " + this.getName());
+                    LOGGER.error("Unknown data model. Details=" + dataModel.toString() + " Sink: " + this.getClass().getName());
             } // switch
         } // accumulate
 
