@@ -330,8 +330,7 @@ RUN \
     # FIXME : Fix java errors and warnings
     #echo "INFO: Java runtime not needs JAVA_HOME... Unsetting..." && \
     #unset JAVA_HOME && \
-    #yum erase -y git java-${JAVA_VERSION}-openjdk-devel python2 && \
-    yum erase -y git python2 && \
+    yum erase -y git java-${JAVA_VERSION}-openjdk-devel python2 && \
     rpm -qa redhat-logos gtk2 pulseaudio-libs libvorbis jpackage* groff alsa* atk cairo libX* | xargs -r rpm -e --nodeps && \
     # FIXME #2113: disabled step 'rpm --rebuilddb', doesn't work in CentOS8 ?
     #yum clean all && rpm --rebuilddb && rm -rf /var/lib/yum/yumdb && rm -rf /var/lib/yum/history && \
