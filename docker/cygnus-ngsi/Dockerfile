@@ -327,7 +327,7 @@ RUN \
     cd ${CYGNUS_HOME}/cygnus-ngsi && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
     rm -rf /root/.m2 && rm -rf ${MVN_HOME} && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz && \
-        # FIXME #2113: Fix java errors and warnings. Original script was breaking in CentOS 8
+    # FIXME #2113: Fix java errors and warnings. Original script was breaking in CentOS 8
     #echo "INFO: Java runtime not needs JAVA_HOME... Unsetting..." && \
     #unset JAVA_HOME && \
     #yum erase -y git java-${JAVA_VERSION}-openjdk-devel && \
