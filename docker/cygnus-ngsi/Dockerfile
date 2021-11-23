@@ -327,9 +327,11 @@ RUN \
     cd ${CYGNUS_HOME}/cygnus-ngsi && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
     rm -rf /root/.m2 && rm -rf ${MVN_HOME} && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz && \
-    echo "INFO: Java runtime not needs JAVA_HOME... Unsetting..." && \
-    unset JAVA_HOME && \
-    yum erase -y git java-${JAVA_VERSION}-openjdk-devel python2 && \
+    # FIXME #2113: Fix java errors and warnings. Original script was breaking in CentOS 8
+    #echo "INFO: Java runtime not needs JAVA_HOME... Unsetting..." && \
+    #unset JAVA_HOME && \
+    #yum erase -y git java-${JAVA_VERSION}-openjdk-devel python2 && \
+    yum erase -y git python2 && \
     rpm -qa redhat-logos gtk2 pulseaudio-libs libvorbis jpackage* groff alsa* atk cairo libX* | xargs -r rpm -e --nodeps && \
     # FIXME #2113: disabled step 'rpm --rebuilddb', doesn't work in CentOS8 ?
     #yum clean all && rpm --rebuilddb && rm -rf /var/lib/yum/yumdb && rm -rf /var/lib/yum/history && \
