@@ -176,7 +176,7 @@ rm -rf $RPM_BUILD_ROOT
 - [cygnus-common][MySQLBackend] Upgrade mysql-connector-java from 8.0.22 to 8.0.27
 - [cygnus-common] Upgrade gson dep from 2.2.4 to 2.6.2 (#1922)
 - [cygnus-common][SQLImpl] Allow multiple fields in last_data_unique_key (#2016)
-- [ngsi-common][SQLBackendImpl][SQLSinks] Refactor persist aggregation sql sinks and utils (#2092)
+- [cygnus-common][SQLBackendImpl][SQLSinks] Refactor persist aggregation sql sinks and utils (#2092)
 - [cygnus-common] Upgrade Dockerfile base image from centos7.9.2009 to centos8.4.2105 (#1996)
 
 * Tue Oct 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.14.0
