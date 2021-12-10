@@ -99,6 +99,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Dec 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.15.0
+- [cygnus-ngsi] Upgrade Dockerfile base image from centos7.9.2009 to centos8.4.2105 (#1996)
+
 * Tue Oct 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.14.0
 - [cygnus-ngsi][MySQL, PostgreSQL, Postgis sinks] Replace `enable_last_data` to `last data mode` conf option: (upsert,insert,both), default is insert
 
