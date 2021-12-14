@@ -36,6 +36,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.apache.logging.log4j.core.LoggerContext;
 
 /**
  *
@@ -69,7 +70,9 @@ public final class LogHandlers {
         if ((transientVar == null) || (transientVar.equals("true"))) {
             String loggersJson = "[";
             boolean firstTime = true;
-            Enumeration<Logger> loggers = LogManager.getLoggerRepository().getCurrentLoggers();
+            //Enumeration<Logger> loggers = LogManager.getLoggerRepository().getCurrentLoggers();
+            LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
+            Enumeration<Logger> loggers = logContext.getConfiguration().getLoggers();
 
             if (allLoggers) {
                 while (loggers.hasMoreElements()) {
@@ -282,7 +285,27 @@ public final class LogHandlers {
             LOGGER.debug("Missing input JSON");
         } // if else
     } // postLoggers
-    
+
+    public static void setLevel(Logger logger, Level level) {
+        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        final Configuration config = ctx.getConfiguration();
+
+        LoggerConfig loggerConfig = config.getLoggerConfig(logger.getName());
+        LoggerConfig specificConfig = loggerConfig;
+
+        // We need a specific configuration for this logger,
+        // otherwise we would change the level of all other loggers
+        // having the original configuration as parent as well
+
+        if (!loggerConfig.getName().equals(logger.getName())) {
+            specificConfig = new LoggerConfig(logger.getName(), level, true);
+            specificConfig.setParent(loggerConfig);
+            config.addLogger(logger.getName(), specificConfig);
+        }
+        specificConfig.setLevel(level);
+        ctx.updateLoggers();
+    }
+
     public static void putLoggers(HttpServletRequest request, HttpServletResponse response, String configurationPath)
         throws IOException {
         response.setContentType("application/json; charset=utf-8");
@@ -314,7 +337,9 @@ public final class LogHandlers {
                     File file = new File(pathToFile);
 
                     if ((isTransient == null) || (isTransient.equals("true"))) {
-                        Enumeration<Logger> currentLoggers = LogManager.getLoggerRepository().getCurrentLoggers();
+                        //Enumeration<Logger> currentLoggers = LogManager.getLoggerRepository().getCurrentLoggers();
+                        LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
+                        Enumeration<Logger> loggers = logContext.getConfiguration().getLoggers();
                         boolean loggerFound = false;
 
                         while (currentLoggers.hasMoreElements()) {
@@ -328,7 +353,8 @@ public final class LogHandlers {
 
                         if (loggerFound) {
                             Logger loggerUpdated = LogManager.getLoggerRepository().getLogger(name);
-                            loggerUpdated.setLevel(Level.toLevel(level));
+                            //loggerUpdated.setLevel(Level.toLevel(level));
+                            setLevel(loggerUpdated, level);
                             response.setStatus(HttpServletResponse.SC_OK);
                             response.getWriter().println("{\"success\":\"true\","
                                 + "\"result\":\"Logger '" + name + "' updated succesfully\"}");
@@ -417,12 +443,15 @@ public final class LogHandlers {
         File file = new File(pathToFile);
 
         if ((isTransient == null) || (isTransient.equals("true"))) {
-            Enumeration<Logger> loggers = LogManager.getLoggerRepository().getCurrentLoggers();
+            //Enumeration<Logger> loggers = LogManager.getLoggerRepository().getCurrentLoggers();
+            LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
+            Enumeration<Logger> loggers = logContext.getConfiguration().getLoggers();
 
             if (allLoggers) {
                 
                 while (loggers.hasMoreElements()) {
-                    loggers.nextElement().setLevel(Level.OFF);
+                    //loggers.nextElement().setLevel(Level.OFF);
+                    setLevel(loggers.nextElement(), Level.OFF);
                 } // while
                 
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -438,7 +467,8 @@ public final class LogHandlers {
                 } // while
 
                 if (loggerNames.contains(LogManager.getLogger(loggerName))) {
-                    LogManager.getLogger(loggerName).setLevel(Level.OFF);
+                    //LogManager.getLogger(loggerName).setLevel(Level.OFF);
+                    setLevel(LogManager.getLogger(loggerName),Level.OFF);
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.getWriter().println("{\"success\":\"true\",\"result\":\"Logger '" + loggerName
                             + "' removed succesfully\"}");
@@ -1043,7 +1073,8 @@ public final class LogHandlers {
         
         try {
             CommonConstants.LoggingLevels.valueOf(logLevel.toUpperCase());
-            LogManager.getRootLogger().setLevel(Level.toLevel(logLevel.toUpperCase()));
+            //LogManager.getRootLogger().setLevel(Level.toLevel(logLevel.toUpperCase()));
+            setLevel(LogManager.getRootLogger(), Level.toLevel(logLevel.toUpperCase()));
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println("{\"success\":\"log4j logging level updated to "
                     + logLevel.toUpperCase() + "\" }");
