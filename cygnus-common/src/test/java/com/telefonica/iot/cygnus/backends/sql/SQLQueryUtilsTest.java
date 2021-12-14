@@ -22,10 +22,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import org.junit.Before;
 import org.junit.Test;
+import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
 
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -137,8 +137,8 @@ public class SQLQueryUtilsTest {
         String uniqueKey = "entityId";
         String timestampKey = "recvTimeS";
         String timestampFormat = "YYYY-MM-DD HH24:MI:SS.MS";
-        String sqlInstance = "postgresql";
-        String destination = "example";
+        SQLInstance sqlInstance = SQLInstance.POSTGRESQL;
+        String schema = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
@@ -150,7 +150,8 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination,
+                null,
+                schema,
                 attrNativeTypes);
         sqlupsertQuery = upsertList.get(0);
         String correctQuery = "INSERT INTO example.exampleTable_last_data " +
@@ -179,8 +180,8 @@ public class SQLQueryUtilsTest {
         String uniqueKey = "entityId";
         String timestampKey = "recvTimeS";
         String timestampFormat = "YYYY-MM-DD HH24:MI:SS.MS";
-        String sqlInstance = "postgresql";
-        String destination = "example";
+        SQLInstance sqlInstance = SQLInstance.POSTGRESQL;
+        String schema = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
@@ -192,7 +193,8 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination,
+                null,
+                schema,
                 attrNativeTypes);
         sqlupsertQuery = upsertList.get(0);
         String correctQuery = "INSERT INTO example.exampleTable_last_data " +
@@ -220,8 +222,8 @@ public class SQLQueryUtilsTest {
         String uniqueKey = "entityId";
         String timestampKey = "recvTimeS";
         String timestampFormat = "YYYY-MM-DD HH24:MI:SS.MS";
-        String sqlInstance = "postgresql";
-        String destination = "example";
+        SQLInstance sqlInstance = SQLInstance.POSTGRESQL;
+        String schema = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
@@ -233,7 +235,8 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination,
+                null,
+                schema,
                 attrNativeTypes);
         try {
             assertEquals(new ArrayList<>(), upsertList);
@@ -252,8 +255,8 @@ public class SQLQueryUtilsTest {
         String uniqueKey = "entityId";
         String timestampKey = "recvTimeS";
         String timestampFormat = "%Y-%m-%d %H:%i:%s.%f";
-        String sqlInstance = "mysql";
-        String destination = "example";
+        SQLInstance sqlInstance = SQLInstance.MYSQL;
+        String dataBase = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
@@ -265,7 +268,8 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination,
+                dataBase,
+                null,
                 attrNativeTypes);
         sqlupsertQuery = upsertList.get(1);
         String correctQuery = "INSERT INTO `exampleTable_last_data` " +
@@ -301,8 +305,8 @@ public class SQLQueryUtilsTest {
         String uniqueKey = "entityId";
         String timestampKey = "recvTimeS";
         String timestampFormat = "%Y-%m-%d %H:%i:%s.%f";
-        String sqlInstance = "mysql";
-        String destination = "example";
+        SQLInstance sqlInstance = SQLInstance.MYSQL;
+        String dataBase = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
@@ -314,7 +318,8 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination,
+                dataBase,
+                null,
                 attrNativeTypes);
         sqlupsertQuery = upsertList.get(0);
 
@@ -349,8 +354,8 @@ public class SQLQueryUtilsTest {
         String uniqueKey = "entityId";
         String timestampKey = "recvTimeS";
         String timestampFormat = "%Y-%m-%d %H:%i:%s.%f";
-        String sqlInstance = "mysql";
-        String destination = "example";
+        SQLInstance sqlInstance = SQLInstance.MYSQL;
+        String dataBase = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
@@ -362,7 +367,8 @@ public class SQLQueryUtilsTest {
                 timestampKey,
                 timestampFormat,
                 sqlInstance,
-                destination,
+                dataBase,
+                null,
                 attrNativeTypes);
         try {
             assertEquals(new ArrayList<>(), upsertList);
@@ -399,14 +405,16 @@ public class SQLQueryUtilsTest {
     @Test
     public void testPostgreSQLInsertQuerySingleBatch() {
         String tableName = "exampleTable";
-        String sqlInstance = "postgresql";
+        SQLInstance sqlInstance = SQLInstance.POSTGRESQL;
         String destination = "example";
+        String schema = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlInsertQuery(getValueFieldsSingleBatch(),
                 tableName,
                 sqlInstance,
                 destination,
+                schema,
                 attrNativeTypes);
 
         String correctQuery = "INSERT INTO example.exampleTable " +
@@ -426,7 +434,7 @@ public class SQLQueryUtilsTest {
     @Test
     public void testMySQLInsertQuerySingleBatch() {
         String tableName = "exampleTable";
-        String sqlInstance = "mysql";
+        SQLInstance sqlInstance = SQLInstance.MYSQL;
         String destination = "example";
         StringBuffer sqlupsertQuery;
         boolean attrNativeTypes = false;
@@ -434,6 +442,7 @@ public class SQLQueryUtilsTest {
                 tableName,
                 sqlInstance,
                 destination,
+                null,
                 attrNativeTypes);
 
         String correctQuery = "INSERT INTO `exampleTable` " +
@@ -453,14 +462,16 @@ public class SQLQueryUtilsTest {
     @Test
     public void testPostgreSQLInsertQueryMultipleBatch() {
         String tableName = "exampleTable";
-        String sqlInstance = "postgresql";
+        SQLInstance sqlInstance = SQLInstance.POSTGRESQL;
         String destination = "example";
+        String schema = "example";
         boolean attrNativeTypes = true;
         StringBuffer sqlupsertQuery;
         sqlupsertQuery = SQLQueryUtils.sqlInsertQuery(getValueFieldsMultipleBatch(),
                 tableName,
                 sqlInstance,
                 destination,
+                schema,
                 attrNativeTypes);
 
         String correctQuery = "INSERT INTO example.exampleTable " +
@@ -482,7 +493,7 @@ public class SQLQueryUtilsTest {
     @Test
     public void testMySQLInsertQueryMultipleBatch() {
         String tableName = "exampleTable";
-        String sqlInstance = "mysql";
+        SQLInstance sqlInstance = SQLInstance.MYSQL;
         String destination = "example";
         boolean attrNativeTypes = false;
         StringBuffer sqlupsertQuery;
@@ -490,6 +501,7 @@ public class SQLQueryUtilsTest {
                 tableName,
                 sqlInstance,
                 destination,
+                null,
                 attrNativeTypes);
 
         String correctQuery = "INSERT INTO `exampleTable` " +

@@ -99,7 +99,24 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
-* Fri March 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.7.0
+* Fri Dec 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.15.0
+- [cygnus-twitter] Upgrade Dockerfile base image from centos7.9.2009 to centos8.4.2105 (#1996)
+
+* Tue Oct 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.14.0
+
+* Mon Sep 20 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.13.0
+
+* Wed Aug 18 2021 Ivan Hernandez <ivan.hernandez@atlantida.es> 2.12.0
+
+* Thu Jul 22 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.11.0
+
+* Wed Jun 02 2021 Fermin GAlan <fermin.galanmarquez@telefonica.com> 2.10.0
+
+* Mon May 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.9.0
+
+* Mon Apr 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.8.0
+
+* Fri Mar 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.7.0
 - [cygnus-common][cygnus-ngsi][cygnus-ngsi-ld][cygnus-twitter] Upgrade Dockerfile base image from 7.6.1810 to centos7.9.2009
 
 * Thu Nov 4 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.6.0

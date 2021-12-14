@@ -59,6 +59,7 @@ public class NGSICKANSink extends NGSISink {
     private String apiKey;
     private String ckanHost;
     private String ckanPort;
+    private String ckanPath;
     private String orionUrl;
     private boolean rowAttrPersistence;
     private boolean attrMetadataStore;
@@ -90,6 +91,14 @@ public class NGSICKANSink extends NGSISink {
     protected String getCKANPort() {
         return ckanPort;
     } // getCKANPort
+
+    /**
+     * Gets the CKAN path. It is protected due to it is only required for testing purposes.
+     * @return The CKAN port
+     */
+    protected String getCKANPath() {
+        return ckanPath;
+    } // getCKANPath
 
     /**
      * Gets the CKAN API key. It is protected due to it is only required for testing purposes.
@@ -165,6 +174,8 @@ public class NGSICKANSink extends NGSISink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (api_key=" + apiKey + ")");
         ckanHost = context.getString("ckan_host", "localhost");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (ckan_host=" + ckanHost + ")");
+        ckanPath = context.getString("ckan_path", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (ckan_path=" + ckanPath + ")");
         ckanPort = context.getString("ckan_port", "80");
         int intPort = Integer.parseInt(ckanPort);
 
@@ -231,8 +242,9 @@ public class NGSICKANSink extends NGSISink {
     @Override
     public void start() {
         try {
-            persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, orionUrl, ssl, backendMaxConns,
-                    backendMaxConnsPerRoute, ckanViewer);
+            persistenceBackend = new CKANBackendImpl(apiKey, ckanHost, ckanPort, ckanPath,
+                                                     orionUrl, ssl, backendMaxConns,
+                                                     backendMaxConnsPerRoute, ckanViewer);
             LOGGER.debug("[" + this.getName() + "] CKAN persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the CKAN persistence backend. Details="
@@ -481,7 +493,7 @@ public class NGSICKANSink extends NGSISink {
             case DMBYENTITYID:
                 //FIXME
                 //note that if we enable encode() and/or encodeCKAN() in this datamodel we could have problems, although it need to be analyzed in deep
-            	resName=entityId;
+                resName=entityId;
                 break;
             case DMBYENTITY:
                 if (enableEncoding) {

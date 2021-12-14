@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.sinks;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
+import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequestLD.ContextElement;
 import com.telefonica.iot.cygnus.errors.*;
 import com.telefonica.iot.cygnus.interceptors.NGSILDEvent;
@@ -48,7 +49,7 @@ public class NGSIPostgreSQLSink extends NGSILDSink {
     private static final String DEFAULT_ENABLE_CACHE = "false";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
     private static final String POSTGRESQL_DRIVER_NAME = "org.postgresql.Driver";
-    private static final String POSTGRESQL_INSTANCE_NAME = "postgresql";
+    private static final SQLInstance POSTGRESQL_INSTANCE_NAME = SQLInstance.POSTGRESQL;
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgreSQLSink.class);
     private String postgresqlHost;
@@ -212,7 +213,7 @@ public class NGSIPostgreSQLSink extends NGSILDSink {
     @Override
     public void start() {
         try {
-            createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, postgresqlDatabase, postgresqlOptions);
+            createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, postgresqlOptions);
         } catch (Exception e) {
             LOGGER.error("Error while creating the PostgreSQL persistence backend. Details="
                     + e.getMessage());
@@ -225,9 +226,9 @@ public class NGSIPostgreSQLSink extends NGSILDSink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String defaultSQLDataBase, String sqlOptions) {
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlOptions) {
         if (postgreSQLPersistenceBackend == null) {
-            postgreSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, defaultSQLDataBase, sqlOptions);
+            postgreSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, sqlOptions);
         }
     }
 
@@ -287,6 +288,7 @@ public class NGSIPostgreSQLSink extends NGSILDSink {
         protected String entityTypeForNaming;
         protected String attributeForNaming;
         protected String schemaName;
+        protected String dataBaseName;
         protected String tableName;
         protected String typedFieldNames;
         protected String fieldNames;
@@ -298,6 +300,14 @@ public class NGSIPostgreSQLSink extends NGSILDSink {
         public String getAggregation() {
             return aggregation;
         } // getAggregation
+
+        public String getDataBaseName(boolean enableLowercase) {
+            if (enableLowercase) {
+                return dataBaseName.toLowerCase();
+            } else {
+                return dataBaseName;
+            } // if else
+        } // getDbName
 
         public String getSchemaName(boolean enableLowercase) {
             if (enableLowercase) {
@@ -332,6 +342,7 @@ public class NGSIPostgreSQLSink extends NGSILDSink {
             attributeForNaming = event.getAttributeForNaming();
             schemaName = buildSchemaName(service);
             tableName = buildTableName(entityForNaming, entityTypeForNaming);
+            dataBaseName = buildDBName(service);
         } // initialize
 
         public abstract void aggregate(NGSILDEvent cygnusEvent);
@@ -529,6 +540,7 @@ public class NGSIPostgreSQLSink extends NGSILDSink {
         String fieldValues = aggregator.getAggregation();
         String schemaName = aggregator.getSchemaName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
+        String dataBaseName = aggregator.getDataBaseName(enableLowercase);
 
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIPostgreSQLSink. Schema ("
                 + schemaName + "), Table (" + tableName + "), Fields (" + fieldNames + "), Values ("
@@ -537,15 +549,15 @@ public class NGSIPostgreSQLSink extends NGSILDSink {
         try {
             if (aggregator instanceof RowAggregator) {
                 postgreSQLPersistenceBackend.createDestination(schemaName);
-                postgreSQLPersistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+                postgreSQLPersistenceBackend.createTable(dataBaseName, schemaName, tableName, typedFieldNames);
             } else if (aggregator instanceof ColumnAggregator){
                 postgreSQLPersistenceBackend.createDestination(schemaName);
-                postgreSQLPersistenceBackend.createTable(schemaName, tableName, typedFieldNames);
+                postgreSQLPersistenceBackend.createTable(dataBaseName, schemaName, tableName, typedFieldNames);
             }// if
             // creating the database and the table has only sense if working in row mode, in column node
             // everything must be provisioned in advance
 
-            postgreSQLPersistenceBackend.insertContextData(schemaName, tableName, fieldNames, fieldValues);
+            postgreSQLPersistenceBackend.insertContextData(dataBaseName, schemaName, tableName, fieldNames, fieldValues);
         } catch (Exception e) {
             throw new CygnusPersistenceError("-, " + e.getMessage());
         } // try catch
@@ -573,6 +585,10 @@ public class NGSIPostgreSQLSink extends NGSILDSink {
 
         return name;
     } // buildSchemaName
+
+    public String buildDBName (String service) {
+        return postgresqlDatabase;
+    }
 
     /**
      * Creates a PostgreSQL table name given the FIWARE service path, the entity and the attribute.

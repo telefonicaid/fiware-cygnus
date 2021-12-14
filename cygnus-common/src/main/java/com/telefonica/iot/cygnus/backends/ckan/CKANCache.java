@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.entity.StringEntity;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -41,6 +42,7 @@ public class CKANCache extends HttpBackend {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(CKANCache.class);
     private final String apiKey;
+    private final String ckanPath;
     private HashMap<String, HashMap<String, ArrayList<String>>> tree; // this cache only contain human readable names
     private HashMap<String, String> orgMap; // this cache contains the translation from organization name to identifier
     private HashMap<String, String> pkgMap; // this cache contains the translation from package name to identifier
@@ -57,9 +59,10 @@ public class CKANCache extends HttpBackend {
      * @param maxConns
      * @param maxConnsPerRoute
      */
-    public CKANCache(String host, String port, boolean ssl, String apiKey, int maxConns, int maxConnsPerRoute) {
+    public CKANCache(String host, String port, String path, boolean ssl, String apiKey, int maxConns, int maxConnsPerRoute) {
         super(host, port, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
         this.apiKey = apiKey;
+        this.ckanPath = path;
         tree = new HashMap<>();
         orgMap = new HashMap<>();
         pkgMap = new HashMap<>();
@@ -177,7 +180,7 @@ public class CKANCache extends HttpBackend {
         String ckanURL = "/api/3/action/organization_show?id=" + orgName + "&include_datasets=true";
         ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
-        JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
+        JsonResponse res = doCKANCacheRequest("GET", ckanURL, true, headers, null);
 
         switch (res.getStatusCode()) {
             case 200:
@@ -236,7 +239,7 @@ public class CKANCache extends HttpBackend {
         String ckanURL = "/api/3/action/package_show?id=" + pkgName;
         ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
-        JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
+        JsonResponse res = doCKANCacheRequest("GET", ckanURL, true, headers, null);
 
         switch (res.getStatusCode()) {
             case 200:
@@ -303,7 +306,7 @@ public class CKANCache extends HttpBackend {
         String ckanURL = "/api/3/action/package_show?id=" + pkgName;
         ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
-        JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
+        JsonResponse res = doCKANCacheRequest("GET", ckanURL, true, headers, null);
 
         switch (res.getStatusCode()) {
             case 200:
@@ -441,7 +444,7 @@ public class CKANCache extends HttpBackend {
         String ckanURL = "/api/3/action/package_show?id=" + pkgName;
         ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
-        JsonResponse res = doRequest("GET", ckanURL, true, headers, null);
+        JsonResponse res = doCKANCacheRequest("GET", ckanURL, true, headers, null);
 
         if (res.getStatusCode() == 200) {
             // get the resource and populate the resource map
@@ -513,5 +516,14 @@ public class CKANCache extends HttpBackend {
     public String getNextResId() {
         return (String) nextEntry.getValue();
     } // getNextResId
+
+
+    private JsonResponse doCKANCacheRequest(String method, String urlPath, Boolean relative,
+                                            ArrayList<Header> headers, StringEntity entity)
+        throws CygnusRuntimeError, CygnusPersistenceError {
+        String fullPath = this.ckanPath + urlPath;
+        LOGGER.debug("doCKACacheNRequest " + method + " to " + fullPath);
+        return doRequest(method, fullPath, relative, headers, entity);
+    } // doCKANRequest
     
 } // CKANCache

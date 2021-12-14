@@ -171,7 +171,44 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
-* Fri March 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.7.0
+* Fri Dec 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.15.0
+- [cygnus-common][SQLSinks] Add more info in logs about rollback, database and sink instance involved in current error
+- [cygnus-common][MySQLBackend] Upgrade mysql-connector-java from 8.0.22 to 8.0.27
+- [cygnus-common] Upgrade gson dep from 2.2.4 to 2.6.2 (#1922)
+- [cygnus-common][SQLImpl] Allow multiple fields in last_data_unique_key (#2016)
+- [cygnus-common][SQLBackendImpl][SQLSinks] Refactor persist aggregation sql sinks and utils (#2092)
+- [cygnus-common] Upgrade Dockerfile base image from centos7.9.2009 to centos8.4.2105 (#1996)
+
+* Tue Oct 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.14.0
+- [cygnus-common][SQLBackendImpl] Fix: use all related queries when upsert error for logs, exception and persistError (#2088)
+- [cygnus-common][SQLBackendImpl] Fix: use schema for postgis destination at sql insert query (#2085)
+- [cygnus-common][SQLBackendImpl] Force to cast to ::text to ensure to_timestamp upsert (#2087)
+
+* Mon Sep 20 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.13.0
+- [cygnus-common] Use ckanPath in ckan cache
+- [cygnus-common] Remove methods in class CKANBackendImpl for allowing the creation of the data store with ngsi-ld notifications due to break backward compatibilitgy ckan in column mode
+
+* Wed Aug 18 2021 Ivan Hernandez <ivan.hernandez@atlantida.es> 2.12.0
+
+* Thu Jul 22 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.11.0
+-[cygnus-commons][PostgreSQL, PostGIS] Upgrade posgresql driver from 9.4-1206-jdbc41 to 42.2.22
+-[cygnus-commons][MySQLBackend] Upgrade mysql-connector-java from 5.1.47 to 8.0.22 due to security vulnerability
+-[cygnus-commons] Upgrade httpclient dependency from 4.3.6 to 4.5.13 due to security vulnerability
+
+* Wed Jun 02 2021 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.10.0
+- [cygnus-common][Mongo] Check mongo uri format (#2046)
+- [cygnus-common][Mongo] Use mongo bulkWriter for aggregated data (#2018)
+- [cygnus-common][MySQL, PostgreSQL, Postgis] Persit error about upsert
+- [cygnus-common][MySQL] Upgrade mysql-connector from 5.1.47 to 5.1.49
+- [cygnus-common] remove hive-exec dependency (unneeded)
+- [cygnus-common] Upgrade mongodb-driver from 3.11.0 to 3.12.8
+
+* Mon May 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.9.0
+
+* Mon Apr 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.8.0
+- [cygnus-common] Remove database initialization on constructors (#2004)
+
+* Fri Mar 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.7.0
 - [cygnus-common] Change log level of timeinstant parser chain (from error to debug)
 - [cygnus-common][ArcGis] New Rest based backend to persist Arcgis data (#1672)
 - [cygnus-common][cygnus-ngsi][cygnus-ngsi-ld][cygnus-twitter] Upgrade Dockerfile base image from 7.6.1810 to centos7.9.2009

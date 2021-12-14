@@ -55,7 +55,7 @@ An Elasticsearch index must have [a single mapping type](https://www.elastic.co/
 
 So `NGSIElasticsearchSink` constructs the index name according to the following steps:
 
-1. create a base string by joining configured &lt;prefix&gt;, &lt;fiware service&gt;, &lt;fiware servicepath&gt;, &lt;entity Id&gt; and &lt;entity tyep&gt;.
+1. create a base string by joining configured &lt;prefix&gt;, &lt;fiware service&gt;, &lt;fiware servicepath&gt;, &lt;entity Id&gt; and &lt;entity type&gt;.
 2. convert the base string to lower cases.
 3. replace forbidden characters to '-'.
 4. when you use `Column-like storing`, append a hash string calculated by the attribute names to be stored

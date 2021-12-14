@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2014-2021 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FIWARE project).
  *
@@ -15,41 +15,22 @@
  *
  * For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
  */
-package com.telefonica.iot.cygnus.backends.ckan.model;
 
-import com.google.gson.JsonElement;
+package com.telefonica.iot.cygnus.backends.sql;
 
-import java.util.ArrayList;
-
-public class DataStore {
-
-    private String resource_id;
-    private ArrayList<JsonElement> fields;
-    private String force;
-
-    public  DataStore(){}
-
-    public ArrayList<JsonElement> getFields() {
-        return fields;
-    }
-
-    public void setFields(ArrayList<JsonElement> fields) {
-        this.fields = fields;
-    }
-
-    public String getResource_id() {
-        return resource_id;
-    }
-
-    public void setResource_id(String resource_id) {
-        this.resource_id = resource_id;
-    }
-
-    public String getForce() {
-        return force;
-    }
-
-    public void setForce(String force) {
-        this.force = force;
+public class Enum {
+    public enum SQLInstance {
+        MYSQL {
+            @Override
+            public String toString() {
+                return "mysql";
+            }
+        },
+        POSTGRESQL {
+            @Override
+            public String toString() {
+                return "postgresql";
+            }
+        }
     }
 }

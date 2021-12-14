@@ -83,7 +83,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         String currentEntityId = new String();
         if (isEnableLastData() && (getLastDataTimestampKey().equalsIgnoreCase(NGSIConstants.RECV_TIME))) {
             currentTS = recvTimeTs;
-            setLastDataTiemstampKeyOnAggregation(NGSIConstants.RECV_TIME);
+            setLastDataTimestampKeyOnAggregation(NGSIConstants.RECV_TIME);
         }
         String recvTime = CommonUtils.getHumanReadable(recvTimeTs, isEnableUTCRecvTime());
         // get the event body
@@ -121,8 +121,8 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                 currentTS = (CommonUtils.getTimeInstantFromString(attrValue.getAsString())).longValue();
             }
             if (isEnableLastData()){
-                if ((getLastDataTiemstampKeyOnAggregation() == null) && (getLastDataTimestampKey().equalsIgnoreCase(attrName))) {
-                    setLastDataTiemstampKeyOnAggregation(attrName);
+                if ((getLastDataTimestampKeyOnAggregation() == null) && (getLastDataTimestampKey().equalsIgnoreCase(attrName))) {
+                    setLastDataTimestampKeyOnAggregation(attrName);
                     currentTS = CommonUtils.getTimeInstantFromString(attrValue.getAsString());
                 }
                 if ((getLastDataUniqueKeyOnAggragation() == null) && (getLastDataUniqueKey().equalsIgnoreCase(attrName))) {
@@ -181,7 +181,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                     for (int i = 0 ; i < list.size() ; i++) {
                         if (list.get(i).getAsString().equals(currentEntityId)) {
                             long storedTS = CommonUtils.getTimeInstantFromString(
-                                    lastData.get(getLastDataTiemstampKeyOnAggregation()).
+                                    lastData.get(getLastDataTimestampKeyOnAggregation()).
                                     get(i).getAsString());
                             if (storedTS < currentTS) {
                                 ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
@@ -202,7 +202,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                 }
             }
             if (updateLastData || (numPreviousValues == 0)) {
-                setLastDataTiemstamp(currentTS);
+                setLastDataTimestamp(currentTS);
                 for (String key : aggregation.keySet()) {
                     ArrayList<JsonElement> valueLastData = new ArrayList<>();
                     if (lastData.containsKey(key)) {
