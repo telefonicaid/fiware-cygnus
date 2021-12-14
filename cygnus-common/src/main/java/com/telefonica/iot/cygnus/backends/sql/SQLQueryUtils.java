@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.backends.sql;
 
 import com.google.gson.JsonElement;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
+import java.util.Arrays;
 
 /**
  * The type Ngsisql utils.
@@ -35,9 +37,9 @@ public class SQLQueryUtils {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(SQLQueryUtils.class);
 
-    private static final String POSTGRES_FIELDS_MARK = "";
-    private static final String MYSQL_FIELDS_MARK = "`";
-    private static final String SEPARATION_MARK = ",";
+    public static final String POSTGRES_FIELDS_MARK = "";
+    public static final String MYSQL_FIELDS_MARK = "`";
+    public static final String SEPARATION_MARK = ",";
 
     /**
      * Sql upsert string buffer.
@@ -60,11 +62,12 @@ public class SQLQueryUtils {
                                                  String uniqueKey,
                                                  String timestampKey,
                                                  String timestampFormat,
-                                                 String sqlInstance,
-                                                 String destination,
+                                                 SQLInstance sqlInstance,
+                                                 String dataBase,
+                                                 String schema,
                                                  boolean attrNativeTypes) {
 
-        if (sqlInstance.equals("postgresql")) {
+    if (sqlInstance == SQLInstance.POSTGRESQL){
             return postgreSqlUpsertQuery(aggregation,
                     lastData,
                     tableName,
@@ -73,9 +76,9 @@ public class SQLQueryUtils {
                     timestampKey,
                     timestampFormat,
                     sqlInstance,
-                    destination,
+                    schema,
                     attrNativeTypes);
-        } else if (sqlInstance.equals("mysql")) {
+        } else if (sqlInstance == SQLInstance.MYSQL) {
             return mySqlUpsertQuery(aggregation,
                     lastData,
                     tableName,
@@ -84,7 +87,7 @@ public class SQLQueryUtils {
                     timestampKey,
                     timestampFormat,
                     sqlInstance,
-                    destination,
+                    dataBase,
                     attrNativeTypes);
         }
         return null;
@@ -101,7 +104,7 @@ public class SQLQueryUtils {
      * @param timestampKey    the timestamp key
      * @param timestampFormat the timestamp format
      * @param sqlInstance     the sql instance
-     * @param destination     the destination
+     * @param schema          the destination
      * @return the string buffer
      */
     protected static ArrayList<StringBuffer> postgreSqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
@@ -111,13 +114,13 @@ public class SQLQueryUtils {
                                                         String uniqueKey,
                                                         String timestampKey,
                                                         String timestampFormat,
-                                                        String sqlInstance,
-                                                        String destination,
+                                                        SQLInstance sqlInstance,
+                                                        String schema,
                                                         boolean attrNativeTypes) {
 
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         StringBuffer postgisTempReference = new StringBuffer("EXCLUDED");
-        StringBuffer postgisDestination = new StringBuffer(destination).append(".").append(tableName).append(tableSuffix);
+        StringBuffer postgisDestination = new StringBuffer(schema).append(".").append(tableName).append(tableSuffix);
 
         for (int i = 0 ; i < collectionSizeOnLinkedHashMap(lastData) ; i++) {
             StringBuffer query = new StringBuffer();
@@ -131,13 +134,13 @@ public class SQLQueryUtils {
                     if (j == 0) {
                         values.append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
                         fields.append(keys.get(j));
-                        if (!keys.get(j).equals(uniqueKey)) {
+                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
                             updateSet.append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
                         }
                     } else {
                         values.append(",").append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
                         fields.append(",").append(keys.get(j));
-                        if (!keys.get(j).equals(uniqueKey)) {
+                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
                             updateSet.append(", ").append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
                         }
                     }
@@ -148,11 +151,17 @@ public class SQLQueryUtils {
             query.append("ON CONFLICT ").append("(").append(uniqueKey).append(") ").
                     append("DO ").
                     append("UPDATE SET ").append(updateSet).append(" ").
-                    append("WHERE ").append(postgisDestination).append(".").append(uniqueKey).append("=").append(postgisTempReference).append(".").append(uniqueKey).append(" ").
-                    append("AND ").append("to_timestamp(").append(postgisDestination).append(".").append(timestampKey).append(", '").append(timestampFormat).append("') ").
-                    append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append(", '").append(timestampFormat).append("')");
+                    append("WHERE ");
+            // for key in uniqueKey
+            String[] uniqueKeys = uniqueKey.split("\\s*,\\s*");
+            for (String uniKey : uniqueKeys) {
+                query.append(postgisDestination).append(".").append(uniKey).append("=").append(postgisTempReference).append(".").append(uniKey).append(" ").append("AND ");
+            }
+            query.append("to_timestamp(").append(postgisDestination).append(".").append(timestampKey).append("::text, '").append(timestampFormat).append("') ").
+                    append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append("::text, '").append(timestampFormat).append("')");
             upsertList.add(query);
         }
+        LOGGER.debug("[SQLQueryUtils.postgreSqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
         return upsertList;
     }
 
@@ -177,7 +186,7 @@ public class SQLQueryUtils {
                                                    String uniqueKey,
                                                    String timestampKey,
                                                    String timestampFormat,
-                                                   String sqlInstance,
+                                                   SQLInstance sqlInstance,
                                                    String destination,
                                                    boolean attrNativeTypes) {
 
@@ -196,7 +205,7 @@ public class SQLQueryUtils {
                     if (j == 0) {
                         values.append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
                         fields.append(MYSQL_FIELDS_MARK).append(keys.get(j)).append(MYSQL_FIELDS_MARK);
-                        if (!keys.get(j).equals(uniqueKey)) {
+                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
                             if (keys.get(j).equalsIgnoreCase(timestampKey)) {
                                 dateKeyUpdate.append(mySQLUpdateRecordQuery(keys.get(j), uniqueKey, timestampKey, timestampFormat));
                             } else {
@@ -206,7 +215,7 @@ public class SQLQueryUtils {
                     } else {
                         values.append(",").append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
                         fields.append(",").append(MYSQL_FIELDS_MARK).append(keys.get(j)).append(MYSQL_FIELDS_MARK);
-                        if (!keys.get(j).equals(uniqueKey)) {
+                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
                             if (keys.get(j).equalsIgnoreCase(timestampKey)) {
                                 dateKeyUpdate.append(mySQLUpdateRecordQuery(keys.get(j), uniqueKey, timestampKey, timestampFormat));
                             } else {
@@ -225,7 +234,7 @@ public class SQLQueryUtils {
                     append("UPDATE ").append(updateSet).append(", ").append(dateKeyUpdate);
             upsertList.add(query);
         }
-        LOGGER.debug("[NGSISQLUtils.sqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
+        LOGGER.debug("[SQLQueryUtils.mySqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
         return upsertList;
     }
 
@@ -238,6 +247,7 @@ public class SQLQueryUtils {
      * @param timestampFormat the timestamp format
      * @return the string buffer like the following one
      * recvTime=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTime), recvTime)
+     * recvTime=IF((entityId=VALUES(entityId)) AND (entityType=VALUES(entityType)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < (STR_TO_DATE(VALUES(recvTime), '%Y-%m-%d %H:%i:%s.%f'))), VALUES(recvTime), recvTime)
      */
 
     protected static StringBuffer mySQLUpdateRecordQuery(String key,
@@ -248,10 +258,13 @@ public class SQLQueryUtils {
         StringBuffer updateSet = new StringBuffer();
         updateSet.append(key).append("=").
                 append("IF").
-                append("(").
-                append("(").append(uniqueKey).append("=").append("VALUES(").append(uniqueKey).append(")").
-                append(")").append(" AND ").
-                append("(").append("STR_TO_DATE(").append(timestampKey).append(", '").append(timestampFormat).append("')").
+                append("(");
+        String[] uniqueKeys = uniqueKey.split("\\s*,\\s*");
+        for (String uniKey : uniqueKeys) {
+            updateSet.append("(").append(uniKey).append("=").append("VALUES(").append(uniKey).append(")");
+            updateSet.append(")").append(" AND ");
+        }
+        updateSet.append("(").append("STR_TO_DATE(").append(timestampKey).append(", '").append(timestampFormat).append("')").
                 append(" < ").
                 append("(").append("STR_TO_DATE(VALUES(").append(timestampKey).append("), '").append(timestampFormat).append("')").append(")").
                 append(")").
@@ -272,8 +285,9 @@ public class SQLQueryUtils {
      */
     protected static StringBuffer sqlInsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                  String tableName,
-                                                 String sqlInstance,
-                                                 String destination,
+                                                 SQLInstance sqlInstance,
+                                                 String database,
+                                                 String schema,
                                                  boolean attrNativeTypes) {
 
         StringBuffer fieldsForInsert;
@@ -288,20 +302,26 @@ public class SQLQueryUtils {
         */
         StringBuffer valuesForInsert = new StringBuffer(getValuesForInsert(aggregation, attrNativeTypes));
 
-        StringBuffer postgisDestination = new StringBuffer(destination).append(".").append(tableName);
+
         StringBuffer query = new StringBuffer();
 
-        if (sqlInstance.equals("postgresql")) {
+        if (valuesForInsert.equals("")) {
+            LOGGER.debug("[SQLQueryUtils.sqlInsertQuery] no values for insert");
+            return query;
+        }
+
+        if (sqlInstance == SQLInstance.POSTGRESQL){
+            StringBuffer postgisDestination = new StringBuffer(schema).append(".").append(tableName);            
             fieldsForInsert = getFieldsForInsert(aggregation.keySet(), POSTGRES_FIELDS_MARK);
             query.append("INSERT INTO ").append(postgisDestination).append(" ").append(fieldsForInsert).append(" ").
                     append("VALUES ").append(valuesForInsert).append(" ");
-        } else if (sqlInstance.equals("mysql")) {
+        } else if (sqlInstance == SQLInstance.MYSQL) {
             fieldsForInsert = getFieldsForInsert(aggregation.keySet(), MYSQL_FIELDS_MARK);
             query.append("INSERT INTO ").append(MYSQL_FIELDS_MARK).append(tableName).append(MYSQL_FIELDS_MARK).append(" ").append(fieldsForInsert).append(" ").
                     append("VALUES ").append(valuesForInsert).append(" ");
         }
 
-        LOGGER.debug("[NGSISQLUtils.sqlInsertQuery] Preparing Insert query: " + query.toString());
+        LOGGER.debug("[SQLQueryUtils.sqlInsertQuery] Preparing Insert query: " + query.toString());
         return query;
     }
 
@@ -323,7 +343,7 @@ public class SQLQueryUtils {
             }
         }
         questionValues.append(")");
-        LOGGER.debug("[NGSISQLUtils.sqlQuestionValues] Preparing question marks for statement query: " + questionValues.toString());
+        LOGGER.debug("[SQLQueryUtils.sqlQuestionValues] Preparing question marks for statement query: " + questionValues.toString());
         return questionValues;
     }
 
@@ -337,7 +357,7 @@ public class SQLQueryUtils {
      * @param fieldMark the field mark
      * @return the fields for insert
      */
-    protected static StringBuffer getFieldsForInsert(Set<String> keyList, String fieldMark) {
+    public static StringBuffer getFieldsForInsert(Set<String> keyList, String fieldMark) {
         StringBuffer fieldsForInsert = new StringBuffer("(");
         boolean first = true;
         Iterator<String> it = keyList.iterator();
@@ -350,7 +370,7 @@ public class SQLQueryUtils {
             } // if else
         } // while
         fieldsForInsert.append(")");
-        LOGGER.debug("[NGSISQLUtils.getFieldsForInsert] Preparing fields for insert for statement: " + fieldsForInsert.toString());
+        LOGGER.debug("[SQLQueryUtils.getFieldsForInsert] Preparing fields for insert for statement: " + fieldsForInsert.toString());
         return fieldsForInsert;
     } // getFieldsForInsert
 
@@ -379,32 +399,32 @@ public class SQLQueryUtils {
                 if (attrNativeTypes) {
                     if (value == null || value.isJsonNull()) {
                         preparedStatement.setString(position, "NULL");
-                        LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added NULL as String");
+                        LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added NULL as String");
                     } else {
                         if (value.isJsonPrimitive()) {
                             if (value.getAsJsonPrimitive().isNumber()) {
                                 preparedStatement.setDouble(position, value.getAsDouble());
-                                LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + value.getAsDouble() + " as Number");
+                                LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added " + value.getAsDouble() + " as Number");
                                 position++;
                             } else if (value.getAsJsonPrimitive().isBoolean()) {
                                 preparedStatement.setBoolean(position, value.getAsBoolean());
-                                LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + value.getAsBoolean() + " as Boolean");
+                                LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added " + value.getAsBoolean() + " as Boolean");
                                 position++;
                             } else {
                                 String stringValue = value.getAsString();
                                 if (stringValue.contains("ST_GeomFromGeoJSON") || stringValue.contains("ST_SetSRID")) {
                                     preparedStatement.setObject(position, stringValue);
-                                    LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
+                                    LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
                                     position++;
                                 } else {
                                     preparedStatement.setObject(position, stringValue);
-                                    LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + stringValue + " as Object");
+                                    LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added " + stringValue + " as Object");
                                     position++;
                                 }
                             } // else
                         } else { // if (value.isJsonPrimitive())
                             preparedStatement.setString(position, value.toString());
-                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + value.toString() + " as String");
+                            LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added " + value.toString() + " as String");
                             position++;
                         } // else
                     } // else
@@ -413,28 +433,28 @@ public class SQLQueryUtils {
                         String stringValue = value.getAsString();
                         if (stringValue.contains("ST_GeomFromGeoJSON") || stringValue.contains("ST_SetSRID")) {
                             preparedStatement.setObject(position, stringValue);
-                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
+                            LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
                             position++;
                         } else {
                             preparedStatement.setObject(position, stringValue);
-                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + stringValue + " as String");
+                            LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added " + stringValue + " as String");
                             position++;
                         }
                     } else {
                         if (value == null){
                             preparedStatement.setObject(position, "NULL");
-                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added NULL as String");
+                            LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added NULL as String");
                             position++;
                         } else {
                             preparedStatement.setObject(position, value.toString());
-                            LOGGER.debug("[NGSISQLUtils.addJsonValues] " + "Added " + value.toString() + " as String");
+                            LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added " + value.toString() + " as String");
                             position++;
                         }
                     }
                 }
             } // while
             preparedStatement.addBatch();
-            LOGGER.debug("[NGSISQLUtils.addJsonValues] Batch added");
+            LOGGER.debug("[SQLQueryUtils.addJsonValues] Batch added");
         } // for
         return preparedStatement;
     }
@@ -506,7 +526,7 @@ public class SQLQueryUtils {
      * @param attrNativeTypes the attr native types
      * @return a String with all VALUES in SQL query format.
      */
-    protected static String getValuesForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, boolean attrNativeTypes) {
+    public static String getValuesForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, boolean attrNativeTypes) {
         String valuesForInsert = "";
         int numEvents = collectionSizeOnLinkedHashMap(aggregation);
 
@@ -535,4 +555,26 @@ public class SQLQueryUtils {
         return valuesForInsert;
     } // getValuesForInsert
 
+
+    /**
+     * Gets fields for create.
+     *
+     * @param aggregation the aggregation
+     * @return the fields (column names) for create in SQL format.
+     */
+    public static String getFieldsForCreate(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+        String fieldsForCreate = "(";
+        boolean first = true;
+        Iterator<String> it = aggregation.keySet().iterator();
+        while (it.hasNext()) {
+            if (first) {
+                fieldsForCreate += (String) it.next() + " text";
+                first = false;
+            } else {
+                fieldsForCreate += "," + (String) it.next() + " text";
+            } // if else
+        } // while
+
+        return fieldsForCreate + ")";
+    } // getFieldsForCreate
 }

@@ -99,6 +99,45 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Dec 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.15.0
+- [cygnus-ngsi] Upgrade Dockerfile base image from centos7.9.2009 to centos8.4.2105 (#1996)
+
+* Tue Oct 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.14.0
+- [cygnus-ngsi][MySQL, PostgreSQL, Postgis sinks] Replace `enable_last_data` to `last data mode` conf option: (upsert,insert,both), default is insert
+
+* Mon Sep 20 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.13.0
+
+* Wed Aug 18 2021 Ivan Hernandez <ivan.hernandez@atlantida.es> 2.12.0
+-[cygnus-ngsi][NGSICkan] Add ckan path configuration option (#2072)
+
+* Thu Jul 22 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.11.0
+-[cygnus-ngsi][NGSISink] Perform batch retries one by one (#2059)
+-[cygnus-ngsi][NGSISink] Try retries when an event batch is in CygnusBadConfiguration, CygnusBadContextData, CygnusRuntimeError (#2059)
+-[cygnus-ngsi][NGSIPostgis, NGSIPostgreSQL] fix create error_log table (#2061)
+-[cygnus-ngsi][NGSISink] Add sink class name to all log about batches
+-[cygnus-ngsi][NGSISink] Add destination (which is composed using srv and subsrv fields) to all log about batches
+-[cygnus-ngsi][GenericRowAggregator] Fix generic row aggregator name used in logs
+
+* Wed Jun 02 2021 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.10.0
+- [cygnus-ngsi][MongoSink][STHSink] Try to not create database and collection in each insertion (#2019, #1975)
+- [cygnus-ngsi][STHSink] Fix aggregation of events with different entityId (#2048)
+- [cygnus-ngsi][MongoSink] Check access to element aggregation before cast to Date mongo type (#2038)
+- [cygnus-ngsi][NGSIRestHandler] NGSIv2 initial notification does not include a list of subservices in servicePath header when is / (#2042)
+- [cygnus-ngsi] Add jodd-core 3.6.8 dependency (previously included as transitive dependency of hive-exec in cygnus-common)
+
+* Mon May 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.9.0
+- [cygnus-ngsi][MongoSink] Cast to mongo Date type all NGSI DateTime attributes in column and row mode (#2020)
+
+* Mon Apr 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.8.0
+- [cygnus-ngsi] [PostgisSink,PostgreSQL,MySQL] Add stack trace and config options to error log about createPersistenceBackend
+- [cygnus-ngsi] [PostgisSink] Fix PostgreSQL encoding when enabled
+- [cygnus-ngsi] [MysqlSink, PostgisSink, PosgreSQLSink] Update sinks to initialize persistance backend objects without database (#2004)
+
+* Fri Mar 5 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.7.0
+- [cygnus-ngsi][NGSISink] Set srv and subsrv logs N/A in proccesBatch (#1983)
+- [cygnus-ngsi][NGSIArcgisFeatureTableSink] New sink to persist Arcgis data, removing the old ArgGis sink (#1672)
+- [cygnus-common][cygnus-ngsi][cygnus-ngsi-ld][cygnus-twitter] Upgrade Dockerfile base image from 7.6.1810 to centos7.9.2009
+
 * Thu Nov 4 2020 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.6.0
 - [cygnus-ngsi][SQLSinks] Fix batch Upsert to build one query for each one of the different unique key values.
 - [cygnus-ngsi][NGSISink] Fix batch managing to fix data losing when an event of the batch fails (#1967).

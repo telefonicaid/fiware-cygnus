@@ -1,21 +1,24 @@
 # Last Data functionality.
 
-Cygnus is capable to perform an `upsert` operation on the following Sinks.
+Cygnus is capable to perform a `upsert` operation on the following Sinks:
 
 - PostgisSink
-- PostgreSQLSink  
+- PostgreSQLSink
+- MySQLSink
   
-**This operation performs a transaction where runs both insert and upsert querys, if any one of them fails, then the other one is rollbacked. This means Both have to be run successfully by Cygnus to store on the database.**
+In order to perform this operation Cygnus needs five keys.
 
-In order to perform this operation Cygnus needs four keys.
-
+- `last_data_mode` This is the mode of operation: `upsert`, `insert` or `both`. Default is `insert` mode
 - `last_data_table_suffix` This is the suffix that will be added to the table name to perform the upsert operation.
-- `last_data_unique_key` This is the reference to indicate to the database engine wich is the reference key to perform the upsert.
+- `last_data_unique_key` This is the reference to indicate to the database engine which is the reference key (or list of keys separed by a comma) to perform the upsert.
 - `last_data_timestamp_key` This is the timestamp reference to know which record is the newest.
 - `last_data_sql_timestamp_format` This is the timestamp format to indicate to the database how to cast the text timestamp to know if the stored record is older than the one trying to insert.
 
 
-This `upsert` consists of two main stages:
+**The upsert mode performs a transaction where runs upsert querys, if any one of them fails, then the other one is rollbacked. This means they have to be run successfully by Cygnus to store on the database.**
+
+
+This `upsert` (running with `last_data_mode` to `upsert` or `both`) consists of two main stages:
 
 ## Batch latest record.
 
@@ -48,7 +51,7 @@ This means that all aggregated events will be stored on a Map wich contains list
      | 1429535773 | 2015-04-20T12:13:22.41.126 | 4wheels           | car1     |
      +------------+----------------------------+-------------------+----------+ 
      
-### Last Data aggretation
+### Last Data aggregation
 
 When last data is enabled. Cygnus will create a second `LinkedHashMap<String, ArrayList<JsonElement>>` collection on the `NGSIGenericColumnAggregator` class. 
 

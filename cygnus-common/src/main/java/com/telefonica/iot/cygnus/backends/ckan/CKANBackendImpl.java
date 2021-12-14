@@ -18,10 +18,6 @@
 
 package com.telefonica.iot.cygnus.backends.ckan;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.telefonica.iot.cygnus.backends.ckan.model.DataStore;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.backends.http.HttpBackend;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -33,7 +29,6 @@ import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 
 import org.json.simple.JSONObject;
 import org.apache.http.Header;
@@ -50,6 +45,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(CKANBackendImpl.class);
     private static final int RECORDSPERPAGE = 100;
+    private final String ckanPath;
     private final String orionUrl;
     private final String apiKey;
     private final String viewer;
@@ -60,23 +56,25 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
      * @param apiKey
      * @param ckanHost
      * @param ckanPort
+     * @param ckanPath
      * @param orionUrl
      * @param ssl
      * @param maxConns
      * @param maxConnsPerRoute
      * @param ckanViewer
      */
-    public CKANBackendImpl(String apiKey, String ckanHost, String ckanPort, String orionUrl,
-            boolean ssl, int maxConns, int maxConnsPerRoute, String ckanViewer) {
+    public CKANBackendImpl(String apiKey, String ckanHost, String ckanPort, String ckanPath,
+                           String orionUrl, boolean ssl, int maxConns, int maxConnsPerRoute, String ckanViewer) {
         super(ckanHost, ckanPort, ssl, false, null, null, null, null, maxConns, maxConnsPerRoute);
         
         // this class attributes
+        this.ckanPath = ckanPath;
         this.apiKey = apiKey;
         this.orionUrl = orionUrl;
         this.viewer = ckanViewer;
         
         // create the cache
-        cache = new CKANCache(ckanHost, ckanPort, ssl, apiKey, maxConns, maxConnsPerRoute);
+        cache = new CKANCache(ckanHost, ckanPort, ckanPath, ssl, apiKey, maxConns, maxConnsPerRoute);
     } // CKANBackendImpl
 
     @Override
@@ -85,11 +83,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         LOGGER.debug("Going to lookup for the resource id, the cache may be updated during the process (orgName="
                 + orgName + ", pkgName=" + pkgName + ", resName=" + resName + ")");
         String resId = "";
-        if (!createEnabled) {
-            resId= resourceLookupOrCreateDynamicFields(orgName, pkgName, resName,records);
-        } else {
-            resId = resourceLookupOrCreate(orgName, pkgName, resName, createEnabled);
-        }
+        resId = resourceLookupOrCreate(orgName, pkgName, resName, createEnabled);
         if (resId == null) {
             throw new CygnusPersistenceError("Cannot persist the data (orgName=" + orgName + ", pkgName=" + pkgName
                     + ", resName=" + resName + ")");
@@ -99,73 +93,6 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             insert(resId, records);
         } // if else
     } // persist
-
-    /**
-     * Lookup or create resources used by cygnus-ngsi-ld and create the datastore with the fields available in the records parameter.
-     * @param orgName The organization in which datastore the record is going to be inserted
-     * @param pkgName The package name to be created or lookup to
-     * @param resName The resource name to be created or lookup to
-     * @param records Te records to be inserted and used to create the datastore fields
-     * @throws Exception
-     */
-    private String resourceLookupOrCreateDynamicFields(String orgName, String pkgName, String resName, String records)
-            throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
-        if (!cache.isCachedOrg(orgName)) {
-            LOGGER.debug("The organization was not cached nor existed in CKAN (orgName=" + orgName + ")");
-
-            String orgId = createOrganization(orgName);
-            cache.addOrg(orgName);
-            cache.setOrgId(orgName, orgId);
-            String pkgId = createPackage(pkgName, orgId);
-            cache.addPkg(orgName, pkgName);
-            cache.setPkgId(orgName, pkgName, pkgId);
-            String resId = createResource(resName, pkgId);
-            cache.addRes(orgName, pkgName, resName);
-            cache.setResId(orgName, pkgName, resName, resId);
-            createDataStoreWithFields(resId,records);
-            createView(resId);
-            return resId;
-            // if else
-        } // if
-
-        LOGGER.debug("The organization was cached (orgName=" + orgName + ")");
-
-        if (!cache.isCachedPkg(orgName, pkgName)) {
-            LOGGER.debug("The package was not cached nor existed in CKAN (orgName=" + orgName + ", pkgName="
-                    + pkgName + ")");
-
-            String pkgId = createPackage(pkgName, cache.getOrgId(orgName));
-            cache.addPkg(orgName, pkgName);
-            cache.setPkgId(orgName, pkgName, pkgId);
-            String resId = createResource(resName, pkgId);
-            cache.addRes(orgName, pkgName, resName);
-            cache.setResId(orgName, pkgName, resName, resId);
-            createDataStoreWithFields(resId,records);
-            createView(resId);
-            return resId;
-
-        } // if
-
-        LOGGER.debug("The package was cached (orgName=" + orgName + ", pkgName=" + pkgName + ")");
-
-        if (!cache.isCachedRes(orgName, pkgName, resName)) {
-            LOGGER.debug("The resource was not cached nor existed in CKAN (orgName=" + orgName + ", pkgName="
-                    + pkgName + ", resName=" + resName + ")");
-
-            String resId = this.createResource(resName, cache.getPkgId(orgName, pkgName));
-            cache.addRes(orgName, pkgName, resName);
-            cache.setResId(orgName, pkgName, resName, resId);
-            createDataStoreWithFields(resId,records);
-            createView(resId);
-            return resId;
-
-        } // if
-
-        LOGGER.debug("The resource was cached (orgName=" + orgName + ", pkgName=" + pkgName + ", resName="
-                + resName + ")");
-
-        return cache.getResId(orgName, pkgName, resName);
-    } // resourceLookupOrCreate
 
     private String resourceLookupOrCreate(String orgName, String pkgName, String resName, boolean createEnabled)
         throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError {
@@ -284,7 +211,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
             LOGGER.debug("Successful organization creation (orgName/OrgId=" + orgName + "/" + orgId + ")");
             return orgId;
         } else {
-            throw new CygnusPersistenceError("Could not create the orgnaization (orgName=" + orgName
+            throw new CygnusPersistenceError("Could not create the organization (orgName=" + orgName
                     + ", statusCode=" + res.getStatusCode() + ")");
         } // if else
     } // createOrganization
@@ -401,56 +328,7 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         } // if else
     } // createResource
 
-    /**
-     * Creates a datastore for a given resource in CKAN.
-     * @param resId Identifies the resource whose datastore is going to be created.
-     * @param records Array list with the attributes names for being used as fields with column mode
-     * @throws Exception
-     */
-    private void createDataStoreWithFields(String resId, String records) throws CygnusRuntimeError, CygnusPersistenceError {
-        // create the CKAN request JSON
-        // CKAN types reference: http://docs.ckan.org/en/ckan-2.2/datastore.html#valid-types
-        org.json.JSONObject jsonContent = new org.json.JSONObject(records);
-        Iterator<String> keys = jsonContent.keys();
-        ArrayList <String> fields = new ArrayList<>();
-        Gson gson = new Gson();
-        DataStore dataStore = new DataStore();
-        ArrayList<JsonElement> jsonArray = new ArrayList<>();
 
-        while (keys.hasNext()) {
-            String key = keys.next();
-            fields.add(key);
-        }
-
-        for (int i=0;i<fields.size();i++){
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("id",fields.get(i));
-            jsonObject.addProperty("type","text");
-            jsonArray.add((jsonObject.getAsJsonObject()));
-        }
-
-        dataStore.setResource_id(resId);
-        dataStore.setFields(jsonArray);
-        dataStore.setForce("true");
-        String jsonString = gson.toJson(dataStore);
-
-        LOGGER.debug("Successful datastore creation jsonString=" + jsonString + "");
-
-        // create the CKAN request URL
-        String urlPath = "/api/3/action/datastore_create";
-
-        // do the CKAN request
-        JsonResponse res = doCKANRequest("POST", urlPath, jsonString);
-
-        // check the status
-        if (res.getStatusCode() == 200) {
-            LOGGER.debug("Successful datastore creation (resourceId=" + resId + ")");
-        } else {
-            throw new CygnusPersistenceError("Could not create the datastore (resId=" + resId
-                    + ", statusCode=" + res.getStatusCode() + ")");
-        } // if else
-    } // createResource
-    
     /**
      * Creates a view for a given resource in CKAN.
      * @param resId Identifies the resource whose view is going to be created.
@@ -689,7 +567,9 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
         ArrayList<Header> headers = new ArrayList<>();
         headers.add(new BasicHeader("Authorization", apiKey));
         headers.add(new BasicHeader("Content-Type", "application/json; charset=utf-8"));
-        return doRequest(method, urlPath, true, headers, new StringEntity(jsonString, "UTF-8"));
+        String fullPath = this.ckanPath + urlPath;
+        LOGGER.debug("doCKANRequest " + method + " to " + fullPath + " with body " + jsonString);
+        return doRequest(method, fullPath, true, headers, new StringEntity(jsonString, "UTF-8"));
     } // doCKANRequest
 
 } // CKANBackendImpl

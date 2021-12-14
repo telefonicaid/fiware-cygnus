@@ -1,9 +1,9 @@
-# <a name="top"></a>cygnus-ngsi agent configuration
-cygnus-ngsi, as any other Cygnus agent, follows the multi-instance configuration of cygnus-common.
+# <a name="top"></a>cygnus-ngsi-ld agent configuration
+cygnus-ngsi-ld, as any other Cygnus agent, follows the multi-instance configuration of cygnus-common.
 
 The file `agent_<id>.conf` can be instantiated from a template given in the Cygnus repository, `conf/agent_ngsi.conf.template`.
 
-```Java
+```java
 #=============================================
 # To be put in APACHE_FLUME_HOME/conf/cygnus.conf
 #
@@ -16,8 +16,8 @@ The file `agent_<id>.conf` can be instantiated from a template given in the Cygn
 # one of them (this example shows how to configure 3 sink types at the same time). Even, you can define more than one
 # sink of the same type and sharing the channel in order to improve the performance (this is like having
 # multi-threading).
-cygnus-ngsi.sources = http-source
-cygnus-ngsi.sinks = postgresql-sink 
+cygnus-ngsi-ld.sources = http-source
+cygnus-ngsi-ld.sinks = postgresql-sink 
 cygnus-ngsi-ld.channels = postgresql-channel 
 
 #=============================================
@@ -96,7 +96,7 @@ cygnus-ngsi-ld.channels.postgresql-channel.type = memory
 cygnus-ngsi-ld.channels.postgresql-channel.capacity = 1000
 # amount of bytes that can be sent per transaction
 cygnus-ngsi-ld.channels.postgresql-channel.transactionCapacity = 100
-
+```
 
 
 [Top](#top)

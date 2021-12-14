@@ -55,6 +55,7 @@ public class CKANCacheTest {
     private final String port = "80";
     private final boolean ssl = false;
     private final String apiKey = "xxxxxxxxxxxxx";
+    private final String path = "";
     private final String orgName = "rooms";
     private final String pkgName = "numeric-rooms";
     private final String resName = "room1-room";
@@ -73,7 +74,7 @@ public class CKANCacheTest {
     @Before
     public void setUp() throws Exception {
         // set up the instance of the tested class
-        cache = new CKANCache(host, port, ssl, apiKey, maxConns, maxConnsPerRoute);
+        cache = new CKANCache(host, port, path, ssl, apiKey, maxConns, maxConnsPerRoute);
 
         // set up the behaviour of the mocked classes
         when(orgMap.get(orgName)).thenReturn(orgId);

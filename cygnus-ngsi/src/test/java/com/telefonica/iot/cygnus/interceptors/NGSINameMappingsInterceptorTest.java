@@ -741,7 +741,7 @@ public class NGSINameMappingsInterceptorTest {
             equals = false;
         } else if (!map.getLeft().equals(expectedServiceConfig4)) {
             System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.doMapConfig4]")
-                    + "-  ERROR  - The Service tyepe is not equal to the expected one");
+                    + "-  ERROR  - The Service type is not equal to the expected one");
             equals = false;
         } 
 
