@@ -50,7 +50,6 @@ import org.apache.hadoop.metrics.spi.AbstractMetricsContext;
 import org.apache.http.impl.DefaultBHttpServerConnection;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.logging.log4j.core.pattern.SequenceNumberPatternConverter;
-import org.codehaus.groovy.control.ErrorCollector;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
