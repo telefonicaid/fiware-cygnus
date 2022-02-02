@@ -21,7 +21,7 @@ package com.telefonica.iot.cygnus.backends.sql;
 import com.google.gson.JsonElement;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
-
+import org.apache.commons.lang.StringEscapeUtils;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -495,24 +495,24 @@ public class SQLQueryUtils {
                     if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
                         stringValue = value.getAsString().replace("\\", "");
                     } else {
-                        stringValue = quotationMark + value.getAsString() + quotationMark;
+                        stringValue = quotationMark + StringEscapeUtils.escapeSql(value.getAsString()) + quotationMark;
                     }
                 }
             } else {
-                stringValue = quotationMark + value.toString() + quotationMark;
+                stringValue = quotationMark + StringEscapeUtils.escapeSql(value.toString()) + quotationMark;
             }
         } else {
             if (value != null && value.isJsonPrimitive()) {
                 if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
                     stringValue = value.getAsString().replace("\\", "");
                 } else {
-                    stringValue = quotationMark + value.getAsString() + quotationMark;
+                    stringValue = quotationMark + StringEscapeUtils.escapeSql(value.getAsString()) + quotationMark;
                 }
             } else {
                 if (value == null){
                     stringValue = quotationMark + "NULL" + quotationMark;
                 } else {
-                    stringValue = quotationMark + value.toString() + quotationMark;
+                    stringValue = quotationMark + StringEscapeUtils.escapeSql(value.toString()) + quotationMark;
                 }
             }
         }
