@@ -53,7 +53,13 @@ ENV JAVA_VERSION "1.8.0"
 RUN adduser ${CYGNUS_USER}
 
 # Install
-RUN yum -y install tar nc which git java-${JAVA_VERSION}-openjdk-devel && \
+RUN \
+    # FIXME: default yum repositories has been changed to vault due to CentOS 8 EOL on February 1st, 2022
+    # This is just a temporal solution so the build doesn't break while we find a new distro to use
+    sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-Linux-* &&\
+    sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-* &&\
+    yum upgrade -y && \
+    yum -y install tar nc which git java-${JAVA_VERSION}-openjdk-devel && \
     yum clean all && \
     export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk && \
     curl --remote-name --location --insecure --silent --show-error "${MVN_URL}" && \
