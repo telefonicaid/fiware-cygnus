@@ -1,2 +1,2 @@
 - [cygnus-ngsi][KafkaSink] Upgrade libthrift dependency from 0.12.0 to 0.14.1 due to github vulnerability report
-- [cygnus-commons] Upgrade httpclient dependency from 42.2.22 to 42.2.25 due to github vulnerability report
+- [cygnus-commons] Upgrade postgresql dependency from 42.2.22 to 42.2.25 due to github vulnerability report
