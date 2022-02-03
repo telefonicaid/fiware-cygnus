@@ -488,7 +488,7 @@ public class SQLQueryUtils {
         // String escaped = StringEscapeUtils.escapeSql(value.getAsString());
         // escaped = escaped.replaceAll("\n", "\\\\n");
         // escaped = escaped.replaceAll("\r", "\\\\r");
-        String escaped = value.getoString();
+        String escaped = value.toString();
         escaped = escaped.replaceAll("'", "''");
         escaped = quotationMark + escaped + quotationMark;
         return escaped;
