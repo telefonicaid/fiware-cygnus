@@ -143,7 +143,7 @@ It is expected UTF-8 character set is maintained by all the Flume elements in th
 ### <a name="section2.3"></a>Quote escaping for `TextUnrestricted` attributes
 Cygnus escapes from `'` to `''` in attributes of type `TextUnrestricted` with the aim of avoiding injection attacks.
 
-Note that other attributes (i.e. with type different to `TextUnrestricted` don't need such escaping as single quote (`'`) is a [forbidden character in Context Broker](https://fiware-orion.readthedocs.io/en/master/user/forbidden_characters/index.html) so that value will never arrives to Cygnus in notifications.
+Note that other attributes (i.e. with type different to `TextUnrestricted`) don't need such escaping as single quote (`'`) is a [forbidden character in Context Broker](https://fiware-orion.readthedocs.io/en/master/user/forbidden_characters/index.html) so that value will never arrives to Cygnus in notifications.
 
 [Top](#top)
 
