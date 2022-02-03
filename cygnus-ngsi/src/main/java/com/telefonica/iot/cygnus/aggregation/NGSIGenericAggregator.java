@@ -758,6 +758,27 @@ public abstract class NGSIGenericAggregator {
     } //setEnableNameMappings
 
     /**
+     * getEscapedString
+     *
+     * @param JsonElement an UnrestrictedString
+     * @param String a quotationMark to escape
+     * @return the escaped string
+     */
+    public String getEscapedString(JsonElement value, String quotationMark) {
+        String escaped = value.toString();
+        switch (quotationMark) {
+        case "'":
+            escaped = escaped.replaceAll("'", "''");
+            break;
+        case '"':
+            escaped = escaped.replaceAll('"', '""');
+            break;
+        }
+        escaped = quotationMark + escaped + quotationMark;
+        return escaped;
+    }
+
+    /**
      * Aggregate declaration for child classes.
      *
      * @param cygnusEvent the cygnus event

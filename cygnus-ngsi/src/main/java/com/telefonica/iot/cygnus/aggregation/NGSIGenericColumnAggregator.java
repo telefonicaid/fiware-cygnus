@@ -146,7 +146,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                     LOGGER.error("[" + getName() + "] Processing context attribute (name=" + attrValue.toString());
                 }
             } else if (attrType.equals("TextUnrestricted")) {
-                attrValue = jsonParser.parse(attrValue.toString().replaceAll("'", "''"));
+                attrValue = jsonParser.parse(getEscapedString(attrValue, "'"));
             }
             // Check if the attribute already exists in the form of 2 columns (one for metadata); if not existing,
             // add an empty value for all previous rows
