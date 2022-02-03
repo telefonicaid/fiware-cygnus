@@ -770,9 +770,9 @@ public abstract class NGSIGenericAggregator {
         case "'":
             escaped = escaped.replaceAll("'", "''");
             break;
-        case '"':
-            escaped = escaped.replaceAll('"', '\"');
-            break;
+        // case '"':
+        //     escaped = escaped.replaceAll('"', '\"');
+        //     break;
         }
         escaped = quotationMark + escaped + quotationMark;
         return escaped;
