@@ -7,6 +7,7 @@ Content:
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Accepted character set](#section2.2)
+    * [Quote escaping for `TextUnrestricted` attributes](#section2.3)
 * [Programmers guide](#section3)
     * [`NGSIRestHandler` class](#section3.1)
 
