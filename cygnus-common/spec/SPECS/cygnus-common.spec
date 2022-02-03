@@ -172,7 +172,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Feb 3 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.16.0
-- [cygnus-commons][NGSIHandler] Check TextUnrestricted type to escape character ' as '' (#2125)
 - [cygnus-commons] Upgrade postgresql dependency from 42.2.22 to 42.2.25 due to github vulnerability report
 
 * Fri Dec 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.15.0
