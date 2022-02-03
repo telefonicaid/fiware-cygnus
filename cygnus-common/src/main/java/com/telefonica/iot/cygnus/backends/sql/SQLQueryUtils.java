@@ -473,11 +473,22 @@ public class SQLQueryUtils {
             return 0;
     }
 
-    protected static String getEscapedString(JsonElement value, String quotationMark) {
+
+    protected static String getEscapedJsonString(JsonElement value, String quotationMark) {
         // String escaped = StringEscapeUtils.escapeSql(value.getAsString());
         // escaped = escaped.replaceAll("\n", "\\\\n");
         // escaped = escaped.replaceAll("\r", "\\\\r");
         String escaped = value.getAsString();
+        //escaped = escaped.replaceAll("'", "''");
+        escaped = quotationMark + escaped + quotationMark;
+        return escaped;
+    }
+
+    protected static String getEscapedString(JsonElement value, String quotationMark) {
+        // String escaped = StringEscapeUtils.escapeSql(value.getAsString());
+        // escaped = escaped.replaceAll("\n", "\\\\n");
+        // escaped = escaped.replaceAll("\r", "\\\\r");
+        String escaped = value.getoString();
         //escaped = escaped.replaceAll("'", "''");
         escaped = quotationMark + escaped + quotationMark;
         return escaped;
@@ -502,28 +513,28 @@ public class SQLQueryUtils {
                     stringValue = value.getAsString().toUpperCase();
                 } else if (value.getAsJsonPrimitive().isNumber()) {
                     stringValue = value.getAsString();
-                }else {
+                } else {
                     if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
                         stringValue = value.getAsString().replace("\\", "");
                     } else {
-                        stringValue = quotationMark + value.getAsString() + quotationMark;
+                        stringValue = getEscapedJsonString(value, quotationMark);
                     }
                 }
             } else {
-                stringValue = quotationMark + value.getAsString() + quotationMark;
+                stringValue = getEscapedString(value, quotationMark);
             }
         } else {
             if (value != null && value.isJsonPrimitive()) {
                 if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
                     stringValue = value.getAsString().replace("\\", "");
                 } else {
-                    stringValue = quotationMark + value.getAsString() + quotationMark;
+                    stringValue = getEscapedJsonString(value, quotationMark);
                 }
             } else {
                 if (value == null){
                     stringValue = quotationMark + "NULL" + quotationMark;
                 } else {
-                    stringValue = quotationMark + value.getAsString() + quotationMark;
+                    stringValue = getEscapedString(value, quotationMark);
                 }
             }
         }
