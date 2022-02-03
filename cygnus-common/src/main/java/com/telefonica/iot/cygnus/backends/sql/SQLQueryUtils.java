@@ -473,6 +473,14 @@ public class SQLQueryUtils {
             return 0;
     }
 
+    protected static String getEscapedString(JsonElement value, String quotationMark) {
+        String escaped = StringEscapeUtils.escapeSql(value.getAsString());
+        escaped = escaped.replaceAll("\n", "\\\\n");
+        escaped = escaped.replaceAll("\r", "\\\\r");
+        return quotationMark + escaped + quotationMark;
+    }
+
+
     /**
      * Gets string value from json element.
      *
@@ -495,24 +503,24 @@ public class SQLQueryUtils {
                     if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
                         stringValue = value.getAsString().replace("\\", "");
                     } else {
-                        stringValue = quotationMark + StringEscapeUtils.escapeSql(value.getAsString()) + quotationMark;
+                        stringValue = getEscapedString(value);
                     }
                 }
             } else {
-                stringValue = quotationMark + StringEscapeUtils.escapeSql(value.toString()) + quotationMark;
+                stringValue = getEscapedString(value);
             }
         } else {
             if (value != null && value.isJsonPrimitive()) {
                 if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
                     stringValue = value.getAsString().replace("\\", "");
                 } else {
-                    stringValue = quotationMark + StringEscapeUtils.escapeSql(value.getAsString()) + quotationMark;
+                    stringValue = getEscapedString(value);
                 }
             } else {
                 if (value == null){
                     stringValue = quotationMark + "NULL" + quotationMark;
                 } else {
-                    stringValue = quotationMark + StringEscapeUtils.escapeSql(value.toString()) + quotationMark;
+                    stringValue = getEscapedString(value);
                 }
             }
         }
