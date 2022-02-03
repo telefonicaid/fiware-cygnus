@@ -100,6 +100,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Feb 3 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.16.0
+- [cygnus-ngsi][NGSIHandler] Check TextUnrestricted type to escape character ' as '' (#2125)
 - [cygnus-ngsi][KafkaSink] Upgrade libthrift dependency from 0.12.0 to 0.14.1 due to github vulnerability report
 
 * Fri Dec 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.15.0
