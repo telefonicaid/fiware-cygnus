@@ -503,24 +503,24 @@ public class SQLQueryUtils {
                     if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
                         stringValue = value.getAsString().replace("\\", "");
                     } else {
-                        stringValue = getEscapedString(value);
+                        stringValue = getEscapedString(value, quotationMark);
                     }
                 }
             } else {
-                stringValue = getEscapedString(value);
+                stringValue = getEscapedString(value, quotationMark);
             }
         } else {
             if (value != null && value.isJsonPrimitive()) {
                 if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
                     stringValue = value.getAsString().replace("\\", "");
                 } else {
-                    stringValue = getEscapedString(value);
+                    stringValue = getEscapedString(value, quotationMark);
                 }
             } else {
                 if (value == null){
                     stringValue = quotationMark + "NULL" + quotationMark;
                 } else {
-                    stringValue = getEscapedString(value);
+                    stringValue = getEscapedString(value, quotationMark);
                 }
             }
         }
