@@ -771,6 +771,7 @@ public abstract class NGSIGenericAggregator {
             escaped = escaped.replaceAll("'", "''");
             break;
         case "\"":
+            // Currently not used but maybe in the future could be useful
             escaped = escaped.replaceAll("\"", "\"\"");
             break;
         }
