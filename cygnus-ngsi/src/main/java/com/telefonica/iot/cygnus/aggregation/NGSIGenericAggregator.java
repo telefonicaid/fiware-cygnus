@@ -774,7 +774,6 @@ public abstract class NGSIGenericAggregator {
         //     escaped = escaped.replaceAll('"', '\"');
         //     break;
         }
-        escaped = quotationMark + escaped + quotationMark;
         return escaped;
     }
 
