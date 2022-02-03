@@ -87,6 +87,9 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
             JsonArray jsonAttrMetadata = (JsonArray) jsonParser.parse(attrMetadata);
             LOGGER.debug("[" + getName() + "] Processing context attribute (name=" + attrName + ", type="
                     + attrType + ")");
+            if (attrType.equals("TextUnrestricted")) {
+                attrValue = jsonParser.parse(getEscapedString(attrValue, "'"));
+            }
             // aggregate the attribute information
             aggregation.get(NGSIConstants.RECV_TIME_TS).add(new JsonPrimitive(Long.toString(recvTimeTs)));
             aggregation.get(NGSIConstants.RECV_TIME).add(new JsonPrimitive(recvTime));
