@@ -771,7 +771,7 @@ public abstract class NGSIGenericAggregator {
             escaped = escaped.replaceAll("'", "''");
             break;
         case '"':
-            escaped = escaped.replaceAll('"', '""');
+            escaped = escaped.replaceAll('"', '\"');
             break;
         }
         escaped = quotationMark + escaped + quotationMark;
