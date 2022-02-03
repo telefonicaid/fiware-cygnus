@@ -474,9 +474,11 @@ public class SQLQueryUtils {
     }
 
     protected static String getEscapedString(JsonElement value, String quotationMark) {
-        String escaped = StringEscapeUtils.escapeSql(value.getAsString());
-        escaped = escaped.replaceAll("\n", "\\\\n");
-        escaped = escaped.replaceAll("\r", "\\\\r");
+        // String escaped = StringEscapeUtils.escapeSql(value.getAsString());
+        // escaped = escaped.replaceAll("\n", "\\\\n");
+        // escaped = escaped.replaceAll("\r", "\\\\r");
+        String escaped = value.getAsString();
+        escaped = escaped.replaceAll("'", "\'");
         return quotationMark + escaped + quotationMark;
     }
 
