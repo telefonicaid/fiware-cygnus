@@ -831,12 +831,11 @@ public class SQLBackendImpl implements SQLBackend{
                 try {
                     // try insert without create error table before
                     insertErrorLog(destination, schema, query, exception);
-                    purgeErrorTable(destination, schema);
-                } catch (Exception e1) {
+                } catch (CygnusBadContextData ex) {
                     createErrorTable(destination, schema);
                     insertErrorLog(destination, schema, query, exception);
-                    purgeErrorTable(destination, schema);
                 }
+                purgeErrorTable(destination, schema);
             }
             return;
         } catch (CygnusBadContextData cygnusBadContextData) {
