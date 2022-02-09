@@ -783,7 +783,6 @@ public class SQLBackendImpl implements SQLBackend{
 
     private void insertErrorLog(String dataBase, String schema, String errorQuery, Exception exception)
             throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError, SQLException {
-        Statement stmt = null;
         java.util.Date date = new Date();
         Timestamp timestamp = new Timestamp(date.getTime());
         String errorTableName = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
@@ -829,9 +828,15 @@ public class SQLBackendImpl implements SQLBackend{
     private void persistError(String destination, String schema, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {
         try {
             if (persistErrors) {
-                createErrorTable(destination, schema);
-                insertErrorLog(destination, schema, query, exception);
-                purgeErrorTable(destination, schema);
+                try {
+                    // try insert without create error table before
+                    insertErrorLog(destination, schema, query, exception);
+                    purgeErrorTable(destination, schema);
+                } catch (Exception e1) {
+                    createErrorTable(destination, schema);
+                    insertErrorLog(destination, schema, query, exception);
+                    purgeErrorTable(destination, schema);
+                }
             }
             return;
         } catch (CygnusBadContextData cygnusBadContextData) {
