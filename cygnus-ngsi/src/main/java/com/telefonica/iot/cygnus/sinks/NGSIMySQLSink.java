@@ -454,20 +454,15 @@ public class NGSIMySQLSink extends NGSISink {
                     try {
                         // Try to insert without create database before
                         mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
-                        mySQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
-                                                                  dbName,
-                                                                  null, // no schema in mysql
-                                                                  tableName,
-                                                                  attrNativeTypes);
-                    } catch (CygnusBadContextData ex2) {
+                    } catch (CygnusPersistenceError ex2) {
                         mySQLPersistenceBackend.createDestination(dbName);
                         mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
-                        mySQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
-                                                                  dbName,
-                                                                  null, // no schema in mysql
-                                                                  tableName,
-                                                                  attrNativeTypes);
                     } // catch
+                    mySQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                              dbName,
+                                                              null, // no schema in mysql
+                                                              tableName,
+                                                              attrNativeTypes);
                 } else {
                     // column
                     throw ex;
