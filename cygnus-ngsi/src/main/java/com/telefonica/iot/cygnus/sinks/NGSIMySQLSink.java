@@ -459,7 +459,7 @@ public class NGSIMySQLSink extends NGSISink {
                                                                   null, // no schema in mysql
                                                                   tableName,
                                                                   attrNativeTypes);
-                    } catch (CygnusBadContextData ex) {
+                    } catch (CygnusBadContextData ex2) {
                         mySQLPersistenceBackend.createDestination(dbName);
                         mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
                         mySQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
