@@ -420,7 +420,7 @@ public class NGSIMySQLSink extends NGSISink {
 
         String dbName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
-        
+
         if (lastDataMode.equals("upsert") || lastDataMode.equals("both")) {
             if (rowAttrPersistence) {
                 LOGGER.warn("[" + this.getName() + "] no upsert due to row mode");

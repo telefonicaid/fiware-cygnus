@@ -426,13 +426,6 @@ public class NGSIPostgreSQLSink extends NGSISink {
             schemaName = ESCAPED_DEFAULT_FIWARE_SERVICE;
         }
 
-        if (aggregator instanceof NGSIGenericRowAggregator) {
-            String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
-            postgreSQLPersistenceBackend.createDestination(schemaName);
-            postgreSQLPersistenceBackend.createTable(databaseName, schemaName, tableName, fieldsForCreate);
-        } // if
-        // creating the database and the table has only sense if working in row mode, in column node
-        // everything must be provisioned in advance
         if (lastDataMode.equals("upsert") || lastDataMode.equals("both")) {
             if (rowAttrPersistence) {
                 LOGGER.warn("[" + this.getName() + "] no upsert due to row mode");
@@ -450,11 +443,40 @@ public class NGSIPostgreSQLSink extends NGSISink {
             }
         }
         if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
-            postgreSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
-                                                           databaseName,
-                                                           schemaName,
-                                                           tableName,
-                                                           attrNativeTypes);
+            try {
+                // Try to insert without create database and table before
+                postgreSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                               databaseName,
+                                                               schemaName,
+                                                               tableName,
+                                                               attrNativeTypes);
+            } catch (CygnusBadContextData ex) {
+                // creating the database and the table has only sense if working in row mode, in column node
+                // everything must be provisioned in advance
+                if (rowAttrPersistence) {
+                    String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+                     try {
+                        // Try to insert without create database before
+                         postgreSQLPersistenceBackend.createTable(databaseName, schemaName, tableName, fieldsForCreate);
+                         postgreSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                                        databaseName,
+                                                                        schemaName,
+                                                                        tableName,
+                                                                        attrNativeTypes);
+                     } catch (CygnusBadContextData ex2) {
+                         postgreSQLPersistenceBackend.createDestination(schemaName);
+                         postgreSQLPersistenceBackend.createTable(databaseName, schemaName, tableName, fieldsForCreate);
+                         postgreSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                                        databaseName,
+                                                                        schemaName,
+                                                                        tableName,
+                                                                        attrNativeTypes);
+                     } // catch
+                } else {
+                    // column
+                    throw ex;
+                }
+            } // catch
         }
     } // persistAggregation
 
