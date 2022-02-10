@@ -458,20 +458,15 @@ public class NGSIPostgreSQLSink extends NGSISink {
                      try {
                         // Try to insert without create database before
                          postgreSQLPersistenceBackend.createTable(databaseName, schemaName, tableName, fieldsForCreate);
-                         postgreSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
-                                                                        databaseName,
-                                                                        schemaName,
-                                                                        tableName,
-                                                                        attrNativeTypes);
                      } catch (CygnusBadContextData ex2) {
                          postgreSQLPersistenceBackend.createDestination(schemaName);
                          postgreSQLPersistenceBackend.createTable(databaseName, schemaName, tableName, fieldsForCreate);
-                         postgreSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
-                                                                        databaseName,
-                                                                        schemaName,
-                                                                        tableName,
-                                                                        attrNativeTypes);
                      } // catch
+                     postgreSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                                    databaseName,
+                                                                    schemaName,
+                                                                    tableName,
+                                                                    attrNativeTypes);
                 } else {
                     // column
                     throw ex;

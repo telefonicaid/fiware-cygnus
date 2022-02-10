@@ -457,7 +457,7 @@ public class NGSIPostgisSink extends NGSISink {
                                                             schemaName,
                                                             tableName,
                                                             attrNativeTypes);
-            } catch (CygnusBadContextData ex) {
+            } catch (CygnusPersistenceError | CygnusBadContextData | CygnusRuntimeError ex) {
                 // creating the database and the table has only sense if working in row mode, in column node
                 // everything must be provisioned in advance
                 if (rowAttrPersistence) {
@@ -465,20 +465,15 @@ public class NGSIPostgisSink extends NGSISink {
                     try {
                         // Try to insert without create database before
                         postgisPersistenceBackend.createTable(dataBaseName, schemaName, tableName, fieldsForCreate);
-                        postgisPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
-                                                                    dataBaseName,
-                                                                    schemaName,
-                                                                    tableName,
-                                                                    attrNativeTypes);
-                    } catch (CygnusBadContextData ex2) {
+                    } catch (CygnusRuntimeError | CygnusPersistenceError ex2) {
                         postgisPersistenceBackend.createDestination(schemaName);
                         postgisPersistenceBackend.createTable(dataBaseName, schemaName, tableName, fieldsForCreate);
-                        postgisPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
-                                                                    dataBaseName,
-                                                                    schemaName,
-                                                                    tableName,
-                                                                    attrNativeTypes);
                     } // catch
+                    postgisPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                                dataBaseName,
+                                                                schemaName,
+                                                                tableName,
+                                                                attrNativeTypes);
                 } else {
                     // column
                     throw ex;

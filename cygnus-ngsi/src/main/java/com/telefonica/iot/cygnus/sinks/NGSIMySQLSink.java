@@ -446,7 +446,7 @@ public class NGSIMySQLSink extends NGSISink {
                                                           null, // no schema in mysql
                                                           tableName,
                                                           attrNativeTypes);
-            } catch (CygnusBadContextData ex) {
+            } catch (CygnusPersistenceError | CygnusBadContextData | CygnusRuntimeError ex) {
                 // creating the database and the table has only sense if working in row mode, in column node
                 // everything must be provisioned in advance
                 if (rowAttrPersistence) {
@@ -454,7 +454,7 @@ public class NGSIMySQLSink extends NGSISink {
                     try {
                         // Try to insert without create database before
                         mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
-                    } catch (CygnusPersistenceError ex2) {
+                    } catch (CygnusRuntimeError | CygnusPersistenceError ex2) {
                         mySQLPersistenceBackend.createDestination(dbName);
                         mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
                     } // catch
