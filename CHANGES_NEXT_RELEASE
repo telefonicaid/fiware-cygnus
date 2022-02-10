@@ -1,1 +1,1 @@
-[cygnus-common][SQLBackend] Try to insert in error table without create it before
+[cygnus-common][SQLBackend] Try to insert in error table without create it before (#2132)
