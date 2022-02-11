@@ -465,6 +465,7 @@ public class NGSIPostgisSink extends NGSISink {
                     try {
                         // Try to insert without create database before
                         postgisPersistenceBackend.createTable(dataBaseName, schemaName, tableName, fieldsForCreate);
+                        // this case will generate a false error in errors table
                     } catch (CygnusRuntimeError | CygnusPersistenceError ex2) {
                         postgisPersistenceBackend.createDestination(schemaName);
                         postgisPersistenceBackend.createTable(dataBaseName, schemaName, tableName, fieldsForCreate);

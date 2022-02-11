@@ -454,6 +454,7 @@ public class NGSIMySQLSink extends NGSISink {
                     try {
                         // Try to insert without create database before
                         mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
+                        // this case will generate a false error in errors table
                     } catch (CygnusRuntimeError | CygnusPersistenceError ex2) {
                         mySQLPersistenceBackend.createDestination(dbName);
                         mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
