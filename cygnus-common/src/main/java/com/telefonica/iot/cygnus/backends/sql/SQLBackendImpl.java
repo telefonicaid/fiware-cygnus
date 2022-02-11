@@ -584,7 +584,7 @@ public class SQLBackendImpl implements SQLBackend{
                                    String timestampKey,
                                    String timestampFormat,
                                    boolean attrNativeTypes)
-        throws CygnusPersistenceError, CygnusBadContextData, CygnusRuntimeError,  CygnusPersistenceError{
+        throws CygnusPersistenceError, CygnusBadContextData, CygnusRuntimeError {
 
         Connection connection = null;
         String upsertQuerys = new String();
@@ -666,7 +666,7 @@ public class SQLBackendImpl implements SQLBackend{
                                    String schema,
                                    String tableName,
                                    boolean attrNativeTypes)
-        throws CygnusPersistenceError, CygnusBadContextData, CygnusRuntimeError,  CygnusPersistenceError{
+        throws CygnusPersistenceError, CygnusBadContextData, CygnusRuntimeError {
 
         Connection connection = null;
         String insertQuery = new String();
