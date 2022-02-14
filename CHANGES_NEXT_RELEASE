@@ -1,1 +1,2 @@
+[cygnus-common][SQLBackend] Try to insert in row mode tables without create db and table before
 [cygnus-common][SQLBackend] Try to insert in error table without create it before (#2132)
