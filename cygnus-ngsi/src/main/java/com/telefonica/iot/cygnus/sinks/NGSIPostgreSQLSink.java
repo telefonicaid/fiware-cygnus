@@ -445,20 +445,26 @@ public class NGSIPostgreSQLSink extends NGSISink {
         if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
             try {
                 // Try to insert without create database and table before
+                Boolean persistErrorsBackup = persistErrors;
+                if (rowAttrPersistence) {
+                    // disable persistErrors in row mode in order to avoid a false error insertion
+                    // since the insertion will be retried creating table and destination before
+                    persistErrors = false;
+                }
                 postgreSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
                                                                databaseName,
                                                                schemaName,
                                                                tableName,
                                                                attrNativeTypes);
+                persistErrors = persistErrorsBackup;
             } catch (CygnusPersistenceError | CygnusBadContextData | CygnusRuntimeError ex) {
                 // creating the database and the table has only sense if working in row mode, in column node
                 // everything must be provisioned in advance
                 if (rowAttrPersistence) {
                     String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
                      try {
-                        // Try to insert without create database before
+                         // Try to insert without create database before
                          postgreSQLPersistenceBackend.createTable(databaseName, schemaName, tableName, fieldsForCreate);
-                         // this case will generate a false error in errors table
                      } catch (CygnusRuntimeError | CygnusPersistenceError ex2) {
                          postgreSQLPersistenceBackend.createDestination(schemaName);
                          postgreSQLPersistenceBackend.createTable(databaseName, schemaName, tableName, fieldsForCreate);
