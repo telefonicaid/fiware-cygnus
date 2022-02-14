@@ -452,22 +452,16 @@ public class NGSIPostgisSink extends NGSISink {
         if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
             try {
                 // Try to insert without create database and table before
-                Boolean persistErrorsBackup = persistErrors;
-                if (rowAttrPersistence) {
-                    // disable persistErrors in row mode in order to avoid a false error insertion
-                    // since the insertion will be retried creating table and destination before
-                    persistErrors = false;
-                }
                 postgisPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
                                                             dataBaseName,
                                                             schemaName,
                                                             tableName,
                                                             attrNativeTypes);
-                persistErrors = persistErrorsBackup;
             } catch (CygnusPersistenceError | CygnusBadContextData | CygnusRuntimeError ex) {
                 // creating the database and the table has only sense if working in row mode, in column node
                 // everything must be provisioned in advance
                 if (rowAttrPersistence) {
+                    // This case will create a false error entry in error table
                     String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
                     try {
                         // Try to insert without create database before
