@@ -568,6 +568,17 @@ they can be managed using a REST-based API. Using such API, new name mappings ca
 
 The name mappings API is described in [this piece of documentation](../../cygnus-common/installation_and_administration_guide/management_interface_v1.md#section9).
 
+
+[Top](#top)
+
+## Name Mappings & Docker
+
+When Cygnus was deployed using a docker image [Installation via docker](./install_with_docker.md) and namemappings files are 
+provided in a volume, then updating these namemappings should be done in a way that i-node of that namemapping file would 
+not be modified. This way cygnus will read namemappings changes without need of be restarted. 
+To a achieve that is recomended not use editors like vim or emacs which uses temporal files while editing, and use simple editors 
+like nano.
+
 [Top](#top)
 
 ## Name Mappings vs. grouping rules
