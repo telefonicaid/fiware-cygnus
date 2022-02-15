@@ -99,6 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Feb 4 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.16.0
+- [cygnus-ngsi][NGSIHandler] Check TextUnrestricted type to escape character ' as '' (#2125)
+- [cygnus-ngsi][KafkaSink] Upgrade libthrift dependency from 0.12.0 to 0.14.1 due to github vulnerability report
+
 * Fri Dec 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.15.0
 - [cygnus-ngsi] Upgrade Dockerfile base image from centos7.9.2009 to centos8.4.2105 (#1996)
 

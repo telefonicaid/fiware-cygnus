@@ -433,13 +433,6 @@ public class NGSIPostgisSink extends NGSISink {
             schemaName = ESCAPED_DEFAULT_FIWARE_SERVICE;
         }
 
-        if (aggregator instanceof NGSIGenericRowAggregator) {
-            String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
-            postgisPersistenceBackend.createDestination(schemaName);
-            postgisPersistenceBackend.createTable(dataBaseName, schemaName, tableName, fieldsForCreate);
-        } // if
-        // creating the database and the table has only sense if working in row mode, in column node
-        // everything must be provisioned in advance
         if (lastDataMode.equals("upsert") || lastDataMode.equals("both")) {
             if (rowAttrPersistence) {
                 LOGGER.warn("[" + this.getName() + "] no upsert due to row mode");
@@ -457,11 +450,36 @@ public class NGSIPostgisSink extends NGSISink {
             }
         }
         if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
-            postgisPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
-                                                        dataBaseName,
-                                                        schemaName,
-                                                        tableName,
-                                                        attrNativeTypes);
+            try {
+                // Try to insert without create database and table before
+                postgisPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                            dataBaseName,
+                                                            schemaName,
+                                                            tableName,
+                                                            attrNativeTypes);
+            } catch (CygnusPersistenceError | CygnusBadContextData | CygnusRuntimeError ex) {
+                // creating the database and the table has only sense if working in row mode, in column node
+                // everything must be provisioned in advance
+                if (rowAttrPersistence) {
+                    // This case will create a false error entry in error table
+                    String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+                    try {
+                        // Try to insert without create database before
+                        postgisPersistenceBackend.createTable(dataBaseName, schemaName, tableName, fieldsForCreate);
+                    } catch (CygnusRuntimeError | CygnusPersistenceError ex2) {
+                        postgisPersistenceBackend.createDestination(schemaName);
+                        postgisPersistenceBackend.createTable(dataBaseName, schemaName, tableName, fieldsForCreate);
+                    } // catch
+                    postgisPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                                dataBaseName,
+                                                                schemaName,
+                                                                tableName,
+                                                                attrNativeTypes);
+                } else {
+                    // column
+                    throw ex;
+                } // if
+            } // catch
         }
     } // persistAggregation
 

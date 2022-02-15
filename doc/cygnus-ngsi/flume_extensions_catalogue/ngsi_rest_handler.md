@@ -7,6 +7,7 @@ Content:
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Accepted character set](#section2.2)
+    * [Quote escaping for `TextUnrestricted` attributes](#section2.3)
 * [Programmers guide](#section3)
     * [`NGSIRestHandler` class](#section3.1)
 
@@ -43,26 +44,26 @@ Let's assume the following not-intercepted event regarding a received notificati
 ```
 notification={
    headers={
-	   fiware-service=hotel1,
-	   fiware-servicepath=/other,/suites,
-	   correlation-id=1234567890-0000-1234567890
+       fiware-service=hotel1,
+       fiware-servicepath=/other,/suites,
+       correlation-id=1234567890-0000-1234567890
    },
    body={
       {
-	      entityId=suite.12,
-	      entityType=room,
-	      attributes=[
-	         ...
-	      ]
-	   },
-	   {
-	      entityId=other.9,
-	      entityType=room,
-	      attributes=[
-	         ...
-	      ]
-	   }
-	}
+          entityId=suite.12,
+          entityType=room,
+          attributes=[
+             ...
+          ]
+       },
+       {
+          entityId=other.9,
+          entityType=room,
+          attributes=[
+             ...
+          ]
+       }
+    }
 }
 ```
 
@@ -72,40 +73,40 @@ As can be seen, two entities (`suite.12` and `other.9`) of the same type (`room`
 ```
 ngsi-event-1={
    headers={
-	   fiware-service=hotel,
-	   fiware-servicepath=/suites,
-	   transaction-id=1234567890-0000-1234567890,
-	   correlation-id=1234567890-0000-1234567890,
-	   timestamp=1234567890,
-	   mapped-fiware-service=hotel
-	   mapped-fiware-service-path=/suites
-	},
+       fiware-service=hotel,
+       fiware-servicepath=/suites,
+       transaction-id=1234567890-0000-1234567890,
+       correlation-id=1234567890-0000-1234567890,
+       timestamp=1234567890,
+       mapped-fiware-service=hotel
+       mapped-fiware-service-path=/suites
+    },
    original-context-element={
-	   entityId=suite.12,
-	   entityType=room,
-	   attributes=[
-	      ...
-	   ]
-	}
+       entityId=suite.12,
+       entityType=room,
+       attributes=[
+          ...
+       ]
+    }
 }
     
 ngsi-event-2={
    headers={
-	   fiware-service=hotel,
-	   fiware-servicepath=/other,
-	   transaction-id=1234567890-0000-1234567890,
-	   correlation-id=1234567890-0000-1234567890,
-	   timestamp=1234567890,
-	   mapped-fiware-service=hotel
-	   mapped-fiware-service-path=/other
+       fiware-service=hotel,
+       fiware-servicepath=/other,
+       transaction-id=1234567890-0000-1234567890,
+       correlation-id=1234567890-0000-1234567890,
+       timestamp=1234567890,
+       mapped-fiware-service=hotel
+       mapped-fiware-service-path=/other
    },
    original-context-element={
-	   entityId=other.9,
-	   entityType=room,
-	   attributes=[
-	      ...
-	   ]
-	}
+       entityId=other.9,
+       entityType=room,
+       attributes=[
+          ...
+       ]
+    }
 }
 ```
 
@@ -136,6 +137,13 @@ A configuration example could be:
 This handler for NGSI only works with UTF-8 encoding. Thus, notifications must send a `Content-Type` header with `application/json; charset=utf-8` as value. Any other content type wont be considered and the notification will be discarded.
 
 It is expected UTF-8 character set is maintained by all the Flume elements in the configuration, in order the final sinks (or their backend abstractions, if they exist) compose their writes/inserts/upserts by properly specifying this kind of encoding.
+
+[Top](#top)
+
+### <a name="section2.3"></a>Quote escaping for `TextUnrestricted` attributes
+Cygnus escapes from `'` to `''` in attributes of type `TextUnrestricted` with the aim of avoiding injection attacks.
+
+Note that other attributes (i.e. with type different to `TextUnrestricted`) don't need such escaping as single quote (`'`) is a [forbidden character in Context Broker](https://fiware-orion.readthedocs.io/en/master/user/forbidden_characters/index.html) so that value will never arrives to Cygnus in notifications.
 
 [Top](#top)
 

@@ -584,7 +584,7 @@ public class SQLBackendImpl implements SQLBackend{
                                    String timestampKey,
                                    String timestampFormat,
                                    boolean attrNativeTypes)
-        throws CygnusPersistenceError, CygnusBadContextData, CygnusRuntimeError,  CygnusPersistenceError{
+        throws CygnusPersistenceError, CygnusBadContextData, CygnusRuntimeError {
 
         Connection connection = null;
         String upsertQuerys = new String();
@@ -666,7 +666,7 @@ public class SQLBackendImpl implements SQLBackend{
                                    String schema,
                                    String tableName,
                                    boolean attrNativeTypes)
-        throws CygnusPersistenceError, CygnusBadContextData, CygnusRuntimeError,  CygnusPersistenceError{
+        throws CygnusPersistenceError, CygnusBadContextData, CygnusRuntimeError {
 
         Connection connection = null;
         String insertQuery = new String();
@@ -783,7 +783,6 @@ public class SQLBackendImpl implements SQLBackend{
 
     private void insertErrorLog(String dataBase, String schema, String errorQuery, Exception exception)
             throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError, SQLException {
-        Statement stmt = null;
         java.util.Date date = new Date();
         Timestamp timestamp = new Timestamp(date.getTime());
         String errorTableName = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
@@ -829,8 +828,13 @@ public class SQLBackendImpl implements SQLBackend{
     private void persistError(String destination, String schema, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {
         try {
             if (persistErrors) {
-                createErrorTable(destination, schema);
-                insertErrorLog(destination, schema, query, exception);
+                try {
+                    // try insert without create error table before
+                    insertErrorLog(destination, schema, query, exception);
+                } catch (CygnusBadContextData ex) {
+                    createErrorTable(destination, schema);
+                    insertErrorLog(destination, schema, query, exception);
+                }
                 purgeErrorTable(destination, schema);
             }
             return;

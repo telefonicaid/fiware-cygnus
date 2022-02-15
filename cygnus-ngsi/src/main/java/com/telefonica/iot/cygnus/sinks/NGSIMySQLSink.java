@@ -420,14 +420,6 @@ public class NGSIMySQLSink extends NGSISink {
 
         String dbName = aggregator.getDbName(enableLowercase);
         String tableName = aggregator.getTableName(enableLowercase);
-        
-        // creating the database and the table has only sense if working in row mode, in column node
-        // everything must be provisioned in advance
-        if (aggregator instanceof NGSIGenericRowAggregator) {
-            String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
-            mySQLPersistenceBackend.createDestination(dbName);
-            mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
-        } // if
 
         if (lastDataMode.equals("upsert") || lastDataMode.equals("both")) {
             if (rowAttrPersistence) {
@@ -445,14 +437,39 @@ public class NGSIMySQLSink extends NGSISink {
                                                           attrNativeTypes);
             }
         }
-        if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
-            mySQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
-                                                      dbName,
-                                                      null, // no schema in mysql
-                                                      tableName,
-                                                      attrNativeTypes);
-        }
 
+        if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
+            try {
+                // Try to insert without create database and table before
+                mySQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                          dbName,
+                                                          null, // no schema in mysql
+                                                          tableName,
+                                                          attrNativeTypes);
+            } catch (CygnusPersistenceError | CygnusBadContextData | CygnusRuntimeError ex) {
+                // creating the database and the table has only sense if working in row mode, in column node
+                // everything must be provisioned in advance
+                if (rowAttrPersistence) {
+                    // This case will create a false error entry in error table
+                    String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+                    try {
+                        // Try to insert without create database before
+                        mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
+                    } catch (CygnusRuntimeError | CygnusPersistenceError ex2) {
+                        mySQLPersistenceBackend.createDestination(dbName);
+                        mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
+                    } // catch
+                    mySQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                              dbName,
+                                                              null, // no schema in mysql
+                                                              tableName,
+                                                              attrNativeTypes);
+                } else {
+                    // column
+                    throw ex;
+                }
+            } // catch
+        }
     } // persistAggregation
     
     /**

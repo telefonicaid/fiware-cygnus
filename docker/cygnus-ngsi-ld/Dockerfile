@@ -23,7 +23,7 @@ ARG GITHUB_REPOSITORY=fiware-cygnus
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "2.15.0-SNAPSHOT"
+ENV CYGNUS_VERSION "2.16.0-SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-ngsi-ld"
@@ -276,6 +276,11 @@ RUN ls -lsrt
 
 # Install
 RUN \
+    # FIXME: default yum repositories has been changed to vault due to CentOS 8 EOL on February 1st, 2022
+    # This is just a temporal solution so the build doesn't break while we find a new distro to use
+    sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-Linux-* &&\
+    sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-* &&\
+    yum upgrade -y && \
     # Add Cygnus user
     adduser ${CYGNUS_USER} && \
     yum -y install nc java-${JAVA_VERSION}-openjdk-devel git python2 && \
