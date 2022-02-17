@@ -27,6 +27,7 @@ import java.util.List;
 
 //import org.apache.log4j.BasicConfigurator;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.DefaultConfiguration;
 //import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Logger;
 import org.junit.Before;
@@ -45,7 +46,8 @@ import com.telefonica.iot.cygnus.backends.arcgis.restutils.RestFeatureTable;
  */
 public class RestFeatureTableTest implements ArcgisBaseTest {
 
-    static final Logger LOGGER = Logger.getLogger(RestFeatureTableTest.class);
+    //static final Logger LOGGER = Logger.getLogger(RestFeatureTableTest.class);
+    static final Logger LOGGER = LogManager.getLogger(RestFeatureTableTest.class);
 
     /**
      * 
