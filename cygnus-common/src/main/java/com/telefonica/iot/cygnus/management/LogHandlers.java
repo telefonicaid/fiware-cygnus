@@ -28,7 +28,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.Iterator;
 import java.util.Properties;
+import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.core.Appender;
@@ -36,7 +38,10 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.apache.logging.log4j.core.layout.PatternLayout.Builder;
 import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.config.Configuration;
 
 /**
  *
@@ -72,13 +77,16 @@ public final class LogHandlers {
             boolean firstTime = true;
             //Enumeration<Logger> loggers = LogManager.getLoggerRepository().getCurrentLoggers();
             LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
-            Enumeration<Logger> loggers = logContext.getConfiguration().getLoggers();
+            Map<String,LoggerConfig> loggers = logContext.getConfiguration().getLoggers();
 
             if (allLoggers) {
-                while (loggers.hasMoreElements()) {
-
-                    Logger logger = loggers.nextElement();
-                    String loggName = logger.getName();
+                //while (loggers.hasMoreElements()) {
+                Iterator<Map.Entry<String, LoggerConfig>> iterator = loggers.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry entry = iterator.next();
+                    //Logger logger = loggers.nextElement();
+                    String loggName = entry.getKey().toString();
+                    Logger logger = LogManager.getLogger(loggName);
                     Level level = logger.getLevel();
 
                     if (!firstTime) {
@@ -100,9 +108,13 @@ public final class LogHandlers {
             } else {
                 boolean loggerFound = false;
 
-                while (loggers.hasMoreElements()) {
-
-                    Logger log = loggers.nextElement();
+                //while (loggers.hasMoreElements()) {
+                Iterator<Map.Entry<String, LoggerConfig>> iterator = loggers.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry entry = iterator.next();
+                    String loggName = entry.getKey().toString();
+                    Logger log = LogManager.getLogger(loggName);
+                    //Logger log = loggers.nextElement();
                     if (log.getName().equals(loggerName)) {
                         loggersJson += "{\"name\":\"" + log.getName() + "\"}";
                         loggerFound = true;
@@ -113,7 +125,8 @@ public final class LogHandlers {
                 loggersJson += "]";
 
                 if (loggerFound) {
-                    LogManager.getLoggerRepository().getLogger(loggerName);
+                    //LogManager.getLoggerRepository().getLogger(loggerName);
+                    LogManager.getLogger(loggerName);
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.getWriter().println("{\"success\":\"true\",\"logger\":" + loggersJson + "}");
                     LOGGER.debug("Log4j logger successfully obtained");
@@ -339,12 +352,18 @@ public final class LogHandlers {
                     if ((isTransient == null) || (isTransient.equals("true"))) {
                         //Enumeration<Logger> currentLoggers = LogManager.getLoggerRepository().getCurrentLoggers();
                         LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
-                        Enumeration<Logger> loggers = logContext.getConfiguration().getLoggers();
+                        //Enumeration<Logger> loggers = logContext.getConfiguration().getLoggers();
+                        Map<String,LoggerConfig> loggers = logContext.getConfiguration().getLoggers();
                         boolean loggerFound = false;
 
-                        while (currentLoggers.hasMoreElements()) {
-                            Logger currentLogger = currentLoggers.nextElement();
-                            String loggerName = currentLogger.getName();
+                        //while (currentLoggers.hasMoreElements()) {
+                        Iterator<Map.Entry<String, LoggerConfig>> iterator = loggers.entrySet().iterator();
+                        while (iterator.hasNext()) {
+                            Map.Entry entry = iterator.next();
+                            //Logger currentLogger = currentLoggers.nextElement();
+                            //String loggerName = currentLogger.getName();
+                            String loggerName = entry.getKey().toString();
+                            Logger currentLogger = LogManager.getLogger(loggerName);
 
                             if (loggerName.equals(name)) {
                                 loggerFound = true;
@@ -352,9 +371,11 @@ public final class LogHandlers {
                         } // while
 
                         if (loggerFound) {
-                            Logger loggerUpdated = LogManager.getLoggerRepository().getLogger(name);
+                            //Logger loggerUpdated = LogManager.getLoggerRepository().getLogger(name);
+                            Logger loggerUpdated = LogManager.getLogger(name);
+
                             //loggerUpdated.setLevel(Level.toLevel(level));
-                            setLevel(loggerUpdated, level);
+                            setLevel(loggerUpdated, Level.toLevel(level));
                             response.setStatus(HttpServletResponse.SC_OK);
                             response.getWriter().println("{\"success\":\"true\","
                                 + "\"result\":\"Logger '" + name + "' updated succesfully\"}");
@@ -445,15 +466,15 @@ public final class LogHandlers {
         if ((isTransient == null) || (isTransient.equals("true"))) {
             //Enumeration<Logger> loggers = LogManager.getLoggerRepository().getCurrentLoggers();
             LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
-            Enumeration<Logger> loggers = logContext.getConfiguration().getLoggers();
+            Map<String,LoggerConfig> loggers = logContext.getConfiguration().getLoggers();
 
             if (allLoggers) {
-                
-                while (loggers.hasMoreElements()) {
+                //while (loggers.hasMoreElements()) {
+                loggers.forEach((loggName, config) -> {
                     //loggers.nextElement().setLevel(Level.OFF);
-                    setLevel(loggers.nextElement(), Level.OFF);
-                } // while
-                
+                    setLevel(LogManager.getLogger(loggName), Level.OFF);
+                }); // while
+
                 response.setStatus(HttpServletResponse.SC_OK);
                 response.getWriter().println("{\"success\":\"true\",\"result\":\"Loggers removed succesfully\"}");
                 LOGGER.debug("Log4j loggers removed succesfully");
@@ -462,9 +483,10 @@ public final class LogHandlers {
 
                 ArrayList<Logger> loggerNames = new ArrayList<>();
 
-                while (loggers.hasMoreElements()) {
-                    loggerNames.add(loggers.nextElement());
-                } // while
+                //while (loggers.hasMoreElements()) {
+                loggers.forEach((loggName, config) -> {
+                    loggerNames.add(LogManager.getLogger(loggName));
+                }); // while
 
                 if (loggerNames.contains(LogManager.getLogger(loggerName))) {
                     //LogManager.getLogger(loggerName).setLevel(Level.OFF);
@@ -583,7 +605,10 @@ public final class LogHandlers {
             String appendersJson;
 
             if (allAppenders) {
-                Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
+                //Enumeration appenders = LogManager.getRootLogger().getAllAppenders();
+                LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
+                Map<String,Appender> appendersMap = logContext.getConfiguration().getAppenders();
+                Enumeration<Appender> appenders = Collections.enumeration(appendersMap.values());
                 appendersJson = ManagementInterfaceUtils.getStringAppender(appenders);
 
                 if (appendersJson.equals("[]")) {
@@ -599,7 +624,9 @@ public final class LogHandlers {
             } else {
 
                 try {
-                    Appender app = LogManager.getRootLogger().getAppender(appenderName);
+                    //Appender app = LogManager.getRootLogger().getAppender(appenderName);
+                    LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
+                    Appender app = logContext.getConfiguration().getAppender(appenderName);
                     String name = app.getName();
                     PatternLayout layout = (PatternLayout) app.getLayout();
                     String layoutStr = layout.getConversionPattern();
@@ -834,7 +861,10 @@ public final class LogHandlers {
                 File file = new File(pathToFile);
                 
                 if ((isTransient == null) || (isTransient.equals("true"))) {
-                    Enumeration<Appender> currentAppenders = LogManager.getRootLogger().getAllAppenders();
+                    //Enumeration<Appender> currentAppenders = LogManager.getRootLogger().getAllAppenders();
+                    LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
+                    Map<String,Appender> currentAppendersMap = logContext.getConfiguration().getAppenders();
+                    Enumeration<Appender> currentAppenders = Collections.enumeration(currentAppendersMap.values());
                     boolean appenderFound = false;
 
                     while (currentAppenders.hasMoreElements()) {
@@ -846,11 +876,15 @@ public final class LogHandlers {
                         } // if
                     } // while
 
-                    PatternLayout patternLayout = new PatternLayout(pattern);
+                    //PatternLayout patternLayout = new PatternLayout(pattern);
+                    PatternLayout p = PatternLayout.createDefaultLayout();
+                    PatternLayout.Builder pb = p.newBuilder();
+                    PatternLayout patternLayout = pb.withPattern(pattern).build();
 
                     if (appenderFound) {
-                        Appender appUpdated = LogManager.getRootLogger().getAppender(name);
-                        appUpdated.setLayout(patternLayout);
+                        //Appender appUpdated = LogManager.getRootLogger().getAppender(name);
+                        Appender appUpdated = logContext.getConfiguration().getAppender(name);
+                        //appUpdated.setLayout(patternLayout);
                         response.setStatus(HttpServletResponse.SC_OK);
                         response.getWriter().println("{\"success\":\"true\","
                             + "\"result\":\"Appender '" + name + "' updated succesfully\"}");
@@ -951,7 +985,14 @@ public final class LogHandlers {
         if ((isTransient == null) || (isTransient.equals("true"))) {
 
             if (allAppenders) {
-                LogManager.getRootLogger().removeAllAppenders();
+                //LogManager.getRootLogger().removeAllAppenders();
+                LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
+                Map<String,Appender> appenders = logContext.getConfiguration().getAppenders();
+                Configuration config = logContext.getConfiguration();
+                appenders.forEach((name, appender) -> {
+                        config.getRootLogger().removeAppender(name);
+                });
+                logContext.updateLoggers();
                 response.setStatus(HttpServletResponse.SC_OK);
                 response.getWriter().println("{\"success\":\"true\",\"result\":\"Appenders removed succesfully\"}}");
                 LOGGER.debug("Log4j appenders removed succesfully");
@@ -959,8 +1000,11 @@ public final class LogHandlers {
 
                 try {
                     // Check if appender already exists
-                    Appender delete = LogManager.getRootLogger().getAppender(appenderName);
-                    LogManager.getRootLogger().removeAppender(delete);
+                    LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
+                    Configuration config = logContext.getConfiguration();
+                    //Appender delete = LogManager.getRootLogger().getAppender(appenderName);
+                    //LogManager.getRootLogger().removeAppender(delete);
+                    config.getRootLogger().removeAppender(appenderName);
                     response.setStatus(HttpServletResponse.SC_OK);
                     response.getWriter().println("{\"success\":\"true\",\"result\":\"Appender '" + appenderName
                             + "'removed succesfully\"}");
