@@ -34,6 +34,7 @@ import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -861,7 +862,6 @@ public final class LogHandlers {
                 File file = new File(pathToFile);
                 
                 if ((isTransient == null) || (isTransient.equals("true"))) {
-                    //Enumeration<Appender> currentAppenders = LogManager.getRootLogger().getAllAppenders();
                     LoggerContext logContext = (LoggerContext) LogManager.getContext(false);
                     Map<String,Appender> currentAppendersMap = logContext.getConfiguration().getAppenders();
                     Enumeration<Appender> currentAppenders = Collections.enumeration(currentAppendersMap.values());
@@ -883,8 +883,12 @@ public final class LogHandlers {
 
                     if (appenderFound) {
                         //Appender appUpdated = LogManager.getRootLogger().getAppender(name);
-                        Appender appUpdated = logContext.getConfiguration().getAppender(name);
                         //appUpdated.setLayout(patternLayout);
+                        ConsoleAppender newAppender = ConsoleAppender.createDefaultAppenderForLayout(patternLayout);
+                        logContext.getConfiguration().addAppender(newAppender);
+                        logContext.getRootLogger().addAppender(logContext.getConfiguration().getAppender(newAppender.getName()));
+                        logContext.updateLoggers();
+
                         response.setStatus(HttpServletResponse.SC_OK);
                         response.getWriter().println("{\"success\":\"true\","
                             + "\"result\":\"Appender '" + name + "' updated succesfully\"}");
