@@ -17,8 +17,10 @@
  */
 package com.telefonica.iot.cygnus.backends.sql;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+// import org.apache.log4j.Level;
+// import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Test;
 
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;

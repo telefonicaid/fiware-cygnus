@@ -19,8 +19,10 @@ package com.telefonica.iot.cygnus.handlers;
 
 import com.telefonica.iot.cygnus.metrics.CygnusMetrics;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+// import org.apache.log4j.Level;
+// import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;

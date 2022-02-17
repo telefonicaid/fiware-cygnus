@@ -40,8 +40,10 @@ import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.apache.flume.Context;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+// import org.apache.log4j.Level;
+// import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Test;
 
 import java.util.ArrayList;

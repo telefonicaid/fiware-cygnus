@@ -7,8 +7,10 @@ package com.telefonica.iot.cygnus.metrics;
 
 import com.telefonica.iot.cygnus.metrics.CygnusMetrics.Metrics;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+// import org.apache.log4j.Level;
+// import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 

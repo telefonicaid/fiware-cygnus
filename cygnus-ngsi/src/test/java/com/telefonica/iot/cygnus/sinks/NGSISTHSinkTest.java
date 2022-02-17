@@ -21,8 +21,10 @@ import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHe
 import com.telefonica.iot.cygnus.utils.NGSIUtilsForTests;
 import java.util.Arrays;
 import org.apache.flume.Context;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+// import org.apache.log4j.Level;
+// import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 

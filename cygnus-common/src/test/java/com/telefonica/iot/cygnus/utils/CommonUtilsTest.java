@@ -19,9 +19,11 @@ package com.telefonica.iot.cygnus.utils;
 
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import java.text.ParseException;
-import java.util.logging.Logger;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+//import java.util.logging.Logger;
+// import org.apache.log4j.Level;
+// import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import static org.junit.Assert.assertEquals;

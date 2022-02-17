@@ -31,8 +31,10 @@ import org.apache.flume.SourceRunner;
 import org.apache.flume.source.EventDrivenSourceRunner;
 import org.apache.flume.source.http.HTTPSource;
 import org.apache.flume.source.http.HTTPSourceHandler;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+// import org.apache.log4j.Level;
+// import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 

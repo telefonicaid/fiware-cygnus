@@ -23,8 +23,10 @@ import static org.junit.Assert.assertTrue;
 import java.security.Permission;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+// import org.apache.log4j.Level;
+// import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

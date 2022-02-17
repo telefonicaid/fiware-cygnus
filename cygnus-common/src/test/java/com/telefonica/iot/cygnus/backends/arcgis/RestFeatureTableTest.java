@@ -25,8 +25,10 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+//import org.apache.log4j.BasicConfigurator;
+import org.apache.logging.log4j.core.config.Configurator;
+//import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,7 +52,8 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
      */
     @Before
     public void setUp() {
-        BasicConfigurator.configure();
+        //BasicConfigurator.configure();
+        Configurator.initialize(new DefaultConfiguration());
     }
 
     /**

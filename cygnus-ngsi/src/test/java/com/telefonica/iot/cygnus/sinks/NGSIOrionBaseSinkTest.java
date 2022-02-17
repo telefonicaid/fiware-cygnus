@@ -21,8 +21,10 @@ import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHe
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+// import org.apache.log4j.Level;
+// import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;

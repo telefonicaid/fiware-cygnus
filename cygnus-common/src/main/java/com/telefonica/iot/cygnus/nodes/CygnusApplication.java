@@ -44,7 +44,8 @@ import org.apache.flume.node.Application;
 import org.apache.flume.node.MaterializedConfiguration;
 import org.apache.flume.node.PollingPropertiesFileConfigurationProvider;
 import org.apache.flume.node.PropertiesFileConfigurationProvider;
-import org.slf4j.MDC;
+//import org.slf4j.MDC;
+import org.apache.logging.log4j.ThreadContext
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -178,11 +179,12 @@ public class CygnusApplication extends Application {
         try {
             // Set some MDC logging fields to 'N/A' for this thread
             // Later in this method the component field will be given a value
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_COMP, CommonConstants.NA);
+            ThreadContext.put("id", UUID.randomUUID().toString());
+            ThreadContext.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_COMP, CommonConstants.NA);
         
             // Print Cygnus starting trace including version
             LOGGER.info("Starting Cygnus, version " + CommonUtils.getCygnusVersion() + "."
@@ -309,7 +311,8 @@ public class CygnusApplication extends Application {
             } // if else
                  
             // Set MDC logging field value for component
-            MDC.put(CommonConstants.LOG4J_COMP, commandLine.getOptionValue('n'));
+            //MDC.put(CommonConstants.LOG4J_COMP, commandLine.getOptionValue('n'));
+            ThreadContext.put(CommonConstants.LOG4J_COMP, commandLine.getOptionValue('n'));
                         
             // start the Cygnus application
             application.start();

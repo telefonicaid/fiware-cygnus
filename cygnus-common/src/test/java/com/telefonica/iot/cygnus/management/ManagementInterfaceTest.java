@@ -40,8 +40,10 @@ import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHe
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import javax.servlet.http.HttpServletResponseWrapper;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+// import org.apache.log4j.Level;
+// import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
