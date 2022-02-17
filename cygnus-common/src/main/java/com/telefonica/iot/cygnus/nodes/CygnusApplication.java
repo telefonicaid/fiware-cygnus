@@ -45,7 +45,7 @@ import org.apache.flume.node.MaterializedConfiguration;
 import org.apache.flume.node.PollingPropertiesFileConfigurationProvider;
 import org.apache.flume.node.PropertiesFileConfigurationProvider;
 //import org.slf4j.MDC;
-import org.apache.logging.log4j.ThreadContext
+import org.apache.logging.log4j.ThreadContext;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
