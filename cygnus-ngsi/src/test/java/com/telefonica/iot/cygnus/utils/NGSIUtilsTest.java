@@ -28,6 +28,9 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 // import org.apache.log4j.LogManager;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.junit.Test;
@@ -44,7 +47,11 @@ public class NGSIUtilsTest {
      * Constructor.
      */
     public NGSIUtilsTest() {
-        LogManager.getRootLogger().setLevel(Level.FATAL);
+        //LogManager.getRootLogger().setLevel(Level.FATAL);
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        Configuration config = ctx.getConfiguration();
+        LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+        loggerConfig.setLevel(Level.FATAL);
     } // NGSIUtilsTest
 
     /**

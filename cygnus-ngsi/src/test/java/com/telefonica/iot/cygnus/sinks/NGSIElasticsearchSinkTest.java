@@ -89,7 +89,11 @@ public class NGSIElasticsearchSinkTest {
          */
         @BeforeClass
         public static void setUpClass() {
-            LogManager.getRootLogger().setLevel(Level.FATAL);
+            //LogManager.getRootLogger().setLevel(Level.FATAL);
+            LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+            Configuration config = ctx.getConfiguration();
+            LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+            loggerConfig.setLevel(Level.FATAL);
         } // setUpClass
 
         @Parameters
@@ -369,7 +373,11 @@ public class NGSIElasticsearchSinkTest {
          */
         @BeforeClass
         public static void setUpClass() {
-            LogManager.getRootLogger().setLevel(Level.FATAL);
+            //LogManager.getRootLogger().setLevel(Level.FATAL);
+            LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+            Configuration config = ctx.getConfiguration();
+            LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+            loggerConfig.setLevel(Level.FATAL);
         } // setUpClass
 
         @Mock
@@ -547,7 +555,11 @@ public class NGSIElasticsearchSinkTest {
          */
         @BeforeClass
         public static void setUpClass() {
-            LogManager.getRootLogger().setLevel(Level.FATAL);
+            //LogManager.getRootLogger().setLevel(Level.FATAL);
+            LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+            Configuration config = ctx.getConfiguration();
+            LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+            loggerConfig.setLevel(Level.FATAL);
         } // setUpClass
 
         @Mock
@@ -1721,7 +1733,11 @@ public class NGSIElasticsearchSinkTest {
          */
         @BeforeClass
         public static void setUpClass() {
-            LogManager.getRootLogger().setLevel(Level.FATAL);
+            //LogManager.getRootLogger().setLevel(Level.FATAL);
+            LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+            Configuration config = ctx.getConfiguration();
+            LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+            loggerConfig.setLevel(Level.FATAL);
         } // setUpClass
 
         @Parameters
