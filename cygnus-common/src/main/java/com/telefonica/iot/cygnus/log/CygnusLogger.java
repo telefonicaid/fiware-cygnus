@@ -17,8 +17,11 @@
  */
 package com.telefonica.iot.cygnus.log;
 
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Wrapper class for log4j Logger class. Reference:
@@ -37,7 +40,8 @@ public class CygnusLogger {
      * @param name
      */
     public CygnusLogger(String name) {
-        this.logger = Logger.getLogger(name);
+        //this.logger = LoggerM.getLogger(name);
+        this.logger = LogManager.getLogger(name);
     } // CygnusLogger
     
     /**
@@ -54,7 +58,8 @@ public class CygnusLogger {
      */
     public void fatal(Object msg) {
         try {
-            logger.log(fqcn, Level.FATAL, msg, null);
+            //logger.log(fqcn, Level.FATAL, msg, null);
+            logger.log(Level.FATAL, msg, null);
         } catch (Exception e) {
             traceAndExit(e);
         } // try catch
@@ -66,7 +71,8 @@ public class CygnusLogger {
      */
     public void error(Object msg) {
         try {
-            logger.log(fqcn, Level.ERROR, msg, null);
+            //logger.log(fqcn, Level.ERROR, msg, null);
+            logger.log(Level.ERROR, msg, null);
         } catch (Exception e) {
             traceAndExit(e);
         } // try catch
@@ -78,7 +84,8 @@ public class CygnusLogger {
      */
     public void debug(Object msg) {
         try {
-            logger.log(fqcn, Level.DEBUG, msg, null);
+            //logger.log(fqcn, Level.DEBUG, msg, null);
+            logger.log(Level.DEBUG, msg, null);
         } catch (Exception e) {
             traceAndExit(e);
         } // try catch
@@ -90,7 +97,8 @@ public class CygnusLogger {
      */
     public void info(Object msg) {
         try {
-            logger.log(fqcn, Level.INFO, msg, null);
+            //logger.log(fqcn, Level.INFO, msg, null);
+            logger.log(Level.INFO, msg, null);
         } catch (Exception e) {
             traceAndExit(e);
         } // try catch
@@ -102,7 +110,8 @@ public class CygnusLogger {
      */
     public void warn(Object msg) {
         try {
-            logger.log(fqcn, Level.WARN, msg, null);
+            //logger.log(fqcn, Level.WARN, msg, null);
+            logger.log(Level.WARN, msg, null);
         } catch (Exception e) {
             traceAndExit(e);
         } // try catch
@@ -115,7 +124,8 @@ public class CygnusLogger {
      */
     public void trace(Object msg) {
         try {
-            logger.log(fqcn, Level.TRACE, msg, null);
+            //logger.log(fqcn, Level.TRACE, msg, null);
+            logger.log(Level.TRACE, msg, null);
         } catch (Exception e) {
             traceAndExit(e);
         } // try catch
