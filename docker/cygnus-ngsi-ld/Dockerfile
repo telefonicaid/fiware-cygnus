@@ -321,6 +321,8 @@ RUN \
     chmod +x ${FLUME_HOME}/bin/cygnus-flume-ng && \
     echo "INFO: Instantiate some configuration files" && \
     cp ${CYGNUS_HOME}/cygnus-common/conf/log4j2.properties.template ${FLUME_HOME}/conf/log4j2.properties && \
+    # Keep log4j.properties v1 until flume support log4j2
+    cp ${CYGNUS_HOME}/cygnus-common/conf/log4j.properties.template ${FLUME_HOME}/conf/log4j.properties && \
     echo "INFO: Create Cygnus log folder" && \
     mkdir -p /var/log/cygnus && \
     chmod 777 /var/log/cygnus && \
