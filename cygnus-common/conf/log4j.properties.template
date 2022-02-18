@@ -65,7 +65,7 @@ log4j.appender.DAILY.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SS
 
 # Console appender, i.e. printing logs in the standar output.
 # Add "console" to flume.root.logger above if you want to use this.
-log4j.appender.console=org.apache.log4j.core.appender.ConsoleAppender
+log4j.appender.console=org.apache.log4j.ConsoleAppender
 log4j.appender.console.target=System.err
 log4j.appender.console.layout=org.apache.log4j.PatternLayout
 log4j.appender.console.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSS}Z | lvl=%p | corr=%X{correlatorId} | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | comp=%X{agent} | op=%M | msg=%C[%L] : %m%n
