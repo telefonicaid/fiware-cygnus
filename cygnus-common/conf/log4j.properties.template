@@ -56,7 +56,7 @@ log4j.appender.LOGFILE.layout.ConversionPattern=time=%d{yyyy-MM-dd}T%d{HH:mm:ss.
 # This uses the updated rolling file appender from log4j-extras that supports a reliable time-based rolling policy.
 # See http://logging.apache.org/log4j/companions/extras/apidocs/org/apache/log4j/rolling/TimeBasedRollingPolicy.html
 # Add "DAILY" to flume.root.logger above if you want to use this.
-log4j.appender.DAILY=org.apache.log4j.RollingFileAppender
+log4j.appender.DAILY=org.apache.log4j.rolling.RollingFileAppender
 log4j.appender.DAILY.rollingPolicy=org.apache.log4j.rolling.TimeBasedRollingPolicy
 log4j.appender.DAILY.rollingPolicy.ActiveFileName=${flume.log.dir}/${flume.log.file}
 log4j.appender.DAILY.rollingPolicy.FileNamePattern=${flume.log.dir}/${flume.log.file}.%d{yyyy-MM-dd}
