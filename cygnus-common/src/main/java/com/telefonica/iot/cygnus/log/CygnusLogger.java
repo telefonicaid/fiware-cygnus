@@ -17,8 +17,8 @@
  */
 package com.telefonica.iot.cygnus.log;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Level;
 
 /**
@@ -39,7 +39,7 @@ public class CygnusLogger {
      */
     public CygnusLogger(String name) {
         //this.logger = LoggerM.getLogger(name);
-        this.logger = LoggerFactory.getLogger(name);
+        this.logger = LogManager.getLogger(name);
     } // CygnusLogger
     
     /**
