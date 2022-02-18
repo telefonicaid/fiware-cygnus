@@ -32,6 +32,7 @@ public class CygnusMetricsTest {
         Configuration config = ctx.getConfiguration();
         LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
         loggerConfig.setLevel(Level.FATAL);
+        ctx.updateLoggers();
     } // CygnusMetricsTest
 
     /**
