@@ -320,7 +320,7 @@ RUN \
     cp ${CYGNUS_HOME}/cygnus-common/target/classes/cygnus-flume-ng ${FLUME_HOME}/bin/ && \
     chmod +x ${FLUME_HOME}/bin/cygnus-flume-ng && \
     echo "INFO: Instantiate some configuration files" && \
-    cp ${CYGNUS_HOME}/cygnus-common/conf/log4j.properties.template ${FLUME_HOME}/conf/log4j.properties && \
+    cp ${CYGNUS_HOME}/cygnus-common/conf/log4j2.properties.template ${FLUME_HOME}/conf/log4j2.properties && \
     echo "INFO: Create Cygnus log folder" && \
     mkdir -p /var/log/cygnus && \
     chmod 777 /var/log/cygnus && \
