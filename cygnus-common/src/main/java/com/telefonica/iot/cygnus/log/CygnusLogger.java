@@ -56,7 +56,7 @@ public class CygnusLogger {
     public void fatal(Object msg) {
         try {
             //logger.log(fqcn, Level.FATAL, msg, null);
-            logger.log(Level.FATAL, msg, null);
+            logger.log(Level.FATAL, msg);
         } catch (Exception e) {
             traceAndExit(e);
         } // try catch
@@ -69,7 +69,7 @@ public class CygnusLogger {
     public void error(Object msg) {
         try {
             //logger.log(fqcn, Level.ERROR, msg, null);
-            logger.log( Level.ERROR, msg, null);
+            logger.log( Level.ERROR, msg);
         } catch (Exception e) {
             traceAndExit(e);
         } // try catch
@@ -82,12 +82,7 @@ public class CygnusLogger {
     public void debug(Object msg) {
         try {
             //logger.log(fqcn, Level.DEBUG, msg, null);
-            logger.log(Level.DEBUG, msg, null);
             logger.log(Level.DEBUG, msg);
-            logger.log(Level.DEBUG, fqcn, msg);
-            logger.debug(fqcn, msg, null);
-            logger.debug(fqcn, msg);
-            logger.debug(msg);
         } catch (Exception e) {
             traceAndExit(e);
         } // try catch
@@ -100,7 +95,7 @@ public class CygnusLogger {
     public void info(Object msg) {
         try {
             //logger.log(fqcn, Level.INFO, msg, null);
-            logger.log(Level.INFO, msg, null);
+            logger.log(Level.INFO, msg);
         } catch (Exception e) {
             traceAndExit(e);
         } // try catch
@@ -113,7 +108,7 @@ public class CygnusLogger {
     public void warn(Object msg) {
         try {
             // logger.log(fqcn, Level.WARN, msg, null);
-            logger.log(Level.WARN, msg, null);
+            logger.log(Level.WARN, msg);
         } catch (Exception e) {
             traceAndExit(e);
         } // try catch
@@ -127,7 +122,7 @@ public class CygnusLogger {
     public void trace(Object msg) {
         try {
             //logger.log(fqcn, Level.TRACE, msg, null);
-            logger.log(Level.TRACE, msg, null);
+            logger.log(Level.TRACE, msg);
         } catch (Exception e) {
             traceAndExit(e);
         } // try catch
