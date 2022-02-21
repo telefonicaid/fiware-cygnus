@@ -317,7 +317,7 @@ public class CygnusApplication extends Application {
                  
             // Set MDC logging field value for component
             //MDC.put(CommonConstants.LOG4J_COMP, commandLine.getOptionValue('n'));
-            ThreadContext.put(CommonConstants.LOG4J_COMP, commandLine.getOptionValue('n'));
+            ThreadContext.put(CommonConstants.LOG4J_COMP, agentName);
                         
             // start the Cygnus application
             application.start();
