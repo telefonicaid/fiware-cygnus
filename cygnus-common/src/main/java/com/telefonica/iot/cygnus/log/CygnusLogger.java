@@ -83,6 +83,11 @@ public class CygnusLogger {
         try {
             //logger.log(fqcn, Level.DEBUG, msg, null);
             logger.log(Level.DEBUG, msg, null);
+            logger.log(Level.DEBUG, msg);
+            logger.log(Level.DEBUG, fqcn, msg);
+            logger.debug(fqcn, msg, null);
+            logger.debug(fqcn, msg);
+            logger.debug(msg);
         } catch (Exception e) {
             traceAndExit(e);
         } // try catch
