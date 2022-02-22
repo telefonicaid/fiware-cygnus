@@ -45,6 +45,7 @@ import org.apache.http.MethodNotSupportedException;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 //import org.slf4j.MDC;
 import org.apache.logging.log4j.ThreadContext;
+import java.util.UUID;
 
 /**
  *
