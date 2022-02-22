@@ -170,6 +170,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         // org.apache.log4j.MDC.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
         // org.apache.log4j.MDC.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
         // org.apache.log4j.MDC.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
+        ThreadContext.put("id", UUID.randomUUID().toString());
         ThreadContext.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
         ThreadContext.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
         ThreadContext.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
