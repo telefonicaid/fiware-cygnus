@@ -99,6 +99,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     private int num_rollback_by_channel_exception;
     private int num_rollback_by_exception;
 
+    private static final String DEF_AGENT_NAME = "cygnus-ngsi";
+
     /**
      * Constructor.
      */
@@ -352,6 +354,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
     @Override
     public void start() {
+        ThreadContext.put(CommonConstants.LOG4J_COMP, DEF_AGENT_NAME);
         super.start();
 
         if (invalidConfiguration) {

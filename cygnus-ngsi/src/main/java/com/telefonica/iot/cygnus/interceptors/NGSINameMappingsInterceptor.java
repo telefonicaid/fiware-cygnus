@@ -54,6 +54,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
     private final boolean invalidConfiguration;
     private NameMappings nameMappings;
     private PeriodicalNameMappingsReader periodicalNameMappingsReader;
+    private static final String DEF_AGENT_NAME = "cygnus-ngsi";
 
     /**
      * Constructor.
@@ -204,7 +205,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             ThreadContext.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
             ThreadContext.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
             ThreadContext.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
-            ThreadContext.put(CommonConstants.LOG4J_COMP, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_COMP, DEF_AGENT_NAME);
             while (!stop) {
                 // Check if the configuration has changed
                 File groupingRulesFile = new File(nameMappingsConfFile);

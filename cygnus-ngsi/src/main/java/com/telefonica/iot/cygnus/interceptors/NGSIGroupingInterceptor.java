@@ -47,7 +47,8 @@ public class NGSIGroupingInterceptor implements Interceptor {
     private final boolean enableEncoding;
     private ConfigurationReader configurationReader;
     private boolean invalidConfiguration = false;
-    
+    private static final String DEF_AGENT_NAME = "cygnus-ngsi";
+
     /**
      * Constructor.
      * @param groupingRulesFileName
@@ -241,7 +242,7 @@ public class NGSIGroupingInterceptor implements Interceptor {
             ThreadContext.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
             ThreadContext.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
             ThreadContext.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
-            ThreadContext.put(CommonConstants.LOG4J_COMP, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_COMP, DEF_AGENT_NAME);
             while (!stop) {
                 // check if the configuration has changed
                 File groupingRulesFile = new File(groupingRulesFileName);
