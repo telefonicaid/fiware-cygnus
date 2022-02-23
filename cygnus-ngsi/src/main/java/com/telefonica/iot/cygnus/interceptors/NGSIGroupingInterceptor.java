@@ -30,6 +30,9 @@ import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.interceptor.Interceptor;
 
+import org.apache.logging.log4j.ThreadContext;
+import java.util.UUID;
+
 /**
  * Custom interceptor in charge of extracting the destination where the data must be persisted. This destination is
  * added as a 'destination' header.
@@ -233,6 +236,12 @@ public class NGSIGroupingInterceptor implements Interceptor {
         
         @Override
         public void run() {
+            ThreadContext.put("id", UUID.randomUUID().toString());
+            ThreadContext.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_COMP, CommonConstants.NA);
             while (!stop) {
                 // check if the configuration has changed
                 File groupingRulesFile = new File(groupingRulesFileName);
