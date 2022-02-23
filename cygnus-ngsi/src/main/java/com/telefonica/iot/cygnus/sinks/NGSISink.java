@@ -354,8 +354,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
     @Override
     public void start() {
-        ThreadContext.put(CommonConstants.LOG4J_COMP, DEF_AGENT_NAME);
         super.start();
+        ThreadContext.put(CommonConstants.LOG4J_COMP, DEF_AGENT_NAME);
 
         if (invalidConfiguration) {
             LOGGER.info("[" + this.getName() + "] Startup completed. Nevertheless, there are errors "
