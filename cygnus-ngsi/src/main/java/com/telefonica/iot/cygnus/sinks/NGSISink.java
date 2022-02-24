@@ -702,6 +702,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         ThreadContext.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
         ThreadContext.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
         ThreadContext.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
+        ThreadContext.put(CommonConstants.LOG4J_COMP, DEF_AGENT_NAME);
     } // setMDCToNA
 
     /**
