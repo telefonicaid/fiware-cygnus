@@ -66,6 +66,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
     private String notificationTarget;
     private String defaultService;
     private String defaultServicePath;
+    private static final String DEF_AGENT_NAME = "cygnus-ngsi";
     
     // shared variables, making them static all the instances of this class will share them
     private static final Object LOCK = new Object();
@@ -176,6 +177,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         ThreadContext.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
         ThreadContext.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
         ThreadContext.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
+        ThreadContext.put(CommonConstants.LOG4J_COMP, DEF_AGENT_NAME);
 
         // Result
         ArrayList<Event> ngsiEvents = new ArrayList<>();
