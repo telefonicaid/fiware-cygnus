@@ -44,7 +44,6 @@ import org.apache.flume.node.Application;
 import org.apache.flume.node.MaterializedConfiguration;
 import org.apache.flume.node.PollingPropertiesFileConfigurationProvider;
 import org.apache.flume.node.PropertiesFileConfigurationProvider;
-//import org.slf4j.MDC;
 import org.apache.logging.log4j.ThreadContext;
 import java.util.UUID;
 
@@ -316,7 +315,6 @@ public class CygnusApplication extends Application {
             } // if else
                  
             // Set MDC logging field value for component
-            //MDC.put(CommonConstants.LOG4J_COMP, commandLine.getOptionValue('n'));
             ThreadContext.put(CommonConstants.LOG4J_COMP, agentName);
                         
             // start the Cygnus application

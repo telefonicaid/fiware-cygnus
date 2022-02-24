@@ -35,8 +35,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpResponse;
-// import org.apache.log4j.Level;
-// import org.apache.log4j.LogManager;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -94,7 +92,6 @@ public class ElasticsearchBackendImplTest {
          */
         @BeforeClass
         public static void setUpClass() {
-            //LogManager.getRootLogger().setLevel(Level.FATAL);
             LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
             Configuration config = ctx.getConfiguration();
             LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
@@ -247,7 +244,6 @@ public class ElasticsearchBackendImplTest {
          */
         @BeforeClass
         public static void setUpClass() {
-            //LogManager.getRootLogger().setLevel(Level.FATAL);
             LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
             Configuration config = ctx.getConfiguration();
             LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
@@ -335,7 +331,6 @@ public class ElasticsearchBackendImplTest {
          */
         @BeforeClass
         public static void setUpClass() {
-            //LogManager.getRootLogger().setLevel(Level.FATAL);
             LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
             Configuration config = ctx.getConfiguration();
             LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
@@ -411,7 +406,6 @@ public class ElasticsearchBackendImplTest {
          */
         @BeforeClass
         public static void setUpClass() {
-            //LogManager.getRootLogger().setLevel(Level.FATAL);
             LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
             Configuration config = ctx.getConfiguration();
             LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
@@ -526,7 +520,6 @@ public class ElasticsearchBackendImplTest {
          */
         @BeforeClass
         public static void setUpClass() {
-            //LogManager.getRootLogger().setLevel(Level.FATAL);
             LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
             Configuration config = ctx.getConfiguration();
             LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);

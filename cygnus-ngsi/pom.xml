@@ -52,10 +52,6 @@
           <groupId>org.apache.logging.log4j</groupId>
           <artifactId>log4j-slf4j-impl</artifactId>
           <version>2.17.1</version>
-          <!-- <scope>test</scope> -->
-            <!-- <groupId>org.slf4j</groupId> -->
-            <!-- <artifactId>slf4j-simple</artifactId> -->
-            <!-- <version>1.7.21</version> -->
         </dependency>
         <!-- Required by NameMapper -->
         <dependency>

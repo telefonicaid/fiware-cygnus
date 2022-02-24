@@ -31,8 +31,6 @@ import org.apache.flume.SourceRunner;
 import org.apache.flume.source.EventDrivenSourceRunner;
 import org.apache.flume.source.http.HTTPSource;
 import org.apache.flume.source.http.HTTPSourceHandler;
-// import org.apache.log4j.Level;
-// import org.apache.log4j.LogManager;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -51,7 +49,6 @@ public class MetricsHandlersTest {
      * Constructor.
      */
     public MetricsHandlersTest() {
-        //LogManager.getRootLogger().setLevel(Level.FATAL);
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         Configuration config = ctx.getConfiguration();
         LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);

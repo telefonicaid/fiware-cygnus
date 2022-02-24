@@ -259,7 +259,6 @@ public abstract class HttpBackend {
          * @param entity
          */
         PrivilegedRequest(String method, String url, ArrayList<Header> headers, StringEntity entity) {
-            //this.logger = Logger.getLogger(PrivilegedRequest.class);
             this.logger = LogManager.getLogger(PrivilegedRequest.class);
             this.method = method;
             this.url = url;

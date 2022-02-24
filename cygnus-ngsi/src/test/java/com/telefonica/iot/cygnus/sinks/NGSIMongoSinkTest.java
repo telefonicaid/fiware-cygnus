@@ -36,8 +36,6 @@ import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
 import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.flume.Context;
-// import org.apache.log4j.Level;
-// import org.apache.log4j.LogManager;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -66,7 +64,6 @@ public class NGSIMongoSinkTest {
     public static final String QUOTATION_MARK_CHAR = "";
 
     public NGSIMongoSinkTest() {
-        //LogManager.getRootLogger().setLevel(Level.FATAL);
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         Configuration config = ctx.getConfiguration();
         LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);

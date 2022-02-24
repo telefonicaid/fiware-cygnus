@@ -40,8 +40,6 @@ import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.apache.flume.Context;
-// import org.apache.log4j.Level;
-// import org.apache.log4j.LogManager;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -64,7 +62,6 @@ public class NGSICKANSinkTest {
      * Constructor.
      */
     public NGSICKANSinkTest() {
-        //LogManager.getRootLogger().setLevel(Level.FATAL);
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         Configuration config = ctx.getConfiguration();
         LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
