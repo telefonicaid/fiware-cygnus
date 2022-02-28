@@ -148,23 +148,20 @@ public class NGSIEvent implements Event {
      * @return The entity for naming
      */
     public String getEntityForNaming(boolean enableGrouping, boolean enableMappings, boolean enableEncoding) {
+        String concatenator = enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : CommonConstants.OLD_CONCATENATOR;
         if (enableGrouping) {
             return headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY);
         } else if (enableMappings) {
             if (mappedCE.getType() == null || mappedCE.getType().isEmpty()) {
                 return mappedCE.getId();
             } else {
-                return mappedCE.getId()
-                        + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : CommonConstants.OLD_CONCATENATOR)
-                        + mappedCE.getType();
+                return mappedCE.getId().isEmpty() ? mappedCE.getType() : mappedCE.getId() + concatenator + mappedCE.getType();
             } // if else
         } else {
             if (originalCE.getType() == null || originalCE.getType().isEmpty()) {
                 return originalCE.getId(); // should never occur since Orion does not allow it
             } else {
-                return originalCE.getId()
-                        + (enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : CommonConstants.OLD_CONCATENATOR)
-                        + originalCE.getType();
+                return originalCE.getId().isEmpty() ? originalCE.getType() : originalCE.getId() + concatenator + originalCE.getType();
             } // if else
         } // if else
     } // getEntityForNaming
