@@ -88,7 +88,6 @@ public class CygnusApplication extends Application {
     private static final int DEF_MGMT_IF_PORT = 8081;
     private static final int DEF_GUI_PORT = 8082;
     private static final int DEF_POLLING_INTERVAL = 30;
-    private static final String DEF_AGENT_NAME = "cygnus-ngsi";
     private boolean firstTime = true;
     
     private static YAFS yafs = null;
@@ -232,7 +231,7 @@ public class CygnusApplication extends Application {
             CommandLine commandLine = parser.parse(options, args);
 
             File configurationFile = new File(commandLine.getOptionValue('f'));
-            String agentName = DEF_AGENT_NAME;
+            String agentName = CommonConstants.DEF_AGENT_NAME;
             if (commandLine.hasOption('n')) {
                 agentName = commandLine.getOptionValue('n');
             } // if

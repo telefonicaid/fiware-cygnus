@@ -18,8 +18,6 @@
 package com.telefonica.iot.cygnus.utils;
 
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-// import org.apache.log4j.Level;
-// import org.apache.log4j.LogManager;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -38,7 +36,6 @@ public class NGSICharsetsTest {
      * Constructor.
      */
     public NGSICharsetsTest() {
-        //LogManager.getRootLogger().setLevel(Level.FATAL);
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         Configuration config = ctx.getConfiguration();
         LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);

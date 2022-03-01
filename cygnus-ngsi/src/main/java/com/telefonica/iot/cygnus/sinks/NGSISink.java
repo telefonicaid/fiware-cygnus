@@ -98,8 +98,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     private int num_rollback_by_channel_exception;
     private int num_rollback_by_exception;
 
-    private static final String DEF_AGENT_NAME = "cygnus-ngsi";
-
     /**
      * Constructor.
      */
@@ -354,7 +352,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     @Override
     public void start() {
         super.start();
-        ThreadContext.put(CommonConstants.LOG4J_COMP, DEF_AGENT_NAME);
+        ThreadContext.put(CommonConstants.LOG4J_COMP, CommonConstants.DEF_AGENT_NAME);
 
         if (invalidConfiguration) {
             LOGGER.info("[" + this.getName() + "] Startup completed. Nevertheless, there are errors "
@@ -691,7 +689,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         ThreadContext.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
         ThreadContext.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
         ThreadContext.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
-        ThreadContext.put(CommonConstants.LOG4J_COMP, DEF_AGENT_NAME);
+        ThreadContext.put(CommonConstants.LOG4J_COMP, CommonConstants.DEF_AGENT_NAME);
     } // setMDCToNA
 
     /**
