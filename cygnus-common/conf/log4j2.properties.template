@@ -25,6 +25,20 @@ flume.root.logger=INFO,LOGFILE
 flume.log.dir=/var/log/cygnus/
 flume.log.file=cygnus.log
 
+# Logging level for third party components.
+log4j.logger.org.apache.flume.lifecycle = WARN
+log4j.logger.org.jboss = WARN
+log4j.logger.org.mortbay = WARN
+log4j.logger.org.apache.avro.ipc.NettyTransceiver = WARN
+log4j.logger.org.apache.hadoop = WARN
+log4j.logger.org.mongodb = WARN
+log4j.logger.org.apache.http = WARN
+log4j.logger.org.apache.zookeeper = WARN
+log4j.logger.org.apache.kafka = WARN
+log4j.logger.org.I0Itec = WARN
+log4j.logger.com.amazonaws = WARN
+
+
 # Extra logging related to initialization of Log4j
 # Set to debug or trace if log4j initialization is failing
 status = warn
