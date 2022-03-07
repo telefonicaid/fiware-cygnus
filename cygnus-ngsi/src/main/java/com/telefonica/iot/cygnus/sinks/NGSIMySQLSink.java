@@ -513,11 +513,13 @@ public class NGSIMySQLSink extends NGSISink {
                     name = NGSICharsets.encodeMySQL(servicePath);
                     break;
                 case DMBYENTITY:
+                case DMBYENTITYDATABASE:
                     name = NGSICharsets.encodeMySQL(servicePath)
                             + CommonConstants.CONCATENATOR
                             + NGSICharsets.encodeMySQL(entity);
                     break;
                 case DMBYENTITYTYPE:
+                case DMBYENTITYTYPEDATABASE:
                     name = NGSICharsets.encodeMySQL(servicePath)
                             + CommonConstants.CONCATENATOR
                             + NGSICharsets.encodeMySQL(entityType);
@@ -543,11 +545,13 @@ public class NGSIMySQLSink extends NGSISink {
                     
                     name = NGSIUtils.encode(servicePath, true, false);
                     break;
+                case DMBYENTITYDATABASE:
                 case DMBYENTITY:
                     String truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
                             + NGSIUtils.encode(entity, false, true);
                     break;
+                case DMBYENTITYDATABASE:
                 case DMBYENTITYTYPE:
                     truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
