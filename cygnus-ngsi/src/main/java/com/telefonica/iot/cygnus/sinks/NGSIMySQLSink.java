@@ -551,7 +551,7 @@ public class NGSIMySQLSink extends NGSISink {
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
                             + NGSIUtils.encode(entity, false, true);
                     break;
-                case DMBYENTITYDATABASE:
+                case DMBYENTITYTYPEDATABASE:
                 case DMBYENTITYTYPE:
                     truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
