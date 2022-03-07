@@ -87,8 +87,8 @@ The name of these tables depends on the configured data model (see the [Configur
 * Data model by entity database schema (`data_model=dm-by-entity-database-schema`). Same as Data model by entity (`data_model=dm-by-entity`).
 * Data model by entity database (`data_model=dm-by-entity-database`). Same as Data model by entity (`data_model=dm-by-entity`).
 * Data model by entity type (`data_model=dm-by-entity-type`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity type in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity type is concatenated.
-* Data model by entity database schema (`data_model=dm-by-entitytype-database-schema`). Same as Data model by entity type(`data_model=dm-by-entity-type`).
-* Data model by entity type database (`data_model=dm-by-entitytype-database`). Same as Data model by entity (`data_model=dm-by-entity-type`).
+* Data model by entity database schema (`data_model=dm-by-entity-type-database-schema`). Same as Data model by entity type(`data_model=dm-by-entity-type`).
+* Data model by entity type database (`data_model=dm-by-entity-type-database`). Same as Data model by entity (`data_model=dm-by-entity-type`).
 
 It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
 
@@ -96,14 +96,14 @@ PostgreSQL [tables name length](http://www.postgresql.org/docs/current/static/sq
 
 The following table summarizes the table name composition (old encoding):
 
-| FIWARE service path | `dm-by-service-path` | `dm-by-entity`, `dm-by-entity-database-schema`, `dm-by-entity-database` | `dm-by-entity-type` |
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity`, `dm-by-entity-database-schema`, `dm-by-entity-database` | `dm-by-entity-type`, `dm-by-entity-type-database-schema`, `dm-by-entity-type-database` |
 |---|---|---|---|
 | `/` | N/A | `<entityId>_<entityType>` | `<entityType>` |
 | `/<svcPath>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` | `<svcPath>_<entityType>` |
 
 Using the new encoding:
 
-| FIWARE service path | `dm-by-service-path` | `dm-by-entity`, `dm-by-entity-database-schema`, `dm-by-entity-database` | `dm-by-entity-type` |
+| FIWARE service path | `dm-by-service-path` | `dm-by-entity`, `dm-by-entity-database-schema`, `dm-by-entity-database` | `dm-by-entity-type`, `dm-by-entity-type-database-schema`, `dm-by-entity-type-database` |
 |---|---|---|---|
 | `/` | `x002f` | `x002fxffff<entityId>xffff<entityType>` | `x002fxffff<entityType>` |
 | `/<svcPath>` | `x002f<svcPath>` | `x002f<svcPath>xffff<entityId>xffff<entityType>` |`x002f<svcPath>xffff<entityType>` |
@@ -266,10 +266,10 @@ Coming soon.
 | last\_data\_unique\_key | no | entityId | This must be a unique key on the database to find when a previous record exists. Check this [link](./last_data_function.md) for more details. |
 | last\_data\_timestamp\_key | no | recvTime | This must be a timestamp key on the aggregation to know which record is older. Check this [link](./last_data_function.md) for more details. |
 | last\_data\_sql_timestamp\_format | no | YYYY-MM-DD HH24:MI:SS.MS | This must be a timestamp format to cast [SQL Text to timestamp](https://www.postgresql.org/docs/9.1/functions-formatting.html). Check this [link](./last_data_function.md) for more details. |
-| data\_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i> or <i>dm-by-entity-type</i> or <i>dm-by-entity-database</i> or <i>dm-by-entity-database-schema</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
+| data\_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i> or <i>dm-by-entity-type</i> or <i>dm-by-entity-database</i> or <i>dm-by-entity-database-schema</i> or <i>dm-by-entity-type-database</i> or <i>dm-by-entity-type-database-schema</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
 | postgresql\_host | no | localhost | FQDN/IP address where the PostgreSQL server runs. |
 | postgresql\_port | no | 5432 ||
-| postgresql\_database | no | postgres | `postgres` is the default database that is created automatically when install. Note also than with datamodels <i>dm-by-entity-database</i> and <i>dm-by-entity-database-schema</i> this setting is ignored (as the database is part of the mapping done by the datamodel) | |
+| postgresql\_database | no | postgres | `postgres` is the default database that is created automatically when install. Note also than with datamodels <i>dm-by-entity-database</i>, <i>dm-by-entity-database-schema</i>, <i>dm-by-entity-type-database</i> and <i>dm-by-entity-type-database-schema</i> this setting is ignored (as the database is part of the mapping done by the datamodel) | |
 | postgresql\_username | no | postgres | `postgres` is the default username that is created automatically when install |
 | postgresql\_password | no | N/A | Empty value by default (No password is created when install) |
 | postgresql\_options | no | N/A | optional connection parameter(s) concatinated to jdbc url if necessary<br/>When `sslmode=require` is set to `postgresql_options`, jdbc url will become like <b>jdbc:postgresql://postgresql.example.com:5432/postgres?sslmode=require</b>|
