@@ -51,10 +51,10 @@ you wish to get involved in the implementation or influence the roadmap
 
 The following list contains all features that were in the roadmap and have already been implemented.
 
-- JSON native types persistence (MySQL, PostGIS and PostgreSQL sinks) [#1782](https://github.com/telefonicaid/fiware-cygnus/issues/1782), [#1780](https://github.com/telefonicaid/fiware-cygnus/issues/1780)
-- Refactor and improvements in batch support (MySQL, PostGIS, PostgreSQL, CKAN sinks) [#1787](https://github.com/telefonicaid/fiware-cygnus/issues/1787)
-- Ability to disable metadata (all sinks) [#1706](https://github.com/telefonicaid/fiware-cygnus/issues/1706)
-- New mode dm-by-entity-shifted (CKAN sink) [#1792](https://github.com/telefonicaid/fiware-cygnus/issues/1792)
-- dm-by-entitytype in additional sinks (PostGIS and PostgreSQL sinks) [#1684](https://github.com/telefonicaid/fiware-cygnus/issues/1684)
-- Improve the error feedback provided to users (all sinks) [#1791](https://github.com/telefonicaid/fiware-cygnus/issues/1791)
-- Operational requirements (logs, correlation id, etc.) (all sinks) [#1770](https://github.com/telefonicaid/fiware-cygnus/issues/1770)
+- JSON native types persistence (MySQL, PostGIS and PostgreSQL sinks) [#1782](https://github.com/telefonicaid/fiware-cygnus/issues/1782), [#1780](https://github.com/telefonicaid/fiware-cygnus/issues/1780) ([1.18.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/1.18.0))
+- Refactor and improvements in batch support (MySQL, PostGIS, PostgreSQL, CKAN sinks) [#1787](https://github.com/telefonicaid/fiware-cygnus/issues/1787) ([1.18.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/1.18.0))
+- Ability to disable metadata (all sinks) [#1706](https://github.com/telefonicaid/fiware-cygnus/issues/1706) ([1.18.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/1.18.0))
+- dm-by-entitytype in additional sinks (PostGIS and PostgreSQL sinks) [#1684](https://github.com/telefonicaid/fiware-cygnus/issues/1684) ([2.0.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/2.0.0))
+- Improve the error feedback provided to users (all sinks) [#1791](https://github.com/telefonicaid/fiware-cygnus/issues/1791) ([2.0.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/2.0.0))
+- Operational requirements (logs, correlation id, etc.) (all sinks) [#1770](https://github.com/telefonicaid/fiware-cygnus/issues/1770) ([2.0.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/2.0.0))
+- New mode dm-by-entity-shifted (CKAN sink) [#1792](https://github.com/telefonicaid/fiware-cygnus/issues/1792) ([2.2.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/2.2.0))
