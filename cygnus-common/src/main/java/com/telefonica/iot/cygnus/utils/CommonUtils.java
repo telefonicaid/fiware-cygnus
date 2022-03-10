@@ -244,6 +244,14 @@ public final class CommonUtils {
                 return "dm-by-entity-type";
             case DMBYATTRIBUTE:
                 return "dm-by-attribute";
+            case DMBYENTITYDATABASE:
+                return "dm-by-entity-database";
+            case DMBYENTITYTYPEDATABASE:
+                return "dm-by-entity-type-database";
+            case DMBYENTITYDATABASESCHEMA:
+                return "dm-by-entity-database-schema";
+            case DMBYENTITYTYPEDATABASESCHEMA:
+                return "dm-by-entity-type-database-schema";
             default:
                 return null;
         } // switch
