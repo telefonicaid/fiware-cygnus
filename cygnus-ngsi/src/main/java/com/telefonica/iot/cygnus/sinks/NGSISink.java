@@ -32,6 +32,11 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYATTRIBUTE;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITY;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYTYPE;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYDATABASE;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYTYPEDATABASE;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYDATABASESCHEMA;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYTYPEDATABASESCHEMA;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYSERVICE;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYSERVICEPATH;
 import java.util.Map;
@@ -814,6 +819,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 case DMBYENTITY:
                     accumulateByEntity(event);
                     break;
+                case DMBYENTITYTYPEDATABASE:
+                case DMBYENTITYTYPEDATABASESCHEMA:
                 case DMBYENTITYTYPE:
                     accumulateByEntityType(event);
                     break;

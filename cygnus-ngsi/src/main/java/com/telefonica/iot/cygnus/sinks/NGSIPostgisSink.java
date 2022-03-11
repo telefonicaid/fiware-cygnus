@@ -496,6 +496,8 @@ public class NGSIPostgisSink extends NGSISink {
             switch(dataModel) {
                 case DMBYENTITYDATABASE:
                 case DMBYENTITYDATABASESCHEMA:
+                case DMBYENTITYTYPEDATABASE:
+                case DMBYENTITYTYPEDATABASESCHEMA:
                     if (service != null)
                         name = NGSICharsets.encodePostgreSQL(service);
                     break;
@@ -506,6 +508,8 @@ public class NGSIPostgisSink extends NGSISink {
             switch(dataModel) {
                 case DMBYENTITYDATABASE:
                 case DMBYENTITYDATABASESCHEMA:
+                case DMBYENTITYTYPEDATABASE:
+                case DMBYENTITYTYPEDATABASESCHEMA:
                     if (service != null)
                         name = NGSIUtils.encode(service, false, true);
                     break;
@@ -533,6 +537,7 @@ public class NGSIPostgisSink extends NGSISink {
         if (enableEncoding) {
             switch(dataModel) {
                 case DMBYENTITYDATABASESCHEMA:
+                case DMBYENTITYTYPEDATABASESCHEMA:
                     name = NGSICharsets.encodePostgreSQL(subService);
                     break;
                 default:
@@ -541,6 +546,7 @@ public class NGSIPostgisSink extends NGSISink {
         } else {
             switch(dataModel) {
                 case DMBYENTITYDATABASESCHEMA:
+                case DMBYENTITYTYPEDATABASESCHEMA:
                     name = NGSIUtils.encode(subService, false, true);
                     break;
                 default:
@@ -579,6 +585,8 @@ public class NGSIPostgisSink extends NGSISink {
                             + CommonConstants.CONCATENATOR
                             + NGSICharsets.encodePostgreSQL(entity);
                     break;
+                case DMBYENTITYTYPEDATABASE:
+                case DMBYENTITYTYPEDATABASESCHEMA:
                 case DMBYENTITYTYPE:
                     name = NGSICharsets.encodePostgreSQL(servicePath)
                             + CommonConstants.CONCATENATOR
@@ -593,7 +601,7 @@ public class NGSIPostgisSink extends NGSISink {
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use dm-by-service-path, dm-by-entity or dm-by-attribute");
+                            + "'. Please, use dm-by-service-path, dm-by-entity, dm-by-entity-database, dm-by-entity-database-schema, dm-by-entity-type, dm-by-entity-type-database, dm-by-entity-type-database-schema or dm-by-attribute");
             } // switch
         } else {
             switch(dataModel) {
@@ -612,6 +620,8 @@ public class NGSIPostgisSink extends NGSISink {
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
                             + NGSIUtils.encode(entity, false, true);
                     break;
+                case DMBYENTITYTYPEDATABASE:
+                case DMBYENTITYTYPEDATABASESCHEMA:
                 case DMBYENTITYTYPE:
                     truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
@@ -625,7 +635,7 @@ public class NGSIPostgisSink extends NGSISink {
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY, DMBYENTITYTYPE or DMBYATTRIBUTE");
+                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITYDATABASE, DMBYENTITYDATABASESCHEMA, DMBYENTITY, DMBYENTITYTYPEDATABASE, DMBYENTITYTYPEDATABASESCHEMA, DMBYENTITYTYPE or DMBYATTRIBUTE");
             } // switch
         } // if else
 
