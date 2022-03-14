@@ -38,6 +38,7 @@ log4j.logger.org.apache.zookeeper = WARN
 log4j.logger.org.apache.kafka = WARN
 log4j.logger.org.I0Itec = WARN
 log4j.logger.com.amazonaws = WARN
+log4j.logger.org.eclipse.jetty = WARN
 
 # Define the root logger to the system property "flume.root.logger".
 log4j.rootLogger=${flume.root.logger}
