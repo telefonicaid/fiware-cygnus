@@ -52,6 +52,6 @@ appender.console.layout.type = PatternLayout
 appender.console.layout.pattern = time=%d{yyyy-MM-dd}T%d{HH:mm:ss.SSS}Z | lvl=%p | corr=%X{correlatorId} | trans=%X{transactionId} | srv=%X{service} | subsrv=%X{subservice} | comp=%X{agent} | op=%M | msg=%C[%L] : %m%n
 
 # Root logger level
-rootLogger.level = warn
+rootLogger.level = debug
 # Root logger referring to console appender
 rootLogger.appenderRef.stdout.ref = consoleLogger
