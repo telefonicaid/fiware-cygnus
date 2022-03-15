@@ -99,6 +99,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Tue Mar 15 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.17.0
+- [cygnus-ngsi][NGSIEvent] Avoid double concatenator when entityId is empty in getEntityForNamning (used by datamodel) (#2139)
+
 * Fri Feb 4 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.16.0
 - [cygnus-ngsi][NGSIHandler] Check TextUnrestricted type to escape character ' as '' (#2125)
 - [cygnus-ngsi][KafkaSink] Upgrade libthrift dependency from 0.12.0 to 0.14.1 due to github vulnerability report

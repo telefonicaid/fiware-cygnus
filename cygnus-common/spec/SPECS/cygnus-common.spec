@@ -171,6 +171,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Tue Mar 15 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.17.0
+- [cygnus-common][Postgis,PostgresSQL] Add new data models dm-by-entity-type-database and dm-by-entity-type-database-schema (#2142)
+- [cygnus-common][SQLBackend] Try to insert in row mode tables without create db and table before
+- [cygnus-common][SQLBackend] Try to insert in error table without create it before (#2132)
+- [cygnus-commons] Upgrade postgresql dependency from 42.2.25 to 42.3.3 due to github vulnerability report
+
 * Fri Feb 4 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.16.0
 - [cygnus-commons] Upgrade postgresql dependency from 42.2.22 to 42.2.25 due to github vulnerability report
 
