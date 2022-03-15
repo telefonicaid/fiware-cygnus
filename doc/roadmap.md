@@ -31,13 +31,16 @@ Disclaimer:
 
 The following list of features are planned to be addressed in the short term,
 and incorporated in a next release of the product in the short term:
-*None at the present moment*
+
+* *None at the present moment*
 
 ## Medium term
 
 The following list of features are planned to be addressed in the medium term,
 typically within the subsequent release(s) generated in the next **9 months**
-after next planned release: *None at the present moment*
+after next planned release:
+
+* *None at the present moment*
 
 ## Long term
 
