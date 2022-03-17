@@ -23,7 +23,7 @@ MAINTAINER Francisco Romero Bueno <francisco.romerobueno@telefonica.com>
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "2.16.0-SNAPSHOT"
+ENV CYGNUS_VERSION "2.17.0-SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-common"
