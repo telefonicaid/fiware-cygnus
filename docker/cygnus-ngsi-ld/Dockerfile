@@ -16,9 +16,7 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
-# FIXME: this PR is based in CentOS 8, which has reached End of Life. It should be migrated to Debian,
-# as we did with cygnus-ngsi Dockerfile. Basically, the changes done in PR https://github.com/telefonicaid/fiware-cygnus/pull/2152
-# should be also applied here
+
 
 FROM debian:11.2-slim
 ARG GITHUB_ACCOUNT=telefonicaid
