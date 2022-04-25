@@ -20,7 +20,7 @@
 # as we did with cygnus-ngsi Dockerfile. Basically, the changes done in PR https://github.com/telefonicaid/fiware-cygnus/pull/2152
 # should be also applied here
 
-FROM centos:centos8.4.2105
+FROM debian:11.2-slim
 ARG GITHUB_ACCOUNT=telefonicaid
 ARG GITHUB_REPOSITORY=fiware-cygnus
 
@@ -280,15 +280,15 @@ RUN ls -lsrt
 
 # Install
 RUN \
-    # FIXME: default yum repositories has been changed to vault due to CentOS 8 EOL on February 1st, 2022
-    # This is just a temporal solution so the build doesn't break while we find a new distro to use
-    sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-Linux-* &&\
-    sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-* &&\
-    yum upgrade -y && \
+    # openjdk-8-jdk is not included in Debian 11 repositories, so we need to add jessie-backports for it
+    echo 'deb http://httpredir.debian.org/debian-security stretch/updates main' > /etc/apt/sources.list.d/jessie-backports.list && \
+    apt-get -y update && \
+    apt-get -y upgrade && \
+    # Install dependencies
+    apt-get -y install openjdk-8-jdk curl git python2 && \
     # Add Cygnus user
     adduser ${CYGNUS_USER} && \
-    yum -y install nc java-${JAVA_VERSION}-openjdk-devel git python2 && \
-    export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk && \
+    export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64 && \
     export MAVEN_OPTS="-Xmx2048M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:+CMSClassUnloadingEnabled" && \
     export MAVEN_ARGS="-B -T8" && \
     # For debug Maven
@@ -334,17 +334,23 @@ RUN \
     cd ${CYGNUS_HOME}/cygnus-ngsi-ld && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
     rm -rf /root/.m2 && rm -rf ${MVN_HOME} && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz && \
+    # Cleanup
+    apt-get clean && \
+    apt-get -y remove python2 git && \
+    apt-get -y autoremove --purge && \
+    # FIXME: from now on, old cleanup in CentOS 8. Should be reviewed...
     echo "INFO: Java runtime not needs JAVA_HOME... Unsetting..." && \
     unset JAVA_HOME && \
-    yum erase -y git java-${JAVA_VERSION}-openjdk-devel python2 && \
-    rpm -qa redhat-logos gtk2 pulseaudio-libs libvorbis jpackage* groff alsa* atk cairo libX* | xargs -r rpm -e --nodeps && \
+    #yum erase -y git java-${JAVA_VERSION}-openjdk-devel python2 && \
+    #rpm -qa redhat-logos gtk2 pulseaudio-libs libvorbis jpackage* groff alsa* atk cairo libX* | xargs -r rpm -e --nodeps && \
     # FIXME #2113: disabled step 'rpm --rebuilddb', doesn't work in CentOS8 ?
     #yum clean all && rpm --rebuilddb && rm -rf /var/lib/yum/yumdb && rm -rf /var/lib/yum/history && \
-    yum clean all && rm -rf /var/lib/yum/yumdb && rm -rf /var/lib/yum/history && \
+    #yum clean all && rm -rf /var/lib/yum/yumdb && rm -rf /var/lib/yum/history && \
     find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en_US' ! -name 'locale.alias' | xargs -r rm -r && rm -f /var/log/*log && \
     bash -c 'localedef --list-archive | grep -v -e "en_US" | xargs localedef --delete-from-archive' && \
     /bin/cp -f /usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.tmpl && \
-    build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf && echo "INFO: END build"
+    #build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf && echo "INFO: END build"
+    echo "INFO: END build"
 
 
 COPY docker/cygnus-ngsi-ld/cygnus-entrypoint.sh /
