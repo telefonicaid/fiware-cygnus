@@ -369,8 +369,9 @@ public class CKANBackendImpl extends HttpBackend implements CKANBackend {
 
         // check the status
         if (res.getStatusCode() == 200) {
-            LOGGER.debug("Successful view listing (resourceId=" + resId + ")");
-            return (((JSONArray) res.getJsonObject().get("result")).size() > 0);
+            boolean isResultList = ((JSONArray) res.getJsonObject().get("result")).size() >= 0;
+            LOGGER.debug("View listing (resourceId=" + resId + "): checking if there is a result list is: " + isResultList + ")");
+            return isResultList;
         } else {
             throw new CygnusPersistenceError("Could not check if the view exists (resId=" + resId
                     + ", statusCode=" + res.getStatusCode() + ")");
