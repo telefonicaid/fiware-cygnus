@@ -372,32 +372,14 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
                         + "," + numericAggr.getNumSamples() + "]");
 
                 try {
-                    // try insert without create database and collection before
+                    // createCollection is an idempotent operation so we can safely run it each time a new doc is going to be inserted        
+                    backend.createCollection(dbName, collectionName, dataExpiration);
                     backend.insertContextDataAggregated(dbName, collectionName, lastRecvTimeTs,
-                            entityId, entityType, numericAggr.getAttrName(), numericAggr.getAttrType(),
-                            numericAggr.getMax(), numericAggr.getMin(), numericAggr.getSum(),
-                            numericAggr.getSum2(), numericAggr.getNumSamples(), resolutions);
-                } catch (Exception e1) {
-                    try {
-                        // try insert without create collection before
-                        backend.createCollection(dbName, collectionName, dataExpiration);
-                        backend.insertContextDataAggregated(dbName, collectionName, lastRecvTimeTs,
-                            entityId, entityType, numericAggr.getAttrName(), numericAggr.getAttrType(),
-                            numericAggr.getMax(), numericAggr.getMin(), numericAggr.getSum(),
-                            numericAggr.getSum2(), numericAggr.getNumSamples(), resolutions);
-                    } catch (Exception e2) {
-                        try {
-                            // insert creating database and collection before
-                            backend.createDatabase(dbName);
-                            backend.createCollection(dbName, collectionName, dataExpiration);
-                            backend.insertContextDataAggregated(dbName, collectionName, lastRecvTimeTs,
-                                    entityId, entityType, numericAggr.getAttrName(), numericAggr.getAttrType(),
-                                    numericAggr.getMax(), numericAggr.getMin(), numericAggr.getSum(),
-                                    numericAggr.getSum2(), numericAggr.getNumSamples(), resolutions);
-                        } catch (Exception e) {
-                            throw new CygnusPersistenceError("-, " + e.getMessage());
-                        } // try catch
-                    } // try catch
+                                                        entityId, entityType, numericAggr.getAttrName(), numericAggr.getAttrType(),
+                                                        numericAggr.getMax(), numericAggr.getMin(), numericAggr.getSum(),
+                                                        numericAggr.getSum2(), numericAggr.getNumSamples(), resolutions);
+                } catch (Exception e) {
+                    throw new CygnusPersistenceError("-, " + e.getMessage());
                 } // try catch
             } // for
 
