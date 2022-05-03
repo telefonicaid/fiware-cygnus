@@ -372,7 +372,7 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
                         + "," + numericAggr.getNumSamples() + "]");
 
                 try {
-                    // try insert without create database before
+                    // createCollection is an idempotent operation so we can safely run it each time a new doc is going to be inserted        
                     backend.createCollection(dbName, collectionName, dataExpiration);
                     backend.insertContextDataAggregated(dbName, collectionName, lastRecvTimeTs,
                                                         entityId, entityType, numericAggr.getAttrName(), numericAggr.getAttrType(),
