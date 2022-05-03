@@ -30,13 +30,6 @@ import org.bson.Document;
 public interface MongoBackend {
 
     /**
-     * Creates a database, given its name, if not exists.
-     * @param dbName
-     * @throws Exception
-     */
-    void createDatabase(String dbName) throws Exception;
-
-    /**
      * Creates a collection for STH Comet, given its name, if not exists in the given database. Time-based limits are
      * set, if possible.
      * @param dbName
