@@ -284,6 +284,7 @@ public class NGSIMongoSink extends NGSIMongoBaseSink {
         LOGGER.info("[" + this.getName() + "] Persisting data at NGSIMongoSink. Database: "
                 + dbName + ", Collection: " + collectionName + ", Data: " + aggregation.toString());
         try {
+            // createCollection is an idempotent operation so we can safely run it each time a new doc is going to be inserted
             backend.createCollection(dbName, collectionName, collectionsSize, maxDocuments, dataExpiration);
             backend.insertContextDataRaw(dbName, collectionName, aggregation);
         } catch (Exception e) {
