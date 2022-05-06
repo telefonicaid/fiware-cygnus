@@ -96,18 +96,6 @@ public class MongoBackendImpl implements MongoBackend {
         LOGGER.debug("Creating Mongo collection=" + collectionName + " at database=" + dbName);
         MongoDatabase db = getDatabase(dbName);
 
-        // create the collection
-        try {
-            db.createCollection(collectionName);
-        } catch (MongoException e) {
-            ErrorCategory errorCategory = ErrorCategory.fromErrorCode( e.getCode() );
-            if (errorCategory == ErrorCategory.fromErrorCode(48)){
-                LOGGER.debug("Collection already exists, nothing to create");
-            } else {
-                throw e;
-            } // if else
-        } // try catch
-
         // check STH indexes documentation at https://github.com/telefonicaid/fiware-sth-comet/blob/master/doc/manuals/db_indexes.md
         BasicDBObject keys;
         IndexOptions options;
