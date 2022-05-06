@@ -138,31 +138,31 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
     ngsi-event={
         headers={
-	         content-type=application/json,
-	         timestamp=1429535775,
-	         transactionId=1429535775-308-0000000000,
-	         correlationId=1429535775-308-0000000000,
-	         fiware-service=vehicles,
-	         fiware-servicepath=/4wheels,
-	         <grouping_rules_interceptor_headers>,
-	         <name_mappings_interceptor_headers>
+             content-type=application/json,
+             timestamp=1429535775,
+             transactionId=1429535775-308-0000000000,
+             correlationId=1429535775-308-0000000000,
+             fiware-service=vehicles,
+             fiware-servicepath=/4wheels,
+             <grouping_rules_interceptor_headers>,
+             <name_mappings_interceptor_headers>
         },
         body={
-	        entityId=car1,
-	        entityType=car,
-	        attributes=[
-	            {
-	                attrName=speed,
-	                attrType=float,
-	                attrValue=112.9
-	            },
-	            {
-	                attrName=oil_level,
-	                attrType=float,
-	                attrValue=74.6
-	            }
-	        ]
-	    }
+            entityId=car1,
+            entityType=car,
+            attributes=[
+                {
+                    attrName=speed,
+                    attrType=float,
+                    attrValue=112.9
+                },
+                {
+                    attrName=oil_level,
+                    attrType=float,
+                    attrValue=74.6
+                }
+            ]
+        }
     }
 
 [Top](#top)
@@ -314,8 +314,8 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 | batch\_retry\_intervals | no | 5000 | Comma-separated list of intervals (in miliseconds) at which the retries regarding not persisted batches will be done. First retry will be done as many miliseconds after as the first value, then the second retry will be done as many miliseconds after as second value, and so on. If the batch\_ttl is greater than the number of intervals, the last interval is repeated. |
 | data\_expiration | no | 0 | Collections will be removed if older than the value specified in seconds. The reference of time is the one stored in the `recvTime` property. Set to 0 if not wanting this policy. |
-| collections\_size | no | 0 | The oldest data (according to insertion time) will be removed if the size of the data collection gets bigger than the value specified in bytes. Notice that the size-based truncation policy takes precedence over the time-based one. Set to 0 if not wanting this policy. Minimum value (different than 0) is 4096 bytes. |
-| max\_documents | no | 0 | The oldest data (according to insertion time) will be removed if the number of documents in the data collections goes beyond the specified value. Set to 0 if not wanting this policy. |
+| collections\_size | no | 0 | The oldest data (according to insertion time) will be removed if the size of the data collection gets bigger than the value specified in bytes. Notice that the size-based truncation policy takes precedence over the time-based one. Set to 0 if not wanting this policy. Minimum value (different than 0) is 4096 bytes. More detail in [mongo java driver]( https://mongodb.github.io/mongo-java-driver/3.6/javadoc/com/mongodb/client/model/CreateCollectionOptions.html) |
+| max\_documents | no | 0 | The oldest data (according to insertion time) will be removed if the number of documents in the data collections goes beyond the specified value. Set to 0 if not wanting this policy. More detail in [mongo java driver]( https://mongodb.github.io/mongo-java-driver/3.6/javadoc/com/mongodb/client/model/CreateCollectionOptions.html)|
 | ignore\_white\_spaces | no | true | <i>true</i> if exclusively white space-based attribute values must be ignored, <i>false</i> otherwise. |
 
 A configuration example could be:
