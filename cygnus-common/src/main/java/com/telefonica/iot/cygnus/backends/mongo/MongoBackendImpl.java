@@ -86,6 +86,8 @@ public class MongoBackendImpl implements MongoBackend {
     /**
      * Creates a collection for STH Comet, given its name, if not exists in the given database. Time-based limits are set,
      * if possible.
+     * Note that different from the homonym createCollection method in this class, this one doesn't do an explicit collection 
+     * creation operation in the DB, given that the creation of the indexes will automatically create the collection
      * @param dbName
      * @param collectionName
      * @param dataExpiration
@@ -95,18 +97,6 @@ public class MongoBackendImpl implements MongoBackend {
     public void createCollection(String dbName, String collectionName, long dataExpiration) throws MongoException {
         LOGGER.debug("Creating Mongo collection=" + collectionName + " at database=" + dbName);
         MongoDatabase db = getDatabase(dbName);
-
-        // create the collection
-        try {
-            db.createCollection(collectionName);
-        } catch (MongoException e) {
-            ErrorCategory errorCategory = ErrorCategory.fromErrorCode( e.getCode() );
-            if (errorCategory == ErrorCategory.fromErrorCode(48)){
-                LOGGER.debug("Collection already exists, nothing to create");
-            } else {
-                throw e;
-            } // if else
-        } // try catch
 
         // check STH indexes documentation at https://github.com/telefonicaid/fiware-sth-comet/blob/master/doc/manuals/db_indexes.md
         BasicDBObject keys;
