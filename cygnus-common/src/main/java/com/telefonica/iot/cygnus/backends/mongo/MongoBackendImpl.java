@@ -86,6 +86,8 @@ public class MongoBackendImpl implements MongoBackend {
     /**
      * Creates a collection for STH Comet, given its name, if not exists in the given database. Time-based limits are set,
      * if possible.
+     * Note that different from the homonym createCollection method in this class, this one doesn't do an explicit collection 
+     * creation operation in the DB, given that the creation of the indexes will automatically create the collection
      * @param dbName
      * @param collectionName
      * @param dataExpiration
