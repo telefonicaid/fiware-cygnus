@@ -99,6 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed May 11 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.18.0
+- [cygnus-ngsi][MongoSink][STHSink] Do not attemp to database in each insertion (#2156, #2019 reopened)
+- [cygnus-ngsi] Upgrade Dockerfile base image from centos8.4.2105 to Debian 11.2-slim
+
 * Tue Mar 15 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.17.0
 - [cygnus-ngsi][NGSIEvent] Avoid double concatenator when entityId is empty in getEntityForNamning (used by datamodel) (#2139)
 
