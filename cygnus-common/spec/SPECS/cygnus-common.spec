@@ -171,6 +171,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Wed May 11 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.18.0
+- [cygnus-common][MongoBackendImpl] Remove unneded mongo create collection in non capped case (#2161)
+- [cygnus-commons] Upgrade mongodb-driver dependency from 3.12.8 to 3.12.11
+- [cygnus-common][CKANBackendImpl] allow empty result as resource_view_list (#2150)
+
 * Tue Mar 15 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.17.0
 - [cygnus-common][Postgis,PostgresSQL] Add new data models dm-by-entity-type-database and dm-by-entity-type-database-schema (#2142)
 - [cygnus-common][SQLBackend] Try to insert in row mode tables without create db and table before

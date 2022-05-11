@@ -1,5 +1,1 @@
-- [cygnus-common][MongoBackendImpl] Remove unneded mongo create collection in non capped case (#2161)
-- [cygnus-commons] Upgrade mongodb-driver dependency from 3.12.8 to 3.12.11
-- [cygnus-ngsi][MongoSink][STHSink] Do not attemp to database in each insertion (#2156, #2019 reopened)
-- [cygnus-common][CKANBackendImpl] allow empty result as resource_view_list (#2150)
-- [cygnus-ngsi] Upgrade Dockerfile base image from centos8.4.2105 to Debian 11.2-slim
+
