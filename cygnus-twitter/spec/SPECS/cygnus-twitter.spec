@@ -99,9 +99,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
-* Tue Mar 15 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.17.0
+* Wed May 11 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.18.0
 
-* Fri Feb 4 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.16.0
+* Tue Mar 15 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.17.0
+
+* Fri Feb 4 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.16.0
 
 * Fri Dec 10 2021 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.15.0
 - [cygnus-twitter] Upgrade Dockerfile base image from centos7.9.2009 to centos8.4.2105 (#1996)

@@ -1,5 +1,2 @@
 [cygnus-common] Upgrade log4j from v1 (1.2.17) to v2 (2.17.2) series
-- [cygnus-ngsi][MongoSink][STHSink] Do not attemp to database in each insertion (#2156, #2019 reopened)
-- [cygnus-common][CKANBackendImpl] allow empty result as resource_view_list (#2150)
-- [cygnus-ngsi] Upgrade Dockerfile base image from centos8.4.2105 to Debian 11.2-slim
 
