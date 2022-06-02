@@ -1049,9 +1049,10 @@ public final class LogHandlers {
             // Change log level of all possible loggers
             Enumeration<Logger> loggers = LogManager.getCurrentLoggers();
             while (loggers.hasMoreElements()) {
-                if (loggers.nextElement().getName().contains("com.telefonica.iot.cygnus")) {
-                    LOGGER.debug("log4j logging level of logger " + loggers.nextElement().getName() + "updated to " + logLevel.toUpperCase());
-                    LogManager.getLogger(loggers.nextElement().getName()).setLevel(Level.toLevel(logLevel.toUpperCase()));
+                Logger currentLogger = (Logger) loggers.nextElement();
+                if (currentLogger.getName().contains("com.telefonica.iot.cygnus")) {
+                    LOGGER.debug("log4j logging level of logger " + currentLogger.getName() + "updated to " + logLevel.toUpperCase());
+                    LogManager.getLogger(currentLogger.getName()).setLevel(Level.toLevel(logLevel.toUpperCase()));
                 }
             }
             response.setStatus(HttpServletResponse.SC_OK);
