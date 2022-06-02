@@ -1045,9 +1045,11 @@ public final class LogHandlers {
             CommonConstants.LoggingLevels.valueOf(logLevel.toUpperCase());
             // Change log level of rootLogger
             LogManager.getRootLogger().setLevel(Level.toLevel(logLevel.toUpperCase()));
+            LOGGER.debug("log4j logging level of rootLogger updated to " + logLevel.toUpperCase());
             // Change log level of all possible loggers
             Enumeration<Logger> loggers = LogManager.getCurrentLoggers();
             while (loggers.hasMoreElements()) {
+                LOGGER.debug("log4j logging level of logger " + loggers.nextElement().getName() + "updated to " + logLevel.toUpperCase());
                 LogManager.getLogger(loggers.nextElement().getName()).setLevel(Level.toLevel(logLevel.toUpperCase()));
             }
             response.setStatus(HttpServletResponse.SC_OK);
