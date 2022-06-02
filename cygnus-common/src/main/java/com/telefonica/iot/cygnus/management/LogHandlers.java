@@ -1051,7 +1051,7 @@ public final class LogHandlers {
             while (loggers.hasMoreElements()) {
                 Logger currentLogger = (Logger) loggers.nextElement();
                 if (currentLogger.getName().contains("com.telefonica.iot.cygnus")) {
-                    LOGGER.debug("log4j logging level of logger " + currentLogger.getName() + "updated to " + logLevel.toUpperCase());
+                    LOGGER.debug("log4j logging level of logger " + currentLogger.getName() + " updated to " + logLevel.toUpperCase());
                     LogManager.getLogger(currentLogger.getName()).setLevel(Level.toLevel(logLevel.toUpperCase()));
                 }
             }
