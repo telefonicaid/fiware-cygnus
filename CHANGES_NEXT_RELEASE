@@ -1,1 +1,0 @@
-- FIX: change log level should change log level of all loggers, not just rootLogger (#1827)

@@ -99,6 +99,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Jun 03 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.19.0
+
 * Wed May 11 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.18.0
 - [cygnus-ngsi][MongoSink][STHSink] Do not attemp to database in each insertion (#2156, #2019 reopened)
 - [cygnus-ngsi] Upgrade Dockerfile base image from centos8.4.2105 to Debian 11.2-slim
