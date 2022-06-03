@@ -172,7 +172,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Jun 03 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.19.0
-- [cygnus-common] FIX: change log level should change log level of all loggers, not just rootLogger (#1827)
+- [cygnus-common] FIX: change log level should change log level of all cygnus loggers, not just rootLogger (#1827)
 
 * Wed May 11 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.18.0
 - [cygnus-common][MongoBackendImpl] Remove unneded mongo create collection in non capped case (#2161)
