@@ -144,9 +144,9 @@ public class CygnusApplication extends Application {
         if (firstTime) {
             // get references to the different elements of the agent, this will be needed when shutting down Cygnus in a
             // certain order
-            sourcesRef = conf.getSourceRunners();
-            channelsRef = conf.getChannels();
-            sinksRef = conf.getSinkRunners();
+            sourcesRef = ImmutableMap.copyOf(conf.getSourceRunners());
+            channelsRef = ImmutableMap.copyOf(conf.getChannels());
+            sinksRef = ImmutableMap.copyOf(conf.getSinkRunners());
             LOGGER.debug("References to Flume components have been taken");
             firstTime = false;
             return;
@@ -156,9 +156,9 @@ public class CygnusApplication extends Application {
         
         // get references to the different elements of the agent, this will be needed when shutting down Cygnus in a
         // certain order
-        sourcesRef = conf.getSourceRunners();
-        channelsRef = conf.getChannels();
-        sinksRef = conf.getSinkRunners();
+        sourcesRef = ImmutableMap.copyOf(conf.getSourceRunners());
+        channelsRef = ImmutableMap.copyOf(conf.getChannels());
+        sinksRef = ImmutableMap.copyOf(conf.getSinkRunners());
         LOGGER.debug("References to Flume components have been taken");
         
         // Resume Thread checking
