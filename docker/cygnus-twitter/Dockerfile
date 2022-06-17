@@ -46,7 +46,7 @@ ENV MVN_TGZ "apache-maven-${MVN_VER}-bin.tar.gz"
 ENV MVN_URL "http://www.eu.apache.org/dist/maven/maven-3/${MVN_VER}/binaries/${MVN_TGZ}"
 ENV MVN_HOME "/opt/apache-maven"
 
-ENV FLUME_VER "1.10.0"
+ENV FLUME_VER "1.9.0"
 ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
 ENV FLUME_URL "http://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 ENV FLUME_HOME "/opt/apache-flume"
