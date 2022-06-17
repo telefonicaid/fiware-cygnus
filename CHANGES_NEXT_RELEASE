@@ -1,2 +1,1 @@
-- [cygnus-common] Upgrade flume-ng-node version from 1.9.0 to 1.10.0 (#2179)
 - [cygnus-ngsi] Upgrade Debian version from 11.2 to 11.3 in Dockerfile
