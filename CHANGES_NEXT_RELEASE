@@ -1,3 +1,4 @@
 - [cygnus-ngsi]  Fix aggregate using event servicepath (#2185)
 - [cygnus-common][MySQLBackend] Upgrade mysql-connector-java from 8.0.27 to 8.0.28
 - [cygnus-ngsi] Upgrade Debian version from 11.2 to 11.3 in Dockerfile
+- [cygnus-ngsi] Remove apache-flume and apache-maven tar.gz files from docker
