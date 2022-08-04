@@ -77,6 +77,8 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
     public void aggregate(NGSIEvent event) {
         // Number of previous values
         int numPreviousValues = getAggregation().get(NGSIConstants.FIWARE_SERVICE_PATH).size();
+        // get the servicePath from event
+        String eventServicePath = event.getServicePathForData();
         // Get the event headers
         long recvTimeTs = event.getRecvTimeTs();
         long currentTS = 0;
@@ -110,7 +112,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
         aggregation.get(NGSIConstants.RECV_TIME_TS+"C").add(new JsonPrimitive(Long.toString(recvTimeTs)));
         aggregation.get(NGSIConstants.RECV_TIME).add(new JsonPrimitive(recvTime));
-        aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(new JsonPrimitive(getServicePathForData()));
+        aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(new JsonPrimitive(eventServicePath));
         aggregation.get(NGSIConstants.ENTITY_ID).add(new JsonPrimitive(entityId));
         aggregation.get(NGSIConstants.ENTITY_TYPE).add(new JsonPrimitive(entityType));
         for (NotifyContextRequest.ContextAttribute contextAttribute : contextAttributes) {
