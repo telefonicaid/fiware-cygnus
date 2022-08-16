@@ -244,8 +244,6 @@ public final class CommonUtils {
                 return "dm-by-entity-type";
             case DMBYFIXEDENTITYTYPE:
                 return "dm-by-fixed-entity-type";
-            case DMBYENTITYIDTYPE:
-                return "dm-by-entityid-type";
             case DMBYATTRIBUTE:
                 return "dm-by-attribute";
             case DMBYENTITYDATABASE:
