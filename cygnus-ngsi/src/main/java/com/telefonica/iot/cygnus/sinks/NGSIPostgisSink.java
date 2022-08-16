@@ -612,7 +612,7 @@ public class NGSIPostgisSink extends NGSISink {
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use dm-by-service-path, dm-by-entity, dm-by-entity-database, dm-by-entity-database-schema, dm-by-entity-type, dm-by-entity-type-database, dm-by-entity-type-database-schema or dm-by-attribute");
+                            + "'. Please, use dm-by-service-path, dm-by-entity, dm-by-entity-database, dm-by-entity-database-schema, dm-by-entity-type, dm-by-entity-type-database, dm-by-entity-type-database-schema, dm-by-fixed-entity-type-database, dm-by-fixed-entity-type-database-schema or dm-by-attribute");
             } // switch
         } else {
             switch(dataModel) {
