@@ -39,9 +39,9 @@ import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYDATABASE
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYTYPEDATABASESCHEMA;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYSERVICE;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYSERVICEPATH;
-import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYIDTYPE;
-import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYIDTYPEDATABASE;
-import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYIDTYPEDATABASESCHEMA;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYFIXEDENTITYTYPE;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYFIXEDENTITYTYPEDATABASE;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYFIXEDENTITYYPEDATABASESCHEMA;
 import java.util.Map;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
