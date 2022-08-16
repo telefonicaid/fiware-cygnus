@@ -993,8 +993,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             } else {
                 if (enableNameMappings) {
                     destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
-                            + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH) + "_"
-                            + mappedCE.getId() "_" + mappedCE.getType();
+                            + mappedCE.getType();
                 } else {
                     destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
                             + originalCE.getType();
