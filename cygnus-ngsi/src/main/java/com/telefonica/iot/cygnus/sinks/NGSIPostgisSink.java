@@ -498,6 +498,8 @@ public class NGSIPostgisSink extends NGSISink {
                 case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITYTYPEDATABASE:
                 case DMBYENTITYTYPEDATABASESCHEMA:
+                case DMBYENTITYIDTYPEDATABASE:
+                case DMBYENTITYIDTYPEDATABASESCHEMA:
                     if (service != null)
                         name = NGSICharsets.encodePostgreSQL(service);
                     break;
@@ -510,6 +512,8 @@ public class NGSIPostgisSink extends NGSISink {
                 case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITYTYPEDATABASE:
                 case DMBYENTITYTYPEDATABASESCHEMA:
+                case DMBYENTITYIDTYPEDATABASE:
+                case DMBYENTITYIDTYPEDATABASESCHEMA:
                     if (service != null)
                         name = NGSIUtils.encode(service, false, true);
                     break;
@@ -538,6 +542,7 @@ public class NGSIPostgisSink extends NGSISink {
             switch(dataModel) {
                 case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITYTYPEDATABASESCHEMA:
+                case DMBYENTITYIDTYPEDATABASESCHEMA:
                     name = NGSICharsets.encodePostgreSQL(subService);
                     break;
                 default:
@@ -547,6 +552,7 @@ public class NGSIPostgisSink extends NGSISink {
             switch(dataModel) {
                 case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITYTYPEDATABASESCHEMA:
+                case DMBYENTITYIDTYPEDATABASESCHEMA:
                     name = NGSIUtils.encode(subService, false, true);
                     break;
                 default:
@@ -599,6 +605,13 @@ public class NGSIPostgisSink extends NGSISink {
                             + CommonConstants.CONCATENATOR
                             + NGSICharsets.encodePostgreSQL(attribute);
                     break;
+                case DMBYENTITYIDTYPE:
+                case DMBYENTITYIDTYPEDATABASE:
+                case DMBYENTITYIDTYPEDATABASESCHEMA:
+                    name = NGSICharsets.encodePostgreSQL(entity)
+                            + CommonConstants.CONCATENATOR
+                            + NGSICharsets.encodePostgreSQL(entityType);
+                    break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
                             + "'. Please, use dm-by-service-path, dm-by-entity, dm-by-entity-database, dm-by-entity-database-schema, dm-by-entity-type, dm-by-entity-type-database, dm-by-entity-type-database-schema or dm-by-attribute");
@@ -632,6 +645,10 @@ public class NGSIPostgisSink extends NGSISink {
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
                             + NGSIUtils.encode(entity, false, true)
                             + '_' + NGSIUtils.encode(attribute, false, true);
+                    break;
+                case DMBYENTITYTYPEIDDATABASESCHEMA:
+                    name = NGSIUtils.encode(entity, false, true)
+                           + '_' + NGSIUtils.encode(entityType, false, true);
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()

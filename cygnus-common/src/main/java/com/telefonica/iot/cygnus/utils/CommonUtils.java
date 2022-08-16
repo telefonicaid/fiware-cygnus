@@ -242,6 +242,8 @@ public final class CommonUtils {
                 return "dm-by-entity";
             case DMBYENTITYTYPE:
                 return "dm-by-entity-type";
+            case DMBYENTITYIDTYPE:
+                return "dm-by-entityid-type";
             case DMBYATTRIBUTE:
                 return "dm-by-attribute";
             case DMBYENTITYDATABASE:
@@ -252,6 +254,10 @@ public final class CommonUtils {
                 return "dm-by-entity-database-schema";
             case DMBYENTITYTYPEDATABASESCHEMA:
                 return "dm-by-entity-type-database-schema";
+            case DMBYENTITYIDTYPEDATABASE:
+                return "dm-by-entityid-type-database";
+            case DMBYENTITYIDTYPEDATABASESCHEMA:
+                return "dm-by-entityid-type-database-schema";
             default:
                 return null;
         } // switch

@@ -39,6 +39,9 @@ import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYDATABASE
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYTYPEDATABASESCHEMA;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYSERVICE;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYSERVICEPATH;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYIDTYPE;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYIDTYPEDATABASE;
+import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYIDTYPEDATABASESCHEMA;
 import java.util.Map;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
@@ -828,6 +831,11 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 case DMBYENTITYID:
                     accumulateByEntityId(event);
                     break;
+                case DMBYENTITYIDTYPE:
+                case DMBYENTITYIDTYPEDATABASE:
+                case DMBYENTITYIDTYPEDATABASESCHEMA:
+                    accumulateByEntityIdType(event);
+                    break;
                 default:
                     LOGGER.error("Unknown data model. Details=" + dataModel.toString() + " Sink: " + this.getClass().getName());
             } // switch
@@ -969,6 +977,37 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
             batch.addEvent(destination, event);
         } // accumulateByServicePath
+
+        private void accumulateByEntityIdType(NGSIEvent event) {
+            Map<String, String> headers = event.getHeaders();
+            ContextElement originalCE = event.getOriginalCE();
+            ContextElement mappedCE = event.getMappedCE();
+            String destination;
+            if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
+                String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
+                if (enableGrouping) {
+                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH)
+                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY)
+                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE);
+                } else {
+                    destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH)
+                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY)
+                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE);
+                } // if else
+            } else {
+                if (enableNameMappings) {
+                    destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
+                            + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH) + "_"
+                            + mappedCE.getId() "_" + mappedCE.getType();
+                } else {
+                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
+                            + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
+                            + mappedCE.getId() "_" + originalCE.getType();
+                } // if else
+            } // if else
+
+            batch.addEvent(destination, event);
+        } // accumulateByEntityIdType
 
         private void accumulateByAttribute(NGSIEvent event) {
             Map<String, String> headers = event.getHeaders();
