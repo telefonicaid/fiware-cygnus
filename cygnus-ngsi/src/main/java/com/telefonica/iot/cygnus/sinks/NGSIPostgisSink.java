@@ -650,8 +650,7 @@ public class NGSIPostgisSink extends NGSISink {
                     name = NGSIUtils.encode(entityType, false, true);
                     break;
                 default:
-                    throw new CygnusBadConfigurati
-                        on("Unknown data model '" + dataModel.toString()
+                    throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
                             + "'. Please, use DMBYSERVICEPATH, DMBYENTITYDATABASE, DMBYENTITYDATABASESCHEMA, DMBYENTITY, DMBYENTITYTYPEDATABASE, DMBYENTITYTYPEDATABASESCHEMA, DMBYENTITYTYPE, DMBYFIXEDENTITYTYPE, DMBYFIXEDENTITYTYPEDATABASE, DMBYFIXEDENTITYTYPEDATABASESCHEMA or DMBYATTRIBUTE");
             } // switch
         } // if else
