@@ -256,7 +256,7 @@ public final class CommonUtils {
                 return "dm-by-entity-type-database-schema";
             case DMBYFIXEDENTITYTYPEDATABASE:
                 return "dm-by-fixed-entity-type-database";
-            case DMBYFIXEDENTITYYPEDATABASESCHEMA:
+            case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
                 return "dm-by-fixed-entity-type-database-schema";
             default:
                 return null;
