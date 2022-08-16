@@ -531,8 +531,8 @@ public class NGSIMySQLSink extends NGSISink {
                             + CommonConstants.CONCATENATOR
                             + NGSICharsets.encodeMySQL(attribute);
                     break;
-                case DMBYENTITYTYPE:
-                case DMBYENTITYTYPEDATABASE:
+                case DMBYFIXEDENTITYTYPE:
+                case DMBYFIXEDENTITYTYPEDATABASE:
                     name = NGSICharsets.encodeMySQL(entityType);
                     break;
                 default:
