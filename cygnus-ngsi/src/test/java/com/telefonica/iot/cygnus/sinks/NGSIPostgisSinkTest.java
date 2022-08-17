@@ -1084,7 +1084,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "x002fsomex0050athxffffsomex0054ype";
+            String expecetedTableName = "somex0054ype";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);
