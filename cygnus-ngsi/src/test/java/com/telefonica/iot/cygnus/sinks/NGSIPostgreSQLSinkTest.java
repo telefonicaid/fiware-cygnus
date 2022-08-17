@@ -1081,7 +1081,7 @@ public class NGSIPostgreSQLSinkTest {
 
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "someType";
+            String expecetedTableName = "somex0054ype";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);
