@@ -101,14 +101,14 @@ PostgreSQL [tables name length](http://www.postgresql.org/docs/current/static/sq
 The following table summarizes the table name composition (old encoding):
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity`, `dm-by-entity-database-schema`, `dm-by-entity-database` | `dm-by-entity-type`, `dm-by-entity-type-database-schema`, `dm-by-entity-type-database` | `dm-by-fixed-entity-type`, `dm-by-fixed-entity-type-database-schema`, `dm-by-fixed-entity-type-database` |
-|---|---|---|---|
+|---|---|---|---|---|
 | `/` | N/A | `<entityId>_<entityType>` | `<entityType>` | `<entityType>` |
 | `/<svcPath>` | `<svcPath>` | `<svcPath>_<entityId>_<entityType>` | `<svcPath>_<entityType>` | `<entityType>` |
 
 Using the new encoding:
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity`, `dm-by-entity-database-schema`, `dm-by-entity-database` | `dm-by-entity-type`, `dm-by-entity-type-database-schema`, `dm-by-entity-type-database` | `dm-by-fixed-entity-type`, `dm-by-fixed-entity-type-database-schema`, `dm-by-fixed-entity-type-database` |
-|---|---|---|---|
+|---|---|---|---|---|
 | `/` | `x002f` | `x002fxffff<entityId>xffff<entityType>` | `x002fxffff<entityType>` | `<entityType>` |
 | `/<svcPath>` | `x002f<svcPath>` | `x002f<svcPath>xffff<entityId>xffff<entityType>` | `x002f<svcPath>xffff<entityType>` | `<entityType>` |
 
