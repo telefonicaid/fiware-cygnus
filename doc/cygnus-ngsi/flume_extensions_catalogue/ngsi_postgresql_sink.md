@@ -201,14 +201,14 @@ The PostgreSQL schema will always be `vehicles`.
 The PostgreSQL table names will be, depending on the configured data model, the following ones (old encoding):
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-entity-type` | `dm-by-fixed-entity-type` |
-|---|---|---|---|
+|---|---|---|---|---|
 | `/` | N/A | `car1_car` | `car` | `car` |
 | `/4wheels` | `4wheels` | `4wheels_car1_car` | `4wheels_car` | `car` |
 
 Using the new encoding:
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-entity-type` | `dm-by-fixed-entity-type` |
-|---|---|---|---|
+|---|---|---|---|---|
 | `/` | `x002f` | `x002fxffffcar1xffffcar` | `x002fxffffcar` | `car` |
 | `/wheels` | `x002f4wheels` | `x002f4wheelsxffffcar1xffffcar` | `x002f4wheelsxffffcar` | `car` |
 
