@@ -531,9 +531,13 @@ public class NGSIMySQLSink extends NGSISink {
                             + CommonConstants.CONCATENATOR
                             + NGSICharsets.encodeMySQL(attribute);
                     break;
+                case DMBYFIXEDENTITYTYPE:
+                case DMBYFIXEDENTITYTYPEDATABASE:
+                    name = NGSICharsets.encodeMySQL(entityType);
+                    break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use dm-by-service-path, dm-by-entity or dm-by-attribute");
+                            + "'. Please, use dm-by-service-path, dm-by-entity, dm-by-entitytype or dm-by-fixed-entitytype or dm-by-attribute");
             } // switch
         } else {
             switch (dataModel) {
@@ -563,9 +567,13 @@ public class NGSIMySQLSink extends NGSISink {
                             + NGSIUtils.encode(entity, false, true)
                             + '_' + NGSIUtils.encode(attribute, false, true);
                     break;
+                case DMBYFIXEDENTITYTYPEDATABASE:
+                case DMBYFIXEDENTITYTYPE:
+                    name = NGSIUtils.encode(entityType, false, true);
+                    break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY, DMBYENTITYTYPE or DMBYATTRIBUTE");
+                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY, DMBYENTITYTYPE, DMBYFIXEDENTITYTYPE or DMBYATTRIBUTE");
             } // switch
         } // if else
 

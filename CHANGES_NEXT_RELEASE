@@ -1,3 +1,4 @@
+- [cygnus-ngsi][SQL-sinks] New datamodels added:  `data_model=dm-by-fixed-entity-type`, `data_model=dm-by-fixed-entity-type-database-schema`, `data_model=dm-by-fixed-entity-type-database` (#2190)
 - [cygnus-ngsi]  Fix aggregate using event servicepath (#2185)
 - [cygnus-common] Upgrade postgresql from 42.3.3 to 42.4.1
 - [cygnus-common][MySQLBackend] Upgrade mysql-connector-java from 8.0.27 to 8.0.28
