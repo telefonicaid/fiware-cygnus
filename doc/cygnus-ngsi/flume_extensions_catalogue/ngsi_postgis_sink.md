@@ -26,10 +26,10 @@ Colum should be provisioned as type [`geometry`](http://postgis.net/workshops/po
 [Top](#top)
 
 ## <a name="section2"></a>Administration guide
-Please refear to [`NGSIPostgreSQLSink`](/ngsi_postgresql_sink.md) since all administration options about PostgreSQLSink applies to PostGISSink.
+Please refear to [`NGSIPostgreSQLSink`](/doc/cygnus-ngsi/flume_extensions_catalogue/ngsi_postgresql_sink.md) since all administration options about PostgreSQLSink applies to PostGISSink.
 
 ## <a name="section3"></a>Programmers guide
-Please refear to [`NGSIPostgreSQLSink`](/ngsi_postgresql_sink.md) since all programing details about PostgreSQLSink applies to PostGISSink.
+Please refear to [`NGSIPostgreSQLSink`](/doc/cygnus-ngsi/flume_extensions_catalogue/ngsi_postgresql_sink.md) since all programing details about PostgreSQLSink applies to PostGISSink.
 
 
 ## <a name="section4"></a>Native types
