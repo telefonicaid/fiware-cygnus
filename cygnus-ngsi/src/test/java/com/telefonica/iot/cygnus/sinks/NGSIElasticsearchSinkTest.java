@@ -781,7 +781,7 @@ public class NGSIElasticsearchSinkTest {
             sink.persistBatch(batch);
             verify(mockBackend, times(1)).bulkInsert(idxCaptor.capture(), mappingTypeCaptor.capture(), dataCaptor.capture());
 
-            assertEquals("cygnus-room_service-room_service_path-room1-room-1970.01.15", idxCaptor.getValue());
+            assertEquals("cygnus-room_service-room_service_path-room1-room", idxCaptor.getValue());
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -837,7 +837,7 @@ public class NGSIElasticsearchSinkTest {
             byte[] bytes = MessageDigest.getInstance("md5").digest("temperature:".getBytes(StandardCharsets.UTF_8));
             String hash = DatatypeConverter.printHexBinary(bytes).toLowerCase();
 
-            assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash + "-1970.01.15", idxCaptor.getValue());
+            assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash, idxCaptor.getValue());
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -890,7 +890,7 @@ public class NGSIElasticsearchSinkTest {
             sink.persistBatch(batch);
             verify(mockBackend, times(1)).bulkInsert(idxCaptor.capture(), mappingTypeCaptor.capture(), dataCaptor.capture());
 
-            assertEquals("cygnus-room_service-room_service_path-room1-room-1970.01.15", idxCaptor.getValue());
+            assertEquals("cygnus-room_service-room_service_path-room1-room", idxCaptor.getValue());
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -944,7 +944,7 @@ public class NGSIElasticsearchSinkTest {
             sink.persistBatch(batch);
             verify(mockBackend, times(1)).bulkInsert(idxCaptor.capture(), mappingTypeCaptor.capture(), dataCaptor.capture());
 
-            assertEquals("cygnus-room_service-room_service_path-room1-room-1970.01.15", idxCaptor.getValue());
+            assertEquals("cygnus-room_service-room_service_path-room1-room", idxCaptor.getValue());
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -1019,7 +1019,7 @@ public class NGSIElasticsearchSinkTest {
             byte[] bytes = MessageDigest.getInstance("md5").digest("temperature:".getBytes(StandardCharsets.UTF_8));
             String hash = DatatypeConverter.printHexBinary(bytes).toLowerCase();
 
-            assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash + "-1970.01.15", idxCaptor.getValue());
+            assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash, idxCaptor.getValue());
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -1075,7 +1075,7 @@ public class NGSIElasticsearchSinkTest {
             byte[] bytes = MessageDigest.getInstance("md5").digest("roomtype:temperature:".getBytes(StandardCharsets.UTF_8));
             String hash = DatatypeConverter.printHexBinary(bytes).toLowerCase();
 
-            assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash + "-1970.01.15", idxCaptor.getValue());
+            assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash, idxCaptor.getValue());
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -1130,9 +1130,9 @@ public class NGSIElasticsearchSinkTest {
             verify(mockBackend, times(1)).bulkInsert(idxCaptor.capture(), mappingTypeCaptor.capture(), dataCaptor.capture());
 
             if (timezone == "Asia/Tokyo") {
-                assertEquals("cygnus-room_service-room_service_path-room1-room-2018.01.02", idxCaptor.getValue());
+                assertEquals("cygnus-room_service-room_service_path-room1-room", idxCaptor.getValue());
             } else {
-                assertEquals("cygnus-room_service-room_service_path-room1-room-2018.01.01", idxCaptor.getValue());
+                assertEquals("cygnus-room_service-room_service_path-room1-room", idxCaptor.getValue());
             }
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
@@ -1243,9 +1243,9 @@ public class NGSIElasticsearchSinkTest {
             String hash = DatatypeConverter.printHexBinary(bytes).toLowerCase();
 
             if (timezone == "Asia/Tokyo") {
-                assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash + "-2018.01.02", idxCaptor.getValue());
+                assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash, idxCaptor.getValue());
             } else {
-                assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash + "-2018.01.01", idxCaptor.getValue());
+                assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash, idxCaptor.getValue());
             }
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
@@ -1308,7 +1308,7 @@ public class NGSIElasticsearchSinkTest {
             sink.persistBatch(batch);
             verify(mockBackend, times(1)).bulkInsert(idxCaptor.capture(), mappingTypeCaptor.capture(), dataCaptor.capture());
 
-            assertEquals("cygnus-room_service-room_service_path-room1-room-1970.01.15", idxCaptor.getValue());
+            assertEquals("cygnus-room_service-room_service_path-room1-room", idxCaptor.getValue());
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -1356,7 +1356,7 @@ public class NGSIElasticsearchSinkTest {
             sink.persistBatch(batch);
             verify(mockBackend, times(1)).bulkInsert(idxCaptor.capture(), mappingTypeCaptor.capture(), dataCaptor.capture());
 
-            assertEquals("cygnus-room_service-room_service_path-room1-room-1970.01.15", idxCaptor.getValue());
+            assertEquals("cygnus-room_service-room_service_path-room1-room", idxCaptor.getValue());
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -1407,7 +1407,7 @@ public class NGSIElasticsearchSinkTest {
             byte[] bytes = MessageDigest.getInstance("md5").digest("temperature:".getBytes(StandardCharsets.UTF_8));
             String hash = DatatypeConverter.printHexBinary(bytes).toLowerCase();
 
-            assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash + "-1970.01.15", idxCaptor.getValue());
+            assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash, idxCaptor.getValue());
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -1457,7 +1457,7 @@ public class NGSIElasticsearchSinkTest {
             byte[] bytes = MessageDigest.getInstance("md5").digest("temperature:".getBytes(StandardCharsets.UTF_8));
             String hash = DatatypeConverter.printHexBinary(bytes).toLowerCase();
 
-            assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash + "-1970.01.15", idxCaptor.getValue());
+            assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash, idxCaptor.getValue());
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -1504,7 +1504,7 @@ public class NGSIElasticsearchSinkTest {
             sink.persistBatch(batch);
             verify(mockBackend, times(1)).bulkInsert(idxCaptor.capture(), mappingTypeCaptor.capture(), dataCaptor.capture());
 
-            assertEquals("cygnus-room_service-room_service_path-room1-room-1970.01.15", idxCaptor.getValue());
+            assertEquals("cygnus-room_service-room_service_path-room1-room", idxCaptor.getValue());
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -1569,7 +1569,7 @@ public class NGSIElasticsearchSinkTest {
             sink.persistBatch(batch);
             verify(mockBackend, times(1)).bulkInsert(idxCaptor.capture(), mappingTypeCaptor.capture(), dataCaptor.capture());
 
-            assertEquals("cygnus-room_service-room_service_path-room1-room-1970.01.15", idxCaptor.getValue());
+            assertEquals("cygnus-room_service-room_service_path-room1-room", idxCaptor.getValue());
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -1637,7 +1637,7 @@ public class NGSIElasticsearchSinkTest {
             byte[] bytes = MessageDigest.getInstance("md5").digest("roomtype:temperature:".getBytes(StandardCharsets.UTF_8));
             String hash = DatatypeConverter.printHexBinary(bytes).toLowerCase();
 
-            assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash + "-1970.01.15", idxCaptor.getValue());
+            assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash, idxCaptor.getValue());
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
@@ -1686,7 +1686,7 @@ public class NGSIElasticsearchSinkTest {
             byte[] bytes = MessageDigest.getInstance("md5").digest("roomtype:temperature:".getBytes(StandardCharsets.UTF_8));
             String hash = DatatypeConverter.printHexBinary(bytes).toLowerCase();
 
-            assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash + "-1970.01.15", idxCaptor.getValue());
+            assertEquals("cygnus-room_service-room_service_path-room1-room-" + hash, idxCaptor.getValue());
             assertEquals("cygnus_type", mappingTypeCaptor.getValue());
 
             List<Map<String, String>> requestedData = dataCaptor.getValue();
