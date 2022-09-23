@@ -116,6 +116,22 @@ Please observe the concatenation of entity ID and type is already given in the `
 
 [Top](#top)
 
+#### <a name="section1.2.4"></a>Summary datamodels PostgreSQL data structure
+
+This table contains the database structure used for each datamodel supported by this sink
+
+|data_model|database name|schema name|table name|
+|:----|:----|:----|:----|
+|dm-by-fixed-entity-type-database-schema|fiware-service|fiware-servicePath|entity type|
+|dm-by-fixed-entity-type-database|fiware-service|fiware-service|entity type|
+|dm-by-fixed-entity-type|agent properties|fiware-service|entity type|
+|dm-by-entity-database-schema|fiware-service|fiware-servicePath|fiware-servicePath + entity type + entity id|
+|dm-by-entity-database|fiware-service|fiware-service|fiware-servicePath + entity type + entity id|
+|dm-by-entity-type|agent properties|fiware-service|fiware-servicePath + entity type|
+|dm-by-service-path|agent properties|fiware-service|fiware-servicePath|
+|dm-by-entity|agent properties|fiware-service|fiware-servicePath + entity type + entity id|
+
+
 #### <a name="section1.2.4"></a>Row-like storing
 Regarding the specific data stored within the above table, if `attr_persistence` parameter is set to `row` (default storing mode) then the notified data is stored attribute by attribute, composing an insert for each one of them. Each insert contains the following fields:
 
