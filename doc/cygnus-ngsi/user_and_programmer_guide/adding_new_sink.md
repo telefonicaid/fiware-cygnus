@@ -46,7 +46,6 @@ All the sinks extending `NGSISink` inherit the following configuration parameter
 | batch_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 | data_model | no | dm-by-entity | Accepted values: <i>dm-by-service</i>, <i>dm-by-service-path</i>, <i>dm-by-entity</i>, <i>dm-by-entity-type</i> and <dm-by-attribute</i>. |
-| enable_grouping | no | false | Accepted values: <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | Accepted values: <i>true</i> or <i>false</i>. |
 
 These parameters are read (and defaulted, when required) in the `configure(Context)` method.
@@ -67,7 +66,7 @@ Please notice that the `process()` method handles all the possible errors that m
 
     fiware-cygnus/cygnus-common/src/main/java/com/telefonica/iot/cygnus/errors/
 
-Once finished, accumulation results in a `NGSIBatch` object, which internally holds sub-batches per each notified/grouped destination (`notified-destinations` and `grouped-destinations` headers in the Flume event objects are inspected to created the sub-batches, depending on the configured `enable_grouping` value). Information within this `NGSIBatch` object is the one the specific implementation of the new sink must persist.
+Once finished, accumulation results in a `NGSIBatch` object, which internally holds sub-batches per each notified/grouped destination (`notified-destinations` and `grouped-destinations` headers in the Flume event objects are inspected to created the sub-batches, depending on the configured `enable_name_mappings` value). Information within this `NGSIBatch` object is the one the specific implementation of the new sink must persist.
 
 Specific persistence logic is implemented by overwriting the only abstract method within `NGSISink`, i.e. `persistBatch(NGSIBatch)`:
 
@@ -90,16 +89,32 @@ The `configure(Context)` method of `NGSISink` can be extended with specific conf
 [Top](#top)
 
 ### <a name="section3.2"></a>Kind of information to be persisted
-We include a list of fields that are usually persisted in Cygnus sinks:* The reception time of the notification in miliseconds.* The reception time of the notification in human-readable format.* The notified/grouped FIWARE service path.* The entity ID.* The entity type.* The attributes and the attribute’s metadata.Regarding the attributes and their metadata, you may choose between two options (or both of them, by means of a switching configuration parameter):* <i>row</i> format, i.e. a write/insertion/upsert per attribute and metadata.* <i>column</i> format, i.e. a single write/insertion/upsert containing all the attributes and their metadata.
+We include a list of fields that are usually persisted in Cygnus sinks:
+
+* The reception time of the notification in miliseconds.
+* The reception time of the notification in human-readable format.
+* The notified/grouped FIWARE service path.
+* The entity ID.
+* The entity type.
+* The attributes and the attribute’s metadata.
+
+Regarding the attributes and their metadata, you may choose between two options (or both of them, by means of a switching configuration parameter):
+
+* <i>row</i> format, i.e. a write/insertion/upsert per attribute and metadata.
+* <i>column</i> format, i.e. a single write/insertion/upsert containing all the attributes and their metadata.
 
 [Top](#top)
 
 ### <a name="section3.2"></a>Fitting to the specific data structures
 It is worth to briefly comment how the specific data structures should be created.
-Typically, the notified service (which defines a client/tenant) should map to the storage element in charge of defining namespaces per user. For instance, in MySQL, PostgreSQL, MongoDB and STH, the service maps to a specific database where permissions can be defined at user level. While in CKAN, the service maps to an organization. In other cases, the mapping is not so evident, as in HDFS, where the service maps into a folder under `hdfs://user/`. Or it is totally impossible to fit, as is the case of DynamoDB or Kafka, where the service can only be added as part of the persistence element name (table and topic, respectively).
-Regarding the notified service path, it is usually included as a prefix of the destination name (file, table, resource, collection, topic) where the data is really written. This is the case of all the sinks except HDFS and CKAN. HDFS maps the service path as a subfolder under `hdfs://user/service`, and CKAN maps the service path as a package.
-Of special interest is the root service path (`/`). In this case, the service path should not be considered when prefixing destination name (because it is used to be a forbidden character).
-Finally, in order to differentiate among all the entities, the concatenation of entity ID and type should be used as the default destination name (unless a grouping rule is used to overwrite this default behavior).
+
+Typically, the notified service (which defines a client/tenant) should map to the storage element in charge of defining namespaces per user. For instance, in MySQL, PostgreSQL, MongoDB and STH, the service maps to a specific database where permissions can be defined at user level. While in CKAN, the service maps to an organization. In other cases, the mapping is not so evident, as in HDFS, where the service maps into a folder under `hdfs://user/`. Or it is totally impossible to fit, as is the case of DynamoDB or Kafka, where the service can only be added as part of the persistence element name (table and topic, respectively).
+
+Regarding the notified service path, it is usually included as a prefix of the destination name (file, table, resource, collection, topic) where the data is really written. This is the case of all the sinks except HDFS and CKAN. HDFS maps the service path as a subfolder under `hdfs://user/service`, and CKAN maps the service path as a package.
+
+Of special interest is the root service path (`/`). In this case, the service path should not be considered when prefixing destination name (because it is used to be a forbidden character).
+
+Finally, in order to differentiate among all the entities, the concatenation of entity ID and type should be used as the default destination name (unless a grouping rule is used to overwrite this default behavior).
 
 [Top](#top)
 

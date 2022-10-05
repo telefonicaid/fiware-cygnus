@@ -416,7 +416,6 @@ Everything equals to the raw historic-based storing, but:
 |---|---|---|---|
 | type | yes | N/A | Must be `com.telefonica.iot.cygnus.sinks.NGSICartoDBSink` |
 | channel | yes | N/A ||
-| enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data\_model | no | dm-by-entity |  <i>dm-by-service-path</i> or <i>dm-by-entity</i>. |

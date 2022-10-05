@@ -225,13 +225,13 @@ public class NGSIEventTest {
     } // testGetServicePathForData
     
     /**
-     * [NGSIEvent.getServicePathForNaming] -------- When grouping and mappings are not enabled, the original service
+     * [NGSIEvent.getServicePathForNaming] -------- When mappings are not enabled, the original service
      * path is returned.
      */
     @Test
-    public void testGetServicePathForNamingNoGRNoNM() {
+    public void testGetServicePathForNamingNoNM() {
         System.out.println(getTestTraceHead("[NGSIEvent.getServicePathForNaming]")
-                + "-------- When grouping and mappings are not enabled, the original service path is returned");
+                + "-------- When mappings are not enabled, the original service path is returned");
         HashMap<String, String> headers = new HashMap<>();
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
@@ -242,7 +242,7 @@ public class NGSIEventTest {
         NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
-            assertEquals(originalServicePath, event.getServicePathForNaming(false, false));
+            assertEquals(originalServicePath, event.getServicePathForNaming(false));
             System.out.println(getTestTraceHead("[NGSIEvent.getServicePathForNaming]")
                     + "-  OK  - The original service path has been returned");
         } catch (AssertionError e) {
@@ -250,34 +250,7 @@ public class NGSIEventTest {
                     + "- FAIL - The original service path has not been returned");
             throw e;
         } // try catch
-    } // testGetServicePathForNamingNoGRNoNM
-    
-    /**
-     * [NGSIEvent.getServicePathForNaming] -------- When grouping is enabled, the grouped service path is returned.
-     */
-    @Test
-    public void testGetServicePathForNamingGR() {
-        System.out.println(getTestTraceHead("[NGSIEvent.getServicePathForNaming]")
-                + "-------- When grouping is enabled, the grouped service path is returned");
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
-        headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH, groupedServicePath);
-        byte[] body = null; // irrelevant for this test
-        ContextElement originalCE = null; // irrelevant for this test
-        ContextElement mappedCE = null; // irrelevant for this test
-        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
-        
-        try {
-            assertEquals(groupedServicePath, event.getServicePathForNaming(true, false));
-            System.out.println(getTestTraceHead("[NGSIEvent.getServicePathForNaming]")
-                    + "-  OK  - The grouped service path has been returned");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSIEvent.getServicePathForNaming]")
-                    + "- FAIL - The grouped service path has not been returned");
-            throw e;
-        } // try catch
-    } // testGetServicePathForNamingGR
+    } // testGetServicePathForNamingNoNM
     
     /**
      * [NGSIEvent.getServicePathForNaming] -------- When mappings are enabled, the mapped service path is returned.
@@ -296,7 +269,7 @@ public class NGSIEventTest {
         NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
-            assertEquals(mappedServicePath, event.getServicePathForNaming(false, true));
+            assertEquals(mappedServicePath, event.getServicePathForNaming(true));
             System.out.println(getTestTraceHead("[NGSIEvent.getServicePathForNaming]")
                     + "-  OK  - The grouped service path has been returned");
         } catch (AssertionError e) {
@@ -307,13 +280,13 @@ public class NGSIEventTest {
     } // testGetServicePathForNamingNM
     
     /**
-     * [NGSIEvent.getEntityForNaming] -------- When grouping, mappings and new encoding are not enabled, the original
+     * [NGSIEvent.getEntityForNaming] -------- When mappings and new encoding are not enabled, the original
      * entity (not encoded) is returned.
      */
     @Test
-    public void testGetEntityForNamingNoGRNoNMNoEncoding() {
+    public void testGetEntityForNamingNoNMNoEncoding() {
         System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
-                + "-------- When grouping, mappings and new encoding are not enabled, the original entity "
+                + "-------- When mappings and new encoding are not enabled, the original entity "
                 + "(not encoded) is returned");
         HashMap<String, String> headers = null; // irrelevant for this test
         byte[] body = null; // irrelevant for this test
@@ -332,7 +305,7 @@ public class NGSIEventTest {
         NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
-            assertEquals(originalEntityNoEncoding, event.getEntityForNaming(false, false, false));
+            assertEquals(originalEntityNoEncoding, event.getEntityForNaming(false, false));
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "-  OK  - The original entity (not encoded) has been returned");
         } catch (AssertionError e) {
@@ -340,16 +313,16 @@ public class NGSIEventTest {
                     + "- FAIL - The original entity (not encoded) has not been returned");
             throw e;
         } // try catch
-    } // testGetEntityForNamingNoGRNoNMNoEncoding
+    } // testGetEntityForNamingNoNMNoEncoding
     
     /**
-     * [NGSIEvent.getEntityForNaming] -------- When grouping and mappings are not enabled and new encoding is enabled,
+     * [NGSIEvent.getEntityForNaming] -------- When mappings are not enabled and new encoding is enabled,
      * the original entity (encoded) is returned.
      */
     @Test
-    public void testGetEntityForNamingNoGRNoNMEncoding() {
+    public void testGetEntityForNamingNoNMEncoding() {
         System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
-                + "-------- When grouping and mappings are not enabled and new encoding is enabled, the original "
+                + "-------- When mappings are not enabled and new encoding is enabled, the original "
                 + "entity (encoded) is returned");
         HashMap<String, String> headers = null; // irrelevant for this test
         byte[] body = null; // irrelevant for this test
@@ -368,7 +341,7 @@ public class NGSIEventTest {
         NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
-            assertEquals(originalEntityEncoding, event.getEntityForNaming(false, false, true));
+            assertEquals(originalEntityEncoding, event.getEntityForNaming(false, true));
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "-  OK  - The original entity (not encoded) has been returned");
         } catch (AssertionError e) {
@@ -376,44 +349,7 @@ public class NGSIEventTest {
                     + "- FAIL - The original entity (not encoded) has not been returned");
             throw e;
         } // try catch
-    } // testGetEntityForNamingNoGRNoNMEncoding
-    
-    /**
-     * [NGSIEvent.getEntityForNaming] -------- When grouping is enabled, independently of the new encoding, the grouped
-     * entity is returned.
-     */
-    @Test
-    public void testGetEntityForNamingGR() {
-        System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
-                + "-------- When grouping is enabled, independently of the new encoding, the grouped entity is "
-                + "returned");
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY, groupedEntity);
-        byte[] body = null; // irrelevant for this test
-        ContextElement originalCE;
-        ContextElement mappedCE;
-        
-        try {
-            originalCE = NGSIUtilsForTests.createJsonContextElement(originalCEStr);
-            mappedCE = NGSIUtilsForTests.createJsonContextElement(mappedCEStr);
-        } catch (Exception e) {
-            System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
-                    + "- FAIL - There was some problem when setting up the test");
-            throw new AssertionError(e.getMessage());
-        } // try catch
-        
-        NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
-        
-        try {
-            assertEquals(groupedEntity, event.getEntityForNaming(true, false, true));
-            System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
-                    + "-  OK  - The grouped entity has been returned");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
-                    + "- FAIL - The grouped entity has not been returned");
-            throw e;
-        } // try catch
-    } // testGetEntityForNamingGR
+    } // testGetEntityForNamingNoNMEncoding
     
     /**
      * [NGSIEvent.getEntityForNaming] -------- When mappings is enabled and new encoding is not enabled, the
@@ -441,7 +377,7 @@ public class NGSIEventTest {
         NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
-            assertEquals(mappedEntityID + "_" + mappedEntityType, event.getEntityForNaming(false, true, false));
+            assertEquals(mappedEntityID + "_" + mappedEntityType, event.getEntityForNaming(true, false));
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "-  OK  - The concatenation of the mapped entity ID and type (no encoding) has been returned");
         } catch (AssertionError e) {
@@ -478,7 +414,7 @@ public class NGSIEventTest {
         NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
-            assertEquals(mappedEntityID + "=" + mappedEntityType, event.getEntityForNaming(false, true, true));
+            assertEquals(mappedEntityID + "=" + mappedEntityType, event.getEntityForNaming(true, true));
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "-  OK  - The concatenation of the mapped entity ID and type (encoding) has been returned");
         } catch (AssertionError e) {
@@ -514,7 +450,7 @@ public class NGSIEventTest {
         NGSIEvent event = new NGSIEvent(headers, body, originalCE, mappedCE);
         
         try {
-            assertEquals(mappedEntityID, event.getEntityForNaming(false, true, true));
+            assertEquals(mappedEntityID, event.getEntityForNaming( true, true));
             System.out.println(getTestTraceHead("[NGSIEvent.getEntityForNaming]")
                     + "-  OK  - The entity ID has been returned");
         } catch (AssertionError e) {

@@ -284,8 +284,8 @@ public class NGSISTHSink extends NGSIMongoBaseSink {
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             String service = event.getServiceForNaming(enableNameMappings);
             String servicePathForData = event.getServicePathForData();
-            String servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            String entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            String servicePathForNaming = event.getServicePathForNaming(enableNameMappings);
+            String entityForNaming = event.getEntityForNaming(enableNameMappings, enableEncoding);
             String attributeForNaming = event.getAttributeForNaming(enableNameMappings);
             dbName = buildDbName(service);
             collectionName = buildCollectionName(servicePathForNaming, entityForNaming, attributeForNaming) + ".aggr";

@@ -126,14 +126,11 @@ public class NGSIEvent implements Event {
 
     /**
      * Gets the service path for naming.
-     * @param enableGrouping
      * @param enableMappings
      * @return The service path for naming
      */
-    public String getServicePathForNaming(boolean enableGrouping, boolean enableMappings) {
-        if (enableGrouping) {
-            return headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH);
-        } else if (enableMappings) {
+    public String getServicePathForNaming(boolean enableMappings) {
+        if (enableMappings) {
             return headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH);
         } else {
             return headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
@@ -142,16 +139,13 @@ public class NGSIEvent implements Event {
     
     /**
      * Gets the entity for naming.
-     * @param enableGrouping
      * @param enableMappings
      * @param enableEncoding
      * @return The entity for naming
      */
-    public String getEntityForNaming(boolean enableGrouping, boolean enableMappings, boolean enableEncoding) {
+    public String getEntityForNaming(boolean enableMappings, boolean enableEncoding) {
         String concatenator = enableEncoding ? CommonConstants.INTERNAL_CONCATENATOR : CommonConstants.OLD_CONCATENATOR;
-        if (enableGrouping) {
-            return headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY);
-        } else if (enableMappings) {
+        if (enableMappings) {
             if (mappedCE.getType() == null || mappedCE.getType().isEmpty()) {
                 return mappedCE.getId();
             } else {
@@ -168,14 +162,11 @@ public class NGSIEvent implements Event {
 
     /**
      * Gets the entity type for naming.
-     * @param enableGrouping
      * @param enableMappings
      * @return The entity for naming
      */
-    public String getEntityTypeForNaming(boolean enableGrouping, boolean enableMappings) {
-        if (enableGrouping) {
-            return headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE);
-        } else if (enableMappings) {
+    public String getEntityTypeForNaming(boolean enableMappings) {
+        if (enableMappings) {
             if (mappedCE.getType() == null || mappedCE.getType().isEmpty()) {
              // should never occur since Orion does not allow it
                 LOGGER.error("[NGSIEvent] Entity Type musn´t be empty or null while grouping by entity type. ("

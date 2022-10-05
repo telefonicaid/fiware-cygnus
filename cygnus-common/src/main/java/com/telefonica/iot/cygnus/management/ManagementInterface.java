@@ -113,8 +113,6 @@ public class ManagementInterface extends AbstractHandler {
                         handleGetVersion(response);
                     } else if (uri.equals("/v1/stats")) {
                         StatsHandlers.get(response, sources, channels, sinks);
-                    } else if (uri.equals("/v1/groupingrules")) {
-                        GroupingRulesHandlers.get(response, groupingRulesConfFile);
                     } else if (uri.equals("/v1/subscriptions")) {
                         SubscriptionsHandlers.get(request, response);
                     } else if (uri.startsWith("/admin/configuration/agent")) {
@@ -142,9 +140,7 @@ public class ManagementInterface extends AbstractHandler {
                     
                     break;
                 case "POST":
-                    if (uri.equals("/v1/groupingrules")) {
-                        GroupingRulesHandlers.post(request, response, groupingRulesConfFile);
-                    } else if (uri.equals("/v1/subscriptions")) {
+                    if (uri.equals("/v1/subscriptions")) {
                         SubscriptionsHandlers.post(request, response);
                     } else if (uri.startsWith("/admin/configuration/agent")) {
                         ConfigurationAgentHandlers.post(request, response, false);
@@ -169,8 +165,6 @@ public class ManagementInterface extends AbstractHandler {
                 case "PUT":
                     if (uri.equals("/v1/stats")) {
                         StatsHandlers.put(response, sources, channels, sinks);
-                    } else if (uri.equals("/v1/groupingrules")) {
-                        GroupingRulesHandlers.put(request, response, groupingRulesConfFile);
                     } else if (uri.startsWith("/admin/configuration/agent")) {
                         ConfigurationAgentHandlers.put(request, response, false);
                     } else if (uri.startsWith("/v1/admin/configuration/agent")) {
@@ -192,9 +186,7 @@ public class ManagementInterface extends AbstractHandler {
                     
                     break;
                 case "DELETE":
-                    if (uri.equals("/v1/groupingrules")) {
-                        GroupingRulesHandlers.delete(request, response, groupingRulesConfFile);
-                    } else if (uri.equals("/v1/subscriptions")) {
+                    if (uri.equals("/v1/subscriptions")) {
                         SubscriptionsHandlers.delete(request, response);
                     } else if (uri.startsWith("/admin/configuration/agent")) {
                         ConfigurationAgentHandlers.delete(request, response, false);

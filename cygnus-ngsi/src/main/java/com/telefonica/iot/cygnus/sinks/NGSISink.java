@@ -81,7 +81,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSISink.class);
     // General parameters for all the sinks
     protected DataModel dataModel;
-    protected boolean enableGrouping;
     protected int batchSize;
     protected int batchTimeout;
     protected int batchTTL;
@@ -163,14 +162,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     } // getDataModel
 
     /**
-     * Gets if the grouping feature is enabled.
-     * @return True if the grouping feature is enabled, false otherwise.
-     */
-    protected boolean getEnableGrouping() {
-        return enableGrouping;
-    } // getEnableGrouping
-
-    /**
      * Gets if lower case is enabled.
      * @return True is lower case is enabled, false otherwise.
      */
@@ -232,18 +223,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             LOGGER.warn("[" + this.getName() + "] Invalid configuration (data_model="
                     + dataModelStr + ")");
         } // catch
-
-        String enableGroupingStr = context.getString("enable_grouping", "false");
-        
-        if (enableGroupingStr.equals("true") || enableGroupingStr.equals("false")) {
-            enableGrouping = Boolean.valueOf(enableGroupingStr);
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_grouping="
-                + enableGroupingStr + ")");
-        }  else {
-            invalidConfiguration = true;
-            LOGGER.warn("[" + this.getName() + "] Invalid configuration (enable_grouping="
-                + enableGroupingStr + ") -- Must be 'true' or 'false'");
-        }  // if else
         
         String enableLowercaseStr = context.getString("enable_lowercase", "false");
         
@@ -861,17 +840,12 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
         private void accumulateByServicePath(NGSIEvent event) {
             Map<String, String> headers = event.getHeaders();
-            ContextElement mappedCE = event.getMappedCE();
+            ContextElement mappedCE = event.getMappedCE(); // FIXME PR
             String destination;
             
             if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
                 String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-                
-                if (enableGrouping) {
-                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH);
-                } else {
-                    destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
-                } // if else
+                destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
             } else {
                 if (enableNameMappings) {
                     destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
@@ -893,14 +867,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             
             if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
                 String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-                
-                if (enableGrouping) {
-                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH)
-                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY);
-                } else {
-                    destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH)
-                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY);
-                } // if else
+                destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH)
+                    + "_" + headers.get(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY);
             } else {
                 if (enableNameMappings) {
                     destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
@@ -924,15 +892,9 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             
             if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
                 String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-                
-                if (enableGrouping) {
-                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH)
-                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE);
-                } else {
-                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
-                            + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
-                            + originalCE.getType();
-                } // if else
+                destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
+                    + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
+                    + originalCE.getType();
             } else {
                 if (enableNameMappings) {
                     destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
@@ -956,14 +918,8 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             
             if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
                 String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-                
-                if (enableGrouping) {
-                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH)
-                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY);
-                } else {
-                    destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH)
-                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY);
-                } // if else
+                destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH)
+                    + "_" + headers.get(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY);
             } else {
                 if (enableNameMappings) {
                     destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
@@ -986,11 +942,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             String destination;
             if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
                 String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-                if (enableGrouping) {
-                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE);
-                } else {
-                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE);
-                } // if else
+                destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE);
             } else {
                 if (enableNameMappings) {
                     destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
@@ -1012,14 +964,9 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             
             if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
                 String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-                
-                if (enableGrouping) {
-                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH)
-                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY);
-                } else {
-                    destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH)
-                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY);
-                } // if else
+
+                destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH)
+                    + "_" + headers.get(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY);
                 
                 ArrayList<ContextAttribute> attrs = originalCE.getAttributes();
 

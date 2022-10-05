@@ -120,7 +120,7 @@ public class NGSISinkTest {
     public void testStart() {
         System.out.println(getTestTraceHead("[NGSISink.start]") + "-------- The sink starts properly");
         NGSISinkImpl sink = new NGSISinkImpl();
-        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null, null));
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null));
         sink.setChannel(new MemoryChannel());
         sink.start();
         LifecycleState state = sink.getLifecycleState();
@@ -144,7 +144,7 @@ public class NGSISinkTest {
         System.out.println(getTestTraceHead("[NGSISink.configure]")
                 + "-------- When not configured, the default values are used for non mandatory parameters");
         NGSISinkImpl sink = new NGSISinkImpl();
-        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null, null));
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null));
         
         try {
             assertEquals("5000", sink.getBatchRetryIntervals());
@@ -196,17 +196,6 @@ public class NGSISinkTest {
             System.out.println(getTestTraceHead("[NGSISink.configure]")
                     + "- FAIL - The default configuration value for "
                     + "'data_model' is '" + sink.getDataModel() + "'");
-            throw e;
-        } // try catch
-        
-        try {
-            assertEquals(false, sink.getEnableGrouping());
-            System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "-  OK  - The default configuration value for 'enable_grouping' is 'false'");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "- FAIL - The default configuration value for "
-                    + "'enable_grouping' is '" + sink.getEnableGrouping() + "'");
             throw e;
         } // try catch
         
@@ -287,7 +276,7 @@ public class NGSISinkTest {
                 + "-------- When configured, non mandatory parameters get the appropiate value");
         NGSISinkImpl sink = new NGSISinkImpl();
         String maxRecords = "5";
-        sink.configure(createContext(null, null, null, null, null, null, null, null, maxRecords, null, null));
+        sink.configure(createContext(null, null, null, null, null, null, null, maxRecords, null, null));
         
         try {
             assertEquals(5, sink.getPersistencePolicyMaxRecords());
@@ -301,7 +290,7 @@ public class NGSISinkTest {
         } // try catch
         
         String expirationTime = "60";
-        sink.configure(createContext(null, null, null, null, null, null, null, null, null, expirationTime, null));
+        sink.configure(createContext(null, null, null, null, null, null, null, null, expirationTime, null));
         
         try {
             assertEquals(60, sink.getPersistencePolicyExpirationTime());
@@ -315,7 +304,7 @@ public class NGSISinkTest {
         } // try catch
         
         String checkingTime = "7200";
-        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null,
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null,
                 checkingTime));
         
         try {
@@ -341,7 +330,7 @@ public class NGSISinkTest {
                 + "having a discrete set of accepted values, or numerical values having upper or lower limits");
         NGSISinkImpl sink = new NGSISinkImpl();
         String configuredBatchSize = "0";
-        sink.configure(createContext(null, configuredBatchSize, null, null, null, null, null, null, null, null, null));
+        sink.configure(createContext(null, configuredBatchSize, null, null, null, null, null, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -357,7 +346,7 @@ public class NGSISinkTest {
         
         sink = new NGSISinkImpl();
         String configuredBatchTimeout = "0";
-        sink.configure(createContext(null, null, configuredBatchTimeout, null, null, null, null, null, null, null,
+        sink.configure(createContext(null, null, configuredBatchTimeout, null, null, null, null, null, null,
                 null));
         
         try {
@@ -374,7 +363,7 @@ public class NGSISinkTest {
         
         sink = new NGSISinkImpl();
         String configuredBatchTTL = "-2";
-        sink.configure(createContext(null, null, null, configuredBatchTTL, null, null, null, null, null, null, null));
+        sink.configure(createContext(null, null, null, configuredBatchTTL, null, null, null, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -388,7 +377,7 @@ public class NGSISinkTest {
         
         sink = new NGSISinkImpl();
         String dataModel = "dm-by-other";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null, null));
+        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -401,25 +390,8 @@ public class NGSISinkTest {
         } // try catch
         
         sink = new NGSISinkImpl();
-        String configuredEnableGrouping = "falso";
-        sink.configure(createContext(null, null, null, null, null, configuredEnableGrouping, null, null, null, null,
-                null));
-        
-        try {
-            assertTrue(sink.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "-  OK  - A wrong configuration 'enable_grouping='"
-                    + configuredEnableGrouping + "' has been detected");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSISink.configure]")
-                    + "- FAIL - A wrong configuration 'enable_grouping='"
-                    + configuredEnableGrouping + "' has not been detected");
-            throw e;
-        } // try catch
-        
-        sink = new NGSISinkImpl();
         String configuredEnableLowercase = "verdadero";
-        sink.configure(createContext(null, null, null, null, null, null, configuredEnableLowercase, null, null, null,
+        sink.configure(createContext(null, null, null, null, null, configuredEnableLowercase, null, null, null,
                 null));
         
         try {
@@ -436,7 +408,7 @@ public class NGSISinkTest {
         
         sink = new NGSISinkImpl();
         String configuredEnableNameMappings = "verdadero";
-        sink.configure(createContext(null, null, null, null, null, null, null, configuredEnableNameMappings,
+        sink.configure(createContext(null, null, null, null, null, null, configuredEnableNameMappings,
                 null, null, null));
         
         try {
@@ -453,7 +425,7 @@ public class NGSISinkTest {
         
         sink = new NGSISinkImpl();
         String batchRetryIntervals = "1000,2000,-3000";
-        sink.configure(createContext(batchRetryIntervals, null, null, null, null, null, null, null, null, null, null));
+        sink.configure(createContext(batchRetryIntervals, null, null, null, null, null, null, null, null, null));
         
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -469,7 +441,7 @@ public class NGSISinkTest {
         
         sink = new NGSISinkImpl();
         String checkingTime = "-1000";
-        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null,
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null,
                 checkingTime));
         
         try {
@@ -496,7 +468,7 @@ public class NGSISinkTest {
                 + "-------- When data model is by service, a notification is successfully accumulated");
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-service";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null, null));
+        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
         Map<String, String> headers = new HashMap<>();
@@ -558,7 +530,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalServicePath, events.get(0).getServicePathForNaming(false, false));
+            assertEquals(originalServicePath, events.get(0).getServicePathForNaming(false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + originalServicePath + "'");
         } catch (AssertionError e) {
@@ -600,7 +572,7 @@ public class NGSISinkTest {
                 + "-------- When data model is by service path, a notification is successfully accumulated");
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-service-path";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null, null));
+        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
         Map<String, String> headers = new HashMap<>();
@@ -662,7 +634,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalServicePath, events.get(0).getServicePathForNaming(false, false));
+            assertEquals(originalServicePath, events.get(0).getServicePathForNaming(false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + originalServicePath + "'");
         } catch (AssertionError e) {
@@ -704,7 +676,7 @@ public class NGSISinkTest {
                 + "-------- When data model is by entity, a notification is successfully accumulated");
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-entity";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null, null));
+        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
         Map<String, String> headers = new HashMap<>();
@@ -768,7 +740,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalServicePath, events.get(0).getServicePathForNaming(false, false));
+            assertEquals(originalServicePath, events.get(0).getServicePathForNaming(false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + originalServicePath + "'");
         } catch (AssertionError e) {
@@ -778,7 +750,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalEntity, events.get(0).getEntityForNaming(false, false, false));
+            assertEquals(originalEntity, events.get(0).getEntityForNaming(false, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is '" + originalEntity + "'");
         } catch (AssertionError e) {
@@ -810,7 +782,7 @@ public class NGSISinkTest {
                 + "-------- When data model is by attribute, a notification is successfully accumulated");
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-attribute";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null, null));
+        sink.configure(createContext(null, null, null, null, dataModel, null, null, null, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
         Map<String, String> headers = new HashMap<>();
@@ -875,7 +847,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalServicePath, events.get(0).getServicePathForNaming(false, false));
+            assertEquals(originalServicePath, events.get(0).getServicePathForNaming(false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + originalServicePath + "'");
         } catch (AssertionError e) {
@@ -885,7 +857,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(originalEntity, events.get(0).getEntityForNaming(false, false, false));
+            assertEquals(originalEntity, events.get(0).getEntityForNaming(false, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is '" + originalEntity + "'");
         } catch (AssertionError e) {
@@ -918,7 +890,7 @@ public class NGSISinkTest {
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-service";
         String enableNameMappings = "true";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings, null, null, null));
+        sink.configure(createContext(null, null, null, null, dataModel, null, enableNameMappings, null, null, null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
         Map<String, String> headers = new HashMap<>();
@@ -980,7 +952,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedServicePath, events.get(0).getServicePathForNaming(false, true));
+            assertEquals(mappedServicePath, events.get(0).getServicePathForNaming(true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + mappedServicePath + "'");
         } catch (AssertionError e) {
@@ -1024,7 +996,7 @@ public class NGSISinkTest {
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-service-path";
         String enableNameMappings = "true";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings, null, null,
+        sink.configure(createContext(null, null, null, null, dataModel, null,  enableNameMappings, null, null,
                 null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
@@ -1087,7 +1059,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedServicePath, events.get(0).getServicePathForNaming(false, true));
+            assertEquals(mappedServicePath, events.get(0).getServicePathForNaming(true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + mappedServicePath + "'");
         } catch (AssertionError e) {
@@ -1131,7 +1103,7 @@ public class NGSISinkTest {
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-entity";
         String enableNameMappings = "true";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings, null, null,
+        sink.configure(createContext(null, null, null, null, dataModel, null, enableNameMappings, null, null,
                 null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
@@ -1196,7 +1168,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedServicePath, events.get(0).getServicePathForNaming(false, true));
+            assertEquals(mappedServicePath, events.get(0).getServicePathForNaming(true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + mappedServicePath + "'");
         } catch (AssertionError e) {
@@ -1206,7 +1178,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedEntity, events.get(0).getEntityForNaming(false, true, false));
+            assertEquals(mappedEntity, events.get(0).getEntityForNaming(true, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is '" + mappedEntity + "'");
         } catch (AssertionError e) {
@@ -1240,7 +1212,7 @@ public class NGSISinkTest {
         NGSISinkImpl sink = new NGSISinkImpl();
         String dataModel = "dm-by-attribute";
         String enableNameMappings = "true";
-        sink.configure(createContext(null, null, null, null, dataModel, null, null, enableNameMappings, null, null,
+        sink.configure(createContext(null, null, null, null, dataModel, null, enableNameMappings, null, null,
                 null));
         Accumulator acc = sink.new Accumulator();
         acc.initialize(new Date().getTime());
@@ -1306,7 +1278,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedServicePath, events.get(0).getServicePathForNaming(false, true));
+            assertEquals(mappedServicePath, events.get(0).getServicePathForNaming(true));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's service path is '" + mappedServicePath + "'");
         } catch (AssertionError e) {
@@ -1316,7 +1288,7 @@ public class NGSISinkTest {
         } // try catch
         
         try {
-            assertEquals(mappedEntity, events.get(0).getEntityForNaming(false, true, false));
+            assertEquals(mappedEntity, events.get(0).getEntityForNaming(true, false));
             System.out.println(getTestTraceHead("[NGSISink.Accumulator.accumulate]")
                     + "-  OK  - Accumulated event's entity path is '" + mappedEntity + "'");
         } catch (AssertionError e) {
@@ -1346,7 +1318,7 @@ public class NGSISinkTest {
         System.out.println(getTestTraceHead("[NGSISink.getRollbackedAccumulationForRetry]")
                 + "-------- When there are no candidates for retrying, null is returned");
         NGSISinkImpl sink = new NGSISinkImpl();
-        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null, null));
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null));
         ArrayList<Accumulator> rollbackedAccumulations = new ArrayList<>();
         sink.setRollbackedAccumulations(rollbackedAccumulations);
         
@@ -1387,7 +1359,7 @@ public class NGSISinkTest {
         System.out.println(getTestTraceHead("[NGSISink.getRollbackedAccumulationForRetry]")
                 + "-------- When there is a candidate for retrying, it is returned");
         NGSISinkImpl sink = new NGSISinkImpl();
-        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null, null));
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null));
         ArrayList<Accumulator> rollbackedAccumulations = new ArrayList<>();
         Accumulator acc = sink.new Accumulator();
         // this accumulation has supposedly been retried 10000 miliseconds ago, so it is a candidate
@@ -1417,7 +1389,7 @@ public class NGSISinkTest {
                 + "-------- When rollbacking for the first time, the accumulator is added to the rollbacked "
                 + "accumulations having the maximum TTL");
         NGSISinkImpl sink = new NGSISinkImpl();
-        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null, null));
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null));
         Accumulator acc = sink.new Accumulator();
         sink.doRollback(acc);
         
@@ -1453,7 +1425,7 @@ public class NGSISinkTest {
                 + "-------- When rollbacking after the first time, the accumulator is added to the rollbacked "
                 + "accumulations having a decreased TTL");
         NGSISinkImpl sink = new NGSISinkImpl();
-        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null, null));
+        sink.configure(createContext(null, null, null, null, null, null, null, null, null, null));
         Accumulator acc = sink.new Accumulator();
         int ttl = 3;
         acc.setTTL(ttl);
@@ -1482,7 +1454,7 @@ public class NGSISinkTest {
     } // testDoRollbackAgain
     
     private Context createContext(String batchRetryIntervals, String batchSize, String batchTimeout, String batchTTL,
-            String dataModel, String enableGrouping, String enableLowercase, String enableNameMappings,
+            String dataModel, String enableLowercase, String enableNameMappings,
             String perisistencePolicyMaxRecords, String perisistencePolicyExpirationTime,
             String perisistencePolicyCheckingTime) {
         Context context = new Context();
@@ -1491,7 +1463,6 @@ public class NGSISinkTest {
         context.put("batch_timeout", batchTimeout);
         context.put("batch_ttl", batchTTL);
         context.put("data_model", dataModel);
-        context.put("enable_grouping", enableGrouping);
         context.put("enable_lowercase", enableLowercase);
         context.put("enable_name_mappings", enableNameMappings);
         context.put("persistence_policy.max_records", perisistencePolicyMaxRecords);

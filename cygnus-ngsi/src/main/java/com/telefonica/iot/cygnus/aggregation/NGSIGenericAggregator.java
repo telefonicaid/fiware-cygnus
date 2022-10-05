@@ -64,7 +64,6 @@ public abstract class NGSIGenericAggregator {
     private String lastDataTimestampKey;
     private String lastDataUniqueKey;
     private boolean attrNativeTypes;
-    private boolean enableGrouping;
     private boolean enableEncoding;
     private boolean enableNameMappings;
     private boolean enableGeoParse;
@@ -702,24 +701,6 @@ public abstract class NGSIGenericAggregator {
     public void setAttrNativeTypes(boolean attrNativeTypes) {
         this.attrNativeTypes = attrNativeTypes;
     } //setAttrNativeTypes
-
-    /**
-     * Is enable grouping boolean.
-     *
-     * @return the boolean
-     */
-    public boolean isEnableGrouping() {
-        return enableGrouping;
-    } //isEnableGrouping
-
-    /**
-     * Sets enable grouping.
-     *
-     * @param enableGrouping the enable grouping
-     */
-    public void setEnableGrouping(boolean enableGrouping) {
-        this.enableGrouping = enableGrouping;
-    } //setEnableGrouping
 
     /**
      * Is enable encoding boolean.

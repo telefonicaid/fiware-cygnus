@@ -560,7 +560,7 @@ public class NGSIElasticsearchSink extends NGSISink {
          */
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             String service = event.getServiceForNaming(enableNameMappings);
-            String servicePath = event.getServicePathForNaming(enableGrouping, enableNameMappings);
+            String servicePath = event.getServicePathForNaming(enableNameMappings);
 
             ContextElement contextElement = event.getContextElement();
             String entityId = contextElement.getId();

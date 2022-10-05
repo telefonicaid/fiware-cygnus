@@ -95,7 +95,7 @@ public class NGSIMongoSinkTest {
     } // createContextElement
 
     private Context createContextforNativeTypes(String attrPersistence, String batchSize, String batchTime, String batchTTL,
-                                                String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
+                                                String dataModel, String enableEncoding, String enableLowercase, String host,
                                                 String password, String port, String username, String cache, String attrNativeTypes) {
         Context context = new Context();
         context.put("attr_persistence", attrPersistence);
@@ -104,7 +104,6 @@ public class NGSIMongoSinkTest {
         context.put("batch_ttl", batchTTL);
         context.put("data_model", dataModel);
         context.put("enable_encoding", enableEncoding);
-        context.put("enable_grouping", enableGrouping);
         context.put("enable_lowercase", enableLowercase);
         context.put("mysql_host", host);
         context.put("mysql_password", password);
@@ -204,7 +203,7 @@ public class NGSIMongoSinkTest {
     public void testNativeTypeColumnBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
         NGSIBatch batch = setUpBatch();
         String destination = "someDestination";NGSIMongoSink ngsiMongoSink = new NGSIMongoSink();
-        ngsiMongoSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, null));
+        ngsiMongoSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
@@ -213,9 +212,9 @@ public class NGSIMongoSinkTest {
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
-                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
-                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setDbName(ngsiMongoSink.buildDbName(aggregator.getService()));
                 aggregator.setAttrMetadataStore(true);
@@ -266,7 +265,7 @@ public class NGSIMongoSinkTest {
     public void testNativeTypeRowBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
         NGSIBatch batch = setUpBatch();
         String destination = "someDestination";NGSIMongoSink ngsiMongoSink = new NGSIMongoSink();
-        ngsiMongoSink.configure(createContextforNativeTypes("row", null, null, null, null, null, null, null, null, null, null, null, null, null));
+        ngsiMongoSink.configure(createContextforNativeTypes("row", null, null, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
             while (batch.hasNext()) {
@@ -275,9 +274,9 @@ public class NGSIMongoSinkTest {
                 NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
-                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
-                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setDbName(ngsiMongoSink.buildDbName(aggregator.getService()));
                 aggregator.setCollectionName(ngsiMongoSink.buildCollectionName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getAttribute()));

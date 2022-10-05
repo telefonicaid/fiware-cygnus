@@ -85,7 +85,6 @@ time=2015-12-10T14:31:49.486CET | lvl=INFO | trans=1429535775-308-0000000000 | s
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSITestSink</i> |
 | channel | yes | N/A ||
-| enable_grouping | no | false | <i>true</i> or <i>false</i>. |
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. |
 | batch_size | no | 1 | Number of events accumulated before persistence. |

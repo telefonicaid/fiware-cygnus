@@ -110,11 +110,6 @@ elif [ "$CYGNUS_MYSQL_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_mysql.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        if [ "${CYGNUS_MYSQL_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules_mysql.conf
-            cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
-            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        fi
         if [ "${CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_mysql.conf
             if [ "${CYGNUS_MYSQL_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -145,9 +140,6 @@ elif [ "$CYGNUS_MYSQL_HOST" != "" ]; then
     # The following are optional and disabled by default
     if [ "$CYGNUS_MYSQL_ENABLE_ENCODING" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.enable_encoding = '${CYGNUS_MYSQL_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    fi
-    if [ "$CYGNUS_MYSQL_ENABLE_GROUPING" != "" ]; then
-        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.enable_grouping = '${CYGNUS_MYSQL_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     if [ "$CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.mysql-sink.enable_name_mappings = '${CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -207,11 +199,6 @@ elif [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
         AGENT_CONF_FILE=agent_mongo.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
         sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.port/c '${CYGNUS_AGENT_NAME}'.sources.http-source.port = '${CYGNUS_MONGO_SERVICE_PORT} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        if [ "${CYGNUS_MONGO_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules_mongo.conf
-            cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
-            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        fi
         if [ "${CYGNUS_MONGO_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_mongo.conf
             if [ "${CYGNUS_MONGO_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -247,9 +234,6 @@ elif [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
     # The following are optional and disabled by default
     if [ "$CYGNUS_MONGO_ENABLE_ENCODING" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_encoding = '${CYGNUS_MONGO_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    fi
-    if [ "$CYGNUS_MONGO_ENABLE_GROUPING" != "" ]; then
-        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_grouping = '${CYGNUS_MONGO_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     if [ "$CYGNUS_MONGO_ENABLE_NAME_MAPPINGS" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.mongo-sink.enable_name_mappings = '${CYGNUS_MONGO_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -292,9 +276,6 @@ elif [ "$CYGNUS_MONGO_HOSTS" != "" ]; then
     fi
     if [ "$CYGNUS_STH_ENABLE_ENCODING" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.enable_encoding = '${CYGNUS_STH_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    fi
-    if [ "$CYGNUS_STH_ENABLE_GROUPING" != "" ]; then
-        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.enable_grouping = '${CYGNUS_STH_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     if [ "$CYGNUS_STH_ENABLE_NAME_MAPPINGS" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.sth-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.sth-sink.enable_name_mappings = '${CYGNUS_STH_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -356,11 +337,6 @@ elif [ "$CYGNUS_CKAN_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_ckan.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        if [ "${CYGNUS_CKAN_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules_ckan.conf
-            cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
-            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        fi
         if [ "${CYGNUS_CKAN_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_ckan.conf
             if [ "${CYGNUS_CKAN_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -391,9 +367,6 @@ elif [ "$CYGNUS_CKAN_HOST" != "" ]; then
     # The following are optional and disabled by default
     if [ "$CYGNUS_CKAN_ENABLE_ENCODING" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.enable_encoding = '${CYGNUS_CKAN_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    fi
-    if [ "$CYGNUS_CKAN_ENABLE_GROUPING" != "" ]; then
-        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.enable_grouping = '${CYGNUS_CKAN_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     if [ "$CYGNUS_CKAN_ENABLE_NAME_MAPPINGS" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.ckan-sink.enable_name_mappings = '${CYGNUS_CKAN_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -452,11 +425,6 @@ elif [ "$CYGNUS_HDFS_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_hdfs.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        if [ "${CYGNUS_HDFS_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules_hdfs.conf
-            cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
-            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        fi
         if [ "${CYGNUS_HDFS_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_hdfs.conf
             if [ "${CYGNUS_HDFS_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -488,9 +456,6 @@ elif [ "$CYGNUS_HDFS_HOST" != "" ]; then
     # The following are optional and disabled by default
     if [ "$CYGNUS_HDFS_ENABLE_ENCODING" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.enable_encoding = '${CYGNUS_HDFS_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    fi
-    if [ "$CYGNUS_HDFS_ENABLE_GROUPING" != "" ]; then
-        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.enable_grouping = '${CYGNUS_HDFS_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     if [ "$CYGNUS_HDFS_ENABLE_NAME_MAPPINGS" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.hdfs-sink.enable_name_mappings = '${CYGNUS_HDFS_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -567,11 +532,6 @@ elif [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_postgresql.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        if [ "${CYGNUS_POSTGRESQL_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules_postgresql.conf
-            cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
-            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        fi
         if [ "${CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_postgresql.conf
             if [ "${CYGNUS_POSTGRESQL_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -606,9 +566,6 @@ elif [ "$CYGNUS_POSTGRESQL_HOST" != "" ]; then
     fi
     if [ "$CYGNUS_POSTGRESQL_ENABLE_ENCODING" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_encoding = '${CYGNUS_POSTGRESQL_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    fi
-    if [ "$CYGNUS_POSTGRESQL_ENABLE_GROUPING" != "" ]; then
-        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_grouping = '${CYGNUS_POSTGRESQL_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     if [ "$CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.postgresql-sink.enable_name_mappings = '${CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -670,11 +627,6 @@ elif [ "$CYGNUS_CARTO_USER" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_carto.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        if [ "${CYGNUS_CARTO_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules_carto.conf
-            cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
-            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        fi
         if [ "${CYGNUS_CARTO_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_carto.conf
             cp -p ${FLUME_HOME}/conf/name_mappings.conf ${FLUME_HOME}/conf/${NAMEMAPPING_CONF_FILE}
@@ -727,11 +679,6 @@ elif [ "$CYGNUS_ORION_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_orion.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        if [ "${CYGNUS_ORION_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules_orion.conf
-            cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
-            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        fi
         if [ "${CYGNUS_ORION_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_orion.conf
             if [ "${CYGNUS_ORION_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -769,9 +716,6 @@ elif [ "$CYGNUS_ORION_HOST" != "" ]; then
     # The following are optional and disabled by default
     if [ "$CYGNUS_ORION_ENABLE_ENCODING" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_encoding = '${CYGNUS_ORION_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    fi
-    if [ "$CYGNUS_ORION_ENABLE_GROUPING" != "" ]; then
-        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_grouping = '${CYGNUS_ORION_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     if [ "$CYGNUS_ORION_ENABLE_NAME_MAPPINGS" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.orion-sink.enable_name_mappings = '${CYGNUS_ORION_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -827,11 +771,6 @@ elif [ "$CYGNUS_POSTGIS_HOST" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_postgis.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        if [ "${CYGNUS_POSTGIS_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules_postgis.conf
-            cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
-            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        fi
         if [ "${CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_postgis.conf
             if [ "${CYGNUS_POSTGIS_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -863,9 +802,6 @@ elif [ "$CYGNUS_POSTGIS_HOST" != "" ]; then
     # The following are optional and disabled by default
     if [ "$CYGNUS_POSTGIS_ENABLE_ENCODING" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.enable_encoding = '${CYGNUS_POSTGIS_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    fi
-    if [ "$CYGNUS_POSTGIS_ENABLE_GROUPING" != "" ]; then
-        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.enable_grouping = '${CYGNUS_POSTGIS_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     if [ "$CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.postgis-sink.enable_name_mappings = '${CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
@@ -1001,11 +937,6 @@ elif [ "$CYGNUS_ARCGIS_URL" != "" ]; then
     if [ "${CYGNUS_MULTIAGENT,,}" == "true" ]; then
         AGENT_CONF_FILE=agent_arcgis.conf
         cp -p /opt/fiware-cygnus/docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        if [ "${CYGNUS_ARCGIS_ENABLE_GROUPING,,}" == "true" ]; then
-            GROUPING_CONF_FILE=grouping_rules_arcgis.conf
-            cp -p ${FLUME_HOME}/conf/grouping_rules.conf ${FLUME_HOME}/conf/${GROUPING_CONF_FILE}
-            sed -i '/'${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file/c '${CYGNUS_AGENT_NAME}'.sources.http-source.interceptors.gi.grouping_rules_conf_file = '${FLUME_HOME}/conf/${GROUPING_CONF_FILE} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-        fi
         if [ "${CYGNUS_ARCGIS_ENABLE_NAME_MAPPINGS,,}" == "true" ]; then
             NAMEMAPPING_CONF_FILE=name_mappings_arcgis.conf
             if [ "${CYGNUS_ARCGIS_SKIP_NAME_MAPPINGS_GENERATION,,}" != "true" ]; then
@@ -1025,9 +956,6 @@ elif [ "$CYGNUS_ARCGIS_URL" != "" ]; then
     # The following are optional and disabled by default
     if [ "$CYGNUS_ARCGIS_ENABLE_ENCODING" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.enable_encoding/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.enable_encoding = '${CYGNUS_ARCGIS_ENABLE_ENCODING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
-    fi
-    if [ "$CYGNUS_ARCGIS_ENABLE_GROUPING" != "" ]; then
-        sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.enable_grouping/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.enable_grouping = '${CYGNUS_ARCGIS_ENABLE_GROUPING} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}
     fi
     if [ "$CYGNUS_ARCGIS_ENABLE_NAME_MAPPINGS" != "" ]; then
         sed -i '/#'${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.enable_name_mappings/c '${CYGNUS_AGENT_NAME}'.sinks.arcgis-sink.enable_name_mappings = '${CYGNUS_ARCGIS_ENABLE_NAME_MAPPINGS} ${FLUME_HOME}/conf/${AGENT_CONF_FILE}

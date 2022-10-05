@@ -6,11 +6,6 @@ Content:
 * [Stats](#section3)
     * [GET `/v1/stats`](#section3.1)
     * [PUT `/v1/stats`](#section3.2)
-* [Grouping Rules](#section4)
-    * [GET `/v1/groupingrules`](#section4.1)
-    * [POST `/v1/groupingrules`](#section4.2)
-    * [PUT `/v1/groupingrules`](#section4.3)
-    * [DELETE `/v1/groupingrules`](#section4.4)
 * [Subscriptions](#section5)
     * [POST `/v1/subscriptions`](#section5.1)
         * [`NGSI Version 1`](#section5.1.1)
@@ -156,109 +151,6 @@ Resets the statistics about the configured Flume components. It is important to 
 
 ```
 PUT http://<cygnus_host>:<management_port>/v1/stats
-```
-
-Response:
-
-```
-{"success":"true"}
-```
-
-[Top](#top)
-
-
-
-## <a name="section4"></a>Grouping Rules
-
-**Note that grouping rules functionality is deprecated. You should not use this API**
-
-### <a name="section4.1"></a>`GET /v1/groupingrules`
-
-Gets the configured [grouping rules](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md).
-
-```
-GET http://<cygnus_host>:<management_port>/v1/groupingrules
-```
-
-Response:
-
-```
-{
-    "grouping_rules": [
-        {
-            "destination": "allcars",
-            "fields": [
-                "entityType"
-            ],
-            "fiware_service_path": "cars",
-            "id": 1,
-            "regex": "Car"
-        },
-        {
-            "destination": "allrooms",
-            "fields": [
-                "entityType"
-            ],
-            "fiware_service_path": "rooms",
-            "id": 2,
-            "regex": "Room"
-        }
-    ],
-    "success": "true"
-}
-```
-
-[Top](#top)
-
-### <a name="section4.2"></a>`POST /v1/groupingrules`
-Adds a new rule, passed as a Json in the payload, to the [grouping rules](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md).
-
-```
-POST http://<cygnus_host>:<management_port>/v1/groupingrules
-{
-    "regex": "Room",
-    "destination": "allrooms",
-    "fiware_service_path": "rooms",
-    "fields": ["entityType"]
-}
-```
-
-Response:
-
-```
-{"success":"true"}
-```
-
-Please observe the `id` field is not passed as part of the posted Json. This is because the Management Interface automatically deals with the proper ID insertion.
-
-[Top](#top)
-
-### <a name="section4.3"></a>`PUT /v1/groupingrules`
-Updates an already existent [grouping rules](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md), given its ID as a query parameter and passed the rule as a Json in the payload.
-
-```
-PUT http://<cygnus_host>:<management_port>/v1/groupingrules=id=2
-{
-    "regex": "Room",
-    "destination": "otherrooms",
-    "fiware_service_path": "rooms",
-    "fields": ["entityType"]
-}
-```
-
-Response:
-
-```
-{"success":"true"}
-```
-
-[Top](#top)
-
-### <a name="section4.4"></a>`DELETE /v1/groupingrules`
-Deletes a [grouping rules](../../cygnus-ngsi/flume_extensions_catalogue/ngsi_grouping_interceptor.md), given its ID as a query parameter.
-
-```
-DELETE http://<cygnus_host>:<management_port>/v1/groupingrules?id=2
 ```
 
 Response:

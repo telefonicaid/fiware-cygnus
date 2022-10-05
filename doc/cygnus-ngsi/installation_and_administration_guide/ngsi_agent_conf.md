@@ -37,14 +37,9 @@ cygnus-ngsi.sources.http-source.handler.default_service = default
 # default service path (service path semantic depends on the persistence sink)
 cygnus-ngsi.sources.http-source.handler.default_service_path = /
 # source interceptors, do not change
-cygnus-ngsi.sources.http-source.interceptors = ts gi
+cygnus-ngsi.sources.http-source.interceptors = ts
 # TimestampInterceptor, do not change
 cygnus-ngsi.sources.http-source.interceptors.ts.type = timestamp
-# GroupingInterceptor, do not change
-cygnus-ngsi.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
-# Grouping rules for the GroupingIntercetor, put the right absolute path to the file if necessary
-# see the doc/design/interceptors document for more details
-cygnus-ngsi.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
 
 # ============================================
 # NGSIHDFSSink configuration

@@ -127,17 +127,6 @@ Testing RoundRobinChannelSelector.getRequiredChannels
 Testing RoundRobinChannelSelector.configure
 Testing RoundRobinChannelSelector.getOptionalChannels
 Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.073 sec
-Running com.telefonica.iot.cygnus.interceptors.CygnusGroupingRuleTest
-[GroupingRule.isValid] -------------------------- fiware-servicePath field in a grouping rule must start with '/'
-[GroupingRule.isValid] -------------------  OK  - The fiware-servicePath field in the rule '{"fiware_service_path":"\/rooms","regex":"room1","destination":"all_rooms","fields":["entityId"]}' starts with '/'
-[GroupingRule.getXXXX] -------------------------- Rule's attributes are not null
-[GroupingRule.getPattern] ----------------  OK  - Rule?s pattern is not null
-[GroupingRule.getId] ---------------------  OK  - Rule?s id is upper than 0
-[GroupingRule.getFields] -----------------  OK  - Rule?s fields are not null
-[GroupingRule.getRegex] ------------------  OK  - Rule?s regex is not null
-[GroupingRule.getDestination] ------------  OK  - Rule?s destination is not null
-[GroupingRule.getNewFiwareServicePath] ---  OK  - Rule?s newFiwareServicePath is not null
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 sec
 Running com.telefonica.iot.cygnus.management.ManagementInterfaceTest
 Testing ManagementInterface.handle
 Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.073 sec

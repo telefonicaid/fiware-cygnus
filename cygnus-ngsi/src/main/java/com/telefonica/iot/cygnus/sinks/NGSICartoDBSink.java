@@ -520,8 +520,8 @@ public class NGSICartoDBSink extends NGSISink {
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
-            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            servicePathForNaming = event.getServicePathForNaming(enableNameMappings);
+            entityForNaming = event.getEntityForNaming(enableNameMappings, enableEncoding);
             attributeForNaming = event.getAttributeForNaming(enableNameMappings);
             schemaName = buildSchemaName(service);
             tableName = buildTableName(servicePathForNaming, entityForNaming, attributeForNaming);
@@ -652,8 +652,8 @@ public class NGSICartoDBSink extends NGSISink {
             String attrMetadata = contextAttribute.getContextMetadata();
             ImmutablePair<String, Boolean> location = NGSIUtils.getGeometry(attrValue, attrType, attrMetadata,
                     swapCoordinates);
-            String tableName = buildTableName(event.getServicePathForNaming(enableGrouping, enableNameMappings),
-                    event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding),
+            String tableName = buildTableName(event.getServicePathForNaming(enableNameMappings),
+                    event.getEntityForNaming(enableNameMappings, enableEncoding),
                     event.getAttributeForNaming(enableNameMappings))
                     + CommonConstants.CONCATENATOR + "distance";
 
@@ -776,7 +776,7 @@ public class NGSICartoDBSink extends NGSISink {
         String recvTime = CommonUtils.getHumanReadable(recvTimeTs, true);
         String schema = buildSchemaName(event.getServiceForNaming(enableNameMappings));
         String tableName = NGSICharsets.encodePostgreSQL(
-                event.getServicePathForNaming(enableGrouping, enableNameMappings))
+                event.getServicePathForNaming(enableNameMappings))
                 + CommonConstants.CONCATENATOR + "rawsnapshot";
 
         // Iterate on the context attribute and build both 'sets' and 'fields' and the 'rows' in a single loop
