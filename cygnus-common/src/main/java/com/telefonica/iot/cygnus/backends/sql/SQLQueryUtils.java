@@ -122,6 +122,7 @@ public class SQLQueryUtils {
         StringBuffer postgisTempReference = new StringBuffer("EXCLUDED");
         StringBuffer postgisDestination = new StringBuffer(schema).append(".").append(tableName).append(tableSuffix);
 
+        boolean updateCommaAlreadyUsed = false;
         for (int i = 0 ; i < collectionSizeOnLinkedHashMap(lastData) ; i++) {
             StringBuffer query = new StringBuffer();
             StringBuffer values = new StringBuffer("(");
@@ -129,22 +130,48 @@ public class SQLQueryUtils {
             StringBuffer updateSet = new StringBuffer();
             ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
             for (int j = 0 ; j < keys.size() ; j++) {
-                if (lastData.get(keys.get(j)).get(i) != null) {
+                //if (lastData.get(keys.get(j)).get(i) != null) {
                     JsonElement value = lastData.get(keys.get(j)).get(i);
                     if (j == 0) {
-                        values.append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
+                        // FIXME PR: duplicated code
+                        if (value == null) {
+                            values.append("null");
+                        }
+                        else {
+                            values.append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
+                        }
                         fields.append(keys.get(j));
                         if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
-                            updateSet.append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
+                            // FIXME PR: refactor this!
+                            if (updateCommaAlreadyUsed) {
+                                updateSet.append(", ").append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
+                            }
+                            else {
+                                updateSet.append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
+                                updateCommaAlreadyUsed = true;
+                            }
                         }
                     } else {
-                        values.append(",").append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
+                        // FIXME PR: duplicated code
+                        if (value == null) {
+                            values.append(", null");
+                        }
+                        else {
+                            values.append(",").append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
+                        }
                         fields.append(",").append(keys.get(j));
                         if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
-                            updateSet.append(", ").append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
+                            // FIXME PR: refactor this!
+                            if (updateCommaAlreadyUsed) {
+                                updateSet.append(", ").append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
+                            }
+                            else {
+                                updateSet.append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
+                                updateCommaAlreadyUsed = true;
+                            }
                         }
                     }
-                }
+                //}
             }
             query.append("INSERT INTO ").append(postgisDestination).append(" ").append(fields).append(") ").
                     append("VALUES ").append(values).append(") ");

@@ -608,6 +608,9 @@ public class SQLBackendImpl implements SQLBackend{
                     schema,
                     attrNativeTypes);
 
+            // Ordering queries to avoid deadlocks. See issue #2197 for more detail
+            upsertQuerysList.sort(Comparator.comparing(buff -> buff.toString()));
+
             for (StringBuffer query : upsertQuerysList) {
                 PreparedStatement upsertStatement;
                 currentUpsertQuery = query.toString();
