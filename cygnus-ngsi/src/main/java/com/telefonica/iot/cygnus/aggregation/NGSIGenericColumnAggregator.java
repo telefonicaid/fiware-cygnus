@@ -58,8 +58,11 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
         // The first fields are the ones that are part of the primary key of the table
         // (needed in SQL sinks to avoid deadlocks would be avoided. See issue #2197 for more detail)
-        for (String key : getLastDataUniqueKey().split(",")) {
-            aggregation.put(key.trim(), new ArrayList<JsonElement>());
+        String uniqueKeys = getLastDataUniqueKey();
+        if (uniqueKeys != null) {
+            for (String key : getLastDataUniqueKey().split(",")) {
+                aggregation.put(key.trim(), new ArrayList<JsonElement>());
+            }
         }
 
         // After adding the fields included in the keys, we order main fields

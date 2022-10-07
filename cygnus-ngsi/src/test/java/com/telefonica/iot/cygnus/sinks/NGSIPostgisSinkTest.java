@@ -2018,7 +2018,7 @@ public class NGSIPostgisSinkTest {
                     aggregator.aggregate(event);
                 }
             }
-            String correctBatch = "('2016-04-20 07:19:55.801','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20 07:19:55.800','somePath','someId2','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
+            String correctBatch = "('someId','someType','somePath','2016-04-20 07:19:55.801',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('someId2','someType','somePath','2016-04-20 07:19:55.800',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
             String valuesForInsert = SQLQueryUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
             if (valuesForInsert.equals(correctBatch)) {
                 System.out.println(getTestTraceHead("[NGSIMySQKSink.testNativeTypesColumnBatch]")
@@ -2066,7 +2066,7 @@ public class NGSIPostgisSinkTest {
                     aggregator.aggregate(event);
                 }
             }
-            String correctBatch = "('2016-04-20 07:19:55.801','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20 07:19:55.802','somePath','someId2','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"NewWGS84\"}]','someValue2New','[]')";
+            String correctBatch = "(NULL,'someId','someType','somePath','2016-04-20 07:19:55.801',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),(NULL,'someId2','someType','somePath','2016-04-20 07:19:55.802',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"NewWGS84\"}]','someValue2New','[]')";
             String valuesForInsert = SQLQueryUtils.getValuesForInsert(aggregator.getLastDataToPersist(), aggregator.isAttrNativeTypes());
             if (valuesForInsert.equals(correctBatch)) {
                 System.out.println(getTestTraceHead("[NGSIMySQKSink.testNativeTypeColumnBatchLastData]")
