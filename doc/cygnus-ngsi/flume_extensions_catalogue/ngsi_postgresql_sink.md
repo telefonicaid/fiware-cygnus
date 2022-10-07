@@ -68,33 +68,27 @@ Where [`agent.conf`](https://github.com/telefonicaid/fiware-cygnus/blob/master/d
 
 [Top](#top)
 
-#### <a name="section1.2.1"></a>PostgreSQL databases naming conventions
-Previous to any operation with PostgreSQL you need to create the database to be used.
+#### <a name="section1.2.1"></a>PostgreSQL databases naming considerations
 
-[PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
-
-PostgreSQL [databases name length](http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) is limited to 63 characters.
-
-Since version 2.2.0 It's added a new capability for Cygnus to create the schema and database name on runtime, this is possible trough enabling a specific Data Model on agent properties. See the [summary datamodels PostgreSQL data structure](#section1.2.4) section for more details.
+- Previous to any operation with PostgreSQL you need to create the database to be used.
+- [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
+- PostgreSQL [databases name length](http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) is limited to 63 characters.
+- Since version 2.2.0 It's added a new capability for Cygnus to create the schema and database name on runtime, this is possible trough enabling a specific Data Model on agent properties. See the [summary datamodels PostgreSQL data structure](#section1.2.4) section for more details.
 
 [Top](#top)
 
-#### <a name="section1.2.2"></a>PostgreSQL schemas naming conventions
-A schema named as the notified `fiware-service` header value (or, in absence of such a header, the defaulted value for the FIWARE service) is created (if not existing yet).
+#### <a name="section1.2.2"></a>PostgreSQL schemas naming considerations
 
-It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
-
-PostgreSQL [schemas name length](http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) is limited to 63 characters.
-
-Since version 2.2.0 Cygnus creates the name of the schema name on runtime according to the selected DataModel for the sink. See the [summary datamodels PostgreSQL data structure](#section1.2) section for more details.
+- [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
+- PostgreSQL [schemas name length](http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) is limited to 63 characters.
+- Since version 2.2.0 Cygnus creates the name of the schema name on runtime according to the selected DataModel for the sink. See the [summary datamodels PostgreSQL data structure](#section1.2) section for more details.
 
 [Top](#top)
 
-#### <a name="section1.2.3"></a>PostgreSQL tables naming conventions
+#### <a name="section1.2.3"></a>PostgreSQL tables naming considerations
 
-It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
-
-PostgreSQL [tables name length](http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) is limited to 63 characters.
+- [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
+- PostgreSQL [tables name length](http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) is limited to 63 characters.
 
 The following table summarizes the table name composition (old encoding):
 
