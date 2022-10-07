@@ -118,7 +118,7 @@ Please observe the concatenation of entity ID and type is already given in the `
 
 #### <a name="section1.2.4"></a>Summary datamodels PostgreSQL data structure
 
-For a given entity, `entityname`, of type `entitytype`, inside a tenant `service` under `/servicepath`, how the information is stored in the database differs from using different datamodel configurations. This configuration can be selected by defining the parameter  `cygnus-ngsi.sinks.postgresql-sink.data_model` in the `agent.conf` file or by defining the env var `CYGNUS_POSTGRESQL_DATA_MODEL` with . This table contains the database structure used for each datamodel supported by this sink for the previously decribed entity:
+For a given entity, `entityname`, of type `entitytype`, inside a tenant `service` under `/servicepath`, how the information is stored in the database differs from using different datamodel configurations. This configuration can be selected by defining the parameter  `cygnus-ngsi.sinks.postgresql-sink.data_model` in the [`agent.conf`](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/ngsi_agent_conf.md) file or by defining the env var `CYGNUS_POSTGRESQL_DATA_MODEL` with . This table contains the database structure used for each datamodel supported by this sink for the previously decribed entity:
 
 | datamodel name                            | database name | schema  name | table name                        | note                                              |
 |-------------------------------------------|---------------|--------------|-----------------------------------|---------------------------------------------------|
@@ -132,7 +132,7 @@ For a given entity, `entityname`, of type `entitytype`, inside a tenant `service
 | `dm-by-service-path`                      | `agent.conf`  | service      | servicepath                       | Automatic schema creation                         |
 | `dm-by-entity`                            | `agent.conf`  | service      | servicepath_entityname_entitytype | Automatic schema creation                         |
 
-Where `agent.conf` is the default database name selected in that file under the field `cygnus-ngsi.sinks.postgresql-sink.postgresql_database` or the env var `CYGNUS_POSTGRESQL_DATABASE`
+Where [`agent.conf`](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/ngsi_agent_conf.md) is the default database name selected in that file under the field `cygnus-ngsi.sinks.postgresql-sink.postgresql_database` or the env var `CYGNUS_POSTGRESQL_DATABASE`
 
 #### <a name="section1.2.4"></a>Row-like storing
 Regarding the specific data stored within the above table, if `attr_persistence` parameter is set to `row` (default storing mode) then the notified data is stored attribute by attribute, composing an insert for each one of them. Each insert contains the following fields:
