@@ -2066,6 +2066,12 @@ public class NGSIPostgisSinkTest {
                     aggregator.aggregate(event);
                 }
             }
+
+            // This tests is testing a weird situation: entityid is defined as key, but it is not included
+            // in the notification. In that case the query uses NULL for that attribute position (at the beginning
+            // of the query string). This will fail when the query hits the DB (as keys cannot be NULL) but this tests ensures
+            // Cygnus is doing its job. This is a consequence of the changes done in PR #2199
+            // in the initialize() method of the NGSIGenericColumnAggregator class
             String correctBatch = "(NULL,'someId','someType','somePath','2016-04-20 07:19:55.801',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),(NULL,'someId2','someType','somePath','2016-04-20 07:19:55.802',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"NewWGS84\"}]','someValue2New','[]')";
             String valuesForInsert = SQLQueryUtils.getValuesForInsert(aggregator.getLastDataToPersist(), aggregator.isAttrNativeTypes());
             if (valuesForInsert.equals(correctBatch)) {
