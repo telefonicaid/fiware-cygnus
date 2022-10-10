@@ -33,14 +33,11 @@ import com.telefonica.iot.cygnus.utils.CommonConstants;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -1963,7 +1960,7 @@ public class NGSIPostgisSinkTest {
         return batch;
     }
 
-    public NGSIBatch setUpLastDataBatch() {
+    public NGSIBatch setUpBatchOverlappingEvents() {
         String timestamp = "1461136795802";
         String correlatorId = "123456789";
         String transactionId = "123456789";
@@ -2038,7 +2035,7 @@ public class NGSIPostgisSinkTest {
     @Test
     public void testNativeTypeColumnBatchLastData() throws CygnusBadConfiguration{
         String attr_native_types = "true";
-        NGSIBatch batch = setUpLastDataBatch();  // 3 events (1 on someId, 1 in someId2, 1 in someId2 with new values)
+        NGSIBatch batch = setUpBatchOverlappingEvents();  // 3 events (1 on someId, 1 in someId2, 1 in someId2 with new values)
         String destination = "someDestination";
         NGSIPostgisSink ngsiPostgisSink = new NGSIPostgisSink();
         ngsiPostgisSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
@@ -2199,7 +2196,7 @@ public class NGSIPostgisSinkTest {
         // FIXME: as the function under test is postgreSqlUpsertQuery(), consider
         // move this to NGSIPostgreSQLSinkTest.java
         String attr_native_types = "true";
-        NGSIBatch batch = setUpLastDataBatch();  // 3 events (1 on someId, 1 in someId2, 1 in someId2 with new values)
+        NGSIBatch batch = setUpBatchOverlappingEvents();  // 3 events (1 on someId, 1 in someId2, 1 in someId2 with new values)
         String destination = "someDestination";
         NGSIPostgisSink ngsiPostgisSink = new NGSIPostgisSink();
         ngsiPostgisSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
