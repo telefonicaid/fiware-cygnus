@@ -114,7 +114,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         String entityId = contextElement.getId();
         // FIXME: it's weird... getLastDataUniqueKey() could be "entityid,foo,bar", but
         // equalsIgnoreCase("entityid") will not match it. Should be change to "include" instead of "equal"?
-        if (isEnableLastData() && (getLastDataUniqueKey().equalsIgnoreCase(NGSIConstants.ENTITY_ID))) {
+        if (isEnableLastData() && getLastDataUniqueKey() != null && (getLastDataUniqueKey().equalsIgnoreCase(NGSIConstants.ENTITY_ID))) {
             setLastDataUniqueKeyOnAggragation(NGSIConstants.ENTITY_ID);
             currentEntityId = entityId;
         }
@@ -149,7 +149,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                     setLastDataTimestampKeyOnAggregation(attrName);
                     currentTS = CommonUtils.getTimeInstantFromString(attrValue.getAsString());
                 }
-                if ((getLastDataUniqueKeyOnAggragation() == null) && (getLastDataUniqueKey().equalsIgnoreCase(attrName))) {
+                if ((getLastDataUniqueKeyOnAggragation() == null) && getLastDataUniqueKey() != null && (getLastDataUniqueKey().equalsIgnoreCase(attrName))) {
                     setLastDataUniqueKeyOnAggragation(attrName);
                     currentEntityId = attrName;
                 }
@@ -205,7 +205,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                 if (lastData.containsKey(getLastDataUniqueKeyOnAggragation())) {
                     ArrayList<JsonElement> list = lastData.get(getLastDataUniqueKeyOnAggragation());
                     for (int i = 0 ; i < list.size() ; i++) {
-                        if (list.get(i).getAsString().equals(currentEntityId)) {
+                        if (list.get(i) !=null && list.get(i).getAsString().equals(currentEntityId)) {
                             long storedTS = CommonUtils.getTimeInstantFromString(
                                     lastData.get(getLastDataTimestampKeyOnAggregation()).
                                     get(i).getAsString());
