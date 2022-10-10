@@ -53,19 +53,16 @@ def  configuration_of_cygnus_instances_agents_files_and_properties_json_file_and
         world.cygnus.config_instances(id, quantity, world.sink, persistence, different_port)
 
 @step (u'copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "([^"]*)"')
-def copy_another_configuration_files_to_cygnus(step, grouping_rules_file, only_once):
+def copy_another_configuration_files_to_cygnus(step, only_once):
     """
     copy another configuration files used by cygnus and restart cygnus service
           - log4j.properties
           - krb5.conf
-          - grouping_rules.conf
           - flume-env.sh
     :param only_once: determine if the configuration is execute only once or no (True | False)
     :param step:
     """
-    world.grouping_rules_file = grouping_rules_file
     if not world.background_executed:
-        world.cygnus.another_files(grouping_rules_file)
         world.cygnus.cygnus_service("restart")
     if only_once.lower() == "true":
         world.background_executed = True

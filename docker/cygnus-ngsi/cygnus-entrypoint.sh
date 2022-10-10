@@ -60,7 +60,6 @@ JAVA_OPTS=${CYGNUS_JAVA_OPTS}
 export JAVA_OPTS
 
 AGENT_CONF_FILE=agent.conf
-GROUPING_CONF_FILE=grouping_rules.conf
 NAMEMAPPING_CONF_FILE=name_mappings.conf
 
 

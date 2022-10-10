@@ -40,10 +40,6 @@ from integration.notifications.common_steps.notifications import *   # common_st
 # @step (u'receives multiples notifications one by instance and the port defined incremented with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"')
 # @step(u'receive an "([^"]*)" http code')
 
-# --------------------------- grouping_rules.py -----------------------------------
-# @step (u'update real values in resource "([^"]*)" and service path "([^"]*)" to notification request')
-# @step (u'changes new destination "([^"]*)" where to verify in dataset "([^"]*)"')
-
 # --------------------------- multi_instances.py ----------------------------------
 # @step (u'delete instances files')
 

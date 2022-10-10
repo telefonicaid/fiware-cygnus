@@ -234,31 +234,7 @@ public class ManagementInterface extends AbstractHandler {
         response.getWriter().println("{\"success\":\"true\",\"version\":\"" + CommonUtils.getCygnusVersion()
                 + "." + CommonUtils.getLastCommit() + "\"}");
     } // handleGetVersion
-    
-    private String getGroupingRulesConfFile() throws IOException {
-        if (!configurationFile.exists()) {
-            return "404 - Configuration file for Cygnus not found. Details: "
-                    + configurationFile.toString();
-        } // if
 
-        String grConfFile = null;
-        
-        try (BufferedReader reader = new BufferedReader(new FileReader(configurationFile))) {
-            String line;
-            
-            while ((line = reader.readLine()) != null) {
-                if (!line.startsWith("#")) {
-                    if (line.contains("grouping_rules_conf_file")) {
-                        String[] splits = line.split("=");
-                        grConfFile = splits[1].replaceAll(" ", "");
-                        break;
-                    } // if
-                } // if
-            } // while
-        }
-        return grConfFile;
-    } // getGroupingRulesConfFile
-    
     private String getNameMappingsConfFile() throws IOException {
         if (!configurationFile.exists()) {
             return "404 - Configuration file for Cygnus not found. Details: "

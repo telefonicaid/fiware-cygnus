@@ -37,7 +37,6 @@ PORT                   = u'port'
 DEFAULT_SERVICE        = u'default_service'
 DEFAULT_SERVICE_PATH   = u'default_service_path'
 TTL                    = u'ttl'
-GROUPING_RULES_FILE    = u'grouping_rules_file'
 HOST                   = u'host'
 HOST_PORT              = u'host_port'
 LOCALHOST              = u'localhost'
@@ -127,7 +126,6 @@ class Agent:
         :param default_service: tenant used by default
         :param default_service_path: service path used by default
         :param ttl: Number of channel re-injection retries before a Flume event is definitely discarded (-1 means infinite retries)
-        :param grouping_rules_file: Matching table for the destination extractor interceptor, put the right absolute path to the file if necessary
         :return commands list
         """
         self.sink                 = kwargs.get(SINK, EMPTY)
@@ -136,8 +134,6 @@ class Agent:
         self.default_service      = kwargs.get(DEFAULT_SERVICE, "def_serv")
         self.default_service_path = kwargs.get(DEFAULT_SERVICE_PATH, "def_servpath")
         self.ttl                  = kwargs.get(TTL, "10")
-        self.grouping_rules_file  = kwargs.get(GROUPING_RULES_FILE, "/usr/cygnus/conf/grouping_rules.conf")
-        sed_grouping_rules_file = self.grouping_rules_file.replace("/", "\/")    # replace / to \/ in path that is used in sed command
         self.__append_command('sed -i "s/%s.sinks = .*/%s.sinks = %s/" %s/%s ' % (self.id, self.id, self.sink, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.channels = .*/%s.channels = %s/" %s/%s ' % (self.id, self.id, self.channel, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.sources\.http-source\.channels = .*/%s.sources\.http-source.channels = %s/" %s/%s ' % (self.id, self.id, self.channel, self.target_path, self.name), self.target_path, self.sudo)
@@ -148,7 +144,6 @@ class Agent:
             sed_default_service_path = self.default_service_path.replace("/", "\/")    # replace / to \/ in path that is used in sed command
             self.__append_command('sed -i "s/%s.sources.http-source.handler.default_service_path = .*/%s.sources.http-source.handler.default_service_path = %s/" %s/%s ' % (self.id, self.id, sed_default_service_path, self.target_path, self.name), self.target_path, self.sudo)
         self.__append_command('sed -i "s/%s.sources.http-source.handler.events_ttl = .*/%s.sources.http-source.handler.events_ttl = %s/" %s/%s ' % (self.id, self.id, self.ttl, self.target_path, self.name), self.target_path, self.sudo)
-        self.__append_command('sed -i "s/%s.sources.http-source.interceptors.de.grouping_rules = .*/%s.sources.http-source.interceptors.de.grouping_rules = %s/" %s/%s ' % (self.id, self.id, sed_grouping_rules_file, self.target_path, self.name), self.target_path, self.sudo)
         return OPS_LIST
 
     def config_hdfs_sink(self, **kwargs):

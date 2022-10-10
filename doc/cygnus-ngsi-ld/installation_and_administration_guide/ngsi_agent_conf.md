@@ -42,9 +42,6 @@ cygnus-ngsi-ld.sources.http-source.interceptors = ts gi
 cygnus-ngsi-ld.sources.http-source.interceptors.ts.type = timestamp
 # GroupingInterceptor, do not change
 cygnus-ngsi-ld.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
-# Grouping rules for the GroupingIntercetor, put the right absolute path to the file if necessary
-# see the doc/design/interceptors document for more details
-cygnus-ngsi-ld.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
 
 
 # ============================================

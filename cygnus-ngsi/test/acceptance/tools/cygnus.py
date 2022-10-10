@@ -33,7 +33,6 @@ from tools.fabric_utils import FabricSupport
 from tools.cygnus_agent_config import Agent
 from tools.cygnus_instance_config import Cygnus_Instance
 from tools.cygnus_krb5_config import Krb5
-from tools.cygnus_grouping_rules_config import Grouping_Rules
 from tools.remote_log_utils import Remote_Log
 
 
@@ -235,7 +234,7 @@ class Cygnus:
             myfab.runs(cygnus_instance.append_id(admin_port=str(management_port), id=self.instance_id+"_"+str(i)))
             # generate agent_<id>.conf ex: agent_test_0.conf
             ops_list = cygnus_agent.append_id(id=self.instance_id+"_"+str(i))
-            ops_list = cygnus_agent.source(sink=sinks, channel=self.__get_channels(sinks), port=port, grouping_rules_file=self.fabric_target_path+"/grouping_rules.conf",)
+            ops_list = cygnus_agent.source(sink=sinks, channel=self.__get_channels(sinks), port=port)
             sinks_list = sinks.split(" ")
             for i in range(len(sinks_list)):
                 if sinks_list[i].find(HDFS_SINK)>=0:
@@ -259,24 +258,16 @@ class Cygnus:
             # create and modify values in agent_<id>.conf
             myfab.runs(ops_list)
 
-    def another_files (self, grouping_rules_file_name=DEFAULT):
+    def another_files (self):
         """
         copy another configuration files used by cygnus
           - flume-env.sh
-          - grouping_rules.conf
           - log4j.properties
           - krb5.conf
         """
         myfab = FabricSupport(host=self.cygnus_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
         myfab.current_directory(self.fabric_target_path)
         myfab.run("cp -R flume-env.sh.template flume-env.sh")
-        #  grouping_rules.conf configuration
-        if grouping_rules_file_name == DEFAULT:
-            myfab.run("cp -R grouping_rules.conf.template grouping_rules.conf")
-        elif grouping_rules_file_name != EMPTY:
-             Grouping_Rules(fab_driver=myfab, file=grouping_rules_file_name, target_path=self.fabric_target_path, sudo=self.fabric_sudo_cygnus)
-        else:
-            myfab.run("rm -f grouping_rules.conf")
         # change to DEBUG mode in log4j.properties
         myfab.current_directory(self.fabric_target_path)
         myfab.run("cp -R log4j.properties.template log4j.properties", target_path=self.fabric_target_path, sudo=self.fabric_sudo_cygnus)
