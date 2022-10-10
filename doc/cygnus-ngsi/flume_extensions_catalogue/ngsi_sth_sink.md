@@ -90,7 +90,7 @@ Using the new encoding:
 | `/` | `sth_x002f.aggr` | `sth_x002fxffff<entityId>xffff<entityType>.aggr` | `sth_x002fxffff<entityId>xffff<entityType>xffff<attrName>.aggr` |
 | `/<svcPath>` | `sth_x002fxffff<svcPath>.aggr` | `sth_x002fxffff<svcPath>xffff<entityId>xffff<entityType>.aggr` | `sth_x002fxffff<svcPath>xffff<entityId>xffff<entityType>xffff<attrName>.aggr` |
 
-Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
+Please observe the concatenation of entity ID and type is already given in the `notified_entities` header value within the `NGSIEvent`.
 
 [Top](#top)
 

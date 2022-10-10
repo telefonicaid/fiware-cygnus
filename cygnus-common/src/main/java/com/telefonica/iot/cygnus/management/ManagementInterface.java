@@ -67,14 +67,6 @@ public class ManagementInterface extends AbstractHandler {
         this.configurationFile = configurationFile;
 
         try {
-            this.groupingRulesConfFile = getGroupingRulesConfFile();
-        } catch (IOException e) {
-            this.groupingRulesConfFile = null;
-            LOGGER.error("There was a problem while obtaining the grouping rules configuration file. Details: "
-                    + e.getMessage());
-        } // try catch
-
-        try {
             this.nameMappingsConfFile = getNameMappingsConfFile();
         } catch (Exception e) {
             this.nameMappingsConfFile = null;

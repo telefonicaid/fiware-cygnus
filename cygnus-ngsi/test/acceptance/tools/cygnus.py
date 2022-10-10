@@ -339,18 +339,6 @@ class Cygnus:
         line = log.find_line(label, text)
         assert line != None, "ERROR  - label %s and text %s is not found.    \n       - %s" % (label, text, line)
 
-    def delete_grouping_rules_file(self, grouping_rules_file_name):
-        """
-        delete grouping rules file in cygnus conf remotely
-        used the file name "grouping_rules_name" stored in configuration.json file
-        """
-        myfab = FabricSupport(host=self.cygnus_host, user=self.fabric_user, password=self.fabric_password, cert_file=self.fabric_cert_file, retry=self.fabric_error_retry, hide=True, sudo=self.fabric_sudo_cygnus)
-        myfab.current_directory(self.fabric_target_path)
-        Grouping_Rules(fab_driver=myfab, file=grouping_rules_file_name, target_path=self.fabric_target_path, sudo=self.fabric_sudo_cygnus)
-
-        grouping_rules = Grouping_Rules()
-        myfab.run("rm -f %s" % grouping_rules.get_grouping_rules_file_name())
-
     def delete_cygnus_instances_files(self):
         """
         delete all cygnus instances files (cygnus_instance_%s_*.conf and agent_test_*.conf)

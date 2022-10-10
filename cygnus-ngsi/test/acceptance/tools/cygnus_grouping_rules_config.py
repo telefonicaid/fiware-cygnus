@@ -61,12 +61,6 @@ class Grouping_Rules:
 
         self.fab_driver.put_file_to_remote("%s/%s" % (self.configuration[SETTINGS_PATH], self.file_name), self.target_path)
 
-    def get_grouping_rules_file_name(self):
-        """
-        return grouping rules file name
-        used the file name "grouping_rules_name" stored in configuration.json file
-        """
-        return self.configuration[GROUPING_RULES_NAME]
 
 
 

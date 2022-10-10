@@ -33,7 +33,7 @@ Feature: start multi-instances of cygnus using sth sink
   Scenario Outline: start multi-instances of cygnus using sth sink, ports differents and store multiples notifications one by instance and the port defined incremented
     Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "<instances_number>", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
     And service "test_happy_path", service path "/test", entity type "room", entity id "room2", with attribute number "1", attribute name "random" and attribute type "celcius"
@@ -60,7 +60,7 @@ Feature: start multi-instances of cygnus using sth sink
     Given copy properties.json file from "epg_properties.json" to test "sth-sink" and sudo local "false"
     And reinitialize log file
     And configuration of cygnus instances with different ports "false", agents files quantity "<instances_number>", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "false"
     And verify if cygnus is installed correctly
     And verify if mongo is installed correctly
     And service "test_same_port", service path "/test", entity type "room", entity id "room2", with attribute number "1", attribute name "random" and attribute type "celcius"

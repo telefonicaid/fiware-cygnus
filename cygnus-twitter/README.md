@@ -247,7 +247,7 @@ $ curl -X GET "http://localhost:8081/v1/stats" | python -m json.tool
 }
 ```
 
-Many other operations, like getting/putting/updating/deleting the grouping rules can be found in Management Interface [documentation](../../doc/cygnus-common/installation_and_administration_guide/management_interface.md).
+Many other operations, like getting/setting log level, can be found in Management Interface [documentation](../../doc/cygnus-common/installation_and_administration_guide/management_interface.md).
 
 [Top](#top)
 

@@ -57,7 +57,7 @@ The following table summarizes the topic name composition:
 | `/` | `<svc>` | `<svc>xffffx002f` | `<svc>xffffx002fxffff<entityId>xffff<entityType>` | `<svc>xffffx002fxffff<entityId>xffff<entityType>xffff<attrName>` |
 | `/<svcPath>` | `<svc>` | `<svc>xffffx002f<svcPath>` | `<svc>xffffx002f<svcPath>xffff<entityId>xffff<entityType>` | `<svc>xffffx002f<svcPath>xffff<entityId>xffff<entityType>xffff<attrName>` |
 
-Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
+Please observe the concatenation of entity ID and type is already given in the `notified_entities` header value within the `NGSIEvent`.
 
 [Top](#top)
 
