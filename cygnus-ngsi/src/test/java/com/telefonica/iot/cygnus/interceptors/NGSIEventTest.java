@@ -79,7 +79,6 @@ public class NGSIEventTest {
     private final String mappedService = "new_rooms";
     private final String originalServicePath = "/hotel1";
     private final String mappedServicePath = "/hotels";
-    private final String groupedServicePath = "/hotels";
     private final String originalEntityNoEncoding = "Room1_Room";
     private final String originalEntityEncoding = "Room1=Room";
     private final String groupedEntity = "all_rooms";
@@ -207,7 +206,6 @@ public class NGSIEventTest {
         HashMap<String, String> headers = new HashMap<>();
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH, groupedServicePath);
         byte[] body = null; // irrelevant for this test
         ContextElement originalCE = null; // irrelevant for this test
         ContextElement mappedCE = null; // irrelevant for this test
@@ -235,7 +233,6 @@ public class NGSIEventTest {
         HashMap<String, String> headers = new HashMap<>();
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH, groupedServicePath);
         byte[] body = null; // irrelevant for this test
         ContextElement originalCE = null; // irrelevant for this test
         ContextElement mappedCE = null; // irrelevant for this test
@@ -262,7 +259,6 @@ public class NGSIEventTest {
         HashMap<String, String> headers = new HashMap<>();
         headers.put(CommonConstants.HEADER_FIWARE_SERVICE_PATH, originalServicePath);
         headers.put(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH, mappedServicePath);
-        headers.put(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH, groupedServicePath);
         byte[] body = null; // irrelevant for this test
         ContextElement originalCE = null; // irrelevant for this test
         ContextElement mappedCE = null; // irrelevant for this test
