@@ -52,7 +52,9 @@ public class SQLQueryUtils {
      * @param timestampKey    the timestamp key
      * @param timestampFormat the timestamp format
      * @param sqlInstance     the sql instance
-     * @param destination     the destination
+     * @param dataBase        the database
+     * @param schema          the database schema
+     * @param attrNativeTypes
      * @return the string buffer
      */
     protected static ArrayList<StringBuffer> sqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
@@ -122,56 +124,32 @@ public class SQLQueryUtils {
         StringBuffer postgisTempReference = new StringBuffer("EXCLUDED");
         StringBuffer postgisDestination = new StringBuffer(schema).append(".").append(tableName).append(tableSuffix);
 
-        boolean updateCommaAlreadyUsed = false;
         for (int i = 0 ; i < collectionSizeOnLinkedHashMap(lastData) ; i++) {
             StringBuffer query = new StringBuffer();
             StringBuffer values = new StringBuffer("(");
             StringBuffer fields = new StringBuffer("(");
             StringBuffer updateSet = new StringBuffer();
+            String valuesSeparator = "";
+            String fieldsSeparator = "";
+            String updateSetSeparator = "";
             ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
             for (int j = 0 ; j < keys.size() ; j++) {
-                //if (lastData.get(keys.get(j)).get(i) != null) {
-                    JsonElement value = lastData.get(keys.get(j)).get(i);
-                    if (j == 0) {
-                        // FIXME PR: duplicated code
-                        if (value == null) {
-                            values.append("null");
-                        }
-                        else {
-                            values.append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
-                        }
-                        fields.append(keys.get(j));
-                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
-                            // FIXME PR: refactor this!
-                            if (updateCommaAlreadyUsed) {
-                                updateSet.append(", ").append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
-                            }
-                            else {
-                                updateSet.append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
-                                updateCommaAlreadyUsed = true;
-                            }
-                        }
-                    } else {
-                        // FIXME PR: duplicated code
-                        if (value == null) {
-                            values.append(", null");
-                        }
-                        else {
-                            values.append(",").append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
-                        }
-                        fields.append(",").append(keys.get(j));
-                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
-                            // FIXME PR: refactor this!
-                            if (updateCommaAlreadyUsed) {
-                                updateSet.append(", ").append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
-                            }
-                            else {
-                                updateSet.append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
-                                updateCommaAlreadyUsed = true;
-                            }
-                        }
-                    }
-                //}
+                // values
+                JsonElement value = lastData.get(keys.get(j)).get(i);
+                String valueToAppend = value == null ? "null" : getStringValueFromJsonElement(value, "'", attrNativeTypes);
+                values.append(valuesSeparator).append(valueToAppend);
+                valuesSeparator = ",";
+
+                // fields
+                fields.append(fieldsSeparator).append(keys.get(j));
+                fieldsSeparator = ",";
+
+                // updateSet
+                if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
+                    updateSet.append(updateSetSeparator).append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
+                    updateSetSeparator = ",";
+                }
+
             }
             query.append("INSERT INTO ").append(postgisDestination).append(" ").append(fields).append(") ").
                     append("VALUES ").append(values).append(") ");
@@ -307,7 +285,9 @@ public class SQLQueryUtils {
      * @param aggregation     the aggregation
      * @param tableName       the table name
      * @param sqlInstance     the sql instance
-     * @param destination     the destination
+     * @param database        the database
+     * @param schema          the database schema
+     * @param attrNativeTypes
      * @return the string buffer
      */
     protected static StringBuffer sqlInsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
