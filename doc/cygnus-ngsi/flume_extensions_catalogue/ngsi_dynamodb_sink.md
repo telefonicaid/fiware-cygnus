@@ -190,7 +190,6 @@ A configuration example could be:
     ...
     cygnus-ngsi.sinks. dynamodb-sink.type = com.telefonica.iot.cygnus.sinks.NGSIDynamoDBSink
     cygnus-ngsi.sinks.dynamodb-sink.channel = dynamodb-channel
-    cygnus-ngsi.sinks.dynamodb-sink.enable_grouping = false
     cygnus-ngsi.sinks.dynamodb-sink.enable_lowercase = false
     cygnus-ngsi.sinks.dynamodb-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.dynamodb-sink.data_model = dm-by-entity

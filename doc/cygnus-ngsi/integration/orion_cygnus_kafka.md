@@ -448,7 +448,6 @@ cygnus-ngsi.channels.kafka-channel.trasactionCapacity = 100
 
 cygnus-ngsi.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.NGSIKafkaSink
 cygnus-ngsi.sinks.kafka-sink.channel = kafka-channel
-cygnus-ngsi.sinks.kafka-sink.enable_grouping = false
 cygnus-ngsi.sinks.kafka-sink.data_model = dm-by-entity
 cygnus-ngsi.sinks.kafka-sink.broker_list = localhost:9092
 cygnus-ngsi.sinks.kafka-sink.zookeeper_endpoint = localhost:2181

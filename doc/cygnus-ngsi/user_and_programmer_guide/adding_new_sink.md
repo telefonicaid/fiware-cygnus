@@ -114,7 +114,7 @@ Regarding the notified service path, it is usually included as a prefix of the d
 
 Of special interest is the root service path (`/`). In this case, the service path should not be considered when prefixing destination name (because it is used to be a forbidden character).
 
-Finally, in order to differentiate among all the entities, the concatenation of entity ID and type should be used as the default destination name (unless a grouping rule is used to overwrite this default behavior).
+Finally, in order to differentiate among all the entities, the concatenation of entity ID and type should be used as the default destination name (unless a name mapping is used to overwrite this default behavior).
 
 [Top](#top)
 

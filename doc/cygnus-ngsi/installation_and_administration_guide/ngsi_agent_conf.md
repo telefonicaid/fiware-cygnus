@@ -49,8 +49,6 @@ cygnus-ngsi.sinks.hdfs-sink.channel = hdfs-channel
 cygnus-ngsi.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
 # true or false, true applies the new encoding, false applies the old encoding.
 #cygnus-ngsi.sinks.hdfs-sink.enable_encoding = false
-# true if the grouping feature is enabled for this sink, false otherwise
-#cygnus-ngsi.sinks.hdfs-sink.enable_grouping = false
 # true if name mappings are enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.hdfs-sink.enable_name_mappings = false
 # true if lower case is wanted to forced in all the element names, false otherwise
@@ -111,8 +109,6 @@ cygnus-ngsi.sinks.hdfs-sink.krb5_auth.krb5_password = xxxxxxxxxxxxx
 cygnus-ngsi.sinks.ckan-sink.channel = ckan-channel
 # sink class, must not be changed
 cygnus-ngsi.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.NGSICKANSink
-# true if the grouping feature is enabled for this sink, false otherwise
-#cygnus-ngsi.sinks.ckan-sink.enable_grouping = false
 # true if name mappings are enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.ckan-sink.enable_name_mappings = false
 # true applies the new encoding, false applies the old encoding.
@@ -150,8 +146,6 @@ cygnus-ngsi.sinks.postgresql-sink.channel = postgresql-channel
 cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink
 # true applies the new encoding, false applies the old encoding.
 #cygnus-ngsi.sinks.postgresql-sink.enable_encoding = false
-# true if the grouping feature is enabled for this sink, false otherwise
-#cygnus-ngsi.sinks.postgresql-sink.enable_grouping = false
 # true if name mappings are enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.postgresql-sink.enable_name_mappings = false
 # true if lower case is wanted to forced in all the element names, false otherwise
@@ -191,8 +185,6 @@ cygnus-ngsi.sinks.postgis-sink.channel = postgis-channel
 cygnus-ngsi.sinks.postgis-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgisSink
 # true applies the new encoding, false applies the old encoding.
 #cygnus-ngsi.sinks.postgis-sink.enable_encoding = false
-# true if the grouping feature is enabled for this sink, false otherwise
-#cygnus-ngsi.sinks.postgis-sink.enable_grouping = false
 # true if name mappings are enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.postgis-sink.enable_name_mappings = false
 # true if lower case is wanted to forced in all the element names, false otherwise
@@ -230,8 +222,6 @@ cygnus-ngsi.sinks.mysql-sink.channel = mysql-channel
 cygnus-ngsi.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSink
 # true applies the new encoding, false applies the old encoding
 #cygnus-ngsi.sinks.mysql-sink.enable_encoding = false
-# true if the grouping feature is enabled for this sink, false otherwise
-#cygnus-ngsi.sinks.mysql-sink.enable_grouping = false
 # true if name mappings are enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.mysql-sink.enable_name_mappings = false
 # true if lower case is wanted to forced in all the element names, false otherwise
@@ -267,8 +257,6 @@ cygnus-ngsi.sinks.mongo-sink.channel = mongo-channel
 #cygnus-ngsi.sinks.mongo-sink.enable_name_mappings = false
 # true applies the new encoding, false applies the old encoding
 #cygnus-ngsi.sinks.mongo-sink.enable_encoding = false
-# true if the grouping feature is enabled for this sink, false otherwise
-#cygnus-ngsi.sinks.mongo-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
 #cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
@@ -318,8 +306,6 @@ cygnus-ngsi.sinks.sth-sink.channel = sth-channel
 #cygnus-ngsi.sinks.mongo-sink.enable_name_mappings = false
 # true applies the new encoding, false applies the old encoding
 #cygnus-ngsi.sinks.mongo-sink.enable_encoding = false
-# true if the grouping feature is enabled for this sink, false otherwise
-#cygnus-ngsi.sinks.sth-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
 #cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
 # FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run
@@ -357,8 +343,6 @@ cygnus-ngsi.sinks.sth-sink.channel = sth-channel
 cygnus-ngsi.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.NGSIKafkaSink
 # channel name from where to read notification events
 cygnus-ngsi.sinks.kafka-sink.channel = kafka-channel
-# true if the grouping feature is enabled for this sink, false otherwise
-#cygnus-ngsi.sinks.kafka-sink.enable_grouping = false
 # true if name mappings are enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.kafka-sink.enable_name_mappings = false
 # true if lower case is wanted to forced in all the element names, false otherwise
@@ -392,8 +376,6 @@ cygnus-ngsi.sinks.dynamo-sink.access_key_id = xxxxxxxx
 cygnus-ngsi.sinks.dynamo-sink.secret_access_key = xxxxxxxxx
 # AWS region where the tables will be created (link)
 #cygnus-ngsi.sinks.dynamo-sink.region = eu-central-1
-# true if the grouping feature is enabled for this sink, false otherwise
-#cygnus-ngsi.sinks.dynamo-sink.enable_grouping = false
 # true if name mappings are enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.dynamo-sink.enable_name_mappings = false
 # true if lower case is wanted to forced in all the element names, false otherwise
@@ -415,8 +397,6 @@ cygnus-ngsi.sinks.dynamo-sink.secret_access_key = xxxxxxxxx
 cygnus-ngsi.sinks.cartodb-sink.type = com.telefonica.iot.cygnus.sinks.NGSICartoDBSink
 # channel name from where to read notification events
 cygnus-ngsi.sinks.cartodb-sink.channel = cartodb-channel
-# true if the grouping feature is enabled for this sink, false otherwise
-#cygnus-ngsi.sinks.cartodb-sink.enable_grouping = false
 # true if name mappings are enabled for this sink, false otherwise
 #cygnus-ngsi.sinks.cartodb-sink.enable_name_mappings = false
 # true if lower case is wanted to forced in all the element names, false otherwise

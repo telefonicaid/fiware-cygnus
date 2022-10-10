@@ -198,8 +198,8 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         public void run() {
             while (!stop) {
                 // Check if the configuration has changed
-                File groupingRulesFile = new File(nameMappingsConfFile);
-                long modified = groupingRulesFile.lastModified();
+                File nameMappingsFile = new File(nameMappingsConfFile);
+                long modified = nameMappingsFile.lastModified();
 
                 if (lastModified != 0 && modified == lastModified) {
                     logger.debug("[nmi] The configuration has not changed");

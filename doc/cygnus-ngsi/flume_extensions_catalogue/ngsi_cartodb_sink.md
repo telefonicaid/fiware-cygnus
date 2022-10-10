@@ -441,7 +441,6 @@ cygnus-ngsi.channels = cartodb-channel
 ...
 cygnus-ngsi.sinks.cartodb-sink.channel = cartodb-channel
 cygnus-ngsi.sinks.cartodb-sink.type = com.telefonica.iot.cygnus.sinks.NGSICartoDBSink
-cygnus-ngsi.sinks.cartodb-sink.enable_grouping = false
 cygnus-ngsi.sinks.cartodb-sink.enable_name_mappings = false
 cygnus-ngsi.sinks.cartodb-sink.enable_lowercase = false
 cygnus-ngsi.sinks.cartodb-sink.keys_conf_file = /usr/cygnus/conf/cartodb_keys.conf

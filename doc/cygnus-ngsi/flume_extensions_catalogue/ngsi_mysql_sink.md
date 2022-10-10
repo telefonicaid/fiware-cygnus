@@ -256,7 +256,6 @@ A configuration example could be:
     cygnus-ngsi.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSink
     cygnus-ngsi.sinks.mysql-sink.channel = mysql-channel
     cygnus-ngsi.sinks.mysql-sink.enable_encoding = false
-    cygnus-ngsi.sinks.mysql-sink.enable_grouping = false
     cygnus-ngsi.sinks.mysql-sink.enable_lowercase = false
     cygnus-ngsi.sinks.mysql-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.mysql-sink.data_model = dm-by-entity

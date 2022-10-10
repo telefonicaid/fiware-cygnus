@@ -97,7 +97,6 @@ A configuration example could be:
     ...
     cygnus-ngsi.sinks.test-sink.type = com.telefonica.iot.cygnus.sinks.NGSITestSink
     cygnus-ngsi.sinks.test-sink.channel = ckan-channel
-    cygnus-ngsi.sinks.test-sink.enable_grouping = false
     cygnus-ngsi.sinks.test-sink.enable_lowercase = false
     cygnus-ngsi.sinks.test-sink.data_model = dm-by-entity
     cygnus-ngsi.sinks.test-sink.batch_size = 100

@@ -297,7 +297,6 @@ Assuming `data_model=dm-by-entity` and all the possible resolutions as configura
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.NGSISTHSink |
 | channel | yes | N/A |
 | enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable\_grouping | no | false | Always <i>false</i>. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data\_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported. |
@@ -324,7 +323,6 @@ A configuration example could be:
     cygnus-ngsi.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.NGSISTHSink
     cygnus-ngsi.sinks.sth-sink.channel = sth-channel
     cygnus-ngsi.sinks.sth-sink.enable_encoding = false
-    cygnus-ngsi.sinks.sth-sink.enable_grouping = false
     cygnus-ngsi.sinks.sth-sink.enable_lowercase = false
     cygnus-ngsi.sinks.sth-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.sth-sink.data_model = dm-by-entity

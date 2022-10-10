@@ -42,7 +42,6 @@ public class ManagementInterface extends AbstractHandler {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(ManagementInterface.class);
     private final File configurationFile;
-    private String groupingRulesConfFile;
     private String nameMappingsConfFile;    
     private final ImmutableMap<String, SourceRunner> sources;
     private final ImmutableMap<String, Channel> channels;

@@ -309,7 +309,6 @@ A configuration example could be:
     cygnus-ngsi.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
     cygnus-ngsi.sinks.hdfs-sink.channel = hdfs-channel
     cygnus-ngsi.sinks.hdfs-sink.enable_encoding = false
-    cygnus-ngsi.sinks.hdfs-sink.enable_grouping = false
     cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
     cygnus-ngsi.sinks.hdfs-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.hdfs-sink.data_model = dm-by-entity

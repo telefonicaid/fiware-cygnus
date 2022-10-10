@@ -147,7 +147,6 @@ A configuration example could be:
     ...
     cygnus-ngsi.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.NGSIKafkaSink
     cygnus-ngsi.sinks.kafka-sink.channel = kafka-channel
-    cygnus-ngsi.sinks.kafka-sink.enable_grouping = false
     cygnus-ngsi.sinks.kafka-sink.enable_lowercase = false
     cygnus-ngsi.sinks.kafka-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.kafka-sink.data_model = dm-by-entity

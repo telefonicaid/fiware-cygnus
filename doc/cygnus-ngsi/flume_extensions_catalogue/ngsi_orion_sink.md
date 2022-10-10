@@ -100,13 +100,11 @@ A configuration example could be:
     cygnus-ngsi.sinks.orion-sink.type = com.telefonica.iot.cygnus.sinks.NGSIOrionSink
     cygnus-ngsi.sinks.orion-sink.channel = orion-channel
     cygnus-ngsi.sinks.orion-sink.enable_encoding = false
-    cygnus-ngsi.sinks.orion-sink.enable_grouping = false
     cygnus-ngsi.sinks.orion-sink.enable_lowercase = false
     cygnus-ngsi.sinks.orion-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.orion-sink.type = com.telefonica.iot.cygnus.sinks.NGSINGSIOrionSink
     cygnus-ngsi.sinks.orion-sink.channel = orion-channel
     cygnus-ngsi.sinks.orion-sink.enable_encoding = false
-    cygnus-ngsi.sinks.orion-sink.enable_grouping = false
     cygnus-ngsi.sinks.orion-sink.enable_lowercase = false
     cygnus-ngsi.sinks.orion-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.orion-sink.orion_host = XXXXXXXXX

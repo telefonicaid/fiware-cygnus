@@ -145,10 +145,8 @@ Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.25 sec
 Running com.telefonica.iot.cygnus.sinks.NGSICKANSinkTest
 Testing OrionCKANSink.start
 Testing OrionCKANSink.configure
-Testing OrionCKANSinkTest.persistBatch (row persistence, enable grouping)
-Testing OrionCKANSinkTest.persistBatch (row persistence, disable grouping)
-Testing OrionCKANSinkTest.persistBatch (column attr persistence, enable grouping)
-Testing OrionCKANSinkTest.persistBatch (column attr persistence, disable grouping)
+Testing OrionCKANSinkTest.persistBatch (row persistence)
+Testing OrionCKANSinkTest.persistBatch (column attr persistence)
 Testing OrionCKANSink.persistBatch ("root" servicePath name)
 Testing OrionCKANSink.persistBatch (multiple destinations and fiware-servicePaths)
 Testing OrionCKANSinkTest.persistBatch (null batches)
@@ -248,14 +246,12 @@ Running com.telefonica.iot.cygnus.sinks.NGSISinkTest
 [OrionSink.configure] --------------------  OK  - A wrong configuration 'batch_timeout='0' has been detected
 [OrionSink.configure] --------------------  OK  - A wrong configuration 'batch_ttl='-2' has been detected
 [OrionSink.configure] --------------------  OK  - A wrong configuration 'data_model='dm-by-other' has been detected
-[OrionSink.configure] --------------------  OK  - A wrong configuration 'enable_grouping='falso' has been detected
 [OrionSink.configure] --------------------  OK  - A wrong configuration 'enable_lowercase='verdadero' has been detected
 [OrionSink.configure] --------------------------- When not configured, the default values are used for non mandatory parameters
 [OrionSink.configure] --------------------  OK  - The default configuration value for 'batch_size' is '1'
 [OrionSink.configure] --------------------  OK  - The default configuration value for 'batch_timeout' is '30'
 [OrionSink.configure] --------------------  OK  - The default configuration value for 'batch_ttl' is '10'
 [OrionSink.configure] --------------------  OK  - The default configuration value for 'data_model' is 'dm-by-entity'
-[OrionSink.configure] --------------------  OK  - The default configuration value for 'enable_grouping' is 'false'
 [OrionSink.configure] --------------------  OK  - The default configuration value for 'enable_lowercase' is 'false'
 Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 sec
 Running com.telefonica.iot.cygnus.sinks.NGSISTHSinkTest

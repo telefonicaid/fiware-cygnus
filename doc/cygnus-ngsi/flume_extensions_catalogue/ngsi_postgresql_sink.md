@@ -292,7 +292,6 @@ A configuration example could be:
     cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink
     cygnus-ngsi.sinks.postgresql-sink.channel = postgresql-channel
     cygnus-ngsi.sinks.postgresql-sink.enable_encoding = false
-    cygnus-ngsi.sinks.postgresql-sink.enable_grouping = false
     cygnus-ngsi.sinks.postgresql-sink.enable_lowercase = false
     cygnus-ngsi.sinks.postgresql-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.postgresql-sink.data_model = dm-by-entity

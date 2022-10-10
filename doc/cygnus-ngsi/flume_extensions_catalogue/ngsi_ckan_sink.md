@@ -376,7 +376,6 @@ A configuration example could be:
     cygnus-ngsi.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.NGSICKANSink
     cygnus-ngsi.sinks.ckan-sink.channel = ckan-channel
     cygnus-ngsi.sinks.ckan-sink.enable_encoding = false
-    cygnus-ngsi.sinks.ckan-sink.enable_grouping = false
     cygnus-ngsi.sinks.ckan-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.ckan-sink.data_model = dm-by-entity
     cygnus-ngsi.sinks.ckan-sink.attr_persistence = column
