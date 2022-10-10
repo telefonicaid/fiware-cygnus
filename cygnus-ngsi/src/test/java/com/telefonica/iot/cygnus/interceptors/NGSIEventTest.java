@@ -81,7 +81,6 @@ public class NGSIEventTest {
     private final String mappedServicePath = "/hotels";
     private final String originalEntityNoEncoding = "Room1_Room";
     private final String originalEntityEncoding = "Room1=Room";
-    private final String groupedEntity = "all_rooms";
     private final String mappedEntityID = "all_rooms";
     private final String mappedEntityType = "room";
     private final String originalAttribute = "temperature";
@@ -267,10 +266,10 @@ public class NGSIEventTest {
         try {
             assertEquals(mappedServicePath, event.getServicePathForNaming(true));
             System.out.println(getTestTraceHead("[NGSIEvent.getServicePathForNaming]")
-                    + "-  OK  - The grouped service path has been returned");
+                    + "-  OK  - The mapped service path has been returned");
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[NGSIEvent.getServicePathForNaming]")
-                    + "- FAIL - The grouped service path has not been returned");
+                    + "- FAIL - The mapped service path has not been returned");
             throw e;
         } // try catch
     } // testGetServicePathForNamingNM

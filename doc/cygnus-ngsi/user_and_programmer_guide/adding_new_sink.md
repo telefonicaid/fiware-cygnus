@@ -66,7 +66,7 @@ Please notice that the `process()` method handles all the possible errors that m
 
     fiware-cygnus/cygnus-common/src/main/java/com/telefonica/iot/cygnus/errors/
 
-Once finished, accumulation results in a `NGSIBatch` object, which internally holds sub-batches per each notified/grouped destination (`notified-destinations` and `grouped-destinations` headers in the Flume event objects are inspected to created the sub-batches, depending on the configured `enable_name_mappings` value). Information within this `NGSIBatch` object is the one the specific implementation of the new sink must persist.
+Once finished, accumulation results in a `NGSIBatch` object, which internally holds sub-batches per each notified/mapped destination (`notified-destinations` header in the Flume event objects are inspected to created the sub-batches, depending on the configured `enable_name_mappings` value). Information within this `NGSIBatch` object is the one the specific implementation of the new sink must persist.
 
 Specific persistence logic is implemented by overwriting the only abstract method within `NGSISink`, i.e. `persistBatch(NGSIBatch)`:
 
@@ -93,7 +93,7 @@ We include a list of fields that are usually persisted in Cygnus sinks:
 
 * The reception time of the notification in miliseconds.
 * The reception time of the notification in human-readable format.
-* The notified/grouped FIWARE service path.
+* The notified/mapped FIWARE service path.
 * The entity ID.
 * The entity type.
 * The attributes and the attribute’s metadata.
