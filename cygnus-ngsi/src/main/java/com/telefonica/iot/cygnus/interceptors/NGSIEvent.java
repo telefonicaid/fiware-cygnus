@@ -167,7 +167,7 @@ public class NGSIEvent implements Event {
      */
     public String getEntityTypeForNaming(boolean enableMappings) {
         if (enableMappings) {
-            if (mappedCE.getType() == null || mappedCE.getType().isEmpty()) {  // TODO: remove when
+            if (mappedCE.getType() == null || mappedCE.getType().isEmpty()) {
              // should never occur since Orion does not allow it
                 LOGGER.error("[NGSIEvent] Entity Type musn´t be empty or null while grouping by entity type. ("
                         + originalCE.getId() + ")");
@@ -176,7 +176,7 @@ public class NGSIEvent implements Event {
                 return mappedCE.getType();
             } // if else
         } else {
-            if (originalCE.getType() == null || originalCE.getType().isEmpty()) {  // TODO: remove when
+            if (originalCE.getType() == null || originalCE.getType().isEmpty()) {
              // should never occur since Orion does not allow it
                 LOGGER.error("[NGSIEvent] Entity Type musn´t be empty or null while grouping by entity type. ("
                         + originalCE.getId() + ")");
