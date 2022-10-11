@@ -81,7 +81,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSISink.class);
     // General parameters for all the sinks
     protected DataModel dataModel;
-    protected boolean enableGrouping;
     protected int batchSize;
     protected int batchTimeout;
     protected int batchTTL;
@@ -163,14 +162,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     } // getDataModel
 
     /**
-     * Gets if the grouping feature is enabled.
-     * @return True if the grouping feature is enabled, false otherwise.
-     */
-    protected boolean getEnableGrouping() {
-        return enableGrouping;
-    } // getEnableGrouping
-
-    /**
      * Gets if lower case is enabled.
      * @return True is lower case is enabled, false otherwise.
      */
@@ -232,18 +223,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             LOGGER.warn("[" + this.getName() + "] Invalid configuration (data_model="
                     + dataModelStr + ")");
         } // catch
-
-        String enableGroupingStr = context.getString("enable_grouping", "false");
-        
-        if (enableGroupingStr.equals("true") || enableGroupingStr.equals("false")) {
-            enableGrouping = Boolean.valueOf(enableGroupingStr);
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (enable_grouping="
-                + enableGroupingStr + ")");
-        }  else {
-            invalidConfiguration = true;
-            LOGGER.warn("[" + this.getName() + "] Invalid configuration (enable_grouping="
-                + enableGroupingStr + ") -- Must be 'true' or 'false'");
-        }  // if else
         
         String enableLowercaseStr = context.getString("enable_lowercase", "false");
         
@@ -843,17 +822,12 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
         private void accumulateByService(NGSIEvent event) {
             Map<String, String> headers = event.getHeaders();
-            ContextElement mappedCE = event.getMappedCE();
             String destination;
             
-            if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
-                destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
+            if (enableNameMappings) {
+                destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE);
             } else {
-                if (enableNameMappings) {
-                    destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE);
-                } else {
-                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-                } // if else
+                destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
             } // if else
             
             batch.addEvent(destination, event);
@@ -861,25 +835,14 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
         private void accumulateByServicePath(NGSIEvent event) {
             Map<String, String> headers = event.getHeaders();
-            ContextElement mappedCE = event.getMappedCE();
             String destination;
-            
-            if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
-                String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-                
-                if (enableGrouping) {
-                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH);
-                } else {
-                    destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
-                } // if else
+
+            if (enableNameMappings) {
+                destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
+                        + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH);
             } else {
-                if (enableNameMappings) {
-                    destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
-                            + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH);
-                } else {
-                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
-                            + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
-                } // if else
+                destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
+                        + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH);
             } // if else
 
             batch.addEvent(destination, event);
@@ -890,27 +853,15 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             ContextElement originalCE = event.getOriginalCE();
             ContextElement mappedCE = event.getMappedCE();
             String destination;
-            
-            if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
-                String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-                
-                if (enableGrouping) {
-                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH)
-                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY);
-                } else {
-                    destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH)
-                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY);
-                } // if else
+
+            if (enableNameMappings) {
+                destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
+                        + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH) + "_"
+                        + mappedCE.getId() + "_" + mappedCE.getType();
             } else {
-                if (enableNameMappings) {
-                    destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
-                            + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH) + "_"
-                            + mappedCE.getId() + "_" + mappedCE.getType();
-                } else {
-                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
-                            + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
-                            + originalCE.getId() + "_" + originalCE.getType();
-                } // if else
+                destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
+                        + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
+                        + originalCE.getId() + "_" + originalCE.getType();
             } // if else
 
             batch.addEvent(destination, event);
@@ -921,28 +872,15 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             ContextElement originalCE = event.getOriginalCE();
             ContextElement mappedCE = event.getMappedCE();
             String destination;
-            
-            if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
-                String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-                
-                if (enableGrouping) {
-                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH)
-                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE);
-                } else {
-                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
-                            + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
-                            + originalCE.getType();
-                } // if else
+
+            if (enableNameMappings) {
+                destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
+                        + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH) + "_"
+                        + mappedCE.getType();
             } else {
-                if (enableNameMappings) {
-                    destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
-                            + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH) + "_"
-                            + mappedCE.getType();
-                } else {
-                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
-                            + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
-                            + originalCE.getType();
-                } // if else
+                destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
+                        + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
+                        + originalCE.getType();
             } // if else
 
             batch.addEvent(destination, event);
@@ -953,27 +891,15 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             ContextElement originalCE = event.getOriginalCE();
             ContextElement mappedCE = event.getMappedCE();
             String destination;
-            
-            if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
-                String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-                
-                if (enableGrouping) {
-                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH)
-                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY);
-                } else {
-                    destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH)
-                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY);
-                } // if else
+
+            if (enableNameMappings) {
+                destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
+                        + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH) + "_"
+                        + mappedCE.getId() + "_" + mappedCE.getType();
             } else {
-                if (enableNameMappings) {
-                    destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
-                            + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH) + "_"
-                            + mappedCE.getId() + "_" + mappedCE.getType();
-                } else {
-                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
-                            + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
-                            + originalCE.getId() + "_" + originalCE.getType();
-                } // if else
+                destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
+                        + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
+                        + originalCE.getId() + "_" + originalCE.getType();
             } // if else
 
             batch.addEvent(destination, event);
@@ -984,21 +910,11 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             ContextElement originalCE = event.getOriginalCE();
             ContextElement mappedCE = event.getMappedCE();
             String destination;
-            if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
-                String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-                if (enableGrouping) {
-                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE);
-                } else {
-                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY_TYPE);
-                } // if else
+
+            if (enableNameMappings) {
+                destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_" + mappedCE.getType();
             } else {
-                if (enableNameMappings) {
-                    destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
-                            + mappedCE.getType();
-                } else {
-                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
-                            + originalCE.getType();
-                } // if else
+                destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_" + originalCE.getType();
             } // if else
 
             batch.addEvent(destination, event);
@@ -1009,53 +925,33 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             ContextElement originalCE = event.getOriginalCE();
             ContextElement mappedCE = event.getMappedCE();
             String destination;
-            
-            if (mappedCE == null) { // 'TODO': remove when Grouping Rules are definitely removed
-                String service = headers.get(CommonConstants.HEADER_FIWARE_SERVICE);
-                
-                if (enableGrouping) {
-                    destination = service + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_SERVICE_PATH)
-                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_GROUPED_ENTITY);
-                } else {
-                    destination = service + "_" + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH)
-                            + "_" + headers.get(NGSIConstants.FLUME_HEADER_NOTIFIED_ENTITY);
-                } // if else
-                
+
+            if (enableNameMappings) {
+                destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
+                        + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH) + "_"
+                        + mappedCE.getId() + "_" + mappedCE.getType();
+                ArrayList<ContextAttribute> attrs = mappedCE.getAttributes();
+
+                for (ContextAttribute attr : attrs) {
+                    ContextElement filteredOriginalCE = originalCE.filter(attr.getName());
+                    ContextElement filteredMappedCE = mappedCE.filter(attr.getName());
+                    event.setOriginalCE(filteredOriginalCE);
+                    event.setMappedCE(filteredMappedCE);
+                    batch.addEvent(destination + "_" + attr.getName(), event);
+                } // for
+            } else {
+                destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
+                        + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
+                        + originalCE.getId() + "_" + originalCE.getType();
                 ArrayList<ContextAttribute> attrs = originalCE.getAttributes();
 
                 for (ContextAttribute attr : attrs) {
                     ContextElement filteredOriginalCE = originalCE.filter(attr.getName());
+                    ContextElement filteredMappedCE = mappedCE.filter(attr.getName()); // not really necessary...
                     event.setOriginalCE(filteredOriginalCE);
+                    event.setMappedCE(filteredMappedCE);
                     batch.addEvent(destination + "_" + attr.getName(), event);
                 } // for
-            } else {
-                if (enableNameMappings) {
-                    destination = headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE) + "_"
-                            + headers.get(NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH) + "_"
-                            + mappedCE.getId() + "_" + mappedCE.getType();
-                    ArrayList<ContextAttribute> attrs = mappedCE.getAttributes();
-
-                    for (ContextAttribute attr : attrs) {
-                        ContextElement filteredOriginalCE = originalCE.filter(attr.getName());
-                        ContextElement filteredMappedCE = mappedCE.filter(attr.getName());
-                        event.setOriginalCE(filteredOriginalCE);
-                        event.setMappedCE(filteredMappedCE);
-                        batch.addEvent(destination + "_" + attr.getName(), event);
-                    } // for
-                } else {
-                    destination = headers.get(CommonConstants.HEADER_FIWARE_SERVICE) + "_"
-                            + headers.get(CommonConstants.HEADER_FIWARE_SERVICE_PATH) + "_"
-                            + originalCE.getId() + "_" + originalCE.getType();
-                    ArrayList<ContextAttribute> attrs = originalCE.getAttributes();
-
-                    for (ContextAttribute attr : attrs) {
-                        ContextElement filteredOriginalCE = originalCE.filter(attr.getName());
-                        ContextElement filteredMappedCE = mappedCE.filter(attr.getName()); // not really necessary...
-                        event.setOriginalCE(filteredOriginalCE);
-                        event.setMappedCE(filteredMappedCE);
-                        batch.addEvent(destination + "_" + attr.getName(), event);
-                    } // for
-                } // if else
             } // if else
         } // accumulateByAttribute
 

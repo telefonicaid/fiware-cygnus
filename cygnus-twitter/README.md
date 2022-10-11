@@ -120,8 +120,6 @@ cygnus-twitter.sinks.hdfs-sink.channel = hdfs-channel
 cygnus-twitter.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
 # true applies the new encoding, false applies the old encoding
 #cygnus-twitter.sinks.hdfs-sink.enable_encoding = false
-# true if the grouping feature is enabled for this sink, false otherwise
-#cygnus-twitter.sinks.hdfs-sink.enable_grouping = false
 # true if lower case is wanted to forced in all the element names, false otherwise
 #cygnus-twitter.sinks.hdfs-sink.enable_lowercase = false
 # rest if the interaction with HDFS will be WebHDFS/HttpFS-based, binary if based on the Hadoop API
@@ -247,7 +245,7 @@ $ curl -X GET "http://localhost:8081/v1/stats" | python -m json.tool
 }
 ```
 
-Many other operations, like getting/putting/updating/deleting the grouping rules can be found in Management Interface [documentation](../../doc/cygnus-common/installation_and_administration_guide/management_interface.md).
+Many other operations, like getting/setting log level, can be found in Management Interface [documentation](../../doc/cygnus-common/installation_and_administration_guide/management_interface.md).
 
 [Top](#top)
 

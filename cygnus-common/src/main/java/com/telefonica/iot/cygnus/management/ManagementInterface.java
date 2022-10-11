@@ -42,7 +42,6 @@ public class ManagementInterface extends AbstractHandler {
 
     private static final CygnusLogger LOGGER = new CygnusLogger(ManagementInterface.class);
     private final File configurationFile;
-    private String groupingRulesConfFile;
     private String nameMappingsConfFile;    
     private final ImmutableMap<String, SourceRunner> sources;
     private final ImmutableMap<String, Channel> channels;
@@ -65,14 +64,6 @@ public class ManagementInterface extends AbstractHandler {
             SourceRunner> sources, ImmutableMap<String, Channel> channels, ImmutableMap<String, SinkRunner> sinks,
             int apiPort, int guiPort) {
         this.configurationFile = configurationFile;
-
-        try {
-            this.groupingRulesConfFile = getGroupingRulesConfFile();
-        } catch (IOException e) {
-            this.groupingRulesConfFile = null;
-            LOGGER.error("There was a problem while obtaining the grouping rules configuration file. Details: "
-                    + e.getMessage());
-        } // try catch
 
         try {
             this.nameMappingsConfFile = getNameMappingsConfFile();
@@ -113,8 +104,6 @@ public class ManagementInterface extends AbstractHandler {
                         handleGetVersion(response);
                     } else if (uri.equals("/v1/stats")) {
                         StatsHandlers.get(response, sources, channels, sinks);
-                    } else if (uri.equals("/v1/groupingrules")) {
-                        GroupingRulesHandlers.get(response, groupingRulesConfFile);
                     } else if (uri.equals("/v1/subscriptions")) {
                         SubscriptionsHandlers.get(request, response);
                     } else if (uri.startsWith("/admin/configuration/agent")) {
@@ -142,9 +131,7 @@ public class ManagementInterface extends AbstractHandler {
                     
                     break;
                 case "POST":
-                    if (uri.equals("/v1/groupingrules")) {
-                        GroupingRulesHandlers.post(request, response, groupingRulesConfFile);
-                    } else if (uri.equals("/v1/subscriptions")) {
+                    if (uri.equals("/v1/subscriptions")) {
                         SubscriptionsHandlers.post(request, response);
                     } else if (uri.startsWith("/admin/configuration/agent")) {
                         ConfigurationAgentHandlers.post(request, response, false);
@@ -169,8 +156,6 @@ public class ManagementInterface extends AbstractHandler {
                 case "PUT":
                     if (uri.equals("/v1/stats")) {
                         StatsHandlers.put(response, sources, channels, sinks);
-                    } else if (uri.equals("/v1/groupingrules")) {
-                        GroupingRulesHandlers.put(request, response, groupingRulesConfFile);
                     } else if (uri.startsWith("/admin/configuration/agent")) {
                         ConfigurationAgentHandlers.put(request, response, false);
                     } else if (uri.startsWith("/v1/admin/configuration/agent")) {
@@ -192,9 +177,7 @@ public class ManagementInterface extends AbstractHandler {
                     
                     break;
                 case "DELETE":
-                    if (uri.equals("/v1/groupingrules")) {
-                        GroupingRulesHandlers.delete(request, response, groupingRulesConfFile);
-                    } else if (uri.equals("/v1/subscriptions")) {
+                    if (uri.equals("/v1/subscriptions")) {
                         SubscriptionsHandlers.delete(request, response);
                     } else if (uri.startsWith("/admin/configuration/agent")) {
                         ConfigurationAgentHandlers.delete(request, response, false);
@@ -250,31 +233,7 @@ public class ManagementInterface extends AbstractHandler {
         response.getWriter().println("{\"success\":\"true\",\"version\":\"" + CommonUtils.getCygnusVersion()
                 + "." + CommonUtils.getLastCommit() + "\"}");
     } // handleGetVersion
-    
-    private String getGroupingRulesConfFile() throws IOException {
-        if (!configurationFile.exists()) {
-            return "404 - Configuration file for Cygnus not found. Details: "
-                    + configurationFile.toString();
-        } // if
 
-        String grConfFile = null;
-        
-        try (BufferedReader reader = new BufferedReader(new FileReader(configurationFile))) {
-            String line;
-            
-            while ((line = reader.readLine()) != null) {
-                if (!line.startsWith("#")) {
-                    if (line.contains("grouping_rules_conf_file")) {
-                        String[] splits = line.split("=");
-                        grConfFile = splits[1].replaceAll(" ", "");
-                        break;
-                    } // if
-                } // if
-            } // while
-        }
-        return grConfFile;
-    } // getGroupingRulesConfFile
-    
     private String getNameMappingsConfFile() throws IOException {
         if (!configurationFile.exists()) {
             return "404 - Configuration file for Cygnus not found. Details: "

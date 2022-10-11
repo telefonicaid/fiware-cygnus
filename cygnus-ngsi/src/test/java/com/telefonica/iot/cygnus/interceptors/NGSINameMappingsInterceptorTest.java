@@ -232,7 +232,7 @@ public class NGSINameMappingsInterceptorTest {
 
     /**
      * [NGSINameMappingsInterceptor.Builder.configure] -------- Configured
-     * 'grouping_rules_conf_file' cannot be null.
+     * 'name_mappings_conf_file' cannot be null.
      */
     @Test
     public void testBuilderConfigureNameMappingsConfFileNotNull() {

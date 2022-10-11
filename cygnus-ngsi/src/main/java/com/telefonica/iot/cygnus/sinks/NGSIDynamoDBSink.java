@@ -204,8 +204,8 @@ public class NGSIDynamoDBSink extends NGSISink {
         public void initialize(NGSIEvent event) throws CygnusBadConfiguration {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
-            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            servicePathForNaming = event.getServicePathForNaming(enableNameMappings);
+            entityForNaming = event.getEntityForNaming(enableNameMappings, enableEncoding);
             tableName = buildTableName(service, servicePathForNaming, entityForNaming, dataModel);
             aggregation = new ArrayList<>();
         } // initialize

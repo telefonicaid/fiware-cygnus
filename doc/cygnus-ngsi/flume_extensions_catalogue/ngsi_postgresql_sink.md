@@ -19,7 +19,6 @@ Content:
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
-        * [About the table type and its relation with the grouping rules](#section2.3.1)
         * [About the persistence mode](#section2.3.2)
         * [About batching](#section2.3.3)
         * [Time zone information](#section2.3.4)
@@ -110,7 +109,7 @@ Using the new encoding:
 | `/` | `x002f` | `x002fxffff<entityId>xffff<entityType>` | `x002fxffff<entityType>` | `<entityType>` |
 | `/<svcPath>` | `x002f<svcPath>` | `x002f<svcPath>xffff<entityId>xffff<entityType>` | `x002f<svcPath>xffff<entityType>` | `<entityType>` |
 
-Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
+Please observe the concatenation of entity ID and type is already given in the `notified_entities` header value within the `NGSIEvent`.
 
 [Top](#top)
 
@@ -167,7 +166,6 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
              correlationId=1429535775-308-0000000000,
              fiware-service=vehicles,
              fiware-servicepath=/4wheels,
-             <grouping_rules_interceptor_headers>,
              <name_mappings_interceptor_headers>
         },
         body={
@@ -260,7 +258,6 @@ Coming soon.
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink</i> |
 | channel | yes | N/A ||
 | enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | last\_data\_mode | no | upsert | <i>upsert</i> or <i>insert</i> or <i>both</i>, to set last data mode. Check this [link](./last_data_function.md) for more details. |
@@ -293,7 +290,6 @@ A configuration example could be:
     cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink
     cygnus-ngsi.sinks.postgresql-sink.channel = postgresql-channel
     cygnus-ngsi.sinks.postgresql-sink.enable_encoding = false
-    cygnus-ngsi.sinks.postgresql-sink.enable_grouping = false
     cygnus-ngsi.sinks.postgresql-sink.enable_lowercase = false
     cygnus-ngsi.sinks.postgresql-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.postgresql-sink.data_model = dm-by-entity
@@ -320,14 +316,6 @@ Use `NGSIPostgreSQLSink` if you are looking for a big database with several tena
 [Top](#top)
 
 ### <a name="section2.3"></a>Important notes
-#### <a name="section2.3.1"></a>About the table type and its relation with the grouping rules
-The table type configuration parameter, as seen, is a method for <i>direct</i> aggregation of data: by <i>default</i> destination (i.e. all the notifications about the same entity will be stored within the same PostgreSQL table) or by <i>default</i> service-path (i.e. all the notifications about the same service-path will be stored within the same PostgreSQL table).
-
-The [Grouping feature](./ngsi_grouping_interceptor.md) is another aggregation mechanism, but an <i>inderect</i> one. This means the grouping feature does not really aggregates the data into a single table, that's something the sink will done based on the configured table type (see above), but modifies the default destination or service-path, causing the data is finally aggregated (or not) depending on the table type.
-
-For instance, if the chosen table type is by destination and the grouping feature is not enabled then two different entities data, `car1` and `car2` both of type `car` will be persisted in two different PostgreSQL tables, according to their <i>default</i> destination, i.e. `car1_car` and `car2_car`, respectively. However, if a grouping rule saying "all cars of type `car` will have a modified destination named `cars`" is enabled then both entities data will be persisted in a single table named `cars`. In this example, the direct aggregation is determined by the table type (by destination), but indirectly we have been deciding the aggregation as well through a grouping rule.
-
-[Top](#top)
 
 #### <a name="section2.3.2"></a>About the persistence mode
 Please observe not always the same number of attributes is notified; this depends on the subscription made to the NGSI-like sender. This is not a problem for the `row` persistence mode, since fixed 8-fields data rows are inserted for each notified attribute. Nevertheless, the `column` mode may be affected by several data rows of different lengths (in term of fields). Thus, the `column` mode is only recommended if your subscription is designed for always sending the same attributes, event if they were not updated since the last notification.

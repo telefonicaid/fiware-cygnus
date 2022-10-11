@@ -155,7 +155,7 @@ The name of each issue MUST follow the following format:
 
 Where <i>short description</i> MAY enclose other “[...]” sublevels. For instance:
 
-    [cygnus-ngsi][hardening][grouping rules] Precompile patterns from regexes
+    [cygnus-ngsi][hardening][name mappings] Get name mappings
 
 Alternatively, labels for each agent and task type SHOULD be created.
 
@@ -202,7 +202,7 @@ Every contribution/PR MUST also add a new line in a special file within the root
 
 Where <i>short description</i> MAY enclose other “[...]” sublevels. For instance:
 
-    - [cygnus-ngsi][hardening][grouping rules] Precompile regexes (#209)
+    - [cygnus-ngsi][hardening][name mappings] Get namemappings (#9999)
 
 [Top](#top)
 
