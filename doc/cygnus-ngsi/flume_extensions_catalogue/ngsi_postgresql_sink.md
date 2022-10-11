@@ -3,7 +3,7 @@ Content:
 
 * [Functionality](#section1)
     * [Mapping NGSI events to `NGSIEvent` objects](#section1.1)
-    * [Mapping `NGSIEvent`s to PostgreSQL data structures](#section1.2)
+    * [PostgreSQL data models](#section1.2)
         * [PostgreSQL databases naming conventions](#section1.2.1)
         * [PostgreSQL schemas naming conventions](#section1.2.2)
         * [PostgreSQL tables naming conventions](#section1.2.3)
@@ -68,6 +68,9 @@ For a given entity, `entityname`, of type `entitytype`, inside a tenant `service
 | `dm-by-attribute` | `agent.conf` | service | servicepath_entityname_entitytype_attribute | Automatic schema creation |
 
 Where [`agent.conf`](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/ngsi_agent_conf.md) is the default database name selected in that file under the field `cygnus-ngsi.sinks.postgresql-sink.postgresql_database` or the env var `CYGNUS_POSTGRESQL_DATABASE`
+
+**NOTE:** the leading underscore `_` in schema name column for `*-schema` cases is not a typo. However, this may change in the future,
+see issue [#2201](https://github.com/telefonicaid/fiware-cygnus/issues/2201).
 
 [Top](#top)
 
