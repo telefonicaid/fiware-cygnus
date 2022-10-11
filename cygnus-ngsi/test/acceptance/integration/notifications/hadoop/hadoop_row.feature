@@ -34,7 +34,7 @@ Feature: Stored in hadoop new notifications per row from context broker
   Scenario Outline:  store in hadoop new notifications from context broker
     Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if hadoop is installed correctly
     And service "happy_path", service path "/testing", entity type "room", entity id "room2", with attribute number "2", attribute name "temperature" and attribute type "celcius"
@@ -52,7 +52,7 @@ Feature: Stored in hadoop new notifications per row from context broker
   Scenario Outline: stored new notifications in hadoop from context broker with differents values
     Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if hadoop is installed correctly
     And service "happy_path", service path "/test", entity type "room", entity id "room2", with attribute number "<attributes_number>", attribute name "temperature" and attribute type "celcius"
@@ -72,7 +72,7 @@ Feature: Stored in hadoop new notifications per row from context broker
   Scenario Outline:  store in hadoop new notifications with different organizations values
     Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if hadoop is installed correctly
     And service "<directory>", service path "/test", entity type "room", entity id "room2", with attribute number "2", attribute name "temperature" and attribute type "celcius"
@@ -96,7 +96,7 @@ Feature: Stored in hadoop new notifications per row from context broker
   Scenario Outline:  store in hadoop new notifications with different service path values
     Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if hadoop is installed correctly
     And service "<directory>", service path "<service_path>", entity type "room", entity id "room2", with attribute number "2", attribute name "temperature" and attribute type "celcius"
@@ -126,7 +126,7 @@ Feature: Stored in hadoop new notifications per row from context broker
   Scenario Outline: store in hadoop new notifications with different resources values
     Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if hadoop is installed correctly
     And service "multi_resources", service path "/test", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "temperature" and attribute type "celcius"
@@ -156,7 +156,7 @@ Feature: Stored in hadoop new notifications per row from context broker
   Scenario Outline:  store in hadoop new notifications with different quantities of attributes
     Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if hadoop is installed correctly
     And service "<directory>", service path "/test", entity type "room", entity id "room2", with attribute number "<attribute_number>", attribute name "temperature" and attribute type "celcius"
@@ -178,7 +178,7 @@ Feature: Stored in hadoop new notifications per row from context broker
   Scenario Outline: stored new notifications in hadoop with different values
     Given copy properties.json file from "filab_properties.json" to test "hdfs-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if hadoop is installed correctly
     And service "<directory>", service path "/test", entity type "room", entity id "room2", with attribute number "2", attribute name "temperature" and attribute type "celcius"

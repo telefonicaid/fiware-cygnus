@@ -72,7 +72,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = "falso";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -81,7 +80,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
 
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -107,7 +106,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = "falso";
         String host = null; // default
         String password = null; // default
@@ -116,7 +114,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
 
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -128,41 +126,6 @@ public class NGSIPostgisSinkTest {
             throw e;
         } // try catch
     } // testConfigureEnableLowercase
-
-    /**
-     * [NGSIPostgisSink.configure] -------- enable_grouping can only be 'true' or 'false'.
-     */
-    @Test
-    public void testConfigureEnableGrouping() {
-        System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
-                + "-------- enable_grouping can only be 'true' or 'false'");
-        String attrPersistence = null; // default
-        String batchSize = null; // default
-        String batchTime = null; // default
-        String batchTTL = null; // default
-        String dataModel = null; // default
-        String enableEncoding = null; // default
-        String enableGrouping = "falso";
-        String enableLowercase = null; // default
-        String host = null; // default
-        String password = null; // default
-        String port = null; // default
-        String username = null; // default
-        String cache = null; // default
-        NGSIPostgisSink sink = new NGSIPostgisSink();
-        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
-
-        try {
-            assertTrue(sink.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
-                    + "-  OK  - 'enable_grouping=falso' was detected");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
-                    + "- FAIL - 'enable_grouping=falso' was not detected");
-            throw e;
-        } // try catch
-    } // testConfigureEnableGrouping
 
     /**
      * [NGSIPostgisSink.configure] -------- data_model can only be 'dm-by-service-path' or 'dm-by-entity'.
@@ -178,7 +141,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-service";
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -187,7 +149,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
 
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -213,7 +175,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -222,7 +183,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
 
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -248,7 +209,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -257,7 +217,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
 
         assertNull(sink.getPostgisOptions());
         System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
@@ -277,7 +237,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -287,7 +246,7 @@ public class NGSIPostgisSinkTest {
         String sqlOptions = "sslmode=require";
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache, sqlOptions));
+                enableLowercase, host, password, port, username, cache, sqlOptions));
 
         assertEquals(sqlOptions, sink.getPostgisOptions());
         System.out.println(getTestTraceHead("[NGSIPostgisSink.configure]")
@@ -309,7 +268,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -318,7 +276,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String service = "someService";
         String servicePath = "someServicePath";
 
@@ -357,7 +315,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity-database"; // default
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -366,7 +323,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String service = "someService";
 
         try {
@@ -404,7 +361,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity-type-database"; // default
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -413,7 +369,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String service = "someService";
 
         try {
@@ -452,7 +408,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -461,7 +416,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String service = "someService";
 
         try {
@@ -500,7 +455,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -509,7 +463,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String service = "someService";
         String servicePath = "someServicePath";
 
@@ -548,7 +502,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -557,7 +510,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String service = "someService";
 
         try {
@@ -595,7 +548,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity-database-schema"; // default
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -604,7 +556,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String service = "someService";
 
         try {
@@ -643,7 +595,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity-type-database-schema"; // default
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -652,7 +603,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String service = "someService";
 
         try {
@@ -691,7 +642,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-service-path";
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -700,7 +650,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
@@ -742,7 +692,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-service-path";
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -751,7 +700,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
@@ -795,7 +744,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity";
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -804,7 +752,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = "someId=someType";
         String entityType = null; // irrelevant for this test
@@ -850,7 +798,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity";
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -859,7 +806,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = "someId=someType";
         String entityType = null; // irrelevant for this test
@@ -905,7 +852,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity-type";
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -914,7 +860,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = "someId=someType";
         String entityType = "someType"; // irrelevant for this test
@@ -960,7 +906,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity-type";
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -969,7 +914,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = "someId=someType";
         String entityType = "someType"; // irrelevant for this test
@@ -1013,7 +958,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-fixed-entity-type";
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1022,7 +966,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = "someId=someType";
         String entityType = "someType"; // irrelevant for this test
@@ -1064,7 +1008,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-fixed-entity-type";
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1073,7 +1016,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/somePath";
         String entity = "someId=someType";
         String entityType = "someType"; // irrelevant for this test
@@ -1115,7 +1058,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-service-path";
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1124,7 +1066,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
@@ -1156,7 +1098,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-service-path";
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1165,7 +1106,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
@@ -1209,7 +1150,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity";
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1218,7 +1158,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
         String entity = "someId=someType";
         String entityType = null; // irrelevant for this test
@@ -1262,7 +1202,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity";
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1271,7 +1210,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
         String entity = "someId=someType";
         String entityType = null; // irrelevant for this test
@@ -1309,7 +1248,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity-type";
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1318,7 +1256,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
         String entity = "someId=someType";
         String entityType = "someType"; // irrelevant for this test
@@ -1362,7 +1300,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity-type";
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1371,7 +1308,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
         String entity = "someId=someType";
         String entityType = "someType"; // irrelevant for this test
@@ -1411,7 +1348,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1420,7 +1356,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String service = "tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongService";
         String servicePath = "someServicePath";
         try {
@@ -1451,7 +1387,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-service-path";
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1460,7 +1395,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
@@ -1493,7 +1428,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity";
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1502,7 +1436,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/tooLooooooooooooooooooooongServicePath";
         String entity = "tooLooooooooooooooooooooooooooongEntity";
         String entityType = null; // irrelevant for this test
@@ -1535,7 +1469,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity-type";
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1544,7 +1477,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/tooLooooooooooooooooooooongServicePath";
         String entity = "tooLooooooooooooooooooooooooooongEntity";
         String entityType = "tooLooooooooooooooooooooooooooongEntityType"; // irrelevant for this test
@@ -1578,7 +1511,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-attribute";
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1587,7 +1519,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
         String servicePath = "/tooLooooooooooooooongServicePath";
         String entity = "tooLooooooooooooooooooongEntity";
         String entityType = null; // irrelevant for this test
@@ -1618,7 +1550,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = null;
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1627,7 +1558,7 @@ public class NGSIPostgisSinkTest {
         String cache = "falso";
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
 
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -1655,7 +1586,6 @@ public class NGSIPostgisSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = null;
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1664,7 +1594,7 @@ public class NGSIPostgisSinkTest {
         String cache = null; // default
         NGSIPostgisSink sink = new NGSIPostgisSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, cache));
+                enableLowercase, host, password, port, username, cache));
 
 
         // Create a PostgisAggregator
@@ -1692,9 +1622,9 @@ public class NGSIPostgisSinkTest {
 
         aggregator.initialize(event);
         aggregator.setService(event.getServiceForNaming(false));
-        aggregator.setServicePathForNaming(event.getServicePathForNaming(false, false));
-        aggregator.setEntityForNaming(event.getEntityForNaming(false, false, false));
-        aggregator.setEntityType(event.getEntityTypeForNaming(false, false));
+        aggregator.setServicePathForNaming(event.getServicePathForNaming(false));
+        aggregator.setEntityForNaming(event.getEntityForNaming(false, false));
+        aggregator.setEntityType(event.getEntityTypeForNaming(false));
         aggregator.setAttribute(event.getAttributeForNaming(false));
         aggregator.setTableName(sink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
 
@@ -1711,7 +1641,7 @@ public class NGSIPostgisSinkTest {
     } // testConfigureEnableEncoding
 
     private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
-            String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
+            String dataModel, String enableEncoding, String enableLowercase, String host,
             String password, String port, String username, String cache) {
         Context context = new Context();
         context.put("attr_persistence", attrPersistence);
@@ -1720,7 +1650,6 @@ public class NGSIPostgisSinkTest {
         context.put("batch_ttl", batchTTL);
         context.put("data_model", dataModel);
         context.put("enable_encoding", enableEncoding);
-        context.put("enable_grouping", enableGrouping);
         context.put("enable_lowercase", enableLowercase);
         context.put("postgis_host", host);
         context.put("postgis_password", password);
@@ -1731,7 +1660,7 @@ public class NGSIPostgisSinkTest {
     } // createContext
 
     private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
-            String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
+            String dataModel, String enableEncoding, String enableLowercase, String host,
             String password, String port, String username, String cache, String sqlOptions) {
         Context context = new Context();
         context.put("attr_persistence", attrPersistence);
@@ -1740,7 +1669,6 @@ public class NGSIPostgisSinkTest {
         context.put("batch_ttl", batchTTL);
         context.put("data_model", dataModel);
         context.put("enable_encoding", enableEncoding);
-        context.put("enable_grouping", enableGrouping);
         context.put("enable_lowercase", enableLowercase);
         context.put("postgis_host", host);
         context.put("postgis_password", password);
@@ -1752,7 +1680,7 @@ public class NGSIPostgisSinkTest {
     } // createContext
 
     private Context createContextforNativeTypes(String attrPersistence, String batchSize, String batchTime, String batchTTL,
-                                  String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
+                                  String dataModel, String enableEncoding, String enableLowercase, String host,
                                   String password, String port, String username, String cache, String attrNativeTypes) {
         Context context = new Context();
         context.put("attr_persistence", attrPersistence);
@@ -1761,7 +1689,6 @@ public class NGSIPostgisSinkTest {
         context.put("batch_ttl", batchTTL);
         context.put("data_model", dataModel);
         context.put("enable_encoding", enableEncoding);
-        context.put("enable_grouping", enableGrouping);
         context.put("enable_lowercase", enableLowercase);
         context.put("postgis_host", host);
         context.put("postgis_password", password);
@@ -1990,7 +1917,7 @@ public class NGSIPostgisSinkTest {
         NGSIBatch batch = setUpBatch();  // 2 events (1 on someId, 1 on someId2)
         String destination = "someDestination";
         NGSIPostgisSink ngsiPostgisSink = new NGSIPostgisSink();
-        ngsiPostgisSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        ngsiPostgisSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = ngsiPostgisSink.getAggregator(false);
@@ -1999,9 +1926,9 @@ public class NGSIPostgisSinkTest {
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
-                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
-                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setDbName(ngsiPostgisSink.buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
                 aggregator.setTableName(ngsiPostgisSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
@@ -2199,7 +2126,7 @@ public class NGSIPostgisSinkTest {
         NGSIBatch batch = setUpBatchOverlappingEvents();  // 3 events (1 on someId, 1 in someId2, 1 in someId2 with new values)
         String destination = "someDestination";
         NGSIPostgisSink ngsiPostgisSink = new NGSIPostgisSink();
-        ngsiPostgisSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        ngsiPostgisSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = ngsiPostgisSink.getAggregator(false);
@@ -2208,9 +2135,9 @@ public class NGSIPostgisSinkTest {
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
-                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
-                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setDbName(ngsiPostgisSink.buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
                 aggregator.setTableName(ngsiPostgisSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));

@@ -126,7 +126,6 @@ ngsi-event={
        correlationId=1429535775-308-0000000000,
        fiware-service=vehicles,
        fiware-servicepath=/4wheels,
-       <grouping_rules_interceptor_headers>,
        <name_mappings_interceptor_headers>
     },
     body={

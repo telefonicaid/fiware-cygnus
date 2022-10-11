@@ -12,7 +12,6 @@ Content:
     * [Channel type](#section3.1)
     * [Channel capacity](#section3.2)
 * [Name Mappings](#section4)
-* [Grouping Rules](#section5)
 * [Writing logs](#section6)
 
 ## <a name="section1"></a>Batching
@@ -196,20 +195,6 @@ Nevertheless, you may write your Name Mappings in a smart way:
 
 * Place the most probably mappings first. Since the checking is sequential, the sooner the appropriate mapping is found for a certain event the sooner another `NGSIEvent`/notification may be checked. Thus, having those mappings applying to the majority of the `NGSIEvent`s/notifications in the first place of the list will increase the performance; then, put the mappings applying to the second major set of `NGSIEvent`s/notifications, and so on.
 * The simplest set of mappings derive from the simplest way of naming and typing the context entities and attributes, as well as the FIWARE service and FIWARE service path they belong to. Try to use names that can be easily grouped, e.g. <i>numeric rooms</i> and <i>not numeric rooms</i> can be easily modeled by using only 2 regular expressions such as `room\.(\d*)` and `room\.(\D*)`, but more anarchical ways of naming them will lead for sure into much more different more complex mappings.
-
-[Top](#top)
-
-## <a name="section5"></a>Grouping Rules
-**IMPORTANT NOTE: from release 1.6.0, this feature is deprecated in favour of Name Mappings. More details can be found [here](./deprecated_and_removed.md#section2.1).**
-
-Grouping Rules feature is a powerful tool for <i>routing</i> your data, i.e. setting an alternative FIWARE service path and entity, whcih in the end decides the HDFS file, MySQL/PostgreSQL/DynamoDB/Carto table, CKAN resource, Kafka queue or MongoDB collection for your context data; on the contrary, the default destination is used.
-
-As you may suppose, the usage of Grouping Rules slows down Cygnus because the alternative FIWARE service path and entity are set after checking a list of rules in a sequential way, trying to find a regex match. Here, worth remembering that regex matching is slow, and that you may configure as many grouping rules as you want/need.
-
-Nevertheless, you may write your Grouping Rules in a smart way:
-
-* Place the most probably rules first. Since the checking is sequential, the sooner the appropriate rule is found for a certain event the sooner another event may be checked. Thus, having those rules applying to the majority of the events in the first place of the list will increase the performance; then, put the rules applying to the second major set of evens, and so on.
-* The simplest matching set of rules derive from the simplest way of naming the context entities, their types or the fiware-service they belong to. Try to use names that can be easily grouped, e.g. <i>numeric rooms</i> and <i>not numeric rooms</i> can be easily modeled by using only 2 regular expressions such as `room\.(\d*)` and `room\.(\D*)`, but more anarchical ways of naming them will lead for sure into much more different more complex rules.
 
 [Top](#top)
 

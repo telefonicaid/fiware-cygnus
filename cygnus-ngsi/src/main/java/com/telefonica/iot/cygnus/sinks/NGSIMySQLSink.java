@@ -329,9 +329,9 @@ public class NGSIMySQLSink extends NGSISink {
             NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
             aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
             aggregator.setServicePathForData(events.get(0).getServicePathForData());
-            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
-            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
-            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
+            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableNameMappings));
+            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableNameMappings, enableEncoding));
+            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableNameMappings));
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
             aggregator.setDbName(buildDbName(aggregator.getService()));
             aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
@@ -373,9 +373,9 @@ public class NGSIMySQLSink extends NGSISink {
             
             // Do the capping
             String service = event.getServiceForNaming(enableNameMappings);
-            String servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            String entity = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            String entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
+            String servicePathForNaming = event.getServicePathForNaming(enableNameMappings);
+            String entity = event.getEntityForNaming(enableNameMappings, enableEncoding);
+            String entityType = event.getEntityTypeForNaming(enableNameMappings);
             String attribute = event.getAttributeForNaming(enableNameMappings);
             
             try {

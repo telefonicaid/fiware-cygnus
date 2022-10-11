@@ -364,9 +364,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
             NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
             aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
             aggregator.setServicePathForData(events.get(0).getServicePathForData());
-            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
-            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
-            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
+            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableNameMappings));
+            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableNameMappings, enableEncoding));
+            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableNameMappings));
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
             aggregator.setSchemeName(buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
             aggregator.setDbName(buildDBName(events.get(0).getServiceForNaming(enableNameMappings)));

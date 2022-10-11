@@ -144,7 +144,7 @@ These are the packages you will need to install under `APACHE_FLUME_HOME/plugins
 | httpcore | 4.3.1 | Overwrites the one bundled in Apache Flume |
 | libthrift | 0.9.1 | Overwrites the one bundled in Apache Flume |
 | gson | 2.2.4 | Management Interface |
-| json-simple | 1.1 | Management Interface and Grouping Rules |
+| json-simple | 1.1 | Management Interface |
 | log4j | 1.2.17 | Logging |
 | mysql-connector-java | 5.1.31 | `SQLBackend` at runtime |
 | postgresql | 9.4-1202-jdbc41 | `SQLBackend` at runtime |

@@ -45,10 +45,8 @@ cygnus-ngsi.sources.http-source.handler.notification_target = /notify
 cygnus-ngsi.sources.http-source.handler.default_service = def_serv
 cygnus-ngsi.sources.http-source.handler.default_service_path = def_servpath
 cygnus-ngsi.sources.http-source.handler.events_ttl = 2
-cygnus-ngsi.sources.http-source.interceptors = ts gi
+cygnus-ngsi.sources.http-source.interceptors = ts
 cygnus-ngsi.sources.http-source.interceptors.ts.type = timestamp
-cygnus-ngsi.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
-cygnus-ngsi.sources.http-source.interceptors.gi.grouping_rules_conf_file = /Applications/apache-flume-1.4.0-bin/conf/grouping_rules.conf
 
 cygnus-ngsi.channels.test-channel.type = memory
 cygnus-ngsi.channels.test-channel.capacity = 1000

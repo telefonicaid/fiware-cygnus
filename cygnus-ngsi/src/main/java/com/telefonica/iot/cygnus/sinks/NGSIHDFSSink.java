@@ -518,8 +518,8 @@ public class NGSIHDFSSink extends NGSISink {
             NGSIGenericAggregator aggregator = getAggregator(fileFormat);
             aggregator.setService(firstEvent.getServiceForNaming(enableNameMappings));
             aggregator.setServicePathForData(firstEvent.getServicePathForData());
-            aggregator.setServicePathForNaming(firstEvent.getServicePathForNaming(enableGrouping, enableNameMappings));
-            aggregator.setEntityForNaming(firstEvent.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
+            aggregator.setServicePathForNaming(firstEvent.getServicePathForNaming(enableNameMappings));
+            aggregator.setEntityForNaming(firstEvent.getEntityForNaming(enableNameMappings, enableEncoding));
             aggregator.setAttrMetadataStore(enableMetadataPersistance);
             aggregator.setHdfsFolder(buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
             aggregator.setHdfsFile(buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));

@@ -42,13 +42,12 @@ public class NGSIDynamoDBSinkTest {
         String batchTimeout = null;
         String batchTTL = null;
         String dataModel = null;
-        String enableGrouping = null;
         String enableLowercase = null;
         String region = null;
         String secretAccessKey = "my_secret_access_key";
         NGSIDynamoDBSink sink = new NGSIDynamoDBSink();
         sink.configure(createContext(accessKeyId, attrPersistence, batchSize, batchTimeout, batchTTL, dataModel,
-                enableGrouping, enableLowercase, region, secretAccessKey));
+                enableLowercase, region, secretAccessKey));
         
         try {
             assertTrue(sink.getRowAttrPersistence());
@@ -111,16 +110,6 @@ public class NGSIDynamoDBSinkTest {
         } // try catch
         
         try {
-            assertTrue(!sink.getEnableGrouping());
-            System.out.println(getTestTraceHead("[NGSIDynamoDBSink.configure]")
-                    + "-  OK  - 'enable_grouping=false' configured by default");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSIDynamoDBSink.configure]")
-                    + "- FAIL - 'enable_grouping=false' not configured by default");
-            throw e;
-        } // try catch
-        
-        try {
             assertTrue(!sink.getEnableLowerCase());
             System.out.println(getTestTraceHead("[NGSIDynamoDBSink.configure]")
                     + "-  OK  - 'enable_lowercase=false' configured by default");
@@ -142,7 +131,7 @@ public class NGSIDynamoDBSinkTest {
     } // testConfigureDefaults
     
     private Context createContext(String accessKeyId, String attrPersistence, String batchSize, String batchTimeout,
-            String batchTTL, String dataModel, String enableGrouping, String enableLowercase, String region,
+            String batchTTL, String dataModel, String enableLowercase, String region,
             String secretAccessKey) {
         Context context = new Context();
         context.put("access_key_id", accessKeyId);
@@ -151,7 +140,6 @@ public class NGSIDynamoDBSinkTest {
         context.put("batch_timeout", batchTimeout);
         context.put("batch_ttl", batchTTL);
         context.put("data_model", dataModel);
-        context.put("enable_grouping", enableGrouping);
         context.put("enable_lowercase", enableLowercase);
         context.put("region", region);
         context.put("secret_access_key", secretAccessKey);

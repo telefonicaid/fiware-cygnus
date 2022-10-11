@@ -3,7 +3,7 @@ Content:
 
 * [Functionality](#section1)
     * [Mapping NGSI events to `NGSIEvent` objects](#section1.1)
-    * [Mapping `NGSIEvent`s to PostgreSQL data structures](#section1.2)
+    * [PostgreSQL data models](#section1.2)
         * [PostgreSQL databases naming conventions](#section1.2.1)
         * [PostgreSQL schemas naming conventions](#section1.2.2)
         * [PostgreSQL tables naming conventions](#section1.2.3)
@@ -19,7 +19,6 @@ Content:
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
     * [Important notes](#section2.3)
-        * [About the table type and its relation with the grouping rules](#section2.3.1)
         * [About the persistence mode](#section2.3.2)
         * [About batching](#section2.3.3)
         * [Time zone information](#section2.3.4)
@@ -45,58 +44,56 @@ This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks
 
 [Top](#top)
 
-### <a name="section1.2"></a>Mapping `NGSIEvent`s to PostgreSQL data structures
-PostgreSQL organizes the data in schemas inside a database that contain tables of data rows. Such organization is exploited by `NGSIPostgreSQLSink` each time a `NGSIEvent` is going to be persisted.
+### <a name="section1.2">PostgreSQL data models</a>
+PostgreSQL organizes the data in schemas inside a database that contain tables of data rows. Such organization is exploited by `NGSIPostgreSQLSink` each time a `NGSIEvent` is going to be persisted, by mapping `NGSIEvent`s to PostgreSQL data structures. 
+
+The name of these tables, schemas and databases depends on the configured data model, selected by defining the parameter `cygnus-ngsi.sinks.postgresql-sink.data_model` in the [`agent.conf`](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/ngsi_agent_conf.md) file or by defining the env var `CYGNUS_POSTGRESQL_DATA_MODEL`.
+
+For a given entity, `entityname`, of type `entitytype`, inside a tenant `service` under `/servicepath`, how the information is stored in the database differs from using different datamodel configurations. The following table contains the database, schema and table names used for each datamodel supported by this sink:
+
+| datamodel name                            | database name | schema  name | table name                        | note                                              |
+|-------------------------------------------|---------------|--------------|-----------------------------------|---------------------------------------------------|
+| by default                                | `agent.conf`  | service      | servicepath_entityname_entitytype | Automatic schema creation                         |
+| `dm-by-fixed-entity-type-database-schema` | service       | _servicepath | entitytype                        | Database and schema need to be created in advance |
+| `dm-by-fixed-entity-type-database`        | service       | service      | entitytype                        | Database and schema need to be created in advance |
+| `dm-by-fixed-entity-type`                 | `agent.conf`  | service      | entitytype                        | Automatic schema creation                         |
+| `dm-by-entity-database-schema`            | service       | _servicepath | servicepath_entityname_entitytype | Database and schema need to be created in advance |
+| `dm-by-entity-database`                   | service       | service      | servicepath_entityname_entitytype | Database and schema need to be created in advance |
+| `dm-by-entity-type-database-schema` | service | _servicepath | servicepath_entitytype | Database and schema need to be created in advance |
+| `dm-by-entity-type-database` | service | service | servicepath_entitytype | Database and schema need to be created in advance |
+| `dm-by-entity-type`                       | `agent.conf`  | service      | servicepath_entitytype            | Automatic schema creation                         |
+| `dm-by-service-path`                      | `agent.conf`  | service      | servicepath                       | Automatic schema creation                         |
+| `dm-by-entity`                            | `agent.conf`  | service      | servicepath_entityname_entitytype | Automatic schema creation                         |
+| `dm-by-attribute` | `agent.conf` | service | servicepath_entityname_entitytype_attribute | Automatic schema creation |
+
+Where [`agent.conf`](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/ngsi_agent_conf.md) is the default database name selected in that file under the field `cygnus-ngsi.sinks.postgresql-sink.postgresql_database` or the env var `CYGNUS_POSTGRESQL_DATABASE`
+
+**NOTE:** the leading underscore `_` in schema name column for `*-schema` cases is not a typo. However, this may change in the future,
+see issue [#2201](https://github.com/telefonicaid/fiware-cygnus/issues/2201).
 
 [Top](#top)
 
-#### <a name="section1.2.1"></a>PostgreSQL databases naming conventions
-Previous to any operation with PostgreSQL you need to create the database to be used.
+#### <a name="section1.2.1"></a>PostgreSQL databases naming considerations
 
-It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
-
-PostgreSQL [databases name length](http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) is limited to 63 characters.
-
-Since version 2.2.0 It's added a new capability for Cygnus to create the schema and database name on runtime, this is possible trough enabling a specific Data Model on agent properties. That works the following way.
-
-* Data model by entity database (`data_model=dm-by-entity-database`). For this datamodel the name of the database will be auto generated by the sink, this name will be the `fiware-service` found on the headers of the first request incoming to the sink. In case there is a database specified on the agent properties, it's ignored.
-* Data model by entity database schema (`data_model=dm-by-entity-database-schema`). For this datamodel the name of the database will be auto generated by the sink, this name will be the `fiware-service` found on the headers of the first request incoming to the sink. In case there is a database specified on the agent properties, it's ignored.
+- Previous to any operation with PostgreSQL you need to create the database to be used.
+- [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
+- PostgreSQL [databases name length](http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) is limited to 63 characters.
+- Since version 2.2.0 It's added a new capability for Cygnus to create the schema and database name on runtime, this is possible trough enabling a specific Data Model on agent properties. See the [summary datamodels PostgreSQL data structure](#section1.2.4) section for more details.
 
 [Top](#top)
 
-#### <a name="section1.2.2"></a>PostgreSQL schemas naming conventions
-A schema named as the notified `fiware-service` header value (or, in absence of such a header, the defaulted value for the FIWARE service) is created (if not existing yet).
+#### <a name="section1.2.2"></a>PostgreSQL schemas naming considerations
 
-It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
-
-PostgreSQL [schemas name length](http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) is limited to 63 characters.
-
-Since version 2.2.0 Cygnus creates the name of the schema name on runtime according to the selected DataModel for the sink.
-
-* Data model by entity database schema (`data_model=dm-by-entity-database-schema`), entity type database schema (`data_model=dm-by-entity-type-database-schema`) and fixed entity type database schema (`data_model=dm-by-fixed-entity-type-database-schema`). For these datamodel the name of the schema will be auto generated by the sink, this name will be the `fiware-servicePath` found on the headers of the first request to store.
-
-* All the other data models will take the name of the schema from the notified `fiware-service` as usual.
+- [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
+- PostgreSQL [schemas name length](http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) is limited to 63 characters.
+- Since version 2.2.0 Cygnus creates the name of the schema name on runtime according to the selected DataModel for the sink. See the [summary datamodels PostgreSQL data structure](#section1.2) section for more details.
 
 [Top](#top)
 
-#### <a name="section1.2.3"></a>PostgreSQL tables naming conventions
-The name of these tables depends on the configured data model (see the [Configuration](#section2.1) section for more details):
+#### <a name="section1.2.3"></a>PostgreSQL tables naming considerations
 
-* Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md)) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
-* Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
-* Data model by entity database schema (`data_model=dm-by-entity-database-schema`). Same as Data model by entity (`data_model=dm-by-entity`).
-* Data model by entity database (`data_model=dm-by-entity-database`). Same as Data model by entity (`data_model=dm-by-entity`).
-* Data model by entity type (`data_model=dm-by-entity-type`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity type in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity type is concatenated.
-* Data model by entity database schema (`data_model=dm-by-entity-type-database-schema`). Same as Data model by entity type(`data_model=dm-by-entity-type`).
-* Data model by entity type database (`data_model=dm-by-entity-type-database`). Same as Data model by entity (`data_model=dm-by-entity-type`).
-* Data model by fixed entity type (`data_model=dm-by-fixed-entity-type`). For each entity, the notified entity type is used as a fixed table name.
-* Data model by fixed entity database schema (`data_model=dm-by-fixed-entity-type-database-schema`). Same as Data model by fixed entity type(`data_model=dm-by-fixed-entity-type`).
-* Data model by fixed entity type database (`data_model=dm-by-fixed-entity-type-database`). Same as Data model by fixed entity type (`data_model=dm-by-fixed-entity-type`).
-
-
-It must be said [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
-
-PostgreSQL [tables name length](http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) is limited to 63 characters.
+- [PostgreSQL only accepts](https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) alphanumeric characters and the underscore (`_`). This leads to  certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
+- PostgreSQL [tables name length](http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS) is limited to 63 characters.
 
 The following table summarizes the table name composition (old encoding):
 
@@ -112,7 +109,7 @@ Using the new encoding:
 | `/` | `x002f` | `x002fxffff<entityId>xffff<entityType>` | `x002fxffff<entityType>` | `<entityType>` |
 | `/<svcPath>` | `x002f<svcPath>` | `x002f<svcPath>xffff<entityId>xffff<entityType>` | `x002f<svcPath>xffff<entityType>` | `<entityType>` |
 
-Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
+Please observe the concatenation of entity ID and type is already given in the `notified_entities` header value within the `NGSIEvent`.
 
 [Top](#top)
 
@@ -169,7 +166,6 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
              correlationId=1429535775-308-0000000000,
              fiware-service=vehicles,
              fiware-servicepath=/4wheels,
-             <grouping_rules_interceptor_headers>,
              <name_mappings_interceptor_headers>
         },
         body={
@@ -262,7 +258,6 @@ Coming soon.
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink</i> |
 | channel | yes | N/A ||
 | enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | last\_data\_mode | no | upsert | <i>upsert</i> or <i>insert</i> or <i>both</i>, to set last data mode. Check this [link](./last_data_function.md) for more details. |
@@ -295,7 +290,6 @@ A configuration example could be:
     cygnus-ngsi.sinks.postgresql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIPostgreSQLSink
     cygnus-ngsi.sinks.postgresql-sink.channel = postgresql-channel
     cygnus-ngsi.sinks.postgresql-sink.enable_encoding = false
-    cygnus-ngsi.sinks.postgresql-sink.enable_grouping = false
     cygnus-ngsi.sinks.postgresql-sink.enable_lowercase = false
     cygnus-ngsi.sinks.postgresql-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.postgresql-sink.data_model = dm-by-entity
@@ -322,14 +316,6 @@ Use `NGSIPostgreSQLSink` if you are looking for a big database with several tena
 [Top](#top)
 
 ### <a name="section2.3"></a>Important notes
-#### <a name="section2.3.1"></a>About the table type and its relation with the grouping rules
-The table type configuration parameter, as seen, is a method for <i>direct</i> aggregation of data: by <i>default</i> destination (i.e. all the notifications about the same entity will be stored within the same PostgreSQL table) or by <i>default</i> service-path (i.e. all the notifications about the same service-path will be stored within the same PostgreSQL table).
-
-The [Grouping feature](./ngsi_grouping_interceptor.md) is another aggregation mechanism, but an <i>inderect</i> one. This means the grouping feature does not really aggregates the data into a single table, that's something the sink will done based on the configured table type (see above), but modifies the default destination or service-path, causing the data is finally aggregated (or not) depending on the table type.
-
-For instance, if the chosen table type is by destination and the grouping feature is not enabled then two different entities data, `car1` and `car2` both of type `car` will be persisted in two different PostgreSQL tables, according to their <i>default</i> destination, i.e. `car1_car` and `car2_car`, respectively. However, if a grouping rule saying "all cars of type `car` will have a modified destination named `cars`" is enabled then both entities data will be persisted in a single table named `cars`. In this example, the direct aggregation is determined by the table type (by destination), but indirectly we have been deciding the aggregation as well through a grouping rule.
-
-[Top](#top)
 
 #### <a name="section2.3.2"></a>About the persistence mode
 Please observe not always the same number of attributes is notified; this depends on the subscription made to the NGSI-like sender. This is not a problem for the `row` persistence mode, since fixed 8-fields data rows are inserted for each notified attribute. Nevertheless, the `column` mode may be affected by several data rows of different lengths (in term of fields). Thus, the `column` mode is only recommended if your subscription is designed for always sending the same attributes, event if they were not updated since the last notification.

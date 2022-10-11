@@ -77,7 +77,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = null; // default value
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -91,7 +90,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
@@ -185,16 +184,6 @@ public class NGSIHDFSSinkTest {
         } // try catch
         
         try {
-            assertTrue(!sink.getEnableGrouping());
-            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
-                    + "-  OK  - 'enable_grouping=false' configured by default");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
-                    + "- FAIL - 'enable_grouping=false' not configured by default");
-            throw e;
-        } // try catch
-        
-        try {
             assertTrue(!sink.getEnableLowerCase());
             System.out.println(getTestTraceHead("[NGSIHDFSSink.configure]")
                     + "-  OK  - 'enable_lowercase=false' configured by default");
@@ -282,7 +271,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = null;
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -296,7 +284,7 @@ public class NGSIHDFSSinkTest {
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
@@ -326,7 +314,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = null;
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -340,7 +327,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
@@ -370,7 +357,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "falso";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -384,7 +370,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
@@ -414,7 +400,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "true";
-        String enableGrouping = null; // default value
         String enableLowercase = "falso";
         String fileFormat = null; // default value
         String host = null; // default value
@@ -428,7 +413,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
@@ -441,51 +426,6 @@ public class NGSIHDFSSinkTest {
             throw e;
         } // try catch
     } // testConfigureEnableLowercase
-    
-    /**
-     * [NGSIHDFSSinkTest.configure] -------- enable_grouping can only be 'true' or 'false'.
-     */
-    // TBD: check for enable_grouping values in NGSIHDFSSink and uncomment this test.
-    //@Test
-    public void testConfigureEnableGrouping() {
-        System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
-                + "-------- enable_grouping can only be 'true' or 'false'");
-        String backendImpl = null; // default value
-        String backendMaxConns = null; // default value
-        String backendMaxConnsPerRoute = null; // default value
-        String batchSize = null; // default value
-        String batchTime = null; // default value
-        String batchTTL = null; // default value
-        String csvSeparator = null; // default value
-        String dataModel = null; // default value
-        String enableEncoding = "true";
-        String enableGrouping = "falso";
-        String enableLowercase = null; // default value
-        String fileFormat = null; // default value
-        String host = null; // default value
-        String password = "mypassword";
-        String port = null; // default value
-        String username = "myuser";
-        String hive = "false";
-        String krb5 = "false";
-        String token = "mytoken";
-        String serviceAsNamespace  = null; // default value
-        String periodicity = null;
-        NGSIHDFSSink sink = new NGSIHDFSSink();
-        sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
-                password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
-        
-        try {
-            assertTrue(sink.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
-                    + "-  OK  - 'enable_grouping=falso' was detected");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSIHDFSSinkTest.configure]")
-                    + "- FAIL - 'enable_grouping=falso' was not detected");
-            throw e;
-        } // try catch
-    } // testConfigureEnableGrouping
     
     /**
      * [NGSIHDFSSinkTest.configure] -------- backend.impl can only be 'rest' or 'binary'.
@@ -503,7 +443,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "true";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -517,7 +456,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
@@ -548,7 +487,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = "dm-by-service-path";
         String enableEncoding = "true";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -562,7 +500,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
@@ -593,7 +531,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "true";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = "fila";
         String host = null; // default value
@@ -607,7 +544,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         
         try {
@@ -640,7 +577,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "false";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -654,7 +590,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/somePath";
@@ -701,7 +637,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "true";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -715,7 +650,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/somePath";
@@ -762,7 +697,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "false";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -776,7 +710,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/";
@@ -823,7 +757,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "true";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -837,7 +770,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/";
@@ -884,7 +817,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "false";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -898,7 +830,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/somePath";
@@ -946,7 +878,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "false";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -960,7 +891,7 @@ public class NGSIHDFSSinkTest {
         String serviceAsNamespace  = null; // default value
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/somePath";
@@ -1013,7 +944,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "true";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -1027,7 +957,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/somePath";
@@ -1075,7 +1005,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "true";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -1089,7 +1018,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = "daily";
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/somePath";
@@ -1141,7 +1070,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "false";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -1155,7 +1083,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/";
@@ -1203,7 +1131,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "false";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -1217,7 +1144,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = "monthly";
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/";
@@ -1268,7 +1195,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "true";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -1282,7 +1208,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/";
@@ -1330,7 +1256,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = "true";
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -1344,7 +1269,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = "yearly";
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "someService";
         String servicePath = "/";
@@ -1392,7 +1317,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = null; // default value
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -1406,7 +1330,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogService";
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
@@ -1441,7 +1365,6 @@ public class NGSIHDFSSinkTest {
         String csvSeparator = null; // default value
         String dataModel = null; // default value
         String enableEncoding = null; // default value
-        String enableGrouping = null; // default value
         String enableLowercase = null; // default value
         String fileFormat = null; // default value
         String host = null; // default value
@@ -1455,7 +1378,7 @@ public class NGSIHDFSSinkTest {
         String periodicity = null;
         NGSIHDFSSink sink = new NGSIHDFSSink();
         sink.configure(createContext(backendImpl, backendMaxConns, backendMaxConnsPerRoute, batchSize, batchTime,
-                batchTTL, csvSeparator, dataModel, enableEncoding, enableGrouping, enableLowercase, fileFormat, host,
+                batchTTL, csvSeparator, dataModel, enableEncoding, enableLowercase, fileFormat, host,
                 password, port, username, hive, krb5, token, serviceAsNamespace, periodicity));
         String service = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooogService";
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
@@ -1476,7 +1399,7 @@ public class NGSIHDFSSinkTest {
 
     private Context createContext(String backendImpl, String backendMaxConns, String backendMaxConnsPerRoute,
                                   String batchSize, String batchTime, String batchTTL, String csvSeparator, String dataModel,
-                                  String enableEncoding, String enableGrouping, String enableLowercase, String fileFormat, String host,
+                                  String enableEncoding, String enableLowercase, String fileFormat, String host,
                                   String password, String port, String username, String hive, String krb5, String token,
                                   String serviceAsNamespace, String periodicity) {
         Context context = new Context();
@@ -1489,8 +1412,7 @@ public class NGSIHDFSSinkTest {
         context.put("csv_separator", csvSeparator);
         context.put("data_model", dataModel);
         context.put("enable_encoding", enableEncoding);
-        context.put("enable_grouping", enableGrouping);
-        context.put("enable_grouping", enableLowercase);
+        context.put("enable_lowercase", enableLowercase);
         context.put("file_format", fileFormat);
         context.put("hdfs_host", host);
         context.put("hdfs_password", password);
@@ -1535,7 +1457,7 @@ public class NGSIHDFSSinkTest {
 
     private Context createContextforNativeTypes(String backendImpl, String backendMaxConns, String backendMaxConnsPerRoute,
                                                 String batchSize, String batchTime, String batchTTL, String csvSeparator, String dataModel,
-                                                String enableEncoding, String enableGrouping, String enableLowercase, String fileFormat, String host,
+                                                String enableEncoding, String enableLowercase, String fileFormat, String host,
                                                 String password, String port, String username, String hive, String krb5, String token,
                                                 String serviceAsNamespace, String attrNativeTypes, String metadata) {
         Context context = new Context();
@@ -1548,8 +1470,7 @@ public class NGSIHDFSSinkTest {
         context.put("csv_separator", csvSeparator);
         context.put("data_model", dataModel);
         context.put("enable_encoding", enableEncoding);
-        context.put("enable_grouping", enableGrouping);
-        context.put("enable_grouping", enableLowercase);
+        context.put("enable_lowercase", enableLowercase);
         context.put("file_format", fileFormat);
         context.put("hdfs_host", host);
         context.put("hdfs_password", password);
@@ -1655,7 +1576,7 @@ public class NGSIHDFSSinkTest {
         String destination = "someDestination";
         String file_format = "csv-column";
         NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
@@ -1666,9 +1587,9 @@ public class NGSIHDFSSinkTest {
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
-                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
-                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
                 aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
@@ -1697,7 +1618,7 @@ public class NGSIHDFSSinkTest {
         String destination = "someDestination";
         String file_format = "csv-column";
         NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
@@ -1708,9 +1629,9 @@ public class NGSIHDFSSinkTest {
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
-                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
-                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
                 aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
@@ -1739,7 +1660,7 @@ public class NGSIHDFSSinkTest {
         String destination = "someDestination";
         String file_format = "json-column";
         NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
@@ -1750,9 +1671,9 @@ public class NGSIHDFSSinkTest {
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
-                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
-                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
                 aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
@@ -1782,7 +1703,7 @@ public class NGSIHDFSSinkTest {
         String destination = "someDestination";
         String file_format = "json-column";
         NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = new NGSIGenericColumnAggregator();
@@ -1793,9 +1714,9 @@ public class NGSIHDFSSinkTest {
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
-                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
-                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
                 aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
@@ -1825,7 +1746,7 @@ public class NGSIHDFSSinkTest {
         String destination = "someDestination";
         String file_format = "csv-row";
         NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
@@ -1836,9 +1757,9 @@ public class NGSIHDFSSinkTest {
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
-                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
-                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
                 aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
@@ -1867,7 +1788,7 @@ public class NGSIHDFSSinkTest {
         String destination = "someDestination";
         String file_format = "csv-row";
         NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
@@ -1878,9 +1799,9 @@ public class NGSIHDFSSinkTest {
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
-                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
-                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
                 aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
@@ -1909,7 +1830,7 @@ public class NGSIHDFSSinkTest {
         String destination = "someDestination";
         String file_format = "json-row";
         NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
@@ -1920,9 +1841,9 @@ public class NGSIHDFSSinkTest {
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
-                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
-                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
                 aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));
@@ -1961,7 +1882,7 @@ public class NGSIHDFSSinkTest {
         String destination = "someDestination";
         String file_format = "json-row";
         NGSIHDFSSink ngsihdfsSink = new NGSIHDFSSink();
-        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
+        ngsihdfsSink.configure(createContextforNativeTypes(null, null, null, null, null, null, null, null, null, null, file_format, null, null, null, null, null, null, null, null, null, null));
         try {
             batch.startIterator();
             NGSIGenericAggregator aggregator = new NGSIGenericRowAggregator();
@@ -1972,9 +1893,9 @@ public class NGSIHDFSSinkTest {
                 ArrayList<NGSIEvent> events = batch.getNextEvents();
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
-                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
-                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setHdfsFolder(ngsihdfsSink.buildFolderPath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming()));
                 aggregator.setHdfsFile(ngsihdfsSink.buildFilePath(aggregator.getService(), aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), calendar));

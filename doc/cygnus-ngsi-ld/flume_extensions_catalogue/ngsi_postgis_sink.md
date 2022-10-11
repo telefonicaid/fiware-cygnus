@@ -85,7 +85,7 @@ The following table summarizes the table name composition (old encoding):
 | `dm-by-entity` | `dm-by-entity-type`|
 |---|---|
 |`<entityId>` |`<entityType>`|
-Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
+Please observe the concatenation of entity ID and type is already given in the `notified_entities` header value within the `NGSIEvent`.
 
 
 ## <a name="section2"></a>Administration guide

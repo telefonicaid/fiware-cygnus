@@ -76,7 +76,6 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 	         correlationId=1429535775-308-0000000000,
 	         fiware-service=vehicles,
 	         fiware-servicepath=/4wheels,
-	         <grouping_rules_interceptor_headers>,
 	         <name_mappings_interceptor_headers>
         },
         body={
@@ -116,7 +115,6 @@ Feature table unique field:
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIArcgisFeatureTableSink</i> |
 | channel | yes | N/A ||
 | enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | arcgis\_service\_url | yes | N/A | https://{url\_host}/{id\_arcgis}/arcgis/rest/services|
 | arcgis\_username | yes | N/A |  |

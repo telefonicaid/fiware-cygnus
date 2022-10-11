@@ -93,10 +93,8 @@ cygnusagent.sources.http-source.handler.notification_target = /notify
 cygnusagent.sources.http-source.handler.default_service = def_serv
 cygnusagent.sources.http-source.handler.default_service_path = /def_servpath
 cygnusagent.sources.http-source.handler.events_ttl = 10
-cygnusagent.sources.http-source.interceptors = ts gi
+cygnusagent.sources.http-source.interceptors = ts
 cygnusagent.sources.http-source.interceptors.ts.type = timestamp
-cygnusagent.sources.http-source.interceptors.gi.type = com.telefonica.iot.cygnus.interceptors.NGSIGroupingInterceptor$Builder
-cygnusagent.sources.http-source.interceptors.gi.grouping_rules_conf_file = /usr/cygnus/conf/grouping_rules.conf
 
 cygnusagent.channels.test-channel.type = memory
 cygnusagent.channels.test-channel.capacity = 1000
@@ -221,7 +219,7 @@ $ curl -X GET "http://localhost:8081/v1/stats" | python -m json.tool
 }
 ```
 
-Many other operations, like getting/putting/updating/deleting the grouping rules can be found in Management Interface [documentation](../doc/cygnus-common/installation_and_administration_guide/management_interface.md).
+Many other operations, like getting/setting the log level, can be found in Management Interface [documentation](../doc/cygnus-common/installation_and_administration_guide/management_interface.md).
 
 [Top](#top)
 

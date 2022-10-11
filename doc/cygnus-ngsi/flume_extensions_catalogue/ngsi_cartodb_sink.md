@@ -84,7 +84,7 @@ The following table summarizes the table name composition:
 | `/` | `x002f` | `x002fxffff<entityId>xffff<entityType>[xffffdistance]` |
 | `/<svcPath>` | `x002fxffff<svcPath>[xffffdistance|xffffrawsnapshot]` | `x002fxffff<svcPath>xffff<entityId>xffff<entityType>[xffffdistance]` |
 
-Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
+Please observe the concatenation of entity ID and type is already given in the `notified_entities` header value within the `NGSIEvent`.
 
 [Top](#top)
 
@@ -163,7 +163,6 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 	         correlationId=1429535775-308-0000000000,
 	         fiware-service=vehicles,
 	         fiware-servicepath=/4wheels,
-	         <grouping_rules_interceptor_headers>,
 	         <name_mappings_interceptor_headers>
         },
         body={
@@ -416,7 +415,6 @@ Everything equals to the raw historic-based storing, but:
 |---|---|---|---|
 | type | yes | N/A | Must be `com.telefonica.iot.cygnus.sinks.NGSICartoDBSink` |
 | channel | yes | N/A ||
-| enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data\_model | no | dm-by-entity |  <i>dm-by-service-path</i> or <i>dm-by-entity</i>. |
@@ -443,7 +441,6 @@ cygnus-ngsi.channels = cartodb-channel
 ...
 cygnus-ngsi.sinks.cartodb-sink.channel = cartodb-channel
 cygnus-ngsi.sinks.cartodb-sink.type = com.telefonica.iot.cygnus.sinks.NGSICartoDBSink
-cygnus-ngsi.sinks.cartodb-sink.enable_grouping = false
 cygnus-ngsi.sinks.cartodb-sink.enable_name_mappings = false
 cygnus-ngsi.sinks.cartodb-sink.enable_lowercase = false
 cygnus-ngsi.sinks.cartodb-sink.keys_conf_file = /usr/cygnus/conf/cartodb_keys.conf

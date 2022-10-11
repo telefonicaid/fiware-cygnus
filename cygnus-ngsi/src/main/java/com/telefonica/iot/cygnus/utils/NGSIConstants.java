@@ -30,12 +30,8 @@ public final class NGSIConstants {
     private NGSIConstants() {
     } // NGSIConstants
     
-    // Flume header names added by NGSIRestHandler or NGSIGroupingInterceptor
+    // Flume header names added by NGSIRestHandler
     public static final String FLUME_HEADER_TRANSACTION_ID        = "transaction-id";
-    public static final String FLUME_HEADER_GROUPED_SERVICE_PATH  = "grouped-servicepath"; // 'TODO': remove
-    public static final String FLUME_HEADER_NOTIFIED_ENTITY       = "notified-entity"; // 'TODO': remove
-    public static final String FLUME_HEADER_GROUPED_ENTITY        = "grouped-entity"; // 'TODO': remove
-    public static final String FLUME_HEADER_GROUPED_ENTITY_TYPE   = "grouped-entity-type"; // 'TODO': remove
     public static final String FLUME_HEADER_TIMESTAMP             = "timestamp";
     public static final String FLUME_HEADER_MAPPED_SERVICE        = "mapped-fiware-service";
     public static final String FLUME_HEADER_MAPPED_SERVICE_PATH   = "mapped-fiware-servicepath";

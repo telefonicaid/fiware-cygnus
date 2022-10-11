@@ -59,7 +59,6 @@ public final class NGSIUtilsForTests {
         context.put("data_model", dataModel);
         context.put("db_prefix", dbPrefix);
         context.put("enable_encoding", enableEncoding);
-        context.put("enable_grouping", "false");
         context.put("enable_lowercase", "false");
         context.put("max_documents", "0");
         context.put("mongo_hosts", "localhost:27017");

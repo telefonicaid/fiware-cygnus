@@ -57,7 +57,7 @@ The following table summarizes the topic name composition:
 | `/` | `<svc>` | `<svc>xffffx002f` | `<svc>xffffx002fxffff<entityId>xffff<entityType>` | `<svc>xffffx002fxffff<entityId>xffff<entityType>xffff<attrName>` |
 | `/<svcPath>` | `<svc>` | `<svc>xffffx002f<svcPath>` | `<svc>xffffx002f<svcPath>xffff<entityId>xffff<entityType>` | `<svc>xffffx002f<svcPath>xffff<entityId>xffff<entityType>xffff<attrName>` |
 
-Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
+Please observe the concatenation of entity ID and type is already given in the `notified_entities` header value within the `NGSIEvent`.
 
 [Top](#top)
 
@@ -78,7 +78,6 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 	         correlationId=1429535775-308-0000000000,
 	         fiware-service=vehicles,
 	         fiware-servicepath=/4wheels,
-	         <grouping_rules_interceptor_headers>,
 	         <name_mappings_interceptor_headers>
         },
         body={
@@ -129,7 +128,6 @@ Let's assume a topic name `vehiclesxffffx002f4wheelsxffffcar1xffffcarxffffspeed`
 |---|---|---|---|
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIKafkaSink</i> |
 | channel | yes | N/A ||
-| enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data\_model | no | dm-by-entity |  <i>dm-by-service</i>, <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <i>dm-by-attribute</i>. |
@@ -149,7 +147,6 @@ A configuration example could be:
     ...
     cygnus-ngsi.sinks.kafka-sink.type = com.telefonica.iot.cygnus.sinks.NGSIKafkaSink
     cygnus-ngsi.sinks.kafka-sink.channel = kafka-channel
-    cygnus-ngsi.sinks.kafka-sink.enable_grouping = false
     cygnus-ngsi.sinks.kafka-sink.enable_lowercase = false
     cygnus-ngsi.sinks.kafka-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.kafka-sink.data_model = dm-by-entity

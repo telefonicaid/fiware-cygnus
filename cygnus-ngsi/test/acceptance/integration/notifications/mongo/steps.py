@@ -22,17 +22,15 @@ __author__ = 'Iván Arias León (ivan.ariasleon at telefonica dot com)'
 from integration.notifications.common_steps.multi_instances import * # common_steps to multi-instances
 from integration.notifications.common_steps.configuration import *   # common_steps to pre-configurations
 from integration.notifications.common_steps.notifications import *   # common_steps to notifications
-from integration.notifications.common_steps.grouping_rules import *   # common_steps to grouping rules
 
 # ----------------------------------- COMMON STEPS ------------------------------------
 # ---------------------------- configuration.py --------------------------------------
 # @step (u'copy properties.json file from "([^"]*)" to test "([^"]*)" and sudo local "([^"]*)"')
 # @step (u'configuration of cygnus instances with different ports "([^"]*)", agents files quantity "([^"]*)", id "([^"]*)" and in "([^"]*)" mode')
-# @step (u'copy flume-env.sh, grouping rules file from "([^"]*)", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "([^"]*)"')
+# @step (u'copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "([^"]*)"')
 # @step (u'verify if cygnus is installed correctly')
 # @step (u'reinitialize log file')
 # @step (u'check in log, label "([^"]*)" and text "([^"]*)"')
-# @step (u'delete grouping rules file')
 
 # --------------------------- notifications.py ------------------------------------
 # @step (u'service "([^"]*)", service path "([^"]*)", entity type "([^"]*)", entity id "([^"]*)", with attribute number "([^"]*)", attribute name "([^"]*)" and attribute type "([^"]*)"')
@@ -40,10 +38,6 @@ from integration.notifications.common_steps.grouping_rules import *   # common_s
 # @step (u'receives "([^"]*)" notifications with consecutive values beginning with "([^"]*)" and with one step')
 # @step (u'receives multiples notifications one by instance and the port defined incremented with attributes value "([^"]*)", metadata value "([^"]*)" and content "([^"]*)"')
 # @step(u'receive an "([^"]*)" http code')
-
-# --------------------------- grouping_rules.py -----------------------------------
-# @step (u'update real values in resource "([^"]*)" and service path "([^"]*)" to notification request')
-# @step (u'changes new destination "([^"]*)" where to verify in dataset "([^"]*)"')
 
 # --------------------------- multi_instances.py ----------------------------------
 # @step (u'delete instances files')

@@ -185,7 +185,6 @@ As seen above, the default configuration distributed with the image is tied to c
     * The pass for MySQL is `mysql` but can be changed through the CYGNUS_MYSQL_PASS environment variable.
     * CYGNUS_MYSQL_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_MYSQL_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
-    * CYGNUS_MYSQL_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
     * CYGNUS_MYSQL_SKIP_NAME_MAPPINGS_GENERATION: true if name mappings should not be generated empty at start, false otherwise. Default is false.
     * CYGNUS_MYSQL_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
@@ -207,7 +206,6 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_MONGO_REPLICA_SET: Replica Set name. Note that this parameter is optional because Cygnus is able to connect to a MongoDB replica set without needing to specify its name.
     * CYGNUS_MONGO_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_MONGO_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
-    * CYGNUS_MONGO_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_MONGO_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
     * CYGNUS_MONGO_SKIP_NAME_MAPPINGS_GENERATION: true if name mappings should not be generated empty at start, false otherwise. Default is false.
     * CYGNUS_MONGO_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
@@ -223,7 +221,6 @@ As seen above, the default configuration distributed with the image is tied to c
     * CYGNUS_MONGO_MAX_DOCUMENTS: value specifies the number of documents. Set to 0 if not wanting this policy
     * CYGNUS_MONGO_IGNORE_WHITE_SPACES: true if exclusively white space-based attribute values must be ignored, false otherwise
     * CYGNUS_STH_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
-    * CYGNUS_STH_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_STH_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
     * CYGNUS_STH_SKIP_NAME_MAPPINGS_GENERATION: true if name mappings should not be generated empty at start, false otherwise. Default is false.
     * CYGNUS_STH_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
@@ -244,7 +241,6 @@ As seen above, the default configuration distributed with the image is tied to c
     * The api_key for CKAN is blank but can be changed through the CYGNUS_CKAN_API_KEY environment variable.
     * CYGNUS_CKAN_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_CKAN_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
-    * CYGNUS_CKAN_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_CKAN_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
     * CYGNUS_CKAN_SKIP_NAME_MAPPINGS_GENERATION: true if name mappings should not be generated empty at start, false otherwise. Default is false.
     * CYGNUS_CKAN_DATA_MODEL: select the data_model: dm-by-service-path or dm-by-entity.
@@ -264,7 +260,6 @@ As seen above, the default configuration distributed with the image is tied to c
     * The token for HDFS is empty but can be set through the CYGNUS_HDFS_TOKEN environment variable
     * CYGNUS_HDFS_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_HDFS_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
-    * CYGNUS_HDFS_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_HDFS_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
     * CYGNUS_HDFS_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
     * CYGNUS_HDFS_DATA_MODEL: select the data_model: dm-by-service-path or dm-by-entity.
@@ -290,7 +285,6 @@ As seen above, the default configuration distributed with the image is tied to c
     * The database for PostgreSQL is `postgres` but can be changed through the CYGNUS_POSTGRESQL_DATABASE environment variable.
     * CYGNUS_POSTGRESQL_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_POSTGRESQL_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
-    * CYGNUS_POSTGRESQL_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
     * CYGNUS_POSTGRESQL_SKIP_NAME_MAPPINGS_GENERATION: true if name mappings should not be generated empty at start, false otherwise. Default is false.
     * CYGNUS_POSTGRESQL_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
@@ -315,7 +309,6 @@ As seen above, the default configuration distributed with the image is tied to c
     * The pass for Orion is empty but can be changed through the CYGNUS_ORION_PASS environment variable.
     * CYGNUS_ORION_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_ORION_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
-    * CYGNUS_ORION_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_ORION_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
     * CYGNUS_ORION_SKIP_NAME_MAPPINGS_GENERATION: true if name mappings should not be generated empty at start, false otherwise. Default is false.
     * CYGNUS_ORION_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
@@ -337,7 +330,6 @@ As seen above, the default configuration distributed with the image is tied to c
     * The pass for Postgis is `postgresql` but can be changed through the CYGNUS_POSTGIS_PASS environment variable.
     * CYGNUS_POSTGIS_SKIP_CONF_GENERATION: true skips the generation of the conf files, typically this files will be got from a volume, false autogenerate the conf files from the rest of environment variables.
     * CYGNUS_POSTGIS_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
-    * CYGNUS_POSTGIS_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
     * CYGNUS_POSTGIS_SKIP_NAME_MAPPINGS_GENERATION: true if name mappings should not be generated empty at start, false otherwise. Default is false.
     * CYGNUS_POSTGIS_ENABLE_LOWERCASE: true if lower case is wanted to forced in all the element names, false otherwise.
@@ -373,7 +365,6 @@ As seen above, the default configuration distributed with the image is tied to c
     * The user for ArcGis is `ArcGis` but can be changed through the CYGNUS_ARCGIS_USER environment variable.
     * The pass for ArcGis is `ArcGis` but can be changed through the CYGNUS_ARCGIS_PASS environment variable.
     * CYGNUS_ARCGIS_ENABLE_ENCODING: true applies the new encoding, false applies the old encoding.
-    * CYGNUS_ARCGIS_ENABLE_GROUPING: true if the grouping feature is enabled for this sink, false otherwise.
     * CYGNUS_ARCGIS_ENABLE_NAME_MAPPINGS: true if name mappings are enabled for this sink, false otherwise.
     * CYGNUS_ARCGIS_DATA_MODEL: select the data_model: dm-by-service-path, dm-by-entity or dm-by-entity-type.
     * CYGNUS_ARCGIS_BATCH_SIZE: number of notifications to be included within a processing batch.
