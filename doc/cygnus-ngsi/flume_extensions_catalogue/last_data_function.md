@@ -124,7 +124,7 @@ no matter if the PUMP-001 notification came before PUMP-002 or the other way aro
 
 This, combined with the field ordering [already described in section before](#current-cygnus-aggregation)
 avoids deadlocks when two Cygnus instances are trying to upsert in the same table
-(more detail on this in issue (#2197)[https://github.com/telefonicaid/fiware-cygnus/issues/2197]).
+(more detail on this in issue [#2197](https://github.com/telefonicaid/fiware-cygnus/issues/2197)).
 
 ## SQL UPSERT
 
