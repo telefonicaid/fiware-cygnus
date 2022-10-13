@@ -142,8 +142,8 @@ ON CONFLICT (entityId) DO UPDATE SET
 entityType=EXCLUDED.entityType, fiwareServicePath=EXCLUDED.fiwareServicePath, recvTime=EXCLUDED.recvTime, 
 fillingLevel=EXCLUDED.fillingLevel, fillingLevel_md=EXCLUDED.fillingLevel_md 
 WHERE pruebapostmanx.subpruebapostman_5dde9_wastecontainer_last_data.entityId=EXCLUDED.entityId 
-AND to_timestamp(pruebapostmanx.subpruebapostman_5dde9_wastecontainer_last_data.recvTime, 'YYYY-MM-DD HH24:MI:SS.MS') 
-< to_timestamp(EXCLUDED.recvTime, 'YYYY-MM-DD HH24:MI:SS.MS')`
+AND to_timestamp(pruebapostmanx.subpruebapostman_5dde9_wastecontainer_last_data.recvTime::text, 'YYYY-MM-DD HH24:MI:SS.MS') 
+< to_timestamp(EXCLUDED.recvTime::text, 'YYYY-MM-DD HH24:MI:SS.MS')`
 
 There are some important considerations for this query.
 
@@ -159,11 +159,11 @@ This line defines that this `INSERT` could create a conflict. `(entityId)` in th
 
 By default PostgreSQL references the conflicting values as `EXCLUDED`.
 
-`to_timestamp(pruebapostmanx.subpruebapostman_5dde9_wastecontainer_last_data.recvTime, 'YYYY-MM-DD HH24:MI:SS.MS')`
+`to_timestamp(pruebapostmanx.subpruebapostman_5dde9_wastecontainer_last_data.recvTime::text, 'YYYY-MM-DD HH24:MI:SS.MS')`
 
 `to_timestamp` casts a Strig timestamp into a SQL Timestamp format. In order to do so, it needs to be provided with a timestamp format (`last_data_sql_timestamp_format`) and a key that corresponds to the value to cast (`last_data_timestamp_key`). In this case, this line casts the current value stored into the table.
 
-`< to_timestamp(EXCLUDED.recvTime, 'YYYY-MM-DD HH24:MI:SS.MS')`
+`< to_timestamp(EXCLUDED.recvTime::text, 'YYYY-MM-DD HH24:MI:SS.MS')`
 
 This line casts the conflictive timestamp value and compares it with the stored one.
 
