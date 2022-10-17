@@ -1960,7 +1960,9 @@ public class NGSIPostgisSinkTest {
     }
 
     @Test
-    public void testNativeTypeColumnBatchLastData() throws CygnusBadConfiguration{
+    public void testNativeTypeColumnBatchLastDataEntityIdKey() throws CygnusBadConfiguration{
+        // This test uses aggregator.setLastDataUniqueKey("entityid");, which is one of the
+        // "special keys" (it uses entityId)
         String attr_native_types = "true";
         NGSIBatch batch = setUpBatchOverlappingEvents();  // 3 events (1 on someId, 1 in someId2, 1 in someId2 with new values)
         String destination = "someDestination";
@@ -1993,17 +1995,11 @@ public class NGSIPostgisSinkTest {
                 }
             }
 
-            // This tests is testing a weird situation: entityid is defined as key, but it is not included
-            // in the notification. In that case the query uses NULL for that attribute position (at the beginning
-            // of the query string). This will fail when the query hits the DB (as keys cannot be NULL) but this tests ensures
-            // Cygnus is doing its job. This is a consequence of the changes done in PR #2199
-            // in the initialize() method of the NGSIGenericColumnAggregator class
-
             // 2 rows (the events on someId2 are aggregated in the same rows)
-            String correctBatch = "(NULL,'someId','someType','somePath','2016-04-20 07:19:55.801',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),(NULL,'someId2','someType','somePath','2016-04-20 07:19:55.802',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"NewWGS84\"}]','someValue2New','[]')";
+            String correctBatch = "('someId','someType','somePath','2016-04-20 07:19:55.801',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('someId2','someType','somePath','2016-04-20 07:19:55.802',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"NewWGS84\"}]','someValue2New','[]')";
             String valuesForInsert = SQLQueryUtils.getValuesForInsert(aggregator.getLastDataToPersist(), aggregator.isAttrNativeTypes());
             if (valuesForInsert.equals(correctBatch)) {
-                System.out.println(getTestTraceHead("[NGSIPostgisSink.testNativeTypeColumnBatchLastData]")
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testNativeTypeColumnBatchLastDataEntityIdKey]")
                         + "-  OK  - NativeTypesOK");
                 assertTrue(true);
             } else {
@@ -2017,7 +2013,7 @@ public class NGSIPostgisSinkTest {
 
     @Test
     public void testNativeTypeColumnBatchLastDataKeyOtherThanEntityId() throws CygnusBadConfiguration{
-        // Same as testNativeTypeColumnBatchLastData() but with aggregator.setLastDataUniqueKey("someString");
+        // Same as testNativeTypeColumnBatchLastDataEntityIdKey() but with aggregator.setLastDataUniqueKey("someString");
         String attr_native_types = "true";
         NGSIBatch batch = setUpBatch();  // 2 events (1 on someId, 1 on someId2)
         String destination = "someDestination";
@@ -2068,7 +2064,7 @@ public class NGSIPostgisSinkTest {
 
     @Test
     public void testNativeTypeColumnBatchLastDataNoKey() throws CygnusBadConfiguration{
-        // Same as testNativeTypeColumnBatchLastData() but without "aggregator.setLastDataUniqueKey("entityid");"
+        // Same as testNativeTypeColumnBatchLastDataEntityIdKey() but without "aggregator.setLastDataUniqueKey("entityid");"
         String attr_native_types = "true";
         NGSIBatch batch = setUpBatch();  // 2 events (1 on someId, 1 on someId2)
         String destination = "someDestination";

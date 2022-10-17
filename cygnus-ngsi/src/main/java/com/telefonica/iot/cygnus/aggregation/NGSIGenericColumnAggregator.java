@@ -41,6 +41,17 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
 
     private boolean swapCoordinates;
 
+    private boolean isSpecialKey(String key) {
+        if (key.equalsIgnoreCase(NGSIConstants.ENTITY_ID) ||
+            key.equalsIgnoreCase(NGSIConstants.ENTITY_TYPE) ||
+            key.equalsIgnoreCase(NGSIConstants.FIWARE_SERVICE_PATH) ||
+            key.equalsIgnoreCase(NGSIConstants.RECV_TIME_TS+"C") ||
+            key.equalsIgnoreCase(NGSIConstants.RECV_TIME)) {
+            return true;
+        }
+        return false;
+    } // isSpecialKey
+
     @Override
     public void initialize(NGSIEvent event) {
         // TBD: possible option for postgisSink
@@ -48,20 +59,23 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         // particular initialization
         LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
         // First: fields that are part of the primary key of the table
-        // (needed in SQL sinks to avoid deadlocks would be avoided. See issue #2197 for more detail)
+        // (needed in SQL sinks to avoid deadlocks would be avoided. See issue #2197 for more detail),
+        // except for main fields (entityId, entityType, etc.) which are added in second part
         String uniqueKeys = getLastDataUniqueKey();
         if (uniqueKeys != null) {
             for (String key : getLastDataUniqueKey().split(",")) {
-                aggregation.put(key.trim(), new ArrayList<JsonElement>());
+                if (!isSpecialKey(key.trim())) {
+                    aggregation.put(key.trim(), new ArrayList<JsonElement>());
+                }
             }
         }
 
-        // Second: all other main fields
+        // Second: main fields
         aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<JsonElement>());
         aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<JsonElement>());
         aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<JsonElement>());
         aggregation.put(NGSIConstants.RECV_TIME_TS+"C", new ArrayList<JsonElement>());
-        aggregation.put( NGSIConstants.RECV_TIME, new ArrayList<JsonElement>());
+        aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<JsonElement>());
 
         // Third: iterate on all this context element attributes, if there are attributes
         ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = null;
