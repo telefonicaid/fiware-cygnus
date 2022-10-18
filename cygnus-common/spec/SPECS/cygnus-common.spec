@@ -171,6 +171,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Tue Oct 18 2022 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.20.0
+- [cygnus-common][SQLBackend] Ordernig batch INSERT sentences upon upsert to avoid deadlocks (#2197)
+- [cygnus-common][MySQLBackend] Upgrade mysql-connector-java from 8.0.27 to 8.0.28
+- [cygnus-common] Upgrade postgresql from 42.3.3 to 42.4.1
+- [cygnus-common] Remove grouping rules functionality (deprecated since version 1.6.0 in December 2016)
+
 * Fri Jun 03 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.19.0
 - [cygnus-common] FIX: change log level should change log level of all cygnus loggers, not just rootLogger (#1827)
 
