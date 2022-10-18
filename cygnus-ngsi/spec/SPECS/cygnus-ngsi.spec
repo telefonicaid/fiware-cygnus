@@ -99,6 +99,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Tue Oct 18 2022 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.20.0
+- [cygnus-ngsi][SQL-sinks] New datamodels added: `data_model=dm-by-fixed-entity-type`, `data_model=dm-by-fixed-entity-type-database-schema`, `data_model=dm-by-fixed-entity-type-database` (#2190)
+- [cygnus-ngsi] Fix aggregate using event servicepath (#2185)
+- [cygnus-ngsi] Fix wrong table destination when namemapping is not used in datamodels db-by-entity-type-database, dm-by-entity-type-database-schema and dm-by-entity-type
+- [cygnus-ngsi] Remove apache-flume and apache-maven tar.gz files from docker
+- [cygnus-ngsi] Ensure columns are in a given order in column aggregator (#2197)
+- [cygnus-ngsi] Upgrade Debian version from 11.2 to 11.3 in Dockerfile
+
 * Fri Jun 03 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.19.0
 
 * Wed May 11 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.18.0
