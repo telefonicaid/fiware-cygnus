@@ -42,14 +42,11 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
     private boolean swapCoordinates;
 
     private boolean isSpecialKey(String key) {
-        if (key.equalsIgnoreCase(NGSIConstants.ENTITY_ID) ||
+        return (key.equalsIgnoreCase(NGSIConstants.ENTITY_ID) ||
             key.equalsIgnoreCase(NGSIConstants.ENTITY_TYPE) ||
             key.equalsIgnoreCase(NGSIConstants.FIWARE_SERVICE_PATH) ||
             key.equalsIgnoreCase(NGSIConstants.RECV_TIME_TS+"C") ||
-            key.equalsIgnoreCase(NGSIConstants.RECV_TIME)) {
-            return true;
-        }
-        return false;
+            key.equalsIgnoreCase(NGSIConstants.RECV_TIME));
     } // isSpecialKey
 
     @Override
@@ -119,7 +116,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         // FIXME: thi's weird... getLastDataUniqueKey() could be a comma separated string (e.g. "entityid,foo,bar")?
         // In that case equalsIgnoreCase("entityid") should not work...
         if (isEnableLastData() && getLastDataUniqueKey() != null && (getLastDataUniqueKey().equalsIgnoreCase(NGSIConstants.ENTITY_ID))) {
-            setLastDataUniqueKeyOnAggragation(NGSIConstants.ENTITY_ID);
+            setLastDataUniqueKeyOnAggregation(NGSIConstants.ENTITY_ID);
             currentEntityId = entityId;
         }
         String entityType = contextElement.getType();
@@ -153,8 +150,8 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                     setLastDataTimestampKeyOnAggregation(attrName);
                     currentTS = CommonUtils.getTimeInstantFromString(attrValue.getAsString());
                 }
-                if ((getLastDataUniqueKeyOnAggragation() == null) && getLastDataUniqueKey() != null && (getLastDataUniqueKey().equalsIgnoreCase(attrName))) {
-                    setLastDataUniqueKeyOnAggragation(attrName);
+                if ((getLastDataUniqueKeyOnAggregation() == null) && getLastDataUniqueKey() != null && (getLastDataUniqueKey().equalsIgnoreCase(attrName))) {
+                    setLastDataUniqueKeyOnAggregation(attrName);
                     currentEntityId = attrName;
                 }
             }
@@ -206,8 +203,8 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             boolean updateLastData = false;
             LinkedHashMap<String, ArrayList<JsonElement>> lastData = getLastData();
             if (numPreviousValues > 0) {
-                if (lastData.containsKey(getLastDataUniqueKeyOnAggragation())) {
-                    ArrayList<JsonElement> list = lastData.get(getLastDataUniqueKeyOnAggragation());
+                if (lastData.containsKey(getLastDataUniqueKeyOnAggregation())) {
+                    ArrayList<JsonElement> list = lastData.get(getLastDataUniqueKeyOnAggregation());
                     for (int i = 0 ; i < list.size() ; i++) {
                         if (list.get(i) !=null && list.get(i).getAsString().equals(currentEntityId)) {
                             long storedTS = CommonUtils.getTimeInstantFromString(
