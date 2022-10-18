@@ -41,19 +41,40 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
 
     private boolean swapCoordinates;
 
+    private boolean isSpecialKey(String key) {
+        return (key.equalsIgnoreCase(NGSIConstants.ENTITY_ID) ||
+            key.equalsIgnoreCase(NGSIConstants.ENTITY_TYPE) ||
+            key.equalsIgnoreCase(NGSIConstants.FIWARE_SERVICE_PATH) ||
+            key.equalsIgnoreCase(NGSIConstants.RECV_TIME_TS+"C") ||
+            key.equalsIgnoreCase(NGSIConstants.RECV_TIME));
+    } // isSpecialKey
+
     @Override
     public void initialize(NGSIEvent event) {
         // TBD: possible option for postgisSink
         swapCoordinates = false;
         // particular initialization
         LinkedHashMap<String, ArrayList<JsonElement>> aggregation = getAggregation();
-        aggregation.put(NGSIConstants.RECV_TIME_TS+"C", new ArrayList<JsonElement>());
-        aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<JsonElement>());
-        aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<JsonElement>());
+        // First: fields that are part of the primary key of the table
+        // (needed in SQL sinks to avoid deadlocks would be avoided. See issue #2197 for more detail),
+        // except for main fields (entityId, entityType, etc.) which are added in second part
+        String uniqueKeys = getLastDataUniqueKey();
+        if (uniqueKeys != null) {
+            for (String key : getLastDataUniqueKey().split(",")) {
+                if (!isSpecialKey(key.trim())) {
+                    aggregation.put(key.trim(), new ArrayList<JsonElement>());
+                }
+            }
+        }
+
+        // Second: main fields
         aggregation.put(NGSIConstants.ENTITY_ID, new ArrayList<JsonElement>());
         aggregation.put(NGSIConstants.ENTITY_TYPE, new ArrayList<JsonElement>());
+        aggregation.put(NGSIConstants.FIWARE_SERVICE_PATH, new ArrayList<JsonElement>());
+        aggregation.put(NGSIConstants.RECV_TIME_TS+"C", new ArrayList<JsonElement>());
+        aggregation.put(NGSIConstants.RECV_TIME, new ArrayList<JsonElement>());
 
-        // iterate on all this context element attributes, if there are attributes
+        // Third: iterate on all this context element attributes, if there are attributes
         ArrayList<NotifyContextRequest.ContextAttribute> contextAttributes = null;
         if (isEnableNameMappings() && event.getMappedCE() != null && event.getMappedCE().getAttributes() != null && !event.getMappedCE().getAttributes().isEmpty()) {
             contextAttributes = event.getMappedCE().getAttributes();
@@ -92,8 +113,10 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         NotifyContextRequest.ContextElement contextElement = event.getContextElement();
         NotifyContextRequest.ContextElement mappedContextElement = event.getMappedCE();
         String entityId = contextElement.getId();
-        if (isEnableLastData() && (getLastDataUniqueKey().equalsIgnoreCase(NGSIConstants.ENTITY_ID))) {
-            setLastDataUniqueKeyOnAggragation(NGSIConstants.ENTITY_ID);
+        // FIXME: thi's weird... getLastDataUniqueKey() could be a comma separated string (e.g. "entityid,foo,bar")?
+        // In that case equalsIgnoreCase("entityid") should not work...
+        if (isEnableLastData() && getLastDataUniqueKey() != null && (getLastDataUniqueKey().equalsIgnoreCase(NGSIConstants.ENTITY_ID))) {
+            setLastDataUniqueKeyOnAggregation(NGSIConstants.ENTITY_ID);
             currentEntityId = entityId;
         }
         String entityType = contextElement.getType();
@@ -127,8 +150,8 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                     setLastDataTimestampKeyOnAggregation(attrName);
                     currentTS = CommonUtils.getTimeInstantFromString(attrValue.getAsString());
                 }
-                if ((getLastDataUniqueKeyOnAggragation() == null) && (getLastDataUniqueKey().equalsIgnoreCase(attrName))) {
-                    setLastDataUniqueKeyOnAggragation(attrName);
+                if ((getLastDataUniqueKeyOnAggregation() == null) && getLastDataUniqueKey() != null && (getLastDataUniqueKey().equalsIgnoreCase(attrName))) {
+                    setLastDataUniqueKeyOnAggregation(attrName);
                     currentEntityId = attrName;
                 }
             }
@@ -180,10 +203,10 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             boolean updateLastData = false;
             LinkedHashMap<String, ArrayList<JsonElement>> lastData = getLastData();
             if (numPreviousValues > 0) {
-                if (lastData.containsKey(getLastDataUniqueKeyOnAggragation())) {
-                    ArrayList<JsonElement> list = lastData.get(getLastDataUniqueKeyOnAggragation());
+                if (lastData.containsKey(getLastDataUniqueKeyOnAggregation())) {
+                    ArrayList<JsonElement> list = lastData.get(getLastDataUniqueKeyOnAggregation());
                     for (int i = 0 ; i < list.size() ; i++) {
-                        if (list.get(i).getAsString().equals(currentEntityId)) {
+                        if (list.get(i) !=null && list.get(i).getAsString().equals(currentEntityId)) {
                             long storedTS = CommonUtils.getTimeInstantFromString(
                                     lastData.get(getLastDataTimestampKeyOnAggregation()).
                                     get(i).getAsString());

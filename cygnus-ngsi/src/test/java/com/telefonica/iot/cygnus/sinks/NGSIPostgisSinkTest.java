@@ -33,14 +33,11 @@ import com.telefonica.iot.cygnus.utils.CommonConstants;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.telefonica.iot.cygnus.utils.NGSIUtils;
 import org.apache.flume.Context;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -1890,7 +1887,7 @@ public class NGSIPostgisSinkTest {
         return batch;
     }
 
-    public NGSIBatch setUpLastDataBatch() {
+    public NGSIBatch setUpBatchOverlappingEvents() {
         String timestamp = "1461136795802";
         String correlatorId = "123456789";
         String transactionId = "123456789";
@@ -1917,7 +1914,7 @@ public class NGSIPostgisSinkTest {
     @Test
     public void testNativeTypeColumnBatch() throws CygnusBadConfiguration{
         String attr_native_types = "true";
-        NGSIBatch batch = setUpBatch();
+        NGSIBatch batch = setUpBatch();  // 2 events (1 on someId, 1 on someId2)
         String destination = "someDestination";
         NGSIPostgisSink ngsiPostgisSink = new NGSIPostgisSink();
         ngsiPostgisSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
@@ -1945,10 +1942,12 @@ public class NGSIPostgisSinkTest {
                     aggregator.aggregate(event);
                 }
             }
-            String correctBatch = "('2016-04-20 07:19:55.801','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20 07:19:55.800','somePath','someId2','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
+
+            // 2 rows (one per event in the batch)
+            String correctBatch = "('someId','someType','somePath','2016-04-20 07:19:55.801',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('someId2','someType','somePath','2016-04-20 07:19:55.800',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
             String valuesForInsert = SQLQueryUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
             if (valuesForInsert.equals(correctBatch)) {
-                System.out.println(getTestTraceHead("[NGSIMySQKSink.testNativeTypesColumnBatch]")
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testNativeTypesColumnBatch]")
                         + "-  OK  - NativeTypesOK");
                 assertTrue(true);
             } else {
@@ -1961,9 +1960,11 @@ public class NGSIPostgisSinkTest {
     }
 
     @Test
-    public void testNativeTypeColumnBatchLastData() throws CygnusBadConfiguration{
+    public void testNativeTypeColumnBatchLastDataEntityIdKey() throws CygnusBadConfiguration{
+        // This test uses aggregator.setLastDataUniqueKey("entityid");, which is one of the
+        // "special keys" (it uses entityId)
         String attr_native_types = "true";
-        NGSIBatch batch = setUpLastDataBatch();
+        NGSIBatch batch = setUpBatchOverlappingEvents();  // 3 events (1 on someId, 1 in someId2, 1 in someId2 with new values)
         String destination = "someDestination";
         NGSIPostgisSink ngsiPostgisSink = new NGSIPostgisSink();
         ngsiPostgisSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
@@ -1993,10 +1994,12 @@ public class NGSIPostgisSinkTest {
                     aggregator.aggregate(event);
                 }
             }
-            String correctBatch = "('2016-04-20 07:19:55.801','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20 07:19:55.802','somePath','someId2','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"NewWGS84\"}]','someValue2New','[]')";
+
+            // 2 rows (the events on someId2 are aggregated in the same rows)
+            String correctBatch = "('someId','someType','somePath','2016-04-20 07:19:55.801',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('someId2','someType','somePath','2016-04-20 07:19:55.802',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"NewWGS84\"}]','someValue2New','[]')";
             String valuesForInsert = SQLQueryUtils.getValuesForInsert(aggregator.getLastDataToPersist(), aggregator.isAttrNativeTypes());
             if (valuesForInsert.equals(correctBatch)) {
-                System.out.println(getTestTraceHead("[NGSIMySQKSink.testNativeTypeColumnBatchLastData]")
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testNativeTypeColumnBatchLastDataEntityIdKey]")
                         + "-  OK  - NativeTypesOK");
                 assertTrue(true);
             } else {
@@ -2008,4 +2011,104 @@ public class NGSIPostgisSinkTest {
         }
     }
 
+    @Test
+    public void testNativeTypeColumnBatchLastDataKeyOtherThanEntityId() throws CygnusBadConfiguration{
+        // Same as testNativeTypeColumnBatchLastDataEntityIdKey() but with aggregator.setLastDataUniqueKey("someString");
+        String attr_native_types = "true";
+        NGSIBatch batch = setUpBatch();  // 2 events (1 on someId, 1 on someId2)
+        String destination = "someDestination";
+        NGSIPostgisSink ngsiPostgisSink = new NGSIPostgisSink();
+        ngsiPostgisSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        try {
+            batch.startIterator();
+            NGSIGenericAggregator aggregator = ngsiPostgisSink.getAggregator(false);
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setDbName(ngsiPostgisSink.buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
+                aggregator.setTableName(ngsiPostgisSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
+                aggregator.setAttrNativeTypes(true);
+                aggregator.setEnableGeoParse(true);
+                aggregator.setAttrMetadataStore(true);
+                aggregator.setEnableNameMappings(true);
+                aggregator.setLastDataTimestampKey(NGSIConstants.RECV_TIME);
+                aggregator.setLastDataUniqueKey("someString");
+                aggregator.setLastDataMode("upsert");
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                }
+            }
+
+            // 2 rows (one per event in the batch)
+            String correctBatch = "('foo','someId','someType','somePath','2016-04-20 07:19:55.801',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','[]','','[]',NULL,NULL,NULL,NULL),(NULL,'someId2','someType','somePath','2016-04-20 07:19:55.800',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
+            String valuesForInsert = SQLQueryUtils.getValuesForInsert(aggregator.getLastDataToPersist(), aggregator.isAttrNativeTypes());
+            if (valuesForInsert.equals(correctBatch)) {
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testNativeTypeColumnBatchLastDataKeyOtherThanEntityId]")
+                        + "-  OK  - NativeTypesOK");
+                assertTrue(true);
+            } else {
+                assertFalse(true);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            assertFalse(true);
+        }
+    }
+
+    @Test
+    public void testNativeTypeColumnBatchLastDataNoKey() throws CygnusBadConfiguration{
+        // Same as testNativeTypeColumnBatchLastDataEntityIdKey() but without "aggregator.setLastDataUniqueKey("entityid");"
+        String attr_native_types = "true";
+        NGSIBatch batch = setUpBatch();  // 2 events (1 on someId, 1 on someId2)
+        String destination = "someDestination";
+        NGSIPostgisSink ngsiPostgisSink = new NGSIPostgisSink();
+        ngsiPostgisSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        try {
+            batch.startIterator();
+            NGSIGenericAggregator aggregator = ngsiPostgisSink.getAggregator(false);
+            while (batch.hasNext()) {
+                destination = batch.getNextDestination();
+                ArrayList<NGSIEvent> events = batch.getNextEvents();
+                aggregator.setService(events.get(0).getServiceForNaming(false));
+                aggregator.setServicePathForData(events.get(0).getServicePathForData());
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
+                aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
+                aggregator.setDbName(ngsiPostgisSink.buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
+                aggregator.setTableName(ngsiPostgisSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
+                aggregator.setAttrNativeTypes(true);
+                aggregator.setEnableGeoParse(true);
+                aggregator.setAttrMetadataStore(true);
+                aggregator.setEnableNameMappings(true);
+                aggregator.setLastDataTimestampKey(NGSIConstants.RECV_TIME);
+                aggregator.setLastDataMode("upsert");
+                aggregator.initialize(events.get(0));
+                for (NGSIEvent event : events) {
+                    aggregator.aggregate(event);
+                }
+            }
+
+            // 2 rows (one per event in the batch)
+            String correctBatch = "('someId','someType','somePath','2016-04-20 07:19:55.801',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]',ST_GeomFromGeoJSON('\"{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}\"'),'[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('someId2','someType','somePath','2016-04-20 07:19:55.800',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,ST_SetSRID(ST_MakePoint(-3.7167::double precision , 40.3833::double precision ), 4326),'[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue2','[]')";
+            String valuesForInsert = SQLQueryUtils.getValuesForInsert(aggregator.getLastDataToPersist(), aggregator.isAttrNativeTypes());
+            if (valuesForInsert.equals(correctBatch)) {
+                System.out.println(getTestTraceHead("[NGSIPostgisSink.testNativeTypeColumnBatchLastDataNoKey]")
+                        + "-  OK  - NativeTypesOK");
+                assertTrue(true);
+            } else {
+                assertFalse(true);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+            assertFalse(true);
+        }
+    }
 } // NGSIPostgisSinkTest

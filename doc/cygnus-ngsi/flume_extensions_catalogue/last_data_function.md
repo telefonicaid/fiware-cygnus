@@ -1,4 +1,4 @@
-# Last Data functionality.
+# Last Data functionality
 
 Cygnus is capable to perform a `upsert` operation on the following Sinks:
 
@@ -20,9 +20,9 @@ In order to perform this operation Cygnus needs five keys.
 
 This `upsert` (running with `last_data_mode` to `upsert` or `both`) consists of two main stages:
 
-## Batch latest record.
+## Batch latest record
 
-### Current Cygnus aggregation.
+### Current Cygnus aggregation
 
 This stage is performed on the `NGSIGenericColumnAggregator` class. This consists on getting the latest record of a given batch. This is in order to perform a single upsert operation.
 
@@ -50,7 +50,17 @@ This means that all aggregated events will be stored on a Map wich contains list
      | 1429535775 | 2015-04-20T12:13:22.41.125 | 4wheels           | null     |
      | 1429535773 | 2015-04-20T12:13:22.41.126 | 4wheels           | car1     |
      +------------+----------------------------+-------------------+----------+ 
-     
+
+Note the aggregation is initialized adding the keys in the following order:
+
+- First: the fields that are part of the primary key of the table
+- Second: all other main fields entityId, entityType, fiwareServicePath and recvTime
+- Third: all the other fields, corresopnding to entity attributes
+
+Doing so the fields in the SQL query generated from the aggregation will come in the same order, so the
+string-based ordering within the batch will avoid posible deadlock situations (more information
+in [this section](#batch-ordering)).
+
 ### Last Data aggregation
 
 When last data is enabled. Cygnus will create a second `LinkedHashMap<String, ArrayList<JsonElement>>` collection on the `NGSIGenericColumnAggregator` class. 
@@ -78,7 +88,7 @@ If any of those cases are true. Then starts the aggregation_last_data process.
 
 This means that the event stored into the `last_data` collection will **not** contain NULL values in case other events procesed in the batch contain columns that the newest entitys doesnt.
 
-Take this exapmple.
+Take this example.
 
 In case the `usual_aggregation` collection contains:
 
@@ -100,6 +110,22 @@ The `last_data` collection should contain:
  
 All this process happens per each NGSIEvent aggregated. 
 
+### Batch ordering
+
+Cygnus does a string-based ordering in the batch insert statements before executing them on database. For instance
+if we have in the same batch an update for PUMP-001 and an update for PUMP-002 the batch will be as follows:
+
+```
+INSERT INTO myservice.pump_lastdata (entityId,entityType,...) VALUE ('PUPM-001','Pump',...) ...
+INSERT INTO myservice.pump_lastdata (entityId,entityType,...) VALUE ('PUPM-002','Pump',...) ...
+```
+
+no matter if the PUMP-001 notification came before PUMP-002 or the other way around.
+
+This, combined with the field ordering [already described in section before](#current-cygnus-aggregation)
+avoids deadlocks when two Cygnus instances are trying to upsert in the same table
+(more detail on this in issue [#2197](https://github.com/telefonicaid/fiware-cygnus/issues/2197)).
+
 ## SQL UPSERT
 
 Once the aggregation is processed, then a query is created to upsert a single record with a PreparedStatement.
@@ -111,13 +137,13 @@ A query like this one is executed
 ### POSTGRESQL
 
 `INSERT INTO pruebapostmanx.subpruebapostman_5dde9_wastecontainer_last_data 
-(recvTime,fiwareServicePath,entityId,entityType,fillingLevel,fillingLevel_md) VALUES (?, ?, ?, ?, ?, ?) 
+(entityId,entityType,fiwareServicePath,recvTime,fillingLevel,fillingLevel_md) VALUES (?, ?, ?, ?, ?, ?) 
 ON CONFLICT (entityId) DO UPDATE SET 
-recvTime=EXCLUDED.recvTime, fiwareServicePath=EXCLUDED.fiwareServicePath, entityType=EXCLUDED.entityType, 
+entityType=EXCLUDED.entityType, fiwareServicePath=EXCLUDED.fiwareServicePath, recvTime=EXCLUDED.recvTime, 
 fillingLevel=EXCLUDED.fillingLevel, fillingLevel_md=EXCLUDED.fillingLevel_md 
 WHERE pruebapostmanx.subpruebapostman_5dde9_wastecontainer_last_data.entityId=EXCLUDED.entityId 
-AND to_timestamp(pruebapostmanx.subpruebapostman_5dde9_wastecontainer_last_data.recvTime, 'YYYY-MM-DD HH24:MI:SS.MS') 
-< to_timestamp(EXCLUDED.recvTime, 'YYYY-MM-DD HH24:MI:SS.MS')`
+AND to_timestamp(pruebapostmanx.subpruebapostman_5dde9_wastecontainer_last_data.recvTime::text, 'YYYY-MM-DD HH24:MI:SS.MS') 
+< to_timestamp(EXCLUDED.recvTime::text, 'YYYY-MM-DD HH24:MI:SS.MS')`
 
 There are some important considerations for this query.
 
@@ -129,15 +155,15 @@ On the table name the `last_data_table_suffix` is added at the end of the usual 
 
 This line defines that this `INSERT` could create a conflict. `(entityId)` in this case represents `last_data_unique_key`, wich by default is `entityId`.
 
-`recvTime=EXCLUDED.recvTime`
+`entityType=EXCLUDED.entityType`
 
 By default PostgreSQL references the conflicting values as `EXCLUDED`.
 
-`to_timestamp(pruebapostmanx.subpruebapostman_5dde9_wastecontainer_last_data.recvTime, 'YYYY-MM-DD HH24:MI:SS.MS')`
+`to_timestamp(pruebapostmanx.subpruebapostman_5dde9_wastecontainer_last_data.recvTime::text, 'YYYY-MM-DD HH24:MI:SS.MS')`
 
 `to_timestamp` casts a Strig timestamp into a SQL Timestamp format. In order to do so, it needs to be provided with a timestamp format (`last_data_sql_timestamp_format`) and a key that corresponds to the value to cast (`last_data_timestamp_key`). In this case, this line casts the current value stored into the table.
 
-`< to_timestamp(EXCLUDED.recvTime, 'YYYY-MM-DD HH24:MI:SS.MS')`
+`< to_timestamp(EXCLUDED.recvTime::text, 'YYYY-MM-DD HH24:MI:SS.MS')`
 
 This line casts the conflictive timestamp value and compares it with the stored one.
 
@@ -181,7 +207,7 @@ Notice the value `4wheels2` on the column `fiwareServicePath` remained after the
 ### MYSQL
 
 `INSERT INTO sub_5dde9_last_data 
-(recvTime,fiwareServicePath,entityId,entityType,fillingLevel,fillingLevel_md) 
+(entityId,entityType,fiwareServicePath,recvTime,fillingLevel,fillingLevel_md) 
 VALUES (?, ?, ?, ?, ?, ?)  
 ON DUPLICATE KEY UPDATE 
 fiwareServicePath=IF((entityId=VALUES(entityId)) AND (STR_TO_DATE(recvTime, '%Y-%m-%d %H:%i:%s.%f') < 

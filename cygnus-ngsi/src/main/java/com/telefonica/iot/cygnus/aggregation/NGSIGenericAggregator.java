@@ -72,7 +72,7 @@ public abstract class NGSIGenericAggregator {
     private String lastDataMode;
     private long lastDataTimestamp;
     private String lastDataTimestampKeyOnAggregation;
-    private String lastDataUniqueKeyOnAggragation;
+    private String lastDataUniqueKeyOnAggregation;
 
     /**
      * Gets aggregation.
@@ -272,18 +272,18 @@ public abstract class NGSIGenericAggregator {
     public void setLastDataTimestampKeyOnAggregation(String lastDataTimestampKeyOnAggregation) { this.lastDataTimestampKeyOnAggregation = lastDataTimestampKeyOnAggregation; }
 
     /**
-     * Gets last data key on aggragation.
+     * Gets last data key on aggregation.
      *
-     * @return the last data key on aggragation
+     * @return the last data key on aggregation
      */
-    public String getLastDataUniqueKeyOnAggragation() { return lastDataUniqueKeyOnAggragation; }
+    public String getLastDataUniqueKeyOnAggregation() { return lastDataUniqueKeyOnAggregation; }
 
     /**
-     * Sets last data key on aggragation.
+     * Sets last data key on aggregation.
      *
-     * @param lastDataUniqueKeyOnAggragation the last data key on aggragation
+     * @param lastDataUniqueKeyOnAggregation the last data key on aggregation
      */
-    public void setLastDataUniqueKeyOnAggragation(String lastDataUniqueKeyOnAggragation) { this.lastDataUniqueKeyOnAggragation = lastDataUniqueKeyOnAggragation; }
+    public void setLastDataUniqueKeyOnAggregation(String lastDataUniqueKeyOnAggregation) { this.lastDataUniqueKeyOnAggregation = lastDataUniqueKeyOnAggregation; }
 
     /**
      * Gets hdfs folder. For HDFS sink.

@@ -6,3 +6,5 @@
 - [cygnus-ngsi] Upgrade Debian version from 11.2 to 11.3 in Dockerfile
 - [cygnus-ngsi] Remove apache-flume and apache-maven tar.gz files from docker
 - [cygnus-common] Remove grouping rules functionality (deprecated since version 1.6.0 in December 2016)
+- [cygnus-common][SQLBackend] Ordernig batch INSERT sentences upon upsert to avoid deadlocks (#2197)
+- [cygnus-ngsi] Ensure columns are in a given order in column aggregator (#2197)
