@@ -96,7 +96,7 @@ public final class NGSIUtils {
      * @return The geometry value, ready for insertion in CartoDB/PostGIS, or the value as it is
      */
     public static ImmutablePair<String, Boolean> getGeometry(String attrValue, String attrType, String metadata,
-            boolean swapCoordinates) {
+                                                             boolean swapCoordinates) {
         // First, check the attribute type
         if (attrType.equals("geo:point")) {
             String[] split = attrValue.replace("\"","").split(",");
@@ -156,6 +156,74 @@ public final class NGSIUtils {
         // The attribute was not related to a geolocation
         return new ImmutablePair(attrValue, false);
     } // getGeometry
+
+
+    /**
+     * Gets a geometry value, ready for insertion in Oracle, given a NGSI attribute value and its metadata.
+     * If the attribute is not geo-related, it is returned as it is.
+     * @param attrValue
+     * @param attrType
+     * @param metadata
+     * @param swapCoordinates
+     * @return The geometry value, ready for insertion in Oracle, or the value as it is
+     */
+    public static ImmutablePair<String, Boolean> getGeometryOracle(String attrValue, String attrType, String metadata,
+                                                                   boolean swapCoordinates, boolean locator) {
+        // First, check the attribute type
+        if (attrType.equals("geo:point")) {
+            String[] split = attrValue.replace("\"","").split(",");
+
+            if (swapCoordinates) {
+                return new ImmutablePair(
+                            "SDO_GEOMETRY(2001,NULL,SDO_POINT_TYPE(" + split[1].trim() + ", " + split[0].trim() + ", NULL),NULL,NULL)", true);
+            } else {
+                return new ImmutablePair(
+                            "SDO_GEOMETRY(2001,NULL,SDO_POINT_TYPE(" + split[0].trim() + ", " + split[1].trim() + ", NULL),NULL,NULL)", true);
+            } // if else
+        } // if
+
+        if (attrType.equals("geo:json")) {
+            if (locator) { // Needs Oracle 12.2(c)
+                return new ImmutablePair("sdo_util.from_geojson('" + attrValue + "')", true);
+            } else {
+                return new ImmutablePair(attrValue, true);
+            }
+        } // if
+
+        // The type was not 'geo:point' nor 'geo:json', thus try the metadata
+        JSONParser parser = new JSONParser();
+        JSONArray mds;
+
+        try {
+            mds = (JSONArray) parser.parse(metadata);
+        } catch (ParseException e) {
+            LOGGER.error("Error while parsing the metadata. Details: " + e.getMessage());
+            return new ImmutablePair(attrValue, false);
+        } // try catch
+
+        for (Object mdObject : mds) {
+            JSONObject md = (JSONObject) mdObject;
+            String mdName = (String) md.get("name");
+            String mdType = (String) md.get("type");
+            String mdValue = (String) md.get("value");
+
+            if (mdName.equals("location") && mdType.equals("string") && mdValue.equals("WGS84")) {
+                String[] split = attrValue.split(",");
+
+                if (swapCoordinates) {
+                    return new ImmutablePair(
+                                "SDO_GEOMETRY(2001,NULL,SDO_POINT_TYPE(" + split[1].trim() + ", " + split[0].trim() + ", NULL),NULL,NULL)", true);
+                } else {
+                    return new ImmutablePair(
+                                "SDO_GEOMETRY(2001,NULL,SDO_POINT_TYPE(" + split[0].trim() + ", " + split[1].trim() + ", NULL),NULL,NULL)", true);
+                } // if else
+            } // if
+        } // for
+
+        // The attribute was not related to a geolocation
+        return new ImmutablePair(attrValue, false);
+    } // getGeometryOracle
+
 
     /**
      * Linked hash map to json list array list.

@@ -31,6 +31,12 @@ public class Enum {
             public String toString() {
                 return "postgresql";
             }
+        },
+        ORACLE {
+            @Override
+            public String toString() {
+                return "oracle:thin";
+            }
         }
     }
 }

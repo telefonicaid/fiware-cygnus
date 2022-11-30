@@ -95,4 +95,8 @@ public final class NGSIConstants {
     // http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
     public static final int POSTGRESQL_MAX_NAME_LEN = 63;
 
+    // NGSIOracleSQLSink specific constants
+    // https://docs.oracle.com/en/database/oracle/oracle-database/21/odpnt/EFCoreIdentifier.html
+    public static final int ORACLE_MAX_NAME_LEN = 30;    
+
 } // NGSIConstants
