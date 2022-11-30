@@ -805,14 +805,14 @@ public class NGSIOracleSQLSinkTest {
         NGSIOracleSQLSink sink = new NGSIOracleSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableLowercase, host, password, port, username, cache));
-        String servicePath = "/somePath";
-        String entity = "someId=someType";
+        String servicePath = "/somepath";
+        String entity = "id=type";
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
 
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "x002fsomex0050athxffffsomex0049dxffffsomex0054ype";
+            String expecetedTableName = "x002fsomepathxffffidxfffftype";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);
@@ -940,109 +940,6 @@ public class NGSIOracleSQLSinkTest {
         } // try catch
     } // testBuildTableNameNonRootServicePathDataModelByEntityTypeNewEncoding
 
-
-    // NEW
-    /**
-     * [NGSIOracleSQLSink.buildTableName] -------- When a non root service-path is notified/defaulted and
-     * data_model is 'dm-by-fixed-entity-type' the OracleSQL table name is the encoding of \<entity_type\>.
-     * @throws java.lang.Exception
-     */
-    @Test
-    public void testBuildTableNameNonRootServicePathDataModelByFixedEntityTypeOldEncoding() throws Exception {
-        System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                + "-------- When a non root service-path is notified/defaulted and data_model is "
-                + "'dm-by-fixed-entity-type' the OracleSQL table name is the encoding of <entityType>");
-        String attrPersistence = null; // default
-        String batchSize = null; // default
-        String batchTime = null; // default
-        String batchTTL = null; // default
-        String dataModel = "dm-by-fixed-entity-type";
-        String enableEncoding = "false";
-        String enableLowercase = null; // default
-        String host = null; // default
-        String password = null; // default
-        String port = null; // default
-        String username = null; // default
-        String cache = null; // default
-        NGSIOracleSQLSink sink = new NGSIOracleSQLSink();
-        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableLowercase, host, password, port, username, cache));
-        String servicePath = "/somePath";
-        String entity = "someId=someType";
-        String entityType = "someType"; // irrelevant for this test
-        String attribute = null; // irrelevant for this test
-
-        try {
-            String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "someType";
-
-            try {
-                assertEquals(expecetedTableName, builtTableName);
-                System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <entityType>");
-            } catch (AssertionError e) {
-                System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <entityType>");
-                throw e;
-            } // try catch
-        } catch (Exception e) {
-            System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                    + "- FAIL - There was some problem when building the table name");
-            throw e;
-        } // try catch
-    } // testBuildTableNameNonRootServicePathDataModelByEntityTypeOldEncoding
-
-    /**
-     * [NGSIOracleSQLSink.buildTableName] -------- When a non root service-path is notified/defaulted and
-     * data_model is 'dm-by-fixed-entity-type' the OracleSQL table name is the encoding of \<entity_type\>.
-     * @throws java.lang.Exception
-     */
-    @Test
-    public void testBuildTableNameNonRootServicePathDataModelByFixedEntityTypeNewEncoding() throws Exception {
-        System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                + "-------- When a non root service-path is notified/defaulted and data_model is "
-                + "'dm-by-fixed-entity-type' the OracleSQL table name is the encoding of <entityType>");
-        String attrPersistence = null; // default
-        String batchSize = null; // default
-        String batchTime = null; // default
-        String batchTTL = null; // default
-        String dataModel = "dm-by-fixed-entity-type";
-        String enableEncoding = "true";
-        String enableLowercase = null; // default
-        String host = null; // default
-        String password = null; // default
-        String port = null; // default
-        String username = null; // default
-        String cache = null; // default
-        NGSIOracleSQLSink sink = new NGSIOracleSQLSink();
-        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableLowercase, host, password, port, username, cache));
-        String servicePath = "/somePath";
-        String entity = "someId=someType";
-        String entityType = "someType"; // irrelevant for this test
-        String attribute = null; // irrelevant for this test
-
-        try {
-            String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "somex0054ype";
-
-            try {
-                assertEquals(expecetedTableName, builtTableName);
-                System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <entityType>");
-            } catch (AssertionError e) {
-                System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <entityType>");
-                throw e;
-            } // try catch
-        } catch (Exception e) {
-            System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                    + "- FAIL - There was some problem when building the table name");
-            throw e;
-        } // try catch
-    } // testBuildTableNameNonRootServicePathDataModelByEntityTypeNewEncoding
-
-    // NEW END
 
     /**
      * [NGSIOracleSQLSink.buildTableName] -------- When a root service-path is notified/defaulted and
@@ -1214,13 +1111,13 @@ public class NGSIOracleSQLSinkTest {
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
-        String entity = "someId=someType";
+        String entity = "someid=sometype";
         String entityType = null; // irrelevant for this test
         String attribute = null; // irrelevant for this test
 
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "x002fxffffsomex0049dxffffsomex0054ype";
+            String expecetedTableName = "x002fxffffsomeidxffffsometype";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);
