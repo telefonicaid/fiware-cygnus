@@ -451,7 +451,8 @@ public class NGSIMySQLSink extends NGSISink {
                 // everything must be provisioned in advance
                 if (rowAttrPersistence) {
                     // This case will create a false error entry in error table
-                    String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+                    String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist(),
+                                                                              MYSQL_INSTANCE_NAME);
                     try {
                         // Try to insert without create database before
                         mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
