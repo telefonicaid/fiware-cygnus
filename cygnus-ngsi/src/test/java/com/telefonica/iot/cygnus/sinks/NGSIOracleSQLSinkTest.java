@@ -198,7 +198,7 @@ public class NGSIOracleSQLSinkTest {
     @Test
     public void testConfigureSQLOptionsIsNull() {
         System.out.println(getTestTraceHead("[NGSIOracleSQLSink.configure]")
-                + "-------- postgresqlOptions is null when postgresql_options is not configured");
+                + "-------- oracleOptions is null when oracle_options is not configured");
         String attrPersistence = null;
         String batchSize = null; // default
         String batchTime = null; // default
@@ -217,7 +217,7 @@ public class NGSIOracleSQLSinkTest {
 
         assertNull(sink.getOracleSQLOptions());
         System.out.println(getTestTraceHead("[NGSIOracleSQLSink.configure]")
-                + "-  OK  - postgresqlOptions is null when it is not configured");
+                + "-  OK  - oracleOptions is null when it is not configured");
     } // testConfigureSQLOptionsIsNull
 
     /**
@@ -226,7 +226,7 @@ public class NGSIOracleSQLSinkTest {
     @Test
     public void testConfigureSQLOptionsHasValue() {
         System.out.println(getTestTraceHead("[NGSIOracleSQLSink.configure]")
-                + "-------- postgresqlOptions has value when postgresql_options is configured");
+                + "-------- oracleOptions has value when oracle_options is configured");
         String attrPersistence = null;
         String batchSize = null; // default
         String batchTime = null; // default
@@ -246,7 +246,7 @@ public class NGSIOracleSQLSinkTest {
 
         assertEquals(sqlOptions, sink.getOracleSQLOptions());
         System.out.println(getTestTraceHead("[NGSIOracleSQLSink.configure]")
-                + "-  OK  - postgresqlOptions has value when it is configured");
+                + "-  OK  - oracleOptions has value when it is configured");
     } // testConfigureSQLOptionsHasValue
 
     /**
@@ -464,7 +464,7 @@ public class NGSIOracleSQLSinkTest {
         try {
             String builtSchemaName = sink.buildDbName(service);
             // The default vale for the DB name
-            String expectedDBName = "postgres";
+            String expectedDBName = "xe";
 
             try {
                 assertEquals(expectedDBName, builtSchemaName);
@@ -510,7 +510,7 @@ public class NGSIOracleSQLSinkTest {
 
         try {
             String builtSchemaName = sink.buildDbName(service);
-            String expectedDBName = "postgres";
+            String expectedDBName = "xe";
 
             try {
                 assertEquals(expectedDBName, builtSchemaName);
@@ -1584,10 +1584,10 @@ public class NGSIOracleSQLSinkTest {
         context.put("data_model", dataModel);
         context.put("enable_encoding", enableEncoding);
         context.put("enable_lowercase", enableLowercase);
-        context.put("postgresql_host", host);
-        context.put("postgresql_password", password);
-        context.put("postgresql_port", port);
-        context.put("postgresql_username", username);
+        context.put("oracle_host", host);
+        context.put("oracle_password", password);
+        context.put("oracle_port", port);
+        context.put("oracle_username", username);
         context.put("backend.enable_cache", cache);
         return context;
     } // createContext
@@ -1603,12 +1603,12 @@ public class NGSIOracleSQLSinkTest {
         context.put("data_model", dataModel);
         context.put("enable_encoding", enableEncoding);
         context.put("enable_lowercase", enableLowercase);
-        context.put("postgresql_host", host);
-        context.put("postgresql_password", password);
-        context.put("postgresql_port", port);
-        context.put("postgresql_username", username);
+        context.put("oracle_host", host);
+        context.put("oracle_password", password);
+        context.put("oracle_port", port);
+        context.put("oracle_username", username);
         context.put("backend.enable_cache", cache);
-        context.put("postgresql_options", sqlOptions);
+        context.put("oracle_options", sqlOptions);
         return context;
     } // createContext
 
@@ -1623,10 +1623,10 @@ public class NGSIOracleSQLSinkTest {
         context.put("data_model", dataModel);
         context.put("enable_encoding", enableEncoding);
         context.put("enable_lowercase", enableLowercase);
-        context.put("postgresql_host", host);
-        context.put("postgresql_password", password);
-        context.put("postgresql_port", port);
-        context.put("postgresql_username", username);
+        context.put("oracle_host", host);
+        context.put("oracle_password", password);
+        context.put("oracle_port", port);
+        context.put("oracle_username", username);
         context.put("backend.enable_cache", cache);
         context.put("attr_native_types", attrNativeTypes);
         return context;
