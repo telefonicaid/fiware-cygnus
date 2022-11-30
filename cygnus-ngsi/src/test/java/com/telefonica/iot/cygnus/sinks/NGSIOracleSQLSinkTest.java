@@ -370,7 +370,7 @@ public class NGSIOracleSQLSinkTest {
         String service = "someService";
 
         try {
-            String builtSchemaName = sink.buildDBName(service);
+            String builtSchemaName = sink.buildDbName(service);
             String expectedDBName = "someService";
 
             try {
@@ -416,7 +416,7 @@ public class NGSIOracleSQLSinkTest {
         String service = "someService";
 
         try {
-            String builtSchemaName = sink.buildDBName(service);
+            String builtSchemaName = sink.buildDbName(service);
             String expectedDBName = "someService";
 
             try {
@@ -462,7 +462,7 @@ public class NGSIOracleSQLSinkTest {
         String service = "someService";
 
         try {
-            String builtSchemaName = sink.buildDBName(service);
+            String builtSchemaName = sink.buildDbName(service);
             // The default vale for the DB name
             String expectedDBName = "postgres";
 
@@ -509,7 +509,7 @@ public class NGSIOracleSQLSinkTest {
         String service = "someService";
 
         try {
-            String builtSchemaName = sink.buildDBName(service);
+            String builtSchemaName = sink.buildDbName(service);
             String expectedDBName = "postgres";
 
             try {
@@ -556,7 +556,7 @@ public class NGSIOracleSQLSinkTest {
         String service = "someService";
 
         try {
-            String builtSchemaName = sink.buildDBName(service);
+            String builtSchemaName = sink.buildDbName(service);
             String expectedDBName = "somex0053ervice";
 
             try {
@@ -603,7 +603,7 @@ public class NGSIOracleSQLSinkTest {
         String service = "someService";
 
         try {
-            String builtSchemaName = sink.buildDBName(service);
+            String builtSchemaName = sink.buildDbName(service);
             String expectedDBName = "somex0053ervice";
 
             try {
