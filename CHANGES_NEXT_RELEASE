@@ -1,2 +1,2 @@
 [cygnus-common] Upgrade postgresql from 42.4.1 to 42.4.3
-[cygnus-ngsi] OracleSQL ngsi sink added
+[cygnus-ngsi] OracleSQL ngsi sink added (for OracleS 11g and 12c) (#2195)
