@@ -1436,39 +1436,6 @@ public class NGSIOracleSQLSinkTest {
         } // try catch
     } // testBuildTableNameLengthDataModelByAttribute
 
-    /**
-     * [NGSIOracleSQLSink.configure] -------- cache can only be 'true' or 'false'.
-     */
-    @Test
-    public void testConfigureCache() {
-        System.out.println(getTestTraceHead("[NGSIOracleSQLSink.configure]")
-                + "-------- cache can only be 'true' or 'false'");
-        String attrPersistence = null; // default
-        String batchSize = null; // default
-        String batchTime = null; // default
-        String batchTTL = null; // default
-        String dataModel = null; // default
-        String enableEncoding = null;
-        String enableLowercase = null; // default
-        String host = null; // default
-        String password = null; // default
-        String port = null; // default
-        String username = null; // default
-        String cache = "falso";
-        NGSIOracleSQLSink sink = new NGSIOracleSQLSink();
-        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableLowercase, host, password, port, username, cache));
-
-        try {
-            assertTrue(sink.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[NGSIOracleSQLSink.configure]")
-                    + "-  OK  - 'enable_cache=falso' was detected");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSIOracleSQLSink.configure]")
-                    + "- FAIL - 'enable_cache=falso' was not detected");
-            throw e;
-        } // try catch
-    } // testConfigureEnableEncoding
 
     private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
             String dataModel, String enableEncoding, String enableLowercase, String host,
