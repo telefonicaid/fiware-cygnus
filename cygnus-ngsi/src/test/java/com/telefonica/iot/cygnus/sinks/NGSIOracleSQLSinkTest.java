@@ -913,14 +913,14 @@ public class NGSIOracleSQLSinkTest {
         NGSIOracleSQLSink sink = new NGSIOracleSQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableLowercase, host, password, port, username, cache));
-        String servicePath = "/somePath";
-        String entity = "someId=someType";
-        String entityType = "someType"; // irrelevant for this test
+        String servicePath = "/somepath";
+        String entity = "someId=someType"; // irrelevant for this test
+        String entityType = "sometype";
         String attribute = null; // irrelevant for this test
 
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "x002fsomePathxffffsomeType";
+            String expecetedTableName = "x002fsomepathxffffsometype";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);
