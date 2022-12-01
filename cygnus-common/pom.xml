@@ -75,7 +75,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.4.1</version>
+            <version>42.4.3</version>
             <type>jar</type>
         </dependency>
         <!-- Required by OracleSQLBackendImpl at runtime -->
