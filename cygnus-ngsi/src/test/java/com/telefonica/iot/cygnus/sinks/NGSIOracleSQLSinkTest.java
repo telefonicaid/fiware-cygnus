@@ -1188,17 +1188,17 @@ public class NGSIOracleSQLSinkTest {
      * @throws java.lang.Exception
      */
     @Test
-    public void testBuildTableNameRootServicePathDataModelByEntityTypeNewEncoding() throws Exception {
+    public void testBuildTableNameRootServicePathDataModelByEntityTypeNoEncoding() throws Exception {
         System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
                 + "-------- When a root service-path is notified/defaulted and data_model is "
-                + "'dm-by-entity-type' the OracleSQL table name is the encoding of the concatenation of <service-path>, "
-                + "<entityId> and <entityType>");
+                + "'dm-by-entity-type' and no encoding the OracleSQL table name is the concatenation of <service-path>, "
+                + "<entityType>");
         String attrPersistence = null; // default
         String batchSize = null; // default
         String batchTime = null; // default
         String batchTTL = null; // default
         String dataModel = "dm-by-entity-type";
-        String enableEncoding = "true";
+        String enableEncoding = "false";
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1209,21 +1209,21 @@ public class NGSIOracleSQLSinkTest {
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
                 enableLowercase, host, password, port, username, cache));
         String servicePath = "/";
-        String entity = "someId=someType";
-        String entityType = "someType"; // irrelevant for this test
+        String entity = "someId";
+        String entityType = "someType";
         String attribute = null; // irrelevant for this test
 
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "x002fxffffsomeType";
+            String expecetedTableName = "someType";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);
                 System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <service-path>");
+                        + "-  OK  - '" + builtTableName + "' is equals to " + expecetedTableName);
             } catch (AssertionError e) {
                 System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding of <service-path>");
+                        + "- FAIL - '" + builtTableName + "' is not equals to " + expecetedTableName);
                 throw e;
             } // try catch
         } catch (Exception e) {
@@ -1231,15 +1231,15 @@ public class NGSIOracleSQLSinkTest {
                     + "- FAIL - There was some problem when building the table name");
             throw e;
         } // try catch
-    } // testBuildTableNameRootServicePathDataModelByEntityTypeNewEncoding
+    } // testBuildTableNameRootServicePathDataModelByEntityTypeNoEncoding
     /**
-     * [NGSIOracleSQLSink.buildSchemaName] -------- A schema name length greater than 63 characters is detected.
+     * [NGSIOracleSQLSink.buildSchemaName] -------- A schema name length greater than 30 characters is detected.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildSchemaNameLength() throws Exception {
         System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildSchemaName]")
-                + "-------- A schema name length greater than 63 characters is detected");
+                + "-------- A schema name length greater than 30 characters is detected");
         String attrPersistence = null; // default
         String batchSize = null; // default
         String batchTime = null; // default
@@ -1261,24 +1261,24 @@ public class NGSIOracleSQLSinkTest {
         try {
             sink.buildSchemaName(service, servicePath);
             System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildSchemaName]")
-                    + "- FAIL - A schema name length greater than 63 characters has not been detected");
+                    + "- FAIL - A schema name length greater than 30 characters has not been detected");
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
             System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildSchemaName]")
-                    + "-  OK  - A schema name length greater than 63 characters has been detected");
+                    + "-  OK  - A schema name length greater than 30 characters has been detected");
         } // try catch
     } // testBuildSchemaNameLength
 
     /**
      * [NGSIOracleSQLSink.buildTableName] -------- When data model is by service path, a table name length greater
-     * than 63 characters is detected.
+     * than 30 characters is detected.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildTableNameLengthDataModelByServicePath() throws Exception {
         System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                + "-------- When data model is by service path, a table name length greater than 63 characters is "
+                + "-------- When data model is by service path, a table name length greater than 30 characters is "
                 + "detected");
         String attrPersistence = null; // default
         String batchSize = null; // default
@@ -1303,24 +1303,24 @@ public class NGSIOracleSQLSinkTest {
         try {
             sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                    + "- FAIL - A table name length greater than 63 characters has not been detected");
+                    + "- FAIL - A table name length greater than 30 characters has not been detected");
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
             System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                    + "-  OK  - A table name length greater than 63 characters has been detected");
+                    + "-  OK  - A table name length greater than 30 characters has been detected");
         } // try catch
     } // testBuildTableNameLengthDataModelByServicePath
 
     /**
-     * [NGSICartoDBSink.buildTableName] -------- When data model is by entity, a table name length greater than 63
+     * [NGSICartoDBSink.buildTableName] -------- When data model is by entity, a table name length greater than 30
      * characters is detected.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildTableNameLengthDataModelByEntity() throws Exception {
         System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                + "-------- When data model is by entity, a table name length greater than 63 characters is detected");
+                + "-------- When data model is by entity, a table name length greater than 30 characters is detected");
         String attrPersistence = null; // default
         String batchSize = null; // default
         String batchTime = null; // default
@@ -1344,24 +1344,24 @@ public class NGSIOracleSQLSinkTest {
         try {
             sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                    + "- FAIL - A table name length greater than 63 characters has not been detected");
+                    + "- FAIL - A table name length greater than 30 characters has not been detected");
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
             System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                    + "-  OK  - A table name length greater than 63 characters has been detected");
+                    + "-  OK  - A table name length greater than 30 characters has been detected");
         } // try catch
     } // testBuildTableNameLengthDataModelByEntity
 
     /**
-     * [NGSIOracleSQLSink.buildTableName] -------- When data model is by entity, a table name length greater than 63
+     * [NGSIOracleSQLSink.buildTableName] -------- When data model is by entity, a table name length greater than 30
      * characters is detected.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildTableNameLengthDataModelByEntityType() throws Exception {
         System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                + "-------- When data model is by entity, a table name length greater than 63 characters is detected");
+                + "-------- When data model is by entity, a table name length greater than 30 characters is detected");
         String attrPersistence = null; // default
         String batchSize = null; // default
         String batchTime = null; // default
@@ -1385,24 +1385,24 @@ public class NGSIOracleSQLSinkTest {
         try {
             sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                    + "- FAIL - A table name length greater than 63 characters has not been detected");
+                    + "- FAIL - A table name length greater than 30 characters has not been detected");
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
             System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                    + "-  OK  - A table name length greater than 63 characters has been detected");
+                    + "-  OK  - A table name length greater than 30 characters has been detected");
         } // try catch
     } // testBuildTableNameLengthDataModelByEntityType
 
     /**
-     * [NGSICartoDBSink.buildTableName] -------- When data model is by attribute, a table name length greater than 63
+     * [NGSICartoDBSink.buildTableName] -------- When data model is by attribute, a table name length greater than 30
      * characters is detected.
      * @throws java.lang.Exception
      */
     @Test
     public void testBuildTableNameLengthDataModelByAttribute() throws Exception {
         System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                + "-------- When data model is by atribute, a table name length greater than 63 characters is "
+                + "-------- When data model is by atribute, a table name length greater than 30 characters is "
                 + "detected");
         String attrPersistence = null; // default
         String batchSize = null; // default
@@ -1427,12 +1427,12 @@ public class NGSIOracleSQLSinkTest {
         try {
             sink.buildTableName(servicePath, entity, entityType, attribute);
             System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                    + "- FAIL - A table name length greater than 63 characters has not been detected");
+                    + "- FAIL - A table name length greater than 30 characters has not been detected");
             assertTrue(false);
         } catch (Exception e) {
             assertTrue(true);
             System.out.println(getTestTraceHead("[NGSIOracleSQLSink.buildTableName]")
-                    + "-  OK  - A table name length greater than 63 characters has been detected");
+                    + "-  OK  - A table name length greater than 30 characters has been detected");
         } // try catch
     } // testBuildTableNameLengthDataModelByAttribute
 
