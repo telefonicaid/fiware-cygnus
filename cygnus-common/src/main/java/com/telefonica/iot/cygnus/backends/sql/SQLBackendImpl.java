@@ -1090,7 +1090,6 @@ public class SQLBackendImpl implements SQLBackend{
             String jdbcUrl = "";
             if (sqlInstance == SQLInstance.ORACLE) {
                 jdbcUrl = "jdbc:" + sqlInstance + ":@" + sqlHost + ":" + sqlPort + ":" + destination;
-                //jdbcUrl = "jdbc:" + sqlInstance + ":@//" + sqlHost + ":" + sqlPort + "/" + destination;  // also should works!
             } else { // PostgreSQL and MySQL
                 jdbcUrl = "jdbc:" + sqlInstance + "://" + sqlHost + ":" + sqlPort + "/" + destination;
             }
