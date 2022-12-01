@@ -226,7 +226,8 @@ public class SQLBackendImpl implements SQLBackend{
         } else if (sqlInstance == SQLInstance.POSTGRESQL) {
             query = "CREATE TABLE IF NOT EXISTS " + tableName + " " + typedFieldNames;
         } else if (sqlInstance == SQLInstance.ORACLE) {
-            query = "CREATE TABLE " + tableName + " " + typedFieldNames; // TBD: oracle workaround for not exists?
+            // FIXME: Add an oracle workaround for "if not exists"
+            query = "CREATE TABLE " + tableName + " " + typedFieldNames;
         }
 
         try {
@@ -254,7 +255,7 @@ public class SQLBackendImpl implements SQLBackend{
     } // createTable
 
 
-    // TBD insertContextData Never used ?
+    // FXIME insertContextData Never used ?
     @Override
     public void insertContextData(String dataBase, String schema, String table, String fieldNames, String fieldValues)
             throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError {
@@ -569,7 +570,8 @@ public class SQLBackendImpl implements SQLBackend{
         } else if (sqlInstance == SQLInstance.POSTGRESQL) {
             query = "CREATE TABLE IF NOT EXISTS" + errorTableName + " " + typedFieldNames;
         } else if (sqlInstance == SQLInstance.ORACLE) {
-            query = "CREATE TABLE " + errorTableName + " " + typedFieldNamesOracle; // TBD: oracle workaround for not exists?
+            // FIXME: Add an oracle workaround for "if not exists"
+            query = "CREATE TABLE " + errorTableName + " " + typedFieldNamesOracle;
         }
 
         try {
@@ -803,7 +805,8 @@ public class SQLBackendImpl implements SQLBackend{
         } else if (sqlInstance == SQLInstance.POSTGRESQL) {
             query = "DELETE FROM " + errorTableName + " "  + "WHERE timestamp NOT IN (SELECT timestamp FROM (SELECT timestamp FROM " + errorTableName + " "  + "ORDER BY timestamp DESC LIMIT " + limit + " ) tmppurge )";
         } else if (sqlInstance == SQLInstance.ORACLE) {
-            query = "DELETE FROM " + errorTableName + " "  + "WHERE timestamp NOT IN (SELECT timestamp FROM (SELECT timestamp FROM " + errorTableName + " "  + "ORDER BY timestamp DESC ) tmppurge )"; // TBD limit for oracle ?
+            // FXIME: add limit
+            query = "DELETE FROM " + errorTableName + " "  + "WHERE timestamp NOT IN (SELECT timestamp FROM (SELECT timestamp FROM " + errorTableName + " "  + "ORDER BY timestamp DESC ) tmppurge )";
         }
 
         try {
