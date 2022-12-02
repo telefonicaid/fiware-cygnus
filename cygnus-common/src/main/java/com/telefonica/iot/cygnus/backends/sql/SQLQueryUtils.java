@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * The type Ngsisql utils.
@@ -39,6 +40,7 @@ public class SQLQueryUtils {
 
     public static final String POSTGRES_FIELDS_MARK = "";
     public static final String MYSQL_FIELDS_MARK = "`";
+    public static final String ORACLE_FIELDS_MARK = "";
     public static final String SEPARATION_MARK = ",";
 
     /**
@@ -53,8 +55,10 @@ public class SQLQueryUtils {
      * @param timestampFormat the timestamp format
      * @param sqlInstance     the sql instance
      * @param dataBase        the database
+     * @param destination     the destination
      * @param schema          the database schema
-     * @param attrNativeTypes
+     * @param attrNativeTypes flag attribute native types
+     *
      * @return the string buffer
      */
     protected static ArrayList<StringBuffer> sqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
@@ -69,7 +73,7 @@ public class SQLQueryUtils {
                                                  String schema,
                                                  boolean attrNativeTypes) {
 
-    if (sqlInstance == SQLInstance.POSTGRESQL){
+        if (sqlInstance == SQLInstance.POSTGRESQL){
             return postgreSqlUpsertQuery(aggregation,
                     lastData,
                     tableName,
@@ -169,6 +173,7 @@ public class SQLQueryUtils {
         LOGGER.debug("[SQLQueryUtils.postgreSqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
         return upsertList;
     }
+
 
     /**
      * Sql upsert query for MySQL string buffer.
@@ -326,6 +331,16 @@ public class SQLQueryUtils {
             fieldsForInsert = getFieldsForInsert(aggregation.keySet(), MYSQL_FIELDS_MARK);
             query.append("INSERT INTO ").append(MYSQL_FIELDS_MARK).append(tableName).append(MYSQL_FIELDS_MARK).append(" ").append(fieldsForInsert).append(" ").
                     append("VALUES ").append(valuesForInsert).append(" ");
+        } else if (sqlInstance == SQLInstance.ORACLE){
+            fieldsForInsert = getFieldsForInsert(aggregation.keySet(), ORACLE_FIELDS_MARK);
+            List<String> listValuesForInsert = getListValuesForInsert(aggregation, attrNativeTypes);
+            // Oracle multiple row insert: https://www.techonthenet.com/oracle/questions/insert_rows.php
+            query.append("INSERT ALL ");
+            for (String valueForInsert: listValuesForInsert) {
+                query.append(" INTO ").append(tableName).append(" ").append(fieldsForInsert).append(" ").
+                    append("VALUES ").append(valueForInsert);
+            }
+            query.append(" SELECT * FROM dual");
         }
 
         LOGGER.debug("[SQLQueryUtils.sqlInsertQuery] Preparing Insert query: " + query.toString());
@@ -381,6 +396,7 @@ public class SQLQueryUtils {
         return fieldsForInsert;
     } // getFieldsForInsert
 
+
     /**
      * Add json values prepared statement.
      *
@@ -419,7 +435,8 @@ public class SQLQueryUtils {
                                 position++;
                             } else {
                                 String stringValue = value.getAsString();
-                                if (stringValue.contains("ST_GeomFromGeoJSON") || stringValue.contains("ST_SetSRID")) {
+                                if (stringValue.contains("ST_GeomFromGeoJSON") || stringValue.contains("ST_SetSRID") ||
+                                    stringValue.contains("SDO_GEOMETRY")) {
                                     preparedStatement.setObject(position, stringValue);
                                     LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
                                     position++;
@@ -438,7 +455,8 @@ public class SQLQueryUtils {
                 } else { //if (attrNativeTypes)
                     if (value != null && value.isJsonPrimitive()) {
                         String stringValue = value.getAsString();
-                        if (stringValue.contains("ST_GeomFromGeoJSON") || stringValue.contains("ST_SetSRID")) {
+                        if (stringValue.contains("ST_GeomFromGeoJSON") || stringValue.contains("ST_SetSRID") ||
+                            stringValue.contains("SDO_GEOMETRY")) {
                             preparedStatement.setObject(position, stringValue);
                             LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
                             position++;
@@ -499,7 +517,8 @@ public class SQLQueryUtils {
                 } else if (value.getAsJsonPrimitive().isNumber()) {
                     stringValue = value.getAsString();
                 }else {
-                    if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
+                    if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID") ||
+                        value.toString().contains("SDO_GEOMETRY")) {
                         stringValue = value.getAsString().replace("\\", "");
                     } else {
                         stringValue = quotationMark + value.getAsString() + quotationMark;
@@ -510,7 +529,8 @@ public class SQLQueryUtils {
             }
         } else {
             if (value != null && value.isJsonPrimitive()) {
-                if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID")) {
+                if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID") ||
+                    value.toString().contains("SDO_GEOMETRY")) {
                     stringValue = value.getAsString().replace("\\", "");
                 } else {
                     stringValue = quotationMark + value.getAsString() + quotationMark;
@@ -562,6 +582,38 @@ public class SQLQueryUtils {
         return valuesForInsert;
     } // getValuesForInsert
 
+    /**
+     * Gets values for insert in a List
+     *
+     * @param aggregation     the aggregation
+     * @param attrNativeTypes the attr native types
+     * @return a List with all string VALUES in SQL query format (oracle).
+     */
+    public static List<String> getListValuesForInsert(LinkedHashMap<String, ArrayList<JsonElement>> aggregation, boolean attrNativeTypes) {
+        List<String> valuesForInsert = new ArrayList<>();
+        int numEvents = collectionSizeOnLinkedHashMap(aggregation);
+
+        for (int i = 0; i < numEvents; i++) {
+            String valueForInsert = "(";
+            boolean first = true;
+            Iterator<String> it = aggregation.keySet().iterator();
+            while (it.hasNext()) {
+                String entry = (String) it.next();
+                ArrayList<JsonElement> values = (ArrayList<JsonElement>) aggregation.get(entry);
+                JsonElement value = values.get(i);
+                String stringValue = getStringValueFromJsonElement(value, "'", attrNativeTypes);
+                if (first) {
+                    valueForInsert += stringValue;
+                    first = false;
+                } else {
+                    valueForInsert += "," + stringValue;
+                }
+            } // while
+            valueForInsert += ")";
+            valuesForInsert.add(valueForInsert);
+        } // for
+        return valuesForInsert;
+    } // getListValuesForInsert
 
     /**
      * Gets fields for create.
@@ -569,19 +621,26 @@ public class SQLQueryUtils {
      * @param aggregation the aggregation
      * @return the fields (column names) for create in SQL format.
      */
-    public static String getFieldsForCreate(LinkedHashMap<String, ArrayList<JsonElement>> aggregation) {
+    public static String getFieldsForCreate(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
+                                            SQLInstance sqlInstance) {
         String fieldsForCreate = "(";
         boolean first = true;
         Iterator<String> it = aggregation.keySet().iterator();
+        String textType = "text";
+        if (sqlInstance == SQLInstance.ORACLE){
+            //textType = "clob";
+            textType = "varchar2(4000)";
+        }
         while (it.hasNext()) {
             if (first) {
-                fieldsForCreate += (String) it.next() + " text";
+                fieldsForCreate += (String) it.next() + " " + textType;
                 first = false;
             } else {
-                fieldsForCreate += "," + (String) it.next() + " text";
+                fieldsForCreate += "," + (String) it.next() + " " + textType;
             } // if else
         } // while
 
         return fieldsForCreate + ")";
     } // getFieldsForCreate
+
 }

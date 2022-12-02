@@ -1,16 +1,16 @@
 # SQL backend
-## `SQLBackend` interface	
-This class enumerates the methods any backend implementation must expose. In this case, the following ones:	
+## `SQLBackend` interface
+This class enumerates the methods any backend implementation must expose. In this case, the following ones:
 
-    void createDatabase(String destination) throws Exception;	
+    void createDatabase(String destination) throws Exception;
 
-> Creates a database/scheme, given its name, if not existing.	
+> Creates a database/scheme, given its name, if not existing.
 
-    void createTable(String destination, String tableName, String fieldNames) throws Exception;	
+    void createTable(String destination, String tableName, String fieldNames) throws Exception;
 
-> Creates a table, given its name, if not existing within the given database/scheme. The field names are given as well.	
+> Creates a table, given its name, if not existing within the given database/scheme. The field names are given as well.
 
-    insertContextData(String destination, String tableName, String fieldNames, String fieldValues) throws Exception;	
+    insertContextData(String destination, String tableName, String fieldNames, String fieldValues) throws Exception;
 
 > Persists the accumulated context data (in the form of the given field values) regarding an entity within the given table. This table belongs to the given database/scheme. The field names are given as well to ensure the right insert of the field values.
 
@@ -24,6 +24,7 @@ This class also has methods to execute any SQL query.
 
 - [PostgreSQL JDBC driver](https://jdbc.postgresql.org/).
 - [MySQL JDBC driver](https://dev.mysql.com/downloads/connector/j/).
+- [Oracle JDBC driver](https://www.oracle.com/database/technologies/appdev/jdbc.html).
 
 It must be said this backend implementation enforces UTF-8 encoding through the usage of `charSet=UTF-8` property when getting a connection via the JDBC driver.
 

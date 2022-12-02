@@ -47,38 +47,45 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
  * @author frb
  * 
  * Detailed documentation can be found at:
- * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/ngsi_mysql_sink.md
+ * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/ngsi_oracle_sink.md
  */
-public class NGSIMySQLSink extends NGSISink {
+public class NGSIOracleSQLSink extends NGSISink {
     
-    private static final String MYSQL_QUOTE_CHAR = "`";
     private static final String DEFAULT_ROW_ATTR_PERSISTENCE = "row";
-    private static final String DEFAULT_PASSWORD = "";
-    private static final String DEFAULT_PORT = "3306";
+    private static final String DEFAULT_PASSWORD = "oracle";
+    private static final String DEFAULT_PORT = "1521";
     private static final String DEFAULT_HOST = "localhost";
-    private static final String DEFAULT_USER_NAME = "root";
+    private static final String DEFAULT_USER_NAME = "system";
+    private static final String DEFAULT_DATABASE = "xe";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
-    private static final String MYSQL_DRIVER_NAME = "com.mysql.jdbc.Driver";
-    private static final SQLInstance MYSQL_INSTANCE_NAME = SQLInstance.MYSQL;
+    //private static final String ORACLE_DRIVER_NAME = "oracle.jdbc.OracleDriver";
+    private static final String ORACLE_DRIVER_NAME = "oracle.jdbc.driver.OracleDriver";    
+    private static final SQLInstance ORACLE_INSTANCE_NAME = SQLInstance.ORACLE;
+    private static final String DEFAULT_FIWARE_SERVICE = "default";
+    private static final String ESCAPED_DEFAULT_FIWARE_SERVICE = "default_service";
     private static final String DEFAULT_LAST_DATA_MODE = "insert";
     private static final String DEFAULT_LAST_DATA_TABLE_SUFFIX = "_last_data";
     private static final String DEFAULT_LAST_DATA_UNIQUE_KEY = NGSIConstants.ENTITY_ID;
     private static final String DEFAULT_LAST_DATA_TIMESTAMP_KEY = NGSIConstants.RECV_TIME;
-    private static final String DEFAULT_LAST_DATA_SQL_TS_FORMAT = "%Y-%m-%d %H:%i:%s.%f";
+    private static final String DEFAULT_LAST_DATA_SQL_TS_FORMAT = "YYYY-MM-DD HH24:MI:SS.MS";
     private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
+    private static final String DEFAULT_ORACLE_NLS_TIMESTAMP_FORMAT = "YYYY-MM-DD HH24:MI:SS.FF6";
+    private static final String DEFAULT_ORACLE_NLS_TIMESTAMP_TZ_FORMAT = "YYYY-MM-DD\"T\"HH24:MI:SS.FF6 TZR";
+    private static final String DEFAULT_ORACLE_LOCATOR = "false";
 
-    private static final CygnusLogger LOGGER = new CygnusLogger(NGSIMySQLSink.class);
-    private String mysqlHost;
-    private String mysqlPort;
-    private String mysqlUsername;
-    private String mysqlPassword;
+    private static final CygnusLogger LOGGER = new CygnusLogger(NGSIOracleSQLSink.class);
+    private String oracleHost;
+    private String oraclePort;
+    private String oracleUsername;
+    private String oraclePassword;
+    private String oracleDatabase;    
     private int maxPoolSize;
     private boolean rowAttrPersistence;
-    private SQLBackendImpl mySQLPersistenceBackend;
+    private SQLBackendImpl oracleSQLPersistenceBackend;
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
-    private String mysqlOptions;
+    private String oracleOptions;
     private boolean persistErrors;
     private String lastDataMode;
     private String lastDataTableSuffix;
@@ -86,45 +93,56 @@ public class NGSIMySQLSink extends NGSISink {
     private String lastDataTimeStampKey;
     private String lastDataSQLTimestampFormat;
     private int maxLatestErrors;
+    private String nlsTimestampFormat;
+    private String nlsTimestampTzFormat;
+    private boolean oracleLocator;
 
     /**
      * Constructor.
      */
-    public NGSIMySQLSink() {
+    public NGSIOracleSQLSink() {
         super();
-    } // NGSIMySQLSink
+    } // NGSIOracleSQLSink
     
     /**
-     * Gets the MySQL host. It is protected due to it is only required for testing purposes.
-     * @return The MySQL host
+     * Gets the Oracle host. It is protected due to it is only required for testing purposes.
+     * @return The OracleSQL host
      */
-    protected String getMySQLHost() {
-        return mysqlHost;
-    } // getMySQLHost
+    protected String getOracleSQLHost() {
+        return oracleHost;
+    } // getOracleSQLHost
     
     /**
-     * Gets the MySQL port. It is protected due to it is only required for testing purposes.
-     * @return The MySQL port
+     * Gets the OracleSQL port. It is protected due to it is only required for testing purposes.
+     * @return The OracleSQL port
      */
-    protected String getMySQLPort() {
-        return mysqlPort;
-    } // getMySQLPort
+    protected String getOracleSQLPort() {
+        return oraclePort;
+    } // getOracleSQLPort
+
+    /**
+     * Gets the oracle database. It is protected due to it is only required for testing purposes.
+     * @return The oracle database
+     */
+    protected String getOracleSQLDatabase() {
+        return oracleDatabase;
+    } // getOracleSQLDatabase
+
+    /**
+     * Gets the OracleSQL username. It is protected due to it is only required for testing purposes.
+     * @return The OracleSQL username
+     */
+    protected String getOracleSQLUsername() {
+        return oracleUsername;
+    } // getOracleSQLUsername
     
     /**
-     * Gets the MySQL username. It is protected due to it is only required for testing purposes.
-     * @return The MySQL username
+     * Gets the OracleSQL password. It is protected due to it is only required for testing purposes.
+     * @return The OracleSQL password
      */
-    protected String getMySQLUsername() {
-        return mysqlUsername;
-    } // getMySQLUsername
-    
-    /**
-     * Gets the MySQL password. It is protected due to it is only required for testing purposes.
-     * @return The MySQL password
-     */
-    protected String getMySQLPassword() {
-        return mysqlPassword;
-    } // getMySQLPassword
+    protected String getOracleSQLPassword() {
+        return oraclePassword;
+    } // getOracleSQLPassword
     
     /**
      * Returns if the attribute persistence is row-based. It is protected due to it is only required for testing
@@ -136,19 +154,19 @@ public class NGSIMySQLSink extends NGSISink {
     } // getRowAttrPersistence
 
     /**
-     * Gets the MySQL options. It is protected due to it is only required for testing purposes.
-     * @return The MySQL options
+     * Gets the OracleSQL options. It is protected due to it is only required for testing purposes.
+     * @return The OracleSQL options
      */
-    protected String getMySQLOptions() {
-        return mysqlOptions;
-    } // getMySQLOptions
+    protected String getOracleSQLOptions() {
+        return oracleOptions;
+    } // getOracleSQLOptions
 
     /**
      * Returns the persistence backend. It is protected due to it is only required for testing purposes.
      * @return The persistence backend
      */
     protected SQLBackendImpl getPersistenceBackend() {
-        return mySQLPersistenceBackend;
+        return oracleSQLPersistenceBackend;
     } // getPersistenceBackend
     
     /**
@@ -156,7 +174,7 @@ public class NGSIMySQLSink extends NGSISink {
      * @param persistenceBackend
      */
     protected void setPersistenceBackend(SQLBackendImpl persistenceBackend) {
-        this.mySQLPersistenceBackend = persistenceBackend;
+        this.oracleSQLPersistenceBackend = persistenceBackend;
     } // setPersistenceBackend
 
 
@@ -171,27 +189,29 @@ public class NGSIMySQLSink extends NGSISink {
     
     @Override
     public void configure(Context context) {
-        mysqlHost = context.getString("mysql_host", DEFAULT_HOST);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_host=" + mysqlHost + ")");
-        mysqlPort = context.getString("mysql_port", DEFAULT_PORT);
-        int intPort = Integer.parseInt(mysqlPort);
+        oracleHost = context.getString("oracle_host", DEFAULT_HOST);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_host=" + oracleHost + ")");
+        oraclePort = context.getString("oracle_port", DEFAULT_PORT);
+        int intPort = Integer.parseInt(oraclePort);
 
         if ((intPort <= 0) || (intPort > 65535)) {
             invalidConfiguration = true;
-            LOGGER.warn("[" + this.getName() + "] Invalid configuration (mysql_port=" + mysqlPort + ") "
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (oracle_port=" + oraclePort + ") "
                     + "must be between 0 and 65535");
         } else {
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_port=" + mysqlPort + ")");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_port=" + oraclePort + ")");
         }  // if else
 
-        mysqlUsername = context.getString("mysql_username", DEFAULT_USER_NAME);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_username=" + mysqlUsername + ")");
-        // FIXME: mysqlPassword should be read encrypted and decoded here
-        mysqlPassword = context.getString("mysql_password", DEFAULT_PASSWORD);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_password=" + mysqlPassword + ")");
+        oracleDatabase = context.getString("oracle_database", DEFAULT_DATABASE);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_database=" + oracleDatabase + ")");
+        oracleUsername = context.getString("oracle_username", DEFAULT_USER_NAME);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_username=" + oracleUsername + ")");
+        // FIXME: oraclePassword should be read encrypted and decoded here
+        oraclePassword = context.getString("oracle_password", DEFAULT_PASSWORD);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_password=" + oraclePassword + ")");
 
-        maxPoolSize = context.getInteger("mysql_maxPoolSize", DEFAULT_MAX_POOL_SIZE);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_maxPoolSize=" + maxPoolSize + ")");
+        maxPoolSize = context.getInteger("oracle_maxPoolSize", DEFAULT_MAX_POOL_SIZE);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_maxPoolSize=" + maxPoolSize + ")");
 
         rowAttrPersistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE).equals("row");
         String persistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE);
@@ -227,8 +247,8 @@ public class NGSIMySQLSink extends NGSISink {
                     + attrMetadataStoreStr + ") -- Must be 'true' or 'false'");
         } // if else
 
-        mysqlOptions = context.getString("mysql_options", null);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_options=" + mysqlOptions + ")");
+        oracleOptions = context.getString("oracle_options", null);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_options=" + oracleOptions + ")");
 
         String persistErrorsStr = context.getString("persist_errors", "true");
 
@@ -269,6 +289,24 @@ public class NGSIMySQLSink extends NGSISink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_sql_timestamp_format="
                 + lastDataSQLTimestampFormat + ")");
 
+        nlsTimestampFormat = context.getString("nls_timestamp_format", DEFAULT_ORACLE_NLS_TIMESTAMP_FORMAT);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (nls_timestamp_format="
+                + nlsTimestampFormat + ")");
+
+        nlsTimestampTzFormat = context.getString("nls_timestamp_tz_format", DEFAULT_ORACLE_NLS_TIMESTAMP_TZ_FORMAT);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (nls_timestamp_tz_format="
+                + nlsTimestampTzFormat + ")");
+
+        String oracleLocatorStr = context.getString("oracle_locator", DEFAULT_ORACLE_LOCATOR);
+        if (oracleLocatorStr.equals("true") || oracleLocatorStr.equals("false")) {
+            oracleLocator = Boolean.valueOf(oracleLocatorStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_locator=" + oracleLocatorStr + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (oracle_locator="
+                + oracleLocatorStr + ") -- Must be 'true' or 'false'");
+        } // if else
+
         maxLatestErrors = context.getInteger("max_latest_errors", DEFAULT_MAX_LATEST_ERRORS);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (max_latest_errors=" + maxLatestErrors + ")");
 
@@ -278,11 +316,11 @@ public class NGSIMySQLSink extends NGSISink {
     @Override
     public void start() {
         try {
-            createPersistenceBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize, mysqlOptions, persistErrors, maxLatestErrors);
-            LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
+            createPersistenceBackend(oracleHost, oraclePort, oracleUsername, oraclePassword, maxPoolSize, oracleOptions, persistErrors, maxLatestErrors);
+            LOGGER.debug("[" + this.getName() + "] OracleSQL persistence backend created");
         } catch (Exception e) {
-            String configParams = " mysqlHost " + mysqlHost + " mysqlPort " + mysqlPort + " mysqlUsername " + mysqlUsername + " mysqlPassword " + mysqlPassword + " maxPoolSize " + maxPoolSize + " mysqlOptions " + mysqlOptions + " persistErrors " + persistErrors + " maxLatestErrors " + maxLatestErrors;
-            LOGGER.error("Error while creating the MySQL persistence backend. " +
+            String configParams = " oracleHost " + oracleHost + " oraclePort " + oraclePort + " oracleUsername " + oracleUsername + " oraclePassword " + oraclePassword + " maxPoolSize " + maxPoolSize + " oracleOptions " + oracleOptions + " persistErrors " + persistErrors + " maxLatestErrors " + maxLatestErrors;
+            LOGGER.error("Error while creating the OracleSQL persistence backend. " +
                          "Config params= " + configParams +
                          "Details=" + e.getMessage() +
                          "Stack trace: " + Arrays.toString(e.getStackTrace()));
@@ -294,15 +332,17 @@ public class NGSIMySQLSink extends NGSISink {
     @Override
     public void stop() {
         super.stop();
-        if (mySQLPersistenceBackend != null) mySQLPersistenceBackend.close();
+        if (oracleSQLPersistenceBackend != null) oracleSQLPersistenceBackend.close();
     } // stop
 
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
     private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
-        if (mySQLPersistenceBackend == null) {
-            mySQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, sqlOptions, persistErrors, maxLatestErrors);
+        if (oracleSQLPersistenceBackend == null) {
+            oracleSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, ORACLE_INSTANCE_NAME, ORACLE_DRIVER_NAME, sqlOptions, persistErrors, maxLatestErrors);
+            oracleSQLPersistenceBackend.setNlsTimestampFormat(nlsTimestampFormat);
+            oracleSQLPersistenceBackend.setNlsTimestampTzFormat(nlsTimestampTzFormat);
         }
     }
 
@@ -333,10 +373,13 @@ public class NGSIMySQLSink extends NGSISink {
             aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableNameMappings, enableEncoding));
             aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableNameMappings));
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
+            aggregator.setSchemeName(buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
             aggregator.setDbName(buildDbName(aggregator.getService()));
             aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
             aggregator.setAttrNativeTypes(attrNativeTypes);
             aggregator.setAttrMetadataStore(attrMetadataStore);
+            aggregator.setEnableGeoParseOracle(true);
+            aggregator.setEnableGeoParseOracleLocator(oracleLocator);
             aggregator.setEnableNameMappings(enableNameMappings);
             aggregator.setLastDataMode(lastDataMode);
             aggregator.setLastDataUniqueKey(lastDataUniqueKey);
@@ -346,7 +389,7 @@ public class NGSIMySQLSink extends NGSISink {
                 aggregator.aggregate(event);
             } // for
             LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" +
-                         SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation().keySet(), SQLQueryUtils.MYSQL_FIELDS_MARK) + ", values=" +
+                         SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation().keySet(), SQLQueryUtils.ORACLE_FIELDS_MARK) + ", values=" +
                          SQLQueryUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes) + ")");
             // Persist the aggregation
             persistAggregation(aggregator);
@@ -383,7 +426,7 @@ public class NGSIMySQLSink extends NGSISink {
                 String tableName = buildTableName(servicePathForNaming, entity, entityType, attribute);
                 LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",dbName="
                         + dbName + ", tableName=" + tableName + ")");
-                mySQLPersistenceBackend.capRecords(dbName, tableName, maxRecords);
+                oracleSQLPersistenceBackend.capRecords(dbName, tableName, maxRecords);
             } catch (CygnusBadConfiguration e) {
                 throw new CygnusCappingError("Data capping error", "CygnusBadConfiguration", e.getMessage());
             } catch (CygnusRuntimeError e) {
@@ -399,7 +442,7 @@ public class NGSIMySQLSink extends NGSISink {
         LOGGER.debug("[" + this.getName() + "] Expirating records (time=" + expirationTime + ")");
         
         try {
-            mySQLPersistenceBackend.expirateRecordsCache(expirationTime);
+            oracleSQLPersistenceBackend.expirateRecordsCache(expirationTime);
         } catch (CygnusRuntimeError e) {
             throw new CygnusExpiratingError("Data expiration error", "CygnusRuntimeError", e.getMessage());
         } catch (CygnusPersistenceError e) {
@@ -418,53 +461,50 @@ public class NGSIMySQLSink extends NGSISink {
     private void persistAggregation(NGSIGenericAggregator aggregator)
         throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
 
-        String dbName = aggregator.getDbName(enableLowercase);
+        String schemaName = aggregator.getSchemeName(enableLowercase);
+        String dbName = aggregator.getDbName(enableLowercase);        
         String tableName = aggregator.getTableName(enableLowercase);
+
+        // Escape a syntax error in SQL
+        if (schemaName.equals(DEFAULT_FIWARE_SERVICE)) {
+            schemaName = ESCAPED_DEFAULT_FIWARE_SERVICE;
+        }
 
         if (lastDataMode.equals("upsert") || lastDataMode.equals("both")) {
             if (rowAttrPersistence) {
                 LOGGER.warn("[" + this.getName() + "] no upsert due to row mode");
             } else {
-                mySQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
-                                                          aggregator.getLastDataToPersist(),
-                                                          dbName,
-                                                          null, // no schema in mysql
-                                                          tableName,
-                                                          lastDataTableSuffix,
-                                                          lastDataUniqueKey,
-                                                          lastDataTimeStampKey,
-                                                          lastDataSQLTimestampFormat,
-                                                          attrNativeTypes);
+                LOGGER.warn("[" + this.getName() + "] no upsert or both mode avaiable for oracle");
             }
         }
 
-        if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
+        if (lastDataMode.equals("insert")) {
             try {
                 // Try to insert without create database and table before
-                mySQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
-                                                          dbName,
-                                                          null, // no schema in mysql
-                                                          tableName,
-                                                          attrNativeTypes);
+                oracleSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                              dbName,
+                                                              schemaName,
+                                                              tableName,
+                                                              attrNativeTypes);
             } catch (CygnusPersistenceError | CygnusBadContextData | CygnusRuntimeError ex) {
                 // creating the database and the table has only sense if working in row mode, in column node
                 // everything must be provisioned in advance
                 if (rowAttrPersistence) {
                     // This case will create a false error entry in error table
                     String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist(),
-                                                                              MYSQL_INSTANCE_NAME);
+                                                                              ORACLE_INSTANCE_NAME);
                     try {
                         // Try to insert without create database before
-                        mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
+                        oracleSQLPersistenceBackend.createTable(dbName, schemaName, tableName, fieldsForCreate);
                     } catch (CygnusRuntimeError | CygnusPersistenceError ex2) {
-                        mySQLPersistenceBackend.createDestination(dbName);
-                        mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
+                        oracleSQLPersistenceBackend.createDestination(schemaName);
+                        oracleSQLPersistenceBackend.createTable(dbName, schemaName, tableName, fieldsForCreate);
                     } // catch
-                    mySQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
-                                                              dbName,
-                                                              null, // no schema in mysql
-                                                              tableName,
-                                                              attrNativeTypes);
+                    oracleSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                                  dbName,
+                                                                  schemaName,
+                                                                  tableName,
+                                                                  attrNativeTypes);
                 } else {
                     // column
                     throw ex;
@@ -474,34 +514,96 @@ public class NGSIMySQLSink extends NGSISink {
     } // persistAggregation
     
     /**
-     * Creates a MySQL DB name given the FIWARE service.
+     * Creates a OracleSQL DB name given the FIWARE service.
      * @param service
-     * @return The MySQL DB name
+     * @return The OracleSQL DB name
      * @throws CygnusBadConfiguration
      */
     protected String buildDbName(String service) throws CygnusBadConfiguration {
-        String name;
-        
-        if (enableEncoding) {
-            name = NGSICharsets.encodeMySQL(service);
-        } else {
-            name = NGSIUtils.encode(service, false, true);
-        } // if else
+        String name = null;
 
-        if (name.length() > NGSIConstants.MYSQL_MAX_NAME_LEN) {
+        if (enableEncoding) {
+            switch(dataModel) {
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
+                case DMBYENTITYTYPEDATABASE:
+                case DMBYENTITYTYPEDATABASESCHEMA:
+                case DMBYFIXEDENTITYTYPEDATABASE:
+                case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
+                    if (service != null)
+                        name = NGSICharsets.encodeOracleSQL(service);
+                    break;
+                default:
+                    name = oracleDatabase;
+            }
+        } else {
+            switch(dataModel) {
+                case DMBYENTITYDATABASE:
+                case DMBYENTITYDATABASESCHEMA:
+                case DMBYENTITYTYPEDATABASE:
+                case DMBYENTITYTYPEDATABASESCHEMA:
+                case DMBYFIXEDENTITYTYPEDATABASE:
+                case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
+                    if (service != null)
+                        name = NGSIUtils.encode(service, false, true);
+                    break;
+                default:
+                    name = oracleDatabase;
+            }
+        } // if else
+        if (name.length() > NGSIConstants.ORACLE_MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building database name '" + name
-                    + "' and its length is greater than " + NGSIConstants.MYSQL_MAX_NAME_LEN);
+                    + "' and its length is greater than " + NGSIConstants.ORACLE_MAX_NAME_LEN);
         } // if
 
         return name;
     } // buildDbName
 
     /**
-     * Creates a MySQL table name given the FIWARE service path, the entity and the attribute.
+     * Creates a OracleSQL scheme name given the FIWARE service.
+     * @param service
+     * @return The oracleSQL scheme name
+     * @throws CygnusBadConfiguration
+     */
+    public String buildSchemaName(String service, String subService) throws CygnusBadConfiguration {
+        String name;
+
+        if (enableEncoding) {
+            switch(dataModel) {
+                case DMBYENTITYDATABASESCHEMA:
+                case DMBYENTITYTYPEDATABASESCHEMA:
+                case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
+                    name = NGSICharsets.encodeOracleSQL(subService);
+                    break;
+                default:
+                    name = NGSICharsets.encodeOracleSQL(service);
+            }
+        } else {
+            switch(dataModel) {
+                case DMBYENTITYDATABASESCHEMA:
+                case DMBYENTITYTYPEDATABASESCHEMA:
+                case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
+                    name = NGSIUtils.encode(subService, false, true);
+                    break;
+                default:
+                    name = NGSIUtils.encode(service, false, true);
+            }
+        } // if else
+
+        if (name.length() > NGSIConstants.ORACLE_MAX_NAME_LEN) {
+            throw new CygnusBadConfiguration("Building schema name '" + name
+                    + "' and its length is greater than " + NGSIConstants.ORACLE_MAX_NAME_LEN);
+        } // if
+
+        return name;
+    } // buildSchemaName
+    
+    /**
+     * Creates a OracleSQL table name given the FIWARE service path, the entity and the attribute.
      * @param servicePath
      * @param entity
      * @param attribute
-     * @return The MySQL table name
+     * @return The OracleSQL table name
      * @throws CygnusBadConfiguration
      */
     protected String buildTableName(String servicePath, String entity, String entityType, String attribute)
@@ -511,34 +613,30 @@ public class NGSIMySQLSink extends NGSISink {
         if (enableEncoding) {
             switch (dataModel) {
                 case DMBYSERVICEPATH:
-                    name = NGSICharsets.encodeMySQL(servicePath);
+                    name = NGSICharsets.encodeOracleSQL(servicePath);
                     break;
                 case DMBYENTITY:
                 case DMBYENTITYDATABASE:
-                    name = NGSICharsets.encodeMySQL(servicePath)
+                    name = NGSICharsets.encodeOracleSQL(servicePath)
                             + CommonConstants.CONCATENATOR
-                            + NGSICharsets.encodeMySQL(entity);
+                            + NGSICharsets.encodeOracleSQL(entity);
                     break;
                 case DMBYENTITYTYPE:
                 case DMBYENTITYTYPEDATABASE:
-                    name = NGSICharsets.encodeMySQL(servicePath)
+                    name = NGSICharsets.encodeOracleSQL(servicePath)
                             + CommonConstants.CONCATENATOR
-                            + NGSICharsets.encodeMySQL(entityType);
+                            + NGSICharsets.encodeOracleSQL(entityType);
                     break;
                 case DMBYATTRIBUTE:
-                    name = NGSICharsets.encodeMySQL(servicePath)
+                    name = NGSICharsets.encodeOracleSQL(servicePath)
                             + CommonConstants.CONCATENATOR
-                            + NGSICharsets.encodeMySQL(entity)
+                            + NGSICharsets.encodeOracleSQL(entity)
                             + CommonConstants.CONCATENATOR
-                            + NGSICharsets.encodeMySQL(attribute);
-                    break;
-                case DMBYFIXEDENTITYTYPE:
-                case DMBYFIXEDENTITYTYPEDATABASE:
-                    name = NGSICharsets.encodeMySQL(entityType);
+                            + NGSICharsets.encodeOracleSQL(attribute);
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use dm-by-service-path, dm-by-entity, dm-by-entitytype or dm-by-fixed-entitytype or dm-by-attribute");
+                            + "'. Please, use dm-by-service-path, dm-by-entity or dm-by-attribute");
             } // switch
         } else {
             switch (dataModel) {
@@ -568,22 +666,18 @@ public class NGSIMySQLSink extends NGSISink {
                             + NGSIUtils.encode(entity, false, true)
                             + '_' + NGSIUtils.encode(attribute, false, true);
                     break;
-                case DMBYFIXEDENTITYTYPEDATABASE:
-                case DMBYFIXEDENTITYTYPE:
-                    name = NGSIUtils.encode(entityType, false, true);
-                    break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY, DMBYENTITYTYPE, DMBYFIXEDENTITYTYPE or DMBYATTRIBUTE");
+                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY, DMBYENTITYTYPE or DMBYATTRIBUTE");
             } // switch
         } // if else
 
-        if (name.length() > NGSIConstants.MYSQL_MAX_NAME_LEN) {
+        if (name.length() > NGSIConstants.ORACLE_MAX_NAME_LEN) {
             throw new CygnusBadConfiguration("Building table name '" + name
-                    + "' and its length is greater than " + NGSIConstants.MYSQL_MAX_NAME_LEN);
+                    + "' and its length is greater than " + NGSIConstants.ORACLE_MAX_NAME_LEN);
         } // if
 
         return name;
     } // buildTableName
 
-} // NGSIMySQLSink
+} // NGSIOracleSQLSink

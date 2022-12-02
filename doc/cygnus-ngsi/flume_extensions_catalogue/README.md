@@ -16,6 +16,7 @@
         * [Last Data Functionality](./last_data_function.md)
     * [NGSIPostGISSink](./ngsi_postgis_sink.md)
         * [Last Data Functionality](./last_data_function.md)
+    * [NGSIOracleSQLSink](./ngsi_oracle_sink.md)
     * [NGSISTHSink](./ngsi_sth_sink.md)
     * [NGSIOrionSink](./ngsi_orion_sink.md)
     * [NGSIElasticsearchSink](./ngsi_elasticsearch_sink.md)

@@ -23,6 +23,7 @@ import com.google.gson.JsonObject;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
+import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackendImpl;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackend;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
@@ -296,7 +297,6 @@ public class NGSICKANSink extends NGSISink {
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
-
             // Persist the aggregation
             persistAggregation(aggregator, service, servicePath);
             batch.setNextPersisted(true);
