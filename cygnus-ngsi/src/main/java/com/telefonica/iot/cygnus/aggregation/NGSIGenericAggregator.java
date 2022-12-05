@@ -67,6 +67,8 @@ public abstract class NGSIGenericAggregator {
     private boolean enableEncoding;
     private boolean enableNameMappings;
     private boolean enableGeoParse;
+    private boolean enableGeoParseOracle;
+    private boolean enableGeoParseOracleLocator;
     private boolean attrMetadataStore;
     private boolean enableUTCRecvTime;
     private String lastDataMode;
@@ -392,6 +394,43 @@ public abstract class NGSIGenericAggregator {
     public void setEnableGeoParse(boolean enableGeoParse) {
         this.enableGeoParse = enableGeoParse;
     } //setEnableGeoParse
+
+    /**
+     * Is enable geo parse boolean. Oracle flag to process geometry types.
+     *
+     * @return the boolean
+     */
+    public boolean isEnableGeoParseOracle() {
+        return enableGeoParseOracle;
+    } //isEnableGeoParseOracle
+
+    /**
+     * Sets enable geo parse oracle
+     *
+     * @param enableGeoParse the enable geo parse
+     */
+    public void setEnableGeoParseOracle(boolean enableGeoParseOracle) {
+        this.enableGeoParseOracle = enableGeoParseOracle;
+    } //setEnableGeoParseOracle
+
+    /**
+     * Is enable geo parse boolean. Oracle flag to process geometry types.
+     *
+     * @return the boolean
+     */
+    public boolean isEnableGeoParseOracleLocator() {
+        return enableGeoParseOracleLocator;
+    } //isEnableGeoParseOracleLocator
+
+    /**
+     * Sets enable geo parse oracle locator (12.2.)
+     *
+     * @param enableGeoParseLocator the enable geo parse
+     */
+    public void setEnableGeoParseOracleLocator(boolean enableGeoParseOracleLocator) {
+        this.enableGeoParseOracleLocator = enableGeoParseOracleLocator;
+    } //setEnableGeoParseOracleLocator
+
 
     /**
      * Gets long timestamp of the record stored on the last data collection

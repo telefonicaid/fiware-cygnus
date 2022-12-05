@@ -455,7 +455,8 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 // everything must be provisioned in advance
                 if (rowAttrPersistence) {
                     // This case will create a false error entry in error table
-                    String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+                    String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist(),
+                                                                              POSTGRESQL_INSTANCE_NAME);
                      try {
                          // Try to insert without create database before
                          postgreSQLPersistenceBackend.createTable(databaseName, schemaName, tableName, fieldsForCreate);

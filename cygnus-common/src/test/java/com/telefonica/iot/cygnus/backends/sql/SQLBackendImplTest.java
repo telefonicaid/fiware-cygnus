@@ -192,6 +192,22 @@ public class SQLBackendImplTest {
     } // testJDBCUrlPostgreSQL
 
     @Test
+    public void testJDBCUrlOracleSQL() {
+        System.out.println("Testing SQLBackendImpl.SQLDriver.generateJDBCUrl (sqlInstance:oracle)");
+        String sqlHost = "localhost";
+        String sqlPort = "5432";
+        SQLInstance sqlInstance = SQLInstance.ORACLE;
+        String sqlDriverName = "oracle.jdbc.OracleDriver";
+        String destination = "dest";
+        String defaultDataBase = "default";
+
+        SQLBackendImpl backend = new SQLBackendImpl(sqlHost, sqlPort, user, password, maxPoolSize, sqlInstance, sqlDriverName, defaultDataBase, persistErrors, maxLatestErrors);
+        SQLBackendImpl.SQLDriver driver = backend.getDriver();
+
+        assertEquals(driver.generateJDBCUrl(destination), "jdbc:oracle:oci://localhost:1521/default");
+    } // testJDBCUrlOracleeSQL    
+
+    @Test
     public void testJDBCUrlMySQLWithOptions() {
         System.out.println("Testing SQLBackendImpl.SQLDriver.generateJDBCUrl (sqlInstance:mysql, options:useSSL=true&requireSSL=false)");
         String sqlHost = "localhost";

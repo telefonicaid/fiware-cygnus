@@ -75,8 +75,15 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.4.1</version>
+            <version>42.4.3</version>
             <type>jar</type>
+        </dependency>
+        <!-- Required by OracleSQLBackendImpl at runtime -->
+        <!-- https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc6 -->
+        <dependency>
+          <groupId>com.oracle.database.jdbc</groupId>
+          <artifactId>ojdbc6</artifactId>
+          <version>11.2.0.4</version>
         </dependency>
         <!-- Required for logging -->
         <dependency>

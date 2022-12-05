@@ -73,6 +73,15 @@ public final class NGSICharsets {
         
         return out;
     } // encodePostgreSQL
+
+    /**
+     * Encodes a string for oracleSQL. Just use postgreSQL encoder.
+     * @param in
+     * @return The encoded string
+     */
+    public static String encodeOracleSQL(String in) {
+        return encodePostgreSQL(in);
+    }
     
     /**
      * Encodes a string for HDFS.

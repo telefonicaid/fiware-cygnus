@@ -170,6 +170,17 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                 } catch (Exception e) {
                     LOGGER.error("[" + getName() + "] Processing context attribute (name=" + attrValue.toString());
                 }
+            } else if (isEnableGeoParseOracle() && (attrType.equals("geo:json") || attrType.equals("geo:point"))) {
+                try {
+                    //Process geometry if applyes
+                    ImmutablePair<String, Boolean> location = NGSIUtils.getGeometryOracle(attrValue.toString(), attrType, attrMetadata, swapCoordinates, isEnableGeoParseOracleLocator());
+                    if (location.right) {
+                        LOGGER.debug("location=" + location.getLeft());
+                        attrValue = new JsonPrimitive(location.getLeft());
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("[" + getName() + "] Processing context attribute (name=" + attrValue.toString());
+                }
             } else if (attrType.equals("TextUnrestricted")) {
                 attrValue = jsonParser.parse(getEscapedString(attrValue, "'"));
             }
