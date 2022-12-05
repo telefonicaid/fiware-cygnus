@@ -312,7 +312,7 @@ public class NGSIOracleSQLSink extends NGSISink {
 
         oracleMajorVersion = context.getInteger("oracle_major_version", DEFAULT_ORACLE_MAJOR_VERSION);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_major_version=" + oracleMajorVersion + ")");
-        if (oracleMajorVersion) {
+        if (oracleMajorVersion < 12) {
             oracleMaxNameLength = NGSIConstants.ORACLE11_MAX_NAME_LEN;
         } else {
             oracleMaxNameLength = NGSIConstants.ORACLE12_MAX_NAME_LEN;
