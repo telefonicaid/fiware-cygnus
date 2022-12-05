@@ -73,7 +73,7 @@ public class NGSIOracleSQLSink extends NGSISink {
     private static final String DEFAULT_ORACLE_NLS_TIMESTAMP_FORMAT = "YYYY-MM-DD HH24:MI:SS.FF6";
     private static final String DEFAULT_ORACLE_NLS_TIMESTAMP_TZ_FORMAT = "YYYY-MM-DD\"T\"HH24:MI:SS.FF6 TZR";
     private static final String DEFAULT_ORACLE_LOCATOR = "false";
-    private static final String DEFAULT_ORACLE_MAJOR_VERSION = "11";
+    private static final int DEFAULT_ORACLE_MAJOR_VERSION = 11;
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIOracleSQLSink.class);
     private String oracleHost;
