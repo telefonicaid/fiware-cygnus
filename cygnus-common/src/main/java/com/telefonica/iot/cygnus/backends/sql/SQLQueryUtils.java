@@ -518,7 +518,7 @@ public class SQLQueryUtils {
                     stringValue = value.getAsString();
                 }else {
                     if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID") ||
-                        value.toString().contains("SDO_GEOMETRY") || value.contains("sdo_util.from_geojson")) {
+                        value.toString().contains("SDO_GEOMETRY") || value.toString().contains("sdo_util.from_geojson")) {
                         stringValue = value.getAsString().replace("\\", "");
                     } else {
                         stringValue = quotationMark + value.getAsString() + quotationMark;
@@ -530,7 +530,7 @@ public class SQLQueryUtils {
         } else {
             if (value != null && value.isJsonPrimitive()) {
                 if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID") ||
-                    value.toString().contains("SDO_GEOMETRY") || value.contains("sdo_util.from_geojson")) {
+                    value.toString().contains("SDO_GEOMETRY") || value.toString().contains("sdo_util.from_geojson")) {
                     stringValue = value.getAsString().replace("\\", "");
                 } else {
                     stringValue = quotationMark + value.getAsString() + quotationMark;
