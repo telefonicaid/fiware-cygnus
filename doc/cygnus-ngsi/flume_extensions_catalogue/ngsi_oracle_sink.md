@@ -28,7 +28,7 @@ Content:
     * [Authentication and authorization](#section3.2)
 
 ## <a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.NGSIOracleSQLSink`, or simply `NGSIOracleSQLSink` is a sink designed to persist NGSI-like context data events within a [Oracle server](https://www.oracle.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.NGSIOracleSQLSink`, or simply `NGSIOracleSQLSink` is a sink designed to persist NGSI-like context data events within a [Oracle server](https://www.oracle.com/) 11g and 12c legacy versions. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific Oracle data structures.
 
@@ -249,6 +249,7 @@ If `attr_persistence=colum` then `NGSIOracleSQLSink` will persist the data withi
 | attr\_native\_types | no | false | if the attribute value will be native <i>true</i> or stringfy or <i>false</i>. When set to true, in case batch option is activated, insert null values for those attributes that doesn't exist in some of the entities to be inserted. If set to false, '' value is inserted for missing attributes. |
 | persist\_errors | no | true | if there is an exception when trying to persist data into storage then error is persisted into a table |
 | oracle_locator | no | false | if there is avaiable of [Oracle locator feature](https://docs.oracle.com/database/121/SPATL/sdo_locator.htm#SPATL340) which is just avaible since oracle 12c. THis imples if a geo:json is in converted a SDO_GEOMETRY or just leave in string format. |
+| oracle_major_version | no | 11 | Major version of Oracle (it defines some values like max name length for identifiers, whichs is 30 for versions prior to 12)
 | nls_timestamp_format | no | `YYYY-MM-DD HH24:MI:SS.FF6` | defines the default timestamp format to use with the TO_CHAR and TO_TIMESTAMP functions [nls_timestamp_format](https://docs.oracle.com/cd/B19306_01/server.102/b14237/initparams132.htm#REFRN10131) |
 | nls_timestamp_tz_format | no | `YYYY-MM-DD"T"HH24:MI:SS.FF6 TZR` | NLS_TIMESTAMP_TZ_FORMAT defines the default timestamp with time zone format to use with the TO_CHAR and TO_TIMESTAMP_TZ functions [nls_timestamp_tz_format](https://docs.oracle.com/database/121/REFRN/GUID-A340C735-BA5A-4704-B24C-AC2C2380BA9E.htm#REFRN10132)|
 

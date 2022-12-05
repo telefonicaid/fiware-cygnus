@@ -97,6 +97,7 @@ public final class NGSIConstants {
 
     // NGSIOracleSQLSink specific constants
     // https://docs.oracle.com/en/database/oracle/oracle-database/21/odpnt/EFCoreIdentifier.html
-    public static final int ORACLE_MAX_NAME_LEN = 30;    
+    public static final int ORACLE11_MAX_NAME_LEN = 30;
+    public static final int ORACLE12_MAX_NAME_LEN = 128;
 
 } // NGSIConstants
