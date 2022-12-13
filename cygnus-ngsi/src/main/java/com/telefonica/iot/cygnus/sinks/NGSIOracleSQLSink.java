@@ -73,6 +73,7 @@ public class NGSIOracleSQLSink extends NGSISink {
     private static final String DEFAULT_ORACLE_NLS_TIMESTAMP_FORMAT = "YYYY-MM-DD HH24:MI:SS.FF6";
     private static final String DEFAULT_ORACLE_NLS_TIMESTAMP_TZ_FORMAT = "YYYY-MM-DD\"T\"HH24:MI:SS.FF6 TZR";
     private static final String DEFAULT_ORACLE_LOCATOR = "false";
+    private static final int DEFAULT_ORACLE_MAJOR_VERSION = 11;
 
     private static final CygnusLogger LOGGER = new CygnusLogger(NGSIOracleSQLSink.class);
     private String oracleHost;
@@ -96,6 +97,8 @@ public class NGSIOracleSQLSink extends NGSISink {
     private String nlsTimestampFormat;
     private String nlsTimestampTzFormat;
     private boolean oracleLocator;
+    private int oracleMajorVersion;
+    private int oracleMaxNameLength;
 
     /**
      * Constructor.
@@ -306,6 +309,14 @@ public class NGSIOracleSQLSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (oracle_locator="
                 + oracleLocatorStr + ") -- Must be 'true' or 'false'");
         } // if else
+
+        oracleMajorVersion = context.getInteger("oracle_major_version", DEFAULT_ORACLE_MAJOR_VERSION);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_major_version=" + oracleMajorVersion + ")");
+        if (oracleMajorVersion < 12) {
+            oracleMaxNameLength = NGSIConstants.ORACLE11_MAX_NAME_LEN;
+        } else {
+            oracleMaxNameLength = NGSIConstants.ORACLE12_MAX_NAME_LEN;
+        }
 
         maxLatestErrors = context.getInteger("max_latest_errors", DEFAULT_MAX_LATEST_ERRORS);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (max_latest_errors=" + maxLatestErrors + ")");
@@ -551,9 +562,9 @@ public class NGSIOracleSQLSink extends NGSISink {
                     name = oracleDatabase;
             }
         } // if else
-        if (name.length() > NGSIConstants.ORACLE_MAX_NAME_LEN) {
+        if (name.length() > this.oracleMaxNameLength) {
             throw new CygnusBadConfiguration("Building database name '" + name
-                    + "' and its length is greater than " + NGSIConstants.ORACLE_MAX_NAME_LEN);
+                    + "' and its length is greater than " + this.oracleMaxNameLength);
         } // if
 
         return name;
@@ -590,9 +601,9 @@ public class NGSIOracleSQLSink extends NGSISink {
             }
         } // if else
 
-        if (name.length() > NGSIConstants.ORACLE_MAX_NAME_LEN) {
+        if (name.length() > this.oracleMaxNameLength) {
             throw new CygnusBadConfiguration("Building schema name '" + name
-                    + "' and its length is greater than " + NGSIConstants.ORACLE_MAX_NAME_LEN);
+                    + "' and its length is greater than " + this.oracleMaxNameLength);
         } // if
 
         return name;
@@ -672,9 +683,9 @@ public class NGSIOracleSQLSink extends NGSISink {
             } // switch
         } // if else
 
-        if (name.length() > NGSIConstants.ORACLE_MAX_NAME_LEN) {
+        if (name.length() > this.oracleMaxNameLength) {
             throw new CygnusBadConfiguration("Building table name '" + name
-                    + "' and its length is greater than " + NGSIConstants.ORACLE_MAX_NAME_LEN);
+                    + "' and its length is greater than " + this.oracleMaxNameLength);
         } // if
 
         return name;

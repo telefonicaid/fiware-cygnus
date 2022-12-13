@@ -436,7 +436,7 @@ public class SQLQueryUtils {
                             } else {
                                 String stringValue = value.getAsString();
                                 if (stringValue.contains("ST_GeomFromGeoJSON") || stringValue.contains("ST_SetSRID") ||
-                                    stringValue.contains("SDO_GEOMETRY")) {
+                                    stringValue.contains("SDO_GEOMETRY") || stringValue.contains("sdo_util.from_geojson")) {
                                     preparedStatement.setObject(position, stringValue);
                                     LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
                                     position++;
@@ -456,7 +456,7 @@ public class SQLQueryUtils {
                     if (value != null && value.isJsonPrimitive()) {
                         String stringValue = value.getAsString();
                         if (stringValue.contains("ST_GeomFromGeoJSON") || stringValue.contains("ST_SetSRID") ||
-                            stringValue.contains("SDO_GEOMETRY")) {
+                            stringValue.contains("SDO_GEOMETRY") || stringValue.contains("sdo_util.from_geojson")) {
                             preparedStatement.setObject(position, stringValue);
                             LOGGER.debug("[SQLQueryUtils.addJsonValues] " + "Added postgis Function " + stringValue + " as Object");
                             position++;
@@ -518,7 +518,7 @@ public class SQLQueryUtils {
                     stringValue = value.getAsString();
                 }else {
                     if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID") ||
-                        value.toString().contains("SDO_GEOMETRY")) {
+                        value.toString().contains("SDO_GEOMETRY") || value.toString().contains("sdo_util.from_geojson")) {
                         stringValue = value.getAsString().replace("\\", "");
                     } else {
                         stringValue = quotationMark + value.getAsString() + quotationMark;
@@ -530,7 +530,7 @@ public class SQLQueryUtils {
         } else {
             if (value != null && value.isJsonPrimitive()) {
                 if (value.toString().contains("ST_GeomFromGeoJSON") || value.toString().contains("ST_SetSRID") ||
-                    value.toString().contains("SDO_GEOMETRY")) {
+                    value.toString().contains("SDO_GEOMETRY") || value.toString().contains("sdo_util.from_geojson")) {
                     stringValue = value.getAsString().replace("\\", "");
                 } else {
                     stringValue = quotationMark + value.getAsString() + quotationMark;
