@@ -1,4 +1,5 @@
-[cygnus-ngsi] Update NameMapping compile log mensage from Warn to Error
+[cygnus-ngsi] Update NameMapping compile log mensage from WARN to ERROR
+
 [cygnus-common] MongoDB indexes are created depending on DM (#2204)
 [cygnus-common] Upgrade postgresql from 42.4.1 to 42.4.3
 [cygnus-common] OracleSQL backend (#2195)
