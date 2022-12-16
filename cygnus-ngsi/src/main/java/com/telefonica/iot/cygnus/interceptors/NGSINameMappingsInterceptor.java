@@ -287,7 +287,7 @@ public class NGSINameMappingsInterceptor implements Interceptor {
             try {
                 nameMappings.compilePatterns();
             } catch (Exception e) {
-                LOGGER.warn("[nmi] Compile patterns error (" + e.getMessage() + ") with namemapping " + jsonStr + " which will be ignored");
+                LOGGER.error("[nmi] Compile patterns error (" + e.getMessage() + ") with namemapping " + jsonStr + " which will be ignored");
                 nameMappings = null;
                 return;
             } // try catch
