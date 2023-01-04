@@ -54,12 +54,12 @@ For a given entity, `entityname`, of type `entitytype`, inside a tenant `service
 | datamodel name                            | database name | schema  name | table name                        | note                                              |
 |-------------------------------------------|---------------|--------------|-----------------------------------|---------------------------------------------------|
 | by default                                | `agent.conf`  | service      | servicepath_entityname_entitytype | Automatic schema creation                         |
-| `dm-by-fixed-entity-type-database-schema` | service       | _servicepath | entitytype                        | Database and schema need to be created in advance |
+| `dm-by-fixed-entity-type-database-schema` | service       | servicepath | entitytype                        | Database and schema need to be created in advance |
 | `dm-by-fixed-entity-type-database`        | service       | service      | entitytype                        | Database and schema need to be created in advance |
 | `dm-by-fixed-entity-type`                 | `agent.conf`  | service      | entitytype                        | Automatic schema creation                         |
-| `dm-by-entity-database-schema`            | service       | _servicepath | servicepath_entityname_entitytype | Database and schema need to be created in advance |
+| `dm-by-entity-database-schema`            | service       | servicepath | servicepath_entityname_entitytype | Database and schema need to be created in advance |
 | `dm-by-entity-database`                   | service       | service      | servicepath_entityname_entitytype | Database and schema need to be created in advance |
-| `dm-by-entity-type-database-schema` | service | _servicepath | servicepath_entitytype | Database and schema need to be created in advance |
+| `dm-by-entity-type-database-schema` | service | servicepath | servicepath_entitytype | Database and schema need to be created in advance |
 | `dm-by-entity-type-database` | service | service | servicepath_entitytype | Database and schema need to be created in advance |
 | `dm-by-entity-type`                       | `agent.conf`  | service      | servicepath_entitytype            | Automatic schema creation                         |
 | `dm-by-service-path`                      | `agent.conf`  | service      | servicepath                       | Automatic schema creation                         |
@@ -67,9 +67,6 @@ For a given entity, `entityname`, of type `entitytype`, inside a tenant `service
 | `dm-by-attribute` | `agent.conf` | service | servicepath_entityname_entitytype_attribute | Automatic schema creation |
 
 Where [`agent.conf`](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/ngsi_agent_conf.md) is the default database name selected in that file under the field `cygnus-ngsi.sinks.postgresql-sink.postgresql_database` or the env var `CYGNUS_POSTGRESQL_DATABASE`
-
-**NOTE:** the leading underscore `_` in schema name column for `*-schema` cases is not a typo. However, this may change in the future,
-see issue [#2201](https://github.com/telefonicaid/fiware-cygnus/issues/2201).
 
 [Top](#top)
 
