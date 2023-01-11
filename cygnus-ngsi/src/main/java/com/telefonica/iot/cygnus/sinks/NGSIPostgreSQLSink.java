@@ -547,7 +547,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITYTYPEDATABASESCHEMA:
                 case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
-                    name = NGSIUtils.encode(subService, false, true);
+                    name = NGSIUtils.encode(subService, true, false);
                     break;
                 default:
                     name = NGSIUtils.encode(service, false, true);
