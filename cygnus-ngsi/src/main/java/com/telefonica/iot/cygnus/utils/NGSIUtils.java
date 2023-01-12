@@ -60,7 +60,11 @@ public final class NGSIUtils {
      */
     public static String encode(String in, boolean deleteSlash, boolean encodeSlash) {
         if (deleteSlash) {
-            return ENCODEPATTERN.matcher(in.substring(1)).replaceAll("_");
+            if (in.startsWith("/")) {
+                return ENCODEPATTERN.matcher(in.substring(1)).replaceAll("_");
+            } else {
+                return ENCODEPATTERN.matcher(in).replaceAll("_");
+            }
         } else if (encodeSlash) {
             return ENCODEPATTERN.matcher(in).replaceAll("_");
         } else {
