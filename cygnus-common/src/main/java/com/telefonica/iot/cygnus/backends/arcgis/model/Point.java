@@ -18,8 +18,6 @@
 
 package com.telefonica.iot.cygnus.backends.arcgis.model;
 
-import org.apache.log4j.Logger;
-
 import com.google.gson.JsonObject;
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 import com.telefonica.iot.cygnus.log.CygnusLogger;

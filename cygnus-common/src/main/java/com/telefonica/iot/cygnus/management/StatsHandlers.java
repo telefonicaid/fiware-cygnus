@@ -17,7 +17,8 @@
  */
 package com.telefonica.iot.cygnus.management;
 
-import com.google.common.collect.ImmutableMap;
+//import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 import com.telefonica.iot.cygnus.channels.CygnusChannel;
 import com.telefonica.iot.cygnus.handlers.CygnusHandler;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
@@ -56,8 +57,8 @@ public final class StatsHandlers {
      * @param sinks
      * @throws IOException
      */
-    public static void get(HttpServletResponse response, ImmutableMap<String, SourceRunner> sources,
-            ImmutableMap<String, Channel> channels, ImmutableMap<String, SinkRunner> sinks) throws IOException {
+    public static void get(HttpServletResponse response, Map<String, SourceRunner> sources,
+            Map<String, Channel> channels, Map<String, SinkRunner> sinks) throws IOException {
         response.setContentType("application/json; charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         String jsonStr = "{\"success\":\"true\",\"stats\":{\"sources\":[";
@@ -181,8 +182,8 @@ public final class StatsHandlers {
      * @param sinks
      * @throws IOException
      */
-    public static void put(HttpServletResponse response, ImmutableMap<String, SourceRunner> sources,
-            ImmutableMap<String, Channel> channels, ImmutableMap<String, SinkRunner> sinks) throws IOException {
+    public static void put(HttpServletResponse response, Map<String, SourceRunner> sources,
+            Map<String, Channel> channels, Map<String, SinkRunner> sinks) throws IOException {
         response.setContentType("application/json; charset=utf-8");
         
         for (String key : sources.keySet()) {

@@ -43,7 +43,8 @@ import org.apache.flume.source.http.HTTPBadRequestException;
 import org.apache.flume.source.http.HTTPSourceHandler;
 import org.apache.http.MethodNotSupportedException;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
-import org.slf4j.MDC;
+import org.apache.logging.log4j.ThreadContext;
+import java.util.UUID;
 
 /**
  *
@@ -165,11 +166,13 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
     public List<Event> getEvents(javax.servlet.http.HttpServletRequest request) throws Exception {
         // Set some MDC logging fields to 'N/A' for this thread
         // Value for the component field is inherited from main thread (CygnusApplication.java)
-        org.apache.log4j.MDC.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
-        org.apache.log4j.MDC.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
-        org.apache.log4j.MDC.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
-        org.apache.log4j.MDC.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
-        
+        ThreadContext.put("id", UUID.randomUUID().toString());
+        ThreadContext.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
+        ThreadContext.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
+        ThreadContext.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
+        ThreadContext.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
+        ThreadContext.put(CommonConstants.LOG4J_COMP, CommonConstants.DEF_AGENT_NAME);
+
         // Result
         ArrayList<Event> ngsiEvents = new ArrayList<>();
         
@@ -253,8 +256,8 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         } // while
         
         // Get a service and servicePath and store it in the log4j Mapped Diagnostic Context (MDC)
-        MDC.put(CommonConstants.LOG4J_SVC, service == null ? defaultService : service);
-        MDC.put(CommonConstants.LOG4J_SUBSVC, servicePath == null ? defaultServicePath : servicePath);
+        ThreadContext.put(CommonConstants.LOG4J_SVC, service == null ? defaultService : service);
+        ThreadContext.put(CommonConstants.LOG4J_SUBSVC, servicePath == null ? defaultServicePath : servicePath);
 
         // If the configuration is invalid, nothing has to be done but to return null
         if (invalidConfiguration) {
@@ -301,8 +304,8 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         
         // Store both of them in the log4j Mapped Diagnostic Context (MDC), this way it will be accessible
         // by the whole source code.
-        MDC.put(CommonConstants.LOG4J_CORR, corrId);
-        MDC.put(CommonConstants.LOG4J_TRANS, transId);
+        ThreadContext.put(CommonConstants.LOG4J_CORR, corrId);
+        ThreadContext.put(CommonConstants.LOG4J_TRANS, transId);
         LOGGER.debug("[NGSIRestHandler] Starting internal transaction (" + transId + ")");
         
         // Get the data content
