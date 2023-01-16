@@ -32,7 +32,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: stored new notifications in ckan from context broker with or without metadata
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "<organization>", service path "<service_path>", entity type "room", entity id "room2", with attribute number "<attributesQuantity>", attribute name "<attribute_name>" and attribute type "<attribute_type>"
@@ -59,7 +59,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: store in ckan new notifications with different organizations behavior
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "<organization>", service path "/myservicepath", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
@@ -83,7 +83,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: store in ckan new notifications with different service_path behavior
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "<organization>", service path "<service_path>", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
@@ -114,7 +114,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: store in ckan new notifications with different resource behavior and with the same service_path
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "org_col_multi_resource_001", service path "/test_02", entity type "<entity_type>", entity id "<entity_id>", with attribute number "1", attribute name "temperature" and attribute type "celcius"
@@ -144,7 +144,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: store in ckan new notifications with different resources behavior and different service path
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "resource_multi_02110", service path "<service_path>", entity type "<entity_type>", entity id "<entity_id>", with attribute number "1", attribute name "temperature" and attribute type "celcius"
@@ -174,7 +174,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline:  store in ckan new notifications with different quantities of attributes
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "<organization>", service path "/test", entity type "room", entity id "room2", with attribute number "<attribute_number>", attribute name "temperature" and attribute type "celcius"
@@ -197,7 +197,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: stored new notifications in ckan with different data types
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "<organization>", service path "/test", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
@@ -233,7 +233,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: try to store new notification in ckan without value or metadata fields
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "without_fields_0311", service path "/test", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
@@ -255,7 +255,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: try to store new notifications in ckan with differents errors in data type
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "<organization>", service path "/test", entity type "room", entity id "room2", with attribute number "1", attribute name "temperature" and attribute type "celcius"
@@ -297,7 +297,7 @@ Feature: Stored in ckan new notifications per column from context broker
   Scenario Outline: try to store new notification in ckan if some element does not exist
     Given copy properties.json file from "ckan_https_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "column" mode
-    And copy flume-env.sh, grouping rules file from "default", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "<organization>", service path "/test", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "temperature" and attribute type "celcius"

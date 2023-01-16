@@ -30,12 +30,8 @@ public final class NGSIConstants {
     private NGSIConstants() {
     } // NGSIConstants
     
-    // Flume header names added by NGSIRestHandler or NGSIGroupingInterceptor
+    // Flume header names added by NGSIRestHandler
     public static final String FLUME_HEADER_TRANSACTION_ID        = "transaction-id";
-    public static final String FLUME_HEADER_GROUPED_SERVICE_PATH  = "grouped-servicepath"; // 'TODO': remove
-    public static final String FLUME_HEADER_NOTIFIED_ENTITY       = "notified-entity"; // 'TODO': remove
-    public static final String FLUME_HEADER_GROUPED_ENTITY        = "grouped-entity"; // 'TODO': remove
-    public static final String FLUME_HEADER_GROUPED_ENTITY_TYPE   = "grouped-entity-type"; // 'TODO': remove
     public static final String FLUME_HEADER_TIMESTAMP             = "timestamp";
     public static final String FLUME_HEADER_MAPPED_SERVICE        = "mapped-fiware-service";
     public static final String FLUME_HEADER_MAPPED_SERVICE_PATH   = "mapped-fiware-servicepath";
@@ -98,5 +94,10 @@ public final class NGSIConstants {
     // NGSIPostgreSQLSink specific constants
     // http://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
     public static final int POSTGRESQL_MAX_NAME_LEN = 63;
+
+    // NGSIOracleSQLSink specific constants
+    // https://docs.oracle.com/en/database/oracle/oracle-database/21/odpnt/EFCoreIdentifier.html
+    public static final int ORACLE11_MAX_NAME_LEN = 30;
+    public static final int ORACLE12_MAX_NAME_LEN = 128;
 
 } // NGSIConstants

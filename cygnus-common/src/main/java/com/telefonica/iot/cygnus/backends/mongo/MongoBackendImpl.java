@@ -102,12 +102,26 @@ public class MongoBackendImpl implements MongoBackend {
         BasicDBObject keys;
         IndexOptions options;
         try {
-            keys = new BasicDBObject()
-                .append("_id.entityId", 1)
-                .append("_id.entityType", 1)
-                .append("_id.attrName", 1)
-                .append("_id.resolution", 1)
-                .append("_id.origin", 1);
+            keys = new BasicDBObject();
+                switch(dataModel) {
+                case DMBYSERVICEPATH:
+                    keys.append("_id.entityId", 1)
+                        .append("_id.entityType", 1)
+                        .append("_id.attrName", 1)
+                        .append("_id.resolution", 1)
+                        .append("_id.origin", 1);
+                    break;
+                case DMBYENTITY:
+                    keys.append("_id.attrName", 1)
+                        .append("_id.resolution", 1)
+                        .append("_id.origin", 1);
+                    break;
+                case DMBYATTRIBUTE:
+                    keys.append("_id.resolution", 1)
+                        .append("_id.origin", 1);
+                    break;
+                default:
+             }
             options = new IndexOptions().name("cyg_agg_opt");
             db.getCollection(collectionName).createIndex(keys, options);
         } catch (Exception e) {
@@ -162,14 +176,33 @@ public class MongoBackendImpl implements MongoBackend {
         } // try catch
 
         // check STH indexes documentation at https://github.com/telefonicaid/fiware-sth-comet/blob/master/doc/manuals/db_indexes.md
+        //Index creation based on data model
         BasicDBObject keys;
         IndexOptions options;
         try {
-            keys = new BasicDBObject()
-                .append("entityId", 1)
-                .append("entityType", 1)
-                .append("attrName", 1)
-                .append("recvTime", 1);
+            keys = new BasicDBObject();
+                switch(dataModel) {
+                case DMBYSERVICEPATH:
+                    keys.append("recvTime", 1)
+                        .append("entityId", 1)
+                        .append("entityType", 1)
+                        .append("attrName", 1)
+                        .append("attrType",1)
+                        .append("attrValue",1);
+                    break;
+                case DMBYENTITY:
+                    keys.append("recvTime", 1)
+                        .append("attrName", 1)
+                        .append("attrType",1)
+                        .append("attrValue",1);
+                    break;
+                case DMBYATTRIBUTE:
+                    keys.append("recvTime", 1)
+                        .append("attrType",1)
+                        .append("attrValue",1);
+                    break;
+                default:
+             }
             options = new IndexOptions().name("cyg_raw_opt");
             db.getCollection(collectionName).createIndex(keys, options);
         } catch (Exception e) {

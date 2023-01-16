@@ -18,9 +18,6 @@ This resource allows you to obtain a list of subresources published by the API:
 
 * version of the current running cygnus on your system
 * statistics about the configured Flume components
-* useful information about configured grouping rules like:
-  * current grouping rules configured
-  * add, update or delete current grouping rules
 
 # Error responses
 
@@ -318,110 +315,6 @@ Name mappings can be deleted by DELETE methods.
         {
             "success":"true",
         }
-
-# Group Grouping Rules API
-API operations used to manage the grouping rules of Cygnus.
-
-## Methods [/Grouping Rules API]
-
-### "GET /v1/groupingrules" [GET /v1/groupingrules]
-Grouping rules can be retrieved by GET methods.
-
-+ Request
-
-       GET http://<cygnus_host>:<management_port>/v1/groupingrules
-
-+ Response 200 (application/json)
-
-        [
-            {
-                "grouping_rules": [
-                        {
-                            "destination": "allcars",
-                            "fields": [
-                                  "entityType"
-                                  ],
-                            "fiware_service_path": "cars",
-                            "id": 1,
-                            "regex": "Car"
-                        },
-                        {
-                             "destination": "allrooms",
-                             "fields": [
-                                  "entityType"
-                                  ],
-                            "fiware_service_path": "rooms",
-                            "id": 2,
-                            "regex": "Room"
-                        }
-                    ],
-                "success": "true"
-            }
-        ]
-
-### "PUT /v1/groupingrules" [PUT /v1/groupingrules]
-A grouping rule can be updated by PUT method.
-
-+ Parameters
-
-       + id: 1 (number) - An unique identifier of the message.
-
-+ Request
-
-       PUT http://<cygnus_host>:<management_port>/v1/groupingrules=id=1
-       {
-           "regex": "Room",
-           "destination": "otherrooms",
-           "fiware_service_path": "rooms",
-           "fields": ["entityType"]
-      }
-
-+ Response 200 (application/json)
-
-        [
-            {"success":"true"}
-        ]
-
-### "POST /v1/groupingrules" [POST /v1/groupingrules]
-A grouping rule can be added by POST method.
-
-+ Parameters
-
-       + id: 1 (number) - An unique identifier of the message.
-
-+ Request
-
-       POST http://<cygnus_host>:<management_port>/v1/groupingrules
-       {
-           "regex": "Room",
-           "destination": "allrooms",
-           "fiware_service_path": "rooms",
-           "fields": ["entityType"]
-       }
-
-+ Response 200 (application/json)
-
-       {
-           "success":"true"
-       }
-
-### "DELETE /v1/groupingrules" [DELETE /v1/groupingrules]
-A grouping rule can be deleted by DELETE method.
-
-+ Parameters
-
-       + id: 1 (number) - An unique identifier of the message.
-
-+ Request
-
-       DELETE http://<cygnus_host>:<management_port>/v1/groupingrules?id=2
-
-+ Response 200 (application/json)
-
-       [
-           {"success":"true"}
-       ]
-
 
 # Group Subscriptions API
 

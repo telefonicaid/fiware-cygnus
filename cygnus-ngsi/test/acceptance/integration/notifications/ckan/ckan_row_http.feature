@@ -31,7 +31,7 @@ Feature: Stored in ckan new notifications per row from context broker
   Scenario Outline: stored new notifications in ckan from context broker with or without metadata
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "happy_path_row_01", service path "/test", entity type "room", entity id "room2", with attribute number "4", attribute name "random" and attribute type "celcius"
@@ -47,7 +47,7 @@ Feature: Stored in ckan new notifications per row from context broker
   Scenario Outline: stored new notifications in ckan from context broker with or without metadata
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "happy_path_row_021", service path "/test", entity type "room", entity id "room2", with attribute number "<attributes_number>", attribute name "random" and attribute type "celcius"
@@ -65,7 +65,7 @@ Feature: Stored in ckan new notifications per row from context broker
   Scenario Outline:  store in ckan new notifications with different organizations values
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "<tenant>", service path "/test", entity type "room", entity id "room2", with attribute number "2", attribute name "random" and attribute type "celcius"
@@ -87,7 +87,7 @@ Feature: Stored in ckan new notifications per row from context broker
   Scenario Outline:  store in ckan new notifications with different service path values
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "<tenant>", service path "<service_path>", entity type "room", entity id "room2", with attribute number "2", attribute name "random" and attribute type "celcius"
@@ -115,7 +115,7 @@ Feature: Stored in ckan new notifications per row from context broker
   Scenario Outline: store in ckan new notifications with different resources values in the same datastore
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "tenant_240", service path "/servicepath", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "random" and attribute type "celcius"
@@ -143,7 +143,7 @@ Feature: Stored in ckan new notifications per row from context broker
   Scenario Outline: store in ckan new notifications with different resources values in differents datastore
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "test_resources", service path "<service_path>", entity type "<entity_type>", entity id "<entity_id>", with attribute number "2", attribute name "random" and attribute type "celcius"
@@ -171,7 +171,7 @@ Feature: Stored in ckan new notifications per row from context broker
   Scenario Outline:  store in ckan new notifications with different quantities of attributes
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "<tenant>", service path "/servicepath", entity type "room", entity id "room1", with attribute number "<attribute_number>", attribute name "random" and attribute type "celcius"
@@ -191,7 +191,7 @@ Feature: Stored in ckan new notifications per row from context broker
   Scenario Outline: stored new notifications in ckan with different values
     Given copy properties.json file from "epg_properties.json" to test "ckan-sink" and sudo local "false"
     And configuration of cygnus instances with different ports "true", agents files quantity "1", id "test" and in "row" mode
-    And copy flume-env.sh, grouping rules file from "grouping_rules.conf", log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
+    And copy flume-env.sh, log4j.properties, krb5.conf and restart cygnus service. This execution is only once "true"
     And verify if cygnus is installed correctly
     And verify if ckan is installed correctly
     And service "<tenant>", service path "/servicepath", entity type "room", entity id "room1", with attribute number "2", attribute name "random" and attribute type "celcius"

@@ -1043,7 +1043,18 @@ public final class LogHandlers {
         
         try {
             CommonConstants.LoggingLevels.valueOf(logLevel.toUpperCase());
+            // Change log level of rootLogger
             LogManager.getRootLogger().setLevel(Level.toLevel(logLevel.toUpperCase()));
+            LOGGER.debug("log4j logging level of rootLogger updated to " + logLevel.toUpperCase());
+            // Change log level of all possible loggers
+            Enumeration<Logger> loggers = LogManager.getCurrentLoggers();
+            while (loggers.hasMoreElements()) {
+                Logger currentLogger = (Logger) loggers.nextElement();
+                if (currentLogger.getName().contains("com.telefonica.iot.cygnus")) {
+                    LOGGER.debug("log4j logging level of logger " + currentLogger.getName() + " updated to " + logLevel.toUpperCase());
+                    LogManager.getLogger(currentLogger.getName()).setLevel(Level.toLevel(logLevel.toUpperCase()));
+                }
+            }
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println("{\"success\":\"log4j logging level updated to "
                     + logLevel.toUpperCase() + "\" }");

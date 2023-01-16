@@ -23,6 +23,7 @@ import com.google.gson.JsonObject;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
+import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackendImpl;
 import com.telefonica.iot.cygnus.backends.ckan.CKANBackend;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
@@ -281,9 +282,9 @@ public class NGSICKANSink extends NGSISink {
             NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
             aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
             aggregator.setServicePathForData(events.get(0).getServicePathForData());
-            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
-            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
-            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
+            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableNameMappings));
+            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableNameMappings, enableEncoding));
+            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableNameMappings));
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
             aggregator.setEnableUTCRecvTime(true);
             aggregator.setOrgName(buildOrgName(aggregator.getService()));
@@ -296,7 +297,6 @@ public class NGSICKANSink extends NGSISink {
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
-
             // Persist the aggregation
             persistAggregation(aggregator, service, servicePath);
             batch.setNextPersisted(true);
@@ -322,8 +322,8 @@ public class NGSICKANSink extends NGSISink {
             
             // Do the capping
             String service = event.getServiceForNaming(enableNameMappings);
-            String servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            String entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            String servicePathForNaming = event.getServicePathForNaming(enableNameMappings);
+            String entityForNaming = event.getEntityForNaming(enableNameMappings, enableEncoding);
             try {
                 String orgName = buildOrgName(service);
                 String pkgName = buildPkgName(service, servicePathForNaming, events.get(0).getContextElement().getId());

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015-2017 Telefonica Investigación y Desarrollo, S.A.U
+ * Copyright 2014-2017 Telefonica Investigación y Desarrollo, S.A.U
  *
  * This file is part of fiware-cygnus (FIWARE project).
  *
@@ -18,12 +18,21 @@
 
 package com.telefonica.iot.cygnus.sinks;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
 import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 import com.telefonica.iot.cygnus.backends.sql.SQLBackendImpl;
 import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
+import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.utils.NGSICharsets;
+import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.utils.NGSIUtils;
+import org.apache.flume.Context;
+
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
 import com.telefonica.iot.cygnus.errors.CygnusBadContextData;
 import com.telefonica.iot.cygnus.errors.CygnusCappingError;
@@ -32,33 +41,27 @@ import com.telefonica.iot.cygnus.errors.CygnusPersistenceError;
 import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
-import com.telefonica.iot.cygnus.utils.*;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import org.apache.flume.Context;
 
 /**
- * The type Ngsi postgre sql sink.
  *
- * @author hermanjunge Detailed documentation can be found at:https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/design/NGSIPostgreSQLSink.md
+ * @author frb
+ * 
+ * Detailed documentation can be found at:
+ * https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/flume_extensions_catalogue/ngsi_oracle_sink.md
  */
-public class NGSIPostgreSQLSink extends NGSISink {
-
+public class NGSIOracleSQLSink extends NGSISink {
+    
     private static final String DEFAULT_ROW_ATTR_PERSISTENCE = "row";
-    private static final String DEFAULT_PASSWORD = "";
-    private static final String DEFAULT_PORT = "5432";
+    private static final String DEFAULT_PASSWORD = "oracle";
+    private static final String DEFAULT_PORT = "1521";
     private static final String DEFAULT_HOST = "localhost";
-    private static final String DEFAULT_USER_NAME = "postgres";
-    private static final String DEFAULT_DATABASE = "postgres";
-    private static final String DEFAULT_ENABLE_CACHE = "false";
+    private static final String DEFAULT_USER_NAME = "system";
+    private static final String DEFAULT_DATABASE = "xe";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
-    private static final String POSTGRESQL_DRIVER_NAME = "org.postgresql.Driver";
-    private static final SQLInstance POSTGRESQL_INSTANCE_NAME = SQLInstance.POSTGRESQL;
+    //private static final String ORACLE_DRIVER_NAME = "oracle.jdbc.OracleDriver";
+    private static final String ORACLE_DRIVER_NAME = "oracle.jdbc.driver.OracleDriver";    
+    private static final SQLInstance ORACLE_INSTANCE_NAME = SQLInstance.ORACLE;
     private static final String DEFAULT_FIWARE_SERVICE = "default";
     private static final String ESCAPED_DEFAULT_FIWARE_SERVICE = "default_service";
     private static final String DEFAULT_LAST_DATA_MODE = "insert";
@@ -67,20 +70,23 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private static final String DEFAULT_LAST_DATA_TIMESTAMP_KEY = NGSIConstants.RECV_TIME;
     private static final String DEFAULT_LAST_DATA_SQL_TS_FORMAT = "YYYY-MM-DD HH24:MI:SS.MS";
     private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
+    private static final String DEFAULT_ORACLE_NLS_TIMESTAMP_FORMAT = "YYYY-MM-DD HH24:MI:SS.FF6";
+    private static final String DEFAULT_ORACLE_NLS_TIMESTAMP_TZ_FORMAT = "YYYY-MM-DD\"T\"HH24:MI:SS.FF6 TZR";
+    private static final String DEFAULT_ORACLE_LOCATOR = "false";
+    private static final int DEFAULT_ORACLE_MAJOR_VERSION = 11;
 
-    private static final CygnusLogger LOGGER = new CygnusLogger(NGSIPostgreSQLSink.class);
-    private String postgresqlHost;
-    private String postgresqlPort;
-    private String postgresqlDatabase;
-    private String postgresqlUsername;
-    private String postgresqlPassword;
+    private static final CygnusLogger LOGGER = new CygnusLogger(NGSIOracleSQLSink.class);
+    private String oracleHost;
+    private String oraclePort;
+    private String oracleUsername;
+    private String oraclePassword;
+    private String oracleDatabase;    
     private int maxPoolSize;
     private boolean rowAttrPersistence;
-    private SQLBackendImpl postgreSQLPersistenceBackend;
-    private boolean enableCache;
+    private SQLBackendImpl oracleSQLPersistenceBackend;
     private boolean attrNativeTypes;
     private boolean attrMetadataStore;
-    private String postgresqlOptions;
+    private String oracleOptions;
     private boolean persistErrors;
     private String lastDataMode;
     private String lastDataTableSuffix;
@@ -88,62 +94,59 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private String lastDataTimeStampKey;
     private String lastDataSQLTimestampFormat;
     private int maxLatestErrors;
+    private String nlsTimestampFormat;
+    private String nlsTimestampTzFormat;
+    private boolean oracleLocator;
+    private int oracleMajorVersion;
+    private int oracleMaxNameLength;
 
     /**
      * Constructor.
      */
-    public NGSIPostgreSQLSink() {
+    public NGSIOracleSQLSink() {
         super();
-    } // NGSIPostgreSQLSink
-
-    /**
-     * Gets the PostgreSQL host. It is protected due to it is only required for testing purposes.
-     * @return The PostgreSQL host
-     */
-    protected String getPostgreSQLHost() {
-        return postgresqlHost;
-    } // getPostgreSQLHost
+    } // NGSIOracleSQLSink
     
     /**
-     * Gets the PostgreSQL cache. It is protected due to it is only required for testing purposes.
-     * @return The PostgreSQL cache state
+     * Gets the Oracle host. It is protected due to it is only required for testing purposes.
+     * @return The OracleSQL host
      */
-    protected boolean getEnableCache() {
-        return enableCache;
-    } // getPostgreSQLHost
+    protected String getOracleSQLHost() {
+        return oracleHost;
+    } // getOracleSQLHost
+    
+    /**
+     * Gets the OracleSQL port. It is protected due to it is only required for testing purposes.
+     * @return The OracleSQL port
+     */
+    protected String getOracleSQLPort() {
+        return oraclePort;
+    } // getOracleSQLPort
 
     /**
-     * Gets the PostgreSQL port. It is protected due to it is only required for testing purposes.
-     * @return The PostgreSQL port
+     * Gets the oracle database. It is protected due to it is only required for testing purposes.
+     * @return The oracle database
      */
-    protected String getPostgreSQLPort() {
-        return postgresqlPort;
-    } // getPostgreSQLPort
+    protected String getOracleSQLDatabase() {
+        return oracleDatabase;
+    } // getOracleSQLDatabase
 
     /**
-     * Gets the PostgreSQL database. It is protected due to it is only required for testing purposes.
-     * @return The PostgreSQL database
+     * Gets the OracleSQL username. It is protected due to it is only required for testing purposes.
+     * @return The OracleSQL username
      */
-    protected String getPostgreSQLDatabase() {
-        return postgresqlDatabase;
-    } // getPostgreSQLDatabase
-
+    protected String getOracleSQLUsername() {
+        return oracleUsername;
+    } // getOracleSQLUsername
+    
     /**
-     * Gets the PostgreSQL username. It is protected due to it is only required for testing purposes.
-     * @return The PostgreSQL username
+     * Gets the OracleSQL password. It is protected due to it is only required for testing purposes.
+     * @return The OracleSQL password
      */
-    protected String getPostgreSQLUsername() {
-        return postgresqlUsername;
-    } // getPostgreSQLUsername
-
-    /**
-     * Gets the PostgreSQL password. It is protected due to it is only required for testing purposes.
-     * @return The PostgreSQL password
-     */
-    protected String getPostgreSQLPassword() {
-        return postgresqlPassword;
-    } // getPostgreSQLPassword
-
+    protected String getOracleSQLPassword() {
+        return oraclePassword;
+    } // getOracleSQLPassword
+    
     /**
      * Returns if the attribute persistence is row-based. It is protected due to it is only required for testing
      * purposes.
@@ -154,14 +157,31 @@ public class NGSIPostgreSQLSink extends NGSISink {
     } // getRowAttrPersistence
 
     /**
-     * Gets the PostgreSQL options. It is protected due to it is only required for testing purposes.
-     * @return The PostgreSQL options
+     * Gets the OracleSQL options. It is protected due to it is only required for testing purposes.
+     * @return The OracleSQL options
      */
-    protected String getPostgreSQLOptions() {
-        return postgresqlOptions;
-    } // getPostgreSQLOptions
+    protected String getOracleSQLOptions() {
+        return oracleOptions;
+    } // getOracleSQLOptions
 
     /**
+     * Returns the persistence backend. It is protected due to it is only required for testing purposes.
+     * @return The persistence backend
+     */
+    protected SQLBackendImpl getPersistenceBackend() {
+        return oracleSQLPersistenceBackend;
+    } // getPersistenceBackend
+    
+    /**
+     * Sets the persistence backend. It is protected due to it is only required for testing purposes.
+     * @param persistenceBackend
+     */
+    protected void setPersistenceBackend(SQLBackendImpl persistenceBackend) {
+        this.oracleSQLPersistenceBackend = persistenceBackend;
+    } // setPersistenceBackend
+
+
+   /**
      * Returns if the attribute value will be native or stringfy. It will be stringfy due to backward compatibility
      * purposes.
      * @return True if the attribute value will be native, false otherwise
@@ -169,54 +189,32 @@ public class NGSIPostgreSQLSink extends NGSISink {
     protected boolean getNativeAttrTypes() {
         return attrNativeTypes;
     } // attrNativeTypes
-
-    /**
-     * Returns the persistence backend. It is protected due to it is only required for testing purposes.
-     * @return The persistence backend
-     */
-    protected SQLBackendImpl getPersistenceBackend() {
-        return postgreSQLPersistenceBackend;
-    } // getPersistenceBackend
-
-    /**
-     * Sets the persistence backend. It is protected due to it is only required for testing purposes.
-     * @param postgreSQLPersistenceBackend
-     */
-    protected void setPersistenceBackend(SQLBackendImpl postgreSQLPersistenceBackend) {
-        this.postgreSQLPersistenceBackend = postgreSQLPersistenceBackend;
-    } // setPersistenceBackend
-
+    
     @Override
     public void configure(Context context) {
-        // Read NGSISink general configuration
-        super.configure(context);
-        
-        // Impose enable lower case, since PostgreSQL only accepts lower case
-        enableLowercase = true;
-        
-        postgresqlHost = context.getString("postgresql_host", DEFAULT_HOST);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_host=" + postgresqlHost + ")");
-        postgresqlPort = context.getString("postgresql_port", DEFAULT_PORT);
-        int intPort = Integer.parseInt(postgresqlPort);
+        oracleHost = context.getString("oracle_host", DEFAULT_HOST);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_host=" + oracleHost + ")");
+        oraclePort = context.getString("oracle_port", DEFAULT_PORT);
+        int intPort = Integer.parseInt(oraclePort);
 
         if ((intPort <= 0) || (intPort > 65535)) {
             invalidConfiguration = true;
-            LOGGER.warn("[" + this.getName() + "] Invalid configuration (postgresql_port=" + postgresqlPort + ")"
-                    + " -- Must be between 0 and 65535");
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (oracle_port=" + oraclePort + ") "
+                    + "must be between 0 and 65535");
         } else {
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_port=" + postgresqlPort + ")");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_port=" + oraclePort + ")");
         }  // if else
 
-        postgresqlDatabase = context.getString("postgresql_database", DEFAULT_DATABASE);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_database=" + postgresqlDatabase + ")");
-        postgresqlUsername = context.getString("postgresql_username", DEFAULT_USER_NAME);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_username=" + postgresqlUsername + ")");
-        // FIXME: postgresqlPassword should be read as a SHA1 and decoded here
-        postgresqlPassword = context.getString("postgresql_password", DEFAULT_PASSWORD);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_password=" + postgresqlPassword + ")");
+        oracleDatabase = context.getString("oracle_database", DEFAULT_DATABASE);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_database=" + oracleDatabase + ")");
+        oracleUsername = context.getString("oracle_username", DEFAULT_USER_NAME);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_username=" + oracleUsername + ")");
+        // FIXME: oraclePassword should be read encrypted and decoded here
+        oraclePassword = context.getString("oracle_password", DEFAULT_PASSWORD);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_password=" + oraclePassword + ")");
 
-        maxPoolSize = context.getInteger("postgresql_maxPoolSize", DEFAULT_MAX_POOL_SIZE);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_maxPoolSize=" + maxPoolSize + ")");
+        maxPoolSize = context.getInteger("oracle_maxPoolSize", DEFAULT_MAX_POOL_SIZE);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_maxPoolSize=" + maxPoolSize + ")");
 
         rowAttrPersistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE).equals("row");
         String persistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE);
@@ -227,31 +225,18 @@ public class NGSIPostgreSQLSink extends NGSISink {
         } else {
             invalidConfiguration = true;
             LOGGER.warn("[" + this.getName() + "] Invalid configuration (attr_persistence="
-                + persistence + ") -- Must be 'row' or 'column'");
-        }  // if else
-                
-        String enableCacheStr = context.getString("backend.enable_cache", DEFAULT_ENABLE_CACHE);
-        
-        if (enableCacheStr.equals("true") || enableCacheStr.equals("false")) {
-            enableCache = Boolean.valueOf(enableCacheStr);
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (backend.enable_cache=" + enableCache + ")");
-        }  else {
-            invalidConfiguration = true;
-            LOGGER.warn("[" + this.getName() + "] Invalid configuration (backend.enable_cache="
-                + enableCache + ") -- Must be 'true' or 'false'");
+                + persistence + ") must be 'row' or 'column'");
         }  // if else
 
         String attrNativeTypesStr = context.getString("attr_native_types", DEFAULT_ATTR_NATIVE_TYPES);
         if (attrNativeTypesStr.equals("true") || attrNativeTypesStr.equals("false")) {
             attrNativeTypes = Boolean.valueOf(attrNativeTypesStr);
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_native_types=" + attrNativeTypes + ")");
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (attr_native_types=" + attrNativeTypesStr + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.warn("[" + this.getName() + "] Invalid configuration (attr_native_types="
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_native_types="
                 + attrNativeTypesStr + ") -- Must be 'true' or 'false'");
         } // if else
-
-
 
         String attrMetadataStoreStr = context.getString("attr_metadata_store", "true");
 
@@ -263,7 +248,22 @@ public class NGSIPostgreSQLSink extends NGSISink {
             invalidConfiguration = true;
             LOGGER.debug("[" + this.getName() + "] Invalid configuration (attr_metadata_store="
                     + attrMetadataStoreStr + ") -- Must be 'true' or 'false'");
-        }
+        } // if else
+
+        oracleOptions = context.getString("oracle_options", null);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_options=" + oracleOptions + ")");
+
+        String persistErrorsStr = context.getString("persist_errors", "true");
+
+        if (persistErrorsStr.equals("true") || persistErrorsStr.equals("false")) {
+            persistErrors = Boolean.parseBoolean(persistErrorsStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (persist_errors="
+                    + persistErrors + ")");
+        } else {
+            invalidConfiguration = true;
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (persist_errors="
+                    + persistErrorsStr + ") -- Must be 'true' or 'false'");
+        } // if else
 
         lastDataMode = context.getString("last_data_mode", DEFAULT_LAST_DATA_MODE);
 
@@ -292,52 +292,68 @@ public class NGSIPostgreSQLSink extends NGSISink {
         LOGGER.debug("[" + this.getName() + "] Reading configuration (last_data_sql_timestamp_format="
                 + lastDataSQLTimestampFormat + ")");
 
-        postgresqlOptions = context.getString("postgresql_options", null);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_options=" + postgresqlOptions + ")");
+        nlsTimestampFormat = context.getString("nls_timestamp_format", DEFAULT_ORACLE_NLS_TIMESTAMP_FORMAT);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (nls_timestamp_format="
+                + nlsTimestampFormat + ")");
 
-        String persistErrorsStr = context.getString("persist_errors", "true");
+        nlsTimestampTzFormat = context.getString("nls_timestamp_tz_format", DEFAULT_ORACLE_NLS_TIMESTAMP_TZ_FORMAT);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (nls_timestamp_tz_format="
+                + nlsTimestampTzFormat + ")");
 
-        if (persistErrorsStr.equals("true") || persistErrorsStr.equals("false")) {
-            persistErrors = Boolean.parseBoolean(persistErrorsStr);
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (persist_errors="
-                    + persistErrors + ")");
+        String oracleLocatorStr = context.getString("oracle_locator", DEFAULT_ORACLE_LOCATOR);
+        if (oracleLocatorStr.equals("true") || oracleLocatorStr.equals("false")) {
+            oracleLocator = Boolean.valueOf(oracleLocatorStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_locator=" + oracleLocatorStr + ")");
         } else {
             invalidConfiguration = true;
-            LOGGER.debug("[" + this.getName() + "] Invalid configuration (persist_errors="
-                    + persistErrorsStr + ") -- Must be 'true' or 'false'");
+            LOGGER.debug("[" + this.getName() + "] Invalid configuration (oracle_locator="
+                + oracleLocatorStr + ") -- Must be 'true' or 'false'");
         } // if else
+
+        oracleMajorVersion = context.getInteger("oracle_major_version", DEFAULT_ORACLE_MAJOR_VERSION);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_major_version=" + oracleMajorVersion + ")");
+        if (oracleMajorVersion < 12) {
+            oracleMaxNameLength = NGSIConstants.ORACLE11_MAX_NAME_LEN;
+        } else {
+            oracleMaxNameLength = NGSIConstants.ORACLE12_MAX_NAME_LEN;
+        }
 
         maxLatestErrors = context.getInteger("max_latest_errors", DEFAULT_MAX_LATEST_ERRORS);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (max_latest_errors=" + maxLatestErrors + ")");
 
+        super.configure(context);
     } // configure
 
     @Override
     public void start() {
         try {
-            createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, postgresqlOptions, persistErrors, maxLatestErrors);
-            LOGGER.debug("[" + this.getName() + "] Postgresql persistence backend created");
+            createPersistenceBackend(oracleHost, oraclePort, oracleUsername, oraclePassword, maxPoolSize, oracleOptions, persistErrors, maxLatestErrors);
+            LOGGER.debug("[" + this.getName() + "] OracleSQL persistence backend created");
         } catch (Exception e) {
-            String configParams = " postgresqlHost " + postgresqlHost + " postgresqlPort " + postgresqlPort +
-                "  postgresqlUsername " + postgresqlUsername + " postgresqlPassword " + postgresqlPassword +
-                " maxPoolSize " +  maxPoolSize + " postgresqlOptions " +
-                postgresqlOptions + " persistErrors " +  persistErrors + " maxLatestErrors " + maxLatestErrors;
-            LOGGER.error("Error while creating the Postgresql persistence backend. " +
+            String configParams = " oracleHost " + oracleHost + " oraclePort " + oraclePort + " oracleUsername " + oracleUsername + " oraclePassword " + oraclePassword + " maxPoolSize " + maxPoolSize + " oracleOptions " + oracleOptions + " persistErrors " + persistErrors + " maxLatestErrors " + maxLatestErrors;
+            LOGGER.error("Error while creating the OracleSQL persistence backend. " +
                          "Config params= " + configParams +
                          "Details=" + e.getMessage() +
                          "Stack trace: " + Arrays.toString(e.getStackTrace()));
         } // try catch
-
+        
         super.start();
-        LOGGER.info("[" + this.getName() + "] Startup completed");
     } // start
+
+    @Override
+    public void stop() {
+        super.stop();
+        if (oracleSQLPersistenceBackend != null) oracleSQLPersistenceBackend.close();
+    } // stop
 
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
     private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
-        if (postgreSQLPersistenceBackend == null) {
-            postgreSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, sqlOptions, persistErrors, maxLatestErrors);
+        if (oracleSQLPersistenceBackend == null) {
+            oracleSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, ORACLE_INSTANCE_NAME, ORACLE_DRIVER_NAME, sqlOptions, persistErrors, maxLatestErrors);
+            oracleSQLPersistenceBackend.setNlsTimestampFormat(nlsTimestampFormat);
+            oracleSQLPersistenceBackend.setNlsTimestampTzFormat(nlsTimestampTzFormat);
         }
     }
 
@@ -348,7 +364,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
             return;
         } // if
-
+ 
         // Iterate on the destinations
         batch.startIterator();
         
@@ -357,10 +373,10 @@ public class NGSIPostgreSQLSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Processing sub-batch regarding the "
                     + destination + " destination");
 
-            // get the sub-batch for this destination
+            // Get the events within the current sub-batch
             ArrayList<NGSIEvent> events = batch.getNextEvents();
-
-            // get an aggregator for this destination and initialize it
+            
+            // Get an aggregator for this destination and initialize it
             NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
             aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
             aggregator.setServicePathForData(events.get(0).getServicePathForData());
@@ -369,23 +385,24 @@ public class NGSIPostgreSQLSink extends NGSISink {
             aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableNameMappings));
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
             aggregator.setSchemeName(buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
-            aggregator.setDbName(buildDBName(events.get(0).getServiceForNaming(enableNameMappings)));
+            aggregator.setDbName(buildDbName(aggregator.getService()));
             aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
             aggregator.setAttrNativeTypes(attrNativeTypes);
             aggregator.setAttrMetadataStore(attrMetadataStore);
+            aggregator.setEnableGeoParseOracle(true);
+            aggregator.setEnableGeoParseOracleLocator(oracleLocator);
             aggregator.setEnableNameMappings(enableNameMappings);
             aggregator.setLastDataMode(lastDataMode);
-            aggregator.setLastDataTimestampKey(lastDataTimeStampKey);
             aggregator.setLastDataUniqueKey(lastDataUniqueKey);
+            aggregator.setLastDataTimestampKey(lastDataTimeStampKey);
             aggregator.initialize(events.get(0));
-
             for (NGSIEvent event : events) {
                 aggregator.aggregate(event);
             } // for
             LOGGER.debug("[" + getName() + "] adding event to aggregator object  (name=" +
-                         SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation().keySet(), SQLQueryUtils.POSTGRES_FIELDS_MARK) + ", values=" +
+                         SQLQueryUtils.getFieldsForInsert(aggregator.getAggregation().keySet(), SQLQueryUtils.ORACLE_FIELDS_MARK) + ", values=" +
                          SQLQueryUtils.getValuesForInsert(aggregator.getAggregation(), attrNativeTypes) + ")");
-            // persist the fieldValues
+            // Persist the aggregation
             persistAggregation(aggregator);
             batch.setNextPersisted(true);
         } // for
@@ -393,20 +410,57 @@ public class NGSIPostgreSQLSink extends NGSISink {
     
     @Override
     public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
+        if (batch == null) {
+            LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
+            return;
+        } // if
+
+        // Iterate on the destinations
+        batch.startIterator();
+        
+        while (batch.hasNext()) {
+            // Get the events within the current sub-batch
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
+
+            // Get a representative from the current destination sub-batch
+            NGSIEvent event = events.get(0);
+            
+            // Do the capping
+            String service = event.getServiceForNaming(enableNameMappings);
+            String servicePathForNaming = event.getServicePathForNaming(enableNameMappings);
+            String entity = event.getEntityForNaming(enableNameMappings, enableEncoding);
+            String entityType = event.getEntityTypeForNaming(enableNameMappings);
+            String attribute = event.getAttributeForNaming(enableNameMappings);
+            
+            try {
+                String dbName = buildDbName(service);
+                String tableName = buildTableName(servicePathForNaming, entity, entityType, attribute);
+                LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",dbName="
+                        + dbName + ", tableName=" + tableName + ")");
+                oracleSQLPersistenceBackend.capRecords(dbName, tableName, maxRecords);
+            } catch (CygnusBadConfiguration e) {
+                throw new CygnusCappingError("Data capping error", "CygnusBadConfiguration", e.getMessage());
+            } catch (CygnusRuntimeError e) {
+                throw new CygnusCappingError("Data capping error", "CygnusRuntimeError", e.getMessage());
+            } catch (CygnusPersistenceError e) {
+                throw new CygnusCappingError("Data capping error", "CygnusPersistenceError", e.getMessage());
+            } // try catch
+        } // while
     } // capRecords
 
     @Override
     public void expirateRecords(long expirationTime) throws CygnusExpiratingError {
         LOGGER.debug("[" + this.getName() + "] Expirating records (time=" + expirationTime + ")");
+        
         try {
-            postgreSQLPersistenceBackend.expirateRecordsCache(expirationTime);
+            oracleSQLPersistenceBackend.expirateRecordsCache(expirationTime);
         } catch (CygnusRuntimeError e) {
             throw new CygnusExpiratingError("Data expiration error", "CygnusRuntimeError", e.getMessage());
         } catch (CygnusPersistenceError e) {
             throw new CygnusExpiratingError("Data expiration error", "CygnusPersistenceError", e.getMessage());
         } // try catch
     } // expirateRecords
-
+    
     protected NGSIGenericAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
             return new NGSIGenericRowAggregator();
@@ -414,11 +468,12 @@ public class NGSIPostgreSQLSink extends NGSISink {
             return new NGSIGenericColumnAggregator();
         } // if else
     } // getAggregator
-
-    private void persistAggregation(NGSIGenericAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
+    
+    private void persistAggregation(NGSIGenericAggregator aggregator)
+        throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
 
         String schemaName = aggregator.getSchemeName(enableLowercase);
-        String databaseName = aggregator.getDbName(enableLowercase);
+        String dbName = aggregator.getDbName(enableLowercase);        
         String tableName = aggregator.getTableName(enableLowercase);
 
         // Escape a syntax error in SQL
@@ -429,46 +484,38 @@ public class NGSIPostgreSQLSink extends NGSISink {
         if (lastDataMode.equals("upsert") || lastDataMode.equals("both")) {
             if (rowAttrPersistence) {
                 LOGGER.warn("[" + this.getName() + "] no upsert due to row mode");
-            }  else {
-                postgreSQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
-                                                               aggregator.getLastDataToPersist(),
-                                                               databaseName,
-                                                               schemaName,
-                                                               tableName,
-                                                               lastDataTableSuffix,
-                                                               lastDataUniqueKey,
-                                                               lastDataTimeStampKey,
-                                                               lastDataSQLTimestampFormat,
-                                                               attrNativeTypes);
+            } else {
+                LOGGER.warn("[" + this.getName() + "] no upsert or both mode avaiable for oracle");
             }
         }
-        if (lastDataMode.equals("insert") || lastDataMode.equals("both")) {
+
+        if (lastDataMode.equals("insert")) {
             try {
                 // Try to insert without create database and table before
-                postgreSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
-                                                               databaseName,
-                                                               schemaName,
-                                                               tableName,
-                                                               attrNativeTypes);
+                oracleSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                              dbName,
+                                                              schemaName,
+                                                              tableName,
+                                                              attrNativeTypes);
             } catch (CygnusPersistenceError | CygnusBadContextData | CygnusRuntimeError ex) {
                 // creating the database and the table has only sense if working in row mode, in column node
                 // everything must be provisioned in advance
                 if (rowAttrPersistence) {
                     // This case will create a false error entry in error table
                     String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist(),
-                                                                              POSTGRESQL_INSTANCE_NAME);
-                     try {
-                         // Try to insert without create database before
-                         postgreSQLPersistenceBackend.createTable(databaseName, schemaName, tableName, fieldsForCreate);
-                     } catch (CygnusRuntimeError | CygnusPersistenceError ex2) {
-                         postgreSQLPersistenceBackend.createDestination(schemaName);
-                         postgreSQLPersistenceBackend.createTable(databaseName, schemaName, tableName, fieldsForCreate);
-                     } // catch
-                     postgreSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
-                                                                    databaseName,
-                                                                    schemaName,
-                                                                    tableName,
-                                                                    attrNativeTypes);
+                                                                              ORACLE_INSTANCE_NAME);
+                    try {
+                        // Try to insert without create database before
+                        oracleSQLPersistenceBackend.createTable(dbName, schemaName, tableName, fieldsForCreate);
+                    } catch (CygnusRuntimeError | CygnusPersistenceError ex2) {
+                        oracleSQLPersistenceBackend.createDestination(schemaName);
+                        oracleSQLPersistenceBackend.createTable(dbName, schemaName, tableName, fieldsForCreate);
+                    } // catch
+                    oracleSQLPersistenceBackend.insertTransaction(aggregator.getAggregationToPersist(),
+                                                                  dbName,
+                                                                  schemaName,
+                                                                  tableName,
+                                                                  attrNativeTypes);
                 } else {
                     // column
                     throw ex;
@@ -476,14 +523,14 @@ public class NGSIPostgreSQLSink extends NGSISink {
             } // catch
         }
     } // persistAggregation
-
+    
     /**
-     * Creates a PostgreSQL DB name given the FIWARE service.
+     * Creates a OracleSQL DB name given the FIWARE service.
      * @param service
-     * @return The PostgreSQL DB name
+     * @return The OracleSQL DB name
      * @throws CygnusBadConfiguration
      */
-    public String buildDBName(String service) throws CygnusBadConfiguration {
+    protected String buildDbName(String service) throws CygnusBadConfiguration {
         String name = null;
 
         if (enableEncoding) {
@@ -495,10 +542,10 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 case DMBYFIXEDENTITYTYPEDATABASE:
                 case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
                     if (service != null)
-                        name = NGSICharsets.encodePostgreSQL(service);
+                        name = NGSICharsets.encodeOracleSQL(service);
                     break;
                 default:
-                    name = postgresqlDatabase;
+                    name = oracleDatabase;
             }
         } else {
             switch(dataModel) {
@@ -512,21 +559,21 @@ public class NGSIPostgreSQLSink extends NGSISink {
                         name = NGSIUtils.encode(service, false, true);
                     break;
                 default:
-                    name = postgresqlDatabase;
+                    name = oracleDatabase;
             }
         } // if else
-        if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
-            throw new CygnusBadConfiguration("Building DB name '" + name
-                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_NAME_LEN);
+        if (name.length() > this.oracleMaxNameLength) {
+            throw new CygnusBadConfiguration("Building database name '" + name
+                    + "' and its length is greater than " + this.oracleMaxNameLength);
         } // if
 
         return name;
-    } // buildSchemaName
+    } // buildDbName
 
     /**
-     * Creates a PostgreSQL scheme name given the FIWARE service.
+     * Creates a OracleSQL scheme name given the FIWARE service.
      * @param service
-     * @return The PostgreSQL scheme name
+     * @return The oracleSQL scheme name
      * @throws CygnusBadConfiguration
      */
     public String buildSchemaName(String service, String subService) throws CygnusBadConfiguration {
@@ -537,79 +584,73 @@ public class NGSIPostgreSQLSink extends NGSISink {
                 case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITYTYPEDATABASESCHEMA:
                 case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
-                    name = NGSICharsets.encodePostgreSQL(subService);
+                    name = NGSICharsets.encodeOracleSQL(subService);
                     break;
                 default:
-                    name = NGSICharsets.encodePostgreSQL(service);
+                    name = NGSICharsets.encodeOracleSQL(service);
             }
         } else {
             switch(dataModel) {
                 case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITYTYPEDATABASESCHEMA:
                 case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
-                    name = NGSIUtils.encode(subService, true, false);
+                    name = NGSIUtils.encode(subService, false, true);
                     break;
                 default:
                     name = NGSIUtils.encode(service, false, true);
             }
         } // if else
 
-        if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
+        if (name.length() > this.oracleMaxNameLength) {
             throw new CygnusBadConfiguration("Building schema name '" + name
-                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_NAME_LEN);
+                    + "' and its length is greater than " + this.oracleMaxNameLength);
         } // if
 
         return name;
     } // buildSchemaName
-
+    
     /**
-     * Creates a PostgreSQL table name given the FIWARE service path, the entity and the attribute.
+     * Creates a OracleSQL table name given the FIWARE service path, the entity and the attribute.
      * @param servicePath
      * @param entity
      * @param attribute
-     * @return The PostgreSQL table name
+     * @return The OracleSQL table name
      * @throws CygnusBadConfiguration
      */
-    public String buildTableName(String servicePath, String entity, String entityType, String attribute) throws CygnusBadConfiguration {
+    protected String buildTableName(String servicePath, String entity, String entityType, String attribute)
+            throws CygnusBadConfiguration {
         String name;
 
         if (enableEncoding) {
-            switch(dataModel) {
+            switch (dataModel) {
                 case DMBYSERVICEPATH:
-                    name = NGSICharsets.encodePostgreSQL(servicePath);
+                    name = NGSICharsets.encodeOracleSQL(servicePath);
                     break;
-                case DMBYENTITYDATABASE:
-                case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITY:
-                    name = NGSICharsets.encodePostgreSQL(servicePath)
+                case DMBYENTITYDATABASE:
+                    name = NGSICharsets.encodeOracleSQL(servicePath)
                             + CommonConstants.CONCATENATOR
-                            + NGSICharsets.encodePostgreSQL(entity);
+                            + NGSICharsets.encodeOracleSQL(entity);
                     break;
-                case DMBYENTITYTYPEDATABASE:
-                case DMBYENTITYTYPEDATABASESCHEMA:
                 case DMBYENTITYTYPE:
-                    name = NGSICharsets.encodeMySQL(servicePath)
+                case DMBYENTITYTYPEDATABASE:
+                    name = NGSICharsets.encodeOracleSQL(servicePath)
                             + CommonConstants.CONCATENATOR
-                            + NGSICharsets.encodeMySQL(entityType);
+                            + NGSICharsets.encodeOracleSQL(entityType);
                     break;
                 case DMBYATTRIBUTE:
-                    name = NGSICharsets.encodePostgreSQL(servicePath)
+                    name = NGSICharsets.encodeOracleSQL(servicePath)
                             + CommonConstants.CONCATENATOR
-                            + NGSICharsets.encodePostgreSQL(entity)
+                            + NGSICharsets.encodeOracleSQL(entity)
                             + CommonConstants.CONCATENATOR
-                            + NGSICharsets.encodePostgreSQL(attribute);
-                    break;
-                case DMBYFIXEDENTITYTYPE:
-                case DMBYFIXEDENTITYTYPEDATABASE:
-                case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
-                    name = NGSICharsets.encodePostgreSQL(entityType);
+                            + NGSICharsets.encodeOracleSQL(attribute);
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use dm-by-service-path, dm-by-entity, dm-by-entity-database, dm-by-entity-database-schema, dm-by-entity-type, dm-by-entity-type-database, dm-by-entity-type-database-schema or dm-by-attribute");
+                            + "'. Please, use dm-by-service-path, dm-by-entity or dm-by-attribute");
             } // switch
         } else {
-            switch(dataModel) {
+            switch (dataModel) {
                 case DMBYSERVICEPATH:
                     if (servicePath.equals("/")) {
                         throw new CygnusBadConfiguration("Default service path '/' cannot be used with "
@@ -619,14 +660,12 @@ public class NGSIPostgreSQLSink extends NGSISink {
                     name = NGSIUtils.encode(servicePath, true, false);
                     break;
                 case DMBYENTITYDATABASE:
-                case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITY:
                     String truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
                             + NGSIUtils.encode(entity, false, true);
                     break;
                 case DMBYENTITYTYPEDATABASE:
-                case DMBYENTITYTYPEDATABASESCHEMA:
                 case DMBYENTITYTYPE:
                     truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
@@ -638,23 +677,18 @@ public class NGSIPostgreSQLSink extends NGSISink {
                             + NGSIUtils.encode(entity, false, true)
                             + '_' + NGSIUtils.encode(attribute, false, true);
                     break;
-                case DMBYFIXEDENTITYTYPEDATABASE:
-                case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
-                case DMBYFIXEDENTITYTYPE:
-                    name = NGSIUtils.encode(entityType, false, true);
-                    break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITYDATABASE, DMBYENTITYDATABASESCHEMA, DMBYENTITY, DMBYENTITYTYPEDATABASE, DMBYENTITYTYPEDATABASESCHEMA, DMBYENTITYTYPE, DMBYFIXEDENTITYTYPE, DMBYFIXEDENTITYTYPEDATABASE, DMBYFIXEDENTITYTYPEDATABASESCHEMA or DMBYATTRIBUTE");
+                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY, DMBYENTITYTYPE or DMBYATTRIBUTE");
             } // switch
         } // if else
 
-        if (name.length() > NGSIConstants.POSTGRESQL_MAX_NAME_LEN) {
+        if (name.length() > this.oracleMaxNameLength) {
             throw new CygnusBadConfiguration("Building table name '" + name
-                    + "' and its length is greater than " + NGSIConstants.POSTGRESQL_MAX_NAME_LEN);
+                    + "' and its length is greater than " + this.oracleMaxNameLength);
         } // if
 
         return name;
     } // buildTableName
 
-} // NGSIPostgreSQLSink
+} // NGSIOracleSQLSink

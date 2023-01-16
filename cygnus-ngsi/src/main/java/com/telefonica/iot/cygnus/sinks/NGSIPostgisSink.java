@@ -371,9 +371,9 @@ public class NGSIPostgisSink extends NGSISink {
             NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
             aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
             aggregator.setServicePathForData(events.get(0).getServicePathForData());
-            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
-            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
-            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
+            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableNameMappings));
+            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableNameMappings, enableEncoding));
+            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableNameMappings));
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
             aggregator.setSchemeName(buildSchemaName(aggregator.getService(), aggregator.getServicePathForNaming()));
             aggregator.setDbName(buildDBName(events.get(0).getServiceForNaming(enableNameMappings)));
@@ -462,7 +462,8 @@ public class NGSIPostgisSink extends NGSISink {
                 // everything must be provisioned in advance
                 if (rowAttrPersistence) {
                     // This case will create a false error entry in error table
-                    String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+                    String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist(),
+                                                                              POSTGIS_INSTANCE_NAME);
                     try {
                         // Try to insert without create database before
                         postgisPersistenceBackend.createTable(dataBaseName, schemaName, tableName, fieldsForCreate);
@@ -498,6 +499,8 @@ public class NGSIPostgisSink extends NGSISink {
                 case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITYTYPEDATABASE:
                 case DMBYENTITYTYPEDATABASESCHEMA:
+                case DMBYFIXEDENTITYTYPEDATABASE:
+                case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
                     if (service != null)
                         name = NGSICharsets.encodePostgreSQL(service);
                     break;
@@ -510,6 +513,8 @@ public class NGSIPostgisSink extends NGSISink {
                 case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITYTYPEDATABASE:
                 case DMBYENTITYTYPEDATABASESCHEMA:
+                case DMBYFIXEDENTITYTYPEDATABASE:
+                case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
                     if (service != null)
                         name = NGSIUtils.encode(service, false, true);
                     break;
@@ -538,6 +543,7 @@ public class NGSIPostgisSink extends NGSISink {
             switch(dataModel) {
                 case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITYTYPEDATABASESCHEMA:
+                case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
                     name = NGSICharsets.encodePostgreSQL(subService);
                     break;
                 default:
@@ -547,6 +553,7 @@ public class NGSIPostgisSink extends NGSISink {
             switch(dataModel) {
                 case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITYTYPEDATABASESCHEMA:
+                case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
                     name = NGSIUtils.encode(subService, false, true);
                     break;
                 default:
@@ -599,9 +606,14 @@ public class NGSIPostgisSink extends NGSISink {
                             + CommonConstants.CONCATENATOR
                             + NGSICharsets.encodePostgreSQL(attribute);
                     break;
+                case DMBYFIXEDENTITYTYPE:
+                case DMBYFIXEDENTITYTYPEDATABASE:
+                case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
+                    name = NGSICharsets.encodePostgreSQL(entityType);
+                    break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use dm-by-service-path, dm-by-entity, dm-by-entity-database, dm-by-entity-database-schema, dm-by-entity-type, dm-by-entity-type-database, dm-by-entity-type-database-schema or dm-by-attribute");
+                            + "'. Please, use dm-by-service-path, dm-by-entity, dm-by-entity-database, dm-by-entity-database-schema, dm-by-entity-type, dm-by-entity-type-database, dm-by-entity-type-database-schema, dm-by-fixed-entity-type-database, dm-by-fixed-entity-type-database-schema or dm-by-attribute");
             } // switch
         } else {
             switch(dataModel) {
@@ -633,9 +645,14 @@ public class NGSIPostgisSink extends NGSISink {
                             + NGSIUtils.encode(entity, false, true)
                             + '_' + NGSIUtils.encode(attribute, false, true);
                     break;
+                case DMBYFIXEDENTITYTYPEDATABASE:
+                case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
+                case DMBYFIXEDENTITYTYPE:
+                    name = NGSIUtils.encode(entityType, false, true);
+                    break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITYDATABASE, DMBYENTITYDATABASESCHEMA, DMBYENTITY, DMBYENTITYTYPEDATABASE, DMBYENTITYTYPEDATABASESCHEMA, DMBYENTITYTYPE or DMBYATTRIBUTE");
+                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITYDATABASE, DMBYENTITYDATABASESCHEMA, DMBYENTITY, DMBYENTITYTYPEDATABASE, DMBYENTITYTYPEDATABASESCHEMA, DMBYENTITYTYPE, DMBYFIXEDENTITYTYPE, DMBYFIXEDENTITYTYPEDATABASE, DMBYFIXEDENTITYTYPEDATABASESCHEMA or DMBYATTRIBUTE");
             } // switch
         } // if else
 

@@ -64,16 +64,17 @@ public abstract class NGSIGenericAggregator {
     private String lastDataTimestampKey;
     private String lastDataUniqueKey;
     private boolean attrNativeTypes;
-    private boolean enableGrouping;
     private boolean enableEncoding;
     private boolean enableNameMappings;
     private boolean enableGeoParse;
+    private boolean enableGeoParseOracle;
+    private boolean enableGeoParseOracleLocator;
     private boolean attrMetadataStore;
     private boolean enableUTCRecvTime;
     private String lastDataMode;
     private long lastDataTimestamp;
     private String lastDataTimestampKeyOnAggregation;
-    private String lastDataUniqueKeyOnAggragation;
+    private String lastDataUniqueKeyOnAggregation;
 
     /**
      * Gets aggregation.
@@ -273,18 +274,18 @@ public abstract class NGSIGenericAggregator {
     public void setLastDataTimestampKeyOnAggregation(String lastDataTimestampKeyOnAggregation) { this.lastDataTimestampKeyOnAggregation = lastDataTimestampKeyOnAggregation; }
 
     /**
-     * Gets last data key on aggragation.
+     * Gets last data key on aggregation.
      *
-     * @return the last data key on aggragation
+     * @return the last data key on aggregation
      */
-    public String getLastDataUniqueKeyOnAggragation() { return lastDataUniqueKeyOnAggragation; }
+    public String getLastDataUniqueKeyOnAggregation() { return lastDataUniqueKeyOnAggregation; }
 
     /**
-     * Sets last data key on aggragation.
+     * Sets last data key on aggregation.
      *
-     * @param lastDataUniqueKeyOnAggragation the last data key on aggragation
+     * @param lastDataUniqueKeyOnAggregation the last data key on aggregation
      */
-    public void setLastDataUniqueKeyOnAggragation(String lastDataUniqueKeyOnAggragation) { this.lastDataUniqueKeyOnAggragation = lastDataUniqueKeyOnAggragation; }
+    public void setLastDataUniqueKeyOnAggregation(String lastDataUniqueKeyOnAggregation) { this.lastDataUniqueKeyOnAggregation = lastDataUniqueKeyOnAggregation; }
 
     /**
      * Gets hdfs folder. For HDFS sink.
@@ -393,6 +394,43 @@ public abstract class NGSIGenericAggregator {
     public void setEnableGeoParse(boolean enableGeoParse) {
         this.enableGeoParse = enableGeoParse;
     } //setEnableGeoParse
+
+    /**
+     * Is enable geo parse boolean. Oracle flag to process geometry types.
+     *
+     * @return the boolean
+     */
+    public boolean isEnableGeoParseOracle() {
+        return enableGeoParseOracle;
+    } //isEnableGeoParseOracle
+
+    /**
+     * Sets enable geo parse oracle
+     *
+     * @param enableGeoParse the enable geo parse
+     */
+    public void setEnableGeoParseOracle(boolean enableGeoParseOracle) {
+        this.enableGeoParseOracle = enableGeoParseOracle;
+    } //setEnableGeoParseOracle
+
+    /**
+     * Is enable geo parse boolean. Oracle flag to process geometry types.
+     *
+     * @return the boolean
+     */
+    public boolean isEnableGeoParseOracleLocator() {
+        return enableGeoParseOracleLocator;
+    } //isEnableGeoParseOracleLocator
+
+    /**
+     * Sets enable geo parse oracle locator (12.2.)
+     *
+     * @param enableGeoParseLocator the enable geo parse
+     */
+    public void setEnableGeoParseOracleLocator(boolean enableGeoParseOracleLocator) {
+        this.enableGeoParseOracleLocator = enableGeoParseOracleLocator;
+    } //setEnableGeoParseOracleLocator
+
 
     /**
      * Gets long timestamp of the record stored on the last data collection
@@ -702,24 +740,6 @@ public abstract class NGSIGenericAggregator {
     public void setAttrNativeTypes(boolean attrNativeTypes) {
         this.attrNativeTypes = attrNativeTypes;
     } //setAttrNativeTypes
-
-    /**
-     * Is enable grouping boolean.
-     *
-     * @return the boolean
-     */
-    public boolean isEnableGrouping() {
-        return enableGrouping;
-    } //isEnableGrouping
-
-    /**
-     * Sets enable grouping.
-     *
-     * @param enableGrouping the enable grouping
-     */
-    public void setEnableGrouping(boolean enableGrouping) {
-        this.enableGrouping = enableGrouping;
-    } //setEnableGrouping
 
     /**
      * Is enable encoding boolean.

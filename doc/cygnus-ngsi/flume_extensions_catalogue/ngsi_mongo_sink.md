@@ -81,7 +81,7 @@ Using the new encoding:
 | `/` | `sth_x002f` | `sth_x002fxffff<entityId>xffff<entityType>` | `sth_x002fxffff<entityId>xffff<entityType>xffff<attrName>` |
 | `/<svcPath>` | `sth_x002f<svcPath>` | `sth_x002f<svcPath>xffff<entityId>xffff<entityType>` | `sth_x002f<svcPath>xffff<entityId>xffff<entityType>xffff<attrName>` |
 
-Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
+Please observe the concatenation of entity ID and type is already given in the `notified_entities` header value within the `NGSIEvent`.
 
 [Top](#top)
 
@@ -144,7 +144,6 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
              correlationId=1429535775-308-0000000000,
              fiware-service=vehicles,
              fiware-servicepath=/4wheels,
-             <grouping_rules_interceptor_headers>,
              <name_mappings_interceptor_headers>
         },
         body={
@@ -296,7 +295,6 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.NGSIMongoSink |
 | channel | yes | N/A |
 | enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable\_grouping | no | false | Always <i>false</i> ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data\_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported. |
@@ -328,7 +326,6 @@ A configuration example could be:
     cygnus-ngsi.sinks.mongo-sink.data_model = dm-by-entity
     cygnus-ngsi.sinks.mongo-sink.attr_persistence = column
     cygnus-ngsi.sinks.mongo-sink.enable_encoding = false
-    cygnus-ngsi.sinks.mongo-sink.enable_grouping = false
     cygnus-ngsi.sinks.mongo-sink.enable_lowercase = false
     cygnus-ngsi.sinks.mongo-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.mongo-sink.mongo_hosts = 192.168.80.34:27017

@@ -90,7 +90,7 @@ Using the new encoding:
 | `/` | `sth_x002f.aggr` | `sth_x002fxffff<entityId>xffff<entityType>.aggr` | `sth_x002fxffff<entityId>xffff<entityType>xffff<attrName>.aggr` |
 | `/<svcPath>` | `sth_x002fxffff<svcPath>.aggr` | `sth_x002fxffff<svcPath>xffff<entityId>xffff<entityType>.aggr` | `sth_x002fxffff<svcPath>xffff<entityId>xffff<entityType>xffff<attrName>.aggr` |
 
-Please observe the concatenation of entity ID and type is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
+Please observe the concatenation of entity ID and type is already given in the `notified_entities` header value within the `NGSIEvent`.
 
 [Top](#top)
 
@@ -126,7 +126,6 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 	         correlationId=1429535775-308-0000000000,
 	         fiware-service=vehicles,
 	         fiware-servicepath=/4wheels,
-	         <grouping_rules_interceptor_headers>,
 	         <name_mappings_interceptor_headers>
         },
         body={
@@ -298,7 +297,6 @@ Assuming `data_model=dm-by-entity` and all the possible resolutions as configura
 | type | yes | N/A | com.telefonica.iot.cygnus.sinks.NGSISTHSink |
 | channel | yes | N/A |
 | enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable\_grouping | no | false | Always <i>false</i>. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data\_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported. |
@@ -325,7 +323,6 @@ A configuration example could be:
     cygnus-ngsi.sinks.sth-sink.type = com.telefonica.iot.cygnus.sinks.NGSISTHSink
     cygnus-ngsi.sinks.sth-sink.channel = sth-channel
     cygnus-ngsi.sinks.sth-sink.enable_encoding = false
-    cygnus-ngsi.sinks.sth-sink.enable_grouping = false
     cygnus-ngsi.sinks.sth-sink.enable_lowercase = false
     cygnus-ngsi.sinks.sth-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.sth-sink.data_model = dm-by-entity

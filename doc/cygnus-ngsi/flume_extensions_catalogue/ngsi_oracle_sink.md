@@ -1,11 +1,11 @@
-# <a name="top"></a>NGSIMySQLSink
+# <a name="top"></a>NGSIOracleSQLSink
 Content:
 
 * [Functionality](#section1)
     * [Mapping NGSI events to `NGSIEvent` objects](#section1.1)
-    * [Mapping `NGSIEvent`s to MySQL data structures](#section1.2)
-        * [MySQL databases naming conventions](#section1.2.1)
-        * [MySQL tables naming conventions](#section1.2.2)
+    * [Mapping `NGSIEvent`s to Oracle data structures](#section1.2)
+        * [Oracle databases naming conventions](#section1.2.1)
+        * [Oracle tables naming conventions](#section1.2.2)
         * [Row-like storing](#section1.2.3)
         * [Column-like storing](#section1.2.4)
         * [Native attribute type](#section1.2.5)
@@ -24,14 +24,13 @@ Content:
         * [About the encoding](#section2.3.5)
         * [About capping resources/expirating records](#section2.3.6)
 * [Programmers guide](#section3)
-    * [`NGSIMySQLSink` class](#section3.1)
+    * [`NGSIOracleSQLSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
-    * [SSL/TLS connection](#section3.3)
 
 ## <a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.NGSIMySQLSink`, or simply `NGSIMySQLSink` is a sink designed to persist NGSI-like context data events within a [MySQL server](https://www.mysql.com/). Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.NGSIOracleSQLSink`, or simply `NGSIOracleSQLSink` is a sink designed to persist NGSI-like context data events within a [Oracle server](https://www.oracle.com/) 11g and 12c legacy versions. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
-Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific MySQL data structures.
+Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific Oracle data structures.
 
 Next sections will explain this in detail.
 
@@ -44,30 +43,31 @@ This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks
 
 [Top](#top)
 
-### <a name="section1.2"></a>Mapping `NGSIEvent`s to MySQL data structures
-MySQL organizes the data in databases that contain tables of data rows. Such organization is exploited by `NGSIMySQLSink` each time a `NGSIEvent` is going to be persisted.
+### <a name="section1.2"></a>Mapping `NGSIEvent`s to Oracle data structures
+Oracle organizes the data in databases that contain tables of data rows. Such organization is exploited by `NGSIOracleSQLSink` each time a `NGSIEvent` is going to be persisted.
 
 [Top](#top)
 
-#### <a name="section1.2.1"></a>MySQL databases naming conventions
+#### <a name="section1.2.1"></a>Oracle databases naming conventions
 A database named as the notified `fiware-service` header value (or, in absence of such a header, the defaulted value for the FIWARE service) is created (if not existing yet).
 
-It must be said MySQL [only accepts](http://dev.mysql.com/doc/refman/5.7/en/identifiers.html) alphanumerics `$` and `_`. This leads to certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
+It must be said Oracle [only accepts](https://docs.oracle.com/cd/E92917_01/PDF/8.1.x.x/common/HTML/DM_Naming/2_Table_and_Column_Naming_Standards.htm) alphanumerics `$`, `_` and `#`. This leads to certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
 
-MySQL [databases name length](http://dev.mysql.com/doc/refman/5.7/en/identifiers.html) is limited to 64 characters.
+Oracle prior version to 12.2 [databases name length](https://docs.oracle.com/en/database/oracle/oracle-database/21/odpnt/EFCoreIdentifier.html) is limited to 30 characters.
 
 [Top](#top)
 
-#### <a name="section1.2.2"></a>MySQL tables naming conventions
+#### <a name="section1.2.2"></a>Oracle tables naming conventions
 The name of these tables depends on the configured data model (see the [Configuration](#section2.1) section for more details):
 
 * Data model by service path (`data_model=dm-by-service-path`). As the data model name denotes, the notified FIWARE service path (or the configured one as default in [`NGSIRestHandler`](./ngsi_rest_handler.md) is used as the name of the table. This allows the data about all the NGSI entities belonging to the same service path is stored in this unique table. The only constraint regarding this data model is the FIWARE service path cannot be the root one (`/`).
 * Data model by entity (`data_model=dm-by-entity`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity ID and type in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity ID and type are concatenated.
 * Data model by entity type (`data_model=dm-by-entity-type`). For each entity, the notified/default FIWARE service path is concatenated to the notified entity type in order to compose the table name. The concatenation character is `_` (underscore). If the FIWARE service path is the root one (`/`) then only the entity type is concatenated.
 
-It must be said MySQL [only accepts](http://dev.mysql.com/doc/refman/5.7/en/identifiers.html) alphanumerics `$` and `_`. This leads to certain [encoding](#section2.3.5) is applied depending on the `enable_encoding` configuration parameter.
+It must be said Oracle [only accepts](https://docs.oracle.com/cd/E92917_01/PDF/8.1.x.x/common/HTML/DM_Naming/2_Table_and_Column_Naming_Standards.htm) alphanumerics `$`, `_` and `#`. This leads to certain [encoding](#section2.3.3) is applied depending on the `enable_encoding` configuration parameter.
 
-MySQL [tables name length](http://dev.mysql.com/doc/refman/5.7/en/identifiers.html) is limited to 64 characters.
+Oracle prior version to 12.2 [databases name length](https://docs.oracle.com/en/database/oracle/oracle-database/21/odpnt/EFCoreIdentifier.html) is limited to 30 characters.
+
 
 The following table summarizes the table name composition (old encoding):
 
@@ -105,7 +105,7 @@ Regarding the specific data stored within the above table, if `attr_persistence`
 #### <a name="section1.2.4"></a>Column-like storing
 Regarding the specific data stored within the above table, if `attr_persistence` parameter is set to `column` then a single line is composed for the whole notified entity, containing the following fields:
 
-* `recvTime`: Timestamp in human-readable format (Similar to [ISO 8601](http://en.wikipedia.org/wiki/ISO_8601), but avoiding the `Z` character denoting UTC, since all MySQL timestamps are supposed to be in UTC format).
+* `recvTime`: Timestamp in human-readable format (Similar to [ISO 8601](http://en.wikipedia.org/wiki/ISO_8601), but avoiding the `Z` character denoting UTC, since all Oracle timestamps are supposed to be in UTC format).
 * `fiwareServicePath`: The notified one or the default one.
 * `entityId`: Notified entity identifier.
 * `entityType`: Notified entity type.
@@ -122,11 +122,11 @@ Regarding the specific data stored within the above table, if `attr_native_types
 
 Type json     | Type
 ------------- | --------------------------------------- 
-string        | text
-number        | double, precision, real, others (numeric, decimal)
-boolean       | boolean (TRUE, FALSE, NULL)
+string        | varchar, varchar2, clob
+number        | NUMBER(precision, scale)
+boolean       | boolean (TRUE, FALSE, YES, NO, ON, OFF)
 DateTime      | timestamp, timestamp with time zone, timestamp without time zone
-json          | text o json - it`s treated as String
+json          | varchar, varchar2, clob - it`s treated as String
 null          | NULL
 
 This only applies to Column mode.
@@ -168,9 +168,9 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 [Top](#top)
 
 #### <a name="section1.3.2"></a>Database and table names
-The MySQL database name will always be `vehicles`.
+The Oracle database name will always be `vehicles`.
 
-The MySQL table names will be, depending on the configured data model, the following ones (old encoding):
+The Oracle table names will be, depending on the configured data model, the following ones (old encoding):
 
 | FIWARE service path | `dm-by-service-path` | `dm-by-entity` | `dm-by-entity-type` |
 |---|---|---|---|
@@ -187,9 +187,9 @@ Using the new encoding:
 [Top](#top)
 
 #### <a name="section1.3.3"></a>Row-like storing
-Assuming `attr_persistence=row` as configuration parameter, then `NGSIMySQLSink` will persist the data within the body as:
+Assuming `attr_persistence=row` as configuration parameter, then `NGSIOracleSQLSink` will persist the data within the body as:
 
-    mysql> select * from 4wheels_car1_car;
+    sqlplus> select * from 4wheels_car1_car;
     +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
     | recvTimeTs | recvTime                   | fiwareServicePath | entityId | entityType | attrName    | attrType  | attrValue | attrMd |
     +------------+----------------------------+-------------------+----------+------------+-------------+-----------+-----------+--------+
@@ -201,9 +201,9 @@ Assuming `attr_persistence=row` as configuration parameter, then `NGSIMySQLSink`
 [Top](#top)
 
 #### <a name="section1.3.4"></a>Column-like storing
-If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within the body as:
+If `attr_persistence=colum` then `NGSIOracleSQLSink` will persist the data within the body as:
 
-    mysql> select * from 4wheels_car1_car;
+    sqlplus> select * from 4wheels_car1_car;
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
     | recvTime                   | fiwareServicePath | entityId | entityType | speed | speed_md | oil_level | oil_level_md |
     +----------------------------+-------------------+----------+------------+-------+----------+-----------+--------------+
@@ -215,27 +215,28 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 
 ## <a name="section2"></a>Administration guide
 ### <a name="section2.1"></a>Configuration
-`NGSIMySQLSink` is configured through the following parameters:
+`NGSIOracleSQLSink` is configured through the following parameters:
 
 | Parameter | Mandatory | Default value | Comments |
 |---|---|---|---|
-| type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIMySQLSink</i> |
+| type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSIOracleSQLSink</i> |
 | channel | yes | N/A ||
 | enable_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
-| last\_data\_mode | no | upsert | <i>upsert</i> or <i>insert</i> or <i>both</i>, to set last data mode. Check this [link](./last_data_function.md) for more details. |
+| last\_data\_mode | no | insert | <i>insert</i>  to set last data mode. Check this [link](./last_data_function.md) for more details. In oracle sink <i>both</i> and <i>upsert</i> are not avaiable |
 | last\_data\_table\_suffix | no | false | This suffix will be added to the table name in order to know where Cygnus will store the last record of an entity. Check this [link](./last_data_function.md) for more details. |
 | last\_data\_unique\_key | no | entityId | This must be a unique key on the database to find when a previous record exists. Check this [link](./last_data_function.md) for more details. |
 | last\_data\_timestamp\_key | no | recvTime | This must be a timestamp key on the aggregation to know which record is older. Check this [link](./last_data_function.md) for more details. |
-| last\_data\_sql_timestamp\_format | no | YYYY-MM-DD HH24:MI:SS.MS | This must be a timestamp format to cast [SQL Text to timestamp](https://dev.mysql.com/doc/refman/8.0/en/date-and-time-functions.html). Check this [link](./last_data_function.md) for more details. |
+| last\_data\_sql_timestamp\_format | no | YYYY-MM-DD HH24:MI:SS.MS | This must be a timestamp format to cast [SQL Text to timestamp](https://dev.oracle.com/doc/refman/8.0/en/date-and-time-functions.html). Check this [link](./last_data_function.md) for more details. |
 | data\_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <i>dm-by-entity-type</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
-| mysql\_host | no | localhost | FQDN/IP address where the MySQL server runs |
-| mysql\_port | no | 3306 ||
-| mysql\_username | no | root | `root` is the default username that is created automatically |
-| mysql\_password | no | N/A | Empty value as default (no password is created automatically) |
-| mysql\_maxPoolSize | no | 3 | Max number of connections per database pool |
-| mysql\_options | no | N/A | optional connection parameter(s) concatinated to jdbc url if necessary<br/>When `useSSL=true&requireSSL=false` is set to `mysql_options`, jdbc url will become like <b>jdbc:mysql://mysql.example.com:3306/fiwareservice?useSSL=true&requireSSL=false</b>|
+| oracle\_host | no | localhost | FQDN/IP address where the Oracle server runs |
+| oracle\_port | no | 1521 ||
+| oracle\_username | no |  system | `system` is the default username that is created automatically |
+| oracle\_password | no | oracle | `oracle` is the default for default username |
+| oracle\_database | no | xe | `xe` is the default database avaiable in oracle 11g XE (express edition) |
+| oracle\_maxPoolSize | no | 3 | Max number of connections per database pool |
+| oracle\_options | no | N/A | optional connection parameter(s) concatinated to jdbc url if necessary<br/>When `useSSL=true&requireSSL=false` is set to `oracle_options`, jdbc url will become like <b>jdbc:oracle://oracle.example.com:3306/fiwareservice?useSSL=true&requireSSL=false</b>|
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>
 | attr\_metadata\_store | no | false | <i>true</i> or <i>false</i>. |
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
@@ -247,39 +248,46 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | persistence\_policy.checking_time | no | 3600 | Frequency (in seconds) at which the sink checks for record expiration. |
 | attr\_native\_types | no | false | if the attribute value will be native <i>true</i> or stringfy or <i>false</i>. When set to true, in case batch option is activated, insert null values for those attributes that doesn't exist in some of the entities to be inserted. If set to false, '' value is inserted for missing attributes. |
 | persist\_errors | no | true | if there is an exception when trying to persist data into storage then error is persisted into a table |
+| oracle_locator | no | false | if there is avaiable of [Oracle locator feature](https://docs.oracle.com/database/121/SPATL/sdo_locator.htm#SPATL340) which is just avaible since oracle 12c. THis imples if a geo:json is in converted a SDO_GEOMETRY or just leave in string format. |
+| oracle_major_version | no | 11 | Major version of Oracle (it defines some values like max name length for identifiers, whichs is 30 for versions prior to 12)
+| nls_timestamp_format | no | `YYYY-MM-DD HH24:MI:SS.FF6` | defines the default timestamp format to use with the TO_CHAR and TO_TIMESTAMP functions [nls_timestamp_format](https://docs.oracle.com/cd/B19306_01/server.102/b14237/initparams132.htm#REFRN10131) |
+| nls_timestamp_tz_format | no | `YYYY-MM-DD"T"HH24:MI:SS.FF6 TZR` | NLS_TIMESTAMP_TZ_FORMAT defines the default timestamp with time zone format to use with the TO_CHAR and TO_TIMESTAMP_TZ functions [nls_timestamp_tz_format](https://docs.oracle.com/database/121/REFRN/GUID-A340C735-BA5A-4704-B24C-AC2C2380BA9E.htm#REFRN10132)|
 
 A configuration example could be:
 
-    cygnus-ngsi.sinks = mysql-sink
-    cygnus-ngsi.channels = mysql-channel
+    cygnus-ngsi.sinks = oracle-sink
+    cygnus-ngsi.channels = oracle-channel
     ...
-    cygnus-ngsi.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSink
-    cygnus-ngsi.sinks.mysql-sink.channel = mysql-channel
-    cygnus-ngsi.sinks.mysql-sink.enable_encoding = false
-    cygnus-ngsi.sinks.mysql-sink.enable_lowercase = false
-    cygnus-ngsi.sinks.mysql-sink.enable_name_mappings = false
-    cygnus-ngsi.sinks.mysql-sink.data_model = dm-by-entity
-    cygnus-ngsi.sinks.mysql-sink.mysql_host = 192.168.80.34
-    cygnus-ngsi.sinks.mysql-sink.mysql_port = 3306
-    cygnus-ngsi.sinks.mysql-sink.mysql_username = myuser
-    cygnus-ngsi.sinks.mysql-sink.mysql_password = mypassword
-    cygnus-ngsi.sinks.mysql-sink.mysql_maxPoolSize = 3
-    cygnus-ngsi.sinks.mysql-sink.mysql_options = useSSL=true&requireSSL=false
-    cygnus-ngsi.sinks.mysql-sink.attr_persistence = row
-    cygnus-ngsi.sinks.mysql-sink.attr_native_types = false
-    cygnus-ngsi.sinks.mysql-sink.batch_size = 100
-    cygnus-ngsi.sinks.mysql-sink.batch_timeout = 30
-    cygnus-ngsi.sinks.mysql-sink.batch_ttl = 10
-    cygnus-ngsi.sinks.mysql-sink.batch_retry_intervals = 5000
-    cygnus-ngsi.sinks.mysql-sink.persistence_policy.max_records = 5
-    cygnus-ngsi.sinks.mysql-sink.persistence_policy.expiration_time = 86400
-    cygnus-ngsi.sinks.mysql-sink.persistence_policy.checking_time = 600
-    cygnus-ngsi.sinks.mysql-sink.persist_errors = true
+    cygnus-ngsi.sinks.oracle-sink.type = com.telefonica.iot.cygnus.sinks.NGSIOracleSQLSink
+    cygnus-ngsi.sinks.oracle-sink.channel = oracle-channel
+    cygnus-ngsi.sinks.oracle-sink.enable_encoding = false
+    cygnus-ngsi.sinks.oracle-sink.enable_lowercase = false
+    cygnus-ngsi.sinks.oracle-sink.enable_name_mappings = false
+    cygnus-ngsi.sinks.oracle-sink.data_model = dm-by-entity
+    cygnus-ngsi.sinks.oracle-sink.oracle_host = 192.168.80.34
+    cygnus-ngsi.sinks.oracle-sink.oracle_port = 1521
+    cygnus-ngsi.sinks.oracle-sink.oracle_database = xe
+    cygnus-ngsi.sinks.oracle-sink.oracle_username = system
+    cygnus-ngsi.sinks.oracle-sink.oracle_password = oracle
+    cygnus-ngsi.sinks.oracle-sink.oracle_locator = false
+    cygnus-ngsi.sinks.oracle-sink.nl_timestamp_format = YYYY-MM-DD HH24:MI:SS.FF6
+    cygnus-ngsi.sinks.oracle-sink.nl_timestamp_tz_format = YYYY-MM-DD\"T\"HH24:MI:SS.FF6 TZR
+    cygnus-ngsi.sinks.oracle-sink.oracle_maxPoolSize = 3
+    cygnus-ngsi.sinks.oracle-sink.attr_persistence = column
+    cygnus-ngsi.sinks.oracle-sink.attr_native_types = false
+    cygnus-ngsi.sinks.oracle-sink.batch_size = 100
+    cygnus-ngsi.sinks.oracle-sink.batch_timeout = 30
+    cygnus-ngsi.sinks.oracle-sink.batch_ttl = 10
+    cygnus-ngsi.sinks.oracle-sink.batch_retry_intervals = 5000
+    cygnus-ngsi.sinks.oracle-sink.persistence_policy.max_records = 5
+    cygnus-ngsi.sinks.oracle-sink.persistence_policy.expiration_time = 86400
+    cygnus-ngsi.sinks.oracle-sink.persistence_policy.checking_time = 600
+    cygnus-ngsi.sinks.oracle-sink.persist_errors = true
 
 [Top](#top)
 
 ### <a name="section2.2"></a>Use cases
-Use `NGSIMySQLSink` if you are looking for a database storage not growing so much in the mid-long term.
+Use `NGSIOracleSQLSink` if you are looking for a database storage not growing so much in the mid-long term.
 
 [Top](#top)
 
@@ -293,20 +301,22 @@ In addition, when running in `column` mode, due to the number of notified attrib
 [Top](#top)
 
 #### <a name="section2.3.3"></a>About batching
-As explained in the [programmers guide](#section3), `NGSIMySQLSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
+As explained in the [programmers guide](#section3), `NGSIOracleSQLSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
-What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 `NGSIEvent`s. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same MySQL table. If processing the events one by one, we would need 100 inserts into MySQL; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination MySQL table. In the worst case, the whole 100 entities will be about 100 different entities (100 different MySQL tables), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
+What is important regarding the batch mechanism is it largely increases the performance of the sink, because the number of writes is dramatically reduced. Let's see an example, let's assume a batch of 100 `NGSIEvent`s. In the best case, all these events regard to the same entity, which means all the data within them will be persisted in the same Oracle table. If processing the events one by one, we would need 100 inserts into Oracle; nevertheless, in this example only one insert is required. Obviously, not all the events will always regard to the same unique entity, and many entities may be involved within a batch. But that's not a problem, since several sub-batches of events are created within a batch, one sub-batch per final destination Oracle table. In the worst case, the whole 100 entities will be about 100 different entities (100 different Oracle tables), but that will not be the usual scenario. Thus, assuming a realistic number of 10-15 sub-batches per batch, we are replacing the 100 inserts of the event by event approach with only 10-15 inserts.
 
 The batch mechanism adds an accumulation timeout to prevent the sink stays in an eternal state of batch building when no new data arrives. If such a timeout is reached, then the batch is persisted as it is.
 
 Regarding the retries of not persisted batches, a couple of parameters is used. On the one hand, a Time-To-Live (TTL) is used, specifing the number of retries Cygnus will do before definitely dropping the event. On the other hand, a list of retry intervals can be configured. Such a list defines the first retry interval, then se second retry interval, and so on; if the TTL is greater than the length of the list, then the last retry interval is repeated as many times as necessary.
 
-By default, `NGSIMySQLSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
+By default, `NGSIOracleSQLSink` has a configured batch size and batch accumulation timeout of 1 and 30 seconds, respectively. Nevertheless, as explained above, it is highly recommended to increase at least the batch size for performance purposes. Which are the optimal values? The size of the batch it is closely related to the transaction size of the channel the events are got from (it has no sense the first one is greater then the second one), and it depends on the number of estimated sub-batches as well. The accumulation timeout will depend on how often you want to see new data in the final storage. A deeper discussion on the batches of events and their appropriate sizing may be found in the [performance document](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/performance_tips.md).
 
 [Top](#top)
 
 #### <a name="section2.3.4"></a>Time zone information
-Time zone information is not added in MySQL timestamps since MySQL stores that information as a environment variable. MySQL timestamps are stored in UTC time.
+Timezone in oracle is defiend by NLS_LANG environment variable of database instance.
+Timestamp and timestampTZ formats are defined by NLS_TIMESTAMP_FORMAT and NLS_TIMESTAMP_TZ_FORMAT environment variables of database instance as well as each connection session.
+More about [time tonze information](https://docs.oracle.com/cd/E11882_01/server.112/e10729/ch4datetime.htm#NLSPG004).
 
 [Top](#top)
 
@@ -317,7 +327,7 @@ Until version 1.2.0 (included), Cygnus applied a very simple encoding:
 * The underscore was used as concatenator character as well.
 * The slash, `/`, in the FIWARE service paths is ignored.
 
-From version 1.3.0 (included), Cygnus applies this specific encoding tailored to MySQL data structures:
+From version 1.3.0 (included), Cygnus applies this specific encoding tailored to Oracle data structures:
 
 * Alphanumeric characters are not encoded.
 * Numeric characters are not encoded.
@@ -341,12 +351,12 @@ Capping and expiration are disabled by default. Nevertheless, if desired, this c
 [Top](#top)
 
 ## <a name="section3"></a>Programmers guide
-### <a name="section3.1"></a>`NGSIMySQLSink` class
-As any other NGSI-like sink, `NGSIMySQLSink` extends the base `NGSISink`. The methods that are extended are:
+### <a name="section3.1"></a>`NGSIOracleSQLSink` class
+As any other NGSI-like sink, `NGSIOracleSQLSink` extends the base `NGSISink`. The methods that are extended are:
 
     void persistBatch(Batch batch) throws Exception;
 
-A `Batch` contains a set of `NGSIEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the MySQL table where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `MySQLBackend` implementation.
+A `Batch` contains a set of `NGSIEvent` objects, which are the result of parsing the notified context data events. Data within the batch is classified by destination, and in the end, a destination specifies the Oracle table where the data is going to be persisted. Thus, each destination is iterated in order to compose a per-destination data string to be persisted thanks to any `OracleBackend` implementation.
 
     void capRecords(NGSIBatch batch, long maxRecords) throws EventDeliveryException;
     
@@ -358,7 +368,7 @@ This method is called in a periodical way (based on `persistence_policy.checking
 
     public void start();
 
-An implementation of `MySQLBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSIMySQLSink()` (contructor), `configure()` and `start()`.
+An implementation of `OracleBackend` is created. This must be done at the `start()` method and not in the constructor since the invoking sequence is `NGSIOracleSQLSink()` (contructor), `configure()` and `start()`.
 
     public void configure(Context);
 
@@ -367,9 +377,6 @@ A complete configuration as the described above is read from the given `Context`
 [Top](#top)
 
 ### <a name="section3.2"></a>Authentication and authorization
-Current implementation of `NGSIMySQLSink` relies on the username and password credentials created at the MySQL endpoint.
-
-### <a name="section3.3"></a>SSL/TLS connection
-When `NGSIMySQLSink` want to connect MySQL Server by using SSL or TLS, please set `mysql_options` configuration parameter to configure jdbc.
+Current implementation of `NGSIOracleSQLSink` relies on the username and password credentials created at the Oracle endpoint as well as database name.
 
 [Top](#top)

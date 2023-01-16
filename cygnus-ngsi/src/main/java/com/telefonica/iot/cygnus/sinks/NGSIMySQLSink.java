@@ -329,9 +329,9 @@ public class NGSIMySQLSink extends NGSISink {
             NGSIGenericAggregator aggregator = getAggregator(rowAttrPersistence);
             aggregator.setService(events.get(0).getServiceForNaming(enableNameMappings));
             aggregator.setServicePathForData(events.get(0).getServicePathForData());
-            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableGrouping, enableNameMappings));
-            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding));
-            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableGrouping, enableNameMappings));
+            aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(enableNameMappings));
+            aggregator.setEntityForNaming(events.get(0).getEntityForNaming(enableNameMappings, enableEncoding));
+            aggregator.setEntityType(events.get(0).getEntityTypeForNaming(enableNameMappings));
             aggregator.setAttribute(events.get(0).getAttributeForNaming(enableNameMappings));
             aggregator.setDbName(buildDbName(aggregator.getService()));
             aggregator.setTableName(buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
@@ -373,9 +373,9 @@ public class NGSIMySQLSink extends NGSISink {
             
             // Do the capping
             String service = event.getServiceForNaming(enableNameMappings);
-            String servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            String entity = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
-            String entityType = event.getEntityTypeForNaming(enableGrouping, enableNameMappings);
+            String servicePathForNaming = event.getServicePathForNaming(enableNameMappings);
+            String entity = event.getEntityForNaming(enableNameMappings, enableEncoding);
+            String entityType = event.getEntityTypeForNaming(enableNameMappings);
             String attribute = event.getAttributeForNaming(enableNameMappings);
             
             try {
@@ -451,7 +451,8 @@ public class NGSIMySQLSink extends NGSISink {
                 // everything must be provisioned in advance
                 if (rowAttrPersistence) {
                     // This case will create a false error entry in error table
-                    String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist());
+                    String fieldsForCreate = SQLQueryUtils.getFieldsForCreate(aggregator.getAggregationToPersist(),
+                                                                              MYSQL_INSTANCE_NAME);
                     try {
                         // Try to insert without create database before
                         mySQLPersistenceBackend.createTable(dbName, null, tableName, fieldsForCreate);
@@ -531,9 +532,13 @@ public class NGSIMySQLSink extends NGSISink {
                             + CommonConstants.CONCATENATOR
                             + NGSICharsets.encodeMySQL(attribute);
                     break;
+                case DMBYFIXEDENTITYTYPE:
+                case DMBYFIXEDENTITYTYPEDATABASE:
+                    name = NGSICharsets.encodeMySQL(entityType);
+                    break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use dm-by-service-path, dm-by-entity or dm-by-attribute");
+                            + "'. Please, use dm-by-service-path, dm-by-entity, dm-by-entitytype or dm-by-fixed-entitytype or dm-by-attribute");
             } // switch
         } else {
             switch (dataModel) {
@@ -563,9 +568,13 @@ public class NGSIMySQLSink extends NGSISink {
                             + NGSIUtils.encode(entity, false, true)
                             + '_' + NGSIUtils.encode(attribute, false, true);
                     break;
+                case DMBYFIXEDENTITYTYPEDATABASE:
+                case DMBYFIXEDENTITYTYPE:
+                    name = NGSIUtils.encode(entityType, false, true);
+                    break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()
-                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY, DMBYENTITYTYPE or DMBYATTRIBUTE");
+                            + "'. Please, use DMBYSERVICEPATH, DMBYENTITY, DMBYENTITYTYPE, DMBYFIXEDENTITYTYPE or DMBYATTRIBUTE");
             } // switch
         } // if else
 

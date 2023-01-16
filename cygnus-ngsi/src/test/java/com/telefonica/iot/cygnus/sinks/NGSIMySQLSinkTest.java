@@ -71,7 +71,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = "falso";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -79,7 +78,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
 
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -105,7 +104,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = "falso";
         String host = null; // default
         String password = null; // default
@@ -113,7 +111,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
 
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -125,40 +123,6 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testConfigureEnableLowercase
-
-    /**
-     * [NGSIMySQLSink.configure] -------- enable_grouping can only be 'true' or 'false'.
-     */
-    @Test
-    public void testConfigureEnableGrouping() {
-        System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
-                + "-------- enable_grouping can only be 'true' or 'false'");
-        String attrPersistence = null; // default
-        String batchSize = null; // default
-        String batchTime = null; // default
-        String batchTTL = null; // default
-        String dataModel = null; // default
-        String enableEncoding = null; // default
-        String enableGrouping = "falso";
-        String enableLowercase = null; // default
-        String host = null; // default
-        String password = null; // default
-        String port = null; // default
-        String username = null; // default
-        NGSIMySQLSink sink = new NGSIMySQLSink();
-        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
-
-        try {
-            assertTrue(sink.getInvalidConfiguration());
-            System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
-                    + "-  OK  - 'enable_grouping=falso' was detected");
-        } catch (AssertionError e) {
-            System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
-                    + "- FAIL - 'enable_grouping=falso' was not detected");
-            throw e;
-        } // try catch
-    } // testConfigureEnableGrouping
 
     /**
      * [NGSIMySQLSink.configure] -------- data_model can only be 'dm-by-service-path' or 'dm-by-entity'.
@@ -174,7 +138,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-service";
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -182,7 +145,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
 
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -208,7 +171,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -216,7 +178,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
 
         try {
             assertTrue(sink.getInvalidConfiguration());
@@ -242,7 +204,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -250,7 +211,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
 
         assertNull(sink.getMySQLOptions());
         System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
@@ -270,7 +231,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -279,7 +239,7 @@ public class NGSIMySQLSinkTest {
         String sqlOptions = "useSSL=true&requireSSL=true";
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username, sqlOptions));
+                enableLowercase, host, password, port, username, sqlOptions));
 
         assertEquals(sqlOptions, sink.getMySQLOptions());
         System.out.println(getTestTraceHead("[NGSIMySQLSink.configure]")
@@ -301,7 +261,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -309,7 +268,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String service = "someService";
 
         try {
@@ -347,7 +306,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -355,7 +313,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String service = "someService";
 
         try {
@@ -394,7 +352,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-service-path";
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -402,7 +359,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String servicePath = "/somePath";
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
@@ -444,7 +401,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-service-path";
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -452,7 +408,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String servicePath = "/somePath";
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
@@ -496,7 +452,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity";
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -504,7 +459,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String servicePath = "/somePath";
         String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
@@ -531,6 +486,7 @@ public class NGSIMySQLSinkTest {
             throw e;
         } // try catch
     } // testBuildTableNameNonRootServicePathDataModelByEntityNoEncoding
+
     /**
      * [NGSIMySQLSink.buildTableName] -------- When no encoding and when a non root service-path is notified/defaulted
      * and data_model is 'dm-by-entity-type' the MySQL table name is the encoding of the concatenation of \<service-path\>,
@@ -549,7 +505,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity-type";
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -557,7 +512,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                 enableLowercase, host, password, port, username));
         String servicePath = "/somePath";
         String entity = "someId";
         String attribute = null; // irrelevant for this test
@@ -585,6 +540,56 @@ public class NGSIMySQLSinkTest {
         } // try catch
     } // testBuildTableNameNonRootServicePathDataModelByEntityTypeNoEncoding
 
+
+    /**
+     * [NGSIMySQLSink.buildTableName] -------- When no encoding and when a non root service-path is notified/defaulted
+     * and data_model is 'dm-by-fixed-entity-type' the MySQL table name is the encoding \<entity_type\>.
+     * @throws java.lang.Exception
+     */
+    @Test
+    public void testBuildTableNameNonRootServicePathDataModelByFixedEntityTypeNoEncoding() throws Exception {
+        System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                + "-------- When no encoding and when a non root service-path is notified/defaulted and data_model is "
+                + "'dm-by-fixed-entity-type' the MySQL table name is the encoding of <entityType>");
+        String attrPersistence = null; // default
+        String batchSize = null; // default
+        String batchTime = null; // default
+        String batchTTL = null; // default
+        String dataModel = "dm-by-fixed-entity-type";
+        String enableEncoding = "false";
+        String enableLowercase = null; // default
+        String host = null; // default
+        String password = null; // default
+        String port = null; // default
+        String username = null; // default
+        NGSIMySQLSink sink = new NGSIMySQLSink();
+        sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
+                enableLowercase, host, password, port, username));
+        String servicePath = "/somePath";
+        String entity = "someId";
+        String attribute = null; // irrelevant for this test
+        String entityType = "someType"; // irrelevant for this test
+
+        try {
+            String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
+            String expecetedTableName = "someType";
+
+            try {
+                assertEquals(expecetedTableName, builtTableName);
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "-  OK  - '" + builtTableName + "' is equals to the encoding of <entityType>");
+            } catch (AssertionError e) {
+                System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                        + "- FAIL - '" + builtTableName + "' is not equals to the encoding <entityType>");
+                throw e;
+            } // try catch
+        } catch (Exception e) {
+            System.out.println(getTestTraceHead("[NGSIMySQLSink.buildTableName]")
+                    + "- FAIL - There was some problem when building the table name");
+            throw e;
+        } // try catch
+    } // testBuildTableNameNonRootServicePathDataModelByFixedEntityTypeNoEncoding
+
     /**
      * [NGSIMySQLSink.buildTableName] -------- When encoding and when a non root service-path is notified/defaulted and
      * data_model is 'dm-by-entity' the MySQL table name is the encoding of the concatenation of \<service-path\>,
@@ -603,7 +608,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity";
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -611,7 +615,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String servicePath = "/somePath";
         String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
@@ -656,7 +660,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity-type";
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -664,7 +667,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String servicePath = "/somePath";
         String entity = "someId";
         String attribute = null; // irrelevant for this test
@@ -708,7 +711,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-service-path";
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -716,7 +718,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String servicePath = "/";
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
@@ -750,7 +752,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-service-path";
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -758,7 +759,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String servicePath = "/";
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
@@ -802,7 +803,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity";
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -810,7 +810,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String servicePath = "/";
         String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
@@ -854,7 +854,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity";
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -862,7 +861,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String servicePath = "/";
         String entity = "someId=someType";
         String attribute = null; // irrelevant for this test
@@ -906,7 +905,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity-type";
         String enableEncoding = "true";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -914,7 +912,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String servicePath = "/";
         String entity = "someId";
         String entityType = "someType";
@@ -958,7 +956,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity-type";
         String enableEncoding = "false";
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -966,7 +963,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String servicePath = "/";
         String entity = "someId";
         String entityType = "someType";
@@ -1006,7 +1003,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = null; // default
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1014,7 +1010,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String service = "tooLoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongService";
 
         try {
@@ -1045,7 +1041,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-service-path";
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1053,7 +1048,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String servicePath = "/tooLooooooooooooooooooooooooooooooooooooooooooooooooooooooongServicePath";
         String entity = null; // irrelevant for this test
         String entityType = null; // irrelevant for this test
@@ -1086,7 +1081,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-entity";
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1094,7 +1088,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String servicePath = "/tooLooooooooooooooooooooongServicePath";
         String entity = "tooLooooooooooooooooooooooooooongEntity";
         String attribute = null; // irrelevant for this test
@@ -1128,7 +1122,6 @@ public class NGSIMySQLSinkTest {
         String batchTTL = null; // default
         String dataModel = "dm-by-attribute";
         String enableEncoding = null; // default
-        String enableGrouping = null; // default
         String enableLowercase = null; // default
         String host = null; // default
         String password = null; // default
@@ -1136,7 +1129,7 @@ public class NGSIMySQLSinkTest {
         String username = null; // default
         NGSIMySQLSink sink = new NGSIMySQLSink();
         sink.configure(createContext(attrPersistence, batchSize, batchTime, batchTTL, dataModel, enableEncoding,
-                enableGrouping, enableLowercase, host, password, port, username));
+                enableLowercase, host, password, port, username));
         String servicePath = "/tooLooooooooooooooongServicePath";
         String entity = "tooLooooooooooooooooooongEntity";
         String attribute = "tooLooooooooooooongAttribute";
@@ -1155,7 +1148,7 @@ public class NGSIMySQLSinkTest {
     } // testBuildTableNameLengthDataModelByAttribute
 
     private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
-                                  String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
+                                  String dataModel, String enableEncoding, String enableLowercase, String host,
                                   String password, String port, String username) {
         Context context = new Context();
         context.put("attr_persistence", attrPersistence);
@@ -1164,7 +1157,6 @@ public class NGSIMySQLSinkTest {
         context.put("batch_ttl", batchTTL);
         context.put("data_model", dataModel);
         context.put("enable_encoding", enableEncoding);
-        context.put("enable_grouping", enableGrouping);
         context.put("enable_lowercase", enableLowercase);
         context.put("mysql_host", host);
         context.put("mysql_password", password);
@@ -1174,7 +1166,7 @@ public class NGSIMySQLSinkTest {
     } // createContext
 
     private Context createContext(String attrPersistence, String batchSize, String batchTime, String batchTTL,
-                                  String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
+                                  String dataModel, String enableEncoding, String enableLowercase, String host,
                                   String password, String port, String username, String sqlOptions) {
         Context context = new Context();
         context.put("attr_persistence", attrPersistence);
@@ -1183,7 +1175,6 @@ public class NGSIMySQLSinkTest {
         context.put("batch_ttl", batchTTL);
         context.put("data_model", dataModel);
         context.put("enable_encoding", enableEncoding);
-        context.put("enable_grouping", enableGrouping);
         context.put("enable_lowercase", enableLowercase);
         context.put("mysql_host", host);
         context.put("mysql_password", password);
@@ -1194,7 +1185,7 @@ public class NGSIMySQLSinkTest {
     } // createContext
 
     private Context createContextforNativeTypes(String attrPersistence, String batchSize, String batchTime, String batchTTL,
-                                                String dataModel, String enableEncoding, String enableGrouping, String enableLowercase, String host,
+                                                String dataModel, String enableEncoding, String enableLowercase, String host,
                                                 String password, String port, String username, String cache, String attrNativeTypes) {
         Context context = new Context();
         context.put("attr_persistence", attrPersistence);
@@ -1203,7 +1194,6 @@ public class NGSIMySQLSinkTest {
         context.put("batch_ttl", batchTTL);
         context.put("data_model", dataModel);
         context.put("enable_encoding", enableEncoding);
-        context.put("enable_grouping", enableGrouping);
         context.put("enable_lowercase", enableLowercase);
         context.put("mysql_host", host);
         context.put("mysql_password", password);
@@ -1326,7 +1316,7 @@ public class NGSIMySQLSinkTest {
     public void testNativeTypeColumnBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
         String attr_native_types = "true"; // default
         NGSIMySQLSink ngsiMySQLSink = new NGSIMySQLSink();
-        ngsiMySQLSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        ngsiMySQLSink.configure(createContextforNativeTypes("column", null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
         // Create a NGSIEvent
         NGSIBatch batch = setUpBatch("1461136795801", "123456789", "123456789", "someService", "somePath", "newService", "newPath", "someDestination");
         String destination = "someDestination";
@@ -1338,9 +1328,9 @@ public class NGSIMySQLSinkTest {
                 NGSIGenericAggregator aggregator = ngsiMySQLSink.getAggregator(false);
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
-                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
-                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setDbName(ngsiMySQLSink.buildDbName(aggregator.getService()));
                 aggregator.setTableName(ngsiMySQLSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));
@@ -1352,7 +1342,7 @@ public class NGSIMySQLSinkTest {
                 for (NGSIEvent event : events) {
                     aggregator.aggregate(event);
                 }
-                String correctBatch = "('2016-04-20 07:19:55.801','somePath','someId','someType',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]','{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}','[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('2016-04-20 07:19:55.801','somePath','someId','someType',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'-3.7167, 40.3833','[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue''2','[]')";
+                String correctBatch = "('someId','someType','somePath','2016-04-20 07:19:55.801',2,'[]',TRUE,'[]','2016-09-21T01:23:00.00Z','[]','{\"type\": \"Point\",\"coordinates\": [-0.036177,39.986159]}','[]','{\"String\": \"string\"}','[]','foo','[]','','[]',NULL,NULL,NULL,NULL),('someId','someType','somePath','2016-04-20 07:19:55.801',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'-3.7167, 40.3833','[{\"name\":\"location\",\"type\":\"string\",\"value\":\"WGS84\"}]','someValue''2','[]')";
                 String valuesForInsert = SQLQueryUtils.getValuesForInsert(aggregator.getAggregationToPersist(), aggregator.isAttrNativeTypes());
                 if (valuesForInsert.equals(correctBatch)) {
                     System.out.println(getTestTraceHead("[NGSIMySQKSink.testNativeTypesColumnBatch]")
@@ -1372,7 +1362,7 @@ public class NGSIMySQLSinkTest {
     public void testNativeTypeRowBatch() throws CygnusBadConfiguration, CygnusRuntimeError, CygnusPersistenceError, CygnusBadContextData {
         String attr_native_types = "true"; // default
         NGSIMySQLSink ngsiMySQLSink = new NGSIMySQLSink();
-        ngsiMySQLSink.configure(createContextforNativeTypes("row", null, null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
+        ngsiMySQLSink.configure(createContextforNativeTypes("row", null, null, null, null, null, null, null, null, null, null, null, attr_native_types));
         // Create a NGSIEvent
         NGSIBatch batch = setUpBatch("1461136795801", "123456789", "123456789", "someService", "somePath", "newService", "newPath", "someDestination");
         String destination = "someDestination";
@@ -1384,9 +1374,9 @@ public class NGSIMySQLSinkTest {
                 NGSIGenericAggregator aggregator = ngsiMySQLSink.getAggregator(true);
                 aggregator.setService(events.get(0).getServiceForNaming(false));
                 aggregator.setServicePathForData(events.get(0).getServicePathForData());
-                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false, false));
-                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false, false));
-                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false, false));
+                aggregator.setServicePathForNaming(events.get(0).getServicePathForNaming(false));
+                aggregator.setEntityForNaming(events.get(0).getEntityForNaming(false, false));
+                aggregator.setEntityType(events.get(0).getEntityTypeForNaming(false));
                 aggregator.setAttribute(events.get(0).getAttributeForNaming(false));
                 aggregator.setDbName(ngsiMySQLSink.buildDbName(aggregator.getService()));
                 aggregator.setTableName(ngsiMySQLSink.buildTableName(aggregator.getServicePathForNaming(), aggregator.getEntityForNaming(), aggregator.getEntityType(), aggregator.getAttribute()));

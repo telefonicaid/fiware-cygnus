@@ -42,6 +42,8 @@ Added at version [0.5](https://github.com/telefonicaid/fiware-cygnus/releases/ta
 
 Deprecated after releasing version [1.6.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/1.6.0) (issue [1182](https://github.com/telefonicaid/fiware-cygnus/issues/1182)).
 
+Removed in version [2.20.0](https://github.com/telefonicaid/fiware-cygnus/releases/tag/2.20.0)
+
 [Top](#top)
 
 ### <a name="section2.3"></a>`flip_coordinates` parameter

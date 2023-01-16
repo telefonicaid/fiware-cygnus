@@ -16,14 +16,14 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
-FROM debian:11.2-slim
+FROM debian:11.3-slim
 ARG GITHUB_ACCOUNT=telefonicaid
 ARG GITHUB_REPOSITORY=fiware-cygnus
 
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "2.18.0-SNAPSHOT"
+ENV CYGNUS_VERSION "2.20.0-SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
@@ -46,7 +46,6 @@ ENV CYGNUS_MYSQL_PORT ""
 ENV CYGNUS_MYSQL_SKIP_CONF_GENERATION ""
 ENV CYGNUS_MYSQL_SERVICE_PORT "5050"
 ENV CYGNUS_MYSQL_ENABLE_ENCODING ""
-ENV CYGNUS_MYSQL_ENABLE_GROUPING ""
 ENV CYGNUS_MYSQL_ENABLE_NAME_MAPPINGS ""
 ENV CYGNUS_MYSQL_SKIP_NAME_MAPPINGS_GENERATION ""
 ENV CYGNUS_MYSQL_ENABLE_LOWERCASE ""
@@ -67,7 +66,6 @@ ENV CYGNUS_MONGO_AUTH_SOURCE ""
 ENV CYGNUS_MONGO_SKIP_CONF_GENERATION ""
 ENV CYGNUS_MONGO_SERVICE_PORT "5051"
 ENV CYGNUS_MONGO_ENABLE_ENCODING ""
-ENV CYGNUS_MONGO_ENABLE_GROUPING ""
 ENV CYGNUS_MONGO_ENABLE_NAME_MAPPINGS ""
 ENV CYGNUS_MONGO_SKIP_NAME_MAPPINGS_GENERATION ""
 ENV CYGNUS_MONGO_ENABLE_LOWERCASE ""
@@ -83,7 +81,6 @@ ENV CYGNUS_MONGO_COLLECTIONS_SIZE ""
 ENV CYGNUS_MONGO_MAX_DOCUMENTS ""
 ENV CYGNUS_MONGO_IGNORE_WHITE_SPACES ""
 ENV CYGNUS_STH_ENABLE_ENCODING ""
-ENV CYGNUS_STH_ENABLE_GROUPING ""
 ENV CYGNUS_STH_ENABLE_NAME_MAPPINGS ""
 ENV CYGNUS_STH_SKIP_NAME_MAPPINGS_GENERATION ""
 ENV CYGNUS_STH_ENABLE_LOWERCASE ""
@@ -104,7 +101,6 @@ ENV CYGNUS_CKAN_API_KEY ""
 ENV CYGNUS_CKAN_SSL ""
 ENV CYGNUS_CKAN_SKIP_CONF_GENERATION ""
 ENV CYGNUS_CKAN_ENABLE_ENCODING ""
-ENV CYGNUS_CKAN_ENABLE_GROUPING ""
 ENV CYGNUS_CKAN_ENABLE_NAME_MAPPINGS ""
 ENV CYGNUS_CKAN_SKIP_NAME_MAPPINGS_GENERATION ""
 ENV CYGNUS_CKAN_DATA_MODEL ""
@@ -124,7 +120,6 @@ ENV CYGNUS_HDFS_PORT ""
 ENV CYGNUS_HDFS_SKIP_CONF_GENERATION ""
 ENV CYGNUS_HDFS_SERVICE_PORT "5053"
 ENV CYGNUS_HDFS_ENABLE_ENCODING ""
-ENV CYGNUS_HDFS_ENABLE_GROUPING ""
 ENV CYGNUS_HDFS_ENABLE_NAME_MAPPINGS ""
 ENV CYGNUS_HDFS_SKIP_NAME_MAPPINGS_GENERATION ""
 ENV CYGNUS_HDFS_ENABLE_LOWERCASE ""
@@ -151,7 +146,6 @@ ENV CYGNUS_POSTGRESQL_DATABASE ""
 ENV CYGNUS_POSTGRESQL_SKIP_CONF_GENERATION ""
 ENV CYGNUS_POSTGRESQL_SERVICE_PORT "5055"
 ENV CYGNUS_POSTGRESQL_ENABLE_ENCODING ""
-ENV CYGNUS_POSTGRESQL_ENABLE_GROUPING ""
 ENV CYGNUS_POSTGRESQL_ENABLE_NAME_MAPPINGS ""
 ENV CYGNUS_POSTGRESQL_SKIP_NAME_MAPPINGS_GENERATION ""
 ENV CYGNUS_POSTGRESQL_ENABLE_LOWERCASE ""
@@ -185,7 +179,6 @@ ENV CYGNUS_CARTO_SERVICE_PORT "5054"
 ENV CYGNUS_ORION_SKIP_CONF_GENERATION ""
 ENV CYGNUS_ORION_SERVICE_PORT "5050"
 ENV CYGNUS_ORION_ENABLE_ENCODING ""
-ENV CYGNUS_ORION_ENABLE_GROUPING ""
 ENV CYGNUS_ORION_ENABLE_NAME_MAPPINGS ""
 ENV CYGNUS_ORION_SKIP_NAME_MAPPINGS_GENERATION ""
 ENV CYGNUS_ORION_ENABLE_LOWERCASE ""
@@ -215,7 +208,6 @@ ENV CYGNUS_POSTGIS_PORT ""
 ENV CYGNUS_POSTGIS_SKIP_CONF_GENERATION ""
 ENV CYGNUS_POSTGIS_SERVICE_PORT "5057"
 ENV CYGNUS_POSTGIS_ENABLE_ENCODING ""
-ENV CYGNUS_POSTGIS_ENABLE_GROUPING ""
 ENV CYGNUS_POSTGIS_ENABLE_NAME_MAPPINGS ""
 ENV CYGNUS_POSTGIS_SKIP_NAME_MAPPINGS_GENERATION ""
 ENV CYGNUS_POSTGIS_ENABLE_LOWERCASE ""
@@ -253,7 +245,6 @@ ENV CYGNUS_ARCGIS_SERVICE_PORT "5059"
 ENV CYGNUS_ARCGIS_PASS ""
 ENV CYGNUS_ELASTICSEARCH_SKIP_CONF_GENERATION ""
 ENV CYGNUS_ARCGIS_ENABLE_ENCODING ""
-ENV CYGNUS_ARCGIS_ENABLE_GROUPING ""
 ENV CYGNUS_ARCGIS_ENABLE_NAME_MAPPINGS ""
 ENV CYGNUS_ARCGIS_DATA_MODEL ""
 ENV CYGNUS_ARCGIS_BATCH_SIZE ""
@@ -293,7 +284,10 @@ RUN \
     APACHE_DOMAIN="$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | python2 -c 'import json,sys;obj=json.load(sys.stdin);print obj["preferred"]')" \
       || APACHE_DOMAIN="http://archive.apache.org/dist/" && \
     MVN_URL="${APACHE_DOMAIN}maven/maven-3/${MVN_VER}/binaries/apache-maven-${MVN_VER}-bin.tar.gz" && \
-    FLUME_URL="${APACHE_DOMAIN}flume/${FLUME_VER}/apache-flume-${FLUME_VER}-bin.tar.gz" && \
+    # FIXME #2179: Flume version has steped to 1.10.0 so 1.9.0 is no longer available in the usual place.
+    # Temporal fix is to download it from archive.apache.org. Once we move to 1.10.0, reenable the following line
+    # FLUME_URL="${APACHE_DOMAIN}flume/${FLUME_VER}/apache-flume-${FLUME_VER}-bin.tar.gz" && \
+    FLUME_URL="https://archive.apache.org/dist/flume/stable/apache-flume-1.9.0-bin.tar.gz" && \
     echo -e $'INFO: Java version <'${JAVA_VERSION}'>\n'$(java -version)'\nINFO: Apache domain <'${APACHE_DOMAIN}'>\nINFO: URL MAVEN <'${MVN_URL}'>\nINFO: URL FLUME <'${FLUME_URL}'>' && \
     echo "INFO: Download and install Maven and Flume..." && \
     curl --remote-name --location --insecure --silent --show-error "${MVN_URL}" && \
@@ -321,7 +315,6 @@ RUN \
     chmod +x ${FLUME_HOME}/bin/cygnus-flume-ng && \
     echo "INFO: Instantiate some configuration files" && \
     cp ${CYGNUS_HOME}/cygnus-common/conf/log4j.properties.template ${FLUME_HOME}/conf/log4j.properties && \
-    cp ${CYGNUS_HOME}/cygnus-ngsi/conf/grouping_rules.conf.template ${FLUME_HOME}/conf/grouping_rules.conf && \
     cp ${CYGNUS_HOME}/cygnus-ngsi/conf/name_mappings.conf.template ${FLUME_HOME}/conf/name_mappings.conf && \
     echo "INFO: Create Cygnus log folder" && \
     mkdir -p /var/log/cygnus && \
@@ -331,7 +324,7 @@ RUN \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
     cd ${CYGNUS_HOME}/cygnus-ngsi && \
     ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
-    rm -rf /root/.m2 && rm -rf ${MVN_HOME} && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz && \
+    rm -rf /root/.m2 && rm -rf ${MVN_HOME} && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz ${CYGNUS_HOME}/*.tar.gz && \
     # Cleanup
     apt-get clean && \
     apt-get -y remove python2 git && \

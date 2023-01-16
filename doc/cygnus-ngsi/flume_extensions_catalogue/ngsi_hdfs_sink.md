@@ -57,9 +57,9 @@ Since the unique data model accepted for `NGSIHDFSSink` is per entity (see the [
 
     /user/<hdfs_userame>/<fiware-service>/<fiware-servicePath>/<destination>
 
-is created (if not existing yet) for each notified entity, where `<hdfs_username>` is a configuration parameter about a HDFS superuser, `<fiware-service>` and `<fiware-servicePath>` are notified as Http headers (or defaulted in NGSIRestHandler), and `<destination>` is the `notified_entities`/`grouped_entities` header value (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
+is created (if not existing yet) for each notified entity, where `<hdfs_username>` is a configuration parameter about a HDFS superuser, `<fiware-service>` and `<fiware-servicePath>` are notified as Http headers (or defaulted in NGSIRestHandler), and `<destination>` is the `notified_entities` header value within the `NGSIEvent`.
 
-Then, for each notified entity a file named `<destination>.txt` is created (if not yet existing) under the above directory. Again, `<destination>` is the `notified_entities`/`grouped_entities` header value (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
+Then, for each notified entity a file named `<destination>.txt` is created (if not yet existing) under the above directory. Again, `<destination>` is the `notified_entities` header value within the `NGSIEvent`.
 
 Please observe HDFS folders and files follow the [Unix rules](https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words) about allowed character set and path max length (255 characters). This leads to certain [encoding](#section2.3.4) is applied depending on the `enable_encoding` configuration parameter.
 
@@ -140,7 +140,6 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 	         correlationId=1429535775-308-0000000000,
 	         fiware-service=vehicles,
 	         fiware-servicepath=/4wheels,
-	         <grouping_rules_interceptor_headers>,
 	         <name_mappings_interceptor_headers>
         },
         body={
@@ -271,7 +270,6 @@ NOTE: `hive` is the Hive CLI for locally querying the data.
 | attr_metadata_store | no | true | If true, it will store metadata as usual. If false it will not store metadata regardless of the `file_format` type  |
 | channel | yes | N/A ||
 | enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | enable\_lowercase | no | false | <i>true</i> or <i>false</i>. |
 | data\_model | no | dm-by-entity |  Always <i>dm-by-entity</i>, even if not configured. |
@@ -311,7 +309,6 @@ A configuration example could be:
     cygnus-ngsi.sinks.hdfs-sink.type = com.telefonica.iot.cygnus.sinks.NGSIHDFSSink
     cygnus-ngsi.sinks.hdfs-sink.channel = hdfs-channel
     cygnus-ngsi.sinks.hdfs-sink.enable_encoding = false
-    cygnus-ngsi.sinks.hdfs-sink.enable_grouping = false
     cygnus-ngsi.sinks.hdfs-sink.enable_lowercase = false
     cygnus-ngsi.sinks.hdfs-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.hdfs-sink.data_model = dm-by-entity

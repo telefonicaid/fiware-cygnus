@@ -29,7 +29,7 @@ Content:
     * [Provisioning a CKAN resource for the column mode](#section4.1)
 
 ## <a name="section1"></a>Functionality
-`com.iot.telefonica.cygnus.sinks.NGSICKANSink`, or simply `NGSICKANSink` is a sink designed to persist NGSI-like context data events within a [CKAN](http://ckan.org/) server. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
+`com.iot.telefonica.cygnus.sinks.NGSICKANSink`, or simply `NGSICKANSink` is a sink designed to persist NGSI-like context data events within a [CKAN](http://ckan.org/) server. The officially supported CKAN version by Cygnus is `2.8`. Usually, such a context data is notified by a [Orion Context Broker](https://github.com/telefonicaid/fiware-orion) instance, but could be any other system speaking the <i>NGSI language</i>.
 
 Independently of the data generator, NGSI context data is always transformed into internal `NGSIEvent` objects at Cygnus sources. In the end, the information within these events must be mapped into specific CKAN data structures.
 
@@ -85,7 +85,7 @@ The following table summarizes the package name composition:
 #### <a name="section1.2.3"></a>Resources naming conventions
 The resource name depends on the configured data model (see the [Configuration](#section2.1) section for more details):
 
-* Data model by entity (`data_model=dm-by-entity`). A resource name always take the concatenation of the entity ID and type. Such a name is already given in the `notified_entities`/`grouped_entities` header values (depending on using or not the grouping rules, see the [Configuration](#section2.1) section for more details) within the `NGSIEvent`.
+* Data model by entity (`data_model=dm-by-entity`). A resource name always take the concatenation of the entity ID and type. Such a name is already given in the `notified_entities` header value within the `NGSIEvent`.
 
 
 * Data model by entity id (`data_model=dm-by-entity-id`). A resource name always take the entity ID. Such a name is already given in the NGSIEvent values, see the [Configuration](#section2.1) section for more details) within the the `NGSIEvent`. Note that in this case, encoding is never applied (this is current marked as "debt" in the source code with a FIXME mark).
@@ -143,7 +143,6 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
              correlationId=1429535775-308-0000000000,
              fiware-service=vehicles,
              fiware-servicepath=/4wheels,
-             <grouping_rules_interceptor_headers>,
              <name_mappings_interceptor_headers>
         },
         body={
@@ -349,7 +348,6 @@ NOTE: `curl` is a Unix command allowing for interacting with REST APIs such as t
 | type | yes | N/A | Must be <i>com.telefonica.iot.cygnus.sinks.NGSICKANSink</i> |
 | channel | yes | N/A |
 | enable\_encoding | no | false | <i>true</i> or <i>false</i>, <i>true</i> applies the new encoding, <i>false</i> applies the old encoding. ||
-| enable\_grouping | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_grouping_interceptor.md) for more details. ||
 | enable\_name\_mappings | no | false | <i>true</i> or <i>false</i>. Check this [link](./ngsi_name_mappings_interceptor.md) for more details. ||
 | data\_model | no | dm-by-entity | <i>dm-by-entity-id</i>, <i>dm-by-entity</i> ||
 | attr\_persistence | no | row | <i>row</i> or <i>column.</i>|
@@ -378,7 +376,6 @@ A configuration example could be:
     cygnus-ngsi.sinks.ckan-sink.type = com.telefonica.iot.cygnus.sinks.NGSICKANSink
     cygnus-ngsi.sinks.ckan-sink.channel = ckan-channel
     cygnus-ngsi.sinks.ckan-sink.enable_encoding = false
-    cygnus-ngsi.sinks.ckan-sink.enable_grouping = false
     cygnus-ngsi.sinks.ckan-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.ckan-sink.data_model = dm-by-entity
     cygnus-ngsi.sinks.ckan-sink.attr_persistence = column

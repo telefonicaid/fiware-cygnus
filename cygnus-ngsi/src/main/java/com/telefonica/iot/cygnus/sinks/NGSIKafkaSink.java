@@ -268,8 +268,8 @@ public class NGSIKafkaSink extends NGSISink {
         public void initialize(NGSIEvent event) {
             service = event.getServiceForNaming(enableNameMappings);
             servicePathForData = event.getServicePathForData();
-            servicePathForNaming = event.getServicePathForNaming(enableGrouping, enableNameMappings);
-            entityForNaming = event.getEntityForNaming(enableGrouping, enableNameMappings, enableEncoding);
+            servicePathForNaming = event.getServicePathForNaming(enableNameMappings);
+            entityForNaming = event.getEntityForNaming(enableNameMappings, enableEncoding);
             attributeForNaming = event.getAttributeForNaming(enableNameMappings);
         } // initialize
 

@@ -16,13 +16,14 @@
         * [Last Data Functionality](./last_data_function.md)
     * [NGSIPostGISSink](./ngsi_postgis_sink.md)
         * [Last Data Functionality](./last_data_function.md)
+    * [NGSIOracleSQLSink](./ngsi_oracle_sink.md)
     * [NGSISTHSink](./ngsi_sth_sink.md)
     * [NGSIOrionSink](./ngsi_orion_sink.md)
     * [NGSIElasticsearchSink](./ngsi_elasticsearch_sink.md)
     * [NGSIArcgisFeatureTableSink](./ngsi_arcgis_featuretable_sink.md)
     * [NGSITestSink](./ngsi_test_sink.md)
 * Interceptors
-    * [GroupingInterceptor](./ngsi_grouping_interceptor.md)
+    * [NameMappingInterceptor](./ngsi_name_mappings_interceptor.md)
 * Channel selectors
     * [RoundRobinChannelSelector](./round_robin_channel_selector.md)
 * [Reporting issues and contact information](./issues_and_contact.md)

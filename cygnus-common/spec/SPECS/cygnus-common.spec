@@ -171,9 +171,18 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Tue Oct 18 2022 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.20.0
+- [cygnus-common][SQLBackend] Ordernig batch INSERT sentences upon upsert to avoid deadlocks (#2197)
+- [cygnus-common][MySQLBackend] Upgrade mysql-connector-java from 8.0.27 to 8.0.28
+- [cygnus-common] Upgrade postgresql from 42.3.3 to 42.4.1
+- [cygnus-common] Remove grouping rules functionality (deprecated since version 1.6.0 in December 2016)
+
+* Fri Jun 03 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.19.0
+- [cygnus-common] FIX: change log level should change log level of all cygnus loggers, not just rootLogger (#1827)
+
 * Wed May 11 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.18.0
 - [cygnus-common][MongoBackendImpl] Remove unneded mongo create collection in non capped case (#2161)
-- [cygnus-commons] Upgrade mongodb-driver dependency from 3.12.8 to 3.12.11
+- [cygnus-common] Upgrade mongodb-driver dependency from 3.12.8 to 3.12.11
 - [cygnus-common][CKANBackendImpl] allow empty result as resource_view_list (#2150)
 
 * Tue Mar 15 2022 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 2.17.0

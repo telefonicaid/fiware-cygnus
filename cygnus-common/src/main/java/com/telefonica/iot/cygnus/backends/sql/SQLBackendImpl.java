@@ -53,6 +53,8 @@ public class SQLBackendImpl implements SQLBackend{
     private final int maxLatestErrors;
     private static final String DEFAULT_ERROR_TABLE_SUFFIX = "_error_log";
     private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
+    private String nlsTimestampFormat;
+    private String nlsTimestampTzFormat;
 
     /**
      * Constructor.
@@ -130,6 +132,28 @@ public class SQLBackendImpl implements SQLBackend{
         return driver;
     } // getDriver
 
+
+    /**
+     * Set NLS_TIMESTAMP_FORMAT and NLS_TIMESTAMP_TZ_FORMAT
+     *
+     * @param format
+     **/
+    public void setNlsTimestampFormat(String format) {
+        this.nlsTimestampFormat = format;
+    } // setNlsTimestampFormat
+
+    public String getNlsTimestampFormat() {
+        return nlsTimestampFormat;
+    } // getNlsTImestampFormat
+
+    public void setNlsTimestampTzFormat(String format) {
+        this.nlsTimestampTzFormat = format;
+    } // setNlsTimestampTzFormat
+
+    public String getNlsTimestampTzFormat() {
+        return nlsTimestampTzFormat;
+    } // getNlsTImestampTzFormat
+
     @Override
     public void createDestination(String destination) throws CygnusRuntimeError, CygnusPersistenceError {
         if (cache.isCachedDataBase(destination)) {
@@ -145,7 +169,7 @@ public class SQLBackendImpl implements SQLBackend{
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "create database if not exists `" + destination + "`";
-        } else if (sqlInstance == SQLInstance.POSTGRESQL){
+        } else if (sqlInstance == SQLInstance.POSTGRESQL) {
             query = "CREATE SCHEMA IF NOT EXISTS " + destination;
         }
 
@@ -184,7 +208,7 @@ public class SQLBackendImpl implements SQLBackend{
     public void createTable(String dataBase, String schema, String table, String typedFieldNames)
             throws CygnusRuntimeError, CygnusPersistenceError {
         String tableName = table;
-        if (sqlInstance == SQLInstance.POSTGRESQL){
+        if (sqlInstance == SQLInstance.POSTGRESQL) {
             tableName = schema + "." + table;
         }
         if (cache.isCachedTable(dataBase, tableName)) {
@@ -199,8 +223,11 @@ public class SQLBackendImpl implements SQLBackend{
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "create table if not exists `" + tableName + "`" + typedFieldNames;
-        } else if (sqlInstance == SQLInstance.POSTGRESQL){
+        } else if (sqlInstance == SQLInstance.POSTGRESQL) {
             query = "CREATE TABLE IF NOT EXISTS " + tableName + " " + typedFieldNames;
+        } else if (sqlInstance == SQLInstance.ORACLE) {
+            // FIXME: Add an oracle workaround for "if not exists"
+            query = "CREATE TABLE " + tableName + " " + typedFieldNames;
         }
 
         try {
@@ -227,6 +254,8 @@ public class SQLBackendImpl implements SQLBackend{
         cache.addTable(dataBase, tableName);
     } // createTable
 
+
+    // FXIME insertContextData Never used ?
     @Override
     public void insertContextData(String dataBase, String schema, String table, String fieldNames, String fieldValues)
             throws CygnusBadContextData, CygnusRuntimeError, CygnusPersistenceError {
@@ -239,8 +268,10 @@ public class SQLBackendImpl implements SQLBackend{
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "insert into `" + tableName + "` " + fieldNames + " values " + fieldValues;
-        } else if (sqlInstance == SQLInstance.POSTGRESQL){
+        } else if (sqlInstance == SQLInstance.POSTGRESQL) {
             tableName = schema + "." + table;
+            query = "INSERT INTO " + tableName + " " + fieldNames + " VALUES " + fieldValues;
+        } else if (sqlInstance == SQLInstance.ORACLE) {
             query = "INSERT INTO " + tableName + " " + fieldNames + " VALUES " + fieldValues;
         }
 
@@ -513,7 +544,7 @@ public class SQLBackendImpl implements SQLBackend{
             throws CygnusRuntimeError, CygnusPersistenceError {
         // the defaul table for error log will be called the same as the destination name
         String errorTableName = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
-        if (sqlInstance == SQLInstance.POSTGRESQL){
+        if (sqlInstance == SQLInstance.POSTGRESQL) {
             errorTableName = schema + "." + dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
         }
         if (cache.isCachedTable(dataBase, errorTableName)) {
@@ -524,6 +555,10 @@ public class SQLBackendImpl implements SQLBackend{
                 "timestamp TIMESTAMP" +
                 ", error text" +
                 ", query text)";
+        String typedFieldNamesOracle = "(" +
+                "timestamp TIMESTAMP" +
+                ", error clob" +
+                ", query clob)";
 
         Statement stmt = null;
         // get a connection to the given destination
@@ -532,8 +567,11 @@ public class SQLBackendImpl implements SQLBackend{
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "create table if not exists `" + errorTableName + "`" + typedFieldNames;
-        } else if (sqlInstance == SQLInstance.POSTGRESQL){
-            query = "create table if not exists " + errorTableName + " " + typedFieldNames;
+        } else if (sqlInstance == SQLInstance.POSTGRESQL) {
+            query = "CREATE TABLE IF NOT EXISTS" + errorTableName + " " + typedFieldNames;
+        } else if (sqlInstance == SQLInstance.ORACLE) {
+            // FIXME: Add an oracle workaround for "if not exists"
+            query = "CREATE TABLE " + errorTableName + " " + typedFieldNamesOracle;
         }
 
         try {
@@ -607,6 +645,9 @@ public class SQLBackendImpl implements SQLBackend{
                     dataBase,
                     schema,
                     attrNativeTypes);
+
+            // Ordering queries to avoid deadlocks. See issue #2197 for more detail
+            upsertQuerysList.sort(Comparator.comparing(buff -> buff.toString()));
 
             for (StringBuffer query : upsertQuerysList) {
                 PreparedStatement upsertStatement;
@@ -747,8 +788,10 @@ public class SQLBackendImpl implements SQLBackend{
             throws CygnusRuntimeError, CygnusPersistenceError {
         // the default table for error log will be called the same as the destination name
         String errorTableName = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
-        if (sqlInstance == SQLInstance.POSTGRESQL){
+        if (sqlInstance == SQLInstance.POSTGRESQL) {
             errorTableName = schema + "." + dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
+        } else if (sqlInstance == SQLInstance.ORACLE) {
+            errorTableName = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
         }
         String limit = String.valueOf(maxLatestErrors);
 
@@ -759,8 +802,11 @@ public class SQLBackendImpl implements SQLBackend{
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "delete from `" + errorTableName + "` "  + "where timestamp not in (select timestamp from (select timestamp from `" + errorTableName + "` "  + "order by timestamp desc limit " + limit + " ) tmppurge )";
-        } else if (sqlInstance == SQLInstance.POSTGRESQL){
+        } else if (sqlInstance == SQLInstance.POSTGRESQL) {
             query = "DELETE FROM " + errorTableName + " "  + "WHERE timestamp NOT IN (SELECT timestamp FROM (SELECT timestamp FROM " + errorTableName + " "  + "ORDER BY timestamp DESC LIMIT " + limit + " ) tmppurge )";
+        } else if (sqlInstance == SQLInstance.ORACLE) {
+            // FXIME: add limit
+            query = "DELETE FROM " + errorTableName + " "  + "WHERE timestamp NOT IN (SELECT timestamp FROM (SELECT timestamp FROM " + errorTableName + " "  + "ORDER BY timestamp DESC ) tmppurge )";
         }
 
         try {
@@ -786,8 +832,8 @@ public class SQLBackendImpl implements SQLBackend{
         java.util.Date date = new Date();
         Timestamp timestamp = new Timestamp(date.getTime());
         String errorTableName = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
-        if (sqlInstance == SQLInstance.POSTGRESQL){
-            errorTableName = schema + "." + dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
+        if (sqlInstance == SQLInstance.POSTGRESQL) {
+            errorTableName = schema + "." + dataBase + DEFAULT_ERROR_TABLE_SUFFIX;            
         }
         String fieldNames  = "(" +
                 "timestamp" +
@@ -800,7 +846,8 @@ public class SQLBackendImpl implements SQLBackend{
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "insert into `" + errorTableName + "` " + fieldNames + " values (?, ?, ?)";
-        } else if (sqlInstance == SQLInstance.POSTGRESQL){
+        } else if (sqlInstance == SQLInstance.POSTGRESQL ||
+                   sqlInstance == SQLInstance.ORACLE){
             query = "INSERT INTO " + errorTableName + " " + fieldNames + " VALUES (?, ?, ?)";
         }
 
@@ -916,6 +963,15 @@ public class SQLBackendImpl implements SQLBackend{
                     DataSource datasource = createConnectionPool(destination);
                     datasources.put(destination, datasource);
                     connection = datasource.getConnection();
+                    if (sqlInstance == SQLInstance.ORACLE) {
+                        // set proper NLS_TIMESTAMP formats for current session
+                        Statement alterStatement1 = connection.createStatement();
+                        alterStatement1.execute("ALTER SESSION SET NLS_TIMESTAMP_FORMAT='" + getNlsTimestampFormat() + "'");
+                        connection.commit();
+                        Statement alterStatement2 = connection.createStatement();
+                        alterStatement2.execute("ALTER SESSION SET NLS_TIMESTAMP_TZ_FORMAT='" + getNlsTimestampTzFormat() + "'");
+                        connection.commit();
+                    }
                 } // if
 
                 // Check Pool cache and log status
@@ -926,7 +982,6 @@ public class SQLBackendImpl implements SQLBackend{
                 }else{
                     LOGGER.error(sqlInstance.toString().toUpperCase() + " Can't find dabase in pool cache (" + destination + ")");
                 }
-
                 return connection;
             } catch (ClassNotFoundException e) {
                 throw new CygnusRuntimeError(sqlInstance.toString().toUpperCase() + " Connection error", "ClassNotFoundException", e.getMessage());
@@ -1015,7 +1070,7 @@ public class SQLBackendImpl implements SQLBackend{
                 String sep = (sqlOptions != null && !sqlOptions.trim().isEmpty()) ? "&" : "?";
                 String logJdbc = jdbcUrl + sep + "user=" + sqlUsername + "&password=XXXXXXXXXX";
 
-                LOGGER.debug(sqlInstance.toString().toUpperCase() + " Creating connection pool jdbc:" + logJdbc);
+                LOGGER.debug(sqlInstance.toString().toUpperCase() + " Creating connection pool jdbc: " + logJdbc);
                 ConnectionFactory cf = new DriverManagerConnectionFactory(jdbcUrl, sqlUsername, sqlPassword);
 
                 // Creates a PoolableConnectionFactory That Will Wraps the Connection Object Created by
@@ -1033,7 +1088,11 @@ public class SQLBackendImpl implements SQLBackend{
          */
         protected String generateJDBCUrl(String destination) {
             String jdbcUrl = "";
-            jdbcUrl = "jdbc:" + sqlInstance + "://" + sqlHost + ":" + sqlPort + "/" + destination;
+            if (sqlInstance == SQLInstance.ORACLE) {
+                jdbcUrl = "jdbc:" + sqlInstance + ":@" + sqlHost + ":" + sqlPort + ":" + destination;
+            } else { // PostgreSQL and MySQL
+                jdbcUrl = "jdbc:" + sqlInstance + "://" + sqlHost + ":" + sqlPort + "/" + destination;
+            }
             if (sqlOptions != null && !sqlOptions.trim().isEmpty()) {
                 jdbcUrl += "?" + sqlOptions;
             }
