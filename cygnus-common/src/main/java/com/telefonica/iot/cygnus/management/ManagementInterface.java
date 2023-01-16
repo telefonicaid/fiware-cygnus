@@ -17,7 +17,6 @@
  */
 package com.telefonica.iot.cygnus.management;
 
-//import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
