@@ -256,7 +256,7 @@ ENV MVN_HOME "/opt/apache-maven"
 
 ENV FLUME_VER "1.11.0"
 ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
-ENV FLUME_URL "http://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
+ENV FLUME_URL "https://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 ENV FLUME_HOME "/opt/apache-flume"
 
 ENV JAVA_VERSION "1.8.0"
