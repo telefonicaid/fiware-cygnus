@@ -255,6 +255,8 @@ ENV MVN_VER "3.5.4"
 ENV MVN_HOME "/opt/apache-maven"
 
 ENV FLUME_VER "1.11.0"
+ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
+ENV FLUME_URL "http://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 ENV FLUME_HOME "/opt/apache-flume"
 
 ENV JAVA_VERSION "1.8.0"
@@ -284,7 +286,7 @@ RUN \
     APACHE_DOMAIN="$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | python2 -c 'import json,sys;obj=json.load(sys.stdin);print obj["preferred"]')" \
       || APACHE_DOMAIN="http://archive.apache.org/dist/" && \
     MVN_URL="${APACHE_DOMAIN}maven/maven-3/${MVN_VER}/binaries/apache-maven-${MVN_VER}-bin.tar.gz" && \
-    FLUME_URL="${APACHE_DOMAIN}flume/${FLUME_VER}/apache-flume-${FLUME_VER}-bin.tar.gz" && \
+    #FLUME_URL="${APACHE_DOMAIN}flume/${FLUME_VER}/apache-flume-${FLUME_VER}-bin.tar.gz" && \
     echo -e $'INFO: Java version <'${JAVA_VERSION}'>\n'$(java -version)'\nINFO: Apache domain <'${APACHE_DOMAIN}'>\nINFO: URL MAVEN <'${MVN_URL}'>\nINFO: URL FLUME <'${FLUME_URL}'>' && \
     echo "INFO: Download and install Maven and Flume..." && \
     curl --remote-name --location --insecure --silent --show-error "${MVN_URL}" && \
