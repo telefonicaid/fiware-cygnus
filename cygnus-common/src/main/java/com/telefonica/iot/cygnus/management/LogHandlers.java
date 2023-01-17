@@ -304,7 +304,7 @@ public final class LogHandlers {
         // We need a specific configuration for this logger,
         // otherwise we would change the level of all other loggers
         // having the original configuration as parent as well
-        LOGGER.info("setLevel of logger name '" + logger.getName());
+
         if (!loggerConfig.getName().equals(logger.getName())) {
             specificConfig = new LoggerConfig(logger.getName(), level, true);
             specificConfig.setParent(loggerConfig);
@@ -1098,7 +1098,7 @@ public final class LogHandlers {
 
 
             setLevel(LogManager.getRootLogger(), Level.toLevel(logLevel.toUpperCase()));
-
+            java.util.logging.Logger.getLogger("org.apache.flume.lifecycle").setLevel(java.util.logging.Level.WARNING);
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println("{\"success\":\"log4j logging level updated to "
                     + logLevel.toUpperCase() + "\" }");
