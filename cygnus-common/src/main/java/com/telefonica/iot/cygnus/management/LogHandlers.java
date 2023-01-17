@@ -304,8 +304,8 @@ public final class LogHandlers {
         // We need a specific configuration for this logger,
         // otherwise we would change the level of all other loggers
         // having the original configuration as parent as well
-
-        if (!loggerConfig.getName().equals(logger.getName())) {
+        LOGGER.info("setLevel of logger name '" + logger.getName());
+        if (!loggerConfig.getName().equals(logger.getName()) && (!logger.getName().contains("org.apache")) {
             specificConfig = new LoggerConfig(logger.getName(), level, true);
             specificConfig.setParent(loggerConfig);
             config.addLogger(logger.getName(), specificConfig);
