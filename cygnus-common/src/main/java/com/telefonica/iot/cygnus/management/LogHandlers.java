@@ -1098,6 +1098,8 @@ public final class LogHandlers {
 
 
             setLevel(LogManager.getRootLogger(), Level.toLevel(logLevel.toUpperCase()));
+            // Force WARN level to all org.apache.flume.lifecycle package
+            // due to high verbosity of DEBUG level of this package
             setLevel(LogManager.getLogger("org.apache.flume.lifecycle"), Level.WARN);
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println("{\"success\":\"log4j logging level updated to "
