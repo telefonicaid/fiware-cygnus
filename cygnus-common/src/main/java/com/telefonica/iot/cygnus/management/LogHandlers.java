@@ -1098,7 +1098,7 @@ public final class LogHandlers {
 
 
             setLevel(LogManager.getRootLogger(), Level.toLevel(logLevel.toUpperCase()));
-            java.util.logging.Logger.getLogger("org.apache.flume.lifecycle").setLevel(java.util.logging.Level.WARNING);
+            setLevel(LogManager.getLogger("org.apache.flume.lifecycle"), Level.OFF);
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().println("{\"success\":\"log4j logging level updated to "
                     + logLevel.toUpperCase() + "\" }");
