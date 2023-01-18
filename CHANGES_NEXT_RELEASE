@@ -1,4 +1,4 @@
-[cygnus-commons] Upgrade gson dependency from 2.6.2 to 2.8.9
+[cygnus-commons] Upgrade gson dependency from 2.6.2 to 2.10.1
 [cygnus-ngsi] Update NameMapping compile log mensage from WARN to ERROR
 [cygnus-common] MongoDB indexes are created depending on DM (#2204)
 [cygnus-common] Upgrade postgresql from 42.4.1 to 42.4.3
