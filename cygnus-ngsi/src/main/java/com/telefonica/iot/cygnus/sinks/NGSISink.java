@@ -56,7 +56,7 @@ import org.apache.flume.Sink.Status;
 import org.apache.flume.Transaction;
 import org.apache.flume.ChannelException;
 import org.apache.flume.conf.Configurable;
-import org.apache.log4j.MDC;
+import org.apache.logging.log4j.ThreadContext;
 
 /**
  *
@@ -339,6 +339,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
     @Override
     public void start() {
         super.start();
+        ThreadContext.put(CommonConstants.LOG4J_COMP, CommonConstants.DEF_AGENT_NAME);
 
         if (invalidConfiguration) {
             LOGGER.info("[" + this.getName() + "] Startup completed. Nevertheless, there are errors "
@@ -555,13 +556,13 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 } // if else
 
                 // Set the correlation ID, transaction ID, service and service path in MDC
-                MDC.put(CommonConstants.LOG4J_CORR,
+                ThreadContext.put(CommonConstants.LOG4J_CORR,
                         ngsiEvent.getHeaders().get(CommonConstants.HEADER_CORRELATOR_ID));
-                MDC.put(CommonConstants.LOG4J_TRANS,
+                ThreadContext.put(CommonConstants.LOG4J_TRANS,
                         ngsiEvent.getHeaders().get(NGSIConstants.FLUME_HEADER_TRANSACTION_ID));
                 // One batch is able to handle/process several events from different srv/subsrvs (#1983)
-                MDC.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
-                MDC.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
+                ThreadContext.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
+                ThreadContext.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
 
                 // Accumulate the event
                 accumulator.accumulate(ngsiEvent);
@@ -671,10 +672,11 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
      * thread (CygnusApplication.java).
      */
     private void setMDCToNA() {
-        MDC.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
-        MDC.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
-        MDC.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
-        MDC.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
+        ThreadContext.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
+        ThreadContext.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
+        ThreadContext.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
+        ThreadContext.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
+        ThreadContext.put(CommonConstants.LOG4J_COMP, CommonConstants.DEF_AGENT_NAME);
     } // setMDCToNA
 
     /**

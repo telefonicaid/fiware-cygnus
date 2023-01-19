@@ -18,8 +18,11 @@
 package com.telefonica.iot.cygnus.utils;
 
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -33,7 +36,10 @@ public class NGSICharsetsTest {
      * Constructor.
      */
     public NGSICharsetsTest() {
-        LogManager.getRootLogger().setLevel(Level.FATAL);
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        Configuration config = ctx.getConfiguration();
+        LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+        loggerConfig.setLevel(Level.FATAL);
     } // NGSICharsetsTest
     
     // ---------- PostgreSQL ---------

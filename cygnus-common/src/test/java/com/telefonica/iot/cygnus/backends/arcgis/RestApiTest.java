@@ -23,7 +23,8 @@ import static org.junit.Assert.fail;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 
-import org.apache.log4j.BasicConfigurator;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.DefaultConfiguration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +44,7 @@ public class RestApiTest extends RestApi{
      */
     @Before
     public void setUp() {
-        BasicConfigurator.configure();
+        Configurator.initialize(new DefaultConfiguration());
     }
 
     /**

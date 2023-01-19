@@ -43,8 +43,11 @@ import java.security.MessageDigest;
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.flume.Context;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -87,7 +90,11 @@ public class NGSIElasticsearchSinkTest {
          */
         @BeforeClass
         public static void setUpClass() {
-            LogManager.getRootLogger().setLevel(Level.FATAL);
+            LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+            Configuration config = ctx.getConfiguration();
+            LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+            loggerConfig.setLevel(Level.FATAL);
+            ctx.updateLoggers();
         } // setUpClass
 
         @Parameters
@@ -367,7 +374,11 @@ public class NGSIElasticsearchSinkTest {
          */
         @BeforeClass
         public static void setUpClass() {
-            LogManager.getRootLogger().setLevel(Level.FATAL);
+            LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+            Configuration config = ctx.getConfiguration();
+            LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+            loggerConfig.setLevel(Level.FATAL);
+            ctx.updateLoggers();
         } // setUpClass
 
         @Mock
@@ -545,7 +556,11 @@ public class NGSIElasticsearchSinkTest {
          */
         @BeforeClass
         public static void setUpClass() {
-            LogManager.getRootLogger().setLevel(Level.FATAL);
+            LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+            Configuration config = ctx.getConfiguration();
+            LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+            loggerConfig.setLevel(Level.FATAL);
+            ctx.updateLoggers();
         } // setUpClass
 
         @Mock
@@ -1719,7 +1734,11 @@ public class NGSIElasticsearchSinkTest {
          */
         @BeforeClass
         public static void setUpClass() {
-            LogManager.getRootLogger().setLevel(Level.FATAL);
+            LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+            Configuration config = ctx.getConfiguration();
+            LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+            loggerConfig.setLevel(Level.FATAL);
+            ctx.updateLoggers();
         } // setUpClass
 
         @Parameters
