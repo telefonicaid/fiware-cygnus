@@ -42,7 +42,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -258,7 +259,7 @@ public abstract class HttpBackend {
          * @param entity
          */
         PrivilegedRequest(String method, String url, ArrayList<Header> headers, StringEntity entity) {
-            this.logger = Logger.getLogger(PrivilegedRequest.class);
+            this.logger = LogManager.getLogger(PrivilegedRequest.class);
             this.method = method;
             this.url = url;
             this.headers = headers;
