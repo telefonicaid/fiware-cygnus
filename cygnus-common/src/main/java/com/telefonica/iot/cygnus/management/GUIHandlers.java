@@ -17,7 +17,7 @@
  */
 package com.telefonica.iot.cygnus.management;
 
-import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 import com.telefonica.iot.cygnus.channels.CygnusChannel;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -69,7 +69,7 @@ public final class GUIHandlers {
      * @param channels
      * @throws IOException
      */
-    public static void getPoints(HttpServletResponse response, ImmutableMap<String, Channel> channels)
+    public static void getPoints(HttpServletResponse response, Map<String, Channel> channels)
         throws IOException {
         // add a new source row
         String sourceColumns = "";

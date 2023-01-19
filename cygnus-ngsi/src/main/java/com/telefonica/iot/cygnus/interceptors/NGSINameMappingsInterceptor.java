@@ -40,6 +40,9 @@ import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.interceptor.Interceptor;
 
+import org.apache.logging.log4j.ThreadContext;
+import java.util.UUID;
+
 /**
  *
  * @author frb
@@ -196,6 +199,12 @@ public class NGSINameMappingsInterceptor implements Interceptor {
 
         @Override
         public void run() {
+            ThreadContext.put("id", UUID.randomUUID().toString());
+            ThreadContext.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_COMP, CommonConstants.DEF_AGENT_NAME);
             while (!stop) {
                 // Check if the configuration has changed
                 File nameMappingsFile = new File(nameMappingsConfFile);

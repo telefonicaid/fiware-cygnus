@@ -28,7 +28,7 @@ ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
 ENV CYGNUS_LOG_LEVEL "INFO"
-ENV CYGNUS_LOG_APPENDER "console"
+ENV CYGNUS_LOG_APPENDER "LOGFILE"
 ENV CYGNUS_SERVICE_PORT "5050"
 ENV CYGNUS_JAVA_OPTS "-Xms2048m -Xmx4096m"
 ENV CYGNUS_API_PORT "5080"
@@ -254,8 +254,10 @@ ENV CYGNUS_ARCGIS_BATCH_TTL ""
 ENV MVN_VER "3.5.4"
 ENV MVN_HOME "/opt/apache-maven"
 
-ENV FLUME_VER "1.9.0"
+ENV FLUME_VER "1.11.0"
 ENV FLUME_HOME "/opt/apache-flume"
+ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
+ENV FLUME_URL "https://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 
 ENV JAVA_VERSION "1.8.0"
 
@@ -284,10 +286,6 @@ RUN \
     APACHE_DOMAIN="$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | python2 -c 'import json,sys;obj=json.load(sys.stdin);print obj["preferred"]')" \
       || APACHE_DOMAIN="http://archive.apache.org/dist/" && \
     MVN_URL="${APACHE_DOMAIN}maven/maven-3/${MVN_VER}/binaries/apache-maven-${MVN_VER}-bin.tar.gz" && \
-    # FIXME #2179: Flume version has steped to 1.10.0 so 1.9.0 is no longer available in the usual place.
-    # Temporal fix is to download it from archive.apache.org. Once we move to 1.10.0, reenable the following line
-    # FLUME_URL="${APACHE_DOMAIN}flume/${FLUME_VER}/apache-flume-${FLUME_VER}-bin.tar.gz" && \
-    FLUME_URL="https://archive.apache.org/dist/flume/stable/apache-flume-1.9.0-bin.tar.gz" && \
     echo -e $'INFO: Java version <'${JAVA_VERSION}'>\n'$(java -version)'\nINFO: Apache domain <'${APACHE_DOMAIN}'>\nINFO: URL MAVEN <'${MVN_URL}'>\nINFO: URL FLUME <'${FLUME_URL}'>' && \
     echo "INFO: Download and install Maven and Flume..." && \
     curl --remote-name --location --insecure --silent --show-error "${MVN_URL}" && \
@@ -314,7 +312,7 @@ RUN \
     cp ${CYGNUS_HOME}/cygnus-common/target/classes/cygnus-flume-ng ${FLUME_HOME}/bin/ && \
     chmod +x ${FLUME_HOME}/bin/cygnus-flume-ng && \
     echo "INFO: Instantiate some configuration files" && \
-    cp ${CYGNUS_HOME}/cygnus-common/conf/log4j.properties.template ${FLUME_HOME}/conf/log4j.properties && \
+    cp ${CYGNUS_HOME}/cygnus-common/conf/log4j2.properties.template ${FLUME_HOME}/conf/log4j2.properties && \
     cp ${CYGNUS_HOME}/cygnus-ngsi/conf/name_mappings.conf.template ${FLUME_HOME}/conf/name_mappings.conf && \
     echo "INFO: Create Cygnus log folder" && \
     mkdir -p /var/log/cygnus && \
