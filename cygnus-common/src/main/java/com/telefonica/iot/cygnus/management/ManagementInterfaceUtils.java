@@ -31,9 +31,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.log4j.Appender;
-import org.apache.log4j.PatternLayout;
-import org.slf4j.MDC;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.apache.logging.log4j.ThreadContext;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 
@@ -59,8 +59,8 @@ public class ManagementInterfaceUtils {
            (request.getHeader(CommonConstants.HEADER_CORRELATOR_ID), transId);
 
         // set the given header to the response or create it
-        MDC.put(CommonConstants.LOG4J_CORR, corrId);
-        MDC.put(CommonConstants.LOG4J_TRANS, transId);
+        ThreadContext.put(CommonConstants.LOG4J_CORR, corrId);
+        ThreadContext.put(CommonConstants.LOG4J_TRANS, transId);
         return corrId;
     } // setCorrelator
     
@@ -283,8 +283,8 @@ public class ManagementInterfaceUtils {
         
         return appendersName;
     } // getAppendersFromProperties
-	
-	/**
+
+    /**
      * getLoggersFromProperties: Returns an ArrayList with the loggers.
      * 
      * @param properties
@@ -321,7 +321,7 @@ public class ManagementInterfaceUtils {
         
         return appendersName;
     } // getLoggersFromProperties
-	
+
     /** 
      * readLogDescriptions: Read the descriptions from a log4j file.
      * 

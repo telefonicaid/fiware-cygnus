@@ -39,8 +39,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.flume.Context;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -56,7 +59,11 @@ public class NGSIPostgisSinkTest {
      * Constructor.
      */
     public NGSIPostgisSinkTest() {
-        LogManager.getRootLogger().setLevel(Level.FATAL);
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        Configuration config = ctx.getConfiguration();
+        LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+        loggerConfig.setLevel(Level.FATAL);
+        ctx.updateLoggers();
     } // NGSIPostgisSinkTest
 
     /**

@@ -63,6 +63,9 @@ public final class CommonConstants {
     public static final String LOG4J_SVC = "service";
     public static final String LOG4J_SUBSVC = "subservice";
     public static final String LOG4J_COMP = "agent";
+
+    // Agent Name
+    public static final String DEF_AGENT_NAME = "cygnus-ngsi";
     
     // encoding
     public static final String INTERNAL_CONCATENATOR = "=";

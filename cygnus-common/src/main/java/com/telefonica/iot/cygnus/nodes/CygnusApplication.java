@@ -44,9 +44,10 @@ import org.apache.flume.node.Application;
 import org.apache.flume.node.MaterializedConfiguration;
 import org.apache.flume.node.PollingPropertiesFileConfigurationProvider;
 import org.apache.flume.node.PropertiesFileConfigurationProvider;
-import org.slf4j.MDC;
-
-import com.google.common.collect.ImmutableMap;
+import org.apache.logging.log4j.ThreadContext;
+import java.util.UUID;
+import java.util.Map;
+//import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -78,9 +79,9 @@ public class CygnusApplication extends Application {
     
     private static final CygnusLogger LOGGER = new CygnusLogger(CygnusApplication.class);
     private static JettyServer mgmtIfServer;
-    private static ImmutableMap<String, SourceRunner> sourcesRef;
-    private static ImmutableMap<String, Channel> channelsRef;
-    private static ImmutableMap<String, SinkRunner> sinksRef;
+    private static Map<String, SourceRunner> sourcesRef;
+    private static Map<String, Channel> channelsRef;
+    private static Map<String, SinkRunner> sinksRef;
     private static LifecycleSupervisor supervisorRef;
     private static final int CHANNEL_CHECKING_INTERVAL = 5000;
     private static final int YAFS_CHECKING_INTERVAL = 1000;
@@ -135,11 +136,14 @@ public class CygnusApplication extends Application {
     @Override
     @Subscribe
     public synchronized void handleConfigurationEvent(MaterializedConfiguration conf) {
+        LOGGER.debug("handleConfigurationEvent with conf: " + conf.toString());
         // Stop checking threads until configuration is loaded
         if (yafs != null) {
             yafs.setReloading(true);
             LOGGER.debug("Pausing YAFS.");
         }
+
+        super.handleConfigurationEvent(conf);
         
         if (firstTime) {
             // get references to the different elements of the agent, this will be needed when shutting down Cygnus in a
@@ -147,12 +151,10 @@ public class CygnusApplication extends Application {
             sourcesRef = conf.getSourceRunners();
             channelsRef = conf.getChannels();
             sinksRef = conf.getSinkRunners();
-            LOGGER.debug("References to Flume components have been taken");
+            LOGGER.debug("References to Flume components have been taken for fist time");
             firstTime = false;
             return;
         } // if
-        
-        super.handleConfigurationEvent(conf);
         
         // get references to the different elements of the agent, this will be needed when shutting down Cygnus in a
         // certain order
@@ -178,11 +180,12 @@ public class CygnusApplication extends Application {
         try {
             // Set some MDC logging fields to 'N/A' for this thread
             // Later in this method the component field will be given a value
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
-            org.apache.log4j.MDC.put(CommonConstants.LOG4J_COMP, CommonConstants.NA);
+            ThreadContext.put("id", UUID.randomUUID().toString());
+            ThreadContext.put(CommonConstants.LOG4J_CORR, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_TRANS, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_SVC, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_SUBSVC, CommonConstants.NA);
+            ThreadContext.put(CommonConstants.LOG4J_COMP, CommonConstants.NA);
         
             // Print Cygnus starting trace including version
             LOGGER.info("Starting Cygnus, version " + CommonUtils.getCygnusVersion() + "."
@@ -229,7 +232,10 @@ public class CygnusApplication extends Application {
             CommandLine commandLine = parser.parse(options, args);
 
             File configurationFile = new File(commandLine.getOptionValue('f'));
-            String agentName = commandLine.getOptionValue('n');
+            String agentName = CommonConstants.DEF_AGENT_NAME;
+            if (commandLine.hasOption('n')) {
+                agentName = commandLine.getOptionValue('n');
+            } // if
             boolean reload = !commandLine.hasOption("no-reload-conf");
             
             String configurationPath = configurationFile.getParent();
@@ -299,6 +305,7 @@ public class CygnusApplication extends Application {
                                 pollingInterval);
                 components.add(configurationProvider);
                 application = new CygnusApplication(components);
+                application.handleConfigurationEvent(configurationProvider.getConfiguration());
                 eventBus.register(application);
             } else {
                 LOGGER.debug("no-reload-conf was set, thus the configuration file will only be read this time");
@@ -309,7 +316,7 @@ public class CygnusApplication extends Application {
             } // if else
                  
             // Set MDC logging field value for component
-            MDC.put(CommonConstants.LOG4J_COMP, commandLine.getOptionValue('n'));
+            ThreadContext.put(CommonConstants.LOG4J_COMP, agentName);
                         
             // start the Cygnus application
             application.start();
