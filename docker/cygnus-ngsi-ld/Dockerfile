@@ -267,6 +267,10 @@ ENV CYGNUS_ARCGIS_BATCH_TTL ""
 ENV MVN_VER "3.5.4"
 ENV MVN_HOME "/opt/apache-maven"
 
+# FIXME: appart from upgrading Flume version in PR #2212, this Dockerfile has not been actually
+# tested. It should be reviews and aligned with the one in cygnus-ngsi (for instance, we shouldn't need
+# to directly download the flume package, as it should be installed through mvn based in the pom.xml
+# configuration)
 ENV FLUME_VER "1.11.0"
 ENV FLUME_HOME "/opt/apache-flume"
 
