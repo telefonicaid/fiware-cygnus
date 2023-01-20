@@ -16,7 +16,7 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
-FROM debian:11.3-slim
+FROM debian:11.6-slim
 ARG GITHUB_ACCOUNT=telefonicaid
 ARG GITHUB_REPOSITORY=fiware-cygnus
 
