@@ -7,8 +7,11 @@ package com.telefonica.iot.cygnus.metrics;
 
 import com.telefonica.iot.cygnus.metrics.CygnusMetrics.Metrics;
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -22,7 +25,11 @@ public class CygnusMetricsTest {
      * Constructor.
      */
     public CygnusMetricsTest() {
-        LogManager.getRootLogger().setLevel(Level.FATAL);
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        Configuration config = ctx.getConfiguration();
+        LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+        loggerConfig.setLevel(Level.FATAL);
+        ctx.updateLoggers();
     } // CygnusMetricsTest
 
     /**

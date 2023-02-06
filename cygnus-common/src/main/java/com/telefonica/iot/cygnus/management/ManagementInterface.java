@@ -17,7 +17,7 @@
  */
 package com.telefonica.iot.cygnus.management;
 
-import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
 import java.io.BufferedReader;
@@ -43,9 +43,9 @@ public class ManagementInterface extends AbstractHandler {
     private static final CygnusLogger LOGGER = new CygnusLogger(ManagementInterface.class);
     private final File configurationFile;
     private String nameMappingsConfFile;    
-    private final ImmutableMap<String, SourceRunner> sources;
-    private final ImmutableMap<String, Channel> channels;
-    private final ImmutableMap<String, SinkRunner> sinks;
+    private final Map<String, SourceRunner> sources;
+    private final Map<String, Channel> channels;
+    private final Map<String, SinkRunner> sinks;
     private final int apiPort;
     private final int guiPort;
     private final String configurationPath;
@@ -60,8 +60,8 @@ public class ManagementInterface extends AbstractHandler {
      * @param apiPort
      * @param guiPort
      */
-    public ManagementInterface(String configurationPath, File configurationFile, ImmutableMap<String,
-            SourceRunner> sources, ImmutableMap<String, Channel> channels, ImmutableMap<String, SinkRunner> sinks,
+    public ManagementInterface(String configurationPath, File configurationFile, Map<String,
+            SourceRunner> sources, Map<String, Channel> channels, Map<String, SinkRunner> sinks,
             int apiPort, int guiPort) {
         this.configurationFile = configurationFile;
 

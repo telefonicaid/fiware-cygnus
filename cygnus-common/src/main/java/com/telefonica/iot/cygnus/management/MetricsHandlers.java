@@ -17,7 +17,7 @@
  */
 package com.telefonica.iot.cygnus.management;
 
-import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 import com.telefonica.iot.cygnus.handlers.CygnusHandler;
 import com.telefonica.iot.cygnus.metrics.CygnusMetrics;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
@@ -57,7 +57,7 @@ public final class MetricsHandlers {
      * @throws IOException
      */
     public static synchronized void get(HttpServletRequest request, HttpServletResponse response,
-            ImmutableMap<String, SourceRunner> sources, ImmutableMap<String, SinkRunner> sinks) throws IOException {
+            Map<String, SourceRunner> sources, Map<String, SinkRunner> sinks) throws IOException {
         // Let's assume everything goes well
         response.setStatus(HttpServletResponse.SC_OK);
         
@@ -89,8 +89,8 @@ public final class MetricsHandlers {
      * @param sinks
      * @throws java.io.IOException
      */
-    public static synchronized void delete(HttpServletResponse response, ImmutableMap<String, SourceRunner> sources,
-            ImmutableMap<String, SinkRunner> sinks) throws IOException {
+    public static synchronized void delete(HttpServletResponse response, Map<String, SourceRunner> sources,
+            Map<String, SinkRunner> sinks) throws IOException {
         deleteMetrics(sources, sinks);
         response.setStatus(HttpServletResponse.SC_OK);
     } // delete
@@ -101,8 +101,8 @@ public final class MetricsHandlers {
      * @param sinks
      * @return
      */
-    protected static CygnusMetrics mergeMetrics(ImmutableMap<String, SourceRunner> sources,
-            ImmutableMap<String, SinkRunner> sinks) {
+    protected static CygnusMetrics mergeMetrics(Map<String, SourceRunner> sources,
+            Map<String, SinkRunner> sinks) {
         CygnusMetrics mergedMetrics = new CygnusMetrics();
     
         if (sources != null) {
@@ -162,8 +162,8 @@ public final class MetricsHandlers {
      * @param sources
      * @param sinks
      */
-    private static void deleteMetrics(ImmutableMap<String, SourceRunner> sources,
-            ImmutableMap<String, SinkRunner> sinks) {
+    private static void deleteMetrics(Map<String, SourceRunner> sources,
+            Map<String, SinkRunner> sinks) {
         if (sources != null) {
             for (String key : sources.keySet()) {
                 Source source;

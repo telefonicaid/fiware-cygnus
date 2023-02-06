@@ -15,6 +15,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>mvnrepository</id>
+            <url>https://repo1.maven.org/maven2</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- Required for testing -->
         <dependency>
@@ -33,13 +40,18 @@
         <dependency>
             <groupId>org.apache.flume</groupId>
             <artifactId>flume-ng-node</artifactId>
-            <version>1.9.0</version>
+            <version>1.11.0</version>
         </dependency>
         <!-- Required for logging -->
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.17.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.17.2</version>
         </dependency>
         <!-- Required by any agent -->
         <dependency>

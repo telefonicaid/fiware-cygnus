@@ -21,7 +21,8 @@ package com.telefonica.iot.cygnus.backends.arcgis;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.apache.log4j.BasicConfigurator;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.DefaultConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,7 +46,7 @@ public class FeatureTest {
      */
     @Before
     public void setUp() throws Exception {
-        BasicConfigurator.configure();
+        Configurator.initialize(new DefaultConfiguration());
     }
 
     /**

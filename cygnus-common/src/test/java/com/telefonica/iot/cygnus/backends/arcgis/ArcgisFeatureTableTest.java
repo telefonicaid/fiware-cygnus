@@ -23,7 +23,8 @@ import static org.junit.Assert.fail;
 
 import java.util.List;
 
-import org.apache.log4j.BasicConfigurator;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.DefaultConfiguration;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,7 +46,7 @@ public class ArcgisFeatureTableTest implements ArcgisBaseTest {
      */
     @Before
     public void setUp() throws Exception {
-        BasicConfigurator.configure();
+        Configurator.initialize(new DefaultConfiguration());
     }
 
     private ArcgisFeatureTable connectArcgis() {
