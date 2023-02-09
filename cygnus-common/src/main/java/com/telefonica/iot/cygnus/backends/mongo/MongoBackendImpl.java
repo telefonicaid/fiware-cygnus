@@ -216,7 +216,7 @@ public class MongoBackendImpl implements MongoBackend {
             } // if
         } catch (Exception e) {
             LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
-        }
+        } // try catch
     } // createCollection
 
     /**
