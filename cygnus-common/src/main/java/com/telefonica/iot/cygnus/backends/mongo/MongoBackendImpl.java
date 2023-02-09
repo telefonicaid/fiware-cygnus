@@ -127,11 +127,15 @@ public class MongoBackendImpl implements MongoBackend {
         } catch (Exception e) {
             LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
         } // try catch
-        if (dataExpiration != 0) {
-            keys = new BasicDBObject().append("_id.origin", 1);
-            options = new IndexOptions().name("cyg_agg_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
-            createIndex(db, collectionName, keys, options);
-        } // if
+        try {
+            if (dataExpiration != 0) {
+                keys = new BasicDBObject().append("_id.origin", 1);
+                options = new IndexOptions().name("cyg_agg_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
+                createIndex(db, collectionName, keys, options);
+            } // if
+        } catch (Exception e) {
+            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
+        } // try catch
     } // createCollection
 
     /**
@@ -204,11 +208,15 @@ public class MongoBackendImpl implements MongoBackend {
         } catch (Exception e) {
             LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
         } // try catch
-        if (dataExpiration != 0) {
-            keys = new BasicDBObject().append("recvTime", 1);
-            options = new IndexOptions().name("cyg_raw_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
-            createIndex(db, collectionName, keys, options);
-        } // if
+        try {
+            if (dataExpiration != 0) {
+                keys = new BasicDBObject().append("recvTime", 1);
+                options = new IndexOptions().name("cyg_raw_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
+                createIndex(db, collectionName, keys, options);
+            } // if
+        } catch (Exception e) {
+            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
+        }
     } // createCollection
 
     /**
@@ -217,10 +225,9 @@ public class MongoBackendImpl implements MongoBackend {
      * @param collectionName
      * @param keys
      * @param options
-     * @throws Exception
      */
     public void createIndex(MongoDatabase db, String collectionName, BasicDBObject keys,
-            IndexOptions options) throws MongoException {
+            IndexOptions options) {
         try {
             db.getCollection(collectionName).createIndex(keys, options);
         } catch(Exception e) {
