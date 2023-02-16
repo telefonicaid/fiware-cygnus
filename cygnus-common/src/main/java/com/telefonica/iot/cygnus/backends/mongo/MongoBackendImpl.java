@@ -101,41 +101,33 @@ public class MongoBackendImpl implements MongoBackend {
         // check STH indexes documentation at https://github.com/telefonicaid/fiware-sth-comet/blob/master/doc/manuals/db_indexes.md
         BasicDBObject keys;
         IndexOptions options;
-        try {
-            keys = new BasicDBObject();
-                switch(dataModel) {
-                case DMBYSERVICEPATH:
-                    keys.append("_id.entityId", 1)
-                        .append("_id.entityType", 1)
-                        .append("_id.attrName", 1)
-                        .append("_id.resolution", 1)
-                        .append("_id.origin", 1);
-                    break;
-                case DMBYENTITY:
-                    keys.append("_id.attrName", 1)
-                        .append("_id.resolution", 1)
-                        .append("_id.origin", 1);
-                    break;
-                case DMBYATTRIBUTE:
-                    keys.append("_id.resolution", 1)
-                        .append("_id.origin", 1);
-                    break;
-                default:
-             }
-            options = new IndexOptions().name("cyg_agg_opt");
+        keys = new BasicDBObject();
+        switch(dataModel) {
+            case DMBYSERVICEPATH:
+                keys.append("_id.entityId", 1)
+                    .append("_id.entityType", 1)
+                    .append("_id.attrName", 1)
+                    .append("_id.resolution", 1)
+                    .append("_id.origin", 1);
+                break;
+            case DMBYENTITY:
+                keys.append("_id.attrName", 1)
+                    .append("_id.resolution", 1)
+                    .append("_id.origin", 1);
+                break;
+            case DMBYATTRIBUTE:
+                keys.append("_id.resolution", 1)
+                    .append("_id.origin", 1);
+                break;
+            default:
+        }
+        options = new IndexOptions().name("cyg_agg_opt");
+        createIndex(db, collectionName, keys, options);
+        if (dataExpiration != 0) {
+            keys = new BasicDBObject().append("_id.origin", 1);
+            options = new IndexOptions().name("cyg_agg_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
             createIndex(db, collectionName, keys, options);
-        } catch (Exception e) {
-            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
-        } // try catch
-        try {
-            if (dataExpiration != 0) {
-                keys = new BasicDBObject().append("_id.origin", 1);
-                options = new IndexOptions().name("cyg_agg_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
-                createIndex(db, collectionName, keys, options);
-            } // if
-        } catch (Exception e) {
-            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
-        } // try catch
+        } // if
     } // createCollection
 
     /**
@@ -179,44 +171,36 @@ public class MongoBackendImpl implements MongoBackend {
         //Index creation based on data model
         BasicDBObject keys;
         IndexOptions options;
-        try {
-            keys = new BasicDBObject();
-                switch(dataModel) {
-                case DMBYSERVICEPATH:
-                    keys.append("recvTime", 1)
-                        .append("entityId", 1)
-                        .append("entityType", 1)
-                        .append("attrName", 1)
-                        .append("attrType",1)
-                        .append("attrValue",1);
-                    break;
-                case DMBYENTITY:
-                    keys.append("recvTime", 1)
-                        .append("attrName", 1)
-                        .append("attrType",1)
-                        .append("attrValue",1);
-                    break;
-                case DMBYATTRIBUTE:
-                    keys.append("recvTime", 1)
-                        .append("attrType",1)
-                        .append("attrValue",1);
-                    break;
-                default:
-             }
-            options = new IndexOptions().name("cyg_raw_opt");
+        keys = new BasicDBObject();
+        switch(dataModel) {
+            case DMBYSERVICEPATH:
+                keys.append("recvTime", 1)
+                    .append("entityId", 1)
+                    .append("entityType", 1)
+                    .append("attrName", 1)
+                    .append("attrType",1)
+                    .append("attrValue",1);
+                break;
+            case DMBYENTITY:
+                keys.append("recvTime", 1)
+                    .append("attrName", 1)
+                    .append("attrType",1)
+                    .append("attrValue",1);
+                break;
+            case DMBYATTRIBUTE:
+                keys.append("recvTime", 1)
+                    .append("attrType",1)
+                    .append("attrValue",1);
+                break;
+            default:
+        }
+        options = new IndexOptions().name("cyg_raw_opt");
+        createIndex(db, collectionName, keys, options);
+        if (dataExpiration != 0) {
+            keys = new BasicDBObject().append("recvTime", 1);
+            options = new IndexOptions().name("cyg_raw_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
             createIndex(db, collectionName, keys, options);
-        } catch (Exception e) {
-            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
-        } // try catch
-        try {
-            if (dataExpiration != 0) {
-                keys = new BasicDBObject().append("recvTime", 1);
-                options = new IndexOptions().name("cyg_raw_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
-                createIndex(db, collectionName, keys, options);
-            } // if
-        } catch (Exception e) {
-            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
-        } // try catch
+        } // if
     } // createCollection
 
     /**
