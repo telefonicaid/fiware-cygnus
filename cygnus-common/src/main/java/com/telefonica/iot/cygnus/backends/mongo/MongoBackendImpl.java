@@ -568,11 +568,13 @@ public class MongoBackendImpl implements MongoBackend {
         for (String uri: uris) {
             String[] uriParts = uri.split(":");
             if (uriParts.length == 2) {
+                LOGGER.debug("Adding 2-part Mongo ServerAddress: Host=" + uriParts[0] + " Port=" + uriParts[1]);
                 servers.add(new ServerAddress(uriParts[0], new Integer(uriParts[1])));
             } else {
-                LOGGER.error("Bad server uri: " + uri);
+                LOGGER.debug("Adding 1-part Mongo ServerAddress: Host=" + uri);
+                servers.add(new ServerAddress(uri));
             }
-        } // for
+        }
 
         // create a Mongo client
 
