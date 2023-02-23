@@ -573,8 +573,8 @@ public class MongoBackendImpl implements MongoBackend {
             } else {
                 LOGGER.debug("Adding 1-part Mongo ServerAddress: Host=" + uri);
                 servers.add(new ServerAddress(uri));
-            }
-        }
+            } // if else
+        } // for
 
         // create a Mongo client
 
