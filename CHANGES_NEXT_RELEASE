@@ -1,3 +1,4 @@
+[cygnus-common] Added support for reindexing of dataExpiration (#2160, partially)
 [cygnus-ngsi] Upgrade Debian version from 11.3 to 11.6 in Dockerfile
 [cygnus-ngsi] Update NameMapping compile log mensage from WARN to ERROR
 [cygnus-common] MongoDB indexes are created depending on DM (#2204)
