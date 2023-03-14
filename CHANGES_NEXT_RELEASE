@@ -7,3 +7,4 @@
 [cygnus-common][cygnus-twitter][cygnus-ngsi][cygnus-ngsi-ld] Upgrade log4j from v1 (1.2.17) to v2 (2.17.2) series (#1592)
 [cygnus-ngsi] OracleSQL ngsi sink added (for OracleS 11g and 12c) (#2195)
 [cygnus-ngsi] Removes "_" in schema name for DM -schema family (#2201)
+[cygnus-common] Added support for MongoDB hosts without a port (#2219)
