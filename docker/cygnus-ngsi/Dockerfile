@@ -259,7 +259,7 @@ ENV FLUME_HOME "/opt/apache-flume"
 ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
 ENV FLUME_URL "https://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 
-ENV JAVA_VERSION "1.8.0"
+ENV JAVA_VERSION "1.11.0"
 
 COPY / ${CYGNUS_HOME}
 
@@ -274,7 +274,7 @@ RUN \
     apt-get -y update && \
     apt-get -y upgrade && \
     # Install dependencies
-    apt-get -y install openjdk-8-jdk curl git python2 && \
+    apt-get -y install openjdk-11-jdk curl git python2 && \
     # Add Cygnus user
     adduser ${CYGNUS_USER} && \
     export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64 && \
