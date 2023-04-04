@@ -108,18 +108,20 @@
           <artifactId>log4j-slf4j-impl</artifactId>
           <version>2.17.2</version>
         </dependency>
-        <!-- Required by HDFSBackendImplBinary -->
+        <!-- <!-\- Required by HDFSBackendImplBinary -\-> -->
         <dependency>
             <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-core</artifactId>
-            <version>1.2.1</version>
+            <!-- <artifactId>hadoop-core</artifactId> -->
+            <!-- <version>1.2.1</version> -->
+            <artifactId>hadoop-client</artifactId>
+            <version>2.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hive</groupId>
             <artifactId>hive-jdbc</artifactId>
-            <version>2.3.4</version>
+            <version>3.1.3</version>
         </dependency>
-        <!-- Required by MongoBackendImpl -->
+        <!-- <!-\- Required by MongoBackendImpl -\-> -->
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver</artifactId>
@@ -134,7 +136,7 @@
         <dependency>
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
-            <version>0.5</version>
+            <version>0.11</version>
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
@@ -145,7 +147,17 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-dynamodb</artifactId>
-            <version>1.10.32</version>
+            <version>1.10.77</version>
+        </dependency>
+        <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty</artifactId>
+          <version>6.1.25</version>
+        </dependency>
+        <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty-util</artifactId>
+          <version>6.1.25</version>
         </dependency>
     </dependencies>
 
@@ -163,7 +175,7 @@
                 <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-surefire-plugin</artifactId>
-                  <version>2.12.4</version>
+                  <version>3.0.0</version>
                   <configuration>
                     <skipTests>true</skipTests>
                   </configuration>
@@ -185,7 +197,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>3.5.0</version>
                     <configuration>
                         <descriptorRefs>
                             <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -196,7 +208,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
-                    <version>1.5.0</version>
+                    <version>3.1.0</version>
                     <executions>
                         <execution>
                             <phase>compile</phase>
@@ -217,21 +229,21 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.5.1</version>
+                    <version>3.8.2</version>
                     <configuration>
                         <reportPlugins>
-                            <plugin>
-                                <groupId>org.codehaus.mojo</groupId>
-                                <artifactId>cobertura-maven-plugin</artifactId>
-                                <version>2.6</version>
-                                <configuration>
-                                    <aggregate>true</aggregate>
-                                </configuration>
-                            </plugin>
+                            <!-- <plugin> -->
+                            <!--     <groupId>org.codehaus.mojo</groupId> -->
+                            <!--     <artifactId>cobertura-maven-plugin</artifactId> -->
+                            <!--     <version>2.6</version> -->
+                            <!--     <configuration> -->
+                            <!--         <aggregate>true</aggregate> -->
+                            <!--     </configuration> -->
+                            <!-- </plugin> -->
                             <plugin>
                                 <groupId>org.apache.maven.plugins</groupId>
                                 <artifactId>maven-surefire-report-plugin</artifactId>
-                                <version>2.16</version>
+                                <version>3.0.0</version>
                                 <configuration>
                                     <aggregate>true</aggregate>
                                 </configuration>
@@ -239,7 +251,7 @@
                             <plugin>
                                 <groupId>org.apache.maven.plugins</groupId>
                                 <artifactId>maven-checkstyle-plugin</artifactId>
-                                <version>2.12</version>
+                                <version>3.2.1</version>
                                 <configuration>
                                     <configLocation>telefonica_checkstyle.xml</configLocation>
                                     <includeTestSourceDirectory>false</includeTestSourceDirectory>
@@ -249,7 +261,7 @@
                             <plugin>
                                 <groupId>org.apache.maven.plugins</groupId>
                                 <artifactId>maven-javadoc-plugin</artifactId>
-                                <version>2.9</version>
+                                <version>3.5.0</version>
                                 <configuration>
                                     <aggregate>true</aggregate>
                                 </configuration>
