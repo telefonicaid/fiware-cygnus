@@ -274,7 +274,7 @@ RUN \
     apt-get -y update && \
     apt-get -y upgrade && \
     # Install dependencies
-    apt-get -y install java-${JAVA_VERSION}-openjdk-devel curl git python2 && \
+    apt-get -y install openjdk-11-jdk curl git python2 && \
     # Add Cygnus user
     adduser ${CYGNUS_USER} && \
     export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64 && \
