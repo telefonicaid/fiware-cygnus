@@ -1,3 +1,5 @@
+[cygnus-common] Upgrade apache httpclient dep from 4.5.13 to 4.5.14
+[cygnus-common] Upgrade apache httpcore dep from 4.3.1 to 4.4.16
 [cygnus-ngsi] Upgrade Debian version from 11.3 to 11.6 in Dockerfile
 [cygnus-ngsi] Update NameMapping compile log mensage from WARN to ERROR
 [cygnus-common] MongoDB indexes are created depending on DM (#2204)
