@@ -1,3 +1,4 @@
+[cygnus-common] Upgrade mongodb driver dep from 3.12.11 to 3.12.12
 [cygnus-common] Upgrade apache httpclient dep from 4.5.13 to 4.5.14
 [cygnus-common][cygnus-ngsi] Upgrade apache httpcore dep from 4.3.1 to 4.4.16
 [cygnus-common] Upgrade apache common lang dep from 3.4.0 to 3.12.0
