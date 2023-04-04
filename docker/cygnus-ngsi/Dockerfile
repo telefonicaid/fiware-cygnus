@@ -251,8 +251,8 @@ ENV CYGNUS_ARCGIS_BATCH_SIZE ""
 ENV CYGNUS_ARCGIS_BATCH_TIMEOUT ""
 ENV CYGNUS_ARCGIS_BATCH_TTL ""
 
-ENV MVN_VER "3.5.4"
-ENV MVN_HOME "/opt/apache-maven"
+#ENV MVN_VER "3.5.4"
+#ENV MVN_HOME "/opt/apache-maven"
 
 ENV FLUME_VER "1.11.0"
 ENV FLUME_HOME "/opt/apache-flume"
@@ -274,23 +274,23 @@ RUN \
     apt-get -y update && \
     apt-get -y upgrade && \
     # Install dependencies
-    apt-get -y install openjdk-11-jdk curl git python2 && \
+    apt-get -y install openjdk-11-jdk curl git python2 maven && \
     # Add Cygnus user
     adduser ${CYGNUS_USER} && \
     export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64 && \
     export MAVEN_OPTS="-Xmx2048M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:+CMSClassUnloadingEnabled" && \
     export MAVEN_ARGS="-B -T8" && \
     # For debug Maven
-    # export MAVEN_ARGS="${MAVEN_ARGS} -X -e -Dmaven.compiler.verbose=true" && \
+    export MAVEN_ARGS="${MAVEN_ARGS} -X -e -Dmaven.compiler.verbose=true" && \
     echo "INFO: Getting apache preferred site and obtain URLs for Maven and Flume..." && \
     APACHE_DOMAIN="$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | python2 -c 'import json,sys;obj=json.load(sys.stdin);print obj["preferred"]')" \
       || APACHE_DOMAIN="http://archive.apache.org/dist/" && \
-    MVN_URL="${APACHE_DOMAIN}maven/maven-3/${MVN_VER}/binaries/apache-maven-${MVN_VER}-bin.tar.gz" && \
+    #MVN_URL="${APACHE_DOMAIN}maven/maven-3/${MVN_VER}/binaries/apache-maven-${MVN_VER}-bin.tar.gz" && \
     echo -e $'INFO: Java version <'${JAVA_VERSION}'>\n'$(java -version)'\nINFO: Apache domain <'${APACHE_DOMAIN}'>\nINFO: URL MAVEN <'${MVN_URL}'>\nINFO: URL FLUME <'${FLUME_URL}'>' && \
     echo "INFO: Download and install Maven and Flume..." && \
-    curl --remote-name --location --insecure --silent --show-error "${MVN_URL}" && \
-    tar xzf apache-maven-${MVN_VER}-bin.tar.gz && \
-    mv apache-maven-${MVN_VER} ${MVN_HOME} && \
+    # curl --remote-name --location --insecure --silent --show-error "${MVN_URL}" && \
+    # tar xzf apache-maven-${MVN_VER}-bin.tar.gz && \
+    # mv apache-maven-${MVN_VER} ${MVN_HOME} && \
     curl --remote-name --location --insecure --silent --show-error "${FLUME_URL}" && \
     tar zxf apache-flume-${FLUME_VER}-bin.tar.gz && \
     mv apache-flume-${FLUME_VER}-bin ${FLUME_HOME} && \
@@ -301,12 +301,12 @@ RUN \
     cd ${CYGNUS_HOME} && \
     echo "INFO: Build and install cygnus-common" && \
     cd ${CYGNUS_HOME}/cygnus-common && \
-    ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean compile exec:exec assembly:single && \
+    mvn ${MAVEN_ARGS} clean compile exec:exec assembly:single && \
     cp target/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar ${FLUME_HOME}/plugins.d/cygnus/libext/ && \
-    ${MVN_HOME}/bin/mvn install:install-file -Dfile=${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=${CYGNUS_VERSION} -Dpackaging=jar -DgeneratePom=false && \
+    mvn install:install-file -Dfile=${FLUME_HOME}/plugins.d/cygnus/libext/cygnus-common-${CYGNUS_VERSION}-jar-with-dependencies.jar -DgroupId=com.telefonica.iot -DartifactId=cygnus-common -Dversion=${CYGNUS_VERSION} -Dpackaging=jar -DgeneratePom=false && \
     echo "INFO: Build and install cygnus-ngsi" && \
     cd ${CYGNUS_HOME}/cygnus-ngsi && \
-    ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean compile exec:exec assembly:single && \
+    mvn ${MAVEN_ARGS} clean compile exec:exec assembly:single && \
     cp target/cygnus-ngsi-${CYGNUS_VERSION}-jar-with-dependencies.jar ${FLUME_HOME}/plugins.d/cygnus/lib/ && \
     echo "INFO: Install Cygnus Application script" && \
     cp ${CYGNUS_HOME}/cygnus-common/target/classes/cygnus-flume-ng ${FLUME_HOME}/bin/ && \
@@ -319,10 +319,10 @@ RUN \
     chmod 777 /var/log/cygnus && \
     echo "INFO: Cleanup to thin the final image... doing optimizations..." && \
     cd ${CYGNUS_HOME}/cygnus-common && \
-    ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
+    mvn ${MAVEN_ARGS} clean && \
     cd ${CYGNUS_HOME}/cygnus-ngsi && \
-    ${MVN_HOME}/bin/mvn ${MAVEN_ARGS} clean && \
-    rm -rf /root/.m2 && rm -rf ${MVN_HOME} && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz ${CYGNUS_HOME}/*.tar.gz && \
+    mvn ${MAVEN_ARGS} clean && \
+    rm -rf /root/.m2 && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz ${CYGNUS_HOME}/*.tar.gz && \
     # Cleanup
     apt-get clean && \
     apt-get -y remove python2 git && \
@@ -340,7 +340,7 @@ RUN \
     find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en_US' ! -name 'locale.alias' | xargs -r rm -r && rm -f /var/log/*log && \
     bash -c 'localedef --list-archive | grep -v -e "en_US" | xargs localedef --delete-from-archive' && \
     /bin/cp -f /usr/lib/locale/locale-archive /usr/lib/locale/locale-archive.tmpl && \
-    #build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xargs -r rm -rf && \
+    #build-locale-archive && find ${CYGNUS_HOME} -name '.[^.]*' 2>/dev/null | xa1rgs -r rm -rf && \
     echo "INFO: END build"
 
 
