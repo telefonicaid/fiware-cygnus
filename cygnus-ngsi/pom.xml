@@ -71,7 +71,12 @@
             <artifactId>jodd-core</artifactId>
             <version>3.6.8</version>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/com.jcraft/jsch -->
+        <dependency>
+          <groupId>com.jcraft</groupId>
+          <artifactId>jsch</artifactId>
+          <version>0.1.55</version>
+        </dependency>
              
     </dependencies>
 
