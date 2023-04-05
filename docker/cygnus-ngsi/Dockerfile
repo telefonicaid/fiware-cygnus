@@ -251,9 +251,6 @@ ENV CYGNUS_ARCGIS_BATCH_SIZE ""
 ENV CYGNUS_ARCGIS_BATCH_TIMEOUT ""
 ENV CYGNUS_ARCGIS_BATCH_TTL ""
 
-#ENV MVN_VER "3.5.4"
-#ENV MVN_HOME "/opt/apache-maven"
-
 ENV FLUME_VER "1.11.0"
 ENV FLUME_HOME "/opt/apache-flume"
 ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
@@ -285,12 +282,8 @@ RUN \
     echo "INFO: Getting apache preferred site and obtain URLs for Maven and Flume..." && \
     APACHE_DOMAIN="$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | python2 -c 'import json,sys;obj=json.load(sys.stdin);print obj["preferred"]')" \
       || APACHE_DOMAIN="http://archive.apache.org/dist/" && \
-    #MVN_URL="${APACHE_DOMAIN}maven/maven-3/${MVN_VER}/binaries/apache-maven-${MVN_VER}-bin.tar.gz" && \
     echo -e $'INFO: Java version <'${JAVA_VERSION}'>\n'$(java -version)'\nINFO: Apache domain <'${APACHE_DOMAIN}'>\nINFO: URL MAVEN <'${MVN_URL}'>\nINFO: URL FLUME <'${FLUME_URL}'>' && \
-    echo "INFO: Download and install Maven and Flume..." && \
-    # curl --remote-name --location --insecure --silent --show-error "${MVN_URL}" && \
-    # tar xzf apache-maven-${MVN_VER}-bin.tar.gz && \
-    # mv apache-maven-${MVN_VER} ${MVN_HOME} && \
+    echo "INFO: Download and install Flume..." && \
     curl --remote-name --location --insecure --silent --show-error "${FLUME_URL}" && \
     tar zxf apache-flume-${FLUME_VER}-bin.tar.gz && \
     mv apache-flume-${FLUME_VER}-bin ${FLUME_HOME} && \
