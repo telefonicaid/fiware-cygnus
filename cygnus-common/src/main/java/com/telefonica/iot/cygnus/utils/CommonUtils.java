@@ -199,6 +199,7 @@ public final class CommonUtils {
             return false;
         } // if
         
+        boolean isDotExist = false;
         for (int i = 0; i < s.length(); i++) {
             if ((i == 0) && (s.charAt(i) == '-')) {
                 if (s.length() == 1) {
@@ -217,6 +218,10 @@ public final class CommonUtils {
             } // if
             
             if (s.charAt(i) == '.') {
+                if (isDotExist) {
+                    return false;
+                } // if
+                isDotExist = true;
                 continue;
             } // if
             
