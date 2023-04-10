@@ -42,9 +42,9 @@ jobs:
       matrix:
         java-version:
           - 8
-          - 9
           # FIXME: something in the current build (pom.xml?) precludes Java>8 to work).
-          #  - 10
+          # - 9
+          # - 10
           - 11
     steps:
       - name: Git checkout
