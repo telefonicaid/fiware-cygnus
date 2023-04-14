@@ -27,6 +27,7 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -319,5 +320,58 @@ public class CommonUtilsTest {
             throw e;
         } // try catch
     } // testGetMilliseconds
+
+    /**
+     * [CommonUtils.isANumber] -------- Returns true when passing a valid Number else false.
+     */
+    @Test
+    public void testIsANumber() {
+        System.out.println(getTestTraceHead("[CommonUtils.isANumber]")
+                + "-------- Returns true when passing a valid Number else false");
+        String ip = "127.0.0.1";
+        String intNumber = "6";
+        String decimalNumber = "10.02";
+        String testStr = "ABC";
+
+        try {
+            assertFalse(CommonUtils.isANumber(ip));
+            System.out.println(getTestTraceHead("[CommonUtils.isANumber]")
+                    + "-  OK  - false obtained for ip "+ ip);
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[CommonUtils.isANumber]")
+                    + "- FAIL - false was not obtained");
+            throw e;
+        } // try catch
+
+        try {
+            assertTrue(CommonUtils.isANumber(intNumber));
+            System.out.println(getTestTraceHead("[CommonUtils.isANumber]")
+                    + "-  OK  - true obtained for intNumber "+ intNumber);
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[CommonUtils.isANumber]")
+                    + "- FAIL - true was not obtained");
+            throw e;
+        } // try catch
+
+        try {
+            assertFalse(CommonUtils.isANumber(testStr));
+            System.out.println(getTestTraceHead("[CommonUtils.isANumber]")
+                    + "-  OK  - false obtained for testStr "+ testStr);
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[CommonUtils.isANumber]")
+                    + "- FAIL - false was not obtained");
+            throw e;
+        } // try catch
+
+        try {
+            assertTrue(CommonUtils.isANumber(decimalNumber));
+            System.out.println(getTestTraceHead("[CommonUtils.isANumber]")
+                    + "-  OK  - true obtained for decimalNumber "+ decimalNumber);
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[CommonUtils.isANumber]")
+                    + "- FAIL - true was not obtained");
+            throw e;
+        } // try catch
+    } // testIsANumber
 
 } // NGSIUtilsTest
