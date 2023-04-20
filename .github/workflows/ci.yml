@@ -41,11 +41,13 @@ jobs:
     strategy:
       matrix:
         java-version:
-          - 8
-        # FIXME: something in the current build (pom.xml?) precludes Java>8 to work).
-        #  - 9
-        #  - 10
-        #  - 11
+          - 11
+          - 12
+          - 13
+          - 14
+          - 15
+#          - 16
+#          - 17
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
