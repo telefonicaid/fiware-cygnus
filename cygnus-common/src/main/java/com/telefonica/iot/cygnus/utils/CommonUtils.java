@@ -59,7 +59,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.json.simple.parser.Yytoken;
 import org.postgresql.largeobject.BlobOutputStream;
-import parquet.org.apache.thrift.meta_data.ListMetaData;
+import org.apache.thrift.meta_data.ListMetaData;
 
 /**
  *
