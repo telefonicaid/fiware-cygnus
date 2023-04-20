@@ -101,41 +101,33 @@ public class MongoBackendImpl implements MongoBackend {
         // check STH indexes documentation at https://github.com/telefonicaid/fiware-sth-comet/blob/master/doc/manuals/db_indexes.md
         BasicDBObject keys;
         IndexOptions options;
-        try {
-            keys = new BasicDBObject();
-                switch(dataModel) {
-                case DMBYSERVICEPATH:
-                    keys.append("_id.entityId", 1)
-                        .append("_id.entityType", 1)
-                        .append("_id.attrName", 1)
-                        .append("_id.resolution", 1)
-                        .append("_id.origin", 1);
-                    break;
-                case DMBYENTITY:
-                    keys.append("_id.attrName", 1)
-                        .append("_id.resolution", 1)
-                        .append("_id.origin", 1);
-                    break;
-                case DMBYATTRIBUTE:
-                    keys.append("_id.resolution", 1)
-                        .append("_id.origin", 1);
-                    break;
-                default:
-             }
-            options = new IndexOptions().name("cyg_agg_opt");
-            db.getCollection(collectionName).createIndex(keys, options);
-        } catch (Exception e) {
-            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
-        } // try catch
-        try {
-            if (dataExpiration != 0) {
-                keys = new BasicDBObject().append("_id.origin", 1);
-                options = new IndexOptions().name("cyg_agg_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
-                db.getCollection(collectionName).createIndex(keys, options);
-            } // if
-        } catch (Exception e) {
-            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
-        } // try catch
+        keys = new BasicDBObject();
+        switch(dataModel) {
+            case DMBYSERVICEPATH:
+                keys.append("_id.entityId", 1)
+                    .append("_id.entityType", 1)
+                    .append("_id.attrName", 1)
+                    .append("_id.resolution", 1)
+                    .append("_id.origin", 1);
+                break;
+            case DMBYENTITY:
+                keys.append("_id.attrName", 1)
+                    .append("_id.resolution", 1)
+                    .append("_id.origin", 1);
+                break;
+            case DMBYATTRIBUTE:
+                keys.append("_id.resolution", 1)
+                    .append("_id.origin", 1);
+                break;
+            default:
+        }
+        options = new IndexOptions().name("cyg_agg_opt");
+        createIndex(db, collectionName, keys, options);
+        if (dataExpiration != 0) {
+            keys = new BasicDBObject().append("_id.origin", 1);
+            options = new IndexOptions().name("cyg_agg_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
+            createIndex(db, collectionName, keys, options);
+        } // if
     } // createCollection
 
     /**
@@ -179,45 +171,58 @@ public class MongoBackendImpl implements MongoBackend {
         //Index creation based on data model
         BasicDBObject keys;
         IndexOptions options;
-        try {
-            keys = new BasicDBObject();
-                switch(dataModel) {
-                case DMBYSERVICEPATH:
-                    keys.append("recvTime", 1)
-                        .append("entityId", 1)
-                        .append("entityType", 1)
-                        .append("attrName", 1)
-                        .append("attrType",1)
-                        .append("attrValue",1);
-                    break;
-                case DMBYENTITY:
-                    keys.append("recvTime", 1)
-                        .append("attrName", 1)
-                        .append("attrType",1)
-                        .append("attrValue",1);
-                    break;
-                case DMBYATTRIBUTE:
-                    keys.append("recvTime", 1)
-                        .append("attrType",1)
-                        .append("attrValue",1);
-                    break;
-                default:
-             }
-            options = new IndexOptions().name("cyg_raw_opt");
-            db.getCollection(collectionName).createIndex(keys, options);
-        } catch (Exception e) {
-            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
-        } // try catch
-        try {
-            if (dataExpiration != 0) {
-                keys = new BasicDBObject().append("recvTime", 1);
-                options = new IndexOptions().name("cyg_raw_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
-                db.getCollection(collectionName).createIndex(keys, options);
-            } // if
-        } catch (Exception e) {
-            LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
-        } // try catch
+        keys = new BasicDBObject();
+        switch(dataModel) {
+            case DMBYSERVICEPATH:
+                keys.append("recvTime", 1)
+                    .append("entityId", 1)
+                    .append("entityType", 1)
+                    .append("attrName", 1)
+                    .append("attrType",1)
+                    .append("attrValue",1);
+                break;
+            case DMBYENTITY:
+                keys.append("recvTime", 1)
+                    .append("attrName", 1)
+                    .append("attrType",1)
+                    .append("attrValue",1);
+                break;
+            case DMBYATTRIBUTE:
+                keys.append("recvTime", 1)
+                    .append("attrType",1)
+                    .append("attrValue",1);
+                break;
+            default:
+        }
+        options = new IndexOptions().name("cyg_raw_opt");
+        createIndex(db, collectionName, keys, options);
+        if (dataExpiration != 0) {
+            keys = new BasicDBObject().append("recvTime", 1);
+            options = new IndexOptions().name("cyg_raw_exp").expireAfter(dataExpiration, TimeUnit.SECONDS);
+            createIndex(db, collectionName, keys, options);
+        } // if
     } // createCollection
+
+    /**
+     * Create an index for dataExpiration in the given raw collection within the given database.
+     * @param db
+     * @param collectionName
+     * @param keys
+     * @param options
+     */
+    public void createIndex(MongoDatabase db, String collectionName, BasicDBObject keys,
+            IndexOptions options) {
+        try {
+            db.getCollection(collectionName).createIndex(keys, options);
+        } catch(Exception e) {
+            if (e.getMessage().contains("IndexOptionsConflict")) {
+                db.getCollection(collectionName).dropIndex(options.getName());
+                createIndex(db, collectionName, keys, options);
+            } else {
+                LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
+            }
+        } // try catch
+    } // createIndex
 
     /**
      * Inserts a new document in the given raw collection within the given database (row-like mode).
@@ -563,10 +568,12 @@ public class MongoBackendImpl implements MongoBackend {
         for (String uri: uris) {
             String[] uriParts = uri.split(":");
             if (uriParts.length == 2) {
+                LOGGER.debug("Adding 2-part Mongo ServerAddress: Host=" + uriParts[0] + " Port=" + uriParts[1]);
                 servers.add(new ServerAddress(uriParts[0], new Integer(uriParts[1])));
             } else {
-                LOGGER.error("Bad server uri: " + uri);
-            }
+                LOGGER.debug("Adding 1-part Mongo ServerAddress: Host=" + uri);
+                servers.add(new ServerAddress(uri));
+            } // if else
         } // for
 
         // create a Mongo client
