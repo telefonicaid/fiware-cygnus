@@ -332,6 +332,7 @@ public class CommonUtilsTest {
         String intNumber = "6";
         String decimalNumber = "10.02";
         String testStr = "ABC";
+        String negativeNumber = "-10.02";
 
         try {
             assertFalse(CommonUtils.isANumber(ip));
@@ -367,6 +368,16 @@ public class CommonUtilsTest {
             assertTrue(CommonUtils.isANumber(decimalNumber));
             System.out.println(getTestTraceHead("[CommonUtils.isANumber]")
                     + "-  OK  - true obtained for decimalNumber "+ decimalNumber);
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[CommonUtils.isANumber]")
+                    + "- FAIL - true was not obtained");
+            throw e;
+        } // try catch
+
+        try {
+            assertTrue(CommonUtils.isANumber(negativeNumber));
+            System.out.println(getTestTraceHead("[CommonUtils.isANumber]")
+                    + "-  OK  - true obtained for negativeNumber "+ negativeNumber);
         } catch (AssertionError e) {
             System.out.println(getTestTraceHead("[CommonUtils.isANumber]")
                     + "- FAIL - true was not obtained");
