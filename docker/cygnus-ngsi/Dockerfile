@@ -267,7 +267,8 @@ RUN ls -lsrt
 # Install
 RUN \
     # openjdk-8-jdk is not included in Debian 11 repositories, so we need to add jessie-backports for it
-    echo 'deb http://httpredir.debian.org/debian-security stretch/updates main' > /etc/apt/sources.list.d/jessie-backports.list && \
+    ###echo 'deb http://httpredir.debian.org/debian-security stretch/updates main' > /etc/apt/sources.list.d/jessie-backports.list && \
+    echo 'deb http://archive.debian.org/debian stretch main' > /etc/apt/sources.list && \
     apt-get -y update && \
     apt-get -y upgrade && \
     # Install dependencies
