@@ -1,3 +1,4 @@
+[cygnus-common] Fixed isANumber for number containing multiple decimals (#2226)
 [cygnus-common][cygnus-ngsi][cygnus-ngsi-ld] Upgrade Java version from 1.8 to 1.11 in Dockerfile
 [cygnus-common] Upgrade hadoop-core from 1.2.1 to hadoop-client 2.7.0
 [cygnus-common] Upgrade hive-jdbc from 2.3.4 to 3.1.3

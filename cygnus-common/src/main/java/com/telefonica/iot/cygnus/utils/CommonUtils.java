@@ -179,53 +179,17 @@ public final class CommonUtils {
     
     /**
      * Decides if a given string is a number.
-     * http://stackoverflow.com/questions/5439529/determine-if-a-string-is-an-integer-in-java
      * @param s
      * @return
      */
     public static boolean isANumber(String s) {
-        return isANumber(s, 10);
-    } // isANumber
-
-    /**
-     * Decides if a given string is a number, given its radix.
-     * http://stackoverflow.com/questions/5439529/determine-if-a-string-is-an-integer-in-java
-     * @param s
-     * @param radix
-     * @return
-     */
-    public static boolean isANumber(String s, int radix) {
-        if (s.isEmpty()) {
+        try {
+            Double.parseDouble(s);
+        } catch (NumberFormatException e){
             return false;
-        } // if
-        
-        for (int i = 0; i < s.length(); i++) {
-            if ((i == 0) && (s.charAt(i) == '-')) {
-                if (s.length() == 1) {
-                    return false;
-                } // if
-                
-                continue;
-            } // if
-            
-            if ((i == 0) && (s.charAt(i) == '.')) {
-                return false;
-            } // if
-            
-            if ((i == s.length() - 1) && (s.charAt(i) == '.')) {
-                return false;
-            } // if
-            
-            if (s.charAt(i) == '.') {
-                continue;
-            } // if
-            
-            if (Character.digit(s.charAt(i), radix) < 0) {
-                return false;
-            } // if
-            
-        } // for
-        
+        } catch (NullPointerException e) {
+            return false;
+        }
         return true;
     } // isANumber
     
