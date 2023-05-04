@@ -171,6 +171,30 @@ rm -rf $RPM_BUILD_ROOT
 /var/run/%{_project_name}
 
 %changelog
+* Thu May 04 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.0.0
+- [cygnus-common] OracleSQL backend (#2195)
+- [cygnus-common] MongoDB indexes are created depending on DM (#2204)
+- [cygnus-common] Added support for reindexing of dataExpiration (#2160, partially)
+- [cygnus-common] Added support for MongoDB hosts without a port (#2219)
+- [cygnus-common] Fixed isANumber for number containing multiple decimals (#2226)
+- [cygnus-common] Upgrade Java version from 1.8 to 1.11 in Dockerfile
+- [cygnus-common] Upgrade flume-ng-node version from 1.9.0 to 1.11.0 (#2179)
+- [cygnus-common] Upgrade log4j from v1 (1.2.17) to v2 (2.17.2) series (#1592)
+- [cygnus-common] Upgrade hadoop-core from 1.2.1 to hadoop-client 2.7.0
+- [cygnus-common] Upgrade hive-jdbc from 2.3.4 to 3.1.3
+- [cygnus-common] Upgrade maven-compiler-plugin dep from 3.5.1 to 3.11.0
+- [cygnus-common] Upgrade maven-assembly-plugin dep from 2.6.0 to 3.5.0
+- [cygnus-common] Upgrade exec-maven-plugin  dep from 3.5.1 to 3.8.2
+- [cygnus-common] Upgrade maven-site-plugin dep from 2.5.1 to 3.8.2
+- [cygnus-common] Upgrade maven-surefire-report-plugin dep from 2.12.4 to 3.0.0
+- [cygnus-common] Upgrade maven-checkstyle-plugin dep from 2.12.0 to 3.2.1
+- [cygnus-common] Upgrade maven-javadoc-plugin dep from 2.9.0 to 3.5.0
+- [cygnus-common] Upgrade mongodb driver dep from 3.12.11 to 3.12.12
+- [cygnus-common] Upgrade apache httpclient dep from 4.5.13 to 4.5.14
+- [cygnus-common] Upgrade apache httpcore dep from 4.3.1 to 4.4.16
+- [cygnus-common] Upgrade apache common lang dep from 3.4.0 to 3.12.0
+- [cygnus-common] Upgrade postgresql from 42.4.1 to 42.4.3
+
 * Tue Oct 18 2022 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.20.0
 - [cygnus-common][SQLBackend] Ordernig batch INSERT sentences upon upsert to avoid deadlocks (#2197)
 - [cygnus-common][MySQLBackend] Upgrade mysql-connector-java from 8.0.27 to 8.0.28
