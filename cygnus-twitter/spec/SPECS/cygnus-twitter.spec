@@ -100,6 +100,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu May 04 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.0.0
+- [cygnus-twitter] Upgrade log4j from v1 (1.2.17) to v2 (2.17.2) series (#1592)
 
 * Tue Oct 18 2022 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.20.0
 

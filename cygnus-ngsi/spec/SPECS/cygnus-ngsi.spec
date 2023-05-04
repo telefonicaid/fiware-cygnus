@@ -100,10 +100,19 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu May 04 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.0.0
-- [cygnus-ngsi] Upgrade Debian version from 11.3 to 11.6 in Dockerfile
 - [cygnus-ngsi] Update NameMapping compile log mensage from WARN to ERROR
 - [cygnus-ngsi] OracleSQL ngsi sink added (for OracleS 11g and 12c) (#2195)
 - [cygnus-ngsi] Removes "_" in schema name for DM -schema family (#2201)
+- [cygnus-ngsi] Upgrade Java version from 1.8 to 1.11 in Dockerfile
+- [cygnus-ngsi] Upgrade log4j from v1 (1.2.17) to v2 (2.17.2) series (#1592)
+- [cygnus-ngsi] Upgrade maven-compiler-plugin dep from 3.5.1 to 3.11.0
+- [cygnus-ngsi] Upgrade maven-assembly-plugin dep from 2.6.0 to 3.5.0
+- [cygnus-ngsi] Upgrade exec-maven-plugin  dep from 3.5.1 to 3.8.2
+- [cygnus-ngsi] Upgrade maven-site-plugin dep from 2.5.1 to 3.8.2
+- [cygnus-ngsi] Upgrade maven-surefire-report-plugin dep from 2.12.4 to 3.0.0
+- [cygnus-ngsi] Upgrade maven-checkstyle-plugin dep from 2.12.0 to 3.2.1
+- [cygnus-ngsi] Upgrade maven-javadoc-plugin dep from 2.9.0 to 3.5.0
+- [cygnus-ngsi] Upgrade Debian version from 11.3 to 11.6 in Dockerfile
 
 * Tue Oct 18 2022 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.20.0
 - [cygnus-ngsi][SQL-sinks] New datamodels added: `data_model=dm-by-fixed-entity-type`, `data_model=dm-by-fixed-entity-type-database-schema`, `data_model=dm-by-fixed-entity-type-database` (#2190)
