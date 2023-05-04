@@ -99,6 +99,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Thu May 04 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.0.0
+- [cygnus-ngsi] Upgrade Debian version from 11.3 to 11.6 in Dockerfile
+- [cygnus-ngsi] Update NameMapping compile log mensage from WARN to ERROR
+- [cygnus-ngsi] OracleSQL ngsi sink added (for OracleS 11g and 12c) (#2195)
+- [cygnus-ngsi] Removes "_" in schema name for DM -schema family (#2201)
+
 * Tue Oct 18 2022 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.20.0
 - [cygnus-ngsi][SQL-sinks] New datamodels added: `data_model=dm-by-fixed-entity-type`, `data_model=dm-by-fixed-entity-type-database-schema`, `data_model=dm-by-fixed-entity-type-database` (#2190)
 - [cygnus-ngsi] Fix aggregate using event servicepath (#2185)
