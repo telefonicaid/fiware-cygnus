@@ -112,6 +112,7 @@ rm -rf $RPM_BUILD_ROOT
 - [cygnus-ngsi] Upgrade maven-surefire-report-plugin dep from 2.12.4 to 3.0.0
 - [cygnus-ngsi] Upgrade maven-checkstyle-plugin dep from 2.12.0 to 3.2.1
 - [cygnus-ngsi] Upgrade maven-javadoc-plugin dep from 2.9.0 to 3.5.0
+- [cygnus-ngsi] Upgrade apache httpcore dep from 4.3.1 to 4.4.16
 - [cygnus-ngsi] Upgrade Debian version from 11.3 to 11.6 in Dockerfile
 
 * Tue Oct 18 2022 Fermin Galan <fermin.galanmarquez@telefonica.com> 2.20.0
