@@ -145,6 +145,15 @@ public abstract class NGSIGenericAggregator {
     }
 
     /**
+     * Sets last data
+     *
+     * @param lastData the last data
+     */
+    public void setLastData(LinkedHashMap<String, ArrayList<JsonElement>> lastData) {
+        this.lastData = lastData;
+    }
+
+    /**
      * Sets last data delete
      *
      * @param lastData the last data delete
