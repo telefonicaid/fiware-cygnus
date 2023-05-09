@@ -258,7 +258,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                         valueLastData = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
                     }
                     valueLastData.add(aggregation.get(key).get(aggregation.get(key).size() - 1));
-                    if (entityDeleteLastData) {
+                    if (lastDataEntityDelete) {
                         lastData.remove(key);
                     } else {
                         lastData.put(key, valueLastData);
