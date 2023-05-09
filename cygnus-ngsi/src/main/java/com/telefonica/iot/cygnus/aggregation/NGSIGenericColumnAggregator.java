@@ -222,6 +222,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         if (isEnableLastData()) { // More detail in doc/cygnus-ngsi/flume_extensions_catalogue/last_data_function.md
             boolean updateLastData = false;
             LinkedHashMap<String, ArrayList<JsonElement>> lastData = getLastData();
+            LinkedHashMap<String, ArrayList<JsonElement>> lastDataDelete = getLastDataDelete();
             if (numPreviousValues > 0) {
                 if (lastData.containsKey(getLastDataUniqueKeyOnAggregation())) {
                     ArrayList<JsonElement> list = lastData.get(getLastDataUniqueKeyOnAggregation());
@@ -259,7 +260,8 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                     }
                     valueLastData.add(aggregation.get(key).get(aggregation.get(key).size() - 1));
                     if (lastDataEntityDelete) {
-                        lastData.remove(key);
+                        // lastData.remove(key); TBD?
+                        lastDataDelete.put(key, valueLastData);
                     } else {
                         lastData.put(key, valueLastData);
                     }

@@ -427,6 +427,7 @@ public class NGSIMySQLSink extends NGSISink {
             } else {
                 mySQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
                                                           aggregator.getLastDataToPersist(),
+                                                          aggregator.getLastDataDeleteToPersist(),
                                                           dbName,
                                                           null, // no schema in mysql
                                                           tableName,

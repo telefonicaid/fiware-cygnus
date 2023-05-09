@@ -48,6 +48,7 @@ public class SQLQueryUtils {
      *
      * @param aggregation     the aggregation
      * @param lastData        the last data
+     * @param lastDataDelete  the last data delete
      * @param tableName       the table name
      * @param tableSuffix     the table suffix
      * @param uniqueKey       the unique key
@@ -63,6 +64,7 @@ public class SQLQueryUtils {
      */
     protected static ArrayList<StringBuffer> sqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                  LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                                 LinkedHashMap<String, ArrayList<JsonElement>> lastDataDelete,
                                                  String tableName,
                                                  String tableSuffix,
                                                  String uniqueKey,
@@ -76,6 +78,7 @@ public class SQLQueryUtils {
         if (sqlInstance == SQLInstance.POSTGRESQL){
             return postgreSqlUpsertQuery(aggregation,
                     lastData,
+                    lastDataDelete,
                     tableName,
                     tableSuffix,
                     uniqueKey,
@@ -87,6 +90,7 @@ public class SQLQueryUtils {
         } else if (sqlInstance == SQLInstance.MYSQL) {
             return mySqlUpsertQuery(aggregation,
                     lastData,
+                    lastDataDelete,
                     tableName,
                     tableSuffix,
                     uniqueKey,
@@ -104,6 +108,7 @@ public class SQLQueryUtils {
      *
      * @param aggregation     the aggregation
      * @param lastData        the last data
+     * @param lastDataDelete  the last data delete
      * @param tableName       the table name
      * @param tableSuffix     the table suffix
      * @param uniqueKey       the unique key
@@ -115,6 +120,7 @@ public class SQLQueryUtils {
      */
     protected static ArrayList<StringBuffer> postgreSqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                         LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                                        LinkedHashMap<String, ArrayList<JsonElement>> lastDataDelete,
                                                         String tableName,
                                                         String tableSuffix,
                                                         String uniqueKey,
@@ -170,6 +176,34 @@ public class SQLQueryUtils {
                     append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append("::text, '").append(timestampFormat).append("')");
             upsertList.add(query);
         }
+        for (int i = 0 ; i < collectionSizeOnLinkedHashMap(lastDataDelete) ; i++) {
+            StringBuffer query = new StringBuffer();
+            StringBuffer values = new StringBuffer("(");
+            StringBuffer fields = new StringBuffer("(");
+            StringBuffer updateSet = new StringBuffer();
+            String valuesSeparator = "";
+            String fieldsSeparator = "";
+            String updateSetSeparator = "";
+            ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
+            for (int j = 0 ; j < keys.size() ; j++) {
+                // values
+                JsonElement value = lastDataDelete.get(keys.get(j)).get(i);
+                String valueToAppend = value == null ? "null" : getStringValueFromJsonElement(value, "'", attrNativeTypes);
+                values.append(valuesSeparator).append(valueToAppend);
+                valuesSeparator = ",";
+                // fields
+                fields.append(fieldsSeparator).append(keys.get(j));
+                fieldsSeparator = ",";
+
+                // updateSet
+                if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
+                    updateSet.append(updateSetSeparator).append(keys.get(j)).append("=").append(postgisTempReference).append(".").append(keys.get(j));
+                    updateSetSeparator = ",";
+                }
+            }
+            query.append("DELETE FROM ").append(postgisDestination).append(" WHERE ").append("(").append(uniqueKey).append(") "); // TBD
+            upsertList.add(query);
+        }
         LOGGER.debug("[SQLQueryUtils.postgreSqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
         return upsertList;
     }
@@ -180,6 +214,7 @@ public class SQLQueryUtils {
      *
      * @param aggregation     the aggregation
      * @param lastData        the last data
+     * @param lastDataDelete  the last data delete
      * @param tableName       the table name
      * @param tableSuffix     the table suffix
      * @param uniqueKey       the unique key
@@ -191,6 +226,7 @@ public class SQLQueryUtils {
      */
     protected static ArrayList<StringBuffer> mySqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                    LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                                   LinkedHashMap<String, ArrayList<JsonElement>> lastDataDelete,
                                                    String tableName,
                                                    String tableSuffix,
                                                    String uniqueKey,
@@ -242,6 +278,46 @@ public class SQLQueryUtils {
                     append("VALUES ").append(values).append(") ");
             query.append("ON DUPLICATE KEY ").
                     append("UPDATE ").append(updateSet).append(", ").append(dateKeyUpdate);
+            upsertList.add(query);
+        }
+        for (int i = 0 ; i < collectionSizeOnLinkedHashMap(lastDataDelete) ; i++) {
+            StringBuffer query = new StringBuffer();
+            StringBuffer dateKeyUpdate = new StringBuffer();
+            StringBuffer values = new StringBuffer("(");
+            StringBuffer fields = new StringBuffer("(");
+            StringBuffer updateSet = new StringBuffer();
+            ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
+            for (int j = 0 ; j < keys.size() ; j++) {
+                if (lastData.get(keys.get(j)).get(i) != null) {
+                    JsonElement value = lastData.get(keys.get(j)).get(i);
+                    if (j == 0) {
+                        values.append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
+                        fields.append(MYSQL_FIELDS_MARK).append(keys.get(j)).append(MYSQL_FIELDS_MARK);
+                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
+                            if (keys.get(j).equalsIgnoreCase(timestampKey)) {
+                                dateKeyUpdate.append(mySQLUpdateRecordQuery(keys.get(j), uniqueKey, timestampKey, timestampFormat));
+                            } else {
+                                updateSet.append(mySQLUpdateRecordQuery(keys.get(j), uniqueKey, timestampKey, timestampFormat));
+                            }
+                        }
+                    } else {
+                        values.append(",").append(getStringValueFromJsonElement(value, "'", attrNativeTypes));
+                        fields.append(",").append(MYSQL_FIELDS_MARK).append(keys.get(j)).append(MYSQL_FIELDS_MARK);
+                        if (!Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
+                            if (keys.get(j).equalsIgnoreCase(timestampKey)) {
+                                dateKeyUpdate.append(mySQLUpdateRecordQuery(keys.get(j), uniqueKey, timestampKey, timestampFormat));
+                            } else {
+                                if (!(updateSet.length() == 0)) {
+                                    updateSet.append(", ");
+                                }
+                                updateSet.append(mySQLUpdateRecordQuery(keys.get(j), uniqueKey, timestampKey, timestampFormat));
+                            }
+                        }
+                    }
+                }
+            }
+            query.append("DELETE FROM ").append(MYSQL_FIELDS_MARK).append(tableName.concat(tableSuffix)).append(MYSQL_FIELDS_MARK).append(" ").append(fields).append(") ").
+                append("WHERE ").append("TBD"); // TBD
             upsertList.add(query);
         }
         LOGGER.debug("[SQLQueryUtils.mySqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());

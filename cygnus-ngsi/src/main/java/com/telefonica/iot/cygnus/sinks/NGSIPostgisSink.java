@@ -439,6 +439,7 @@ public class NGSIPostgisSink extends NGSISink {
             } else {
                 postgisPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
                                                             aggregator.getLastDataToPersist(),
+                                                            aggregator.getLastDataDeleteToPersist(),
                                                             dataBaseName,
                                                             schemaName,
                                                             tableName,
