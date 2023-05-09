@@ -144,6 +144,7 @@ public class SQLQueryUtilsTest {
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
                 getValueFieldsSingleBatch(),
+                new LinkedHashMap<>(),
                 tableName,
                 tableSuffix,
                 uniqueKey,
@@ -187,6 +188,7 @@ public class SQLQueryUtilsTest {
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsMultipleBatch(),
                 getValueFieldsMultipleBatch(),
+                new LinkedHashMap<>(),
                 tableName,
                 tableSuffix,
                 uniqueKey,
@@ -229,6 +231,7 @@ public class SQLQueryUtilsTest {
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         upsertList = SQLQueryUtils.sqlUpsertQuery(new LinkedHashMap<>(),
                 new LinkedHashMap<>(),
+                new LinkedHashMap<>(),
                 tableName,
                 tableSuffix,
                 uniqueKey,
@@ -262,6 +265,7 @@ public class SQLQueryUtilsTest {
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsMultipleBatch(),
                 getValueFieldsMultipleBatch(),
+                new LinkedHashMap<>(),
                 tableName,
                 tableSuffix,
                 uniqueKey,
@@ -312,6 +316,7 @@ public class SQLQueryUtilsTest {
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
                 getValueFieldsSingleBatch(),
+                new LinkedHashMap<>(),
                 tableName,
                 tableSuffix,
                 uniqueKey,
@@ -360,6 +365,7 @@ public class SQLQueryUtilsTest {
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         upsertList = SQLQueryUtils.sqlUpsertQuery(new LinkedHashMap<>(),
+                new LinkedHashMap<>(),
                 new LinkedHashMap<>(),
                 tableName,
                 tableSuffix,
