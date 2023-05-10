@@ -392,7 +392,7 @@ public class SQLQueryUtilsTest {
     public void testMySQLUpsertDeleteQuerySingleBatch() {
         String tableName = "exampleTable";
         String tableSuffix = "_last_data";
-        String uniqueKey = "entityId";
+        String uniqueKey = "entityId, entityType";
         String timestampKey = "recvTimeS";
         String timestampFormat = "%Y-%m-%d %H:%i:%s.%f";
         SQLInstance sqlInstance = SQLInstance.MYSQL;
@@ -414,7 +414,7 @@ public class SQLQueryUtilsTest {
                 attrNativeTypes);
         sqlupsertQuery = upsertList.get(0);
 
-        String correctQuery = "DELETE FROM `exampleTable_last_data` WHERE entityId='entityId1'";
+        String correctQuery = "DELETE FROM `exampleTable_last_data` WHERE entityId='entityId1' AND entityType='entityType'";
         try {
             assertEquals(sqlupsertQuery.toString(), correctQuery);
             System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testMySQLUpsertDeleteQuerySingleBatch]")
