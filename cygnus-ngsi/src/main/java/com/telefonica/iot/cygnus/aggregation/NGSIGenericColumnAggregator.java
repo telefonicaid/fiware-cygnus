@@ -185,7 +185,8 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             } else if (attrType.equals("TextUnrestricted")) {
                 attrValue = jsonParser.parse(getEscapedString(attrValue, "'"));
             } else if (attrName.equals("alterationType")) {
-                if (attrValue.equals("entityDelete")) {
+                LOGGER.debug("alterationType=" + attrValue.getAsString());
+                if (attrValue.getAsString().equals("entityDelete")) {
                     // keep info for lastData
                     lastDataEntityDelete = true;
                 }
