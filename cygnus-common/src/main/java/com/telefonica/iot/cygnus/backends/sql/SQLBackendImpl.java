@@ -600,7 +600,7 @@ public class SQLBackendImpl implements SQLBackend{
      *
      * @param aggregation     the aggregation
      * @param lastData        the last data
-     * @param lastDataDelete  the last data
+     * @param lastDataDelete  the last data delete
      * @param dataBase        the dataBase
      * @param tableName       the table name
      * @param tableSuffix     the table suffix
