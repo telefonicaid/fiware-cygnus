@@ -260,13 +260,13 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                     }
                     valueLastData.add(aggregation.get(key).get(aggregation.get(key).size() - 1));
                     if (lastDataEntityDelete) {
-                        // lastData.remove(key); TBD?
                         lastDataDelete.put(key, valueLastData);
                     } else {
                         lastData.put(key, valueLastData);
                     }
                 } // for
                 setLastData(lastData);
+                setLastDataDelete(lastDataDelete);
             }
         }
     }
