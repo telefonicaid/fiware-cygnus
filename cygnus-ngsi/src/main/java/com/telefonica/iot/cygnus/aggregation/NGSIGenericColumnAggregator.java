@@ -187,11 +187,12 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
             } else if (attrName.equals("alterationType")) {
                 LOGGER.debug("alterationType=" + attrValue.getAsString());
                 if (attrValue.getAsString().equals("entityDelete")) {
-                    // keep info for lastData
+                    // keep info for lastDataDelete
                     lastDataEntityDelete = true;
                 }
-                // Alteration type should not be added into agregation as an attribute
-                // just to next for item
+                // alterationType (in any of their possible values)
+                // should not be added into agregation as an attribute
+                // just jump to next item
                 continue;
             }
             // Check if the attribute already exists in the form of 2 columns (one for metadata); if not existing,
