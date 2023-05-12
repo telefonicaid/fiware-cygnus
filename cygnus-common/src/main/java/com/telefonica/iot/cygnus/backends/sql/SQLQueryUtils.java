@@ -48,6 +48,7 @@ public class SQLQueryUtils {
      *
      * @param aggregation     the aggregation
      * @param lastData        the last data
+     * @param lastDataDelete  the last data delete
      * @param tableName       the table name
      * @param tableSuffix     the table suffix
      * @param uniqueKey       the unique key
@@ -63,6 +64,7 @@ public class SQLQueryUtils {
      */
     protected static ArrayList<StringBuffer> sqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                  LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                                 LinkedHashMap<String, ArrayList<JsonElement>> lastDataDelete,
                                                  String tableName,
                                                  String tableSuffix,
                                                  String uniqueKey,
@@ -76,6 +78,7 @@ public class SQLQueryUtils {
         if (sqlInstance == SQLInstance.POSTGRESQL){
             return postgreSqlUpsertQuery(aggregation,
                     lastData,
+                    lastDataDelete,
                     tableName,
                     tableSuffix,
                     uniqueKey,
@@ -87,6 +90,7 @@ public class SQLQueryUtils {
         } else if (sqlInstance == SQLInstance.MYSQL) {
             return mySqlUpsertQuery(aggregation,
                     lastData,
+                    lastDataDelete,
                     tableName,
                     tableSuffix,
                     uniqueKey,
@@ -104,6 +108,7 @@ public class SQLQueryUtils {
      *
      * @param aggregation     the aggregation
      * @param lastData        the last data
+     * @param lastDataDelete  the last data delete
      * @param tableName       the table name
      * @param tableSuffix     the table suffix
      * @param uniqueKey       the unique key
@@ -115,6 +120,7 @@ public class SQLQueryUtils {
      */
     protected static ArrayList<StringBuffer> postgreSqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                         LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                                        LinkedHashMap<String, ArrayList<JsonElement>> lastDataDelete,
                                                         String tableName,
                                                         String tableSuffix,
                                                         String uniqueKey,
@@ -170,6 +176,24 @@ public class SQLQueryUtils {
                     append("< ").append("to_timestamp(").append(postgisTempReference).append(".").append(timestampKey).append("::text, '").append(timestampFormat).append("')");
             upsertList.add(query);
         }
+        for (int i = 0 ; i < collectionSizeOnLinkedHashMap(lastDataDelete) ; i++) {
+            StringBuffer query = new StringBuffer();
+            ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
+            query.append("DELETE FROM ").append(postgisDestination).append(" WHERE ");
+            for (int j = 0 ; j < keys.size() ; j++) {
+                Boolean addAnd = false;
+                if (Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
+                    JsonElement value = lastDataDelete.get(keys.get(j)).get(i);
+                    String valueToAppend = value == null ? "null" : getStringValueFromJsonElement(value, "'", attrNativeTypes);
+                    if (addAnd) {
+                        query.append(" AND ");
+                    }
+                    query.append(keys.get(j)).append("=").append(valueToAppend);
+                    addAnd = true;
+                }
+            }
+            upsertList.add(query);
+        }
         LOGGER.debug("[SQLQueryUtils.postgreSqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
         return upsertList;
     }
@@ -180,6 +204,7 @@ public class SQLQueryUtils {
      *
      * @param aggregation     the aggregation
      * @param lastData        the last data
+     * @param lastDataDelete  the last data delete
      * @param tableName       the table name
      * @param tableSuffix     the table suffix
      * @param uniqueKey       the unique key
@@ -191,6 +216,7 @@ public class SQLQueryUtils {
      */
     protected static ArrayList<StringBuffer> mySqlUpsertQuery(LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                                    LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                                   LinkedHashMap<String, ArrayList<JsonElement>> lastDataDelete,
                                                    String tableName,
                                                    String tableSuffix,
                                                    String uniqueKey,
@@ -242,6 +268,24 @@ public class SQLQueryUtils {
                     append("VALUES ").append(values).append(") ");
             query.append("ON DUPLICATE KEY ").
                     append("UPDATE ").append(updateSet).append(", ").append(dateKeyUpdate);
+            upsertList.add(query);
+        }
+        for (int i = 0 ; i < collectionSizeOnLinkedHashMap(lastDataDelete) ; i++) {
+            StringBuffer query = new StringBuffer();
+            ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
+            query.append("DELETE FROM ").append(MYSQL_FIELDS_MARK).append(tableName.concat(tableSuffix)).append(MYSQL_FIELDS_MARK).append(" WHERE ");
+            for (int j = 0 ; j < keys.size() ; j++) {
+                Boolean addAnd = false;
+                if (Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
+                    JsonElement value = lastDataDelete.get(keys.get(j)).get(i);
+                    String valueToAppend = value == null ? "null" : getStringValueFromJsonElement(value, "'", attrNativeTypes);
+                    if (addAnd) {
+                        query.append(" AND ");
+                    }
+                    query.append(keys.get(j)).append("=").append(valueToAppend);
+                    addAnd = true;
+                }
+            }
             upsertList.add(query);
         }
         LOGGER.debug("[SQLQueryUtils.mySqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());

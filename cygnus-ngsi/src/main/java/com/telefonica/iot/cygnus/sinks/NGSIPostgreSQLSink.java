@@ -432,6 +432,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             }  else {
                 postgreSQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
                                                                aggregator.getLastDataToPersist(),
+                                                               aggregator.getLastDataDeleteToPersist(),
                                                                databaseName,
                                                                schemaName,
                                                                tableName,

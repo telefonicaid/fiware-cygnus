@@ -40,6 +40,11 @@ public abstract class NGSIGenericAggregator {
     protected LinkedHashMap<String, ArrayList<JsonElement>> lastData;
 
     /**
+     * The Aggregation of processed entityes to be deleted.
+     */
+    protected LinkedHashMap<String, ArrayList<JsonElement>> lastDataDelete;
+
+    /**
      * The Md aggregations for sinks who store on a diferent destination metadata.
      */
     protected Map<String, String> mdAggregations;
@@ -127,12 +132,34 @@ public abstract class NGSIGenericAggregator {
     }
 
     /**
-     * Sets last data.
+     * Gets last data.
+     *
+     * @return the last data delete
+     */
+    public LinkedHashMap<String, ArrayList<JsonElement>> getLastDataDelete() {
+        if (lastDataDelete == null) {
+            return new LinkedHashMap<>();
+        } else {
+            return lastDataDelete;
+        }
+    }
+
+    /**
+     * Sets last data
      *
      * @param lastData the last data
      */
     public void setLastData(LinkedHashMap<String, ArrayList<JsonElement>> lastData) {
         this.lastData = lastData;
+    }
+
+    /**
+     * Sets last data delete
+     *
+     * @param lastData the last data delete
+     */
+    public void setLastDataDelete(LinkedHashMap<String, ArrayList<JsonElement>> lastDataDelete) {
+        this.lastDataDelete = lastDataDelete;
     }
 
     /**
@@ -148,6 +175,22 @@ public abstract class NGSIGenericAggregator {
             return new LinkedHashMap<>();
         } else {
             return NGSIUtils.linkedHashMapWithoutDefaultFields(lastData, attrMetadataStore);
+        }
+    }
+
+    /**
+     * Gets last data delete to persist.This means that the returned aggregation will not have metadata
+     * in case that attrMetadataStore is set to false. Also, added fields for processing purposes
+     * will be removed from the aggregation (like attrType on Column mode).
+     *
+     * @return the last data delete
+     */
+
+    public LinkedHashMap<String, ArrayList<JsonElement>> getLastDataDeleteToPersist() {
+        if (lastDataDelete == null) {
+            return new LinkedHashMap<>();
+        } else {
+            return NGSIUtils.linkedHashMapWithoutDefaultFields(lastDataDelete, attrMetadataStore);
         }
     }
 

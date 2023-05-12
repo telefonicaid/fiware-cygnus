@@ -600,6 +600,7 @@ public class SQLBackendImpl implements SQLBackend{
      *
      * @param aggregation     the aggregation
      * @param lastData        the last data
+     * @param lastDataDelete  the last data delete
      * @param dataBase        the dataBase
      * @param tableName       the table name
      * @param tableSuffix     the table suffix
@@ -614,6 +615,7 @@ public class SQLBackendImpl implements SQLBackend{
      */
     public void upsertTransaction (LinkedHashMap<String, ArrayList<JsonElement>> aggregation,
                                    LinkedHashMap<String, ArrayList<JsonElement>> lastData,
+                                   LinkedHashMap<String, ArrayList<JsonElement>> lastDataDelete,
                                    String dataBase,
                                    String schema,
                                    String tableName,
@@ -636,6 +638,7 @@ public class SQLBackendImpl implements SQLBackend{
 
             ArrayList<StringBuffer> upsertQuerysList = SQLQueryUtils.sqlUpsertQuery(aggregation,
                     lastData,
+                    lastDataDelete,
                     tableName,
                     tableSuffix,
                     uniqueKey,

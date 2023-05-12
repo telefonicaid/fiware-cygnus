@@ -103,6 +103,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         // Get the event headers
         long recvTimeTs = event.getRecvTimeTs();
         long currentTS = 0;
+        Boolean lastDataEntityDelete = false;
         String currentEntityId = new String();
         if (isEnableLastData() && (getLastDataTimestampKey().equalsIgnoreCase(NGSIConstants.RECV_TIME))) {
             currentTS = recvTimeTs;
@@ -183,6 +184,16 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                 }
             } else if (attrType.equals("TextUnrestricted")) {
                 attrValue = jsonParser.parse(getEscapedString(attrValue, "'"));
+            } else if (attrName.equals("alterationType")) {
+                LOGGER.debug("alterationType=" + attrValue.getAsString());
+                if (attrValue.getAsString().equals("entityDelete")) {
+                    // keep info for lastDataDelete
+                    lastDataEntityDelete = true;
+                }
+                // alterationType (in any of their possible values)
+                // should not be added into agregation as an attribute
+                // just jump to next item
+                continue;
             }
             // Check if the attribute already exists in the form of 2 columns (one for metadata); if not existing,
             // add an empty value for all previous rows
@@ -213,6 +224,7 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
         if (isEnableLastData()) { // More detail in doc/cygnus-ngsi/flume_extensions_catalogue/last_data_function.md
             boolean updateLastData = false;
             LinkedHashMap<String, ArrayList<JsonElement>> lastData = getLastData();
+            LinkedHashMap<String, ArrayList<JsonElement>> lastDataDelete = getLastDataDelete();
             if (numPreviousValues > 0) {
                 if (lastData.containsKey(getLastDataUniqueKeyOnAggregation())) {
                     ArrayList<JsonElement> list = lastData.get(getLastDataUniqueKeyOnAggregation());
@@ -249,9 +261,14 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                         valueLastData = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
                     }
                     valueLastData.add(aggregation.get(key).get(aggregation.get(key).size() - 1));
-                    lastData.put(key, valueLastData);
+                    if (lastDataEntityDelete) {
+                        lastDataDelete.put(key, valueLastData);
+                    } else {
+                        lastData.put(key, valueLastData);
+                    }
                 } // for
                 setLastData(lastData);
+                setLastDataDelete(lastDataDelete);
             }
         }
     }
