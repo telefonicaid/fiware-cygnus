@@ -1,2 +1,2 @@
-- Delete entity in lastData when alterationType entityDelete is received (2231)
-- Exclude of attribute processing alterationType send by a subscription in all of their values
+- Add: delete entity in lastData when alterationType entityDelete is received (#2231). Requires Orion 3.9+
+- Add: exclude of attribute processing alterationType send by a subscription in all of their values (#2231)
