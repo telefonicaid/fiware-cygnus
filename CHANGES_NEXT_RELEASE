@@ -1,2 +1,3 @@
 - Add: delete entity in lastData when alterationType entityDelete is received (#2231). Requires Orion 3.9+
 - Add: exclude of attribute processing alterationType send by a subscription in all of their values (#2231)
+- Add missing blank space in create table if not exists for postgresql
