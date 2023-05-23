@@ -568,7 +568,7 @@ public class SQLBackendImpl implements SQLBackend{
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "create table if not exists `" + errorTableName + "`" + typedFieldNames;
         } else if (sqlInstance == SQLInstance.POSTGRESQL) {
-            query = "CREATE TABLE IF NOT EXISTS" + errorTableName + " " + typedFieldNames;
+            query = "CREATE TABLE IF NOT EXISTS " + errorTableName + " " + typedFieldNames;
         } else if (sqlInstance == SQLInstance.ORACLE) {
             // FIXME: Add an oracle workaround for "if not exists"
             query = "CREATE TABLE " + errorTableName + " " + typedFieldNamesOracle;
