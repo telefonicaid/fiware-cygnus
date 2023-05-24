@@ -173,9 +173,9 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 
 * Thu May 24 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.1.0
-- Add: delete entity in lastData when alterationType entityDelete is received (#2231). Requires Orion 3.9+
-- Add: exclude of attribute processing alterationType send by a subscription in all of their values (#2231)
-- Fix: missing blank space in create table if not exists for postgresql
+- [cygnus-cmmon] Add: delete entity in lastData when alterationType entityDelete is received (#2231). Requires Orion 3.9+
+- [cygnus-cmmon] Add: exclude of attribute processing alterationType send by a subscription in all of their values (#2231)
+- [cygnus-cmmon] Fix: missing blank space in create table if not exists for postgresql
     
 * Thu May 04 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.0.0
 - [cygnus-common] OracleSQL backend (#2195)
