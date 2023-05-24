@@ -99,6 +99,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Thu May 24 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.1.0
+- Add: delete entity in lastData when alterationType entityDelete is received (#2231). Requires Orion 3.9+
+- Add: exclude of attribute processing alterationType send by a subscription in all of their values (#2231)
+- Fix: missing blank space in create table if not exists for postgresql
+
 * Thu May 04 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.0.0
 - [cygnus-ngsi] Update NameMapping compile log mensage from WARN to ERROR
 - [cygnus-ngsi] OracleSQL ngsi sink added (for OracleS 11g and 12c) (#2195)
