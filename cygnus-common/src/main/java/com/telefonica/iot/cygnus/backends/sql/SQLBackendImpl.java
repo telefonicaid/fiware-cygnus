@@ -306,7 +306,12 @@ public class SQLBackendImpl implements SQLBackend{
 
         // get a connection to the given destination
         Connection con = driver.getConnection(dataBase);
-        String query = "select " + selection + " from `" + tableName + "` order by recvTime";
+        String query = "";
+        if (sqlInstance == SQLInstance.MYSQL) {
+            query = "select " + selection + " from `" + tableName + "` order by recvTime";
+        } else {
+            query = "select " + selection + " from " + tableName + " order by recvTime";
+        }
 
         try {
             stmt = con.createStatement();
