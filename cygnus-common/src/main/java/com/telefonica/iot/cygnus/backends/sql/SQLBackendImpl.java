@@ -482,9 +482,17 @@ public class SQLBackendImpl implements SQLBackend{
 
                         if (recordTime < (currentTime - (expirationTime * 1000))) {
                             if (filters.isEmpty()) {
-                                filters += "recvTime='" + recvTime + "'";
+                                if (sqlInstance == SQLInstance.MYSQL) {
+                                    filters += "recvTime='" + recvTime + "'";
+                                } else {
+                                    filters += "recvTime=" + recvTime;
+                                }
                             } else {
-                                filters += " or recvTime='" + recvTime + "'";
+                                if (sqlInstance == SQLInstance.MYSQL) {
+                                    filters += " or recvTime='" + recvTime + "'";
+                                } else {
+                                    filters += " or recvTime=" + recvTime;
+                                }
                             } // if else
                         } else {
                             break;
