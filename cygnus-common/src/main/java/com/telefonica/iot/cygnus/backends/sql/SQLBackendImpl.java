@@ -348,7 +348,12 @@ public class SQLBackendImpl implements SQLBackend{
 
         // get a connection to the given destination
         Connection con = driver.getConnection(dataBase);
-        String query = "delete from `" + tableName + "` where " + filters;
+        String query = "";
+        if (sqlInstance == SQLInstance.MYSQL) {
+            query = "delete from `" + tableName + "` where " + filters;
+        } else {
+            query = "delete from " + tableName + " where " + filters;
+        }
 
         try {
             stmt = con.createStatement();
@@ -401,9 +406,17 @@ public class SQLBackendImpl implements SQLBackend{
                     String recvTime = records.getString("recvTime");
 
                     if (filters.isEmpty()) {
-                        filters += "recvTime='" + recvTime + "'";
+                        if (sqlInstance == SQLInstance.MYSQL) {
+                            filters += "recvTime='" + recvTime + "'";
+                        } else {
+                            filters += "recvTime=" + recvTime;
+                        }
                     } else {
-                        filters += " or recvTime='" + recvTime + "'";
+                        if (sqlInstance == SQLInstance.MYSQL) {
+                            filters += " or recvTime='" + recvTime + "'";
+                        } else {
+                            filters += " or recvTime=" + recvTime;
+                        }
                     } // if else
                 } // for
             } // if
