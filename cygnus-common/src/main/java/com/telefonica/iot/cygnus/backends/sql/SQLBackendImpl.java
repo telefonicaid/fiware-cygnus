@@ -373,7 +373,12 @@ public class SQLBackendImpl implements SQLBackend{
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data delete error. Query " + query, "SQLTimeoutException", e.getMessage());
         }catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            persistError(dataBase, "", query, e);
+            String schema = "";
+            closeSQLObjects(con, stmt);
+            if (sqlInstance == SQLInstance.POSTGRESQL) {
+                schema = tableName.split(".")[0];
+            }
+            persistError(dataBase, schema, query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Deleting error", "SQLException", e.getMessage());
         } // try catch
 
