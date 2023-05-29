@@ -552,10 +552,10 @@ public class SQLBackendImpl implements SQLBackend{
         if (sqlInstance == SQLInstance.POSTGRESQL) {
             errorTableName = schema + "." + dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
         }
-        if (cache.isCachedTable(dataBase, errorTableName)) {
-            LOGGER.debug(sqlInstance.toString().toUpperCase() + " '" + errorTableName + "' is cached, thus it is not created");
-            return;
-        } // if
+        // if (cache.isCachedTable(dataBase, errorTableName)) {
+        //     LOGGER.debug(sqlInstance.toString().toUpperCase() + " '" + errorTableName + "' is cached, thus it is not created");
+        //     return;
+        // } // if
         String typedFieldNames = "(" +
                 "timestamp TIMESTAMP" +
                 ", error text" +
@@ -596,8 +596,10 @@ public class SQLBackendImpl implements SQLBackend{
 
         closeSQLObjects(con, stmt);
 
-        LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + errorTableName + "' to the cache after table creation");
-        cache.addTable(dataBase, errorTableName);
+        // // TBD: Do not cache error table since always we are trying to insert and if fails then create it
+        // LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + errorTableName + "' to the cache after table creation");
+
+        // cache.addTable(dataBase, errorTableName); 
     } // createErrorTable
 
     /**
@@ -875,9 +877,9 @@ public class SQLBackendImpl implements SQLBackend{
             closeSQLObjects(con, preparedStatement);
         } // try catch
 
-        LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + dataBase + "' and '" + errorTableName + "' to the cache after insertion");
-        cache.addDataBase(dataBase);
-        cache.addTable(dataBase, errorTableName);
+        // LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + dataBase + "' and '" + errorTableName + "' to the cache after insertion");
+        // cache.addDataBase(dataBase);
+        // cache.addTable(dataBase, errorTableName); 
     } // insertErrorLog
 
     private void persistError(String destination, String schema, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {
