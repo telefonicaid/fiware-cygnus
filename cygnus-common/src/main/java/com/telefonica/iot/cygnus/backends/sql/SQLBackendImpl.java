@@ -339,7 +339,10 @@ public class SQLBackendImpl implements SQLBackend{
             String schema = "";
             closeSQLObjects(con, stmt);
             if (sqlInstance == SQLInstance.POSTGRESQL) {
-                schema = tableName.split(".")[0];
+                String[] parts = tableName.split(".");
+                if (parts.length > 0) {
+                    schema = parts[0];
+                }
             }
             persistError(dataBase, schema, query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Querying error", "SQLException", e.getMessage());
@@ -376,7 +379,10 @@ public class SQLBackendImpl implements SQLBackend{
             String schema = "";
             closeSQLObjects(con, stmt);
             if (sqlInstance == SQLInstance.POSTGRESQL) {
-                schema = tableName.split(".")[0];
+                String[] parts = tableName.split(".");
+                if (parts.length > 0) {
+                    schema = parts[0];
+                }
             }
             persistError(dataBase, schema, query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Deleting error", "SQLException", e.getMessage());
