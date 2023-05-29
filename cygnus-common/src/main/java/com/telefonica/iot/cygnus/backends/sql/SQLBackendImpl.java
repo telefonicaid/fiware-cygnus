@@ -336,8 +336,12 @@ public class SQLBackendImpl implements SQLBackend{
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data select error. Query " + query, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
+            String schema = "";
             closeSQLObjects(con, stmt);
-            persistError(dataBase, "", query, e);
+            if (sqlInstance == SQLInstance.POSTGRESQL) {
+                schema = tableName.split(".")[0];
+            }
+            persistError(dataBase, schema, query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Querying error", "SQLException", e.getMessage());
         } // try catch
     } // select
