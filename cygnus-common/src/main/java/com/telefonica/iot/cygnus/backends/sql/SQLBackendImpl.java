@@ -336,8 +336,15 @@ public class SQLBackendImpl implements SQLBackend{
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data select error. Query " + query, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
+            String schema = "";
             closeSQLObjects(con, stmt);
-            persistError(dataBase, "", query, e);
+            if (sqlInstance == SQLInstance.POSTGRESQL) {
+                String[] parts = tableName.split(".");
+                if (parts.length > 0) {
+                    schema = parts[0];
+                }
+            }
+            persistError(dataBase, schema, query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Querying error", "SQLException", e.getMessage());
         } // try catch
     } // select
@@ -348,7 +355,12 @@ public class SQLBackendImpl implements SQLBackend{
 
         // get a connection to the given destination
         Connection con = driver.getConnection(dataBase);
-        String query = "delete from `" + tableName + "` where " + filters;
+        String query = "";
+        if (sqlInstance == SQLInstance.MYSQL) {
+            query = "delete from `" + tableName + "` where " + filters;
+        } else {
+            query = "delete from " + tableName + " where " + filters;
+        }
 
         try {
             stmt = con.createStatement();
@@ -364,7 +376,15 @@ public class SQLBackendImpl implements SQLBackend{
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data delete error. Query " + query, "SQLTimeoutException", e.getMessage());
         }catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            persistError(dataBase, "", query, e);
+            String schema = "";
+            closeSQLObjects(con, stmt);
+            if (sqlInstance == SQLInstance.POSTGRESQL) {
+                String[] parts = tableName.split(".");
+                if (parts.length > 0) {
+                    schema = parts[0];
+                }
+            }
+            persistError(dataBase, schema, query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Deleting error", "SQLException", e.getMessage());
         } // try catch
 
@@ -401,9 +421,17 @@ public class SQLBackendImpl implements SQLBackend{
                     String recvTime = records.getString("recvTime");
 
                     if (filters.isEmpty()) {
-                        filters += "recvTime='" + recvTime + "'";
+                        if (sqlInstance == SQLInstance.MYSQL) {
+                            filters += "recvTime='" + recvTime + "'";
+                        } else {
+                            filters += "recvTime=" + recvTime;
+                        }
                     } else {
-                        filters += " or recvTime='" + recvTime + "'";
+                        if (sqlInstance == SQLInstance.MYSQL) {
+                            filters += " or recvTime='" + recvTime + "'";
+                        } else {
+                            filters += " or recvTime=" + recvTime;
+                        }
                     } // if else
                 } // for
             } // if
@@ -469,9 +497,17 @@ public class SQLBackendImpl implements SQLBackend{
 
                         if (recordTime < (currentTime - (expirationTime * 1000))) {
                             if (filters.isEmpty()) {
-                                filters += "recvTime='" + recvTime + "'";
+                                if (sqlInstance == SQLInstance.MYSQL) {
+                                    filters += "recvTime='" + recvTime + "'";
+                                } else {
+                                    filters += "recvTime=" + recvTime;
+                                }
                             } else {
-                                filters += " or recvTime='" + recvTime + "'";
+                                if (sqlInstance == SQLInstance.MYSQL) {
+                                    filters += " or recvTime='" + recvTime + "'";
+                                } else {
+                                    filters += " or recvTime=" + recvTime;
+                                }
                             } // if else
                         } else {
                             break;

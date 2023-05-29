@@ -1,1 +1,1 @@
-
+- [cygnus-common] [sql] Fix sql syntax for expiration records (select, delete, filters) in non mysql instances
