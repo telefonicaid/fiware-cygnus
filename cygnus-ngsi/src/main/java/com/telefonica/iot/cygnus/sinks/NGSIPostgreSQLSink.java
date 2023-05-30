@@ -416,7 +416,7 @@ public class NGSIPostgreSQLSink extends NGSISink {
             String attribute = event.getAttributeForNaming(enableNameMappings);
 
             try {
-                String dbName = buildDbName(service);
+                String dbName = buildDBName(service);
                 String tableName = buildTableName(servicePathForNaming, entity, entityType, attribute);
                 LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",dbName="
                         + dbName + ", tableName=" + tableName + ")");
