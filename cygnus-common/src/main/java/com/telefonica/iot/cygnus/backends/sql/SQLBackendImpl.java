@@ -309,6 +309,11 @@ public class SQLBackendImpl implements SQLBackend{
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "select " + selection + " from `" + tableName + "` order by recvTime";
+        } else if (sqlInstance == SQLInstance.POSTGRESQL) {
+            if (schema != null) {
+                tableName = schema + '.' + tableName;
+            }
+            query = "select " + selection + " from " + tableName + " order by recvTime";
         } else {
             query = "select " + selection + " from " + tableName + " order by recvTime";
         }
@@ -352,6 +357,11 @@ public class SQLBackendImpl implements SQLBackend{
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "delete from `" + tableName + "` where " + filters;
+        } else if (sqlInstance == SQLInstance.POSTGRESQL) {
+            if (schema != null) {
+                tableName = schema + '.' + tableName;
+            }
+            query = "delete from " + tableName + " where " + filters;
         } else {
             query = "delete from " + tableName + " where " + filters;
         }
@@ -809,12 +819,11 @@ public class SQLBackendImpl implements SQLBackend{
         } finally {
             closeConnection(connection);
         } // try catch
-
-        LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + dataBase + "' and '" + tableName + "' to the cache after insertion");
-        cache.addDataBase(dataBase);
         if (sqlInstance == SQLInstance.POSTGRESQL) {
             tableName = schema + "." + tableName;
         }
+        LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + dataBase + "' and '" + tableName + "' to the cache after insertion");
+        cache.addDataBase(dataBase);
         cache.addTable(dataBase, tableName);
     }
 
