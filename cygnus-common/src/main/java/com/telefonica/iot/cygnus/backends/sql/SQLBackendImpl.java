@@ -300,7 +300,7 @@ public class SQLBackendImpl implements SQLBackend{
         cache.addTable(dataBase, tableName);
     } // insertContextData
 
-    private CachedRowSet select(String dataBase, String tableName, String selection)
+    private CachedRowSet select(String dataBase, String schema, String tableName, String selection)
             throws CygnusRuntimeError, CygnusPersistenceError {
         Statement stmt = null;
 
@@ -336,20 +336,13 @@ public class SQLBackendImpl implements SQLBackend{
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data select error. Query " + query, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
-            String schema = "";
             closeSQLObjects(con, stmt);
-            if (sqlInstance == SQLInstance.POSTGRESQL) {
-                String[] parts = tableName.split(".");
-                if (parts.length > 0) {
-                    schema = parts[0];
-                }
-            }
             persistError(dataBase, schema, query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Querying error", "SQLException", e.getMessage());
         } // try catch
     } // select
 
-    private void delete(String dataBase, String tableName, String filters)
+    private void delete(String dataBase, String schema, String tableName, String filters)
             throws CygnusRuntimeError, CygnusPersistenceError {
         Statement stmt = null;
 
@@ -376,14 +369,6 @@ public class SQLBackendImpl implements SQLBackend{
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data delete error. Query " + query, "SQLTimeoutException", e.getMessage());
         }catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            String schema = "";
-            closeSQLObjects(con, stmt);
-            if (sqlInstance == SQLInstance.POSTGRESQL) {
-                String[] parts = tableName.split(".");
-                if (parts.length > 0) {
-                    schema = parts[0];
-                }
-            }
             persistError(dataBase, schema, query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Deleting error", "SQLException", e.getMessage());
         } // try catch
@@ -392,10 +377,10 @@ public class SQLBackendImpl implements SQLBackend{
     } // delete
 
     @Override
-    public void capRecords(String dataBase, String tableName, long maxRecords)
+    public void capRecords(String dataBase, String schemaName, String tableName, long maxRecords)
             throws CygnusRuntimeError, CygnusPersistenceError {
         // Get the records within the table
-        CachedRowSet records = select(dataBase, tableName, "*");
+        CachedRowSet records = select(dataBase, schemaName, tableName, "*");
 
         // Get the number of records
         int numRecords = 0;
@@ -446,7 +431,7 @@ public class SQLBackendImpl implements SQLBackend{
         } else {
             LOGGER.debug(sqlInstance.toString().toUpperCase() + " Records must be deleted (destination=" + dataBase + ",tableName=" + tableName + ", filters="
                     + filters + ")");
-            delete(dataBase, tableName, filters);
+            delete(dataBase, schemaName, tableName, filters);
         } // if else
     } // capRecords
 
@@ -462,8 +447,16 @@ public class SQLBackendImpl implements SQLBackend{
             while (cache.hasNextTable(dataBase)) {
                 String tableName = cache.nextTable(dataBase);
 
+                // Get schema frmo tableName if PSQL, just for persistError before
+                String schema = null;
+                if (sqlInstance == SQLInstance.POSTGRESQL) {
+                    String[] parts = tableName.split(".");
+                    if (parts.length > 0) {
+                        schema = parts[0];
+                    }
+                }
                 // Get the records within the table
-                CachedRowSet records = select(dataBase, tableName, "*");
+                CachedRowSet records = select(dataBase, schema, tableName, "*");
 
                 // Get the number of records
                 int numRecords = 0;
@@ -524,7 +517,7 @@ public class SQLBackendImpl implements SQLBackend{
                 } else {
                     LOGGER.debug(sqlInstance.toString().toUpperCase() + " Records must be deleted (destination=" + dataBase + ",tableName=" + tableName + ", filters="
                             + filters + ")");
-                    delete(dataBase, tableName, filters);
+                    delete(dataBase, schema, tableName, filters);
                 } // if else
             } // while
         } // while

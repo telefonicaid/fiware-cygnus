@@ -424,10 +424,11 @@ public class NGSIPostgisSink extends NGSISink {
 
             try {
                 String dbName = buildDBName(service);
+                String schemaName = buildSchemaName(service, servicePathForNaming);
                 String tableName = buildTableName(servicePathForNaming, entity, entityType, attribute);
                 LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",dbName="
                         + dbName + ", tableName=" + tableName + ")");
-                postgisPersistenceBackend.capRecords(dbName, tableName, maxRecords);
+                postgisPersistenceBackend.capRecords(dbName, schemaName, tableName, maxRecords);
             } catch (CygnusBadConfiguration e) {
                 throw new CygnusCappingError("Data capping error", "CygnusBadConfiguration", e.getMessage());
             } catch (CygnusRuntimeError e) {
