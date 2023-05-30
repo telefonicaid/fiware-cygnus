@@ -332,6 +332,7 @@ public class SQLBackendImpl implements SQLBackend{
 
             crs.populate(rs); // FIXME: close Resultset Objects??
             closeSQLObjects(con, stmt);
+            LOGGER.debug(sqlInstance.toString().toUpperCase() + " returning crs");
             return crs;
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data select error. Query " + query, "SQLTimeoutException", e.getMessage());
@@ -811,6 +812,9 @@ public class SQLBackendImpl implements SQLBackend{
 
         LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + dataBase + "' and '" + tableName + "' to the cache after insertion");
         cache.addDataBase(dataBase);
+        if (sqlInstance == SQLInstance.POSTGRESQL) {
+            tableName = schema + "." + tableName;
+        }
         cache.addTable(dataBase, tableName);
     }
 
