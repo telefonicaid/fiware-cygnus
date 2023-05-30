@@ -1010,7 +1010,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                     try {
                         LOGGER.debug("[" + sinkName + "] Expirating records");
                         expirateRecords(persistencePolicyExpirationTime);
-                    } catch (Exception e) {
+                    } catch (CygnusExpiratingError e) {
                         LOGGER.error("[" + sinkName + "] Error while expirating records. Details: "
                                 + e.getMessage());
                     } // try catch
