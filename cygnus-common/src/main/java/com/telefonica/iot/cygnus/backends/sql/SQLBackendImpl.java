@@ -505,6 +505,8 @@ public class SQLBackendImpl implements SQLBackend{
                     throw new CygnusRuntimeError(sqlInstance.toString().toUpperCase() + " Data expiration error", "SQLException", e.getMessage());
                 } catch (ParseException e) {
                     throw new CygnusRuntimeError(sqlInstance.toString().toUpperCase() + " Data expiration error", "ParseException", e.getMessage());
+                } catch (Exception e) {
+                    throw new CygnusRuntimeError(sqlInstance.toString().toUpperCase() + " Data expiration error", "Exception", e.getMessage());
                 } // try catch
 
                 if (filters.isEmpty()) {
