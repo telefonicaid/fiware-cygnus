@@ -440,7 +440,7 @@ public class SQLBackendImpl implements SQLBackend{
         if (filters.isEmpty()) {
             LOGGER.debug(sqlInstance.toString().toUpperCase() + " No records to be deleted");
         } else {
-            LOGGER.debug(sqlInstance.toString().toUpperCase() + " Records must be deleted (destination=" + dataBase + ",tableName=" + tableName + ", filters="
+            LOGGER.debug(sqlInstance.toString().toUpperCase() + " Records must be deleted (destination=" + dataBase + ",schemaName=" + schemaName + ",tableName=" + tableName + ", filters="
                     + filters + ")");
             delete(dataBase, schemaName, tableName, filters);
         } // if else
@@ -501,17 +501,9 @@ public class SQLBackendImpl implements SQLBackend{
 
                         if (recordTime < (currentTime - (expirationTime * 1000))) {
                             if (filters.isEmpty()) {
-                                if (sqlInstance == SQLInstance.MYSQL) {
-                                    filters += "recvTime='" + recvTime + "'";
-                                } else {
-                                    filters += "recvTime=" + recvTime;
-                                }
+                                filters += "recvTime='" + recvTime + "'";
                             } else {
-                                if (sqlInstance == SQLInstance.MYSQL) {
-                                    filters += " or recvTime='" + recvTime + "'";
-                                } else {
-                                    filters += " or recvTime=" + recvTime;
-                                }
+                                filters += " or recvTime='" + recvTime + "'";
                             } // if else
                         } else {
                             break;
