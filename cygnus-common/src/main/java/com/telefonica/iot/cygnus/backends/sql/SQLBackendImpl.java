@@ -417,17 +417,9 @@ public class SQLBackendImpl implements SQLBackend{
                     String recvTime = records.getString("recvTime");
 
                     if (filters.isEmpty()) {
-                        if (sqlInstance == SQLInstance.MYSQL) {
-                            filters += "recvTime='" + recvTime + "'";
-                        } else {
-                            filters += "recvTime=" + recvTime;
-                        }
+                        filters += "recvTime='" + recvTime + "'";
                     } else {
-                        if (sqlInstance == SQLInstance.MYSQL) {
-                            filters += " or recvTime='" + recvTime + "'";
-                        } else {
-                            filters += " or recvTime=" + recvTime;
-                        }
+                        filters += " or recvTime='" + recvTime + "'";
                     } // if else
                 } // for
             } // if
