@@ -179,7 +179,7 @@ public final class CommonUtils {
             return DatatypeConverter.parseDateTime(timestamp).getTime().getTime();
         } catch (Exception e) {
             try { // try get timestamp without timezone
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:S");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
                 Date date = sdf.parse(timestamp);
                 return date.getTime();
             } catch (Exception e2) {
