@@ -179,11 +179,11 @@ public final class CommonUtils {
             return DatatypeConverter.parseDateTime(timestamp).getTime().getTime();
         } catch (Exception e) {
             try { // try get timestamp without timezone
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss:SSS");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
                 Date date = sdf.parse(timestamp);
                 return date.getTime();
             } catch (Exception e2) {
-                throw new java.text.ParseException("Invalid timestamp format for value: " + timestamp, 0);
+                throw new java.text.ParseException("Invalid timestamp format for value: " + timestamp + " due to " + e2.getMessage(), 0);
             }
         }
     } // getMilliseconds
