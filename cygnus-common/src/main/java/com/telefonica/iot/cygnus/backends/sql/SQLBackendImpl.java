@@ -510,7 +510,7 @@ public class SQLBackendImpl implements SQLBackend{
                 if (filters.isEmpty()) {
                     LOGGER.debug(sqlInstance.toString().toUpperCase() + " No records to be deleted");
                 } else {
-                    LOGGER.debug(sqlInstance.toString().toUpperCase() + " Records must be deleted (destination=" + dataBase + ",tableName=" + tableName + ", filters="
+                    LOGGER.debug(sqlInstance.toString().toUpperCase() + " Records must be deleted (destination=" + dataBase + ",schemaName=" + schema + ",tableName=" + tableName + ", filters="
                             + filters + ")");
                     delete(dataBase, schema, tableName, filters);
                 } // if else
@@ -817,8 +817,6 @@ public class SQLBackendImpl implements SQLBackend{
         String errorTableName = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
         if (sqlInstance == SQLInstance.POSTGRESQL) {
             errorTableName = schema + "." + dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
-        } else if (sqlInstance == SQLInstance.ORACLE) {
-            errorTableName = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
         }
         String limit = String.valueOf(maxLatestErrors);
 
