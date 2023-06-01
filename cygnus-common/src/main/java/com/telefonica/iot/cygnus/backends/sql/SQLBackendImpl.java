@@ -300,13 +300,23 @@ public class SQLBackendImpl implements SQLBackend{
         cache.addTable(dataBase, tableName);
     } // insertContextData
 
-    private CachedRowSet select(String dataBase, String tableName, String selection)
+    private CachedRowSet select(String dataBase, String schema, String tableName, String selection)
             throws CygnusRuntimeError, CygnusPersistenceError {
         Statement stmt = null;
 
         // get a connection to the given destination
         Connection con = driver.getConnection(dataBase);
-        String query = "select " + selection + " from `" + tableName + "` order by recvTime";
+        String query = "";
+        if (sqlInstance == SQLInstance.MYSQL) {
+            query = "select " + selection + " from `" + tableName + "` order by recvTime";
+        } else if (sqlInstance == SQLInstance.POSTGRESQL) {
+            if (schema != null) {
+                tableName = schema + '.' + tableName;
+            }
+            query = "select " + selection + " from " + tableName + " order by recvTime";
+        } else {
+            query = "select " + selection + " from " + tableName + " order by recvTime";
+        }
 
         try {
             stmt = con.createStatement();
@@ -324,7 +334,6 @@ public class SQLBackendImpl implements SQLBackend{
             // used once the statement is closed
             @SuppressWarnings("restriction")
             CachedRowSet crs = new CachedRowSetImpl();
-
             crs.populate(rs); // FIXME: close Resultset Objects??
             closeSQLObjects(con, stmt);
             return crs;
@@ -332,18 +341,28 @@ public class SQLBackendImpl implements SQLBackend{
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data select error. Query " + query, "SQLTimeoutException", e.getMessage());
         } catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            persistError(dataBase, "", query, e);
+            persistError(dataBase, schema, query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Querying error", "SQLException", e.getMessage());
         } // try catch
     } // select
 
-    private void delete(String dataBase, String tableName, String filters)
+    private void delete(String dataBase, String schema, String tableName, String filters)
             throws CygnusRuntimeError, CygnusPersistenceError {
         Statement stmt = null;
 
         // get a connection to the given destination
         Connection con = driver.getConnection(dataBase);
-        String query = "delete from `" + tableName + "` where " + filters;
+        String query = "";
+        if (sqlInstance == SQLInstance.MYSQL) {
+            query = "delete from `" + tableName + "` where " + filters;
+        } else if (sqlInstance == SQLInstance.POSTGRESQL) {
+            if (schema != null) {
+                tableName = schema + '.' + tableName;
+            }
+            query = "delete from " + tableName + " where " + filters;
+        } else {
+            query = "delete from " + tableName + " where " + filters;
+        }
 
         try {
             stmt = con.createStatement();
@@ -359,7 +378,7 @@ public class SQLBackendImpl implements SQLBackend{
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data delete error. Query " + query, "SQLTimeoutException", e.getMessage());
         }catch (SQLException e) {
             closeSQLObjects(con, stmt);
-            persistError(dataBase, "", query, e);
+            persistError(dataBase, schema, query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Deleting error", "SQLException", e.getMessage());
         } // try catch
 
@@ -367,10 +386,10 @@ public class SQLBackendImpl implements SQLBackend{
     } // delete
 
     @Override
-    public void capRecords(String dataBase, String tableName, long maxRecords)
+    public void capRecords(String dataBase, String schemaName, String tableName, long maxRecords)
             throws CygnusRuntimeError, CygnusPersistenceError {
         // Get the records within the table
-        CachedRowSet records = select(dataBase, tableName, "*");
+        CachedRowSet records = select(dataBase, schemaName, tableName, "*");
 
         // Get the number of records
         int numRecords = 0;
@@ -411,9 +430,9 @@ public class SQLBackendImpl implements SQLBackend{
         if (filters.isEmpty()) {
             LOGGER.debug(sqlInstance.toString().toUpperCase() + " No records to be deleted");
         } else {
-            LOGGER.debug(sqlInstance.toString().toUpperCase() + " Records must be deleted (destination=" + dataBase + ",tableName=" + tableName + ", filters="
+            LOGGER.debug(sqlInstance.toString().toUpperCase() + " Records must be deleted (destination=" + dataBase + ",schemaName=" + schemaName + ",tableName=" + tableName + ", filters="
                     + filters + ")");
-            delete(dataBase, tableName, filters);
+            delete(dataBase, schemaName, tableName, filters);
         } // if else
     } // capRecords
 
@@ -429,8 +448,16 @@ public class SQLBackendImpl implements SQLBackend{
             while (cache.hasNextTable(dataBase)) {
                 String tableName = cache.nextTable(dataBase);
 
+                // Get schema frmo tableName if PSQL, just for persistError after
+                String schema = null;
+                if (sqlInstance == SQLInstance.POSTGRESQL) {
+                    String[] parts = tableName.split(".");
+                    if (parts.length > 0) {
+                        schema = parts[0];
+                    }
+                }
                 // Get the records within the table
-                CachedRowSet records = select(dataBase, tableName, "*");
+                CachedRowSet records = select(dataBase, schema, tableName, "*");
 
                 // Get the number of records
                 int numRecords = 0;
@@ -476,14 +503,16 @@ public class SQLBackendImpl implements SQLBackend{
                     throw new CygnusRuntimeError(sqlInstance.toString().toUpperCase() + " Data expiration error", "SQLException", e.getMessage());
                 } catch (ParseException e) {
                     throw new CygnusRuntimeError(sqlInstance.toString().toUpperCase() + " Data expiration error", "ParseException", e.getMessage());
+                } catch (Exception e) {
+                    throw new CygnusRuntimeError(sqlInstance.toString().toUpperCase() + " Data expiration error", "Exception", e.getMessage());
                 } // try catch
 
                 if (filters.isEmpty()) {
                     LOGGER.debug(sqlInstance.toString().toUpperCase() + " No records to be deleted");
                 } else {
-                    LOGGER.debug(sqlInstance.toString().toUpperCase() + " Records must be deleted (destination=" + dataBase + ",tableName=" + tableName + ", filters="
+                    LOGGER.debug(sqlInstance.toString().toUpperCase() + " Records must be deleted (destination=" + dataBase + ",schemaName=" + schema + ",tableName=" + tableName + ", filters="
                             + filters + ")");
-                    delete(dataBase, tableName, filters);
+                    delete(dataBase, schema, tableName, filters);
                 } // if else
             } // while
         } // while
@@ -542,15 +571,11 @@ public class SQLBackendImpl implements SQLBackend{
 
     public void createErrorTable(String dataBase, String schema)
             throws CygnusRuntimeError, CygnusPersistenceError {
-        // the defaul table for error log will be called the same as the destination name
+        // the default table for error log will be called the same as the destination name
         String errorTableName = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
         if (sqlInstance == SQLInstance.POSTGRESQL) {
             errorTableName = schema + "." + dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
         }
-        if (cache.isCachedTable(dataBase, errorTableName)) {
-            LOGGER.debug(sqlInstance.toString().toUpperCase() + " '" + errorTableName + "' is cached, thus it is not created");
-            return;
-        } // if
         String typedFieldNames = "(" +
                 "timestamp TIMESTAMP" +
                 ", error text" +
@@ -590,9 +615,6 @@ public class SQLBackendImpl implements SQLBackend{
         } // try catch
 
         closeSQLObjects(con, stmt);
-
-        LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + errorTableName + "' to the cache after table creation");
-        cache.addTable(dataBase, errorTableName);
     } // createErrorTable
 
     /**
@@ -772,7 +794,9 @@ public class SQLBackendImpl implements SQLBackend{
         } finally {
             closeConnection(connection);
         } // try catch
-
+        if (sqlInstance == SQLInstance.POSTGRESQL) {
+            tableName = schema + "." + tableName;
+        }
         LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + dataBase + "' and '" + tableName + "' to the cache after insertion");
         cache.addDataBase(dataBase);
         cache.addTable(dataBase, tableName);
@@ -793,8 +817,6 @@ public class SQLBackendImpl implements SQLBackend{
         String errorTableName = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
         if (sqlInstance == SQLInstance.POSTGRESQL) {
             errorTableName = schema + "." + dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
-        } else if (sqlInstance == SQLInstance.ORACLE) {
-            errorTableName = dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
         }
         String limit = String.valueOf(maxLatestErrors);
 
@@ -870,9 +892,6 @@ public class SQLBackendImpl implements SQLBackend{
             closeSQLObjects(con, preparedStatement);
         } // try catch
 
-        LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + dataBase + "' and '" + errorTableName + "' to the cache after insertion");
-        cache.addDataBase(dataBase);
-        cache.addTable(dataBase, errorTableName);
     } // insertErrorLog
 
     private void persistError(String destination, String schema, String query, Exception exception) throws CygnusPersistenceError, CygnusRuntimeError {

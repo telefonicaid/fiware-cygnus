@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -56,7 +57,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.json.simple.parser.Yytoken;
 import org.postgresql.largeobject.BlobOutputStream;
 import org.apache.thrift.meta_data.ListMetaData;
@@ -174,7 +174,18 @@ public final class CommonUtils {
      * @throws java.text.ParseException
      */
     public static long getMilliseconds(String timestamp) throws java.text.ParseException {
-        return DatatypeConverter.parseDateTime(timestamp).getTime().getTime();
+        try {
+            // timestamp is expected with timezone
+            return DatatypeConverter.parseDateTime(timestamp).getTime().getTime();
+        } catch (Exception e) {
+            try { // try get timestamp without timezone
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+                Date date = sdf.parse(timestamp);
+                return date.getTime();
+            } catch (Exception e2) {
+                throw new java.text.ParseException("Invalid timestamp format for value: " + timestamp + " due to " + e2.getMessage(), 0);
+            }
+        }
     } // getMilliseconds
     
     /**
@@ -239,7 +250,7 @@ public final class CommonUtils {
         
         try {
             mds = (JSONArray) parser.parse(metadata);
-        } catch (ParseException e) {
+        } catch (org.json.simple.parser.ParseException e) {
             LOGGER.error("Error while parsing the metadaga. Details: " + e.getMessage());
             return null;
         } // try catch
