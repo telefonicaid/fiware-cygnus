@@ -4,7 +4,7 @@
 [![](https://img.shields.io/badge/tag-fiware--cygnus-orange.svg?logo=stackoverflow)](http://stackoverflow.com/questions/tagged/fiware-cygnus)
 
 ## Welcome
-This project is part of [FIWARE](http://fiware.org), being part of the [Cosmos](http://catalogue.fiware.org/enablers/bigdata-analysis-cosmos) Ecosystem.
+This project is part of [FIWARE](http://fiware.org), being part of the [Cosmos](https://fiware-cosmos.readthedocs.io/en/latest/) Ecosystem.
 
 Cygnus is a connector in charge of persisting certain sources of data in certain configured third-party storages, creating a historical view of such data.
 
@@ -46,8 +46,8 @@ The per agent **Flume Extensions Catalogue** completes the available documentati
 Other interesting links are:
 
 * Our [Apiary Documentation](http://telefonicaid.github.io/fiware-cygnus/api/latest) if you want to know how to use our API methods for Cygnus.
-* [cygnus-ngsi](doc/cygnus-ngsi/integration) **integration** examples .
-* [cygnus-ngsi](https://edu.fiware.org/mod/resource/view.php?id=1037) **introductory course** in FIWARE Academy.
+* [cygnus-ngsi](./cygnus-ngsi/integration) **integration** examples .
+* [cygnus-ngsi](https://fiware-academy.readthedocs.io/en/latest/core/cygnus.html) **introductory course** in FIWARE Academy.
 * The [Contributing Guidelines](../doc/contributing/contributing_guidelines.md) if your aim is to extend Cygnus.
 
 ## Licensing
