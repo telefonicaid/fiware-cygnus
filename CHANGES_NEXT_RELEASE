@@ -1,3 +1,4 @@
+- [cygnus-common][cygnus-ngsi]  Fix: exclude of attribute processing alterationType send by a subscription in all of their values (#2231, reopened) 
 - [cygnus-common] [sql] Fix sql syntax for expiration records (select, delete, filters) in non mysql instances (#2242) 
 - [cygnus-common] [sql] Exclude error table from persist policy (cap records is based on recvtime which is non used by persistError)
 - [cygnus-common] [sql] Add missed capRecords implementation for PSQL backends
