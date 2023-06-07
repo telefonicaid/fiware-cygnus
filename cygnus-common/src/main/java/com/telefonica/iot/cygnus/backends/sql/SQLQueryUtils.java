@@ -182,7 +182,7 @@ public class SQLQueryUtils {
             query.append("DELETE FROM ").append(postgisDestination).append(" WHERE ");
             Boolean addAnd = false;
             for (int j = 0 ; j < keys.size() ; j++) {
-                if (Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
+                if (Arrays.asList(uniqueKey.toLowerCase().split("\\s*,\\s*")).contains(keys.get(j).toLowerCase())) {
                     JsonElement value = lastDataDelete.get(keys.get(j)).get(i);
                     String valueToAppend = value == null ? "null" : getStringValueFromJsonElement(value, "'", attrNativeTypes);
                     if (addAnd) {
@@ -195,7 +195,7 @@ public class SQLQueryUtils {
             if (addAnd) { // this means delete was finished with at least one element after where
                 upsertList.add(query);
             } else {
-                LOGGER.warn("[SQLQueryUtils.postgreSqlUpsertQuery] incomplete delete for lastdata: " + query.toString() + " with this uniqueKey " + uniqueKey.toString());
+                LOGGER.warn("[SQLQueryUtils.postgreSqlUpsertQuery] incomplete delete for lastdata: " + query.toString() + " with this uniqueKey " + uniqueKey.toString() + " and keys " + keys.toString());
             }
         }
         LOGGER.debug("[SQLQueryUtils.postgreSqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
@@ -293,7 +293,7 @@ public class SQLQueryUtils {
             if (addAnd) { // this means delete was finished with at least one element after where
                 upsertList.add(query);
             } else {
-                LOGGER.warn("[SQLQueryUtils.postgreSqlUpsertQuery] incomplete delete for lastdata: " + query.toString() + " with this uniqueKey " + uniqueKey.toString());
+                LOGGER.warn("[SQLQueryUtils.postgreSqlUpsertQuery] incomplete delete for lastdata: " + query.toString() + " with this uniqueKey " + uniqueKey.toString() + " and keys " + keys.toString());
             }
         }
         LOGGER.debug("[SQLQueryUtils.mySqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
