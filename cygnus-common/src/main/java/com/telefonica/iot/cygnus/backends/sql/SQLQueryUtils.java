@@ -180,8 +180,8 @@ public class SQLQueryUtils {
             StringBuffer query = new StringBuffer();
             ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
             query.append("DELETE FROM ").append(postgisDestination).append(" WHERE ");
+            Boolean addAnd = false;
             for (int j = 0 ; j < keys.size() ; j++) {
-                Boolean addAnd = false;
                 if (Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
                     JsonElement value = lastDataDelete.get(keys.get(j)).get(i);
                     String valueToAppend = value == null ? "null" : getStringValueFromJsonElement(value, "'", attrNativeTypes);
@@ -192,7 +192,11 @@ public class SQLQueryUtils {
                     addAnd = true;
                 }
             }
-            upsertList.add(query);
+            if (addAnd) { // this means delete was finished with at least one element after where
+                upsertList.add(query);
+            } else {
+                LOGGER.warn("[SQLQueryUtils.postgreSqlUpsertQuery] incomplete delete for lastdata: " + query.toString() + " with this uniqueKey " + uniqueKey.toString());
+            }
         }
         LOGGER.debug("[SQLQueryUtils.postgreSqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
         return upsertList;
@@ -274,8 +278,8 @@ public class SQLQueryUtils {
             StringBuffer query = new StringBuffer();
             ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
             query.append("DELETE FROM ").append(MYSQL_FIELDS_MARK).append(tableName.concat(tableSuffix)).append(MYSQL_FIELDS_MARK).append(" WHERE ");
+            Boolean addAnd = false;
             for (int j = 0 ; j < keys.size() ; j++) {
-                Boolean addAnd = false;
                 if (Arrays.asList(uniqueKey.split("\\s*,\\s*")).contains(keys.get(j))) {
                     JsonElement value = lastDataDelete.get(keys.get(j)).get(i);
                     String valueToAppend = value == null ? "null" : getStringValueFromJsonElement(value, "'", attrNativeTypes);
@@ -286,7 +290,11 @@ public class SQLQueryUtils {
                     addAnd = true;
                 }
             }
-            upsertList.add(query);
+            if (addAnd) { // this means delete was finished with at least one element after where
+                upsertList.add(query);
+            } else {
+                LOGGER.warn("[SQLQueryUtils.postgreSqlUpsertQuery] incomplete delete for lastdata: " + query.toString() + " with this uniqueKey " + uniqueKey.toString());
+            }
         }
         LOGGER.debug("[SQLQueryUtils.mySqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
         return upsertList;
