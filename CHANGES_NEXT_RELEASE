@@ -1,3 +1,4 @@
+- [cygnus-common][sql] Check keys for delete lastdata in lowercase for PSQL
 - [cygnus-common][sql] Check if delete query for lastdata was completed before use it
 - [cygnus-common][cygnus-ngsi]  Fix: exclude of attribute processing alterationType send by a subscription in all of their values (#2231, reopened) 
 - [cygnus-common] [sql] Fix sql syntax for expiration records (select, delete, filters) in non mysql instances (#2242) 
