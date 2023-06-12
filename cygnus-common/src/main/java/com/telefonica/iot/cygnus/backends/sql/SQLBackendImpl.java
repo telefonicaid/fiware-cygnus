@@ -453,7 +453,7 @@ public class SQLBackendImpl implements SQLBackend{
                 // Get schema from tableName if PSQL, just for persistError after
                 String schema = null;
                 if (sqlInstance == SQLInstance.POSTGRESQL) {
-                    String[] parts = tableName.split(".");
+                    String[] parts = tableName.split("\\.");
                     if (parts.length > 0) {
                         schema = parts[0];
                     }
