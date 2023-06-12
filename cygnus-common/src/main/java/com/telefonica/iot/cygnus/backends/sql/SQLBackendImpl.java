@@ -882,7 +882,7 @@ public class SQLBackendImpl implements SQLBackend{
             preparedStatement.setObject(1, java.sql.Timestamp.from(Instant.now()));
             preparedStatement.setString(2, exception.getMessage());
             preparedStatement.setString(3, errorQuery);
-            LOGGER.debug(sqlInstance.toString().toUpperCase() + " Executing SQL query '" + query + "'");
+            LOGGER.debug(sqlInstance.toString().toUpperCase() + " Executing SQL query '" +  preparedStatement.toString() + "'");
             preparedStatement.executeUpdate();
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data insertion error. Query: `" + preparedStatement, "SQLTimeoutException", e.getMessage());
