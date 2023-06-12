@@ -388,6 +388,8 @@ public class SQLBackendImpl implements SQLBackend{
     @Override
     public void capRecords(String dataBase, String schemaName, String tableName, long maxRecords)
             throws CygnusRuntimeError, CygnusPersistenceError {
+        LOGGER.debug(sqlInstance.toString().toUpperCase() + " capRecords for database: " +
+                     dataBase + " schema: " + schemaName + " tableName: " + tableName);
         // Get the records within the table
         CachedRowSet records = select(dataBase, schemaName, tableName, "*");
 
@@ -448,7 +450,7 @@ public class SQLBackendImpl implements SQLBackend{
             while (cache.hasNextTable(dataBase)) {
                 String tableName = cache.nextTable(dataBase);
 
-                // Get schema frmo tableName if PSQL, just for persistError after
+                // Get schema from tableName if PSQL, just for persistError after
                 String schema = null;
                 if (sqlInstance == SQLInstance.POSTGRESQL) {
                     String[] parts = tableName.split(".");
@@ -456,6 +458,8 @@ public class SQLBackendImpl implements SQLBackend{
                         schema = parts[0];
                     }
                 }
+                LOGGER.debug(sqlInstance.toString().toUpperCase() + " expirateRecordsCache for database: " +
+                             dataBase + " schema: " + schema + " tableName: " + tableName);
                 // Get the records within the table
                 CachedRowSet records = select(dataBase, schema, tableName, "*");
 
@@ -720,7 +724,9 @@ public class SQLBackendImpl implements SQLBackend{
         } finally {
             closeConnection(connection);
         } // try catch
-
+        if (sqlInstance == SQLInstance.POSTGRESQL) {
+            tableName = schema + "." + tableName;
+        }
         LOGGER.debug(sqlInstance.toString().toUpperCase() + " Trying to add '" + dataBase + "' and '" + tableName + "' to the cache after upsertion");
         cache.addDataBase(dataBase);
         cache.addTable(dataBase, tableName);
