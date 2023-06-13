@@ -115,7 +115,12 @@ public final class NGSIUtils {
         } // if
         
         if (attrType.equals("geo:json")) {
-            return new ImmutablePair("ST_GeomFromGeoJSON('" + attrValue + "')", true);
+            if (attrValue != null) {
+                return new ImmutablePair("ST_GeomFromGeoJSON('" + attrValue + "')", true);
+            } else {
+                // MySQL and PostgreSQL allows null, but without quotation marks
+                return new ImmutablePair("ST_GeomFromGeoJSON(null)", true);
+            }
         } // if
 
         // TBD: What about:  ?
