@@ -49,11 +49,12 @@ public class SQLCache {
      */
     public boolean addDataBase(String dataBase) {
         if (hierarchy.containsKey(dataBase)) {
-            LOGGER.debug("'" + dataBase + "' not added to the cache, since already existing");
+            LOGGER.debug("'" + dataBase + "' not added to the database cache, since already existing (total: " +
+                         hierarchy.size() + ")");
             return false;
         } else {
             hierarchy.put(dataBase, new ArrayList<String>());
-            LOGGER.debug("'" + dataBase + "' added to the cache");
+            LOGGER.debug("'" + dataBase + "' added to the database cache(total: " + hierarchy.size() + ")");
             return true;
         } // if else
     } // addDataBase
@@ -69,15 +70,17 @@ public class SQLCache {
         
         if (tables != null) {
             if (tables.contains(tableName)) {
-                LOGGER.debug("'" + tableName + "' not added to the cache, since already existing");
+                LOGGER.debug("'" + tableName + "' not added to the tables cache, since already existing (total: " +
+                             tables.size() + ")");
                 return false;
             } else {
                 tables.add(tableName);
-                LOGGER.debug("'" + tableName + "' added to the cache");
+                LOGGER.debug("'" + tableName + "' added to the tables cache (total: " + tables.size() + ")");
                 return true;
             } // if else
         } else {
-            LOGGER.debug("'" + dataBase + "' was not added to the cache, since database/scheme did not exist");
+            LOGGER.debug("'" + tableName + "' was not added to the tables cache, since database/scheme" +
+                         "'" + dataBase + "' did not exist (total: " + hierarchy.size() + ")");
             return false;
         } // if else
     } // addTable
