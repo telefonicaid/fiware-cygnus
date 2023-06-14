@@ -43,7 +43,7 @@ cygnus-ngsi.sources.http-source.port = 5050
 cygnus-ngsi.sources.http-source.handler = com.telefonica.iot.cygnus.handlers.NGSIRestHandler
 cygnus-ngsi.sources.http-source.handler.notification_target = /notify
 cygnus-ngsi.sources.http-source.handler.default_service = def_serv
-cygnus-ngsi.sources.http-source.handler.default_service_path = def_servpath
+cygnus-ngsi.sources.http-source.handler.default_service_path = /def_servpath
 cygnus-ngsi.sources.http-source.handler.events_ttl = 2
 cygnus-ngsi.sources.http-source.interceptors = ts
 cygnus-ngsi.sources.http-source.interceptors.ts.type = timestamp
@@ -69,7 +69,7 @@ $ /usr/cygnus/bin/cygnus-flume-ng agent --conf /usr/cygnus/conf/ -f /usr/cygnus/
 ```
 URL=$1
 
-curl $URL -v -s -S --header 'Content-Type: application/json; charset=utf-8' --header 'Accept: application/json' --header "Fiware-Service: qsg" --header "Fiware-ServicePath: testsink" -d @- <<EOF
+curl $URL -v -s -S --header 'Content-Type: application/json; charset=utf-8' --header 'Accept: application/json' --header "Fiware-Service: qsg" --header "Fiware-ServicePath: /testsink" -d @- <<EOF
 {
 	"subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",
 	"originator" : "localhost",
@@ -110,11 +110,11 @@ $ ./notification.sh http://localhost:5050/notify
 
 
 ```
-time=2015-12-10T14:31:49.389CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[150] : Starting transaction (1449754282-690-0000000000)
-time=2015-12-10T14:31:49.392CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[232] : Received data ({  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",  "originator" : "localhost",  "contextResponses" : [    {      "contextElement" : {        "attributes" : [          {            "name" : "temperature",            "type" : "centigrade",            "value" : "26.5"          }        ],        "type" : "Room",        "isPattern" : "false",        "id" : "Room1"      },      "statusCode" : {        "code" : "200",        "reasonPhrase" : "OK"      }    }  ]})
-time=2015-12-10T14:31:49.394CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[255] : Event put in the channel (id=1491400742, ttl=10)
-time=2015-12-10T14:31:49.485CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=persistAggregation | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.NGSITestSink[176] : [test-sink] Persisting data at NGSITestSink. Data (Processing event={Processing headers={recvTimeTs=1449754309394, fiwareService=def_serv, fiwareServicePath=def_serv_path, destinations=room1_room}, Processing context element={id=Room1, type=Room}, Processing attribute={name=temperature, type=centigrade, value="26.5", metadata=[]}})
-time=2015-12-10T14:31:49.486CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=def_serv_path | function=process | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.NGSISink[178] : Finishing transaction (1449754282-690-0000000000)
+time=2015-12-10T14:31:49.389CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=/def_serv_path | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[150] : Starting transaction (1449754282-690-0000000000)
+time=2015-12-10T14:31:49.392CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=/def_serv_path | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[232] : Received data ({  "subscriptionId" : "51c0ac9ed714fb3b37d7d5a8",  "originator" : "localhost",  "contextResponses" : [    {      "contextElement" : {        "attributes" : [          {            "name" : "temperature",            "type" : "centigrade",            "value" : "26.5"          }        ],        "type" : "Room",        "isPattern" : "false",        "id" : "Room1"      },      "statusCode" : {        "code" : "200",        "reasonPhrase" : "OK"      }    }  ]})
+time=2015-12-10T14:31:49.394CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=/def_serv_path | function=getEvents | comp=Cygnus | msg=com.telefonica.iot.cygnus.handlers.NGSIRestHandler[255] : Event put in the channel (id=1491400742, ttl=10)
+time=2015-12-10T14:31:49.485CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=/def_serv_path | function=persistAggregation | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.NGSITestSink[176] : [test-sink] Persisting data at NGSITestSink. Data (Processing event={Processing headers={recvTimeTs=1449754309394, fiwareService=def_serv, fiwareServicePath=/def_serv_path, destinations=room1_room}, Processing context element={id=Room1, type=Room}, Processing attribute={name=temperature, type=centigrade, value="26.5", metadata=[]}})
+time=2015-12-10T14:31:49.486CET | lvl=INFO | trans=1449754282-690-0000000000 | svc=def_serv | subsvc=/def_serv_path | function=process | comp=Cygnus | msg=com.telefonica.iot.cygnus.sinks.NGSISink[178] : Finishing transaction (1449754282-690-0000000000)
 
 ```
 
