@@ -1,3 +1,4 @@
+- [cygnus-common][pSQL] Allow use null for ST_GeomFromGeoJSON
 - [cygnus-common][SQL] cache tablename with schema in pSQL for capRecords case
 - [cygnus-common][sql] Log full values in insert_error instead of placeholder
 - [cygnus-common][sql] Check keys for delete lastdata in lowercase for PSQL
