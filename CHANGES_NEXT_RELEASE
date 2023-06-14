@@ -1,3 +1,4 @@
+- [cygnus-ngsi] Check access to arrayList getting attribute name
 - [cygnus-common][pSQL] Allow use null for ST_GeomFromGeoJSON
 - [cygnus-common][SQL] cache tablename with schema in pSQL for capRecords case
 - [cygnus-common][sql] Log full values in insert_error instead of placeholder
