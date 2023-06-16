@@ -115,7 +115,7 @@ public final class NGSIUtils {
         } // if
         
         if (attrType.equals("geo:json")) {
-            if (attrValue != null) {
+            if (attrValue != null && (!attrValue.equals("null"))) {
                 return new ImmutablePair("ST_GeomFromGeoJSON('" + attrValue + "')", true);
             } else {
                 // MySQL and PostgreSQL allows null, but without quotation marks
