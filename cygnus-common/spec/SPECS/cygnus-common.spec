@@ -172,6 +172,17 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Tue Jun 20 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.2.0
+- [cygnus-common][pSQL] Allow use null for ST_GeomFromGeoJSON
+- [cygnus-common][SQL] cache tablename with schema in pSQL for capRecords case
+- [cygnus-common][sql] Log full values in insert_error instead of placeholder
+- [cygnus-common][sql] Check keys for delete lastdata in lowercase for PSQL
+- [cygnus-common][sql] Check if delete query for lastdata was completed before use it
+- [cygnus-common][cygnus-ngsi]  Fix: exclude of attribute processing alterationType send by a subscription in all of their values (#2231, reopened)
+- [cygnus-common] [sql] Fix sql syntax for expiration records (select, delete, filters) in non mysql instances (#2242)
+- [cygnus-common] [sql] Exclude error table from persist policy (cap records is based on recvtime which is non used by persistError)
+- [cygnus-common] [sql] Add missed capRecords implementation for PSQL backends
+
 * Thu May 24 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.1.0
 - [cygnus-common] Add: delete entity in lastData when alterationType entityDelete is received (#2231). Requires Orion 3.9+
 - [cygnus-common] Add: exclude of attribute processing alterationType send by a subscription in all of their values (#2231)

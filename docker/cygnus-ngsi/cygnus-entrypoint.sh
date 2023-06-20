@@ -58,6 +58,7 @@ trap 'kill -TERM $PIDS' TERM INT
 # Export JAVA_OPTS
 JAVA_OPTS=${CYGNUS_JAVA_OPTS}
 export JAVA_OPTS
+echo "INFO: Using JAVA_OPTS: <${JAVA_OPTS}>"
 
 AGENT_CONF_FILE=agent.conf
 NAMEMAPPING_CONF_FILE=name_mappings.conf
