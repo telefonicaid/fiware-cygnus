@@ -99,6 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Thu Jun 20 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.2.0
+- [cygnus-ngsi] Check access to arrayList getting attribute name
+- [cygnus-common][cygnus-ngsi]  Fix: exclude of attribute processing alterationType send by a subscription in all of their values (#2231, reopened)
+
 * Thu May 24 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.1.0
 - [cygnus-ngsi] Add: delete entity in lastData when alterationType entityDelete is received (#2231). Requires Orion 3.9+
 - [cygnus-ngsi] Add: exclude of attribute processing alterationType send by a subscription in all of their values (#2231)
