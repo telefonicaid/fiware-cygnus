@@ -1,0 +1,2 @@
+- [cygnus-ngsi] Removes "_" in schema name for DM -schema family (#2270, #2201 reopens for Postgis)
+
