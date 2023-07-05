@@ -27,9 +27,9 @@ In order to do it permanently, edit `/root/.bash_profile` (`root` user) or `/etc
 
 Maven is installed by downloading it from [maven.apache.org](http://maven.apache.org/download.cgi). Install it in a folder of your choice (represented by `APACHE_MAVEN_HOME`):
 
-    $ wget https://archive.apache.org/dist/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
-    $ tar xzvf apache-maven-3.2.5-bin.tar.gz
-    $ mv apache-maven-3.2.5 APACHE_MAVEN_HOME
+    $ wget https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+    $ tar xzvf apache-maven-3.6.3-bin.tar.gz
+    $ mv apache-maven-3.6.3 APACHE_MAVEN_HOME
 
 [Top](#top)
 
