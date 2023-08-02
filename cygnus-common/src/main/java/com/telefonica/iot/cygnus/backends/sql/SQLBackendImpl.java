@@ -53,7 +53,7 @@ public class SQLBackendImpl implements SQLBackend{
     private final int maxLatestErrors;
     private static final String DEFAULT_ERROR_TABLE_SUFFIX = "_error_log";
     private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
-    private static final String DEFAULT_LIMIT_SELECT_EXP_RECORDS = "8192";
+    private static final String DEFAULT_LIMIT_SELECT_EXP_RECORDS = "4096";
     private String nlsTimestampFormat;
     private String nlsTimestampTzFormat;
 
