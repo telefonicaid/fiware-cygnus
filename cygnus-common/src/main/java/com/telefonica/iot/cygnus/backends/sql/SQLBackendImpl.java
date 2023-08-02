@@ -336,6 +336,7 @@ public class SQLBackendImpl implements SQLBackend{
             CachedRowSet crs = new CachedRowSetImpl();
             crs.populate(rs); // FIXME: close Resultset Objects??
             closeSQLObjects(con, stmt);
+            rs.close();
             return crs;
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data select error. Query " + query, "SQLTimeoutException", e.getMessage());
