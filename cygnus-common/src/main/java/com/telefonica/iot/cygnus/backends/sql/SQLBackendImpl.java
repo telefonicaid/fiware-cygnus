@@ -310,7 +310,7 @@ public class SQLBackendImpl implements SQLBackend{
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "select " + selection + " from `" + tableName + "` order by recvTime";
         } else if (sqlInstance == SQLInstance.POSTGRESQL) {
-            if (schema != null) {
+            if (schema != null && (!tableName.startsWith(schema))) {
                 tableName = schema + '.' + tableName;
             }
             query = "select " + selection + " from " + tableName + " order by recvTime";
