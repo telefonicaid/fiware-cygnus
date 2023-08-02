@@ -356,7 +356,7 @@ public class SQLBackendImpl implements SQLBackend{
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "delete from `" + tableName + "` where " + filters;
         } else if (sqlInstance == SQLInstance.POSTGRESQL) {
-            if (schema != null) {
+            if (schema != null && (!tableName.startsWith(schema))) {
                 tableName = schema + '.' + tableName;
             }
             query = "delete from " + tableName + " where " + filters;
