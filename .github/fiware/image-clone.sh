@@ -31,3 +31,9 @@ for i in "$@" ; do
     fi
     echo ""
 done
+
+for i in "$@" ; do
+    if [[ $i == "clean" ]]; then
+        docker rmi -f $(docker images -a -q) | true
+    fi
+done
