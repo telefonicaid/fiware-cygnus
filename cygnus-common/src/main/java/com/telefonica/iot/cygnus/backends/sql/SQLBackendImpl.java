@@ -53,6 +53,7 @@ public class SQLBackendImpl implements SQLBackend{
     private final int maxLatestErrors;
     private static final String DEFAULT_ERROR_TABLE_SUFFIX = "_error_log";
     private static final int DEFAULT_MAX_LATEST_ERRORS = 100;
+    private static final String DEFAULT_LIMIT_SELECT_EXP_RECORDS = "4096";
     private String nlsTimestampFormat;
     private String nlsTimestampTzFormat;
 
@@ -308,14 +309,14 @@ public class SQLBackendImpl implements SQLBackend{
         Connection con = driver.getConnection(dataBase);
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
-            query = "select " + selection + " from `" + tableName + "` order by recvTime";
+            query = "select " + selection + " from `" + tableName + "` order by recvTime desc limit " + DEFAULT_LIMIT_SELECT_EXP_RECORDS;
         } else if (sqlInstance == SQLInstance.POSTGRESQL) {
-            if (schema != null) {
+            if (schema != null && (!tableName.startsWith(schema))) {
                 tableName = schema + '.' + tableName;
             }
-            query = "select " + selection + " from " + tableName + " order by recvTime";
+            query = "select " + selection + " from " + tableName + " order by recvTime desc limit " + DEFAULT_LIMIT_SELECT_EXP_RECORDS;
         } else {
-            query = "select " + selection + " from " + tableName + " order by recvTime";
+            query = "select " + selection + " from " + tableName + " order by recvTime desc limit " + DEFAULT_LIMIT_SELECT_EXP_RECORDS;
         }
 
         try {
@@ -336,6 +337,7 @@ public class SQLBackendImpl implements SQLBackend{
             CachedRowSet crs = new CachedRowSetImpl();
             crs.populate(rs); // FIXME: close Resultset Objects??
             closeSQLObjects(con, stmt);
+            rs.close();
             return crs;
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data select error. Query " + query, "SQLTimeoutException", e.getMessage());
@@ -356,7 +358,7 @@ public class SQLBackendImpl implements SQLBackend{
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "delete from `" + tableName + "` where " + filters;
         } else if (sqlInstance == SQLInstance.POSTGRESQL) {
-            if (schema != null) {
+            if (schema != null && (!tableName.startsWith(schema))) {
                 tableName = schema + '.' + tableName;
             }
             query = "delete from " + tableName + " where " + filters;
@@ -376,7 +378,7 @@ public class SQLBackendImpl implements SQLBackend{
             stmt.executeUpdate(query);
         } catch (SQLTimeoutException e) {
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Data delete error. Query " + query, "SQLTimeoutException", e.getMessage());
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             closeSQLObjects(con, stmt);
             persistError(dataBase, schema, query, e);
             throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " Deleting error", "SQLException", e.getMessage());
