@@ -34,6 +34,8 @@ ENV CYGNUS_JAVA_OPTS "-Xms2048m -Xmx4096m"
 ENV CYGNUS_API_PORT "5080"
 ENV CYGNUS_MULTIAGENT false
 ENV CYGNUS_MONITORING_TYPE ""
+ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
+ENV GIT_REV_CYGNUS "master"
 
 # These variables are optional ENV variables to docker runtime
 ENV CYGNUS_SKIP_CONF_GENERATION false
@@ -258,10 +260,6 @@ ENV FLUME_URL "https://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 
 ENV JAVA_VERSION "1.11.0"
 
-COPY / ${CYGNUS_HOME}
-
-WORKDIR ${CYGNUS_HOME}
-
 RUN ls -lsrt
 
 # Install
@@ -271,7 +269,7 @@ RUN \
     # Install dependencies
     apt-get -y install openjdk-11-jdk curl git python2 maven && \
     # Add Cygnus user
-    adduser ${CYGNUS_USER} && \
+    adduser ${CYGNUS_USER} --disabled-password --shell /bin/bash --gecos "User" $username && \
     export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64 && \
     export MAVEN_OPTS="-Xmx2048M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:+CMSClassUnloadingEnabled" && \
     export MAVEN_ARGS="-B -T8" && \
@@ -289,7 +287,9 @@ RUN \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/lib && \
     mkdir -p ${FLUME_HOME}/plugins.d/cygnus/libext && \
     chown -R cygnus:cygnus ${FLUME_HOME} && \
+    git clone ${GIT_URL_CYGNUS} ${CYGNUS_HOME} && \
     cd ${CYGNUS_HOME} && \
+    git checkout ${GIT_REV_CYGNUS} && \
     echo "INFO: Build and install cygnus-common" && \
     cd ${CYGNUS_HOME}/cygnus-common && \
     mvn ${MAVEN_ARGS} clean compile exec:exec assembly:single && \
@@ -335,11 +335,11 @@ RUN \
     echo "INFO: END build"
 
 
-COPY docker/cygnus-ngsi/cygnus-entrypoint.sh /
-COPY docker/cygnus-ngsi/agent.conf ${FLUME_HOME}/conf/
-COPY docker/cygnus-ngsi/agent.conf ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf
+COPY cygnus-entrypoint.sh /
+COPY agent.conf ${FLUME_HOME}/conf/
+COPY agent.conf ${CYGNUS_HOME}/docker/cygnus-ngsi/agent.conf
 RUN true
-COPY docker/cygnus-ngsi/cartodb_keys.conf ${FLUME_HOME}/conf/
+COPY cartodb_keys.conf ${FLUME_HOME}/conf/
 
 # Define the entry point
 ENTRYPOINT ["/cygnus-entrypoint.sh"]
