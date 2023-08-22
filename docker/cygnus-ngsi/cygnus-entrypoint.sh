@@ -1005,6 +1005,11 @@ fi
 touch /var/log/cygnus/cygnus.log
 ln -snf /dev/stdout /var/log/cygnus/cygnus.log & PIDS="$PIDS $!"
 
+if [ "$CYGNUS_LOG_LEVEL" ]; then
+    (sleep 10; curl -X PUT 'http://localhost:'$CYGNUS_API_PORT'/admin/log?level='$CYGNUS_LOG_LEVEL) &
+fi
+
+
 wait $PIDS
 trap - TERM INT
 wait $PIDS
