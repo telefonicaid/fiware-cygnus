@@ -1,3 +1,4 @@
+- [cygnus-ngsi] Switch log level to CYGNUS_LOG_LEVEL env var if was provided to docker (#2886)
 - [cygnus-common][SQL] Fix expiration records tablename used by delete and select (#2265)
 - [cygnus-common][SQL] Fix expiration records select with a limit to avoid java out of memory error (#2273)
 - [cygnus-ngsi] Removes "_" in schema name for DM -schema family (#2270, #2201 reopens for Postgis)
