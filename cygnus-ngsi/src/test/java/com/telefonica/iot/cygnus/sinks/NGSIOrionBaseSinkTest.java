@@ -32,7 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.telefonica.iot.cygnus.backends.orion.OrionBackend;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
