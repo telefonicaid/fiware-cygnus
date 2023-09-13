@@ -47,7 +47,7 @@ jobs:
           - 14
           - 15
 #          - 16
-#          - 17
+          - 17
     steps:
       - name: Git checkout
         uses: actions/checkout@v2
