@@ -58,7 +58,7 @@ jobs:
       - name: 'cygnus-common Unit Tests (Java ${{ matrix.java-version }})'
         run: |
           cd "${GITHUB_WORKSPACE}"/cygnus-common
-          mvn -q test
+          mvn -q test -DargLine="-add-opens=java.base/java.util=ALL-UNNAMED"
           # Build and install cygnus-common, this is necessary because it is a dependency for cygnus-ngsi and others
           mvn -q clean compile exec:exec assembly:single
           VERSION=$(cat pom.xml | grep version | sed -n '1p' | sed -ne '/<version>/s#\s*<[^>]*>\s*##gp' | sed 's/ //g')
@@ -66,11 +66,11 @@ jobs:
       - name: 'cygnus-ngsi Unit Tests (Java ${{ matrix.java-version }})'
         run: |
           cd "${GITHUB_WORKSPACE}"/cygnus-ngsi
-          mvn -q test
+          mvn -q test -DargLine="-add-opens=java.base/java.util=ALL-UNNAMED"
       - name: 'cygnus-ngsi-ld Unit Tests (Java ${{ matrix.java-version }})'
         run: |
           cd "${GITHUB_WORKSPACE}"/cygnus-ngsi-ld
-          mvn -q test
+          mvn -q test -DargLine="-add-opens=java.base/java.util=ALL-UNNAMED"
       # FIXME: placeholder for future cygnus-twitter tests    
       #- name: 'cygnus-twitter Unit Tests (Java ${{ matrix.java-version }})'
       #  run: |
