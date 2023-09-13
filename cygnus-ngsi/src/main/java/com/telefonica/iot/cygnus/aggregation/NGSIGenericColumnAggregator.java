@@ -98,7 +98,10 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
     @Override
     public void aggregate(NGSIEvent event) {
         // Number of previous values
-        int numPreviousValues = getAggregation().get(NGSIConstants.FIWARE_SERVICE_PATH).size();
+        int numPreviousValues = 0;
+        if (getAggregation().get(NGSIConstants.FIWARE_SERVICE_PATH) != null) {
+            numPreviousValues = getAggregation().get(NGSIConstants.FIWARE_SERVICE_PATH).size();
+        }
         // get the servicePath from event
         String eventServicePath = event.getServicePathForData();
         // Get the event headers
