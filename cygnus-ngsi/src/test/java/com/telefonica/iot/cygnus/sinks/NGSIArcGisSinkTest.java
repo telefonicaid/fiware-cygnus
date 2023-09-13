@@ -86,9 +86,9 @@ public class NGSIArcGisSinkTest implements ArcgisBaseTest{
          */
         @Before
         public void setup() throws Exception {
-                Mockito.doNothing().when(mockArcgisLog).addToBatch(Mockito.any(Feature.class));
-                Mockito.doNothing().when(mockArcgisLog).addToBatch(Mockito.anyList());
-                Mockito.when(mockArcgisLog.connected()).thenReturn(true);
+                // Mockito.doNothing().when(mockArcgisLog).addToBatch(Mockito.any(Feature.class));
+                // Mockito.doNothing().when(mockArcgisLog).addToBatch(Mockito.anyList());
+                // Mockito.when(mockArcgisLog.connected()).thenReturn(true);
 
         } // setup
 
