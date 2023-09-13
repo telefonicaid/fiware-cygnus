@@ -174,7 +174,10 @@
                                 <artifactId>maven-surefire-report-plugin</artifactId>
                                 <version>3.0.0</version>
                                 <configuration>
-                                    <aggregate>true</aggregate>
+                                  <aggregate>true</aggregate>
+                                  <argLine>
+                                    --add-opens=java.base/java.lang.invoke=ALL-UNNAMED
+                                  </argLine>
                                 </configuration>
                             </plugin>
                             <plugin>
