@@ -3,4 +3,5 @@
 - [cygnus-common][SQL] Fix expiration records select with a limit to avoid java out of memory error (#2273)
 - [cygnus-ngsi] Removes "_" in schema name for DM -schema family (#2270, #2201 reopens for Postgis)
 - [cygnus-ngsi] UPGRADE: Debian version from 11.6 to 12.1 in Dockerfile
+- [cygnus-ngsi] UPGRADE: Java 11 to Java 17 used in Dockerfile
 - [cygnus-common] Upgrade mongodb driver dep from 3.12.12 to 3.12.14
