@@ -1,4 +1,5 @@
 - [cygnus-ngsi][cygnus-common] upgrade junit dep from 4.13.1 to juniper 5.9.1
+- [cygnus-commons] Upgrade gson dependency from 2.6.2 to 2.10.1
 - [cygnus-ngsi][cygnus-common] upgrade mockito dep from 1.9.5 to 5.5.0
 - [cygnus-ngsi] Fix runtime error: check access aggregator size (#2293)
 - [cygnus-ngsi] Switch log level to CYGNUS_LOG_LEVEL env var if was provided to docker (#2286)
