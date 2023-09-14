@@ -61,12 +61,13 @@ public interface SQLBackend {
     /**
      * Caps records from the given table within the given database according to the given maximum number.
      * @param dataBase
+     * @param schemaName
      * @param tableName
      * @param maxRecords
      * @throws com.telefonica.iot.cygnus.errors.CygnusRuntimeError
      * @throws com.telefonica.iot.cygnus.errors.CygnusPersistenceError
      */
-    void capRecords(String dataBase, String tableName, long maxRecords) throws CygnusRuntimeError, CygnusPersistenceError;
+    void capRecords(String dataBase, String schemaName, String tableName, long maxRecords) throws CygnusRuntimeError, CygnusPersistenceError;
 
     /**
      * Expirates records within all the cached tables based on the expiration time.

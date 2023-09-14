@@ -64,10 +64,10 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -444,7 +444,7 @@ public class NGSIElasticsearchSinkTest {
             });
 
             MockitoAnnotations.initMocks(this);
-            when(mockBackend.bulkInsert(anyString(), anyString(), Matchers.<List<Map<String, String>>>any())).thenReturn(null);
+            when(mockBackend.bulkInsert(anyString(), anyString(), ArgumentMatchers.<List<Map<String, String>>>any())).thenReturn(null);
         }
 
         /**
@@ -467,7 +467,7 @@ public class NGSIElasticsearchSinkTest {
             sink.startInternal();
 
             try {
-                verify(mockBackend, times(0)).bulkInsert(anyString(), anyString(), Matchers.<List<Map<String, String>>>any());
+                verify(mockBackend, times(0)).bulkInsert(anyString(), anyString(), ArgumentMatchers.<List<Map<String, String>>>any());
             } catch (Exception e) {
                 fail(e.getMessage());
             }
@@ -503,7 +503,7 @@ public class NGSIElasticsearchSinkTest {
             sink.startInternal();
 
             try {
-                verify(mockBackend, times(0)).bulkInsert(anyString(), anyString(), Matchers.<List<Map<String, String>>>any());
+                verify(mockBackend, times(0)).bulkInsert(anyString(), anyString(), ArgumentMatchers.<List<Map<String, String>>>any());
             } catch (Exception e) {
                 fail(e.getMessage());
             }
@@ -516,7 +516,7 @@ public class NGSIElasticsearchSinkTest {
             }
             sink.setAggregations(aggregations);
             try {
-                verify(mockBackend, times(0)).bulkInsert(anyString(), anyString(), Matchers.<List<Map<String, String>>>any());
+                verify(mockBackend, times(0)).bulkInsert(anyString(), anyString(), ArgumentMatchers.<List<Map<String, String>>>any());
             } catch (Exception e) {
                 fail(e.getMessage());
             }
@@ -725,7 +725,7 @@ public class NGSIElasticsearchSinkTest {
                                   false, null);
 
             MockitoAnnotations.initMocks(this);
-            when(mockBackend.bulkInsert(anyString(), anyString(), Matchers.<List<Map<String, String>>>any())).thenReturn(null);
+            when(mockBackend.bulkInsert(anyString(), anyString(), ArgumentMatchers.<List<Map<String, String>>>any())).thenReturn(null);
         } // setUp
 
         @Ignore
@@ -767,7 +767,7 @@ public class NGSIElasticsearchSinkTest {
 
             try {
                 sink.persistBatch(null);
-                verify(mockBackend, times(0)).bulkInsert(anyString(), anyString(), Matchers.<List<Map<String, String>>>any());
+                verify(mockBackend, times(0)).bulkInsert(anyString(), anyString(), ArgumentMatchers.<List<Map<String, String>>>any());
             } catch (Exception e) {
                 fail(e.getMessage());
             }

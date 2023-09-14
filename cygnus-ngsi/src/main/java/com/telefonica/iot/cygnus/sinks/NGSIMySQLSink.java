@@ -383,7 +383,7 @@ public class NGSIMySQLSink extends NGSISink {
                 String tableName = buildTableName(servicePathForNaming, entity, entityType, attribute);
                 LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",dbName="
                         + dbName + ", tableName=" + tableName + ")");
-                mySQLPersistenceBackend.capRecords(dbName, tableName, maxRecords);
+                mySQLPersistenceBackend.capRecords(dbName, null, tableName, maxRecords);
             } catch (CygnusBadConfiguration e) {
                 throw new CygnusCappingError("Data capping error", "CygnusBadConfiguration", e.getMessage());
             } catch (CygnusRuntimeError e) {
@@ -427,6 +427,7 @@ public class NGSIMySQLSink extends NGSISink {
             } else {
                 mySQLPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
                                                           aggregator.getLastDataToPersist(),
+                                                          aggregator.getLastDataDeleteToPersist(),
                                                           dbName,
                                                           null, // no schema in mysql
                                                           tableName,

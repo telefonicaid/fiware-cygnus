@@ -126,6 +126,16 @@ This, combined with the field ordering [already described in section before](#cu
 avoids deadlocks when two Cygnus instances are trying to upsert in the same table
 (more detail on this in issue [#2197](https://github.com/telefonicaid/fiware-cygnus/issues/2197)).
 
+
+### alterationType from NGSIv2 notifications
+
+Regarding NGSIv2 subcriptions based in [alterationType](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#subscriptions-based-in-alteration-type), the lastData feature uses the value of this attribute in the following way:
+
+- When `alterationType` value is `entityUpdate`, `entityChange` or `entityCreate` lastaData feature performs corresponding upsert as described.
+- When `alterationType` value is `entityDelete` then lastData feature upsert performs the corresponding delete of lastData table in base if keys defined in lastData and values received in ngsiv2 event.
+
+Note that the `alterationType` attribute doesn't progress as NGSIv2 event for sinks based on ColumnAggregator, as described [here](ngsi_rest_handler.md#section2.4).
+
 ## SQL UPSERT
 
 Once the aggregation is processed, then a query is created to upsert a single record with a PreparedStatement.

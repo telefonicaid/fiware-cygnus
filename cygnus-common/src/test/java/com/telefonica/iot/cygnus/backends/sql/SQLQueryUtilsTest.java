@@ -26,7 +26,7 @@ import com.telefonica.iot.cygnus.backends.sql.Enum.SQLInstance;
 
 import static com.telefonica.iot.cygnus.utils.CommonUtilsForTests.getTestTraceHead;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import java.sql.Connection;
@@ -144,6 +144,7 @@ public class SQLQueryUtilsTest {
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
                 getValueFieldsSingleBatch(),
+                new LinkedHashMap<>(),
                 tableName,
                 tableSuffix,
                 uniqueKey,
@@ -174,6 +175,41 @@ public class SQLQueryUtilsTest {
     }
 
     @Test
+    public void testSQLUpsertDeleteQuerySingleBatch() {
+        String tableName = "exampleTable";
+        String tableSuffix = "_last_data";
+        String uniqueKey = "entityId";
+        String timestampKey = "recvTimeS";
+        String timestampFormat = "YYYY-MM-DD HH24:MI:SS.MS";
+        SQLInstance sqlInstance = SQLInstance.POSTGRESQL;
+        String schema = "example";
+        boolean attrNativeTypes = true;
+        StringBuffer sqlupsertQuery;
+        ArrayList<StringBuffer> upsertList = new ArrayList<>();
+        upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
+                new LinkedHashMap<>(),
+                getValueFieldsSingleBatch(),
+                tableName,
+                tableSuffix,
+                uniqueKey,
+                timestampKey,
+                timestampFormat,
+                sqlInstance,
+                null,
+                schema,
+                attrNativeTypes);
+        sqlupsertQuery = upsertList.get(0);
+        String correctQuery = "DELETE FROM example.exampleTable_last_data WHERE entityId='somePath1'";
+        try {
+            assertEquals(sqlupsertQuery.toString(), correctQuery);
+            System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testSQLUpsertDeleteQuerySingleBatch]")
+                    + "-  OK  - testSQLUpsertDeleteQuerySingleBatch");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
     public void testPostgreSQLUpsertQueryMultipleBatch() {
         String tableName = "exampleTable";
         String tableSuffix = "_last_data";
@@ -187,6 +223,7 @@ public class SQLQueryUtilsTest {
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsMultipleBatch(),
                 getValueFieldsMultipleBatch(),
+                new LinkedHashMap<>(),
                 tableName,
                 tableSuffix,
                 uniqueKey,
@@ -229,6 +266,7 @@ public class SQLQueryUtilsTest {
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         upsertList = SQLQueryUtils.sqlUpsertQuery(new LinkedHashMap<>(),
                 new LinkedHashMap<>(),
+                new LinkedHashMap<>(),
                 tableName,
                 tableSuffix,
                 uniqueKey,
@@ -262,6 +300,7 @@ public class SQLQueryUtilsTest {
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsMultipleBatch(),
                 getValueFieldsMultipleBatch(),
+                new LinkedHashMap<>(),
                 tableName,
                 tableSuffix,
                 uniqueKey,
@@ -312,6 +351,7 @@ public class SQLQueryUtilsTest {
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
                 getValueFieldsSingleBatch(),
+                new LinkedHashMap<>(),
                 tableName,
                 tableSuffix,
                 uniqueKey,
@@ -347,6 +387,43 @@ public class SQLQueryUtilsTest {
         }
     }
 
+
+    @Test
+    public void testMySQLUpsertDeleteQuerySingleBatch() {
+        String tableName = "exampleTable";
+        String tableSuffix = "_last_data";
+        String uniqueKey = "entityId, entityType";
+        String timestampKey = "recvTimeS";
+        String timestampFormat = "%Y-%m-%d %H:%i:%s.%f";
+        SQLInstance sqlInstance = SQLInstance.MYSQL;
+        String dataBase = "example";
+        boolean attrNativeTypes = true;
+        StringBuffer sqlupsertQuery;
+        ArrayList<StringBuffer> upsertList = new ArrayList<>();
+        upsertList = SQLQueryUtils.sqlUpsertQuery(getValueFieldsSingleBatch(),
+                new LinkedHashMap<>(),
+                getValueFieldsSingleBatch(),
+                tableName,
+                tableSuffix,
+                uniqueKey,
+                timestampKey,
+                timestampFormat,
+                sqlInstance,
+                dataBase,
+                null,
+                attrNativeTypes);
+        sqlupsertQuery = upsertList.get(0);
+
+        String correctQuery = "DELETE FROM `exampleTable_last_data` WHERE entityId='entityId1' AND entityType='entityType'";
+        try {
+            assertEquals(sqlupsertQuery.toString(), correctQuery);
+            System.out.println(getTestTraceHead("[NGSISQLUtilsTest.testMySQLUpsertDeleteQuerySingleBatch]")
+                    + "-  OK  - testMySQLUpsertDeleteQuerySingleBatch");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Test
     public void testMySQLUpsertQueryEmptyBatch() {
         String tableName = "exampleTable";
@@ -360,6 +437,7 @@ public class SQLQueryUtilsTest {
         StringBuffer sqlupsertQuery;
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
         upsertList = SQLQueryUtils.sqlUpsertQuery(new LinkedHashMap<>(),
+                new LinkedHashMap<>(),
                 new LinkedHashMap<>(),
                 tableName,
                 tableSuffix,

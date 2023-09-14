@@ -139,7 +139,7 @@ Running the tests require [Apache Maven](https://maven.apache.org/) installed an
 Cygnus NGSI works by receiving NGSI-like notifications, which are finally persisted. In order to test this, you can run any of the notification scripts located in the [resources folder](./resources/ngsi-examples) of this repo, which emulate certain notification types.
 
 ```
-$ ./notification-json-simple.sh http://localhost:5050/notify myservice myservicepath
+$ ./notification-json-simple.sh http://localhost:5050/notify myservice /myservicepath
 *   Trying ::1...
 * Connected to localhost (::1) port 5050 (#0)
 > POST /notify HTTP/1.1
@@ -148,7 +148,7 @@ $ ./notification-json-simple.sh http://localhost:5050/notify myservice myservice
 > Accept: application/json
 > User-Agent: orion/0.10.0
 > Fiware-Service: myservice
-> Fiware-ServicePath: myservicepath
+> Fiware-ServicePath: /myservicepath
 > ngsiv2-attrsformat: normalized
 > Content-Length: 460
 >

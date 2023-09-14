@@ -400,6 +400,43 @@ public class NGSIPostgisSink extends NGSISink {
     
     @Override
     public void capRecords(NGSIBatch batch, long maxRecords) throws CygnusCappingError {
+        if (batch == null) {
+            LOGGER.debug("[" + this.getName() + "] Null batch, nothing to do");
+            return;
+        } // if
+
+        // Iterate on the destinations
+        batch.startIterator();
+
+        while (batch.hasNext()) {
+            // Get the events within the current sub-batch
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
+
+            // Get a representative from the current destination sub-batch
+            NGSIEvent event = events.get(0);
+
+            // Do the capping
+            String service = event.getServiceForNaming(enableNameMappings);
+            String servicePathForNaming = event.getServicePathForNaming(enableNameMappings);
+            String entity = event.getEntityForNaming(enableNameMappings, enableEncoding);
+            String entityType = event.getEntityTypeForNaming(enableNameMappings);
+            String attribute = event.getAttributeForNaming(enableNameMappings);
+
+            try {
+                String dbName = buildDBName(service);
+                String schemaName = buildSchemaName(service, servicePathForNaming);
+                String tableName = buildTableName(servicePathForNaming, entity, entityType, attribute);
+                LOGGER.debug("[" + this.getName() + "] Capping resource (maxRecords=" + maxRecords + ",dbName="
+                        + dbName + ", schemaName=" + schemaName + ", tableName=" + tableName + ")");
+                postgisPersistenceBackend.capRecords(dbName, schemaName, tableName, maxRecords);
+            } catch (CygnusBadConfiguration e) {
+                throw new CygnusCappingError("Data capping error", "CygnusBadConfiguration", e.getMessage());
+            } catch (CygnusRuntimeError e) {
+                throw new CygnusCappingError("Data capping error", "CygnusRuntimeError", e.getMessage());
+            } catch (CygnusPersistenceError e) {
+                throw new CygnusCappingError("Data capping error", "CygnusPersistenceError", e.getMessage());
+            } // try catch
+        } // while
     } // capRecords
 
     @Override
@@ -439,6 +476,7 @@ public class NGSIPostgisSink extends NGSISink {
             } else {
                 postgisPersistenceBackend.upsertTransaction(aggregator.getAggregationToPersist(),
                                                             aggregator.getLastDataToPersist(),
+                                                            aggregator.getLastDataDeleteToPersist(),
                                                             dataBaseName,
                                                             schemaName,
                                                             tableName,
@@ -554,7 +592,7 @@ public class NGSIPostgisSink extends NGSISink {
                 case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITYTYPEDATABASESCHEMA:
                 case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
-                    name = NGSIUtils.encode(subService, false, true);
+                    name = NGSIUtils.encode(subService, true, false);
                     break;
                 default:
                     name = NGSIUtils.encode(service, false, true);

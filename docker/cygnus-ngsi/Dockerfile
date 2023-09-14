@@ -16,14 +16,14 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
-FROM debian:11.6-slim
+FROM debian:12.1-slim
 ARG GITHUB_ACCOUNT=telefonicaid
 ARG GITHUB_REPOSITORY=fiware-cygnus
 
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "3.0.0"
+ENV CYGNUS_VERSION "3.2.0-SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
@@ -256,7 +256,7 @@ ENV FLUME_HOME "/opt/apache-flume"
 ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
 ENV FLUME_URL "https://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 
-ENV JAVA_VERSION "1.11.0"
+ENV JAVA_VERSION "1.17.0"
 
 COPY / ${CYGNUS_HOME}
 
@@ -266,21 +266,19 @@ RUN ls -lsrt
 
 # Install
 RUN \
-    # openjdk-8-jdk is not included in Debian 11 repositories, so we need to add jessie-backports for it
-    echo 'deb http://httpredir.debian.org/debian-security stretch/updates main' > /etc/apt/sources.list.d/jessie-backports.list && \
     apt-get -y update && \
     apt-get -y upgrade && \
     # Install dependencies
-    apt-get -y install openjdk-11-jdk curl git python2 maven && \
+    apt-get -y install openjdk-17-jdk curl git python3 maven && \
     # Add Cygnus user
     adduser ${CYGNUS_USER} && \
     export JAVA_HOME=/usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64 && \
-    export MAVEN_OPTS="-Xmx2048M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -XX:+CMSClassUnloadingEnabled" && \
+    export MAVEN_OPTS="-Xmx2048M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -Dfile.encoding=UTF-8 -Dproject.build.sourceEncoding=UTF-8 -Dmaven.compiler.useIncrementalCompilation=false -DdependencyLocationsEnabled=false -XX:+TieredCompilation -XX:TieredStopAtLevel=1" && \
     export MAVEN_ARGS="-B -T8" && \
     # For debug Maven
     export MAVEN_ARGS="${MAVEN_ARGS} -X -e -Dmaven.compiler.verbose=true" && \
     echo "INFO: Getting apache preferred site and obtain URLs for Maven and Flume..." && \
-    APACHE_DOMAIN="$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | python2 -c 'import json,sys;obj=json.load(sys.stdin);print obj["preferred"]')" \
+    APACHE_DOMAIN="$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | python3 -c 'import json,sys;obj=json.load(sys.stdin);print obj["preferred"]')" \
       || APACHE_DOMAIN="http://archive.apache.org/dist/" && \
     echo -e $'INFO: Java version <'${JAVA_VERSION}'>\n'$(java -version)'\nINFO: Apache domain <'${APACHE_DOMAIN}'>\nINFO: URL MAVEN <'${MVN_URL}'>\nINFO: URL FLUME <'${FLUME_URL}'>' && \
     echo "INFO: Download and install Flume..." && \
@@ -318,14 +316,14 @@ RUN \
     rm -rf /root/.m2 && rm -rf ${FLUME_HOME}/docs && rm -rf ${CYGNUS_HOME}/doc && rm -f /*.tar.gz ${CYGNUS_HOME}/*.tar.gz && \
     # Cleanup
     apt-get clean && \
-    apt-get -y remove python2 git && \
+    apt-get -y remove python3 git && \
     apt-get -y autoremove --purge && \
     # FIXME: from now on, old cleanup in CentOS 8. Should be reviewed...
     # FIXME #2113: Fix java errors and warnings. Original script was breaking in CentOS 8
     #echo "INFO: Java runtime not needs JAVA_HOME... Unsetting..." && \
     #unset JAVA_HOME && \
-    #yum erase -y git java-${JAVA_VERSION}-openjdk-devel python2 && \
-    #yum erase -y git python2 && \
+    #yum erase -y git java-${JAVA_VERSION}-openjdk-devel python && \
+    #yum erase -y git python && \
     #rpm -qa redhat-logos gtk2 pulseaudio-libs libvorbis jpackage* groff alsa* atk cairo libX* | xargs -r rpm -e --nodeps && \
     # FIXME #2113: disabled step 'rpm --rebuilddb', doesn't work in CentOS8 ?
     #yum clean all && rpm --rebuilddb && rm -rf /var/lib/yum/yumdb && rm -rf /var/lib/yum/history && \

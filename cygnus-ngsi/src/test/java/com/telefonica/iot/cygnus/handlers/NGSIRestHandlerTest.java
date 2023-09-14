@@ -39,7 +39,7 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.junit.Test;
 import org.mockito.Mock;
 import static org.mockito.Mockito.when;

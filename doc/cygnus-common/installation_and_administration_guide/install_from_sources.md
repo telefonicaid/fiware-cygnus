@@ -27,9 +27,9 @@ In order to do it permanently, edit `/root/.bash_profile` (`root` user) or `/etc
 
 Maven is installed by downloading it from [maven.apache.org](http://maven.apache.org/download.cgi). Install it in a folder of your choice (represented by `APACHE_MAVEN_HOME`):
 
-    $ wget http://www.eu.apache.org/dist/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
-    $ tar xzvf apache-maven-3.2.5-bin.tar.gz
-    $ mv apache-maven-3.2.5 APACHE_MAVEN_HOME
+    $ wget https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+    $ tar xzvf apache-maven-3.6.3-bin.tar.gz
+    $ mv apache-maven-3.6.3 APACHE_MAVEN_HOME
 
 [Top](#top)
 
@@ -63,7 +63,7 @@ This step is important because if you don't have the log path created Cygnus wil
 ## <a name="section4"></a>Installing Apache Flume
 Apache Flume can be easily installed by downloading its latests version from [flume.apache.org](http://flume.apache.org/download.html). Move the untared directory to a folder of your choice (represented by `APACHE_FLUME_HOME`):
 
-    $ wget http://www.eu.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz
+    $ wget https://archive.apache.org/dist/flume/1.4.0/apache-flume-1.4.0-bin.tar.gz
     $ tar xvzf apache-flume-1.4.0-bin.tar.gz
     $ mv apache-flume-1.4.0-bin APACHE_FLUME_HOME
     $ mv APACHE_FLUME_HOME/lib/httpclient-4.2.1.jar APACHE_FLUME_HOME/lib/httpclient-4.2.1.jar.old

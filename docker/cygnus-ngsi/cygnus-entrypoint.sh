@@ -58,6 +58,7 @@ trap 'kill -TERM $PIDS' TERM INT
 # Export JAVA_OPTS
 JAVA_OPTS=${CYGNUS_JAVA_OPTS}
 export JAVA_OPTS
+echo "INFO: Using JAVA_OPTS: <${JAVA_OPTS}>"
 
 AGENT_CONF_FILE=agent.conf
 NAMEMAPPING_CONF_FILE=name_mappings.conf
@@ -1003,6 +1004,11 @@ fi
 
 touch /var/log/cygnus/cygnus.log
 ln -snf /dev/stdout /var/log/cygnus/cygnus.log & PIDS="$PIDS $!"
+
+if [ "$CYGNUS_LOG_LEVEL" ]; then
+    (sleep 10; curl -X PUT 'http://localhost:'$CYGNUS_API_PORT'/admin/log?level='$CYGNUS_LOG_LEVEL) &
+fi
+
 
 wait $PIDS
 trap - TERM INT

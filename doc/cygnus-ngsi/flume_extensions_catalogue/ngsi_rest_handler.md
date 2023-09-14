@@ -8,6 +8,7 @@ Content:
     * [Configuration](#section2.1)
     * [Accepted character set](#section2.2)
     * [Quote escaping for `TextUnrestricted` attributes](#section2.3)
+    * [Ignored events](#section2.4)
 * [Programmers guide](#section3)
     * [`NGSIRestHandler` class](#section3.1)
 
@@ -144,6 +145,12 @@ It is expected UTF-8 character set is maintained by all the Flume elements in th
 Cygnus escapes from `'` to `''` in attributes of type `TextUnrestricted` with the aim of avoiding injection attacks.
 
 Note that other attributes (i.e. with type different to `TextUnrestricted`) don't need such escaping as single quote (`'`) is a [forbidden character in Context Broker](https://fiware-orion.readthedocs.io/en/master/user/forbidden_characters/index.html) so that value will never arrives to Cygnus in notifications.
+
+[Top](#top)
+
+### <a name="section2.4"></a>Ignored events
+
+Cygnus ignores the `alterationType` attribute which may come in NGSIv2 notifications (as described in the [Orion documentation]([alterationType](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#subscriptions-based-in-alteration-type)), given that attribute is used only to take some decissions related with the lastData functionality (check specific documentation [here](last_data_function.md#alterationtype-from-ngsiv2-notifications))
 
 [Top](#top)
 

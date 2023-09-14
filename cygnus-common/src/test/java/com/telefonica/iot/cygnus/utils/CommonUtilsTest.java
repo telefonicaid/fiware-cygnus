@@ -31,7 +31,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  *
@@ -319,6 +319,30 @@ public class CommonUtilsTest {
                     + "- FAIL - Milliseconds were not obtained");
             throw e;
         } // try catch
+
+
+        System.out.println(getTestTraceHead("[CommonUtils.getMilliseconds]")
+                + "-------- Milliseconds are obtained when passing a valid timestamp");
+        timestamp = "2017-01-10 17:08:00.000";
+        try {
+            milliseconds = CommonUtils.getMilliseconds(timestamp);
+        } catch (ParseException e) {
+            System.out.println(getTestTraceHead("[CommonUtils.getMilliseconds]")
+                    + "- FAIL - There was some problem while getting the milliseconds");
+            throw new AssertionError(e.getMessage());
+        } // try catch
+
+        try {
+            assertEquals(timestamp, CommonUtils.getHumanReadable(milliseconds, true));
+            System.out.println(getTestTraceHead("[CommonUtils.getMilliseconds]")
+                    + "-  OK  - Milliseconds obtained");
+        } catch (AssertionError e) {
+            System.out.println(getTestTraceHead("[CommonUtils.getMilliseconds]")
+                    + "- FAIL - Milliseconds were not obtained");
+            throw e;
+        } // try catch
+
+        
     } // testGetMilliseconds
 
     /**
