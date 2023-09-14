@@ -34,6 +34,11 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
+import static org.junit.jupiter.api.condition.JRE.JAVA_16;
+import static org.junit.jupiter.api.condition.JRE.JAVA_17;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
+
+
 /**
  *
  * @author frb
@@ -362,6 +367,7 @@ public class NGSINameMappingsInterceptorTest {
      * as objects.
      */
     @Test
+    @DisabledForJreRange(min = JAVA_16, max = JAVA_17) // https://bugs.openjdk.org/browse/JDK-8256358
     public void testGetContextElementsInNGSIEvent() {
         System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.intercept]")
                 + "-------- When a NGSI event is put in the channel, it contains the original ContextElement "
@@ -406,6 +412,7 @@ public class NGSINameMappingsInterceptorTest {
      * as bytes in the body.
      */
     @Test
+    @DisabledForJreRange(min = JAVA_16, max = JAVA_17) // https://bugs.openjdk.org/browse/JDK-8256358
     public void testGetBodyInNGSIEvent() {
         System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.intercept]")
                 + "-------- When a NGSI event is put in the channel, it contains the original ContextElement and "
@@ -441,6 +448,7 @@ public class NGSINameMappingsInterceptorTest {
      * obtained from the Name Mappings.
      */
     @Test
+    @DisabledForJreRange(min = JAVA_16, max = JAVA_17) // https://bugs.openjdk.org/browse/JDK-8256358
     public void testDoMap() {
         System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.doMap]")
                 + "-------- A mapped ContextElement can be obtained from the Name Mappings");
@@ -494,6 +502,7 @@ public class NGSINameMappingsInterceptorTest {
      * can be obtained from the Name Mappings.
      */
     @Test
+    @DisabledForJreRange(min = JAVA_16, max = JAVA_17) // https://bugs.openjdk.org/browse/JDK-8256358
     public void testDoMapConfig() {
         System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.doMapConfig]")
                 + "-------- A mapped ContextElement can be obtained from the Name Mappings");
@@ -547,6 +556,7 @@ public class NGSINameMappingsInterceptorTest {
      * can be obtained from the Name Mappings.
      */
     @Test
+    @DisabledForJreRange(min = JAVA_16, max = JAVA_17) // https://bugs.openjdk.org/browse/JDK-8256358
     public void testDoMapConfig2() {
         System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.doMapConfig2]")
                 + "-------- A mapped ContextElement can be obtained from the Name Mappings");
@@ -600,6 +610,7 @@ public class NGSINameMappingsInterceptorTest {
      * can be obtained from the Name Mappings.
      */
     @Test
+    @DisabledForJreRange(min = JAVA_16, max = JAVA_17) // https://bugs.openjdk.org/browse/JDK-8256358
     public void testDoMapConfig3() {
         System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.doMapConfig3]")
                 + "-------- A mapped ContextElement can be obtained from the Name Mappings");
@@ -653,6 +664,7 @@ public class NGSINameMappingsInterceptorTest {
      * be obtained from the Name Mappings.
      */
     @Test
+    @DisabledForJreRange(min = JAVA_16, max = JAVA_17) // https://bugs.openjdk.org/browse/JDK-8256358
     public void testDoMapRegex() {
         System.out.println(getTestTraceHead("[NGSINameMappingInterceptor.doMapRegex]")
                 + "-------- A mapped ContextElement can be obtained from the Name Mappings");
@@ -712,6 +724,7 @@ public class NGSINameMappingsInterceptorTest {
      * omitted.
      */
     @Test
+    @DisabledForJreRange(min = JAVA_16, max = JAVA_17) // https://bugs.openjdk.org/browse/JDK-8256358
     public void testDoMapConfig4() {
         System.out.println(
                 getTestTraceHead("[NGSINameMappingInterceptor.doMapConfig4]") + "-------- Original fields can be omitted");
@@ -769,6 +782,7 @@ public class NGSINameMappingsInterceptorTest {
      * @throws java.lang.Exception
      */
     @Test
+    @DisabledForJreRange(min = JAVA_16, max = JAVA_17) // https://bugs.openjdk.org/browse/JDK-8256358
     public void testLoadNameMappingsError() throws Exception {
         System.out.println(getTestTraceHead("[NGSINameMappingsInterceptor.loadNameMappingsError]")
                 + "-------- Load name mappings with error");

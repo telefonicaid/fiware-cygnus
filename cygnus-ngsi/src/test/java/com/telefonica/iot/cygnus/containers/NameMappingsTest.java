@@ -28,6 +28,10 @@ import java.util.regex.Pattern;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import static org.junit.jupiter.api.condition.JRE.JAVA_16;
+import static org.junit.jupiter.api.condition.JRE.JAVA_17;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
+
 
 /**
  *
@@ -274,6 +278,7 @@ public class NameMappingsTest {
      * @throws java.lang.Exception
      */
     @Test
+    @DisabledForJreRange(min = JAVA_16, max = JAVA_17) // https://bugs.openjdk.org/browse/JDK-8256358
     public void testNameMappingsSuccessfullyParsed() throws Exception {
         System.out.println(getTestTraceHead("[NameMappings.parse]")
                 + "-------- Service mappings can be retrieved");
@@ -466,6 +471,7 @@ public class NameMappingsTest {
      * @throws java.lang.Exception
      */
     @Test
+    @DisabledForJreRange(min = JAVA_16, max = JAVA_17) // https://bugs.openjdk.org/browse/JDK-8256358
     public void testNameMappingsPatternsCompiled() throws Exception {
         System.out.println(getTestTraceHead("[NameMappings.compilePatterns]")
                 + "-------- Patterns are successfully compiled");
