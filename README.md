@@ -22,7 +22,7 @@ check the FIWARE Catalogue entry for the
 
 
 | :books: [Documentation](https://fiware-cygnus.rtfd.io)  | :mortar_board: [Academy](https://fiware-academy.readthedocs.io/en/latest/core/cygnus) | <img style="height:1em" src="https://quay.io/static/img/quay_favicon.png"/> [quay.io](https://quay.io/repository/fiware/cygnus-ngsi)| :whale: [Docker Hub](https://hub.docker.com/r/telefonicaiot/fiware-cygnus) | :dart: [Roadmap](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/roadmap.md) |
-|---|---|---|---|
+|---|---|---|---|---|
 
 ## Contents
 
