@@ -2,7 +2,8 @@
 
 [![](https://nexus.lab.fiware.org/repository/raw/public/badges/chapters/core.svg)](https://www.fiware.org/developers/catalogue/)
 [![License](https://img.shields.io/github/license/telefonicaid/fiware-cygnus.svg)](https://opensource.org/licenses/AGPL-3.0)
-[![Docker badge](https://img.shields.io/docker/pulls/fiware/cygnus-ngsi.svg)](https://hub.docker.com/r/fiware/cygnus-ngsi/)
+[![Quay badge](https://img.shields.io/badge/quay.io-fiware%2Fcygnus--ngsi-grey?logo=red%20hat&labelColor=EE0000)](https://quay.io/repository/fiware/cygnus-ngsi)
+[![Docker badge](https://img.shields.io/badge/docker-telefonicaiot%2Ffiware--cygnus-blue?logo=docker)](https://hub.docker.com/r/telefonicaiot/fiware-cygnus)
 [![](https://img.shields.io/badge/tag-fiware--cygnus-orange.svg?logo=stackoverflow)](http://stackoverflow.com/questions/tagged/fiware-cygnus)
 [![Support badge]( https://img.shields.io/badge/support-askbot-yellowgreen.svg)](https://ask.fiware.org/questions/scope%3Aall/tags%3Acygnus/)
 <br/>
@@ -20,8 +21,8 @@ check the FIWARE Catalogue entry for the
 [Core Context Management](https://github.com/Fiware/catalogue/tree/master/core).
 
 
-| :books: [Documentation](https://fiware-cygnus.rtfd.io)  | :mortar_board: [Academy](https://fiware-academy.readthedocs.io/en/latest/core/cygnus) | :whale: [Docker Hub](https://hub.docker.com/r/fiware/cygnus-ngsi/) |  :dart: [Roadmap](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/roadmap.md) |
-|---|---|---|---|
+| :books: [Documentation](https://fiware-cygnus.rtfd.io)  | :mortar_board: [Academy](https://fiware-academy.readthedocs.io/en/latest/core/cygnus) | <img style="height:1em" src="https://quay.io/static/img/quay_favicon.png"/> [quay.io](https://quay.io/repository/fiware/cygnus-ngsi)| :whale: [Docker Hub](https://hub.docker.com/r/telefonicaiot/fiware-cygnus) | :dart: [Roadmap](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/roadmap.md) |
+|---|---|---|---|---|
 
 ## Contents
 
@@ -113,7 +114,10 @@ Any doubt you may have, please refer to the [Cygnus Core Team](./reporting_issue
 Cygnus is licensed under Affero General Public License (GPL)
 version 3. You can find a [copy of this license in the repository](./LICENSE).
 
-© 2022 Telefonica Investigación y Desarrollo, S.A.U
+© 2023 Telefonica Investigación y Desarrollo, S.A.U
+
+<details>
+<summary><strong>Further information on the use of the AGPL open source license</strong></summary>
 
 ### Are there any legal issues with AGPL 3.0? Is it safe for me to use?
 
@@ -131,3 +135,5 @@ wish to make a clarifying public statement as follows:
 > work of the product. Software that merely uses or aggregates (i.e. links to) an otherwise
 > unmodified version of existing software is not considered a derivative work, and therefore
 > it does not need to be released as under the same license, or even released as open source.
+
+</details>
