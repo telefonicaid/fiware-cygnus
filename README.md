@@ -2,7 +2,8 @@
 
 [![](https://nexus.lab.fiware.org/repository/raw/public/badges/chapters/core.svg)](https://www.fiware.org/developers/catalogue/)
 [![License](https://img.shields.io/github/license/telefonicaid/fiware-cygnus.svg)](https://opensource.org/licenses/AGPL-3.0)
-[![Docker badge](https://img.shields.io/badge/quay.io-fiware%2Fcygnus--ngsi-grey?logo=red%20hat&labelColor=EE0000)](https://quay.io/repository/fiware/cygnus-ngsi)
+[![Quay badge](https://img.shields.io/badge/quay.io-fiware%2Fcygnus--ngsi-grey?logo=red%20hat&labelColor=EE0000)](https://quay.io/repository/fiware/cygnus-ngsi)
+[![Docker badge](https://img.shields.io/badge/docker-telefonicaiot%2Ffiware--cygnus-blue?logo=docker)](https://hub.docker.com/r/telefonicaiot/fiware-cygnus)
 [![](https://img.shields.io/badge/tag-fiware--cygnus-orange.svg?logo=stackoverflow)](http://stackoverflow.com/questions/tagged/fiware-cygnus)
 [![Support badge]( https://img.shields.io/badge/support-askbot-yellowgreen.svg)](https://ask.fiware.org/questions/scope%3Aall/tags%3Acygnus/)
 <br/>
