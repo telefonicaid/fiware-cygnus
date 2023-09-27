@@ -583,13 +583,15 @@ public class SQLBackendImpl implements SQLBackend{
             errorTableName = schema + "." + dataBase + DEFAULT_ERROR_TABLE_SUFFIX;
         }
         String typedFieldNames = "(" +
-                "timestamp TIMESTAMP" +
+                "timestamp TIMESTAMP NOT NULL" +
                 ", error text" +
-                ", query text)";
+                ", query text" +
+            ", CONSTRAINT PK_ErrorLog PRIMARY KEY (timestamp) )";
         String typedFieldNamesOracle = "(" +
-                "timestamp TIMESTAMP" +
+                "timestamp TIMESTAMP NOT NULL" +
                 ", error clob" +
-                ", query clob)";
+                ", query clob" +
+            ", CONSTRAINT PK_ErrorLog PRIMARY KEY (timestamp) )";
 
         Statement stmt = null;
         // get a connection to the given destination
