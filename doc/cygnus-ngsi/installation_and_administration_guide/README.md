@@ -7,7 +7,7 @@
     * [Installation from sources](./install_from_sources.md)
 * Configuration:
     * [NGSI agent configuration](./ngsi_agent_conf.md)
-    * [log4j configuration](../../installation_and_administration_guide/log4j_conf.md)
+    * [log4j configuration](../../cygnus-common/installation_and_administration_guide/log4j_conf.md)
     * [Configuration examples](./configuration_examples.md)
 * Running:
     * [Running as a process](./running_as_process.md)
