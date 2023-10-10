@@ -176,7 +176,9 @@ public class RestApi  {
 
         try {
             String strUrl = fullUrl(urlToRead, params);
-            LOGGER.debug("requesting HTTP: " + strUrl);
+            LOGGER.debug("requesting HTTP: " + strUrl +
+                         "---METHOD: " + httpMethod.toString() +
+                         "---BODY: " + body);
 
             // Create a trust manager that does not validate certificate chains
             TrustManager[] trustAllCerts = new TrustManager[] {new X509TrustManager() {

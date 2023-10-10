@@ -345,9 +345,9 @@ public class ArcgisFeatureTable {
         // Checks if field exists in table, an retrieves it's type
         if (hasAttribute(uniqueField)) {
             String uniqueFieldType = getAttributeType(uniqueField);
-            quoted = GisAttributeType.DATE.equals(uniqueFieldType)
-                    || GisAttributeType.STRING.equals(uniqueFieldType);
-
+            quoted = GisAttributeType.DATE.toString().equalsIgnoreCase(uniqueFieldType)
+                || GisAttributeType.STRING.toString().equalsIgnoreCase(uniqueFieldType);
+            LOGGER.debug("uniqueField: " + uniqueField +  " uniqueFieldType " + uniqueFieldType + " in table");
             // Make the list
             for (Feature feature : featureArray) {
                 if (feature.getAttributes().containsKey(uniqueField)) {
