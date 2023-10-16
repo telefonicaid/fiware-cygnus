@@ -215,11 +215,12 @@ public class MongoBackendImpl implements MongoBackend {
         try {
             db.getCollection(collectionName).createIndex(keys, options);
         } catch(Exception e) {
-            if (e.getMessage().contains("IndexOptionsConflict")) {
+            if (e.getMessage().contains("IndexOptionsConflict") ||
+                e.getMessage().contains("IndexKeySpecsConflict")) {
                 db.getCollection(collectionName).dropIndex(options.getName());
                 createIndex(db, collectionName, keys, options);
             } else {
-                LOGGER.warn("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
+                LOGGER.info("Error in collection " + collectionName + " creating index ex=" + e.getMessage());
             }
         } // try catch
     } // createIndex
