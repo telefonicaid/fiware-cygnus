@@ -227,7 +227,7 @@ public class Feature {
     public Integer getObjectId() throws ArcgisException {
         Integer objectId = -1;
         for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
-            if (OBJECTID_FIELDNAME.equals(attribute.getKey())) {
+            if (OBJECTID_FIELDNAME.equalsIgnoreCase(attribute.getKey())) {
                 objectId = (Integer) attribute.getValue();
                 break;
             }
@@ -252,7 +252,7 @@ public class Feature {
             boolean found = false;
 
             for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
-                if (OBJECTID_FIELDNAME.equals(attribute.getKey())) {
+                if (OBJECTID_FIELDNAME.equalsIgnoreCase(attribute.getKey())) {
                     found = true;
                     attribute.setValue(objectId);
                     break;
