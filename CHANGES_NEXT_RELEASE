@@ -1,3 +1,4 @@
+- [cygnus-common] [MongoDB] fix error about reindex when datamodel changed
 - [cygnus-common] [Arcgis] fix url quoted based on uniqueFieldType (#2311)
 - [cygnus-common] [SQL] Add Primary Key on Timestamp to Error Log table (#2302)
 - [cygnus-common] Upgrade gson dependency from 2.6.2 to 2.10.1
