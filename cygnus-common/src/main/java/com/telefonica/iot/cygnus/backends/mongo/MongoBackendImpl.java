@@ -215,7 +215,11 @@ public class MongoBackendImpl implements MongoBackend {
         try {
             db.getCollection(collectionName).createIndex(keys, options);
         } catch(Exception e) {
-            if (e.getMessage().contains("IndexOptionsConflict")) {
+            // Our guess is:
+            // IndexOptionsConflict -> when the same index (name and keys) already exits
+            // IndexKeySpecsConflict -> when an index with the same name but different keys (i.e. DM was changed) already exist
+            if (e.getMessage().contains("IndexOptionsConflict") ||
+                e.getMessage().contains("IndexKeySpecsConflict")) {
                 db.getCollection(collectionName).dropIndex(options.getName());
                 createIndex(db, collectionName, keys, options);
             } else {
