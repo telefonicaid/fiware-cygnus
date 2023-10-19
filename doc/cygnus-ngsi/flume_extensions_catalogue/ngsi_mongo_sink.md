@@ -13,6 +13,7 @@ Content:
         * [Database and table names](#section1.3.2)
         * [Row-like storing](#section1.3.3)
         * [Column-like storing](#section1.3.4)
+    * [MongoDB Indexes](#section1.4)
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
@@ -285,6 +286,25 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
     {"_id" : ObjectId("56337ea4c9e77c1614bfdbb7"), "recvTimeTs": "1402409899391", "recvTime" : "2015-04-20T12:13:22.41.412Z", "speed" : "112.9", "oil_level" : "74.6"}
 
 [Top](#top)
+
+### <a name="section1.4"></a>MongoDB Indexes
+
+Since version 3.0.0 of cygnus index named `cyg_agg_opt` is created in this way but depending on datamodel:
+
+| datamodel        | keys                                               |
+| :--------------- | :------------------------------------------------- |
+| DMBYSERVICEPATH  | entityId, entityType, attrName, resolution, origin |
+| DMBYENTITY       | attrName, resolution, origin                       |
+| DMBYATTRIBUTE    | resolution, origin                                 |
+
+Since version 3.0.0 of cygnus an index named `cyg_raw_opt` is created in this way but depending on datamodel:
+
+| datamodel       | keys                                                             |
+| :-------------- | :--------------------------------------------------------------- |
+| DMBYSERVICEPATH | recvTime, entityId, entityType, attrName, attrType, attrValue    |
+| DMBYENTITY      | recvTime, attrName, attrType, attrValue                          |
+| DMBYATTRIBUTE   | recvTime, attrType, attrValue                                    |
+
 
 ## <a name="section2"></a>Administration guide
 ### <a name="section2.1"></a>Configuration
