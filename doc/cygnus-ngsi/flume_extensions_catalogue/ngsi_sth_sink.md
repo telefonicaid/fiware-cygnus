@@ -293,11 +293,11 @@ Assuming `data_model=dm-by-entity` and all the possible resolutions as configura
 
 Since version 3.0.0 of cygnus index named `cyg_agg_opt` is created in this way but depending on datamodel:
 
-| datamodel        | keys                                               |
-| :--------------- | :------------------------------------------------- |
-| DMBYSERVICEPATH  | entityId, entityType, attrName, resolution, origin |
-| DMBYENTITY       | attrName, resolution, origin                       |
-| DMBYATTRIBUTE    | resolution, origin                                 |
+| datamodel          | keys                                               |
+| :----------------- | :------------------------------------------------- |
+| dm-by-service-path | entityId, entityType, attrName, resolution, origin |
+| dm-by-entity       | attrName, resolution, origin                       |
+| dm-by-attribute    | resolution, origin                                 |
 
 ## <a name="section2"></a>Administration guide
 ### <a name="section2.1"></a>Configuration

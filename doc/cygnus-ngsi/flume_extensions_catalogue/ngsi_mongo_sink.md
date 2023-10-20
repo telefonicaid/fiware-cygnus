@@ -290,11 +290,11 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 ### <a name="section1.4"></a>MongoDB Indexes
 Since version 3.0.0 of cygnus an index named `cyg_raw_opt` is created in this way but depending on datamodel:
 
-| datamodel       | keys                                                             |
-| :-------------- | :--------------------------------------------------------------- |
-| DMBYSERVICEPATH | recvTime, entityId, entityType, attrName, attrType, attrValue    |
-| DMBYENTITY      | recvTime, attrName, attrType, attrValue                          |
-| DMBYATTRIBUTE   | recvTime, attrType, attrValue                                    |
+| datamodel         | keys                                                             |
+| :---------------- | :--------------------------------------------------------------- |
+| dm-by-servicepath | recvTime, entityId, entityType, attrName, attrType, attrValue    |
+| dm-by-entity      | recvTime, attrName, attrType, attrValue                          |
+| dm-by-attribute   | recvTime, attrType, attrValue                                    |
 
 
 ## <a name="section2"></a>Administration guide
