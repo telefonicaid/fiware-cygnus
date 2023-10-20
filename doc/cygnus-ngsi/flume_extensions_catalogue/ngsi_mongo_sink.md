@@ -288,15 +288,6 @@ If `data_model=dm-by-entity` and `attr_persistence=column` then `NGSIMongoSink` 
 [Top](#top)
 
 ### <a name="section1.4"></a>MongoDB Indexes
-
-Since version 3.0.0 of cygnus index named `cyg_agg_opt` is created in this way but depending on datamodel:
-
-| datamodel        | keys                                               |
-| :--------------- | :------------------------------------------------- |
-| DMBYSERVICEPATH  | entityId, entityType, attrName, resolution, origin |
-| DMBYENTITY       | attrName, resolution, origin                       |
-| DMBYATTRIBUTE    | resolution, origin                                 |
-
 Since version 3.0.0 of cygnus an index named `cyg_raw_opt` is created in this way but depending on datamodel:
 
 | datamodel       | keys                                                             |
