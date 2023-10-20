@@ -299,14 +299,6 @@ Since version 3.0.0 of cygnus index named `cyg_agg_opt` is created in this way b
 | DMBYENTITY       | attrName, resolution, origin                       |
 | DMBYATTRIBUTE    | resolution, origin                                 |
 
-Since version 3.0.0 of cygnus an index named `cyg_raw_opt` is created in this way but depending on datamodel:
-
-| datamodel       | keys                                                             |
-| :-------------- | :--------------------------------------------------------------- |
-| DMBYSERVICEPATH | recvTime, entityId, entityType, attrName, attrType, attrValue    |
-| DMBYENTITY      | recvTime, attrName, attrType, attrValue                          |
-| DMBYATTRIBUTE   | recvTime, attrType, attrValue                                    |
-
 ## <a name="section2"></a>Administration guide
 ### <a name="section2.1"></a>Configuration
 `NGSISTHSink` is configured through the following parameters:
