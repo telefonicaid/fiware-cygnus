@@ -296,7 +296,7 @@ Since version 3.0.0 of cygnus an index named `cyg_raw_opt` is created in this wa
 | dm-by-entity      | recvTime, attrName, attrType, attrValue                          |
 | dm-by-attribute   | recvTime, attrType, attrValue                                    |
 
-Note that attempting to use any other datamodel different from these ones will cause a "Unknown data model" ERROR in log traces. In addition, note that default datamodel for STH/Mongo sink is dm-by-entity as all others sinks which uses datamodel.
+Note that attempting to use any other datamodel different from these ones will cause a "Unknown data model" ERROR in log traces. In addition, note that default datamodel for NGSIMongoSink is dm-by-entity as all others sinks which uses datamodel.
 
 ## <a name="section2"></a>Administration guide
 ### <a name="section2.1"></a>Configuration
