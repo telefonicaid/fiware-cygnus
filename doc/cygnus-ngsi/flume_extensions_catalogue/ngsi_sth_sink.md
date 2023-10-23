@@ -11,6 +11,7 @@ Content:
         * [`NGSIEvent`](#section1.3.1)
         * [Database and table names](#section1.3.2)
         * [Storing](#section1.3.3)
+    * [MongoDB Indexes](#section1.4)
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Use cases](#section2.2)
@@ -120,30 +121,30 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 
     ngsi-event={
         headers={
-	         content-type=application/json,
-	         timestamp=1429535775,
-	         transactionId=1429535775-308-0000000000,
-	         correlationId=1429535775-308-0000000000,
-	         fiware-service=vehicles,
-	         fiware-servicepath=/4wheels,
-	         <name_mappings_interceptor_headers>
+             content-type=application/json,
+             timestamp=1429535775,
+             transactionId=1429535775-308-0000000000,
+             correlationId=1429535775-308-0000000000,
+             fiware-service=vehicles,
+             fiware-servicepath=/4wheels,
+             <name_mappings_interceptor_headers>
         },
         body={
-	        entityId=car1,
-	        entityType=car,
-	        attributes=[
-	            {
-	                attrName=speed,
-	                attrType=float,
-	                attrValue=112.9
-	            },
-	            {
-	                attrName=oil_level,
-	                attrType=float,
-	                attrValue=74.6
-	            }
-	        ]
-	    }
+            entityId=car1,
+            entityType=car,
+            attributes=[
+                {
+                    attrName=speed,
+                    attrType=float,
+                    attrValue=112.9
+                },
+                {
+                    attrName=oil_level,
+                    attrType=float,
+                    attrValue=74.6
+                }
+            ]
+        }
     }
 
 
@@ -287,6 +288,19 @@ Assuming `data_model=dm-by-entity` and all the possible resolutions as configura
     }
 
 [Top](#top)
+
+### <a name="section1.4"></a>MongoDB Indexes
+
+Since version 3.0.0 of cygnus index named `cyg_agg_opt` is created in this way but depending on datamodel:
+
+| datamodel          | keys                                               |
+| :----------------- | :------------------------------------------------- |
+| dm-by-service-path | entityId, entityType, attrName, resolution, origin |
+| dm-by-entity       | attrName, resolution, origin                       |
+| dm-by-attribute    | resolution, origin                                 |
+
+
+Note that attempting to use any other datamodel different from these ones will cause a "Unknown data model" ERROR in log traces. In addition, note that default datamodel for NGSISTHSink is dm-by-entity as all others sinks which uses datamodel.
 
 ## <a name="section2"></a>Administration guide
 ### <a name="section2.1"></a>Configuration
