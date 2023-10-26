@@ -388,7 +388,7 @@ public class ArcgisFeatureTable {
                 Feature serverFeature = serverFeatures.get(i);
                 String serverFeatureId = serverFeature.getAttributes().get(uniqueField).toString();
 
-                if (featureId.equals(serverFeatureId)) {
+                if (featureId.equalsIgnoreCase(serverFeatureId)) {
                     found = true;
                     Integer oid = serverFeature.getObjectId();
                     feature.setObjectId(oid);
