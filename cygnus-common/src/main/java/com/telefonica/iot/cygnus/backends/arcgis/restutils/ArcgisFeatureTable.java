@@ -388,7 +388,7 @@ public class ArcgisFeatureTable {
                 Feature serverFeature = serverFeatures.get(i);
                 String serverFeatureId = serverFeature.getAttributes().get(uniqueField).toString();
 
-                if (featureId.equals(serverFeatureId)) {
+                if (featureId.equalsIgnoreCase(serverFeatureId)) {
                     found = true;
                     Integer oid = serverFeature.getObjectId();
                     feature.setObjectId(oid);
@@ -622,7 +622,15 @@ public class ArcgisFeatureTable {
      * @return
      */
     public boolean hasAttribute(String attName) {
-        return arcGISFeatureTable.getTableAttributes().containsKey(attName);
+        // return arcGISFeatureTable.getTableAttributes().containsKey(attName);
+        // Check containsKey but both in lowerCase
+        Map<String, Field> map = arcGISFeatureTable.getTableAttributes();
+        for (Map.Entry<String, Field> entry : map.entrySet()) {
+            if (entry.getKey().toLowerCase().equals(attName.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

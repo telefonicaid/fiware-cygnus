@@ -1,4 +1,5 @@
 - [cygnus-common] [MongoDB] fix error about reindex when datamodel changed
+- [cygnus-common] [Arcgis] check featureId ignore case (#2320)
 - [cygnus-common] [Arcgis] check object_id ignore case (#2313)
 - [cygnus-common] [Arcgis] fix url quoted based on uniqueFieldType (#2311)
 - [cygnus-common] [SQL] Add Primary Key on Timestamp to Error Log table (#2302)
