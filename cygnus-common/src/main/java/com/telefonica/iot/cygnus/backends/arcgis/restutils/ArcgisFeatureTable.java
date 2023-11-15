@@ -622,15 +622,7 @@ public class ArcgisFeatureTable {
      * @return
      */
     public boolean hasAttribute(String attName) {
-        // return arcGISFeatureTable.getTableAttributes().containsKey(attName);
-        // Check containsKey but both in lowerCase
-        Map<String, Field> map = arcGISFeatureTable.getTableAttributes();
-        for (Map.Entry<String, Field> entry : map.entrySet()) {
-            if (entry.getKey().toLowerCase().equals(attName.toLowerCase())) {
-                return true;
-            }
-        }
-        return false;
+        return arcGISFeatureTable.getTableAttributes().containsKey(attName);
     }
 
     /**
