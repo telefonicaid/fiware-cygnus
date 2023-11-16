@@ -99,6 +99,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Thu Nov 16 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.3.0
+- [cygnus-ngsi][cygnus-common] upgrade mockito dep from 1.9.5 to 5.5.0
+- [cygnus-ngsi] Fix runtime error: check access aggregator size (#2293)
+- [cygnus-ngsi] Switch log level to CYGNUS_LOG_LEVEL env var if was provided to docker (#2286)
+- [cygnus-ngsi] Removes "_" in schema name for DM -schema family (#2270, #2201 reopens for Postgis)
+- [cygnus-ngsi] UPGRADE: Debian version from 11.6 to 12.1 in Dockerfile
+
 * Thu Jun 20 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.2.0
 - [cygnus-ngsi] Check access to arrayList getting attribute name
 - [cygnus-common][cygnus-ngsi]  Fix: exclude of attribute processing alterationType send by a subscription in all of their values (#2231, reopened)

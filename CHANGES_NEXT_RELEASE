@@ -1,15 +1,2 @@
-- [cygnus-common] [MongoDB] fix error about reindex when datamodel changed
-- [cygnus-common] [Arcgis] check featureId ignore case (#2320)
-- [cygnus-common] [Arcgis] check object_id ignore case (#2313)
-- [cygnus-common] [Arcgis] fix url quoted based on uniqueFieldType (#2311)
-- [cygnus-common] [SQL] Add Primary Key on Timestamp to Error Log table (#2302)
-- [cygnus-common] Upgrade gson dependency from 2.6.2 to 2.10.1
-- [cygnus-common] Upgrade mysql-java-connector dependency from 8.0.28 to 8.0.33
-- [cygnus-ngsi][cygnus-common] upgrade mockito dep from 1.9.5 to 5.5.0
-- [cygnus-ngsi] Fix runtime error: check access aggregator size (#2293)
-- [cygnus-ngsi] Switch log level to CYGNUS_LOG_LEVEL env var if was provided to docker (#2286)
-- [cygnus-common][SQL] Fix expiration records tablename used by delete and select (#2265)
-- [cygnus-common][SQL] Fix expiration records select with a limit to avoid java out of memory error (#2273)
-- [cygnus-ngsi] Removes "_" in schema name for DM -schema family (#2270, #2201 reopens for Postgis)
-- [cygnus-ngsi] UPGRADE: Debian version from 11.6 to 12.1 in Dockerfile
-- [cygnus-common] Upgrade mongodb driver dep from 3.12.12 to 3.12.14
+
+

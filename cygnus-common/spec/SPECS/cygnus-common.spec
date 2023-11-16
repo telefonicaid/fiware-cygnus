@@ -172,6 +172,18 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Thu Nov 16 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.3.0
+- [cygnus-common] [MongoDB] fix error about reindex when datamodel changed
+- [cygnus-common] [Arcgis] check featureId ignore case (#2320)
+- [cygnus-common] [Arcgis] check object_id ignore case (#2313)
+- [cygnus-common] [Arcgis] fix url quoted based on uniqueFieldType (#2311)
+- [cygnus-common] [SQL] Add Primary Key on Timestamp to Error Log table (#2302)
+- [cygnus-common] Upgrade gson dependency from 2.6.2 to 2.10.1
+- [cygnus-common] Upgrade mysql-java-connector dependency from 8.0.28 to 8.0.33
+- [cygnus-common][SQL] Fix expiration records tablename used by delete and select (#2265)
+- [cygnus-common][SQL] Fix expiration records select with a limit to avoid java out of memory error (#2273)
+- [cygnus-common] Upgrade mongodb driver dep from 3.12.12 to 3.12.14        
+
 * Tue Jun 20 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.2.0
 - [cygnus-common][pSQL] Allow use null for ST_GeomFromGeoJSON
 - [cygnus-common][SQL] cache tablename with schema in pSQL for capRecords case
