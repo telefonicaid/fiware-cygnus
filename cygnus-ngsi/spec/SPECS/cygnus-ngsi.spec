@@ -103,7 +103,6 @@ rm -rf $RPM_BUILD_ROOT
 - [cygnus-ngsi][cygnus-common] upgrade mockito dep from 1.9.5 to 5.5.0
 - [cygnus-ngsi] Fix runtime error: check access aggregator size (#2293)
 - [cygnus-ngsi] Switch log level to CYGNUS_LOG_LEVEL env var if was provided to docker (#2286)
-
 - [cygnus-ngsi] Removes "_" in schema name for DM -schema family (#2270, #2201 reopens for Postgis)
 - [cygnus-ngsi] UPGRADE: Debian version from 11.6 to 12.1 in Dockerfile
 
