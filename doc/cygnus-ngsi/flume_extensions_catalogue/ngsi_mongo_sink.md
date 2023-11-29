@@ -298,6 +298,8 @@ Since version 3.0.0 of cygnus an index named `cyg_raw_opt` is created in this wa
 
 Note that attempting to use any other datamodel different from these ones will cause a "Unknown data model" ERROR in log traces. In addition, note that default datamodel for NGSIMongoSink is dm-by-entity as all others sinks which uses datamodel.
 
+When datamodel changes Cygnus tries to recreate index (delete current and create a new one) depending on keys related to datamodel. This procedure could takes much time depending on data volume and existence of mongo cluster deploy. In order to reduce this time, an expected index could be created in advance (i.e. before doing the datamodel change) when cygnus and mongo loads allow it.
+
 ## <a name="section2"></a>Administration guide
 ### <a name="section2.1"></a>Configuration
 `NGSIMongoSink` is configured through the following parameters:
