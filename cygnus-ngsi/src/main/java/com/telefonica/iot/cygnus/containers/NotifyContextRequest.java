@@ -483,7 +483,7 @@ public class NotifyContextRequest {
                 return value.getAsJsonObject().toString();
             } else if (value.isJsonArray()) {
                 return value.getAsJsonArray().toString();
-            } else if (!value.isJsonNull){
+            } else if (!value.isJsonNull()){
                 return "\"" + value.getAsString() + "\"";
             } else {
                 return "\"" + value.toString() + "\"";
