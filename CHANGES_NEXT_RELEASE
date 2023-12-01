@@ -1,2 +1,2 @@
-
+- [cygnus-common][NGSIGenericColumnAggregator] Fix getValue when gson object is null
 
