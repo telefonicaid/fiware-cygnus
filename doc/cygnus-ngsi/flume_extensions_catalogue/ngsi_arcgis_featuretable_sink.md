@@ -160,6 +160,11 @@ Connections to `cygnus-ngsi.sinks.arcgis-sink.arcgis_service_url` and `cygnus-ng
 
 [Top](#top)
 
+#### <a name="section2.2.1"></a>About case-sensitivity
+
+**[FIXME #2320](https://github.com/telefonicaid/fiware-cygnus/issues/2320)**. Currently Arcgis sink is case sensitive with the attributes to persist in the Feature Table although arcgis is not case sensitive. This behaviour requires the use of name-mappings to match the case letters of the attribute definition in the Feature Table.
+
+[Top](#top)
 
 ## <a name="section3"></a>Programmers guide
 ### <a name="section3.1"></a>`NGSIArcgisFeatureTableSink` class
