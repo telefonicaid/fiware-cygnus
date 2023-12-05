@@ -69,7 +69,7 @@ Let's see an example:
 
 #### Using Context Broker custom notifications
 
-If a service path has different entitiy types, following the previous example `car` and `van`, they will need to persist in different Feature Layers, to avoid the limitation of one Feature table by a "fiware-servicepath", it can be used [CB custom notifications](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#custom-notifications) in which we can map a different value for `fiware-service` and `fiware-servicepath` headers parameters. 
+If a service path has different entitiy types, following the previous example `car` and `van`, they will need to persist in different Feature Layers, to avoid the limitation of one "fiware-servicepath" can only persist in a unique feature table, it can be used [CB custom notifications](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#custom-notifications) in which we can map a different value for `fiware-service` and `fiware-servicepath` headers parameters. 
 
 ###### Entity data:
 
