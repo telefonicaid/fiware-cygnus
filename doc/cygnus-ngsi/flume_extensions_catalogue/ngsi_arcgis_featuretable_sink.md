@@ -135,7 +135,6 @@ A configuration example could be:
     cygnus-ngsi.sinks.arcgis-sink.type = com.telefonica.iot.cygnus.sinks.NGSIArcgisFeatureTableSink
     cygnus-ngsi.sinks.arcgis-sink.channel = arcgis-channel
     cygnus-ngsi.sinks.arcgis-sink.enable_name_mappings = true
-    cygnus-ngsi.sinks.arcgis-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.arcgis-sink.arcgis_service_url = https://arcgis.com/UsuarioArcgis/arcgis/rest/services
     cygnus-ngsi.sinks.arcgis-sink.arcgis_username = myuser
     cygnus-ngsi.sinks.arcgis-sink.arcgis_password = mypassword
