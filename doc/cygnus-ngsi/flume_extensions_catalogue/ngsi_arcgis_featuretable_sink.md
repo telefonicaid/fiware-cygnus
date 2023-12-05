@@ -42,29 +42,75 @@ Argis feature tables must be provisioned before sending entities.
 #### <a name="section1.2.1"></a>ArcGis databases naming conventions
 Each entity type needs an url and an unique field to be persisted into the feature table.
 
-NGSIArcgisFeatureTableSink composes each table's url with entitie's `service` and `service path`, to provide multiple tables access. 
+NGSIArcgisFeatureTableSink composes each table's url with entitie's `service` and `service path`, to provide multiple tables access. The final url is compounds by `cygnus-ngsi.sinks.arcgis-sink.arcgis_service_url`+`fiware-service`+`fiware-servicepath`. 
 
 Unique field is provided to allow `NGSIArcgisFeatureTableSink` to update existant entities. NGSI `entity type` will be used as unique field name. This means that a feature named `type` in the Feature Table cannot be filled in by the sink. If Feature Table needs to persist the value of entity type it has to be in a feature different than `type`.
 
-All this parameters, can be customized using Cygnus mapping capabilities.
+All this parameters, can be customized using Cygnus mapping capabilities or Context Broker custom notifications.
+
+##### Using Cygnus
 
 Let's see an example:	
 
-##### Agent.conf file:
+###### Agent.conf file:
 
 	agent.arcgis-sink.arcgis_service_url = https://arcgis.com/{hash}/arcgis/rest/services
-##### Entity data:
+###### Entity data:
 
 	service = vehicles
 	service-path = /4wheels
 	entity-type = car
-##### result
+###### result
 
 	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/4wheels
 	Table's unique field: car
 
 [Top](#top)
 
+#### Using Context Broker custom notifications
+
+If a service path has different entitiy types, following the previous example `car` and `van`, they will need to persist in different Feature Layers, to avoid the limitation of one Feature table by a "fiware-servicepath", it can be used [CB custom notifications](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#custom-notifications) in which we can map a different value for `fiware-service` and `fiware-servicepath` headers parameters. 
+
+###### Entity data:
+
+	service = vehicles
+	service-path = /4wheels
+	entity-type = van
+
+For example, if the Feature table for "van" is `https://arcgis.com/{hash}/arcgis/rest/services/vehicles/van`,  the custom notif could be:
+```
+"httpCustom":{
+  "url": "http://iot-cygnus:<source_arcgis_port>/notify",
+  "headers": {
+    "fiware-service": "vehicles",
+    "fiware-servicepath": "/van"
+  }
+}
+```
+
+Using this functionality a different "fiware-servicepath" can be assigned to every entity type.
+
+Moveover, to modify the unique field value of `type` attribute it can be used the [ngsi patching functionality](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#ngsi-payload-patching):
+
+```
+"httpCustom":{
+  "url": "http://iot-cygnus:<source_arcgis_port>/notify",
+  "ngsi": {
+    "type": "car"
+  },
+  "headers": {
+    "fiware-service": "vehicles",
+    "fiware-servicepath": "/van"
+  }
+}
+```
+
+###### result
+
+	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/van
+	Table's unique field: car
+
+[Top](#top)
 
 ### <a name="section1.3"></a>Example
 #### <a name="section1.3.1"></a>`NGSIEvent`
@@ -90,7 +136,7 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
 	                attrValue=112.9
 	            },
 	            {
-	                attrName=oil_level,
+	                attrName=oilLevel,
 	                attrType=float,
 	                attrValue=74.6
 	            }
@@ -164,6 +210,72 @@ Connections to `cygnus-ngsi.sinks.arcgis-sink.arcgis_service_url` and `cygnus-ng
 #### <a name="section2.2.2"></a>About case-sensitivity
 
 **[FIXME #2320](https://github.com/telefonicaid/fiware-cygnus/issues/2320)**. Currently Arcgis sink is case sensitive with the attributes to persist in the Feature Table although arcgis is not case sensitive. This behaviour requires the use of name-mappings to match the case letters of the attribute definition in the Feature Table.
+
+For instance, if we have the following Feature Layer definition for the "car" entity type:
+```
+Fields:
+
+    objectid ( type: esriFieldTypeOID, alias: objectid, editable: false, nullable: false, defaultValue: null, modelName: objectid )
+    car ( type: esriFieldTypeString, alias: id, editable: true, nullable: true, length: 255, defaultValue: null, modelName: id )
+    speed ( type: esriFieldTypeDouble, alias: speed, editable: true, nullable: true, defaultValue: null, modelName: speed )
+    oillevel ( type: esriFieldTypeDouble, alias: oillevel, editable: true, nullable: true, defaultValue: null, modelName: oillevel )
+```
+
+And the model definition of the `car` is:
+
+```
+{
+    "id": "car1",
+    "type": "car",
+    "location": {
+        "type": "geo:json",
+        "value": {
+            "coordinates": [
+                -0.350062,
+                40.054448
+            ],
+            "type": "Point"
+        }
+    },
+    "speed": {
+        "type": "Number",
+        "value": 112.9
+    },
+    "oilLevel": {
+        "type": "Number",
+        "value": 74.6
+    }
+}
+```
+
+The name mappings required to persist the attributes is:
+
+```
+{
+  "serviceMappings": [{
+      "originalService": "vehicle",
+      "servicePathMappings": [{
+          "originalServicePath": "/car",
+          "entityMappings": [{
+              "originalEntityType": "car",
+              "originalEntityId": "^.*",
+              "attributeMappings": [{
+                  "originalAttributeName": "oilLevel",
+                  "newAttributeName": "oillevel",
+                  "originalAttributeType": "^.*"
+                },
+                ...
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+Note that `speed` attribute is not required in the name mappings file as it match, including case-sensitivity, with the field in the Feature Layer.
 
 [Top](#top)
 
