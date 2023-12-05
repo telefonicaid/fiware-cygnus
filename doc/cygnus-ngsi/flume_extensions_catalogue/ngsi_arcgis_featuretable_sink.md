@@ -11,6 +11,8 @@ Content:
     * [Configuration](#section2.1)
     * [Important notes](#section2.2)
         * [About batching](#section2.2.1)
+        * [About case-sensitivity](#section2.2.2)
+        * [About Arcgis data types](#section2.2.3)
 * [Programmers guide](#section3)
     * [`NGSIArcgisFeatureTableSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
@@ -160,11 +162,20 @@ Connections to `cygnus-ngsi.sinks.arcgis-sink.arcgis_service_url` and `cygnus-ng
 
 [Top](#top)
 
-#### <a name="section2.2.1"></a>About case-sensitivity
+#### <a name="section2.2.2"></a>About case-sensitivity
 
 **[FIXME #2320](https://github.com/telefonicaid/fiware-cygnus/issues/2320)**. Currently Arcgis sink is case sensitive with the attributes to persist in the Feature Table although arcgis is not case sensitive. This behaviour requires the use of name-mappings to match the case letters of the attribute definition in the Feature Table.
 
 [Top](#top)
+
+#### <a name="section2.2.3"></a>About Arcgis data types
+
+- **esriFieldTypeDate**
+
+From https://doc.arcgis.com/en/data-pipelines/latest/process/output-feature-layer.htm
+> ... Date fields are stored in feature layers using the format milliseconds from epoch and the coordinated universal time (UTC) time zone. The values will be displayed differently depending on where you are viewing the data. For example, querying the feature service REST end point will return values in milliseconds from epoch, such as 1667411518878....
+
+So, to persist a `esriFieldTypeDate` field in the Feature Layer, cygnus has to receive an attribute "Number" from the CB with the milliseconds from epoch.
 
 ## <a name="section3"></a>Programmers guide
 ### <a name="section3.1"></a>`NGSIArcgisFeatureTableSink` class
