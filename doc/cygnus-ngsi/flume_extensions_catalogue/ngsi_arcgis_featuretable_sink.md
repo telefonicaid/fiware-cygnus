@@ -44,7 +44,7 @@ Each entity type needs an url and an unique field to be persisted into the featu
 
 NGSIArcgisFeatureTableSink composes each table's url with entitie's `service` and `service path`, to provide multiple tables access. The final url is composed of `cygnus-ngsi.sinks.arcgis-sink.arcgis_service_url`+`fiware-service`+`fiware-servicepath`. 
 
-Unique field is provided to allow `NGSIArcgisFeatureTableSink` to update existant entities. NGSI `entity type` will be used as unique field name. This means that a feature named `type` in the Feature Table cannot be filled in by the sink. If Feature Table needs to persist the value of entity type it has to be in a feature different than `type`.
+Unique field is provided to allow `NGSIArcgisFeatureTableSink` to update existant entities. NGSI `entity type` will be used as unique field name. This means that a feature named `type` in the Feature Table cannot be filled in by the sink. If Feature Table needs to persist the value of entity type it has to be in a field different than `type`.
 
 All this parameters, can be customized using Cygnus mapping capabilities or Context Broker custom notifications.
 
