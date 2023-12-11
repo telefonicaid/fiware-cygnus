@@ -88,21 +88,49 @@ For example, if the Feature table for "van" is `https://arcgis.com/{hash}/arcgis
 }
 ```
 
-Using this functionality a different "fiware-servicepath" can be assigned to every entity type.
+Using this functionality a different "fiware-servicepath" can be assigned to every entity type. 
 
-Moveover, to modify the unique field value of `type` attribute it can be used the [ngsi patching functionality](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#ngsi-payload-patching):
+Note that the previous example is incomplete because does not change the type`s value, so to avoid using the name mappings to modify the unique field value of `type` attribute, it is required the use of [ngsi patching functionality](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#ngsi-payload-patching).
+
+An example of the whole subscription:
 
 ```
-"httpCustom":{
-  "url": "http://iot-cygnus:<source_arcgis_port>/notify",
-  "ngsi": {
-    "type": "car"
-  },
-  "headers": {
-    "fiware-service": "vehicles",
-    "fiware-servicepath": "/van"
+  {
+    "description": "Subs arcgis",
+    "status": "active",
+    "subject": {
+      "entities": [
+        {
+          "idPattern": ".*",
+          "type": "van"
+        }
+      ],
+      "condition": {
+        "attrs": [
+          "speed",
+          "oilLevel"
+        ]
+      }
+    },
+    "notification": {
+      "attrs": [
+        "speed",
+        "oilLevel"
+      ],
+      "onlyChangedAttrs": false,
+      "attrsFormat": "normalized",
+      "httpCustom": {
+        "url": "http://iot-cygnus:<source_arcgis_port>/notify",
+          "ngsi": {
+            "type": "car"
+          },
+          "headers": {
+            "fiware-service": "vehicles",
+            "fiware-servicepath": "/van"
+          }
+        }
+    }
   }
-}
 ```
 
 ###### result
