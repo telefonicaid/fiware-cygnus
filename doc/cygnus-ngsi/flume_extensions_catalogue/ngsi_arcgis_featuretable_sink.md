@@ -5,8 +5,6 @@ Content:
     * [Mapping NGSI events to `NGSIEvent` objects](#section1.1)
     * [Mapping `NGSIEvent`s to Arcgis](#section1.2)
         * [ArcGis layers naming conventions](#section1.2.1)
-    * [Example](#section1.3)
-        * [`NGSIEvent`](#section1.3.1)
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Important notes](#section2.2)
@@ -34,8 +32,8 @@ This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks
 [Top](#top)
 
 ### <a name="section1.2"></a>Mapping `NGSIEvent`s to ArcGis
-ArcGis stores data in it's  own databases using it's own data organization, you can checkout this info Reading Feature Table details at Argis server, Such organization is exploited by `NGSIArcgisFeatureTableSink` each time a `NGSIEvent` is going to be persisted.
-Argis feature tables must be provisioned before sending entities.
+ArcGis stores data in it's  own databases using it's own data organization, you can checkout this info Reading Feature Table details at Arcgis server, Such organization is exploited by `NGSIArcgisFeatureTableSink` each time a `NGSIEvent` is going to be persisted.
+Arcgis feature tables must be provisioned before sending entities.
 
 [Top](#top)
 
@@ -159,48 +157,6 @@ The name mappings configuration would be:
 
 	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/cars
 	Table's unique field: licensePlate
-
-[Top](#top)
-
-### <a name="section1.3"></a>Example
-#### <a name="section1.3.1"></a>`NGSIEvent`
-Assuming the following `NGSIEvent` is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
-
-    ngsi-event={
-        headers={
-	         content-type=application/json,
-	         timestamp=1429535775,
-	         transactionId=1429535775-308-0000000000,
-	         correlationId=1429535775-308-0000000000,
-	         fiware-service=vehicles,
-	         fiware-servicepath=/4wheels,
-	         <name_mappings_interceptor_headers>
-        },
-        body={
-	        entityId=car1,
-	        entityType=Car,
-	        attributes=[
-	            {
-	                attrName=speed,
-	                attrType=float,
-	                attrValue=112.9
-	            },
-	            {
-	                attrName=oilLevel,
-	                attrType=float,
-	                attrValue=74.6
-	            }
-	        ]
-	    }
-    }
-
-Resultant service url:
-
-	https://arcgis.com/{hash}/arcgis/rest/services/vehicles/4wheels
-Feature table unique field:
-
-	Unique field name: Car
-	Unique field value: car1
 
 [Top](#top)
 
