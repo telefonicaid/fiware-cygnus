@@ -48,32 +48,29 @@ Unique field is provided to allow `NGSIArcgisFeatureTableSink` to update existan
 
 All this parameters, can be customized using Context Broker custom notifications (preferred) or Cygnus mapping capabilities (should be avoided except in justified cases).
 
+Assuming that the feature table's url: `https://arcgis.com/{hash}/arcgis/rest/services/vehicles/cars` and feature table definition is:
+```
+Fields:
+
+    objectid ( type: esriFieldTypeOID, alias: objectid, editable: false, nullable: false, defaultValue: null, modelName: objectid )
+    licensePlate ( type: esriFieldTypeString, alias: licensePlate, editable: true, nullable: true, length: 255, defaultValue: null, modelName: licensePlate )
+    speed ( type: esriFieldTypeDouble, alias: speed, editable: true, nullable: true, defaultValue: null, modelName: speed )
+    oillevel ( type: esriFieldTypeDouble, alias: oillevel, editable: true, nullable: true, defaultValue: null, modelName: oillevel )
+```
+
+Let's see both configuration options:
+
 ##### Using Context Broker custom notifications (preferred)
 
-If a service-path has different entity types, for example `car` and `van`, and they have to be persisted in different feature table, it cannot be done. To avoid the limitation of one "fiware-servicepath" can only persist in a unique feature table, [CB custom notifications](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#custom-notifications) can be used, so we can map a different value for `fiware-service` and `fiware-servicepath` headers parameters for each entity type.
+["CB custom notifications"](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#custom-notifications) is the preferred option because of its simplicity and not having to manage configuration (name-mappings) files in the server. 
 
-###### Entity data:
+###### Entity data in CB:
 
 	service = vehicles
 	service-path = /4wheels
-	entity-type = van
+	entity-type = Car
 
-For example, if the Feature table for "van" is `https://arcgis.com/{hash}/arcgis/rest/services/vehicles/van`,  the custom notif could be:
-```
-"httpCustom":{
-  "url": "http://iot-cygnus:<source_arcgis_port>/notify",
-  "headers": {
-    "fiware-service": "vehicles",
-    "fiware-servicepath": "/van"
-  }
-}
-```
-
-Using this functionality a different "fiware-servicepath" can be assigned to every entity type. 
-
-Note that the previous example is incomplete because does not change the type's value, so to avoid using the name mappings to modify the unique field value of `type` attribute, it is required the use of [ngsi patching functionality](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#ngsi-payload-patching).
-
-An example of the whole subscription:
+If the Feature table for type "Car" is `https://arcgis.com/{hash}/arcgis/rest/services/vehicles/cars`, the subscription with custom notif would be:
 
 ```
   {
@@ -83,7 +80,7 @@ An example of the whole subscription:
       "entities": [
         {
           "idPattern": ".*",
-          "type": "van"
+          "type": "Car"
         }
       ],
       "condition": {
@@ -103,21 +100,23 @@ An example of the whole subscription:
       "httpCustom": {
         "url": "http://iot-cygnus:<source_arcgis_port>/notify",
           "ngsi": {
-            "type": "car"
+            "type": "licensePlate"
           },
           "headers": {
             "fiware-service": "vehicles",
-            "fiware-servicepath": "/van"
+            "fiware-servicepath": "/cars"
           }
         }
     }
   }
 ```
 
+Note that to avoid using the name mappings to modify the unique field value of `type` attribute, it is required the use of [ngsi patching functionality](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#ngsi-payload-patching).
+
 ###### result
 
-	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/van
-	Table's unique field: car
+	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/car
+	Table's unique field: licensePlate
 
 [Top](#top)
 
@@ -132,11 +131,34 @@ Let's see an example:
 
 	service = vehicles
 	service-path = /4wheels
-	entity-type = car
+	entity-type = Car
+
+The name mappings configuration would be:
+
+```
+{
+  "serviceMappings": [{
+      "originalService": "vehicle",
+      "servicePathMappings": [{
+          "originalServicePath": "/4wheels",
+          "newServicePath": "/cars",
+          "entityMappings": [{
+              "originalEntityType": "Car",
+              "newEntityType": "licensePlate",
+              "originalEntityId": "^.*"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+ 
 ###### result
 
-	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/4wheels
-	Table's unique field: car
+	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/cars
+	Table's unique field: licensePlate
 
 [Top](#top)
 
@@ -156,7 +178,7 @@ Assuming the following `NGSIEvent` is created from a notified NGSI context data 
         },
         body={
 	        entityId=car1,
-	        entityType=car,
+	        entityType=Car,
 	        attributes=[
 	            {
 	                attrName=speed,
@@ -177,7 +199,7 @@ Resultant service url:
 	https://arcgis.com/{hash}/arcgis/rest/services/vehicles/4wheels
 Feature table unique field:
 
-	Unique field name: car
+	Unique field name: Car
 	Unique field value: car1
 
 [Top](#top)
@@ -219,7 +241,6 @@ A configuration example could be:
 
 ### <a name="section2.2"></a>Important notes
 
-
 #### <a name="section2.2.1"></a>About batching
 As explained in the [programmers guide](#section3), `NGSIArcgisFeatureTableSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
 
@@ -237,24 +258,24 @@ Connections to `cygnus-ngsi.sinks.arcgis-sink.arcgis_service_url` and `cygnus-ng
 
 #### <a name="section2.2.2"></a>About case-sensitivity
 
-**[FIXME #2320](https://github.com/telefonicaid/fiware-cygnus/issues/2320)**. Currently Arcgis sink is case sensitive with the attributes to persist in the Feature Table although arcgis is not case sensitive. This behaviour requires the use of name-mappings to match the case letters of the attribute definition in the Feature Table.
+**[FIXME #2320](https://github.com/telefonicaid/fiware-cygnus/issues/2320)**. Currently Arcgis sink is case sensitive with the attributes to persist in the Feature Table although arcgis is not case sensitive. This behaviour requires the use of name-mappings to match the case letters of the attribute's definition in the Feature Table.
 
-For instance, if we have the following Feature Layer definition for the "car" entity type:
+For instance, if we have the following Feature Layer definition for the "Car" entity type:
 ```
 Fields:
 
     objectid ( type: esriFieldTypeOID, alias: objectid, editable: false, nullable: false, defaultValue: null, modelName: objectid )
-    car ( type: esriFieldTypeString, alias: id, editable: true, nullable: true, length: 255, defaultValue: null, modelName: id )
+    licensePlate ( type: esriFieldTypeString, alias: licensePlate, editable: true, nullable: true, length: 255, defaultValue: null, modelName: licensePlate )
     speed ( type: esriFieldTypeDouble, alias: speed, editable: true, nullable: true, defaultValue: null, modelName: speed )
     oillevel ( type: esriFieldTypeDouble, alias: oillevel, editable: true, nullable: true, defaultValue: null, modelName: oillevel )
 ```
 
-And the model definition of the `car` is:
+And the model definition of the `Car` is:
 
 ```
 {
     "id": "car1",
-    "type": "car",
+    "type": "Car",
     "location": {
         "type": "geo:json",
         "value": {
@@ -283,10 +304,12 @@ The name mappings required to persist the attributes is:
   "serviceMappings": [{
       "originalService": "vehicle",
       "servicePathMappings": [{
-          "originalServicePath": "/car",
+          "originalServicePath": "/4wheels",
+          "newServicePath": "/cars",
           "entityMappings": [{
-              "originalEntityType": "car",
-              "originalEntityId": "^.*",
+              "originalEntityType": "Car",
+              "newEntityType": "licensePlate",
+              "originalEntityId": "^.*"
               "attributeMappings": [{
                   "originalAttributeName": "oilLevel",
                   "newAttributeName": "oillevel",
