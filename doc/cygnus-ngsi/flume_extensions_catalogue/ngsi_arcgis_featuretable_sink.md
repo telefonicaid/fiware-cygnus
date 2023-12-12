@@ -71,7 +71,7 @@ For example, if the Feature table for "van" is `https://arcgis.com/{hash}/arcgis
 
 Using this functionality a different "fiware-servicepath" can be assigned to every entity type. 
 
-Note that the previous example is incomplete because does not change the type`s value, so to avoid using the name mappings to modify the unique field value of `type` attribute, it is required the use of [ngsi patching functionality](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#ngsi-payload-patching).
+Note that the previous example is incomplete because does not change the type's value, so to avoid using the name mappings to modify the unique field value of `type` attribute, it is required the use of [ngsi patching functionality](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#ngsi-payload-patching).
 
 An example of the whole subscription:
 
