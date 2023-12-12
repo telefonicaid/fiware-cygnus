@@ -46,7 +46,7 @@ NGSIArcgisFeatureTableSink composes each table's url with entitie's `service` an
 
 Unique field is provided to allow `NGSIArcgisFeatureTableSink` to update existant entities. NGSI `entity type` will be used as unique field name. This means that a feature named `type` in the Feature Table cannot be filled in by the sink. If Feature Table needs to persist the value of entity type it has to be in a field different than `type`.
 
-All this parameters, can be customized using Cygnus mapping capabilities or Context Broker custom notifications.
+All this parameters, can be customized using Context Broker custom notifications (preferred) or Cygnus mapping capabilities (should be avoided except in justified cases).
 
 ##### Using Cygnus
 
