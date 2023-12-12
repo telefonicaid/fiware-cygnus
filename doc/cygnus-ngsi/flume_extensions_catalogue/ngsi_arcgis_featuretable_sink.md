@@ -53,7 +53,7 @@ Fields:
     objectid ( type: esriFieldTypeOID, alias: objectid, editable: false, nullable: false, defaultValue: null, modelName: objectid )
     licensePlate ( type: esriFieldTypeString, alias: licensePlate, editable: true, nullable: true, length: 255, defaultValue: null, modelName: licensePlate )
     speed ( type: esriFieldTypeDouble, alias: speed, editable: true, nullable: true, defaultValue: null, modelName: speed )
-    oillevel ( type: esriFieldTypeDouble, alias: oillevel, editable: true, nullable: true, defaultValue: null, modelName: oillevel )
+    oilLevel ( type: esriFieldTypeDouble, alias: oilLevel, editable: true, nullable: true, defaultValue: null, modelName: oilLevel )
 ```
 
 Let's see both configuration options:
@@ -217,7 +217,7 @@ Connections to `cygnus-ngsi.sinks.arcgis-sink.arcgis_service_url` and `cygnus-ng
 
 **[FIXME #2320](https://github.com/telefonicaid/fiware-cygnus/issues/2320)**. Currently Arcgis sink is case sensitive with the attributes to persist in the Feature Table although arcgis is not case sensitive. This behaviour requires the use of name-mappings to match the case letters of the attribute's definition in the Feature Table.
 
-For instance, if we have the following Feature Layer definition for the "Car" entity type:
+For instance, if we have the following feature table definition for the "Car" entity type:
 ```
 Fields:
 
@@ -226,6 +226,8 @@ Fields:
     speed ( type: esriFieldTypeDouble, alias: speed, editable: true, nullable: true, defaultValue: null, modelName: speed )
     oillevel ( type: esriFieldTypeDouble, alias: oillevel, editable: true, nullable: true, defaultValue: null, modelName: oillevel )
 ```
+
+Note that field `oillevel` is completely in lower case.
 
 And the model definition of the `Car` is:
 
@@ -253,6 +255,7 @@ And the model definition of the `Car` is:
     }
 }
 ```
+With attribute `oilLevel` in camelCase format.
 
 The name mappings required to persist the attributes is:
 
