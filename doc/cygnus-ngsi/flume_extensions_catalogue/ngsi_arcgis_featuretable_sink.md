@@ -115,7 +115,7 @@ Note that to avoid using the name mappings to modify the unique field value of `
 
 ###### result
 
-	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/car
+	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/cars
 	Table's unique field: licensePlate
 
 [Top](#top)
