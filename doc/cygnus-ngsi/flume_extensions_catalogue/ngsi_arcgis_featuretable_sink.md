@@ -48,26 +48,7 @@ Unique field is provided to allow `NGSIArcgisFeatureTableSink` to update existan
 
 All this parameters, can be customized using Context Broker custom notifications (preferred) or Cygnus mapping capabilities (should be avoided except in justified cases).
 
-##### Using Cygnus
-
-Let's see an example:	
-
-###### Agent.conf file:
-
-	agent.arcgis-sink.arcgis_service_url = https://arcgis.com/{hash}/arcgis/rest/services
-###### Entity data:
-
-	service = vehicles
-	service-path = /4wheels
-	entity-type = car
-###### result
-
-	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/4wheels
-	Table's unique field: car
-
-[Top](#top)
-
-##### Using Context Broker custom notifications
+##### Using Context Broker custom notifications (preferred)
 
 If a service-path has different entity types, for example `car` and `van`, and they have to be persisted in different feature table, it cannot be done. To avoid the limitation of one "fiware-servicepath" can only persist in a unique feature table, [CB custom notifications](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#custom-notifications) can be used, so we can map a different value for `fiware-service` and `fiware-servicepath` headers parameters for each entity type.
 
@@ -136,6 +117,25 @@ An example of the whole subscription:
 ###### result
 
 	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/van
+	Table's unique field: car
+
+[Top](#top)
+
+##### Using Cygnus name mappings
+
+Let's see an example:	
+
+###### Agent.conf file:
+
+	agent.arcgis-sink.arcgis_service_url = https://arcgis.com/{hash}/arcgis/rest/services
+###### Entity data:
+
+	service = vehicles
+	service-path = /4wheels
+	entity-type = car
+###### result
+
+	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/4wheels
 	Table's unique field: car
 
 [Top](#top)
