@@ -125,6 +125,7 @@ Let's see an example:
 ###### Agent.conf file:
 
 	agent.arcgis-sink.arcgis_service_url = https://arcgis.com/{hash}/arcgis/rest/services
+        agent.arcgis-sink.enable_name_mappings = true
 ###### Entity data:
 
 	service = vehicles
@@ -136,7 +137,7 @@ The name mappings configuration would be:
 ```
 {
   "serviceMappings": [{
-      "originalService": "vehicle",
+      "originalService": "vehicles",
       "servicePathMappings": [{
           "originalServicePath": "/4wheels",
           "newServicePath": "/cars",
@@ -258,7 +259,7 @@ The name mappings required to persist the attributes is:
 ```
 {
   "serviceMappings": [{
-      "originalService": "vehicle",
+      "originalService": "vehicles",
       "servicePathMappings": [{
           "originalServicePath": "/4wheels",
           "newServicePath": "/cars",
