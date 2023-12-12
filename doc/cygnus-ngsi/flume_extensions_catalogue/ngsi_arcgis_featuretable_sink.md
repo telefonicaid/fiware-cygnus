@@ -122,8 +122,6 @@ Note that to avoid using the name mappings to modify the unique field value of `
 
 ##### Using Cygnus name mappings
 
-Let's see an example:	
-
 ###### Agent.conf file:
 
 	agent.arcgis-sink.arcgis_service_url = https://arcgis.com/{hash}/arcgis/rest/services
