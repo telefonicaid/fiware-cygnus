@@ -56,6 +56,8 @@ Fields:
     oilLevel ( type: esriFieldTypeDouble, alias: oilLevel, editable: true, nullable: true, defaultValue: null, modelName: oilLevel )
 ```
 
+Where `licensePlate` is the unique field to store the entityId value from the Context Broker.
+
 Let's see both configuration options:
 
 ##### Using Context Broker custom notifications (preferred)
@@ -125,7 +127,7 @@ Let's see an example:
 ###### Agent.conf file:
 
 	agent.arcgis-sink.arcgis_service_url = https://arcgis.com/{hash}/arcgis/rest/services
-        agent.arcgis-sink.enable_name_mappings = true
+	agent.arcgis-sink.enable_name_mappings = true
 ###### Entity data:
 
 	service = vehicles
