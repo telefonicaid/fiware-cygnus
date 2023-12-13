@@ -5,12 +5,12 @@ Content:
     * [Mapping NGSI events to `NGSIEvent` objects](#section1.1)
     * [Mapping `NGSIEvent`s to Arcgis](#section1.2)
         * [ArcGis layers naming conventions](#section1.2.1)
-    * [Example](#section1.3)
-        * [`NGSIEvent`](#section1.3.1)
 * [Administration guide](#section2)
     * [Configuration](#section2.1)
     * [Important notes](#section2.2)
         * [About batching](#section2.2.1)
+        * [About case-sensitivity](#section2.2.2)
+        * [About Arcgis data types](#section2.2.3)
 * [Programmers guide](#section3)
     * [`NGSIArcgisFeatureTableSink` class](#section3.1)
     * [Authentication and authorization](#section3.2)
@@ -32,77 +32,132 @@ This is done at the cygnus-ngsi Http listeners (in Flume jergon, sources) thanks
 [Top](#top)
 
 ### <a name="section1.2"></a>Mapping `NGSIEvent`s to ArcGis
-ArcGis stores data in it's  own databases using it's own data organization, you can checkout this info Reading Feature Table details at Argis server, Such organization is exploited by `NGSIArcgisFeatureTableSink` each time a `NGSIEvent` is going to be persisted.
-Argis feature tables must be provisioned before sending entities.
+ArcGis stores data in it's  own databases using it's own data organization, you can checkout this info Reading Feature Table details at Arcgis server, Such organization is exploited by `NGSIArcgisFeatureTableSink` each time a `NGSIEvent` is going to be persisted.
+Arcgis feature tables must be provisioned before sending entities.
 
 [Top](#top)
 
 #### <a name="section1.2.1"></a>ArcGis databases naming conventions
 Each entity type needs an url and an unique field to be persisted into the feature table.
 
-NGSIArcgisFeatureTableSink composes each table's url with entitie's `service` and `service path`, to provide multiple tables access. 
+NGSIArcgisFeatureTableSink composes each table's url with entitie's `service` and `service path`, to provide multiple tables access. The final url is composed of `cygnus-ngsi.sinks.arcgis-sink.arcgis_service_url`+`fiware-service`+`fiware-servicepath`. 
 
-Unique field is provided to allow `NGSIArcgisFeatureTableSink` to update existant entities. NGSI `entity type` will be used as unique field name.
+Unique field is provided to allow `NGSIArcgisFeatureTableSink` to update existant entities. NGSI `entity type` will be used as unique field name. This means that a feature named `type` in the Feature Table cannot be filled in by the sink. If Feature Table needs to persist the value of entity type it has to be in a field different than `type`.
 
-All this parameters, can be customized using Cygnus mapping capabilities.
+All this parameters, can be customized using Context Broker custom notifications (preferred) or Cygnus mapping capabilities.
 
-Let's see an example:	
+Assuming that the feature table's url: `https://arcgis.com/{hash}/arcgis/rest/services/vehicles/cars` and feature table definition is:
+```
+Fields:
 
-##### Agent.conf file:
+    objectid ( type: esriFieldTypeOID, alias: objectid, editable: false, nullable: false, defaultValue: null, modelName: objectid )
+    licensePlate ( type: esriFieldTypeString, alias: licensePlate, editable: true, nullable: true, length: 255, defaultValue: null, modelName: licensePlate )
+    speed ( type: esriFieldTypeDouble, alias: speed, editable: true, nullable: true, defaultValue: null, modelName: speed )
+    oilLevel ( type: esriFieldTypeDouble, alias: oilLevel, editable: true, nullable: true, defaultValue: null, modelName: oilLevel )
+```
 
-	agent.arcgis-sink.arcgis_service_url = https://arcgis.com/{hash}/arcgis/rest/services
-##### Entity data:
+Where `licensePlate` is the unique field to store the entityId value from the Context Broker.
+
+Let's see both configuration options:
+
+##### Using Context Broker custom notifications (preferred)
+
+[CB custom notifications](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#custom-notifications) is the preferred option because of its simplicity and not having to manage configuration (name-mappings) files in the server. 
+
+###### Entity data in CB:
 
 	service = vehicles
 	service-path = /4wheels
-	entity-type = car
-##### result
+	entity-type = Car
 
-	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/4wheels
-	Table's unique field: car
+If the Feature table for type "Car" is `https://arcgis.com/{hash}/arcgis/rest/services/vehicles/cars`, the subscription with custom notif would be:
+
+```
+  {
+    "description": "Subs arcgis",
+    "status": "active",
+    "subject": {
+      "entities": [
+        {
+          "idPattern": ".*",
+          "type": "Car"
+        }
+      ],
+      "condition": {
+        "attrs": [
+          "speed",
+          "oilLevel"
+        ]
+      }
+    },
+    "notification": {
+      "attrs": [
+        "speed",
+        "oilLevel"
+      ],
+      "onlyChangedAttrs": false,
+      "attrsFormat": "normalized",
+      "httpCustom": {
+        "url": "http://iot-cygnus:<source_arcgis_port>/notify",
+          "ngsi": {
+            "type": "licensePlate"
+          },
+          "headers": {
+            "fiware-service": "vehicles",
+            "fiware-servicepath": "/cars"
+          }
+        }
+    }
+  }
+```
+
+Note that to avoid using the name mappings to modify the unique field value of `type` attribute, it is required the use of [ngsi patching functionality](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#ngsi-payload-patching).
+
+###### result
+
+	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/cars
+	Table's unique field: licensePlate
 
 [Top](#top)
 
+##### Using Cygnus name mappings
 
-### <a name="section1.3"></a>Example
-#### <a name="section1.3.1"></a>`NGSIEvent`
-Assuming the following `NGSIEvent` is created from a notified NGSI context data (the code below is an <i>object representation</i>, not any real data format):
+###### Agent.conf file:
 
-    ngsi-event={
-        headers={
-	         content-type=application/json,
-	         timestamp=1429535775,
-	         transactionId=1429535775-308-0000000000,
-	         correlationId=1429535775-308-0000000000,
-	         fiware-service=vehicles,
-	         fiware-servicepath=/4wheels,
-	         <name_mappings_interceptor_headers>
-        },
-        body={
-	        entityId=car1,
-	        entityType=car,
-	        attributes=[
-	            {
-	                attrName=speed,
-	                attrType=float,
-	                attrValue=112.9
-	            },
-	            {
-	                attrName=oil_level,
-	                attrType=float,
-	                attrValue=74.6
-	            }
-	        ]
-	    }
+	agent.arcgis-sink.arcgis_service_url = https://arcgis.com/{hash}/arcgis/rest/services
+	agent.arcgis-sink.enable_name_mappings = true
+###### Entity data:
+
+	service = vehicles
+	service-path = /4wheels
+	entity-type = Car
+
+The name mappings configuration would be:
+
+```
+{
+  "serviceMappings": [{
+      "originalService": "vehicles",
+      "servicePathMappings": [{
+          "originalServicePath": "/4wheels",
+          "newServicePath": "/cars",
+          "entityMappings": [{
+              "originalEntityType": "Car",
+              "newEntityType": "licensePlate",
+              "originalEntityId": "^.*"
+            }
+          ]
+        }
+      ]
     }
+  ]
+}
+```
+ 
+###### result
 
-Resultant service url:
-
-	https://arcgis.com/{hash}/arcgis/rest/services/vehicles/4wheels
-Feature table unique field:
-
-	Unique field name: car
-	Unique field value: car1
+	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/cars
+	Table's unique field: licensePlate
 
 [Top](#top)
 
@@ -133,7 +188,6 @@ A configuration example could be:
     cygnus-ngsi.sinks.arcgis-sink.type = com.telefonica.iot.cygnus.sinks.NGSIArcgisFeatureTableSink
     cygnus-ngsi.sinks.arcgis-sink.channel = arcgis-channel
     cygnus-ngsi.sinks.arcgis-sink.enable_name_mappings = true
-    cygnus-ngsi.sinks.arcgis-sink.enable_name_mappings = false
     cygnus-ngsi.sinks.arcgis-sink.arcgis_service_url = https://arcgis.com/UsuarioArcgis/arcgis/rest/services
     cygnus-ngsi.sinks.arcgis-sink.arcgis_username = myuser
     cygnus-ngsi.sinks.arcgis-sink.arcgis_password = mypassword
@@ -143,7 +197,6 @@ A configuration example could be:
 [Top](#top)
 
 ### <a name="section2.2"></a>Important notes
-
 
 #### <a name="section2.2.1"></a>About batching
 As explained in the [programmers guide](#section3), `NGSIArcgisFeatureTableSink` extends `NGSISink`, which provides a built-in mechanism for collecting events from the internal Flume channel. This mechanism allows extending classes have only to deal with the persistence details of such a batch of events in the final backend.
@@ -160,6 +213,91 @@ Connections to `cygnus-ngsi.sinks.arcgis-sink.arcgis_service_url` and `cygnus-ng
 
 [Top](#top)
 
+#### <a name="section2.2.2"></a>About case-sensitivity
+
+**[FIXME #2320](https://github.com/telefonicaid/fiware-cygnus/issues/2320)**. Currently Arcgis sink is case sensitive with the attributes to persist in the Feature Table although arcgis is not case sensitive. This behaviour requires the use of name-mappings to match the case letters of the attribute's definition in the Feature Table.
+
+For instance, if we have the following feature table definition for the "Car" entity type:
+```
+Fields:
+
+    objectid ( type: esriFieldTypeOID, alias: objectid, editable: false, nullable: false, defaultValue: null, modelName: objectid )
+    licensePlate ( type: esriFieldTypeString, alias: licensePlate, editable: true, nullable: true, length: 255, defaultValue: null, modelName: licensePlate )
+    speed ( type: esriFieldTypeDouble, alias: speed, editable: true, nullable: true, defaultValue: null, modelName: speed )
+    oillevel ( type: esriFieldTypeDouble, alias: oillevel, editable: true, nullable: true, defaultValue: null, modelName: oillevel )
+```
+
+Note that field `oillevel` is completely in lower case.
+
+And the model definition of the `Car` is:
+
+```
+{
+    "id": "car1",
+    "type": "Car",
+    "location": {
+        "type": "geo:json",
+        "value": {
+            "coordinates": [
+                -0.350062,
+                40.054448
+            ],
+            "type": "Point"
+        }
+    },
+    "speed": {
+        "type": "Number",
+        "value": 112.9
+    },
+    "oilLevel": {
+        "type": "Number",
+        "value": 74.6
+    }
+}
+```
+With attribute `oilLevel` in camelCase format.
+
+The name mappings required to persist the attributes is:
+
+```
+{
+  "serviceMappings": [{
+      "originalService": "vehicles",
+      "servicePathMappings": [{
+          "originalServicePath": "/4wheels",
+          "newServicePath": "/cars",
+          "entityMappings": [{
+              "originalEntityType": "Car",
+              "newEntityType": "licensePlate",
+              "originalEntityId": "^.*"
+              "attributeMappings": [{
+                  "originalAttributeName": "oilLevel",
+                  "newAttributeName": "oillevel",
+                  "originalAttributeType": "^.*"
+                },
+                ...
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+Note that `speed` attribute is not required in the name mappings file as it match, including case-sensitivity, with the field in the Feature Layer.
+
+[Top](#top)
+
+#### <a name="section2.2.3"></a>About Arcgis data types
+
+- **esriFieldTypeDate**
+
+From https://doc.arcgis.com/en/data-pipelines/latest/process/output-feature-layer.htm
+> ... Date fields are stored in feature layers using the format milliseconds from epoch and the coordinated universal time (UTC) time zone. The values will be displayed differently depending on where you are viewing the data. For example, querying the feature service REST end point will return values in milliseconds from epoch, such as 1667411518878....
+
+So, to persist a `esriFieldTypeDate` field in the Feature Layer, cygnus has to receive an attribute "Number" from the CB with the milliseconds from epoch.
 
 ## <a name="section3"></a>Programmers guide
 ### <a name="section3.1"></a>`NGSIArcgisFeatureTableSink` class
