@@ -62,7 +62,7 @@ Let's see both configuration options:
 
 ##### Using Context Broker custom notifications (preferred)
 
-["CB custom notifications"](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#custom-notifications) is the preferred option because of its simplicity and not having to manage configuration (name-mappings) files in the server. 
+[CB custom notifications](https://github.com/telefonicaid/fiware-orion/blob/master/doc/manuals/orion-api.md#custom-notifications) is the preferred option because of its simplicity and not having to manage configuration (name-mappings) files in the server. 
 
 ###### Entity data in CB:
 
