@@ -1,2 +1,3 @@
+- [cygnus-common] Upgrade Debian version from 12.1 to 12.4 in Dockerfile
 - [cygnus-common][NGSIGenericColumnAggregator] Fix getValue when gson object is null
 
