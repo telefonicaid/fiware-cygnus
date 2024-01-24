@@ -371,7 +371,7 @@ public class RestApi  {
                 checkHttpResponse(response.getBody());
                 isSuccessful = true;
             } catch (ArcgisException e) {
-                LOGGER.debug("Response has erros, " + e);
+                LOGGER.debug("Response has erros, " + e.toString());
                 response.setError(e);
             }
         } else {
@@ -401,7 +401,7 @@ public class RestApi  {
                 result = httpResponse.get(DELETE_RESULTS_RESPONSE_TAG);
             }
         } catch (Exception e) {
-            LOGGER.error(e);
+            LOGGER.error(e.getMessage());
             throw new ArcgisException(e);
         }
 
