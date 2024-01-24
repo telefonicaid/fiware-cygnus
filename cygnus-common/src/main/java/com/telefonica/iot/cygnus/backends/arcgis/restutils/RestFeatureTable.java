@@ -420,8 +420,10 @@ public class RestFeatureTable extends CredentialRestApi {
             }
 
         } catch (ArcgisException e) {
+            LOGGER.error(e.toString());
             throw e;
         } catch (Exception e) {
+            LOGGER.error("getTableAttributesInfo, Unexpected Exception " + e.toString());
             throw new ArcgisException(
                     "getTableAttributesInfo, Unexpected Exception " + e.toString());
         }
@@ -450,6 +452,7 @@ public class RestFeatureTable extends CredentialRestApi {
                 LOGGER.info("WARN: Feature table has not uniqueIdField");
             }
         } catch (Exception e) {
+            LOGGER.error("Error getting uniqueIdField, " + e.getLocalizedMessage());
             throw new ArcgisException("Error getting uniqueIdField, " + e.getLocalizedMessage());
         }
     }
@@ -473,8 +476,8 @@ public class RestFeatureTable extends CredentialRestApi {
                 this.tableAttributes.put(field.getName(), field);
             }
         } catch (Exception e) {
-            LOGGER.error("Can't cast Attributes from Json " + jsonStr);
-            throw new ArcgisException("Can't cast attributes from Json, " + jsonStr);
+            LOGGER.error("Can't cast Attributes from Json " + jsonStr + " due to " + e.getMessage());
+            throw new ArcgisException("Can't cast attributes from Json, " + jsonStr + "due to " + e.getMessage());
         }
     }
 
@@ -504,7 +507,8 @@ public class RestFeatureTable extends CredentialRestApi {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Error setting unique attributes");
+            LOGGER.error("Error setting unique attributes: "
+                         + e.getClass().getSimpleName() + "  " + e.getMessage());
             throw new ArcgisException("Error setting unique attributes, "
                     + e.getClass().getSimpleName() + "  " + e.getMessage());
         }
@@ -591,6 +595,7 @@ public class RestFeatureTable extends CredentialRestApi {
             if (json.get(ERROR_TAG) != null) {
                 errorDesc = json.get(ERROR_TAG).toString();
             }
+            LOGGER.error(errorDesc);
             throw new ArcgisException(errorDesc);
         }
 
