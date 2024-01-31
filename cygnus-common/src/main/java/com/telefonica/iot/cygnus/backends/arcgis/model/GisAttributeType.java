@@ -61,7 +61,7 @@ public enum GisAttributeType {
             case "Integer":
             case "SmallInteger":
                 return GisAttributeType.INTEGER;
-            case "Number":
+            case "Single":
             case "Double":
                 return GisAttributeType.NUMBER;
             case "Boolean":
