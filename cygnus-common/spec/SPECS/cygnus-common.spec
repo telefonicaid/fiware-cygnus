@@ -172,6 +172,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Thu Feb 1 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.4.0
+- [cygnus-common] [Arcgis] include error in log about cast attributes json
+- [cygnus-common] Upgrade Debian version from 12.1 to 12.4 in Dockerfile
+- [cygnus-common] [NGSIGenericColumnAggregator] Fix getValue when gson object is null
+- [cygnus-common] [Arcgis] Replace esriFieldTypeNumber by esriFieldTypeSingle (#2334)
+
 * Thu Nov 16 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.3.0
 - [cygnus-common] [MongoDB] fix error about reindex when datamodel changed
 - [cygnus-common] [Arcgis] check featureId ignore case (#2320)
