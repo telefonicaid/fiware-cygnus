@@ -99,6 +99,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Thu Feb 1 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.4.0
+
 * Thu Nov 16 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.3.0
 - [cygnus-ngsi][cygnus-common] upgrade mockito dep from 1.9.5 to 5.5.0
 - [cygnus-ngsi] Fix runtime error: check access aggregator size (#2293)
