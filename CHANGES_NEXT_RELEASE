@@ -1,1 +1,1 @@
-- [cygnus-common] [Arcgis] Convert EsriFieldTypeDate (milliseconds from epoch) to a NGSI DateTime (#2339)
+- [cygnus-ngsi] [Arcgis] Convert EsriFieldTypeDate (milliseconds from epoch) to a NGSI DateTime (#2339)
