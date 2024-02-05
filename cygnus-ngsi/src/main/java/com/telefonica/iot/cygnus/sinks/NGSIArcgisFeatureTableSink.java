@@ -683,7 +683,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
             Long epoch = Long.parseLong(millisFromEpocStr);
             Date date = new Date(epoch);
             return date;
-        } catch (ParseException e) {
+        } catch (NumberFormatException e) {
             LOGGER.error("[NGSIArcgisAggregator] Unexpected DateTime format: " + millisFromEpocStr);
             return millisFromEpocStr;
         }
