@@ -69,6 +69,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     private static final String NGSI_DATETIME_DATATYPE = "datetime";
     private static final String NGSI_BOOLEAN_DATATYPE = "boolean";
     private static final String NGSI_GEO_JSON_DATATYPE = "geo:json";
+    private static final String ESRIFIELDTYPEDATE = "esrifieldtypedate";
     
     private static final String DEFAULT_ARCGIS_SERVICE_URL = "localhost";
     private static final String DEFAULT_GETTOKEN_URL = "localhost";
@@ -512,7 +513,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 
                 String entityId = contextElement.getId();
                 String entityType = contextElement.getType();
-
+                LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type=" + entityType + ")");
                 // Set unique filed and it's value.
                 aggregation.setUniqueField(entityType);
                 feature.addAttribute(entityType, entityId);
@@ -616,7 +617,10 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                 String dateStr = attrValue.toString();
                 feature.addAttribute(attrName, parseFiwareDate(dateStr));
                 break;
-
+            case ESRIFIELDTYPEDATE:
+                String millisFromEpocStr = attrValue.toString();
+                feature.addAttribute(attrName, parseEsriFieldTypeDate(millisFromEpocStr));
+                break;
             default:
                 // Verify if it is a string (it is into quotation marks)
                 if (isQuoted(attrValue.toString())) {
@@ -666,6 +670,25 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
             return dateStr;
         }
     }
+
+    /**
+     * Try to convert EsriFieldTypeDate (milliseconds from Epoch) to Date object, If it can't, input string will be returned.
+     *
+     * @param millisFromEpocStr
+     * @return Date Object, or String.
+     */
+    private Object parseEsriFieldTypeDate(String millisFromEpocStr) {
+
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        try {
+            Date date = dateFormatter.parse(Long.parseLong(millisFromEpocStr));
+            return date;
+        } catch (ParseException e) {
+            LOGGER.error("[NGSIArcgisAggregator] Unexpected DateTime format: " + millisFromEpocStr);
+            return millisFromEpocStr;
+        }
+    }
+
 
     /**
      * Determines if input string is quoted or not.
