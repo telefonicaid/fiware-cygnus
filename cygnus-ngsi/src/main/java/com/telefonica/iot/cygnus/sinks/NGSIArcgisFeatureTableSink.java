@@ -513,7 +513,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 
                 String entityId = contextElement.getId();
                 String entityType = contextElement.getType();
-                LOGGER.debug("[" + this.getName() + "] Processing context element (id=" + entityId + ", type=" + entityType + ")");
+                LOGGER.debug("[NGSIArcgisAggregator]  aggregate - Processing context element (id=" + entityId + ", type=" + entityType + ")");
                 // Set unique filed and it's value.
                 aggregation.setUniqueField(entityType);
                 feature.addAttribute(entityType, entityId);
