@@ -256,7 +256,7 @@ ENV FLUME_HOME "/opt/apache-flume"
 ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
 ENV FLUME_URL "https://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 
-ENV JAVA_VERSION "1.11.0"
+ENV JAVA_VERSION "1.17.0"
 
 COPY / ${CYGNUS_HOME}
 
