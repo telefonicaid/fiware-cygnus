@@ -679,9 +679,9 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
      */
     private Object parseEsriFieldTypeDate(String millisFromEpocStr) {
 
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         try {
-            Date date = dateFormatter.parse(Long.parseLong(millisFromEpocStr));
+            Long epoch = Long.parseLong(millisFromEpocStr);
+            Date date = new Date(epoch);
             return date;
         } catch (ParseException e) {
             LOGGER.error("[NGSIArcgisAggregator] Unexpected DateTime format: " + millisFromEpocStr);
