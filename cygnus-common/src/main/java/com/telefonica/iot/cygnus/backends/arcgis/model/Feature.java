@@ -202,8 +202,9 @@ public class Feature {
                     jsonObj.addProperty(name, (Boolean) property);
                     break;
                 case DATE_CLASSNAME:
-                    simpleDateFormat = new SimpleDateFormat(DATE_PATTERN);
-                    jsonObj.addProperty(name, simpleDateFormat.format((Date) property));
+                    // All NGSI DateTime are translated to Millis from Epoch (esriFieldTypeDate)
+                    Date date = (Date) property;
+                    jsonObj.addProperty(name, date.getTime());
                     break;
                 case GREGORIAN_CALENDAR_CLASSNAME:
                     simpleDateFormat = new SimpleDateFormat(DATE_PATTERN);
