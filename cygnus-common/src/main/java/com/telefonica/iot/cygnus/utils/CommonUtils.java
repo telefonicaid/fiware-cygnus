@@ -423,11 +423,7 @@ public final class CommonUtils {
         // trace the file containing the gson library
         myClassURL = JsonPrimitive.class.getProtectionDomain().getCodeSource().getLocation();
         LOGGER.debug("Loading gson from " + myClassURL.toExternalForm());
-        
-        // trace the file containing the json-simple library
-        myClassURL = Yytoken.class.getProtectionDomain().getCodeSource().getLocation();
-        LOGGER.debug("Loading json-simple from " + myClassURL.toExternalForm());
-        
+      
         // trace the file containing the mysql-connector-java library
         myClassURL = Driver.class.getProtectionDomain().getCodeSource().getLocation();
         LOGGER.debug("Loading mysql-connector-java from " + myClassURL.toExternalForm());
