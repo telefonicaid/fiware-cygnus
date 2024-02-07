@@ -31,6 +31,13 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.flume.Context;
+import org.apache.flume.Event;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
