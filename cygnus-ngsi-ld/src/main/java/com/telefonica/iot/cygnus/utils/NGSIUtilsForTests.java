@@ -18,11 +18,13 @@
 package com.telefonica.iot.cygnus.utils;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.telefonica.iot.cygnus.containers.NameMappings;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequestLD;
 import java.util.HashMap;
-
+import java.util.regex.Pattern;
 import com.telefonica.iot.cygnus.interceptors.NGSILDEvent;
+import com.telefonica.iot.cygnus.management.PatternTypeAdapter;
 import org.apache.flume.Context;
 import org.json.JSONObject;
 
@@ -98,7 +100,9 @@ public final class NGSIUtilsForTests {
     } // createContextForOrion
 
     public static NotifyContextRequestLD createJsonNotifyContextRequestLD(String jsonStr) throws Exception {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+            .create();
         return gson.fromJson(jsonStr, NotifyContextRequestLD.class);
     } // createJsonNotifyContextRequest
 
@@ -132,7 +136,9 @@ public final class NGSIUtilsForTests {
      * @throws java.lang.Exception
      */
     public static NameMappings createJsonNameMappings(String jsonStr) throws Exception {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+            .create();
         return gson.fromJson(jsonStr, NameMappings.class);
     } // createJsonNameMappings
 
