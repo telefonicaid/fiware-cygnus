@@ -51,7 +51,7 @@ import org.junit.Assert;
  *
  * @author frb
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class NGSIRestHandlerTest {
     
     // Mocks
