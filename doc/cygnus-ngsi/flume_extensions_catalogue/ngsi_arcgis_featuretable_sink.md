@@ -66,9 +66,9 @@ Let's see both configuration options:
 
 ###### Entity data in CB:
 
-	service = vehicles
-	service-path = /4wheels
-	entity-type = Car
+    service = vehicles
+    service-path = /4wheels
+    entity-type = Car
 
 If the Feature table for type "Car" is `https://arcgis.com/{hash}/arcgis/rest/services/vehicles/cars`, the subscription with custom notif would be:
 
@@ -115,8 +115,8 @@ Note that to avoid using the name mappings to modify the unique field value of `
 
 ###### result
 
-	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/cars
-	Table's unique field: licensePlate
+    Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/cars
+    Table's unique field: licensePlate
 
 [Top](#top)
 
@@ -124,13 +124,13 @@ Note that to avoid using the name mappings to modify the unique field value of `
 
 ###### Agent.conf file:
 
-	agent.arcgis-sink.arcgis_service_url = https://arcgis.com/{hash}/arcgis/rest/services
-	agent.arcgis-sink.enable_name_mappings = true
+    agent.arcgis-sink.arcgis_service_url = https://arcgis.com/{hash}/arcgis/rest/services
+    agent.arcgis-sink.enable_name_mappings = true
 ###### Entity data:
 
-	service = vehicles
-	service-path = /4wheels
-	entity-type = Car
+    service = vehicles
+    service-path = /4wheels
+    entity-type = Car
 
 The name mappings configuration would be:
 
@@ -156,8 +156,8 @@ The name mappings configuration would be:
  
 ###### result
 
-	Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/cars
-	Table's unique field: licensePlate
+    Feature table url: https://arcgis.com/{hash}/arcgis/rest/services/vehicles/cars
+    Table's unique field: licensePlate
 
 [Top](#top)
 
@@ -297,7 +297,7 @@ Note that `speed` attribute is not required in the name mappings file as it matc
 From https://doc.arcgis.com/en/data-pipelines/latest/process/output-feature-layer.htm
 > ... Date fields are stored in feature layers using the format milliseconds from epoch and the coordinated universal time (UTC) time zone. The values will be displayed differently depending on where you are viewing the data. For example, querying the feature service REST end point will return values in milliseconds from epoch, such as 1667411518878....
 
-So, to persist a `esriFieldTypeDate` field in the Feature Layer, cygnus has to receive an attribute "Number" from the CB with the milliseconds from epoch.
+So, all NGSI DateTime are persisted like a `esriFieldTypeDate` field in the Feature Layer, because arcgis sink transform NGSI DateTime into the milliseconds from epoch.
 
 ## <a name="section3"></a>Programmers guide
 ### <a name="section3.1"></a>`NGSIArcgisFeatureTableSink` class
