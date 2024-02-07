@@ -28,13 +28,16 @@ import java.io.File;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.telefonica.iot.cygnus.management.PatternTypeAdapter;
+import java.util.regex.Pattern;
+import com.google.gson.GsonBuilder;
 
 /**
  *
  * @author frb
  */
 public final class NameMappingsHandlers {
-    
+
     private static final CygnusLogger LOGGER = new CygnusLogger(NameMappingsHandlers.class);
     
     /**
@@ -69,7 +72,9 @@ public final class NameMappingsHandlers {
         } // if
 
         // Parse the Json string
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+            .create();
 
         try {
             nameMappings = gson.fromJson(jsonStr, NameMappings.class);

@@ -19,6 +19,7 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextAttribute;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -45,9 +46,11 @@ import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYFIXEDENTITYTYP
 import java.util.Map;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.management.PatternTypeAdapter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.regex.Pattern;
 import org.apache.flume.Channel;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
@@ -537,7 +540,9 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 } else {
                     // Event comes from file... original and mapped context elements must be re-created
                     String[] contextElementsStr = (new String(event.getBody())).split(CommonConstants.CONCATENATOR);
-                    Gson gson = new Gson();
+                    Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+                        .create();
                     ContextElement originalCE = null;
                     ContextElement mappedCE = null;
                 

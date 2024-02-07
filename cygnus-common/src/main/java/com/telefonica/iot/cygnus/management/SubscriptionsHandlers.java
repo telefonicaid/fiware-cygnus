@@ -18,6 +18,7 @@
 package com.telefonica.iot.cygnus.management;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.telefonica.iot.cygnus.backends.http.JsonResponse;
 import com.telefonica.iot.cygnus.backends.orion.OrionBackendImpl;
@@ -26,8 +27,10 @@ import com.telefonica.iot.cygnus.containers.CygnusSubscriptionV2;
 import com.telefonica.iot.cygnus.containers.OrionEndpoint;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
+import com.telefonica.iot.cygnus.management.PatternTypeAdapter;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.simple.JSONObject;
@@ -117,7 +120,9 @@ public final class SubscriptionsHandlers {
 
         // Get the endpoint string and parse it
         String endpointStr = readPayload(request);
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+                        .create();
         OrionEndpoint endpoint;
         
         try {
@@ -276,7 +281,9 @@ public final class SubscriptionsHandlers {
     private static void postV1(String payload, String fiwareService, String fiwareServicePath,
             HttpServletResponse response) throws IOException {
         // Parse the payload
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+            .create();
         CygnusSubscriptionV1 cygnusSubscriptionv1;
 
         try {
@@ -341,7 +348,9 @@ public final class SubscriptionsHandlers {
     private static void postV2(String payload, String fiwareService, String fiwareServicePath,
             HttpServletResponse response) throws IOException {
         // Parse the payload
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+                        .create();
         CygnusSubscriptionV2 cygnusSubscriptionv2;
 
         try {

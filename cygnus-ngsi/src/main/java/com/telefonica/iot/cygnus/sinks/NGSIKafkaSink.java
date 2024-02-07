@@ -18,6 +18,7 @@
 package com.telefonica.iot.cygnus.sinks;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.telefonica.iot.cygnus.backends.kafka.KafkaBackendImpl;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest.ContextElement;
 import com.telefonica.iot.cygnus.errors.CygnusBadConfiguration;
@@ -29,7 +30,9 @@ import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.NGSICharsets;
+import com.telefonica.iot.cygnus.management.PatternTypeAdapter;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.flume.Context;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -325,7 +328,9 @@ public class NGSIKafkaSink extends NGSISink {
         String message = "{\"headers\":[{\"fiware-service\":\"" + fiwareService + "\"},"
                 + "{\"fiware-servicePath\":\"" + fiwareServicePath + "\"},"
                 + "{\"timestamp\":" + recvTimeTs + "}" + "],\"body\":";
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+            .create();
         String contextElementResponseStr = gson.toJson(contextElement);
         message += contextElementResponseStr + "}";
         return message;

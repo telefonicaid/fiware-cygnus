@@ -35,8 +35,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
+import java.util.regex.Pattern;
 import com.telefonica.iot.cygnus.utils.NotifyContextRequestNGSIv2Deserializer;
+import com.telefonica.iot.cygnus.management.PatternTypeAdapter;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
 import org.apache.flume.source.http.HTTPBadRequestException;
@@ -329,7 +330,9 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         // Parse the original data into a NotifyContextRequest object
         NotifyContextRequest ncr = null;
         NotifyContextRequestNGSIv2 notifyContextRequestNGSIv2 = null;
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+            .create();
 
         try {
             if (ngsiVersion != null) {
