@@ -25,6 +25,9 @@ import com.google.gson.Gson;
 import com.telefonica.iot.cygnus.containers.NameMappings;
 import com.telefonica.iot.cygnus.containers.NotifyContextRequest;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
+import com.telefonica.iot.cygnus.management.PatternTypeAdapter;
+import java.util.regex.Pattern;
+import com.google.gson.GsonBuilder;
 
 /**
  *
@@ -122,7 +125,10 @@ public final class NGSIUtilsForTests {
      * @throws java.lang.Exception
      */
     public static NotifyContextRequest createJsonNotifyContextRequest(String jsonStr) throws Exception {
-        Gson gson = new Gson();
+        // Parse the Json string
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+            .create();
         return gson.fromJson(jsonStr, NotifyContextRequest.class);
     } // createJsonNotifyContextRequest
 
@@ -133,7 +139,9 @@ public final class NGSIUtilsForTests {
      * @throws java.lang.Exception
      */
     public static NotifyContextRequest.StatusCode createJsonStatusCode(String jsonStr) throws Exception {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+            .create();
         return gson.fromJson(jsonStr, NotifyContextRequest.StatusCode.class);
     } // createJsonStatusCode
 
@@ -166,7 +174,9 @@ public final class NGSIUtilsForTests {
      * @throws java.lang.Exception
      */
     public static NameMappings createJsonNameMappings(String jsonStr) throws Exception {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+            .create();
         return gson.fromJson(jsonStr, NameMappings.class);
     } // createJsonNameMappings
 
@@ -193,7 +203,9 @@ public final class NGSIUtilsForTests {
      * @throws java.lang.Exception
      */
     public static NotifyContextRequest.ContextElement createJsonContextElement(String jsonStr) throws Exception {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+            .create();
         return gson.fromJson(jsonStr, NotifyContextRequest.ContextElement.class);
     } // createJsonContextElement
 

@@ -256,7 +256,7 @@ ENV FLUME_HOME "/opt/apache-flume"
 ENV FLUME_TGZ "apache-flume-${FLUME_VER}-bin.tar.gz"
 ENV FLUME_URL "https://archive.apache.org/dist/flume/${FLUME_VER}/${FLUME_TGZ}"
 
-ENV JAVA_VERSION "1.11.0"
+ENV JAVA_VERSION "1.17.0"
 
 COPY / ${CYGNUS_HOME}
 
@@ -269,14 +269,8 @@ RUN \
     apt-get -y update && \
     apt-get -y upgrade && \
     # Install dependencies
-    # Debian 12 comes with Java 17 but we have found some problems with it (see https://github.com/telefonicaid/fiware-cygnus/issues/2297)
-    # so we "downgrade" to Java 11
     apt-get -y install curl git python3 && \
-    curl -s --insecure -L 'http://security.debian.org/debian-security/pool/updates/main/o/openjdk-11/openjdk-11-jdk_11.0.22+7-1~deb11u1_amd64.deb' > openjdk-11-jdk_11.0.22+7-1~deb11u1_amd64.deb && \
-    curl -s --insecure -L 'http://security.debian.org/debian-security/pool/updates/main/o/openjdk-11/openjdk-11-jre_11.0.22+7-1~deb11u1_amd64.deb' > openjdk-11-jre_11.0.22+7-1~deb11u1_amd64.deb && \
-    curl -s --insecure -L 'http://security.debian.org/debian-security/pool/updates/main/o/openjdk-11/openjdk-11-jdk-headless_11.0.22+7-1~deb11u1_amd64.deb' > openjdk-11-jdk-headless_11.0.22+7-1~deb11u1_amd64.deb && \
-    curl -s --insecure -L 'http://security.debian.org/debian-security/pool/updates/main/o/openjdk-11/openjdk-11-jre-headless_11.0.22+7-1~deb11u1_amd64.deb' > openjdk-11-jre-headless_11.0.22+7-1~deb11u1_amd64.deb && \
-    apt-get -y install  ./openjdk-11-jre-headless_11.0.22+7-1~deb11u1_amd64.deb ./openjdk-11-jre_11.0.22+7-1~deb11u1_amd64.deb ./openjdk-11-jdk-headless_11.0.22+7-1~deb11u1_amd64.deb ./openjdk-11-jdk_11.0.22+7-1~deb11u1_amd64.deb && \
+    apt-get -y install openjdk-17-jdk openjdk-17-jdk-headless openjdk-17-jre openjdk-17-jre-headless && \
     apt-get -y install maven && \
     # Add Cygnus user
     adduser ${CYGNUS_USER} && \

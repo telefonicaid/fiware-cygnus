@@ -19,6 +19,7 @@
 package com.telefonica.iot.cygnus.handlers;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -27,7 +28,9 @@ import com.telefonica.iot.cygnus.interceptors.NGSILDEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.CommonUtils;
+import com.telefonica.iot.cygnus.management.PatternTypeAdapter;
 import java.io.BufferedReader;
+import java.util.regex.Pattern;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -271,7 +274,9 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
         // Parse the original data into a NotifyContextRequest object
         JSONObject content = new JSONObject(data);
         NotifyContextRequestLD notifyContextRequestLD = null;
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+            .create();
 
         try {
             notifyContextRequestLD = new NotifyContextRequestLD(content);

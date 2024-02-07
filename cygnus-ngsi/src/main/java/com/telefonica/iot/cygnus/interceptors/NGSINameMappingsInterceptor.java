@@ -18,6 +18,7 @@
 package com.telefonica.iot.cygnus.interceptors;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.telefonica.iot.cygnus.containers.NameMappings;
@@ -31,6 +32,7 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.utils.CommonConstants;
 import com.telefonica.iot.cygnus.utils.JsonUtils;
 import com.telefonica.iot.cygnus.utils.NGSIConstants;
+import com.telefonica.iot.cygnus.management.PatternTypeAdapter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +44,7 @@ import org.apache.flume.interceptor.Interceptor;
 
 import org.apache.logging.log4j.ThreadContext;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -272,7 +275,9 @@ public class NGSINameMappingsInterceptor implements Interceptor {
         } // if
 
         // Parse the Json string
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+            .create();
 
         try {
             nameMappings = gson.fromJson(jsonStr, NameMappings.class);

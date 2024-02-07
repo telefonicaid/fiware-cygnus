@@ -31,12 +31,15 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.flume.Context;
 import org.apache.flume.Event;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import static org.junit.Assert.*; // this is required by "fail" like assertions
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.junit.Test;
 import org.mockito.Mock;
 import static org.mockito.Mockito.when;
@@ -48,7 +51,7 @@ import org.junit.Assert;
  *
  * @author frb
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class NGSIRestHandlerTest {
     
     // Mocks
@@ -178,7 +181,11 @@ public class NGSIRestHandlerTest {
      * Constructor.
      */
     public NGSIRestHandlerTest() {
-        LogManager.getRootLogger().setLevel(Level.FATAL);
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        Configuration config = ctx.getConfiguration();
+        LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+        loggerConfig.setLevel(Level.FATAL);
+        ctx.updateLoggers();
     } // NGSIRestHandlerTest
     
     /**

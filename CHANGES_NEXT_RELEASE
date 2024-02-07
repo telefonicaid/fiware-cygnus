@@ -1,1 +1,5 @@
+- [cygnus-ngsi] Upgrade mockito-core dep from 5.5.0 to 5.10.0
+- [cygnus-ngsi-ld] Upgrade mockito-all 1.9.5 to mockito-core 5.10.0, httpcore from 4.3.1 to 4.4.16 and maven dependencies in general
+- [cygnus-ngsi] Upgrade Java version from 1.11 to 1.17 in Dockerfile (#2297, #2304)
+- [cygnus-common][cygnus-ngsi][cygnus-ngsi-ld] Upgrade in source code to support Java 17 build
 - [cygnus-common] [Arcgis] All NGSI DateTime are translated to Millis from Epoch (esriFieldTypeDate) (#2339)

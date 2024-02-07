@@ -21,13 +21,14 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
+import java.util.regex.Pattern;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
+import com.telefonica.iot.cygnus.management.PatternTypeAdapter;
 
 /**
  *
@@ -141,7 +142,9 @@ public class NotifyContextRequestLD {
          * Constructor for Gson, a Json parser.
          */
         public ContextElement(String contextElement) {
-            Gson gson = new Gson();
+            Gson gson = new GsonBuilder()
+                .registerTypeAdapter(Pattern.class, new PatternTypeAdapter())
+                .create();
             String cer = contextElement;
             Map<String, Object> map = gson.fromJson(cer, new TypeToken<Map<String, JsonElement>>() {
             }.getType());
