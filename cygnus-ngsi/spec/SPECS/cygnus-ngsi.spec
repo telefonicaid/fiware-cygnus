@@ -99,6 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Fri Feb 9 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.5.0
+- [cygnus-ngsi] Upgrade mockito-core dep from 5.5.0 to 5.10.0
+- [cygnus-ngsi] Upgrade Java version from 1.11 to 1.17 in Dockerfile (#2297, #2304)
+
 * Thu Feb 1 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.4.0
 
 * Thu Nov 16 2023 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.3.0

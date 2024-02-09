@@ -172,6 +172,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Fri Feb 9 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.5.0
+- [cygnus-common][cygnus-ngsi][cygnus-ngsi-ld] Upgrade in source code to support Java 17 build
+- [cygnus-common] [Arcgis] All NGSI DateTime are translated to Millis from Epoch (esriFieldTypeDate) (#2339)
+
 * Thu Feb 1 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.4.0
 - [cygnus-common] [Arcgis] include error in log about cast attributes json
 - [cygnus-common] Upgrade Debian version from 12.1 to 12.4 in Dockerfile
