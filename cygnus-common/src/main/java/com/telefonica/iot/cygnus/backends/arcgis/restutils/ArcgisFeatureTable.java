@@ -381,13 +381,18 @@ public class ArcgisFeatureTable {
 
         for (Feature feature : featureArray) {
             boolean found = false;
-            String featureId = feature.getAttributes().get(uniqueField).toString();
+            String featureId = null;
+            if (feature.getAttributes().containsKey(uniqueField)) {
+                featureId = feature.getAttributes().get(uniqueField).toString();
+            }
 
             int i = 0;
             while (!found && i < serverFeatures.size()) {
                 Feature serverFeature = serverFeatures.get(i);
-                String serverFeatureId = serverFeature.getAttributes().get(uniqueField).toString();
-
+                String serverFeatureId = null;
+                if ( serverFeature.getAttributes().containsKey(uniqueField)) {
+                    serverFeatureId = serverFeature.getAttributes().get(uniqueField).toString();
+                }
                 if (featureId.equalsIgnoreCase(serverFeatureId)) {
                     found = true;
                     Integer oid = serverFeature.getObjectId();
