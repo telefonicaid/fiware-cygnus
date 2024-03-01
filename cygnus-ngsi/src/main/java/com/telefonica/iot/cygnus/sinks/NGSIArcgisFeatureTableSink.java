@@ -385,12 +385,10 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                         + " is new: " + isNewFeatureTable);
                 ArcgisFeatureTable featureTable = getPersistenceBackend(featureTableUrl);
 
-                // If it's a new one, sets uniqueField value
-                if (isNewFeatureTable) {
-                    LOGGER.debug("[" + this.getName() + "] Created new backend for " + featureTableUrl
-                            + " with uniqueField: " + aggregation.getUniqueField());
-                    featureTable.setUniqueField(aggregation.getUniqueField());
-                }
+                // Sets always uniqueField value
+                LOGGER.debug("[" + this.getName() + "] Backend for " + featureTableUrl
+                             + " with uniqueField: " + aggregation.getUniqueField());
+                featureTable.setUniqueField(aggregation.getUniqueField());
 
                 featureTable.addToBatch(aggregation.getFeature());
                 if (featureTable.hasError()){
@@ -514,6 +512,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                 String entityType = contextElement.getType();
 
                 // Set unique filed and it's value.
+                LOGGER.debug("[NGSIArcgisAggregator] aggregate - uniqueField ->" + entityType);
                 aggregation.setUniqueField(entityType);
                 feature.addAttribute(entityType, entityId);
 
