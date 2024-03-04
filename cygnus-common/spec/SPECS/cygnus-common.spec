@@ -173,8 +173,8 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 
 * Mon Mar 4 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.6.0
--[cygnus-common] Upgrade postgresql from 42.4.3 to 42.7.2
--[cygnus-common] [arcgis] Fix: check feature attributes containsKey before get it (#2347)
+- [cygnus-common] [arcgis] Fix: check feature attributes containsKey before get it (#2347)
+- [cygnus-common] Upgrade postgresql from 42.4.3 to 42.7.2
 
 * Fri Feb 9 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.5.0
 - [cygnus-common][cygnus-ngsi][cygnus-ngsi-ld] Upgrade in source code to support Java 17 build
