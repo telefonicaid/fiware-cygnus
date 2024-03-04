@@ -99,6 +99,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Mon Mar 4 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.6.0
+-[cygnus-ngsi] [arcgis-sink] Set always uniqueField from aggregator for all features (#2349)
+
 * Fri Feb 9 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.5.0
 - [cygnus-ngsi] Upgrade mockito-core dep from 5.5.0 to 5.10.0
 - [cygnus-ngsi] Upgrade Java version from 1.11 to 1.17 in Dockerfile (#2297, #2304)
