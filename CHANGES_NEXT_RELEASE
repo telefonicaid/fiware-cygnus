@@ -1,3 +1,0 @@
-[cygnus-common] Upgrade postgresql from 42.4.3 to 42.7.2
-[cygnus-common] [arcgis] Fix: check feature attributes containsKey before get it (#2347)
-[cygnus-ngsi] [arcgis-sink] Set always uniqueField from aggregator for all features (#2349)
