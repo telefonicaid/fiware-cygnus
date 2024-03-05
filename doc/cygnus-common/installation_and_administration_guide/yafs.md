@@ -7,7 +7,7 @@ Nevertheless, using YAFS has side effects, specially when a thread dies as part 
 
 Of special interest is the case involving a configuration change on the fly. Flume is designed for that purpose, nevertheless using YAFS produce very weird results in conjunction with on the fly configuration changes. This is because reloading a configuration in Flume implies to stop previous running components, i.e. thread stops that YAFS detects and result in a complete Cygnus stop.
 
-In order to avoid scenarios as the ones described above, YAFS can be disabled when configuring the agent, by simply using the `--no-yafs` option. Please check the sections about running a Cygnus agent as a [process](./runninh_as_process.md) or as a [service](./running_as_service.md) for further details.
+In order to avoid scenarios as the ones described above, YAFS can be disabled when configuring the agent, by simply using the `--no-yafs` option. Please check the sections about running a Cygnus agent as a [process](./runninh_as_process.md) for further details.
 
 **NOTE**: Please observe Flume 1.4.0 shows a problem when changing the configuration on the fly, as described in [FLUME-2310](https://issues.apache.org/jira/browse/FLUME-2310). Basically, new components cannot register for JMX monitoring because old ones are not properly deregistered. This problem is inherited by Cygnus since it extends Flume. In any case, it is a minor issue not affecting Flume nor Cygnus functionalityu (except for proper JMX monitoring, of course). You will see this error in Cygnus in traces like this one:
 

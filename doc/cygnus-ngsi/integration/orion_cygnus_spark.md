@@ -92,7 +92,7 @@ Please refere to Orion Context Broker [official documentation](http://fiware-ori
 [Top](#top)
 
 ## <a name="section3"></a>Setting up Cygnus
-Regarding installation, do it from [FIWARE yum repository](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/install_with_rpm.md). Once installed in its latest version, a Cygnus agent must be configured as follows:
+Regarding installation, do it [using Dockerhub](https://github.com/telefonicaid/fiware-cygnus/blob/master/doc/cygnus-ngsi/installation_and_administration_guide/install_with_docker.md). Once installed in its latest version, a Cygnus agent must be configured as follows:
 
 ```
 $ cat /usr/cygnus/conf/agent_spark.conf

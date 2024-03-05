@@ -2,7 +2,6 @@
 
 * [Introduction](./introduction.md)
 * Installation:
-    * [Installation via RPM](./install_with_rpm.md)
     * [Installation via docker](./install_with_docker.md)
     * [Installation from sources](./install_from_sources.md)
 * Configuration:
@@ -11,7 +10,6 @@
     * [Configuration examples](./configuration_examples.md)
 * Running:
     * [Running as a process](./running_as_process.md)
-    * [Running as a service](./running_as_service.md)
 * Advanced topics:
     * [Testing](./testing.md)
     * [Backends as short-term historics](./backends_as_sth.md)

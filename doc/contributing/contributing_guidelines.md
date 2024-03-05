@@ -16,7 +16,6 @@ Content:
     * [Commits and squashing](#section3.8)
     * [Releasing](#section3.9)
 * [Deployers](#section4)
-    * [RPMs](#section4.1)
     * [Dockers](#section4.2)
 * [Documentation](#section5)
     * [Repository documentation](#section5.1)
@@ -120,7 +119,6 @@ Each folder MUST have, at least, the following subdirectories and files:
 * `docker/` → everything about deploying Cygnus by means of Docker
 * `test/` → acceptance tests, e2e tests, performance tests, others
 * `conf/` → templates for configuration files required to run the agent
-* `spec/` → spec file for generating a RPM
 * `pom.xml` → Maven’s Project Object Model
 
 A folder with common content named `cygnus-common` MUST exist. It will be a Maven project in charge of building a Cygnus common library that SHOULD be used by all the agents, enforcing the reusability of code.
@@ -254,17 +252,6 @@ Releases MUST be published in the <i>releases</i> section of the main repository
 As a result of the release, `CHANGES_NEXT_RELEASE` file MUST be emptied in Github repo.
 
 ## <a name="section4"></a>Deployers
-### <a name="section4.1"></a>RPMs
-There MUST exist a `rpm/` folder at the root of the main repository. A packaging script MUST generate a RPM based on the spec file of each Cygnus agent, including `cygnus-common`. Such a spec file MUST live at the `spec` subfolder within the agent folder.
-
-Upon releasing, these RPMs MUST be created and uploaded to some repository in order they are available. As an example, `cygnus-ngsi` agent's RPM is uploaded to `http://repositories.testbed.fiware.org`.
-
-Agents' RPMs MUST depend on `cygnus-common` RPM, which MUST be in charge of installing not only the common classes to all the agents, but installing Apache Flume, default configuration templates and provisioning the Cygnus plugin. `cygnus-common` RPM is typically uploaded to `http://repositories.testbed.fiware.org` as well.
-
-All RPMs spec files (spec for `cygnus-common` and any other agent) MUST contain a copy of the content of `CHANGES_NEXT_RELEASE` file.
-
-[Top](#top)
-
 ### <a name="section4.2"></a>Dockers
 There MUST exist a `docker/` folder at the root of the main repository. Every Cygnus agent MUST include a docker subfolder as per the following rules:
 
@@ -391,6 +378,6 @@ In addition, a table MUST be included in charge of defining a set of alarm condi
 ## <a name="section7"></a>Configuration
 When adding a new agent to Cygnus, it MUST include an agent configuration template in [Flume format](https://flume.apache.org/FlumeUserGuide.html#setup). Other configuration files MAY be added as well.
 
-The specific agent configuration template MUST replace the one handled by `cygnus-common` in the Flume deployment donde by `cygnus-common` RPM.
+The specific agent configuration template MUST replace the one handled by `cygnus-common` in the Flume deployment done by `cygnus-common`.
 
 [Top](#top)
