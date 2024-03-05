@@ -226,7 +226,7 @@ Many other operations, like getting/setting the log level, can be found in Manag
 ## <a name="section3"></a>Advanced topics and further reading
 Detailed information regarding cygus-ngsi can be found in the [Installation and Administration Guide](../doc/cygnus-ngsi/installation_and_administration_guide/introduction.md), the [User and Programmer Guide](../doc/cygnus-ngsi/user_and_programmer_guide/introduction.md) and the [Flume extensions catalogue](../doc/cygnus-ngsi/flume_extensions_catalogue/introduction.md). The following is just a list of shortcuts regarding the most popular topics:
 
-* [Installation with docker](../doc/cygnus-ngsi/installation_and_administration_guide/install_with_docker). An alternative to RPM installation, docker is one of the main options when installing FIWARE components.
+* [Installation with docker](../doc/cygnus-ngsi/installation_and_administration_guide/install_with_docker). Thre preferred installation method, docker is one of the main options when installing FIWARE components.
 * [Installation from sources](../doc/cygnus-ngsi/installation_and_administration_guide/install_from_sources.md). Sometimes you will need to install from sources, particularly when some of the dependencies must be modified, e.g. the `hadoop-core` libraries.
 * [Running as a process](../doc/cygnus-ngsi/installation_and_administration_guide/running_as_process.md). Running cygus-ngsi as a process is very useful for testing and debugging purposes.
 * [Management Interface](../doc/cygnus-ngsi/installation_and_administration_guide/management_interface.md). REST-based management interface for administration purposes.

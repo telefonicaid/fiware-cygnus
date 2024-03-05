@@ -10,7 +10,6 @@
     * log4j configuration (FIXME: we don't have yet and specific configuration for log4j but it will be done in the future)
 * Running:
     * [Running as a process](./running_as_process.md)
-    * [Running as a service](./running_as_service.md)
 * Advanced topics:
     * [Testing](./testing.md)
 * [Sanity checks](./sanity_checks.md)

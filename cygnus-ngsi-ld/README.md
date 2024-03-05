@@ -206,7 +206,7 @@ $ curl -X GET "http://localhost:8081/v1/stats" | python -m json.tool
 ## <a name="section3"></a>Advanced topics and further reading
 Detailed information regarding cygus-ngsi can be found in the [Installation and Administration Guide](../doc/cygnus-ngsi-ld/installation_and_administration_guide/introduction.md), the [User and Programmer Guide](../doc/cygnus-ngsi-ld/user_and_programmer_guide/introduction.md) and the [Flume extensions catalogue](../doc/cygnus-ngsi-ld/flume_extensions_catalogue/introduction.md). The following is just a list of shortcuts regarding the most popular topics:
 
-* [Installation with docker](../doc/cygnus-ngsi-ld/installation_and_administration_guide/install_with_docker.md). An alternative to RPM installation, docker is one of the main options when installing FIWARE components.
+* [Installation with docker](../doc/cygnus-ngsi-ld/installation_and_administration_guide/install_with_docker.md). The preffered installation way, docker is one of the main options when installing FIWARE components.
 * [Installation from sources](../doc/cygnus-ngsi-ld/installation_and_administration_guide/install_from_sources.md). Sometimes you will need to install from sources, particularly when some of the dependencies must be modified.
 
 [Top](#top)
