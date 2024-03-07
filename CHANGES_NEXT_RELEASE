@@ -1,0 +1,1 @@
+- [cygnus-ngsi][ColumnAggregator][LastData] Fix error when remove old values in lastData which does not exist
