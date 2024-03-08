@@ -266,11 +266,20 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                 setLastDataTimestamp(currentTS);
                 for (String key : aggregation.keySet()) {
                     ArrayList<JsonElement> valueLastData = new ArrayList<>();
-                    if (lastData.containsKey(key)) {
-                        valueLastData = lastData.get(key);
-                    } else if (!lastData.containsKey(key)){
-                        valueLastData = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
+                    if (lastDataEntityDelete) {
+                        if (lastDataDelete.containsKey(key)) {
+                            valueLastData = lastDataDelete.get(key);
+                        } else if (!lastDataDelete.containsKey(key)){
+                            valueLastData = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
+                        }
+                    } else {
+                        if (lastData.containsKey(key)) {
+                            valueLastData = lastData.get(key);
+                        } else if (!lastData.containsKey(key)) {
+                            valueLastData = new ArrayList<JsonElement>(Collections.nCopies(numPreviousValues, null));
+                        }
                     }
+
                     valueLastData.add(aggregation.get(key).get(aggregation.get(key).size() - 1));
                     if (lastDataEntityDelete) {
                         lastDataDelete.put(key, valueLastData);
