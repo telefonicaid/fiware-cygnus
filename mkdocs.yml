@@ -16,8 +16,7 @@ pages:
   - 'cygnus-common library':
       - 'Installation and Administration Guide':
           - 'Introduction': 'cygnus-common/installation_and_administration_guide/introduction.md'
-          - 'Hardware requirements': 'cygnus-common/installation_and_administration_guide/hw_requirements.md'
-          - 'Installation via RPM': 'cygnus-common/installation_and_administration_guide/install_with_rpm.md'
+          - 'Hardware requirements': 'cygnus-common/installation_and_administration_guide/hw_requirements.md'          
           - 'Installation from sources': 'cygnus-common/installation_and_administration_guide/install_from_sources.md'
           - 'Installation via docker': 'cygnus-common/installation_and_administration_guide/install_with_docker.md'
           - 'Cygnus agent configuration': 'cygnus-common/installation_and_administration_guide/cygnus_agent_conf.md'
@@ -50,12 +49,10 @@ pages:
       - 'Quick Start Guide': 'cygnus-ngsi/quick_start_guide.md'
       - 'Installation and Administration Guide':
           - 'Introduction': 'cygnus-ngsi/installation_and_administration_guide/introduction.md'
-          - 'Installation via RPM': 'cygnus-ngsi/installation_and_administration_guide/install_with_rpm.md'
           - 'Installation via docker': 'cygnus-ngsi/installation_and_administration_guide/install_with_docker.md'
           - 'Installation from sources': 'cygnus-ngsi/installation_and_administration_guide/install_from_sources.md'
           - 'NGSI agent configuration': 'cygnus-ngsi/installation_and_administration_guide/ngsi_agent_conf.md'
           - 'Configuration examples': 'cygnus-ngsi/installation_and_administration_guide/configuration_examples.md'
-          - 'Running as a service': 'cygnus-ngsi/installation_and_administration_guide/running_as_service.md'
           - 'Testing': 'cygnus-ngsi/installation_and_administration_guide/testing.md'
           - 'Backends as short-term historics': 'cygnus-ngsi/installation_and_administration_guide/backends_as_sth.md'
           - 'Name mappings': 'cygnus-ngsi/installation_and_administration_guide/name_mappings.md'

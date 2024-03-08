@@ -33,7 +33,7 @@ Apart from this introduction, this Installation and Administration Guide mainly 
     * [Configuration examples](./configuration_examples.md)
 * Running:
     * [Running as a process](./running_as_process.md)
-    * [Running as a service](./running_as_service.md)
+
 * Advanced topics:
     * [Testing](./testing.md)
 * [Sanity checks](./sanity_checks.md)

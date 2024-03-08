@@ -74,12 +74,11 @@ Fiware/Cygnus has four sub-modules [cygnus-common](cygnus-common#welcome-to-cygn
 Following are the links of install section of Fiware/Cygnus sub-modules:
 * cygnus-common:
   - [Install from sources](doc/cygnus-common/installation_and_administration_guide/install_from_sources.md)
-  - [Install with docker](doc/cygnus-common/installation_and_administration_guide/install_with_docker.md)
-  - [Install with rpm](doc/cygnus-common/installation_and_administration_guide/install_with_rpm.md)
+  - [Install with docker](doc/cygnus-common/installation_and_administration_guide/install_with_docker.md)  
 * cygnus-ngsi:
   - [Install from sources](doc/cygnus-ngsi/installation_and_administration_guide/install_from_sources.md)
   - [Install with docker](doc/cygnus-ngsi/installation_and_administration_guide/install_with_docker.md)
-  - [Install with rpm](doc/cygnus-ngsi/installation_and_administration_guide/install_with_rpm.md)
+
 * cygnus-twitter:
   - [Install from sources](doc/cygnus-twitter/installation_and_administration_guide/install_from_sources.md)
   - [Install with docker](doc/cygnus-twitter/installation_and_administration_guide/install_with_docker.md)
