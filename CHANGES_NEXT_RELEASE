@@ -1,2 +1,2 @@
-- [cygnus-ngsi][ColumnAggregagor] Fix lastdata when remove multiple entities by alterationType with entityDelete
+- [cygnus-ngsi][ColumnAggregator] Fix lastdata when remove multiple entities by alterationType with entityDelete
 - [cygnus-ngsi][ColumnAggregator][LastData] Fix error when remove old values in lastData which does not exist (i.e. creating and updating entities)
