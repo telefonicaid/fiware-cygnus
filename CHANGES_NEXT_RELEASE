@@ -1,1 +1,1 @@
-- [cygnus-ngsi][ColumnAggregator][LastData] Fix error when remove old values in lastData which does not exist
+- [cygnus-ngsi][ColumnAggregator][LastData] Fix error when remove old values in lastData which does not exist (i.e. creating and updating entiies)
