@@ -293,7 +293,7 @@ public class SQLQueryUtils {
             if (addAnd) { // this means delete was finished with at least one element after where
                 upsertList.add(query);
             } else {
-                LOGGER.warn("[SQLQueryUtils.postgreSqlUpsertQuery] incomplete delete for lastdata: " + query.toString() + " with this uniqueKey " + uniqueKey.toString() + " and keys " + keys.toString());
+                LOGGER.warn("[SQLQueryUtils.mySqlUpsertQuery] incomplete delete for lastdata: " + query.toString() + " with this uniqueKey " + uniqueKey.toString() + " and keys " + keys.toString());
             }
         }
         LOGGER.debug("[SQLQueryUtils.mySqlUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
