@@ -244,7 +244,10 @@ public class NGSIGenericColumnAggregator extends NGSIGenericAggregator {
                             if (storedTS < currentTS) {
                                 ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
                                 for (int j = 0 ; j < keys.size() ; j++) {
-                                    lastData.get(keys.get(j)).remove(i);
+                                    ArrayList<JsonElement> lst = lastData.get(keys.get(j));
+                                    if (lst != null) {
+                                        lst.remove(i);
+                                    }
                                 }
                                 updateLastData = true;
                                 break;
