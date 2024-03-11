@@ -57,7 +57,7 @@
         <dependency>
             <groupId>com.telefonica.iot</groupId>
             <artifactId>cygnus-common</artifactId>
-            <version>3.7.0</version>
+            <version>3.7.0-SNAPSHOT</version>
         </dependency>
         <!-- Required by twitter agent -->
         <dependency>
