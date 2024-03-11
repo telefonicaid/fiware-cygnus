@@ -30,7 +30,7 @@ version=$1
 flumeBasePath=$2
 
 # Export some Maven options
-export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m"
+export MAVEN_OPTS="-Xmx512m"
 
 # Compile
 mvn clean compile assembly:single exec:exec
