@@ -99,6 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Mon Mar 11 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.7.0
+- [cygnus-ngsi][ColumnAggregator][LastData] Fix lastdata when remove multiple entities by alterationType with entityDelete
+- [cygnus-ngsi][ColumnAggregator][LastData] Fix error when remove old values in lastData which does not exist (i.e. creating and updating entities at the same time)
+
 * Mon Mar 4 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.6.0
 - [cygnus-ngsi] [arcgis-sink] Set always uniqueField from aggregator for all features (#2349)
 
