@@ -172,6 +172,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Mon Mar 11 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.7.0
+
 * Mon Mar 4 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.6.0
 - [cygnus-common] [arcgis] Fix: check feature attributes containsKey before get it (#2347)
 - [cygnus-common] Upgrade postgresql from 42.4.3 to 42.7.2
