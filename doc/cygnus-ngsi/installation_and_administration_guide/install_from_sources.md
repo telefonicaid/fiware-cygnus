@@ -105,7 +105,7 @@ Clean up
 Setup Cygnus-Common and Cygnus-Ngsi agents
 
 ### <a name="section2.6"></a>Running `cygnus-ngsi`
-Please make sure that you have ports 5080 (admin port) and 5050 (default instance port) open.
+Please make sure that you have ports 5080 (admin port) and 5050 (default instance port) open.<br/>
 
     $ /opt/apache-flume-1.11.0/bin/cygnus-flume-ng agent --conf {{PATH-TO-CONF-FOLDER}} -f {{PATH-TO-AGENT-NGSI-CONF}} -n {{AGENT-NAME}} -p 5080 -Dflume.root.logger=INFO,LOGFILE -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Dflume.monitoring.type= -Dflume.monitoring.port=41414
 
@@ -115,8 +115,8 @@ Please make sure that you have ports 5080 (admin port) and 5050 (default instanc
 Apache Flume has SSL support, <a href='https://flume.apache.org/FlumeUserGuide.html#ssl-tls-support'>mentioned here</a>
 
 ### <a name="section3.1"></a>Prerequisites for this is that you should have:
-SSL certificated installed (using Certbot & let's encrypt)
-Before doing this make sure that port 80 and 443 are open and that you have a domain assoicated with the IP of the server you are installing SSL on.
+SSL certificated installed (using Certbot & let's encrypt)<br/>
+Before doing this make sure that port 80 and 443 are open and that you have a domain assoicated with the IP of the server you are installing SSL on.<br/>
 Install Certbot with snap
 
     $ sudo apt install snapd
@@ -129,8 +129,8 @@ Issue certificates
   
     $ sudo certbot certonly --standalone -d DOMAINNAME
 
-Java Keystore setup using the above certificates.
-These commands can be put in a bash file and run as a deployment hook, so whenever the certificates renewed the Java Keystore can be updated.
+Java Keystore setup using the above certificates.<br/>
+These commands can be put in a bash file and run as a deployment hook, so whenever the certificates renewed the Java Keystore can be updated.<br/>
 Replace all values withing {{}}
 
     $ openssl pkcs12 -export \
