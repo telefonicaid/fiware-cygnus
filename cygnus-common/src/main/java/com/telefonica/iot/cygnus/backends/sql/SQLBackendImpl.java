@@ -65,13 +65,15 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlUsername
      * @param sqlPassword
      * @param maxPoolSize
+     * @param maxPoolIdle
+     * @param minPoolIdle
      * @param sqlInstance
      * @param sqlDriverName
      * @param persistErrors
      * @param maxLatestErrors
      */
-    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, SQLInstance sqlInstance, String sqlDriverName, boolean persistErrors, int maxLatestErrors) {
-        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, null, persistErrors, maxLatestErrors);
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, SQLInstance sqlInstance, String sqlDriverName, boolean persistErrors, int maxLatestErrors) {
+        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, sqlInstance, sqlDriverName, null, persistErrors, maxLatestErrors);
     } // SQLBackendImpl
 
     /**
@@ -82,12 +84,14 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlUsername
      * @param sqlPassword
      * @param maxPoolSize
+     * @param maxPoolIdle
+     * @param minPoolIdle
      * @param sqlInstance
      * @param sqlDriverName
      * @param sqlOptions
      */
-    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, SQLInstance sqlInstance, String sqlDriverName, String sqlOptions) {
-        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, sqlOptions, true, DEFAULT_MAX_LATEST_ERRORS);
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, SQLInstance sqlInstance, String sqlDriverName, String sqlOptions) {
+        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, sqlInstance, sqlDriverName, sqlOptions, true, DEFAULT_MAX_LATEST_ERRORS);
     } // SQLBackendImpl
 
     /**
@@ -98,14 +102,16 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlUsername
      * @param sqlPassword
      * @param maxPoolSize
+     * @param maxPoolIdle
+     * @param minPoolIdle
      * @param sqlInstance
      * @param sqlDriverName
      * @param sqlOptions
      * @param persistErrors
      * @param maxLatestErrors
      */
-    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, SQLInstance sqlInstance, String sqlDriverName, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
-        driver = new SQLBackendImpl.SQLDriver(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, sqlOptions);
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, SQLInstance sqlInstance, String sqlDriverName, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
+        driver = new SQLBackendImpl.SQLDriver(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, sqlInstance, sqlDriverName, sqlOptions);
         cache = new SQLCache();
         this.sqlInstance = sqlInstance;
         this.persistErrors = persistErrors;
@@ -935,6 +941,8 @@ public class SQLBackendImpl implements SQLBackend{
         private final SQLInstance sqlInstance;
         private final String sqlDriverName;
         private final int maxPoolSize;
+        private final int maxPoolIdle;
+        private final int minPoolIdle;
         private final String sqlOptions;
 
         /**
@@ -949,7 +957,7 @@ public class SQLBackendImpl implements SQLBackend{
          * @param sqlDriverName
          * @param sqlOptions
          */
-        public SQLDriver(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, SQLInstance sqlInstance, String sqlDriverName, String sqlOptions) {
+        public SQLDriver(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, SQLInstance sqlInstance, String sqlDriverName, String sqlOptions) {
             datasources = new HashMap<>();
             pools = new HashMap<>();
             this.sqlHost = sqlHost;
@@ -957,6 +965,8 @@ public class SQLBackendImpl implements SQLBackend{
             this.sqlUsername = sqlUsername;
             this.sqlPassword = sqlPassword;
             this.maxPoolSize = maxPoolSize;
+            this.maxPoolIdle = maxPoolIdle;
+            this.minPoolIdle = minPoolIdle;
             this.sqlInstance = sqlInstance;
             this.sqlDriverName = sqlDriverName;
             this.sqlOptions = sqlOptions;
@@ -1096,6 +1106,8 @@ public class SQLBackendImpl implements SQLBackend{
                 // Creates an Instance of GenericObjectPool That Holds Our Pool of Connections Object!
                 gPool = new GenericObjectPool();
                 gPool.setMaxActive(this.maxPoolSize);
+                gPool.setMaxIdle(this.maxPoolIdle);
+                gPool.setMinIdle(this.minPoolIdle);
                 pools.put(destination, gPool);
 
                 // Creates a ConnectionFactory Object Which Will Be Used by the Pool to Create the Connection Object!

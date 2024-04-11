@@ -56,6 +56,8 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private static final String DEFAULT_DATABASE = "postgres";
     private static final String DEFAULT_ENABLE_CACHE = "false";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
+    private static final int DEFAULT_MAX_POOL_IDLE = 3;
+    private static final int DEFAULT_MIN_POOL_IDLE = 0;
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
     private static final String POSTGRESQL_DRIVER_NAME = "org.postgresql.Driver";
     private static final SQLInstance POSTGRESQL_INSTANCE_NAME = SQLInstance.POSTGRESQL;
@@ -75,6 +77,8 @@ public class NGSIPostgreSQLSink extends NGSISink {
     private String postgresqlUsername;
     private String postgresqlPassword;
     private int maxPoolSize;
+    private int maxPoolIdle;
+    private int minPoolIdle;
     private boolean rowAttrPersistence;
     private SQLBackendImpl postgreSQLPersistenceBackend;
     private boolean enableCache;
@@ -218,6 +222,11 @@ public class NGSIPostgreSQLSink extends NGSISink {
         maxPoolSize = context.getInteger("postgresql_maxPoolSize", DEFAULT_MAX_POOL_SIZE);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_maxPoolSize=" + maxPoolSize + ")");
 
+        maxPoolIdle = context.getInteger("postgresql_maxPoolIdle", DEFAULT_MAX_POOL_IDLE);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_maxPoolIdle=" + maxPoolIdle + ")");
+
+        minPoolIdle = context.getInteger("postgresql_minPoolIdle", DEFAULT_MIN_POOL_IDLE);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_minPoolIdle=" + minPoolIdle + ")");
         rowAttrPersistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE).equals("row");
         String persistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE);
 
@@ -315,12 +324,12 @@ public class NGSIPostgreSQLSink extends NGSISink {
     @Override
     public void start() {
         try {
-            createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, postgresqlOptions, persistErrors, maxLatestErrors);
+            createPersistenceBackend(postgresqlHost, postgresqlPort, postgresqlUsername, postgresqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, postgresqlOptions, persistErrors, maxLatestErrors);
             LOGGER.debug("[" + this.getName() + "] Postgresql persistence backend created");
         } catch (Exception e) {
             String configParams = " postgresqlHost " + postgresqlHost + " postgresqlPort " + postgresqlPort +
                 "  postgresqlUsername " + postgresqlUsername + " postgresqlPassword " + postgresqlPassword +
-                " maxPoolSize " +  maxPoolSize + " postgresqlOptions " +
+                " maxPoolSize " +  maxPoolSize + " maxPoolIdle " +  maxPoolIdle + " minPoolIdle " +  minPoolIdle + " postgresqlOptions " +
                 postgresqlOptions + " persistErrors " +  persistErrors + " maxLatestErrors " + maxLatestErrors;
             LOGGER.error("Error while creating the Postgresql persistence backend. " +
                          "Config params= " + configParams +
@@ -335,9 +344,9 @@ public class NGSIPostgreSQLSink extends NGSISink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
         if (postgreSQLPersistenceBackend == null) {
-            postgreSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, sqlOptions, persistErrors, maxLatestErrors);
+            postgreSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, POSTGRESQL_INSTANCE_NAME, POSTGRESQL_DRIVER_NAME, sqlOptions, persistErrors, maxLatestErrors);
         }
     }
 
