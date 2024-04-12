@@ -56,6 +56,7 @@ public class NGSIPostgisSink extends NGSISink {
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
     private static final int DEFAULT_MAX_POOL_IDLE = 2;
     private static final int DEFAULT_MIN_POOL_IDLE = 0;
+    private static final int DEFAULT_MAX_POOL_WAIT = 10000;
     private static final String DEFAULT_POSTGIS_TYPE = "geometry";
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
     private static final String POSTGIS_DRIVER_NAME = "org.postgresql.Driver";
@@ -79,6 +80,7 @@ public class NGSIPostgisSink extends NGSISink {
     private int maxPoolSize;
     private int maxPoolIdle;
     private int minPoolIdle;
+    private int maxPoolWait;
     private SQLBackendImpl postgisPersistenceBackend;
     private boolean enableCache;
     private boolean swapCoordinates;
@@ -228,6 +230,9 @@ public class NGSIPostgisSink extends NGSISink {
         minPoolIdle = context.getInteger("postgis_minPoolIdle", DEFAULT_MIN_POOL_IDLE);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_minPoolIdle=" + minPoolIdle + ")");
 
+        maxPoolWait = context.getInteger("postgis_maxPoolWait", DEFAULT_MAX_POOL_WAIT);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (postgis_maxPoolWait=" + maxPoolWait + ")");        
+
         rowAttrPersistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE).equals("row");
         String persistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE);
 
@@ -333,11 +338,11 @@ public class NGSIPostgisSink extends NGSISink {
     @Override
     public void start() {
         try {
-            createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, maxPoolIdle, minPoolIdle, postgisOptions, persistErrors, maxLatestErrors);
+            createPersistenceBackend(postgisHost, postgisPort, postgisUsername, postgisPassword, maxPoolSize, maxPoolIdle, minPoolIdle, maxPoolWait, postgisOptions, persistErrors, maxLatestErrors);
             LOGGER.debug("[" + this.getName() + "] POSTGIS persistence backend created");
         } catch (Exception e) {
             String configParams = " postgisHost " + postgisHost + " postgisPort " + postgisPort + "  postgisUsername " +
-                postgisUsername + " postgisPassword " + postgisPassword + " maxPoolSize " +  maxPoolSize + " maxPoolIdle " +  maxPoolIdle + " minPoolIdle " +  minPoolIdle + " postgisOptions " +
+                postgisUsername + " postgisPassword " + postgisPassword + " maxPoolSize " +  maxPoolSize + " maxPoolIdle " +  maxPoolIdle + " minPoolIdle " +  minPoolIdle + " maxPoolWait " +  maxPoolIWaitdle + " postgisOptions " +
                 postgisOptions + " persistErrors " +  persistErrors + " maxLatestErrors " + maxLatestErrors;
             LOGGER.error("Error while creating the Postgis persistence backend. " +
                          "Config params= " + configParams +
@@ -352,9 +357,9 @@ public class NGSIPostgisSink extends NGSISink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, int maxPoolWait, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
         if (postgisPersistenceBackend == null) {
-            postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, sqlOptions, persistErrors, maxLatestErrors);
+            postgisPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, maxPoolWait, POSTGIS_INSTANCE_NAME, POSTGIS_DRIVER_NAME, sqlOptions, persistErrors, maxLatestErrors);
         }
     }
 
