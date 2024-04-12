@@ -58,7 +58,7 @@ public class NGSIMySQLSink extends NGSISink {
     private static final String DEFAULT_HOST = "localhost";
     private static final String DEFAULT_USER_NAME = "root";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
-    private static final int DEFAULT_MAX_POOL_IDLE = 3;
+    private static final int DEFAULT_MAX_POOL_IDLE = 2;
     private static final int DEFAULT_MIN_POOL_IDLE = 0;
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
     private static final String MYSQL_DRIVER_NAME = "com.mysql.jdbc.Driver";

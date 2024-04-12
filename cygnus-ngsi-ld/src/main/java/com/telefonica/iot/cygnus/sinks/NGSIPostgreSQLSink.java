@@ -48,7 +48,7 @@ public class NGSIPostgreSQLSink extends NGSILDSink {
     private static final String DEFAULT_DATABASE = "postgres";
     private static final String DEFAULT_ENABLE_CACHE = "false";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
-    private static final int DEFAULT_MAX_POOL_IDLE = 3;
+    private static final int DEFAULT_MAX_POOL_IDLE = 2;
     private static final int DEFAULT_MIN_POOL_IDLE = 0;
     private static final String POSTGRESQL_DRIVER_NAME = "org.postgresql.Driver";
     private static final SQLInstance POSTGRESQL_INSTANCE_NAME = SQLInstance.POSTGRESQL;

@@ -58,7 +58,7 @@ public class NGSIOracleSQLSink extends NGSISink {
     private static final String DEFAULT_USER_NAME = "system";
     private static final String DEFAULT_DATABASE = "xe";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
-    private static final int DEFAULT_MAX_POOL_IDLE = 3;
+    private static final int DEFAULT_MAX_POOL_IDLE = 2;
     private static final int DEFAULT_MIN_POOL_IDLE = 0;
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
     //private static final String ORACLE_DRIVER_NAME = "oracle.jdbc.OracleDriver";
