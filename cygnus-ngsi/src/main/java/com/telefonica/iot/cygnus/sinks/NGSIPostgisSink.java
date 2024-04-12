@@ -342,7 +342,7 @@ public class NGSIPostgisSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] POSTGIS persistence backend created");
         } catch (Exception e) {
             String configParams = " postgisHost " + postgisHost + " postgisPort " + postgisPort + "  postgisUsername " +
-                postgisUsername + " postgisPassword " + postgisPassword + " maxPoolSize " +  maxPoolSize + " maxPoolIdle " +  maxPoolIdle + " minPoolIdle " +  minPoolIdle + " maxPoolWait " +  maxPoolIWaitdle + " postgisOptions " +
+                postgisUsername + " postgisPassword " + postgisPassword + " maxPoolSize " +  maxPoolSize + " maxPoolIdle " +  maxPoolIdle + " minPoolIdle " +  minPoolIdle + " maxPoolWait " +  maxPoolIWait + " postgisOptions " +
                 postgisOptions + " persistErrors " +  persistErrors + " maxLatestErrors " + maxLatestErrors;
             LOGGER.error("Error while creating the Postgis persistence backend. " +
                          "Config params= " + configParams +
