@@ -1117,7 +1117,7 @@ public class SQLBackendImpl implements SQLBackend{
                 gPool.setMaxIdle(this.maxPoolIdle);
                 gPool.setMinIdle(this.minPoolIdle);
                 //gPool.setMaxWait(this.maxPoolWait);
-                gPool.setMinEvictableIdleTimeMillis(this.maxPoolWait);
+                gPool.setSoftMinEvictableIdleTimeMillis(this.maxPoolWait);
                 pools.put(destination, gPool);
 
                 // Creates a ConnectionFactory Object Which Will Be Used by the Pool to Create the Connection Object!
