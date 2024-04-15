@@ -383,7 +383,7 @@ From version 1.3.0 (included), Cygnus applies this specific encoding tailored to
 * Alphanumeric characters are not encoded.
 * Numeric characters are not encoded.
 * Equals character, `=`, is encoded as `xffff`.
-* User defined strings composed of a `x` character and a [Unicode](http://unicode-table.com) are encoded as `xx` followed by the Unicode.
+* User defined strings composed of a `x` character and a [Unicode](https://symbl.cc) are encoded as `xx` followed by the Unicode.
 * Slash character, `/`, is encoded as `x002f`.
 * All the other characters are not encoded.
 * `xffff` is used as concatenator character.
