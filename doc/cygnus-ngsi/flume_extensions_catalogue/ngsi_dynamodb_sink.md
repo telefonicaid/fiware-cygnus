@@ -247,7 +247,7 @@ Cygnus applies this specific encoding tailored to DynamoDB data structures:
 * Hyphen character, `-`, is not encoded.
 * Dot character, `.`, is not encoded.
 * Equals character, `=`, is encoded as `xffff`.
-* All other characters, including the slash in the FIWARE service paths, are encoded as a `x` character followed by the [Unicode](http://unicode-table.com) of the character.
+* All other characters, including the slash in the FIWARE service paths, are encoded as a `x` character followed by the [Unicode](https://symbl.cc) of the character.
 * User defined strings composed of a `x` character and a Unicode are encoded as `xx` followed by the Unicode.
 * `xffff` is used as concatenator character.
 
