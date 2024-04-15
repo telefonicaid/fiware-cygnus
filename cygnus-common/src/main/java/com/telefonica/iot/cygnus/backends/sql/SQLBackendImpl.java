@@ -1113,10 +1113,14 @@ public class SQLBackendImpl implements SQLBackend{
 
                 // Creates an Instance of GenericObjectPool That Holds Our Pool of Connections Object!
                 gPool = new GenericObjectPool();
+                // Tune from https://javadoc.io/static/commons-pool/commons-pool/1.6/org/apache/commons/pool/impl/GenericObjectPool.html
+                // Sets the cap on the number of objects that can be allocated by the pool (checked out to clients, or idle awaiting checkout) at a given time.
                 gPool.setMaxActive(this.maxPoolSize);
+                // Sets the cap on the number of "idle" instances in the pool.
                 gPool.setMaxIdle(this.maxPoolIdle);
+                // Sets the minimum number of objects allowed in the pool before the evictor thread (if active) spawns new objects.
                 gPool.setMinIdle(this.minPoolIdle);
-                //gPool.setMaxWait(this.maxPoolWait);
+                // Sets the minimum amount of time an object may sit idle in the pool before it is eligible for eviction by the idle object evictor (if any), with the extra condition that at least "minIdle" object instances remain in the pool.
                 gPool.setSoftMinEvictableIdleTimeMillis(this.maxPoolWait);
                 pools.put(destination, gPool);
 
