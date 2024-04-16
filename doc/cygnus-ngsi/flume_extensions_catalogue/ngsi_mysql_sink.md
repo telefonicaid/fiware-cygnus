@@ -235,6 +235,9 @@ If `attr_persistence=colum` then `NGSIMySQLSink` will persist the data within th
 | mysql\_username | no | root | `root` is the default username that is created automatically |
 | mysql\_password | no | N/A | Empty value as default (no password is created automatically) |
 | mysql\_maxPoolSize | no | 3 | Max number of connections per database pool |
+| mysql\_maxPoolIdle | no | 2 | Max number of connections idle per database pool |
+| mysql\_minPoolIdle | no | 0 | Min number of connections idle per database pool |
+| mysql\_minPoolIdleTimeMillis | no | 10000 | minimum amount of time an idle connection before is eligible for eviction |
 | mysql\_options | no | N/A | optional connection parameter(s) concatinated to jdbc url if necessary<br/>When `useSSL=true&requireSSL=false` is set to `mysql_options`, jdbc url will become like <b>jdbc:mysql://mysql.example.com:3306/fiwareservice?useSSL=true&requireSSL=false</b>|
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>
 | attr\_metadata\_store | no | false | <i>true</i> or <i>false</i>. |
@@ -264,6 +267,9 @@ A configuration example could be:
     cygnus-ngsi.sinks.mysql-sink.mysql_username = myuser
     cygnus-ngsi.sinks.mysql-sink.mysql_password = mypassword
     cygnus-ngsi.sinks.mysql-sink.mysql_maxPoolSize = 3
+    cygnus-ngsi.sinks.mysql-sink.mysql_maxPoolIdle = 2
+    cygnus-ngsi.sinks.mysql-sink.mysql_minPoolIdle = 0
+    cygnus-ngsi.sinks.mysql-sink.mysql_minPoolIdleTimeMillis = 10000
     cygnus-ngsi.sinks.mysql-sink.mysql_options = useSSL=true&requireSSL=false
     cygnus-ngsi.sinks.mysql-sink.attr_persistence = row
     cygnus-ngsi.sinks.mysql-sink.attr_native_types = false

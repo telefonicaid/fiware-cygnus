@@ -236,6 +236,9 @@ If `attr_persistence=colum` then `NGSIOracleSQLSink` will persist the data withi
 | oracle\_password | no | oracle | `oracle` is the default for default username |
 | oracle\_database | no | xe | `xe` is the default database avaiable in oracle 11g XE (express edition) |
 | oracle\_maxPoolSize | no | 3 | Max number of connections per database pool |
+| oracle\_maxPoolIdle | no | 2 | Max number of connections idle per database pool |
+| oracle\_minPoolIdle | no | 0 | Min number of connections idle per database pool |
+| oracle\_minPoolIdleTimeMillis | no | 10000 | minimum amount of time an idle connection before is eligible for eviction |
 | oracle\_options | no | N/A | optional connection parameter(s) concatinated to jdbc url if necessary<br/>When `useSSL=true&requireSSL=false` is set to `oracle_options`, jdbc url will become like <b>jdbc:oracle://oracle.example.com:3306/fiwareservice?useSSL=true&requireSSL=false</b>|
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>
 | attr\_metadata\_store | no | false | <i>true</i> or <i>false</i>. |
@@ -273,6 +276,9 @@ A configuration example could be:
     cygnus-ngsi.sinks.oracle-sink.nl_timestamp_format = YYYY-MM-DD HH24:MI:SS.FF6
     cygnus-ngsi.sinks.oracle-sink.nl_timestamp_tz_format = YYYY-MM-DD\"T\"HH24:MI:SS.FF6 TZR
     cygnus-ngsi.sinks.oracle-sink.oracle_maxPoolSize = 3
+    cygnus-ngsi.sinks.oracle-sink.oracle_maxPoolIdle = 2
+    cygnus-ngsi.sinks.oracle-sink.oracle_minPoolIdle = 0
+    cygnus-ngsi.sinks.oracle-sink.oracle_minPoolIdleTimeMillis = 10000
     cygnus-ngsi.sinks.oracle-sink.attr_persistence = column
     cygnus-ngsi.sinks.oracle-sink.attr_native_types = false
     cygnus-ngsi.sinks.oracle-sink.batch_size = 100
