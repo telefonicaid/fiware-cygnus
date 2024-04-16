@@ -1,2 +1,2 @@
-- [cygnus-common] [SQL-sinks] Define default values and allow to set Pool config for maxPoolSize(3), maxPoolIddle(2), minPoolIdle(0) and maxPoolWait(12000) (#2366)
+- [cygnus-common] [SQL-sinks] Define default values and allow to set connection pool config for maxPoolSize(3), maxPoolIddle(2), minPoolIdle(0) and minPoolIdleTimeMillis(10000) (#2366)
 - [cygnus-ngsi] Upgrade Debian version from 12.4 to 12.5 in Dockerfile
