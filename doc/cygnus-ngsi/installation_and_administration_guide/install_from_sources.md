@@ -112,7 +112,7 @@ Please make sure that you have ports 5080 (admin port) and 5050 (default instanc
 [Top](#top)
 
 ## <a name="section3"></a>SSL Support
-Apache Flume has SSL support, <a href='https://flume.apache.org/FlumeUserGuide.html#ssl-tls-support'>mentioned here</a>
+Apache Flume has SSL support, [mentioned here](https://flume.apache.org/FlumeUserGuide.html#ssl-tls-support)
 
 ### <a name="section3.1"></a>Prerequisites for this is that you should have:
 SSL certificated installed (using Certbot & let's encrypt)<br/>
