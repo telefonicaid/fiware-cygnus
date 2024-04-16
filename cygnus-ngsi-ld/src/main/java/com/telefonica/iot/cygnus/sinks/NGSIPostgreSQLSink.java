@@ -196,7 +196,7 @@ public class NGSIPostgreSQLSink extends NGSILDSink {
         minPoolIdle = context.getInteger("postgresql_minPoolIdle", DEFAULT_MIN_POOL_IDLE);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_minPoolIdle=" + minPoolIdle + ")");
 
-        minPoolIdleTimeMillis = context.getInteger("postgresql_minPoolIdleTimeMillis", DEFAULT_MAX_POOL_WAIT);
+        minPoolIdleTimeMillis = context.getInteger("postgresql_minPoolIdleTimeMillis", DEFAULT_MIN_POOL_IDLE_TIME_MILLIS);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (postgresql_minPoolIdleTimeMillis=" + minPoolIdleTimeMillis + ")");        
 
         rowAttrPersistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE).equals("row");
