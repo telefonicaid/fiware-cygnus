@@ -60,7 +60,7 @@ public class NGSIMySQLSink extends NGSISink {
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
     private static final int DEFAULT_MAX_POOL_IDLE = 2;
     private static final int DEFAULT_MIN_POOL_IDLE = 0;
-    private static final int DEFAULT_MAX_POOL_WAIT = 10000;
+    private static final int DEFAULT_MIN_POOL_IDLE_TIME_MILLIS = 10000;
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
     private static final String MYSQL_DRIVER_NAME = "com.mysql.jdbc.Driver";
     private static final SQLInstance MYSQL_INSTANCE_NAME = SQLInstance.MYSQL;
@@ -79,7 +79,7 @@ public class NGSIMySQLSink extends NGSISink {
     private int maxPoolSize;
     private int maxPoolIdle;
     private int minPoolIdle;
-    private int maxPoolWait;
+    private int minPoolIdleTimeMillis;
     private boolean rowAttrPersistence;
     private SQLBackendImpl mySQLPersistenceBackend;
     private boolean attrNativeTypes;
@@ -205,8 +205,8 @@ public class NGSIMySQLSink extends NGSISink {
         minPoolIdle = context.getInteger("mysql_minPoolIdle", DEFAULT_MIN_POOL_IDLE);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_minPoolIdle=" + minPoolIdle + ")");
 
-        maxPoolWait = context.getInteger("mysql_maxPoolWait", DEFAULT_MAX_POOL_WAIT);
-        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_maxPoolWait=" + maxPoolWait + ")");
+        minPoolIdleTimeMillis = context.getInteger("mysql_minPoolIdleTimeMillis", DEFAULT_MIN_POOL_IDLE_TIME_MILLIS);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mysql_minPoolIdleTimeMillis=" + minPoolIdleTimeMillis + ")");
 
         rowAttrPersistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE).equals("row");
         String persistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE);
@@ -293,10 +293,10 @@ public class NGSIMySQLSink extends NGSISink {
     @Override
     public void start() {
         try {
-            createPersistenceBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, maxPoolWait, mysqlOptions, persistErrors, maxLatestErrors);
+            createPersistenceBackend(mysqlHost, mysqlPort, mysqlUsername, mysqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, minPoolIdleTimeMillis, mysqlOptions, persistErrors, maxLatestErrors);
             LOGGER.debug("[" + this.getName() + "] MySQL persistence backend created");
         } catch (Exception e) {
-            String configParams = " mysqlHost " + mysqlHost + " mysqlPort " + mysqlPort + " mysqlUsername " + mysqlUsername + " mysqlPassword " + mysqlPassword + " maxPoolSize " + maxPoolSize + " maxPoolIdle " + maxPoolIdle + " minPoolIdle " + minPoolIdle + " maxPoolWait " + maxPoolWait + " mysqlOptions " + mysqlOptions + " persistErrors " + persistErrors + " maxLatestErrors " + maxLatestErrors;
+            String configParams = " mysqlHost " + mysqlHost + " mysqlPort " + mysqlPort + " mysqlUsername " + mysqlUsername + " mysqlPassword " + mysqlPassword + " maxPoolSize " + maxPoolSize + " maxPoolIdle " + maxPoolIdle + " minPoolIdle " + minPoolIdle + " minPoolIdleTimeMillis " + minPoolIdleTimeMillis + " mysqlOptions " + mysqlOptions + " persistErrors " + persistErrors + " maxLatestErrors " + maxLatestErrors;
             LOGGER.error("Error while creating the MySQL persistence backend. " +
                          "Config params= " + configParams +
                          "Details=" + e.getMessage() +
@@ -315,9 +315,9 @@ public class NGSIMySQLSink extends NGSISink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, int maxPoolWait, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
+private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, int minPoolIdleTimeMillis, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
         if (mySQLPersistenceBackend == null) {
-            mySQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, maxPoolWait, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, sqlOptions, persistErrors, maxLatestErrors);
+            mySQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, minPoolIdleTimeMillis, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, sqlOptions, persistErrors, maxLatestErrors);
         }
     }
 
