@@ -268,6 +268,10 @@ Coming soon.
 | postgresql\_database | no | postgres | `postgres` is the default database that is created automatically when install. Note also than with datamodels <i>dm-by-entity-database</i>, <i>dm-by-entity-database-schema</i>, <i>dm-by-entity-type-database</i> and <i>dm-by-entity-type-database-schema</i> this setting is ignored (as the database is part of the mapping done by the datamodel) | |
 | postgresql\_username | no | postgres | `postgres` is the default username that is created automatically when install |
 | postgresql\_password | no | N/A | Empty value by default (No password is created when install) |
+| postgresql\_maxPoolSize | no | 3 | Max number of connections per database pool |
+| postgresql\_maxPoolIdle | no | 2 | Max number of idle connections per database pool |
+| postgresql\_minPoolIdle | no | 0 | Min number of idle connections per database pool |
+| postgresql\_minPoolIdleTimeMillis | no | 10000 | minimum amount of time an idle connection before is eligible for eviction |
 | postgresql\_options | no | N/A | optional connection parameter(s) concatinated to jdbc url if necessary<br/>When `sslmode=require` is set to `postgresql_options`, jdbc url will become like <b>jdbc:postgresql://postgresql.example.com:5432/postgres?sslmode=require</b>|
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
 | attr\_metadata\_store | no | false | <i>true</i> or <i>false</i>. |
@@ -295,6 +299,10 @@ A configuration example could be:
     cygnus-ngsi.sinks.postgresql-sink.postgresql_database = mydatabase
     cygnus-ngsi.sinks.postgresql-sink.postgresql_username = myuser
     cygnus-ngsi.sinks.postgresql-sink.postgresql_password = mypassword
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_maxPoolSize = 3
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_maxPoolIdle = 2
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_minPoolIdle = 0
+    cygnus-ngsi.sinks.postgresql-sink.postgresql_minPoolIdleTimeMillis = 10000
     cygnus-ngsi.sinks.postgresql-sink.postgresql_options = sslmode=require
     cygnus-ngsi.sinks.postgresql-sink.attr_persistence = row
     cygnus-ngsi.sinks.postgresql-sink.attr_native_types = false

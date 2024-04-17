@@ -58,6 +58,9 @@ public class NGSIOracleSQLSink extends NGSISink {
     private static final String DEFAULT_USER_NAME = "system";
     private static final String DEFAULT_DATABASE = "xe";
     private static final int DEFAULT_MAX_POOL_SIZE = 3;
+    private static final int DEFAULT_MAX_POOL_IDLE = 2;
+    private static final int DEFAULT_MIN_POOL_IDLE = 0;
+    private static final int DEFAULT_MIN_POOL_IDLE_TIME_MILLIS = 10000;
     private static final String DEFAULT_ATTR_NATIVE_TYPES = "false";
     //private static final String ORACLE_DRIVER_NAME = "oracle.jdbc.OracleDriver";
     private static final String ORACLE_DRIVER_NAME = "oracle.jdbc.driver.OracleDriver";    
@@ -82,6 +85,9 @@ public class NGSIOracleSQLSink extends NGSISink {
     private String oraclePassword;
     private String oracleDatabase;    
     private int maxPoolSize;
+    private int maxPoolIdle;
+    private int minPoolIdle;
+    private int minPoolIdleTimeMillis;
     private boolean rowAttrPersistence;
     private SQLBackendImpl oracleSQLPersistenceBackend;
     private boolean attrNativeTypes;
@@ -216,6 +222,15 @@ public class NGSIOracleSQLSink extends NGSISink {
         maxPoolSize = context.getInteger("oracle_maxPoolSize", DEFAULT_MAX_POOL_SIZE);
         LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_maxPoolSize=" + maxPoolSize + ")");
 
+        maxPoolIdle = context.getInteger("oracle_maxPoolIdle", DEFAULT_MAX_POOL_IDLE);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_maxPoolIdle=" + maxPoolIdle + ")");
+
+        minPoolIdle = context.getInteger("oracle_minPoolIdle", DEFAULT_MIN_POOL_IDLE);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_minPoolIdle=" + minPoolIdle + ")");
+
+        minPoolIdleTimeMillis = context.getInteger("oracle_minPoolIdleTimeMillis", DEFAULT_MIN_POOL_IDLE_TIME_MILLIS);
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (oracle_minPoolIdleTimeMillis=" + minPoolIdleTimeMillis + ")");
+
         rowAttrPersistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE).equals("row");
         String persistence = context.getString("attr_persistence", DEFAULT_ROW_ATTR_PERSISTENCE);
 
@@ -327,10 +342,10 @@ public class NGSIOracleSQLSink extends NGSISink {
     @Override
     public void start() {
         try {
-            createPersistenceBackend(oracleHost, oraclePort, oracleUsername, oraclePassword, maxPoolSize, oracleOptions, persistErrors, maxLatestErrors);
+            createPersistenceBackend(oracleHost, oraclePort, oracleUsername, oraclePassword, maxPoolSize, maxPoolIdle, minPoolIdle, minPoolIdleTimeMillis, oracleOptions, persistErrors, maxLatestErrors);
             LOGGER.debug("[" + this.getName() + "] OracleSQL persistence backend created");
         } catch (Exception e) {
-            String configParams = " oracleHost " + oracleHost + " oraclePort " + oraclePort + " oracleUsername " + oracleUsername + " oraclePassword " + oraclePassword + " maxPoolSize " + maxPoolSize + " oracleOptions " + oracleOptions + " persistErrors " + persistErrors + " maxLatestErrors " + maxLatestErrors;
+            String configParams = " oracleHost " + oracleHost + " oraclePort " + oraclePort + " oracleUsername " + oracleUsername + " oraclePassword " + oraclePassword + " maxPoolSize " + maxPoolSize + " maxPoolIdle " + maxPoolIdle + " minPoolIdle " + minPoolIdle + " minPoolIdleTimeMillis " + minPoolIdleTimeMillis + " oracleOptions " + oracleOptions + " persistErrors " + persistErrors + " maxLatestErrors " + maxLatestErrors;
             LOGGER.error("Error while creating the OracleSQL persistence backend. " +
                          "Config params= " + configParams +
                          "Details=" + e.getMessage() +
@@ -349,9 +364,9 @@ public class NGSIOracleSQLSink extends NGSISink {
     /**
      * Initialices a lazy singleton to share among instances on JVM
      */
-    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
+    private void createPersistenceBackend(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, int minPoolIdleTimeMillis, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
         if (oracleSQLPersistenceBackend == null) {
-            oracleSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, ORACLE_INSTANCE_NAME, ORACLE_DRIVER_NAME, sqlOptions, persistErrors, maxLatestErrors);
+            oracleSQLPersistenceBackend = new SQLBackendImpl(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, minPoolIdleTimeMillis, ORACLE_INSTANCE_NAME, ORACLE_DRIVER_NAME, sqlOptions, persistErrors, maxLatestErrors);
             oracleSQLPersistenceBackend.setNlsTimestampFormat(nlsTimestampFormat);
             oracleSQLPersistenceBackend.setNlsTimestampTzFormat(nlsTimestampTzFormat);
         }

@@ -65,13 +65,16 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlUsername
      * @param sqlPassword
      * @param maxPoolSize
+     * @param maxPoolIdle
+     * @param minPoolIdle
+     * @param minPoolIdleTimeMillis
      * @param sqlInstance
      * @param sqlDriverName
      * @param persistErrors
      * @param maxLatestErrors
      */
-    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, SQLInstance sqlInstance, String sqlDriverName, boolean persistErrors, int maxLatestErrors) {
-        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, null, persistErrors, maxLatestErrors);
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, int minPoolIdleTimeMillis, SQLInstance sqlInstance, String sqlDriverName, boolean persistErrors, int maxLatestErrors) {
+        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, minPoolIdleTimeMillis, sqlInstance, sqlDriverName, null, persistErrors, maxLatestErrors);
     } // SQLBackendImpl
 
     /**
@@ -82,12 +85,15 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlUsername
      * @param sqlPassword
      * @param maxPoolSize
+     * @param maxPoolIdle
+     * @param minPoolIdle
+     * @param minPoolIdleTimeMillis
      * @param sqlInstance
      * @param sqlDriverName
      * @param sqlOptions
      */
-    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, SQLInstance sqlInstance, String sqlDriverName, String sqlOptions) {
-        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, sqlOptions, true, DEFAULT_MAX_LATEST_ERRORS);
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, int minPoolIdleTimeMillis, SQLInstance sqlInstance, String sqlDriverName, String sqlOptions) {
+        this(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, minPoolIdleTimeMillis, sqlInstance, sqlDriverName, sqlOptions, true, DEFAULT_MAX_LATEST_ERRORS);
     } // SQLBackendImpl
 
     /**
@@ -98,14 +104,17 @@ public class SQLBackendImpl implements SQLBackend{
      * @param sqlUsername
      * @param sqlPassword
      * @param maxPoolSize
+     * @param maxPoolIdle
+     * @param minPoolIdle
+     * @param minPoolIdleTimeMillis
      * @param sqlInstance
      * @param sqlDriverName
      * @param sqlOptions
      * @param persistErrors
      * @param maxLatestErrors
      */
-    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, SQLInstance sqlInstance, String sqlDriverName, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
-        driver = new SQLBackendImpl.SQLDriver(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, sqlInstance, sqlDriverName, sqlOptions);
+    public SQLBackendImpl(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, int minPoolIdleTimeMillis, SQLInstance sqlInstance, String sqlDriverName, String sqlOptions, boolean persistErrors, int maxLatestErrors) {
+        driver = new SQLBackendImpl.SQLDriver(sqlHost, sqlPort, sqlUsername, sqlPassword, maxPoolSize, maxPoolIdle, minPoolIdle, minPoolIdleTimeMillis, sqlInstance, sqlDriverName, sqlOptions);
         cache = new SQLCache();
         this.sqlInstance = sqlInstance;
         this.persistErrors = persistErrors;
@@ -935,6 +944,9 @@ public class SQLBackendImpl implements SQLBackend{
         private final SQLInstance sqlInstance;
         private final String sqlDriverName;
         private final int maxPoolSize;
+        private final int maxPoolIdle;
+        private final int minPoolIdle;
+        private final int minPoolIdleTimeMillis;
         private final String sqlOptions;
 
         /**
@@ -945,11 +957,14 @@ public class SQLBackendImpl implements SQLBackend{
          * @param sqlUsername
          * @param sqlPassword
          * @param maxPoolSize
+         * @param maxPoolIdle
+         * @param minPoolIdle
+         * @param minPoolIdleTimeMillis
          * @param sqlInstance
          * @param sqlDriverName
          * @param sqlOptions
          */
-        public SQLDriver(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, SQLInstance sqlInstance, String sqlDriverName, String sqlOptions) {
+        public SQLDriver(String sqlHost, String sqlPort, String sqlUsername, String sqlPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, int minPoolIdleTimeMillis, SQLInstance sqlInstance, String sqlDriverName, String sqlOptions) {
             datasources = new HashMap<>();
             pools = new HashMap<>();
             this.sqlHost = sqlHost;
@@ -957,6 +972,9 @@ public class SQLBackendImpl implements SQLBackend{
             this.sqlUsername = sqlUsername;
             this.sqlPassword = sqlPassword;
             this.maxPoolSize = maxPoolSize;
+            this.maxPoolIdle = maxPoolIdle;
+            this.minPoolIdle = minPoolIdle;
+            this.minPoolIdleTimeMillis = minPoolIdleTimeMillis;
             this.sqlInstance = sqlInstance;
             this.sqlDriverName = sqlDriverName;
             this.sqlOptions = sqlOptions;
@@ -1095,7 +1113,17 @@ public class SQLBackendImpl implements SQLBackend{
 
                 // Creates an Instance of GenericObjectPool That Holds Our Pool of Connections Object!
                 gPool = new GenericObjectPool();
+                // Tune from https://javadoc.io/static/commons-pool/commons-pool/1.6/org/apache/commons/pool/impl/GenericObjectPool.html
+                // Sets the cap on the number of objects that can be allocated by the pool (checked out to clients, or idle awaiting checkout) at a given time.
                 gPool.setMaxActive(this.maxPoolSize);
+                // Sets the cap on the number of "idle" instances in the pool.
+                gPool.setMaxIdle(this.maxPoolIdle);
+                // Sets the minimum number of objects allowed in the pool before the evictor thread (if active) spawns new objects.
+                gPool.setMinIdle(this.minPoolIdle);
+                // Sets the minimum amount of time an object may sit idle in the pool before it is eligible for eviction by the idle object evictor (if any)
+                gPool.setMinEvictableIdleTimeMillis(this.minPoolIdleTimeMillis);
+                // Sets the number of milliseconds to sleep between runs of the idle object evictor thread
+                gPool.setTimeBetweenEvictionRunsMillis(this.minPoolIdleTimeMillis*3);
                 pools.put(destination, gPool);
 
                 // Creates a ConnectionFactory Object Which Will Be Used by the Pool to Create the Connection Object!
