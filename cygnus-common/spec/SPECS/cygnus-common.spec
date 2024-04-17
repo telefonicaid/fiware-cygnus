@@ -172,6 +172,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Wed Apr 17 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.8.0
+- [cygnus-common] [SQL-sinks] Define default values and allow to set connection pool config for maxPoolSize(3), maxPoolIddle(2), minPoolIdle(0) and minPoolIdleTimeMillis(10000) (#2366)
+
 * Mon Mar 11 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.7.0
 
 * Mon Mar 4 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.6.0
