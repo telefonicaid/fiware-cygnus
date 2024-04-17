@@ -25,7 +25,7 @@ cygnus:
   volumes:
     - ${CYGNUS_CONF}/agent.conf:/opt/apache-flume/conf/agent.conf
   environment:
-    - CYGNUS_JAVA_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6006
+    - CYGNUS_JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:6006
     - CYGNUS_SKIP_CONF_GENERATION=true
   log_driver: json-file
   log_opt:
@@ -51,6 +51,17 @@ Once the container is up and running you should find on startup a line like this
 Warning: JAVA_HOME is not set!
 + exec /usr/bin/java -Xmx64m -Xms64m -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6006 -Dflume.root.logger=INFO,LOGFILE -Duser.timezone=UTC -Dfile.encoding=UTF-8 -cp '/opt/apache-flume/conf:/opt/apache-flume/lib/*:/opt/apache-flume/plugins.d/cygnus/lib/*:/opt/apache-flume/plugins.d/cygnus/libext/*' -Djava.library.path= com.telefonica.iot.cygnus.nodes.CygnusApplication -f /opt/apache-flume/conf/agent.conf -n cygnus-ngsi -p 5080
 Listening for transport dt_socket at address: 6006
+```
+
+## Attaching java jdb debugger 
+```
+ jdb -attach 127.0.0.1:6006
+```
+```
+Set uncaught java.lang.Throwable
+Set deferred uncaught java.lang.Throwable
+Initializing jdb ...
+> 
 ```
 
 ## Attaching IntelliJ debugger.
