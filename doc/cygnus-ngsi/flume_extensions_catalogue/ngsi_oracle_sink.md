@@ -236,8 +236,8 @@ If `attr_persistence=colum` then `NGSIOracleSQLSink` will persist the data withi
 | oracle\_password | no | oracle | `oracle` is the default for default username |
 | oracle\_database | no | xe | `xe` is the default database avaiable in oracle 11g XE (express edition) |
 | oracle\_maxPoolSize | no | 3 | Max number of connections per database pool |
-| oracle\_maxPoolIdle | no | 2 | Max number of connections idle per database pool |
-| oracle\_minPoolIdle | no | 0 | Min number of connections idle per database pool |
+| oracle\_maxPoolIdle | no | 2 | Max number of idle connections per database pool |
+| oracle\_minPoolIdle | no | 0 | Min number of idle connections per database pool |
 | oracle\_minPoolIdleTimeMillis | no | 10000 | minimum amount of time an idle connection before is eligible for eviction |
 | oracle\_options | no | N/A | optional connection parameter(s) concatinated to jdbc url if necessary<br/>When `useSSL=true&requireSSL=false` is set to `oracle_options`, jdbc url will become like <b>jdbc:oracle://oracle.example.com:3306/fiwareservice?useSSL=true&requireSSL=false</b>|
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>
