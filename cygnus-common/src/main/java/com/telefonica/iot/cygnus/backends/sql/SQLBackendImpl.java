@@ -1017,7 +1017,7 @@ public class SQLBackendImpl implements SQLBackend{
                     } // if
 
                     //DataSource datasource = createConnectionPool(destination);
-                    DataSource datasource = createConnectionPool(sqlHost);
+                    DataSource datasource = createConnectionPool(destination, sqlHost);
                     //datasources.put(destination, datasource);
                     datasources.put(sqlHost, datasource);                    
                     connection = datasource.getConnection();
@@ -1114,11 +1114,14 @@ public class SQLBackendImpl implements SQLBackend{
          * @throws Exception
          */
         @SuppressWarnings("unused")
-        private DataSource createConnectionPool(String destination) throws Exception {
+        private DataSource createConnectionPool(String destination, String sqlHost) throws Exception {
             GenericObjectPool gPool = null;
-            if (pools.containsKey(destination)){
-                LOGGER.debug(sqlInstance.toString().toUpperCase() + " Pool recovered from Cache (" + destination + ")");
-                gPool = pools.get(destination);
+            //if (pools.containsKey(destination)){
+            if (pools.containsKey(sqlHost)){                
+                //LOGGER.debug(sqlInstance.toString().toUpperCase() + " Pool recovered from Cache (" + destination + ")");
+                LOGGER.debug(sqlInstance.toString().toUpperCase() + " Pool recovered from Cache (" + sqlHost + ")");                
+                //gPool = pools.get(destination);
+                gPool = pools.get(sqlHost);                
             }else{
                 String jdbcUrl = generateJDBCUrl(destination);
                 Class.forName(sqlDriverName);
