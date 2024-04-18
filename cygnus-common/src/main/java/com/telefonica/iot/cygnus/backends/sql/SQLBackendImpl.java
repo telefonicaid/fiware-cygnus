@@ -231,7 +231,7 @@ public class SQLBackendImpl implements SQLBackend{
         Statement stmt = null;
 
         // get a connection to the given destination
-        Connection con = driver.getConnection(dataBase, this.sqlHost);        
+        Connection con = driver.getConnection(dataBase, this.sqlHost);
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "create table if not exists `" + tableName + "`" + typedFieldNames;
@@ -276,7 +276,7 @@ public class SQLBackendImpl implements SQLBackend{
         String tableName = table;
 
         // get a connection to the given destination
-        Connection con = driver.getConnection(dataBase, this.sqlHost);        
+        Connection con = driver.getConnection(dataBase, this.sqlHost);
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
             query = "insert into `" + tableName + "` " + fieldNames + " values " + fieldValues;
@@ -606,7 +606,7 @@ public class SQLBackendImpl implements SQLBackend{
 
         Statement stmt = null;
         // get a connection to the given destination
-        Connection con = driver.getConnection(dataBase, this.sqlHost);        
+        Connection con = driver.getConnection(dataBase, this.sqlHost);
 
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
@@ -674,7 +674,7 @@ public class SQLBackendImpl implements SQLBackend{
 
         try {
 
-            connection = driver.getConnection(dataBase, this.sqlHost);            
+            connection = driver.getConnection(dataBase, this.sqlHost);
             connection.setAutoCommit(false);
 
             ArrayList<StringBuffer> upsertQuerysList = SQLQueryUtils.sqlUpsertQuery(aggregation,
@@ -760,7 +760,7 @@ public class SQLBackendImpl implements SQLBackend{
 
         try {
 
-            connection = driver.getConnection(dataBase, this.sqlHost);            
+            connection = driver.getConnection(dataBase, this.sqlHost);
             connection.setAutoCommit(false);
 
             insertQuery = SQLQueryUtils.sqlInsertQuery(aggregation,
@@ -843,7 +843,7 @@ public class SQLBackendImpl implements SQLBackend{
 
         Statement stmt = null;
         // get a connection to the given destination
-        Connection con = driver.getConnection(dataBase, this.sqlHost);        
+        Connection con = driver.getConnection(dataBase, this.sqlHost);
 
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
@@ -887,7 +887,7 @@ public class SQLBackendImpl implements SQLBackend{
                 ", query)";
 
         // get a connection to the given destination
-        Connection con = driver.getConnection(dataBase, this.sqlHost);        
+        Connection con = driver.getConnection(dataBase, this.sqlHost);
 
         String query = "";
         if (sqlInstance == SQLInstance.MYSQL) {
@@ -997,17 +997,13 @@ public class SQLBackendImpl implements SQLBackend{
                 // number, if a new connection is needed, the oldest one is closed
                 Connection connection = null;
 
-                //if (datasources.containsKey(destination)) {
                 if (datasources.containsKey(sqlHost)) {                    
-                    //connection = datasources.get(destination).getConnection();
                     connection = datasources.get(sqlHost).getConnection();
-                    //LOGGER.debug(sqlInstance.toString().toUpperCase() + " Recovered destination connection from cache (" + destination + ")");
                     LOGGER.debug(sqlInstance.toString().toUpperCase() + " Recovered destination connection from cache (" + sqlHost + ")");                    
                 }
 
                 if (connection == null || !connection.isValid(0)) {
                     if (connection != null) {
-                        //LOGGER.debug(sqlInstance.toString().toUpperCase() + " Closing invalid sql connection for destination " + destination);
                         LOGGER.debug(sqlInstance.toString().toUpperCase() + " Closing invalid sql connection for destination " + sqlHost);                        
                         try {
                             connection.close();
@@ -1016,9 +1012,7 @@ public class SQLBackendImpl implements SQLBackend{
                         }
                     } // if
 
-                    //DataSource datasource = createConnectionPool(destination);
                     DataSource datasource = createConnectionPool(destination, sqlHost);
-                    //datasources.put(destination, datasource);
                     datasources.put(sqlHost, datasource);                    
                     connection = datasource.getConnection();
                     if (sqlInstance == SQLInstance.ORACLE) {
@@ -1033,15 +1027,11 @@ public class SQLBackendImpl implements SQLBackend{
                 } // if
 
                 // Check Pool cache and log status
-                //if (pools.containsKey(destination)){
                 if (pools.containsKey(sqlHost)){                    
-                    //GenericObjectPool pool = pools.get(destination);
                     GenericObjectPool pool = pools.get(sqlHost);
-                    //LOGGER.debug(sqlInstance.toString().toUpperCase() + " Pool status (" + destination + ") Max.: " + pool.getMaxActive() + "; Active: "
                     LOGGER.debug(sqlInstance.toString().toUpperCase() + " Pool status (" + sqlHost + ") Max.: " + pool.getMaxActive() + "; Active: "                                 
                             + pool.getNumActive() + "; Idle: " + pool.getNumIdle());
                 }else{
-                    //LOGGER.error(sqlInstance.toString().toUpperCase() + " Can't find dabase in pool cache (" + destination + ")");
                     LOGGER.error(sqlInstance.toString().toUpperCase() + " Can't find dabase in pool cache (" + sqlHost + ")");                    
                 }
                 return connection;
@@ -1116,11 +1106,8 @@ public class SQLBackendImpl implements SQLBackend{
         @SuppressWarnings("unused")
         private DataSource createConnectionPool(String destination, String sqlHost) throws Exception {
             GenericObjectPool gPool = null;
-            //if (pools.containsKey(destination)){
             if (pools.containsKey(sqlHost)){                
-                //LOGGER.debug(sqlInstance.toString().toUpperCase() + " Pool recovered from Cache (" + destination + ")");
                 LOGGER.debug(sqlInstance.toString().toUpperCase() + " Pool recovered from Cache (" + sqlHost + ")");                
-                //gPool = pools.get(destination);
                 gPool = pools.get(sqlHost);                
             }else{
                 String jdbcUrl = generateJDBCUrl(destination);
