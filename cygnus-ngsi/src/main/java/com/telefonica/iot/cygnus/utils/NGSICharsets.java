@@ -41,9 +41,9 @@ public final class NGSICharsets {
             char c = in.charAt(i);
             int code = c;
             
-            if (code >= 97 && code <= 119) { // a-w --> a-w
+            if (code >= 97 && code <= 119 || code >= 65 && code <= 87) { // a-w--> a-w,A-W-->A-W
                 out += c;
-            } else if (c == 'x') {
+            } else if (c == 'x'|| c == 'X') {
                 String next4;
             
                 if (i + 4 < in.length()) {
@@ -57,7 +57,7 @@ public final class NGSICharsets {
                 } else { // x --> x
                     out += c;
                 } // if else
-            } else if (code == 121 || code == 122) { // yz --> yz
+            } else if (code == 121 || code == 122 || code ==89 || code == 90) { // yz --> yz,YZ-->YZ
                 out += c;
             } else if (code >= 48 && code <= 57) { // 0-9 --> 0-9
                 out += c;
