@@ -631,16 +631,15 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                             // Try to insert as Double
                             feature.addAttribute(attrName, Double.parseDouble(attrValue.toString()));
                         } catch (NumberFormatException e3) {
-                            // If all fails, insert as is
                             LOGGER.warn(
                                     "[NGSIArcgisAggregator] Unquoted String attribute: " + attrName + ":" + attrValue);
-                            try {
-                                feature.addAttribute(attrName, attrValue);
-
-                            } catch (Exception e) {
-                                // If all fails, insert as String
+                            // If all fails, insert as String
+                            if (attrValue != null) {
                                 String strValue = URLDecoder.decode(attrValue.toString());
                                 feature.addAttribute(attrName, strValue);
+                            } else {
+                                // Insert null as is
+                                feature.addAttribute(attrName, attrValue);
                             }
 
                         }
