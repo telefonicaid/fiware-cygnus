@@ -633,7 +633,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                         } catch (NumberFormatException e3) {
                             LOGGER.warn(
                                     "[NGSIArcgisAggregator] Unquoted String attribute: " + attrName + ":" + attrValue);
-                            // If all fails, insert as String
+                            // If all fails, insert as String, except if null
                             if (attrValue != null) {
                                 String strValue = URLDecoder.decode(attrValue.toString());
                                 feature.addAttribute(attrName, strValue);
