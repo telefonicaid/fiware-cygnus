@@ -596,6 +596,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 
                     } else {
                         LOGGER.warn("Invalid geo:json type, only points allowed: " + location.toString());
+                        feature.setGeometry(null);
                     }
                 } catch (Exception e) {
                     LOGGER.error("Invalid geo:json format, (sikipped): " + attrValue.toString() + " - Error: "
