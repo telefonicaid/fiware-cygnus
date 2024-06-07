@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
@@ -312,7 +313,7 @@ public class Feature {
                 geometry = Point.createInstanceFromJson(jsonGeometry); // TODO another 
                                                                        //geometry types?
             } else {
-                geometry = null;
+                geometry = new JsonNull();
             }
             Map<String, Object> attributes = attToMap(json.get(ATTRIBUTES_TAG).getAsJsonObject());
             return new Feature(geometry, attributes);
