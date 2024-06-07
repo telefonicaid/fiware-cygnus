@@ -312,7 +312,7 @@ public class Feature {
                 geometry = Point.createInstanceFromJson(jsonGeometry); // TODO another 
                                                                        //geometry types?
             } else {
-                geometry = new Point(0, 0);
+                geometry = null;
             }
             Map<String, Object> attributes = attToMap(json.get(ATTRIBUTES_TAG).getAsJsonObject());
             return new Feature(geometry, attributes);
