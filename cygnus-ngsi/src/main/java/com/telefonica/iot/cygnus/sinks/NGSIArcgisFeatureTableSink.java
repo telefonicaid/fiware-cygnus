@@ -600,6 +600,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                 } catch (Exception e) {
                     LOGGER.error("Invalid geo:json format, (sikipped): " + attrValue.toString() + " - Error: "
                             + e.getMessage());
+                    feature.setGeometry(null);
                 }
                 break;
             case NGSI_BOOLEAN_DATATYPE:
