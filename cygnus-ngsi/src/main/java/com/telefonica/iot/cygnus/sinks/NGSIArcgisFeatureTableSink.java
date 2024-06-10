@@ -719,7 +719,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 
             LOGGER.debug("[ArcgisAggregatorDomain] - constructor init.");
             try {
-                feature = Feature.createPointFeature(0, 0);
+                feature = new Feature();
             } catch (Throwable e) {
                 LOGGER.error(
                         "ArcgisAggregatorDomain - Unexpected error " + e.getClass().getName() + " - " + e.getMessage());

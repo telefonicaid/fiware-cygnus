@@ -275,7 +275,10 @@ public class Feature {
     public JsonObject toJson() {
         JsonObject resultJSON = new JsonObject();
 
-        resultJSON.add(GEOMETRY_TAG, this.getGeometry().toJSON());
+        Geometry geo = this.getGeometry();
+        if (geo != null) {
+            resultJSON.add(GEOMETRY_TAG, geo.toJSON());
+        }
 
         JsonObject attributes = new JsonObject();
         for (Map.Entry<String, Object> attribute : this.attributes.entrySet()) {
