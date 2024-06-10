@@ -276,7 +276,7 @@ public class Feature {
         JsonObject resultJSON = new JsonObject();
 
         Geometry geo = this.getGeometry();
-        if (geo) {
+        if (geo != null) {
             resultJSON.add(GEOMETRY_TAG, geo.toJSON());
         }
 
