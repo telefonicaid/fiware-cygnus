@@ -172,6 +172,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Tue Jun 11 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.9.0
+
+- [cygnus-common] [arcgis] Force null geometry when invalid geo:json format or type is found instead of Point(0,0) (#2379)
+
 * Wed Apr 17 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.8.0
 - [cygnus-common] [SQL-sinks] Define default values and allow to set connection pool config for maxPoolSize(3), maxPoolIddle(2), minPoolIdle(0) and minPoolIdleTimeMillis(10000) (#2366)
 
