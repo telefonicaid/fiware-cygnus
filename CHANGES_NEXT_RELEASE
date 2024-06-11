@@ -1,2 +1,3 @@
+- [cygnus-arcgis] Get service and subservice using enableNameMappings flag config
 - [cygnus-arcgis] Insert null attribute as is in feature table (#2376)
 - [cygnus-arcgis] force null geometry when invalid geo:json format or type is found instead of Point(0,0) (#2379)
