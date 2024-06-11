@@ -482,21 +482,9 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 
                 LOGGER.debug("[NGSIArcgisAggregator] aggregate - Selected context ->" + contextElement);
 
-                // get the getRecvTimeTs headers
-                Map<String, String> headers = event.getHeaders();
+                service = event.getServiceForNaming(enableNameMappings);
+                subService = event.getServicePathForNaming(enableNameMappings);
 
-                for (Entry<String, String> entry : headers.entrySet()) {
-                    LOGGER.debug("Header entry key --> " + entry.getKey().toString() + ", value --> "
-                            + entry.getValue().toString());
-                    if (entry.getKey() != null
-                            && NGSIConstants.FLUME_HEADER_MAPPED_SERVICE.equals(entry.getKey().toString())) {
-                        service = entry.getValue().toString();
-                    } else if (entry.getKey() != null
-                            && NGSIConstants.FLUME_HEADER_MAPPED_SERVICE_PATH.equals(entry.getKey().toString())) {
-                        subService = entry.getValue().toString();
-                    }
-                } // for
-                
                 // Compose full url
                 featureTableUrl = argisServiceUrl + "/" + service + "/" + subService;
                 featureTableUrl = featureTableUrl.replaceAll("([^:])\\/\\/", "$1/");
