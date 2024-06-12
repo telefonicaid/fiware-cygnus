@@ -99,6 +99,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+* Wed Jun 12 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.9.0
+- [cygnus-ngsi] [arcgis-sink] Get service and subservice using enableNameMappings flag config
+- [cygnus-ngsi] [arcgis-sink] Insert null attribute as is in feature table (#2376)
+
 * Wed Apr 17 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.8.0
 - [cygnus-ngsi] Upgrade Debian version from 12.4 to 12.5 in Dockerfile
 
