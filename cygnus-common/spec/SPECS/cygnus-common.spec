@@ -172,8 +172,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
-* Tue Jun 11 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.9.0
-
+* Wed Jun 12 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.9.0
 - [cygnus-common] [arcgis] Force null geometry when invalid geo:json format or type is found instead of Point(0,0) (#2379)
 
 * Wed Apr 17 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.8.0
