@@ -40,6 +40,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLContext;
+import java.security.NoSuchAlgorithmException;
 import org.bson.Document;
 
 /**
@@ -588,6 +590,14 @@ public class MongoBackendImpl implements MongoBackend {
         // create a Mongo client
 
         if (client == null) {
+            SSLContext sslContext = null;
+            if (sslEnabled) {
+                try {
+                    sslContext = SSLContext.getInstance("TLS");
+                } catch (NoSuchAlgorithmException e) {
+                    LOGGER.warn("Error with TLS algorithm " + e.getMessage());
+                }
+            }
             if (mongoUsername.length() != 0) {
                 String authSource;
                 if ((mongoAuthSource != null) && !mongoAuthSource.isEmpty()) {
@@ -608,17 +618,20 @@ public class MongoBackendImpl implements MongoBackend {
                                              requiredReplicaSetName(mongoReplicaSet).
                                              sslEnabled(sslEnabled).
                                              sslInvalidHostNameAllowed(sslInvalidHostNameAllowed).
+                                             sslContext(sslContext).
                                              build());
                 } else {
                     client = new MongoClient(servers, credential, new MongoClientOptions.Builder().
                                              sslEnabled(sslEnabled).
                                              sslInvalidHostNameAllowed(sslInvalidHostNameAllowed).
+                                             sslContext(sslContext).
                                              build());
                 }
             } else {
                 MongoClientOptions options = MongoClientOptions.builder()
                     .sslEnabled(sslEnabled)
                     .sslInvalidHostNameAllowed(sslInvalidHostNameAllowed)
+                    .sslContext(sslContext)
                     .build();
                  client = new MongoClient(servers, options);
             } // if else
