@@ -1,0 +1,2 @@
+[cygnus-ngsi] [mongo-sink] Add mongo_ssl and mongo_ssl_invalid_host_allowed options for mongoDB connections
+[cygnus-common] [mongo-backend] Use sslEnabled and sslInvalidHostNameAllowed options for mongoDB connections
