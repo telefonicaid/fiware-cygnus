@@ -616,7 +616,11 @@ public class MongoBackendImpl implements MongoBackend {
                                              build());
                 }
             } else {
-                client = new MongoClient(servers);
+                MongoClientOptions options = MongoClientOptions.builder()
+                    .sslEnabled(sslEnabled)
+                    .sslInvalidHostNameAllowed(sslInvalidHostNameAllowed)
+                    .build();
+                 client = new MongoClient(servers, options);
             } // if else
         } // if
 
