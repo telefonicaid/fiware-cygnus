@@ -39,6 +39,8 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     protected String mongoPassword;
     protected String mongoAuthSource;
     protected String mongoReplicaSet;
+    protected Boolean sslEnabled;
+    protected Boolean sslInvalidHostNameAllowed;
     protected String dbPrefix;
     protected String collectionPrefix;
     protected MongoBackendImpl backend;
@@ -169,12 +171,37 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
             LOGGER.warn("[" + this.getName() + "] Invalid configuration (ignore_white_spaces="
                 + ignoreWhiteSpacesStr + ") -- Must be 'true' or 'false'");
         }  // if else
+
+        String sslEnabledStr = context.getString("sslEnabled", "true");
+        if (sslEnabledStr.equals("true") || sslEnabledStr.equals("false")) {
+            sslEnabled = Boolean.valueOf(sslEnabledStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (sslEnabled="
+                + sslEnabledStr + ")");
+        }  else {
+            invalidConfiguration = true;
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (sslEnabled="
+                + sslEnabledStr + ") -- Must be 'true' or 'false'");
+        }  // if else
+
+        String sslInvalidHostNameAllowedStr = context.getString("sslInvalidHostNameAllowed", "true");
+        if (sslInvalidHostNameAllowedStr.equals("true") || sslInvalidHostNameAllowedStr.equals("false")) {
+            sslInvalidHostNameAllowed = Boolean.valueOf(sslInvalidHostNameAllowedStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (sslInvalidHostNameAllowed="
+                + sslInvalidHostNameAllowedStr + ")");
+        }  else {
+            invalidConfiguration = true;
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (sslInvalidHostNameAllowed="
+                + sslInvalidHostNameAllowedStr + ") -- Must be 'true' or 'false'");
+        }  // if else
+
     } // configure
 
     @Override
     public void start() {
         try {
-            backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword, mongoAuthSource, mongoReplicaSet, dataModel);
+            backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword,
+                                           mongoAuthSource, mongoReplicaSet, dataModel,
+                                           sslEnabled, sslInvalidHostNameAllowed);
             LOGGER.debug("[" + this.getName() + "] MongoDB persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the MongoDB persistence backend. Details="

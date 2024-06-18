@@ -60,6 +60,8 @@ public class MongoBackendImpl implements MongoBackend {
     private final String mongoPassword;
     private final String mongoAuthSource;
     private final String mongoReplicaSet;
+    private final Boolean sslEnabled;
+    private final Boolean sslInvalidHostNameAllowed;
     private final DataModel dataModel;
     private static final CygnusLogger LOGGER = new CygnusLogger(MongoBackendImpl.class);
 
@@ -73,13 +75,16 @@ public class MongoBackendImpl implements MongoBackend {
      * @param dataModel
      */
     public MongoBackendImpl(String mongoHosts, String mongoUsername, String mongoPassword,
-            String mongoAuthSource, String mongoReplicaSet, DataModel dataModel) {
+                            String mongoAuthSource, String mongoReplicaSet, DataModel dataModel,
+                            Boolean sslEnabled, Boolean sslInvalidHostNameAllowed) {
         client = null;
         this.mongoHosts = mongoHosts;
         this.mongoUsername = mongoUsername;
         this.mongoPassword = mongoPassword;
         this.mongoAuthSource = mongoAuthSource;
         this.mongoReplicaSet = mongoReplicaSet;
+        this.sslEnabled = sslEnabled;
+        this.sslInvalidHostNameAllowed = sslInvalidHostNameAllowed;
         this.dataModel = dataModel;
     } // MongoBackendImpl
 
@@ -592,6 +597,7 @@ public class MongoBackendImpl implements MongoBackend {
                 }
                 MongoCredential credential = MongoCredential.createCredential(mongoUsername, authSource,
                         mongoPassword.toCharArray());
+
                 /****
                 // This constructor is deprecated see Mongo Client API documentation
                 // @deprecated Prefer {@link #MongoClient(List, MongoCredential, MongoClientOptions)}
@@ -599,9 +605,15 @@ public class MongoBackendImpl implements MongoBackend {
                 ****/
                 if ((mongoReplicaSet!= null) && !mongoReplicaSet.isEmpty()) {
                     client = new MongoClient(servers, credential, new MongoClientOptions.Builder().
-                            requiredReplicaSetName(mongoReplicaSet).build());
+                                             requiredReplicaSetName(mongoReplicaSet).
+                                             sslEnabled(sslEnabled).
+                                             sslInvalidHostNameAllowed(sslInvalidHostNameAllowed).
+                                             build());
                 } else {
-                    client = new MongoClient(servers, credential, new MongoClientOptions.Builder().build());
+                    client = new MongoClient(servers, credential, new MongoClientOptions.Builder().
+                                             sslEnabled(sslEnabled).
+                                             sslInvalidHostNameAllowed(sslInvalidHostNameAllowed).
+                                             build());
                 }
             } else {
                 client = new MongoClient(servers);
