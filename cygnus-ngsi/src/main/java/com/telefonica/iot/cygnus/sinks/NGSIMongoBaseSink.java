@@ -172,25 +172,25 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
                 + ignoreWhiteSpacesStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
-        String sslEnabledStr = context.getString("sslEnabled", "true");
+        String sslEnabledStr = context.getString("mongo_ssl", "false");
         if (sslEnabledStr.equals("true") || sslEnabledStr.equals("false")) {
             sslEnabled = Boolean.valueOf(sslEnabledStr);
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (sslEnabled="
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_ssl="
                 + sslEnabledStr + ")");
         }  else {
             invalidConfiguration = true;
-            LOGGER.warn("[" + this.getName() + "] Invalid configuration (sslEnabled="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (mongo_ssl="
                 + sslEnabledStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
-        String sslInvalidHostNameAllowedStr = context.getString("sslInvalidHostNameAllowed", "true");
+        String sslInvalidHostNameAllowedStr = context.getString("mongo_ssl_invalid_host_allowed", "false");
         if (sslInvalidHostNameAllowedStr.equals("true") || sslInvalidHostNameAllowedStr.equals("false")) {
             sslInvalidHostNameAllowed = Boolean.valueOf(sslInvalidHostNameAllowedStr);
-            LOGGER.debug("[" + this.getName() + "] Reading configuration (sslInvalidHostNameAllowed="
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_ssl_invalid_host_allowed="
                 + sslInvalidHostNameAllowedStr + ")");
         }  else {
             invalidConfiguration = true;
-            LOGGER.warn("[" + this.getName() + "] Invalid configuration (sslInvalidHostNameAllowed="
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (mongo_ssl_invalid_host_allowed="
                 + sslInvalidHostNameAllowedStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
