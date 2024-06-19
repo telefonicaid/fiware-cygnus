@@ -609,6 +609,7 @@ public class MongoBackendImpl implements MongoBackend {
                     TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                     trustManagerFactory.init(keyStore);
                     sslContext = SSLContext.getInstance("TLS");
+                    sslContext.init(null, trustManagerFactory.getTrustManagers(), new java.security.SecureRandom());
                 } catch (Exception e) {
                     LOGGER.warn("Error with TLS algorithm " + e.getMessage());
                 }
