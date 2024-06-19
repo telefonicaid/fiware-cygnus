@@ -611,7 +611,7 @@ public class MongoBackendImpl implements MongoBackend {
                     sslContext = SSLContext.getInstance("TLS");
                     sslContext.init(null, trustManagerFactory.getTrustManagers(), new java.security.SecureRandom());
                 } catch (Exception e) {
-                    LOGGER.warn("Error with TLS algorithm " + e.getMessage());
+                    LOGGER.warn("Error when init SSL Context: " + e.getMessage());
                 }
             }
             if (mongoUsername.length() != 0) {
