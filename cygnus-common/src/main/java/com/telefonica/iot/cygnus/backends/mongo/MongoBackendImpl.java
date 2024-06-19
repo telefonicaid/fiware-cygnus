@@ -599,7 +599,7 @@ public class MongoBackendImpl implements MongoBackend {
         if (client == null) {
 
             SSLContext sslContext = null;
-            if (sslEnabled && sslKeystorePathFile && !sslKeystorePathFile.isEmpty()) {
+            if (sslEnabled && (sslKeystorePathFile != null) && !sslKeystorePathFile.isEmpty()) {
                 try {
                     // Init TrustManager to init SSL Context
                     KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
