@@ -1,2 +1,2 @@
-[cygnus-ngsi] [mongo-sink] Add mongo_ssl, mongo_ssl_invalid_host_allowed, mongo_ssl_keystore_path_file options for mongoDB connections
-[cygnus-common] [mongo-backend] Use sslEnabled, sslInvalidHostNameAllowed and sslKeystorePathFile options for mongoDB connections
+[cygnus-ngsi] [mongo-sink] Add mongo_ssl, mongo_ssl_invalid_host_allowed, mongo_ssl_keystore_path_file and mongo_ssl_keystore_password options for mongoDB connections
+[cygnus-common] [mongo-backend] Use sslEnabled, sslInvalidHostNameAllowed, sslKeystorePathFile and sslKeystorePassword options for mongoDB connections
