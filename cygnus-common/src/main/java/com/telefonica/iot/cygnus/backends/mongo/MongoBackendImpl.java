@@ -42,6 +42,11 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import java.security.NoSuchAlgorithmException;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.security.KeyStore;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import org.bson.Document;
 
 /**
@@ -64,6 +69,7 @@ public class MongoBackendImpl implements MongoBackend {
     private final String mongoReplicaSet;
     private final Boolean sslEnabled;
     private final Boolean sslInvalidHostNameAllowed;
+    private final String sslKeystorePathFile;
     private final DataModel dataModel;
     private static final CygnusLogger LOGGER = new CygnusLogger(MongoBackendImpl.class);
 
@@ -78,7 +84,7 @@ public class MongoBackendImpl implements MongoBackend {
      */
     public MongoBackendImpl(String mongoHosts, String mongoUsername, String mongoPassword,
                             String mongoAuthSource, String mongoReplicaSet, DataModel dataModel,
-                            Boolean sslEnabled, Boolean sslInvalidHostNameAllowed) {
+                            Boolean sslEnabled, Boolean sslInvalidHostNameAllowed, String sslKeystorePathFile) {
         client = null;
         this.mongoHosts = mongoHosts;
         this.mongoUsername = mongoUsername;
@@ -87,6 +93,7 @@ public class MongoBackendImpl implements MongoBackend {
         this.mongoReplicaSet = mongoReplicaSet;
         this.sslEnabled = sslEnabled;
         this.sslInvalidHostNameAllowed = sslInvalidHostNameAllowed;
+        this.sslKeystorePathFile = sslKeystorePathFile;
         this.dataModel = dataModel;
     } // MongoBackendImpl
 
@@ -590,11 +597,19 @@ public class MongoBackendImpl implements MongoBackend {
         // create a Mongo client
 
         if (client == null) {
+
             SSLContext sslContext = null;
             if (sslEnabled) {
                 try {
+                    // Init TrustManager to init SSL Context
+                    KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                    try (InputStream keyStoreStream = new FileInputStream(sslKeystorePathFile)) {
+                        keyStore.load(keyStoreStream, "keystore-password".toCharArray());
+                    }
+                    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                    trustManagerFactory.init(keyStore);
                     sslContext = SSLContext.getInstance("TLS");
-                } catch (NoSuchAlgorithmException e) {
+                } catch (Exception e) {
                     LOGGER.warn("Error with TLS algorithm " + e.getMessage());
                 }
             }

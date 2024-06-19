@@ -53,7 +53,7 @@ public class MongoBackendImplTest {
     public void testGetRange() {
         System.out.println(getTestTraceHead("[MongoBackendImpl.getRange]")
                 + "-------- Given a resolution, its related range is correctly returned");
-        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, null, false, false);
+        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, null, false, false, null);
 
 
         try {
@@ -115,7 +115,7 @@ public class MongoBackendImplTest {
     public void testGetOrigin() {
         System.out.println(getTestTraceHead("[MongoBackendImpl.getOrigin]")
                 + "-------- Given a calendar and a resolution, its related origin is correctly returned");
-        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, null, false, false);
+        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, null, false, false, null);
         GregorianCalendar calendar = new GregorianCalendar(2017, 4, 5, 11, 46, 13);
 
         try {
@@ -198,7 +198,7 @@ public class MongoBackendImplTest {
     public void testGetOffset() {
         System.out.println(getTestTraceHead("[MongoBackendImpl.getOffset]")
                 + "-------- Given a calendar and a resolution, its related offset is correctly returned");
-        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, null, false, false);
+        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, null, false, false, null);
         GregorianCalendar calendar = new GregorianCalendar(2017, 3, 5, 11, 46, 13); // month 3 is April
 
         try {
@@ -266,7 +266,7 @@ public class MongoBackendImplTest {
         String entityType = "someType";
         String attrName = "someName";
         GregorianCalendar calendar = new GregorianCalendar(2017, 3, 5, 11, 46, 13); // month 3 is April
-        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, DataModel.DMBYSERVICEPATH, false, false);
+        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, DataModel.DMBYSERVICEPATH, false, false, null);
         String queryForInsertAggregated = "{\"_id\": {\"entityId\": \"someId\", \"entityType\": \"someType\", "
                 + "\"attrName\": \"someName\", \"origin\": {\"$date\": 1491392760000}, "
                 + "\"resolution\": \"second\", \"range\": \"minute\"}, \"points.offset\": 13}";
@@ -353,7 +353,7 @@ public class MongoBackendImplTest {
             throw e;
         } // try catch
 
-        backend = new MongoBackendImpl(null, null, null, null, null, DataModel.DMBYENTITY, false, false);
+        backend = new MongoBackendImpl(null, null, null, null, null, DataModel.DMBYENTITY, false, false, null);
 
         queryForInsertAggregated = "{\"_id\": {\"attrName\": \"someName\", "
                 + "\"origin\": {\"$date\": 1491392760000}, \"resolution\": \"second\", "
@@ -457,7 +457,7 @@ public class MongoBackendImplTest {
         double sum2 = 200;
         int numSamples = 2;
         GregorianCalendar calendar = new GregorianCalendar(2017, 3, 5, 11, 46, 13); // month 3 is April
-        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, null, false, false);
+        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, null, false, false, null);
         String updateForUpdate = "{\"$set\": {\"attrType\": \"someType\"}, "
                 + "\"$inc\": {\"points.$.samples\": 2, \"points.$.sum\": 20.0, \"points.$.sum2\": 200.0}, "
                 + "\"$min\": {\"points.$.min\": 0.0}, \"$max\": {\"points.$.max\": 10.0}}";
@@ -489,7 +489,7 @@ public class MongoBackendImplTest {
         String value = "someString";
         int count = 2;
         GregorianCalendar calendar = new GregorianCalendar(2017, 3, 5, 11, 46, 13); // month 3 is April
-        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, null, false, false);
+        MongoBackendImpl backend = new MongoBackendImpl(null, null, null, null, null, null, false, false, null);
         String updateForUpdate = "{\"$set\": {\"attrType\": \"someType\"}, "
                 + "\"$inc\": {\"points.13.samples\": 2, \"points.13.occur.someString\": 2}}";
 

@@ -41,6 +41,7 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     protected String mongoReplicaSet;
     protected Boolean sslEnabled;
     protected Boolean sslInvalidHostNameAllowed;
+    protected String sslKeystorePathFile;
     protected String dbPrefix;
     protected String collectionPrefix;
     protected MongoBackendImpl backend;
@@ -194,6 +195,9 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
                 + sslInvalidHostNameAllowedStr + ") -- Must be 'true' or 'false'");
         }  // if else
 
+        sslKeystorePathFile = context.getString("mongo_ssl_keystone_path_file", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_ssl_keystone_path_file=" + sslKeystorePathFile + ")");
+
     } // configure
 
     @Override
@@ -201,7 +205,7 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
         try {
             backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword,
                                            mongoAuthSource, mongoReplicaSet, dataModel,
-                                           sslEnabled, sslInvalidHostNameAllowed);
+                                           sslEnabled, sslInvalidHostNameAllowed, sslKeystorePathFile);
             LOGGER.debug("[" + this.getName() + "] MongoDB persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the MongoDB persistence backend. Details="
