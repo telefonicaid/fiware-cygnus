@@ -322,6 +322,7 @@ When datamodel changes Cygnus tries to recreate index (delete current and create
 | db\_prefix | no | sth_ ||
 | mongo\_ssl | no | false | Enable SSL in mongodb connection |
 | mongo\_ssl\_invalid\_host\_allowed | no | false | Allow invalid host name in mongo SSL connections |
+| mongo\_ssl\_keystore\_path\_File | no | <i>empty</i> | Java SSL KeyStore path file (JKS file) |
 | collection\_prefix | no | sth_ | `system.` is not accepted. |
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
