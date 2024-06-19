@@ -40,6 +40,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLContext;
+import java.security.NoSuchAlgorithmException;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.security.KeyStore;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import org.bson.Document;
 
 /**
@@ -60,6 +67,10 @@ public class MongoBackendImpl implements MongoBackend {
     private final String mongoPassword;
     private final String mongoAuthSource;
     private final String mongoReplicaSet;
+    private final Boolean sslEnabled;
+    private final Boolean sslInvalidHostNameAllowed;
+    private final String sslKeystorePathFile;
+    private final String sslKeystorePassword;
     private final DataModel dataModel;
     private static final CygnusLogger LOGGER = new CygnusLogger(MongoBackendImpl.class);
 
@@ -73,13 +84,19 @@ public class MongoBackendImpl implements MongoBackend {
      * @param dataModel
      */
     public MongoBackendImpl(String mongoHosts, String mongoUsername, String mongoPassword,
-            String mongoAuthSource, String mongoReplicaSet, DataModel dataModel) {
+                            String mongoAuthSource, String mongoReplicaSet, DataModel dataModel,
+                            Boolean sslEnabled, Boolean sslInvalidHostNameAllowed,
+                            String sslKeystorePathFile, String sslKeystorePassword) {
         client = null;
         this.mongoHosts = mongoHosts;
         this.mongoUsername = mongoUsername;
         this.mongoPassword = mongoPassword;
         this.mongoAuthSource = mongoAuthSource;
         this.mongoReplicaSet = mongoReplicaSet;
+        this.sslEnabled = sslEnabled;
+        this.sslInvalidHostNameAllowed = sslInvalidHostNameAllowed;
+        this.sslKeystorePathFile = sslKeystorePathFile;
+        this.sslKeystorePassword = sslKeystorePassword;
         this.dataModel = dataModel;
     } // MongoBackendImpl
 
@@ -583,6 +600,30 @@ public class MongoBackendImpl implements MongoBackend {
         // create a Mongo client
 
         if (client == null) {
+
+            SSLContext sslContext = null;
+            if (sslEnabled && (sslKeystorePathFile != null) && !sslKeystorePathFile.isEmpty()) {
+                try {
+                    // Init TrustManager to init SSL Context
+                    KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                    try (InputStream keyStoreStream = new FileInputStream(sslKeystorePathFile)) {
+                        keyStore.load(keyStoreStream, sslKeystorePassword.toCharArray());
+                    }
+                    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                    trustManagerFactory.init(keyStore);
+                    sslContext = SSLContext.getInstance("TLS");
+                    sslContext.init(null, trustManagerFactory.getTrustManagers(), new java.security.SecureRandom());
+                } catch (Exception e) {
+                    LOGGER.warn("Error when init SSL Context: " + e.getMessage());
+                }
+            }
+
+            MongoClientOptions options = MongoClientOptions.builder()
+                .sslEnabled(sslEnabled)
+                .sslInvalidHostNameAllowed(sslInvalidHostNameAllowed)
+                .sslContext(sslContext)
+                .build();
+
             if (mongoUsername.length() != 0) {
                 String authSource;
                 if ((mongoAuthSource != null) && !mongoAuthSource.isEmpty()) {
@@ -591,20 +632,24 @@ public class MongoBackendImpl implements MongoBackend {
                     authSource = dbName;
                 }
                 MongoCredential credential = MongoCredential.createCredential(mongoUsername, authSource,
-                        mongoPassword.toCharArray());
+                                                                              mongoPassword.toCharArray());
+
                 /****
                 // This constructor is deprecated see Mongo Client API documentation
                 // @deprecated Prefer {@link #MongoClient(List, MongoCredential, MongoClientOptions)}
                 client = new MongoClient(servers, Arrays.asList(credential));
                 ****/
                 if ((mongoReplicaSet!= null) && !mongoReplicaSet.isEmpty()) {
-                    client = new MongoClient(servers, credential, new MongoClientOptions.Builder().
-                            requiredReplicaSetName(mongoReplicaSet).build());
-                } else {
-                    client = new MongoClient(servers, credential, new MongoClientOptions.Builder().build());
+                    options = MongoClientOptions.builder()
+                        .requiredReplicaSetName(mongoReplicaSet)
+                        .sslEnabled(sslEnabled)
+                        .sslInvalidHostNameAllowed(sslInvalidHostNameAllowed)
+                        .sslContext(sslContext)
+                        .build();
                 }
+                client = new MongoClient(servers, credential, options);
             } else {
-                client = new MongoClient(servers);
+                client = new MongoClient(servers, options);
             } // if else
         } // if
 

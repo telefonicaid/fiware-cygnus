@@ -39,6 +39,10 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     protected String mongoPassword;
     protected String mongoAuthSource;
     protected String mongoReplicaSet;
+    protected Boolean sslEnabled;
+    protected Boolean sslInvalidHostNameAllowed;
+    protected String sslKeystorePathFile;
+    protected String sslKeystorePassword;
     protected String dbPrefix;
     protected String collectionPrefix;
     protected MongoBackendImpl backend;
@@ -169,12 +173,44 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
             LOGGER.warn("[" + this.getName() + "] Invalid configuration (ignore_white_spaces="
                 + ignoreWhiteSpacesStr + ") -- Must be 'true' or 'false'");
         }  // if else
+
+        String sslEnabledStr = context.getString("mongo_ssl", "false");
+        if (sslEnabledStr.equals("true") || sslEnabledStr.equals("false")) {
+            sslEnabled = Boolean.valueOf(sslEnabledStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_ssl="
+                + sslEnabledStr + ")");
+        }  else {
+            invalidConfiguration = true;
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (mongo_ssl="
+                + sslEnabledStr + ") -- Must be 'true' or 'false'");
+        }  // if else
+
+        String sslInvalidHostNameAllowedStr = context.getString("mongo_ssl_invalid_host_allowed", "false");
+        if (sslInvalidHostNameAllowedStr.equals("true") || sslInvalidHostNameAllowedStr.equals("false")) {
+            sslInvalidHostNameAllowed = Boolean.valueOf(sslInvalidHostNameAllowedStr);
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_ssl_invalid_host_allowed="
+                + sslInvalidHostNameAllowedStr + ")");
+        }  else {
+            invalidConfiguration = true;
+            LOGGER.warn("[" + this.getName() + "] Invalid configuration (mongo_ssl_invalid_host_allowed="
+                + sslInvalidHostNameAllowedStr + ") -- Must be 'true' or 'false'");
+        }  // if else
+
+        sslKeystorePathFile = context.getString("mongo_ssl_keystore_path_file", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_ssl_keystore_path_file=" + sslKeystorePathFile + ")");
+
+        sslKeystorePassword = context.getString("mongo_ssl_keystore_password", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_ssl_keystore_password=" + sslKeystorePassword + ")");
+
     } // configure
 
     @Override
     public void start() {
         try {
-            backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword, mongoAuthSource, mongoReplicaSet, dataModel);
+            backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword,
+                                           mongoAuthSource, mongoReplicaSet, dataModel,
+                                           sslEnabled, sslInvalidHostNameAllowed,
+                                           sslKeystorePathFile, sslKeystorePassword);
             LOGGER.debug("[" + this.getName() + "] MongoDB persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the MongoDB persistence backend. Details="
