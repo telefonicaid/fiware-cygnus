@@ -43,6 +43,8 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     protected Boolean sslInvalidHostNameAllowed;
     protected String sslKeystorePathFile;
     protected String sslKeystorePassword;
+    protected String sslTruststorePathFile;
+    protected String sslTruststorePassword;
     protected String dbPrefix;
     protected String collectionPrefix;
     protected MongoBackendImpl backend;
@@ -202,6 +204,12 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
         sslKeystorePassword = context.getString("mongo_ssl_keystore_password", "");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_ssl_keystore_password=" + sslKeystorePassword + ")");
 
+        sslTruststorePathFile = context.getString("mongo_ssl_truststore_path_file", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_ssl_truststore_path_file=" + sslTruststorePathFile + ")");
+
+        sslTruststorePassword = context.getString("mongo_ssl_truststore_password", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_ssl_truststore_password=" + sslTruststorePassword + ")");
+
     } // configure
 
     @Override
@@ -210,7 +218,8 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
             backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword,
                                            mongoAuthSource, mongoReplicaSet, dataModel,
                                            sslEnabled, sslInvalidHostNameAllowed,
-                                           sslKeystorePathFile, sslKeystorePassword);
+                                           sslKeystorePathFile, sslKeystorePassword,
+                                           sslTruststorePathFile, sslTruststorePassword);
             LOGGER.debug("[" + this.getName() + "] MongoDB persistence backend created");
         } catch (Exception e) {
             LOGGER.error("Error while creating the MongoDB persistence backend. Details="
