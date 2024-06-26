@@ -45,6 +45,8 @@ import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import java.security.KeyStore;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import org.bson.Document;
@@ -71,6 +73,8 @@ public class MongoBackendImpl implements MongoBackend {
     private final Boolean sslInvalidHostNameAllowed;
     private final String sslKeystorePathFile;
     private final String sslKeystorePassword;
+    private final String sslTruststorePathFile;
+    private final String sslTruststorePassword;
     private final DataModel dataModel;
     private static final CygnusLogger LOGGER = new CygnusLogger(MongoBackendImpl.class);
 
@@ -86,7 +90,8 @@ public class MongoBackendImpl implements MongoBackend {
     public MongoBackendImpl(String mongoHosts, String mongoUsername, String mongoPassword,
                             String mongoAuthSource, String mongoReplicaSet, DataModel dataModel,
                             Boolean sslEnabled, Boolean sslInvalidHostNameAllowed,
-                            String sslKeystorePathFile, String sslKeystorePassword) {
+                            String sslKeystorePathFile, String sslKeystorePassword,
+                            String sslTruststorePathFile, String sslTruststorePassword) {
         client = null;
         this.mongoHosts = mongoHosts;
         this.mongoUsername = mongoUsername;
@@ -97,6 +102,8 @@ public class MongoBackendImpl implements MongoBackend {
         this.sslInvalidHostNameAllowed = sslInvalidHostNameAllowed;
         this.sslKeystorePathFile = sslKeystorePathFile;
         this.sslKeystorePassword = sslKeystorePassword;
+        this.sslTruststorePathFile = sslTruststorePathFile;
+        this.sslTruststorePassword = sslTruststorePassword;
         this.dataModel = dataModel;
     } // MongoBackendImpl
 
@@ -602,12 +609,25 @@ public class MongoBackendImpl implements MongoBackend {
         if (client == null) {
 
             SSLContext sslContext = null;
-            if (sslEnabled && (sslKeystorePathFile != null) && !sslKeystorePathFile.isEmpty()) {
+
+            if (sslEnabled) {
                 try {
-                    // Init TrustManager to init SSL Context
                     KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                    try (InputStream keyStoreStream = new FileInputStream(sslKeystorePathFile)) {
+                    KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                    if ((sslKeystorePathFile != null) && !sslKeystorePathFile.isEmpty()) {
+                        try (InputStream keyStoreStream = new FileInputStream(sslKeystorePathFile)) {
                         keyStore.load(keyStoreStream, sslKeystorePassword.toCharArray());
+                        }
+                    } else {
+                        keyStore.load(null);
+                    }
+                    if ((sslTruststorePathFile != null) && !sslTruststorePathFile.isEmpty()) {
+                        try (InputStream trustStoreStream = new FileInputStream(sslTruststorePathFile)) {
+                            trustStore.load(trustStoreStream, sslTruststorePassword.toCharArray());
+                            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                            X509Certificate caCert = (X509Certificate) cf.generateCertificate(trustStoreStream);
+                            keyStore.setCertificateEntry("caCert", caCert);
+                        }
                     }
                     TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                     trustManagerFactory.init(keyStore);
