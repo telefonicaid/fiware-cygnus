@@ -611,23 +611,22 @@ public class MongoBackendImpl implements MongoBackend {
                 try {
                     KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
                     if ((sslKeystorePathFile != null) && !sslKeystorePathFile.isEmpty()) {
-                        try (InputStream keyStoreStream = new FileInputStream(sslKeystorePathFile)) {
+                        InputStream keyStoreStream = new FileInputStream(sslKeystorePathFile);
                         keyStore.load(keyStoreStream, sslKeystorePassword.toCharArray());
-                        }
                     } else {
                         keyStore.load(null);
                     }
                     if ((sslCAPathFile != null) && !sslCAPathFile.isEmpty()) {
-                        try (InputStream trustStoreStream = new FileInputStream(sslCAPathFile)) {
-                            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                            X509Certificate caCert = (X509Certificate) cf.generateCertificate(trustStoreStream);
-                            keyStore.setCertificateEntry("caCert", caCert);
-                        }
+                        InputStream caStream = new FileInputStream(sslCAPathFile);
+                        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                        X509Certificate caCert = (X509Certificate) cf.generateCertificate(caStream);
+                        LOGGER.debug("CA subjectDN: " + caCert.getSubjectDN());
+                        keyStore.setCertificateEntry("caCert", caCert);
                     }
                     TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                     trustManagerFactory.init(keyStore);
                     sslContext = SSLContext.getInstance("TLS");
-                    sslContext.init(null, trustManagerFactory.getTrustManagers(), new java.security.SecureRandom());
+                    sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
                 } catch (Exception e) {
                     LOGGER.warn("Error when init SSL Context: " + e.getMessage());
                 }
