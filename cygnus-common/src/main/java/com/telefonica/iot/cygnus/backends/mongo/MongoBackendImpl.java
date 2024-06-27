@@ -613,21 +613,15 @@ public class MongoBackendImpl implements MongoBackend {
             if (sslEnabled) {
                 try {
                     KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-                    KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
                     if ((sslKeystorePathFile != null) && !sslKeystorePathFile.isEmpty()) {
-                        try (InputStream keyStoreStream = new FileInputStream(sslKeystorePathFile)) {
+                        InputStream keyStoreStream = new FileInputStream(sslKeystorePathFile);
                         keyStore.load(keyStoreStream, sslKeystorePassword.toCharArray());
-                        }
                     } else {
                         keyStore.load(null);
                     }
                     if ((sslTruststorePathFile != null) && !sslTruststorePathFile.isEmpty()) {
-                        try (InputStream trustStoreStream = new FileInputStream(sslTruststorePathFile)) {
-                            trustStore.load(trustStoreStream, sslTruststorePassword.toCharArray());
-                            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                            X509Certificate caCert = (X509Certificate) cf.generateCertificate(trustStoreStream);
-                            keyStore.setCertificateEntry("caCert", caCert);
-                        }
+                        InputStream trustStoreStream = new FileInputStream(sslTruststorePathFile);
+                        keyStore.load(trustStoreStream, sslTruststorePassword.toCharArray());
                     }
                     TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                     trustManagerFactory.init(keyStore);
