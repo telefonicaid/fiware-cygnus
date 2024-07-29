@@ -309,13 +309,21 @@ public class Feature {
      */
     public static Feature createInstanceFromJson(JsonObject json) throws ArcgisException {
         try {
-            Geometry geometry;
+            Geometry geometry = null;
             if (json.has(GEOMETRY_TAG)) {
-                JsonObject jsonGeometry = json.get(GEOMETRY_TAG).getAsJsonObject();
-                geometry = Point.createInstanceFromJson(jsonGeometry); // TODO another 
-                                                                       //geometry types?
-            } else {
-                geometry = null;
+                JsonElement jsonGeometryElement = json.get(GEOMETRY_TAG);
+                if (jsonGeometryElement.isJsonObject()) {
+                    JsonObject jsonGeometry = jsonGeometryElement.getAsJsonObject();
+                    if (jsonGeometry.get("x") != null) {
+                        geometry = Point.createInstanceFromJson(jsonGeometry);
+                    } else if (jsonGeometry.get("paths") != null) {
+                        // geometry = Polyline.createInstance(jsonGeometry);
+                    } else if (jsonGeometry.get("points") != null) {
+                        // geometry = MultiPoint.createInstance(jsonGeometry);
+                    } else if (jsonGeometry.get("rings") != null) {
+                        // geometry = Polygon.createInstance(jsonGeometry);
+                    }
+                }
             }
             Map<String, Object> attributes = attToMap(json.get(ATTRIBUTES_TAG).getAsJsonObject());
             return new Feature(geometry, attributes);
