@@ -317,11 +317,11 @@ public class Feature {
                     if (jsonGeometry.get("x") != null) {
                         geometry = Point.createInstanceFromJson(jsonGeometry);
                     } else if (jsonGeometry.get("paths") != null) {
-                        // geometry = Polyline.createInstance(jsonGeometry);
-                    } else if (jsonGeometry.get("points") != null) {
-                        // geometry = MultiPoint.createInstance(jsonGeometry);
-                    } else if (jsonGeometry.get("rings") != null) {
-                        // geometry = Polygon.createInstance(jsonGeometry);
+                        geometry = PolyLine.createInstanceFromJson(jsonGeometry);
+                    // } else if (jsonGeometry.get("points") != null) {
+                    //     // geometry = MultiPoint.createInstance(jsonGeometry);
+                    // } else if (jsonGeometry.get("rings") != null) {
+                    //     // geometry = Polygon.createInstance(jsonGeometry);
                     }
                 }
             }
