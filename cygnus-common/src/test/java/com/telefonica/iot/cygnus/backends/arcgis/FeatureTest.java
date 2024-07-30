@@ -157,6 +157,7 @@ public class FeatureTest {
     public void getPolyFeatureTest() {
         System.out.println("----------------  getNewPolyLineFeature");
         Feature poly = FeatureTestFactory.getNewPolyLineFeature("Mi PolyLine", 33);
+        System.out.println("feature poly -  " + poly.toJson());
     }
 
 }
