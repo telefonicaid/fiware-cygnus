@@ -149,4 +149,14 @@ public class FeatureTest {
         }
 
     }
+
+    /**
+     *
+     */
+    @Test
+    public void getPolyFeatureTest() {
+        System.out.println("----------------  getNewPolyLineFeature");
+        Feature poly = FeatureTestFactory.getNewPolyLineFeature("Mi PolyLine", 33);
+    }
+
 }

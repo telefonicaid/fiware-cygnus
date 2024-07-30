@@ -155,6 +155,19 @@ public class Feature {
     }
 
     /**
+     *
+     * @param paths
+     * @return
+     */
+    public static Feature createPolyLineFeature(String paths) {
+        try {
+            return new Feature(new PolyLine(paths));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * This method merges unexistent attributes from sourceFeature.
      * 
      * @param sourceFeature
