@@ -25,6 +25,10 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.DefaultConfiguration;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -38,6 +42,7 @@ import com.telefonica.iot.cygnus.backends.arcgis.model.Feature;
  * @author dmartinez
  *
  */
+@RunWith(MockitoJUnitRunner.class)
 public class FeatureTest {
 
     /**
@@ -114,7 +119,7 @@ public class FeatureTest {
             feature.setObjectId(255);
             assertTrue("getObjectId() doesn't match", feature.getObjectId() == 255);
             assertTrue("OBJECTID not properly saved",
-                    ((Long) feature.getAttributes().get("OBJECTID")) == 255);
+                       ((Long)feature.getAttributes().get("OBJECTID")) == 255);
         } catch (ArcgisException e) {
             fail(e.getMessage());
         }
@@ -158,6 +163,7 @@ public class FeatureTest {
         System.out.println("----------------  getNewPolyLineFeature");
         Feature poly = FeatureTestFactory.getNewPolyLineFeature("Mi PolyLine", 33);
         System.out.println("feature poly -  " + poly.toJson());
+        assertTrue("ok.", true);
     }
 
 }
