@@ -332,6 +332,7 @@ public class Feature {
                         geometry = Point.createInstanceFromJson(jsonGeometry);
                     } else if (jsonGeometry.get("paths") != null) {
                         geometry = PolyLine.createInstanceFromJson(jsonGeometry);
+                    // FIXME when MultiPoint and Polygon will be implemented
                     // } else if (jsonGeometry.get("points") != null) {
                     //     // geometry = MultiPoint.createInstance(jsonGeometry);
                     // } else if (jsonGeometry.get("rings") != null) {
