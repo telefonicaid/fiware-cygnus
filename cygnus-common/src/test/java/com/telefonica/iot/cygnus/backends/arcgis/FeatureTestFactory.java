@@ -110,6 +110,40 @@ public abstract class FeatureTestFactory {
     }
 
     /**
+     *
+     * @param description
+     * @param externalId
+     * @return
+     */
+    public static Feature getNewPolyLineFeature(String description, Integer externalId) {
+        Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+        attributes.put("IDEXTERNO", externalId);
+        attributes.put("DESCRIPCION", description);
+        attributes.put("RAZONSOCIAL", "Razon social");
+        attributes.put("NUMEROPOSTAL", null);
+        attributes.put("TIPOOCUPACION", 0);
+        attributes.put("FINI", new Date());
+        attributes.put("UNIDADMEDIDA", null);
+        attributes.put("EXCSABDOM", 0);
+        attributes.put("EXCFESTIVOS", 0);
+        attributes.put("PRESENCIAPOLICIAL", 0);
+        attributes.put("REVISADO", 0);
+        attributes.put("IDACTIVIDAD", 0);
+        attributes.put("ACTIVIDAD", "actividad");
+        attributes.put("IDCLASE", 0);
+        attributes.put("CLASE", "clase");
+        attributes.put("IDESTADO", 0);
+        attributes.put("ESTADO", "estado");
+        attributes.put("CALLE", "calle");
+        attributes.put("FFIN", new GregorianCalendar());
+        attributes.put("CANTIDADOCUPADA", null);
+        String jsonString = "{ \"paths\": [ [ [-97.06138, 32.837], [-97.06133, 33.836], [-98.2, 34.834], [-97, 40] ] ] }";
+        Feature feature = Feature.createPolyLineFeature(jsonString);
+        feature.setAttributes(attributes);
+        return feature;
+    }
+
+    /**
      * 
      * @return
      */

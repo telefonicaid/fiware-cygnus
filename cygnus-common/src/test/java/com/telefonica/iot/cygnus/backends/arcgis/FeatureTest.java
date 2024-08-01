@@ -25,6 +25,10 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.DefaultConfiguration;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -32,12 +36,23 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 import com.telefonica.iot.cygnus.backends.arcgis.model.Feature;
+import com.telefonica.iot.cygnus.backends.arcgis.model.PolyLine;
+
+import java.util.List;
+import java.util.Arrays;
+import java.util.ArrayList;
+import com.google.gson.JsonObject;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+
 
 /**
  * 
  * @author dmartinez
  *
  */
+@RunWith(MockitoJUnitRunner.class)
 public class FeatureTest {
 
     /**
@@ -114,7 +129,7 @@ public class FeatureTest {
             feature.setObjectId(255);
             assertTrue("getObjectId() doesn't match", feature.getObjectId() == 255);
             assertTrue("OBJECTID not properly saved",
-                    ((Long) feature.getAttributes().get("OBJECTID")) == 255);
+                       ((Long)feature.getAttributes().get("OBJECTID")) == 255);
         } catch (ArcgisException e) {
             fail(e.getMessage());
         }
@@ -149,4 +164,25 @@ public class FeatureTest {
         }
 
     }
+
+    /**
+     *
+     */
+    @Test
+    public void getPolyFeatureTest() {
+        System.out.println("----------------  getNewPolyLineFeature");
+        try {
+            String paths = "{ \"paths\": [ [ [-97.06138, 32.837], [-97.06133, 33.836], [-98.2, 34.834], [-97, 40] ] ] }";
+            PolyLine poly = new PolyLine(paths);
+            System.out.println("POLY: " + poly.toString());
+
+        } catch (Exception e) {
+            System.out.println("Exception");
+            System.out.println(e.getClass().getSimpleName() + "  " + e.getMessage());
+        }
+        Feature poly = FeatureTestFactory.getNewPolyLineFeature("Mi PolyLine", 33);
+        System.out.println("feature poly -  " + poly.toJson());
+        assertTrue("ok.", true);
+    }
+
 }
