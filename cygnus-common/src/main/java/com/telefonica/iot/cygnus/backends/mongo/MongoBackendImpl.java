@@ -661,9 +661,17 @@ public class MongoBackendImpl implements MongoBackend {
                         .sslContext(sslContext)
                         .build();
                 }
-                client = new MongoClient(servers, credential, options);
+                if (servers.size() == 1) { // allow auto-discover when just one endpoint is provided
+                    client = new MongoClient(servers.get(0), credential, options);
+                } else {
+                    client = new MongoClient(servers, credential, options);
+                }
             } else {
-                client = new MongoClient(servers, options);
+                if (servers.size() == 1) { // allow auto-discover when just one endpoint is provided
+                    client = new MongoClient(servers.get(0), options);
+                } else {
+                    client = new MongoClient(servers, options);
+                }
             } // if else
         } // if
 
