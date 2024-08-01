@@ -19,8 +19,14 @@
 package com.telefonica.iot.cygnus.backends.arcgis.model;
 
 import java.util.List;
+import java.util.Arrays;
+import java.util.ArrayList;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 
@@ -36,27 +42,7 @@ public class PolyLine implements Geometry {
     private static final String WKID_TAG = "wkid";
     private static final String PATHS_TAG = "paths";    
 
-    class Paths {
-        private List<List<Point>> paths;
-
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("{\n  \"paths\": [\n");
-            for (List<Point> path : this.paths) {
-                sb.append("    [\n");
-                for (Point point : path) {
-                    sb.append("      ").append(point.toString()).append(",\n");
-                }
-                sb.setLength(sb.length() - 2);
-                sb.append("\n    ],\n");
-            }
-            sb.setLength(sb.length() - 2);
-            sb.append("\n  ]\n}");
-            return sb.toString();
-        }
-        
-    }
-    private List<List<Point>> paths;
+    public List<List<double[]>> paths;
 
     private SpatialReference spatialReference;
     private int type = Geometry.TYPE_SHAPE; // TBD
@@ -67,7 +53,7 @@ public class PolyLine implements Geometry {
      * @param paths
      * @param spatialReference
      */
-    public PolyLine(List<List<Point>> paths, SpatialReference spatialReference) {
+    public PolyLine(List<List<double[]>> paths, SpatialReference spatialReference) {
         this.paths = paths;
         this.spatialReference = spatialReference;
     }
@@ -78,7 +64,7 @@ public class PolyLine implements Geometry {
      * @param lat
      * @param lng
      */
-    public PolyLine(List<List<Point>> paths) {
+    public PolyLine(List<List<double[]>> paths) {
         this(paths, SpatialReference.WGS84);
     }
 
@@ -92,7 +78,6 @@ public class PolyLine implements Geometry {
         } else {
             throw new ArcgisException("Invalid Geometry Type, Point expected.");
         }
-
     }
 
     /**
@@ -103,13 +88,15 @@ public class PolyLine implements Geometry {
      */
     public PolyLine(String strPolyline) throws ArcgisException {
         try {
+            JsonObject jsonObject = JsonParser.parseString(strPolyline).getAsJsonObject();
+            String thePathsStr = jsonObject.get("paths").toString();
             Gson gson = new Gson();
-            Paths wrapper = gson.fromJson(strPolyline, Paths.class);
-            this.paths = wrapper.paths;
+            Type listType = new TypeToken<List<List<double[]>>>() {}.getType();
+            this.paths = gson.fromJson(thePathsStr, listType);
             this.spatialReference = SpatialReference.WGS84;
-            
         } catch (NumberFormatException e) {
-            throw new ArcgisException("Unexpected string format for type Point.");
+            LOGGER.error(e.getClass().getSimpleName() + "  " + e.getMessage());
+            throw new ArcgisException("Unexpected string format for type PolyLine.");
         }
     }
 
@@ -126,7 +113,8 @@ public class PolyLine implements Geometry {
      */
     public JsonObject toJSON() {
         JsonObject result = new JsonObject();
-        result.addProperty(PATHS_TAG, this.paths.toString());
+        LOGGER.debug("toJSON  ");
+        result.addProperty(PATHS_TAG, this.toString());
 
         JsonObject spatialRef = new JsonObject();
         spatialRef.addProperty(WKID_TAG, spatialReference.getWkid());
@@ -156,7 +144,25 @@ public class PolyLine implements Geometry {
      * @return String
      */
     public String toString() {
-        return getPaths().toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append("{ \"paths\": [");
+        for (int i = 0; i < this.paths.size(); i++) {
+            List<double[]> innerList = this.paths.get(i);
+            for (int j = 0; j < innerList.size(); j++) {
+                sb.append(" [");
+                sb.append("[");
+                double[] array = innerList.get(j);
+                for (double value : array) {
+                    sb.append(" ").append(value).append(",");
+                }
+                sb.append(" ]");
+                sb.setLength(sb.length() - 2);
+                sb.append(" ],");
+            }
+        }
+        sb.setLength(sb.length() - 2);
+        sb.append(" ]}");
+        return sb.toString();
     }
 
     /**
@@ -184,8 +190,8 @@ public class PolyLine implements Geometry {
      * 
      * @return
      */
-    public List<List<Point>> getPaths() {
-        return paths;
+    public List<List<double[]>> getPaths() {
+        return this.paths;
     }
 
     @Override

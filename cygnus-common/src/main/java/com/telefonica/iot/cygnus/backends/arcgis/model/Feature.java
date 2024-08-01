@@ -163,6 +163,7 @@ public class Feature {
         try {
             return new Feature(new PolyLine(paths));
         } catch (Exception e) {
+            LOGGER.error(e.getClass().getSimpleName() + "  " + e.getMessage());
             return null;
         }
     }

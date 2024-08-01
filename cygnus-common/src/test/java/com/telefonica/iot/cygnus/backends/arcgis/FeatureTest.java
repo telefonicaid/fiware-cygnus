@@ -36,6 +36,16 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 import com.telefonica.iot.cygnus.backends.arcgis.model.Feature;
+import com.telefonica.iot.cygnus.backends.arcgis.model.PolyLine;
+
+import java.util.List;
+import java.util.Arrays;
+import java.util.ArrayList;
+import com.google.gson.JsonObject;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+
 
 /**
  * 
@@ -161,6 +171,15 @@ public class FeatureTest {
     @Test
     public void getPolyFeatureTest() {
         System.out.println("----------------  getNewPolyLineFeature");
+        try {
+            String paths = "{ \"paths\": [ [ [-97.06138, 32.837], [-97.06133, 33.836], [-98.2, 34.834], [-97, 40] ] ] }";
+            PolyLine poly = new PolyLine(paths);
+            System.out.println("POLY: " + poly.toString());
+
+        } catch (Exception e) {
+            System.out.println("Exception");
+            System.out.println(e.getClass().getSimpleName() + "  " + e.getMessage());
+        }
         Feature poly = FeatureTestFactory.getNewPolyLineFeature("Mi PolyLine", 33);
         System.out.println("feature poly -  " + poly.toJson());
         assertTrue("ok.", true);

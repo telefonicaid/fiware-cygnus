@@ -138,7 +138,6 @@ public abstract class FeatureTestFactory {
         attributes.put("FFIN", new GregorianCalendar());
         attributes.put("CANTIDADOCUPADA", null);
         String jsonString = "{ \"paths\": [ [ [-97.06138, 32.837], [-97.06133, 33.836], [-98.2, 34.834], [-97, 40] ] ] }";
-
         Feature feature = Feature.createPolyLineFeature(jsonString);
         feature.setAttributes(attributes);
         return feature;
