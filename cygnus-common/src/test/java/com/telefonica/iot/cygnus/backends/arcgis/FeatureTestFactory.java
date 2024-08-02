@@ -144,6 +144,74 @@ public abstract class FeatureTestFactory {
     }
 
     /**
+     *
+     * @param description
+     * @param externalId
+     * @return
+     */
+    public static Feature getNewPolygonFeature(String description, Integer externalId) {
+        Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+        attributes.put("IDEXTERNO", externalId);
+        attributes.put("DESCRIPCION", description);
+        attributes.put("RAZONSOCIAL", "Razon social");
+        attributes.put("NUMEROPOSTAL", null);
+        attributes.put("TIPOOCUPACION", 0);
+        attributes.put("FINI", new Date());
+        attributes.put("UNIDADMEDIDA", null);
+        attributes.put("EXCSABDOM", 0);
+        attributes.put("EXCFESTIVOS", 0);
+        attributes.put("PRESENCIAPOLICIAL", 0);
+        attributes.put("REVISADO", 0);
+        attributes.put("IDACTIVIDAD", 0);
+        attributes.put("ACTIVIDAD", "actividad");
+        attributes.put("IDCLASE", 0);
+        attributes.put("CLASE", "clase");
+        attributes.put("IDESTADO", 0);
+        attributes.put("ESTADO", "estado");
+        attributes.put("CALLE", "calle");
+        attributes.put("FFIN", new GregorianCalendar());
+        attributes.put("CANTIDADOCUPADA", null);
+        String jsonString = "{ \"rings\": [ [ [-97.06138,32.837,35.1,4.8], [-97.06133,32.836,35.2,4.1], [-97.06124,32.834,35.3,4.2], [-97.06138,32.837,35.1,4.8] ], [ [-97.06326,32.759,35.4],  [-97.06298,32.755,35.5], [-97.06153,32.749,35.6], [-97.06326,32.759,35.4] ] ] }";
+        Feature feature = Feature.createPolygonFeature(jsonString);
+        feature.setAttributes(attributes);
+        return feature;
+    }
+
+    /**
+     *
+     * @param description
+     * @param externalId
+     * @return
+     */
+    public static Feature getNewMultiPointFeature(String description, Integer externalId) {
+        Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+        attributes.put("IDEXTERNO", externalId);
+        attributes.put("DESCRIPCION", description);
+        attributes.put("RAZONSOCIAL", "Razon social");
+        attributes.put("NUMEROPOSTAL", null);
+        attributes.put("TIPOOCUPACION", 0);
+        attributes.put("FINI", new Date());
+        attributes.put("UNIDADMEDIDA", null);
+        attributes.put("EXCSABDOM", 0);
+        attributes.put("EXCFESTIVOS", 0);
+        attributes.put("PRESENCIAPOLICIAL", 0);
+        attributes.put("REVISADO", 0);
+        attributes.put("IDACTIVIDAD", 0);
+        attributes.put("ACTIVIDAD", "actividad");
+        attributes.put("IDCLASE", 0);
+        attributes.put("CLASE", "clase");
+        attributes.put("IDESTADO", 0);
+        attributes.put("ESTADO", "estado");
+        attributes.put("CALLE", "calle");
+        attributes.put("FFIN", new GregorianCalendar());
+        attributes.put("CANTIDADOCUPADA", null);
+        String jsonString = "{ \"points\": [ [-97.06138, 32.837], [-97.06133, 33.836], [-98.2, 34.834], [-97, 40] ] }";
+        Feature feature = Feature.createMultiPointFeature(jsonString);
+        feature.setAttributes(attributes);
+        return feature;
+    }    
+
+    /**
      * 
      * @return
      */

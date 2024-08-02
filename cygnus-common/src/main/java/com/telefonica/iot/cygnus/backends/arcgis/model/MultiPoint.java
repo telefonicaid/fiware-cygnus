@@ -35,14 +35,14 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
  * @author avega
  *
  */
-public class PolyLine implements Geometry {
-    private static final CygnusLogger LOGGER = new CygnusLogger(PolyLine.class);
+public class MultiPoint implements Geometry {
+    private static final CygnusLogger LOGGER = new CygnusLogger(MultiPoint.class);
     
     private static final String SPATIAL_REFERENCE_TAG = "spatialReference";
     private static final String WKID_TAG = "wkid";
-    private static final String PATHS_TAG = "paths";    
+    private static final String POINTS_TAG = "points";    
 
-    public List<List<double[]>> paths;
+    public List<double[]> points;
 
     private SpatialReference spatialReference;
     private int type = Geometry.TYPE_SHAPE; // TBD
@@ -50,21 +50,21 @@ public class PolyLine implements Geometry {
     /**
      * Constructor.
      * 
-     * @param paths
+     * @param points
      * @param spatialReference
      */
-    public PolyLine(List<List<double[]>> paths, SpatialReference spatialReference) {
-        this.paths = paths;
+    public MultiPoint(List<double[]> points, SpatialReference spatialReference) {
+        this.points = points;
         this.spatialReference = spatialReference;
     }
 
     /**
      * Constructor.
      * 
-     * @param paths
+     * @param points
      */
-    public PolyLine(List<List<double[]>> paths) {
-        this(paths, SpatialReference.WGS84);
+    public MultiPoint(List<double[]> points) {
+        this(points, SpatialReference.WGS84);
     }
 
     /**
@@ -72,10 +72,10 @@ public class PolyLine implements Geometry {
      */
     public void setValue(Geometry g) throws ArcgisException {
         if (g.getGeometryType() == Geometry.TYPE_SHAPE) {
-            PolyLine polyline = (PolyLine) g;
-            this.paths = polyline.paths;
+            MultiPoint multipoint = (MultiPoint) g;
+            this.points = multipoint.points;
         } else {
-            throw new ArcgisException("Invalid Geometry Type, PolyLine expected.");
+            throw new ArcgisException("Invalid Geometry Type, MultiPoint expected.");
         }
     }
 
@@ -85,17 +85,17 @@ public class PolyLine implements Geometry {
      * @param strPoint
      * @throws ArcgisException
      */
-    public PolyLine(String strPolyline) throws ArcgisException {
+    public MultiPoint(String strPolyline) throws ArcgisException {
         try {
             JsonObject jsonObject = JsonParser.parseString(strPolyline).getAsJsonObject();
-            String thePathsStr = jsonObject.get("paths").toString();
+            String thePointsStr = jsonObject.get("points").toString();
             Gson gson = new Gson();
-            Type listType = new TypeToken<List<List<double[]>>>() {}.getType();
-            this.paths = gson.fromJson(thePathsStr, listType);
+            Type listType = new TypeToken<List<double[]>>() {}.getType();
+            this.points = gson.fromJson(thePointsStr, listType);
             this.spatialReference = SpatialReference.WGS84;
         } catch (NumberFormatException e) {
             LOGGER.error(e.getClass().getSimpleName() + "  " + e.getMessage());
-            throw new ArcgisException("Unexpected string format for type PolyLine.");
+            throw new ArcgisException("Unexpected string format for type MultiPoint.");
         }
     }
 
@@ -113,7 +113,7 @@ public class PolyLine implements Geometry {
     public JsonObject toJSON() {
         JsonObject result = new JsonObject();
         LOGGER.debug("toJSON  ");
-        result.addProperty(PATHS_TAG, this.toString());
+        result.addProperty(POINTS_TAG, this.toString());
 
         JsonObject spatialRef = new JsonObject();
         spatialRef.addProperty(WKID_TAG, spatialReference.getWkid());
@@ -131,10 +131,10 @@ public class PolyLine implements Geometry {
      */
     public static Geometry createInstanceFromJson(JsonObject json) throws ArcgisException {
         try {
-            return new PolyLine(json.get(PATHS_TAG).getAsString());
+            return new MultiPoint(json.get(POINTS_TAG).getAsString());
         } catch (Exception e) {
             LOGGER.error(e.getClass().getSimpleName() + "  " + e.getMessage());
-            throw new ArcgisException("Unable to parse PolyLine from json " + e.getMessage());
+            throw new ArcgisException("Unable to parse MultiPoint from json " + e.getMessage());
         }
 
     }
@@ -144,20 +144,15 @@ public class PolyLine implements Geometry {
      */
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{ \"paths\": [");
-        for (int i = 0; i < this.paths.size(); i++) {
-            List<double[]> innerList = this.paths.get(i);
-            for (int j = 0; j < innerList.size(); j++) {
-                sb.append(" [");
-                sb.append("[");
-                double[] array = innerList.get(j);
-                for (double value : array) {
-                    sb.append(" ").append(value).append(",");
-                }
-                sb.append(" ]");
-                sb.setLength(sb.length() - 2);
-                sb.append(" ],");
+        sb.append("{ \"points\": [");
+        for (int i = 0; i < this.points.size(); i++) {
+            sb.append("[");
+            double[] array = points.get(i);                
+            for (double value : array) {
+                sb.append(" ").append(value).append(",");
             }
+            sb.setLength(sb.length() - 2);
+            sb.append(" ],");
         }
         sb.setLength(sb.length() - 2);
         sb.append(" ]}");
@@ -189,8 +184,8 @@ public class PolyLine implements Geometry {
      * 
      * @return
      */
-    public List<List<double[]>> getPaths() {
-        return this.paths;
+    public List<double[]> getPoints() {
+        return this.points;
     }
 
     @Override

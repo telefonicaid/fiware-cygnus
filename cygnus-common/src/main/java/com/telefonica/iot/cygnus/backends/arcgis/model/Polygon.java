@@ -35,14 +35,14 @@ import com.telefonica.iot.cygnus.log.CygnusLogger;
  * @author avega
  *
  */
-public class PolyLine implements Geometry {
-    private static final CygnusLogger LOGGER = new CygnusLogger(PolyLine.class);
+public class Polygon implements Geometry {
+    private static final CygnusLogger LOGGER = new CygnusLogger(Polygon.class);
     
     private static final String SPATIAL_REFERENCE_TAG = "spatialReference";
     private static final String WKID_TAG = "wkid";
-    private static final String PATHS_TAG = "paths";    
+    private static final String RINGS_TAG = "rings";    
 
-    public List<List<double[]>> paths;
+    public List<List<double[]>> rings;
 
     private SpatialReference spatialReference;
     private int type = Geometry.TYPE_SHAPE; // TBD
@@ -50,21 +50,21 @@ public class PolyLine implements Geometry {
     /**
      * Constructor.
      * 
-     * @param paths
+     * @param rings
      * @param spatialReference
      */
-    public PolyLine(List<List<double[]>> paths, SpatialReference spatialReference) {
-        this.paths = paths;
+    public Polygon(List<List<double[]>> rings, SpatialReference spatialReference) {
+        this.rings = rings;
         this.spatialReference = spatialReference;
     }
 
     /**
      * Constructor.
      * 
-     * @param paths
+     * @param rings
      */
-    public PolyLine(List<List<double[]>> paths) {
-        this(paths, SpatialReference.WGS84);
+    public Polygon(List<List<double[]>> rings) {
+        this(rings, SpatialReference.WGS84);
     }
 
     /**
@@ -72,10 +72,10 @@ public class PolyLine implements Geometry {
      */
     public void setValue(Geometry g) throws ArcgisException {
         if (g.getGeometryType() == Geometry.TYPE_SHAPE) {
-            PolyLine polyline = (PolyLine) g;
-            this.paths = polyline.paths;
+            Polygon polygon = (Polygon) g;
+            this.rings = polygon.rings;
         } else {
-            throw new ArcgisException("Invalid Geometry Type, PolyLine expected.");
+            throw new ArcgisException("Invalid Geometry Type, Polygon expected.");
         }
     }
 
@@ -85,17 +85,17 @@ public class PolyLine implements Geometry {
      * @param strPoint
      * @throws ArcgisException
      */
-    public PolyLine(String strPolyline) throws ArcgisException {
+    public Polygon(String strPolyline) throws ArcgisException {
         try {
             JsonObject jsonObject = JsonParser.parseString(strPolyline).getAsJsonObject();
-            String thePathsStr = jsonObject.get("paths").toString();
+            String theRingsStr = jsonObject.get("rings").toString();
             Gson gson = new Gson();
             Type listType = new TypeToken<List<List<double[]>>>() {}.getType();
-            this.paths = gson.fromJson(thePathsStr, listType);
+            this.rings = gson.fromJson(theRingsStr, listType);
             this.spatialReference = SpatialReference.WGS84;
         } catch (NumberFormatException e) {
             LOGGER.error(e.getClass().getSimpleName() + "  " + e.getMessage());
-            throw new ArcgisException("Unexpected string format for type PolyLine.");
+            throw new ArcgisException("Unexpected string format for type Polygon.");
         }
     }
 
@@ -113,7 +113,7 @@ public class PolyLine implements Geometry {
     public JsonObject toJSON() {
         JsonObject result = new JsonObject();
         LOGGER.debug("toJSON  ");
-        result.addProperty(PATHS_TAG, this.toString());
+        result.addProperty(RINGS_TAG, this.toString());
 
         JsonObject spatialRef = new JsonObject();
         spatialRef.addProperty(WKID_TAG, spatialReference.getWkid());
@@ -131,10 +131,10 @@ public class PolyLine implements Geometry {
      */
     public static Geometry createInstanceFromJson(JsonObject json) throws ArcgisException {
         try {
-            return new PolyLine(json.get(PATHS_TAG).getAsString());
+            return new Polygon(json.get(RINGS_TAG).getAsString());
         } catch (Exception e) {
             LOGGER.error(e.getClass().getSimpleName() + "  " + e.getMessage());
-            throw new ArcgisException("Unable to parse PolyLine from json " + e.getMessage());
+            throw new ArcgisException("Unable to parse Polygon from json " + e.getMessage());
         }
 
     }
@@ -144,9 +144,9 @@ public class PolyLine implements Geometry {
      */
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{ \"paths\": [");
-        for (int i = 0; i < this.paths.size(); i++) {
-            List<double[]> innerList = this.paths.get(i);
+        sb.append("{ \"rings\": [");
+        for (int i = 0; i < this.rings.size(); i++) {
+            List<double[]> innerList = this.rings.get(i);
             for (int j = 0; j < innerList.size(); j++) {
                 sb.append(" [");
                 sb.append("[");
@@ -189,8 +189,8 @@ public class PolyLine implements Geometry {
      * 
      * @return
      */
-    public List<List<double[]>> getPaths() {
-        return this.paths;
+    public List<List<double[]>> getRings() {
+        return this.rings;
     }
 
     @Override

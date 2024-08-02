@@ -169,6 +169,34 @@ public class Feature {
     }
 
     /**
+     *
+     * @param rings
+     * @return
+     */
+    public static Feature createPolygonFeature(String rings) {
+        try {
+            return new Feature(new Polygon(rings));
+        } catch (Exception e) {
+            LOGGER.error(e.getClass().getSimpleName() + "  " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     *
+     * @param points
+     * @return
+     */
+    public static Feature createMultiPointFeature(String points) {
+        try {
+            return new Feature(new MultiPoint(points));
+        } catch (Exception e) {
+            LOGGER.error(e.getClass().getSimpleName() + "  " + e.getMessage());
+            return null;
+        }
+    }    
+
+    /**
      * This method merges unexistent attributes from sourceFeature.
      * 
      * @param sourceFeature
@@ -332,11 +360,10 @@ public class Feature {
                         geometry = Point.createInstanceFromJson(jsonGeometry);
                     } else if (jsonGeometry.get("paths") != null) {
                         geometry = PolyLine.createInstanceFromJson(jsonGeometry);
-                    // FIXME when MultiPoint and Polygon will be implemented
-                    // } else if (jsonGeometry.get("points") != null) {
-                    //     // geometry = MultiPoint.createInstance(jsonGeometry);
-                    // } else if (jsonGeometry.get("rings") != null) {
-                    //     // geometry = Polygon.createInstance(jsonGeometry);
+                    } else if (jsonGeometry.get("points") != null) {
+                        geometry = MultiPoint.createInstanceFromJson(jsonGeometry);
+                    } else if (jsonGeometry.get("rings") != null) {
+                        geometry = Polygon.createInstanceFromJson(jsonGeometry);
                     }
                 }
             }
