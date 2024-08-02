@@ -37,6 +37,8 @@ import com.google.gson.JsonParser;
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 import com.telefonica.iot.cygnus.backends.arcgis.model.Feature;
 import com.telefonica.iot.cygnus.backends.arcgis.model.PolyLine;
+import com.telefonica.iot.cygnus.backends.arcgis.model.Polygon;
+import com.telefonica.iot.cygnus.backends.arcgis.model.MultiPoint;
 
 import java.util.List;
 import java.util.Arrays;
@@ -173,16 +175,57 @@ public class FeatureTest {
         System.out.println("----------------  getNewPolyLineFeature");
         try {
             String paths = "{ \"paths\": [ [ [-97.06138, 32.837], [-97.06133, 33.836], [-98.2, 34.834], [-97, 40] ] ] }";
-            PolyLine poly = new PolyLine(paths);
-            System.out.println("POLY: " + poly.toString());
+            PolyLine polyline = new PolyLine(paths);
+            System.out.println("POLYLINE: " + polyline.toString());
 
         } catch (Exception e) {
             System.out.println("Exception");
             System.out.println(e.getClass().getSimpleName() + "  " + e.getMessage());
         }
-        Feature poly = FeatureTestFactory.getNewPolyLineFeature("Mi PolyLine", 33);
-        System.out.println("feature poly -  " + poly.toJson());
+        Feature polyline = FeatureTestFactory.getNewPolyLineFeature("Mi PolyLine", 33);
+        System.out.println("feature with polyline -  " + polyline.toJson());
         assertTrue("ok.", true);
     }
+
+
+    /**
+     *
+     */
+    @Test
+    public void getPolygonTest() {
+        System.out.println("----------------  getNewPolygonFeature");
+        try {
+            String rings = "{ \"rings\": [ [ [-97.06138,32.837,35.1,4.8], [-97.06133,32.836,35.2,4.1], [-97.06124,32.834,35.3,4.2], [-97.06138,32.837,35.1,4.8] ], [ [-97.06326,32.759,35.4],  [-97.06298,32.755,35.5], [-97.06153,32.749,35.6], [-97.06326,32.759,35.4] ] ] }";
+            Polygon poly = new Polygon(rings);
+            System.out.println("POLYGON: " + poly.toString());
+
+        } catch (Exception e) {
+            System.out.println("Exception");
+            System.out.println(e.getClass().getSimpleName() + "  " + e.getMessage());
+        }
+        Feature polygon = FeatureTestFactory.getNewPolygonFeature("Mi Polygon", 33);
+        System.out.println("feature with polygon -  " + polygon.toJson());
+        assertTrue("ok.", true);
+    }
+
+    /**
+     *
+     */
+    @Test
+    public void getMultiPointTest() {
+        System.out.println("----------------  getNewMultiPointFeature");
+        try {
+            String points = "{ \"points\": [ [-97.06138, 32.837], [-97.06133, 33.836], [-98.2, 34.834], [-97, 40] ] }";
+            MultiPoint multipoint = new MultiPoint(points);
+            System.out.println("MULTIPOINT: " + multipoint.toString());
+
+        } catch (Exception e) {
+            System.out.println("Exception");
+            System.out.println(e.getClass().getSimpleName() + "  " + e.getMessage());
+        }
+        Feature multipoint = FeatureTestFactory.getNewMultiPointFeature("Mi MultiPoint", 33);
+        System.out.println("feature with multipoint -  " + multipoint.toJson());
+        assertTrue("ok.", true);
+    }    
 
 }
