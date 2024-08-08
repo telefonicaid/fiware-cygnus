@@ -172,6 +172,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Thu Aug 8 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.10.0
+
+- [cygnus-common] [mongo-backend] Use sslEnabled, sslInvalidHostNameAllowed, sslKeystorePathFile, sslKeystorePassword, sslTruststorePathFile and sslTruststorePassword options for mongoDB connections
+- [cygnus-common] [mongo-backend] Allow mongodb autodiscover at connect when just one server is provided
+- [cygnus-common] Upgrade gson dependency from 2.10.1 to 2.11.0
+
 * Wed Jun 12 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.9.0
 - [cygnus-common] [arcgis] Force null geometry when invalid geo:json format or type is found instead of Point(0,0) (#2379)
 

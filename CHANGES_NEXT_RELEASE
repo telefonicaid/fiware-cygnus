@@ -1,5 +1,1 @@
-[cygnus-ngsi] [mongo-sink] Add mongo_ssl, mongo_ssl_invalid_host_allowed, mongo_ssl_keystore_path_file, mongo_ssl_keystore_password, mongo_ssl_truststore_path_file and mongo_ssl_truststore_password options for mongoDB connections
-[cygnus-common] [mongo-backend] Use sslEnabled, sslInvalidHostNameAllowed, sslKeystorePathFile, sslKeystorePassword, sslTruststorePathFile and sslTruststorePassword options for mongoDB connections
-[cygnus-common] [mongo-backend] Allow mongodb autodiscover at connect when just one server is provided
-[cygnus-ngsi] [arcgis-sink] Add esri Geometry PolyLine, MultiPoint and Polygon support (#2392)
-[cygnus-common] Upgrade gson dependency from 2.10.1 to 2.11.0
+
