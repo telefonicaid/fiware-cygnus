@@ -16,14 +16,14 @@
 # For those usages not covered by the GNU Affero General Public License please contact with iot_support at tid dot es
 #
 
-FROM debian:12.5-slim
+FROM debian:12.6-slim
 ARG GITHUB_ACCOUNT=telefonicaid
 ARG GITHUB_REPOSITORY=fiware-cygnus
 
 # Environment variables
 ENV CYGNUS_USER "cygnus"
 ENV CYGNUS_HOME "/opt/fiware-cygnus"
-ENV CYGNUS_VERSION "3.9.0-SNAPSHOT"
+ENV CYGNUS_VERSION "3.10.0-SNAPSHOT"
 ENV CYGNUS_CONF_PATH "/opt/apache-flume/conf"
 ENV CYGNUS_CONF_FILE "/opt/apache-flume/conf/agent.conf"
 ENV CYGNUS_AGENT_NAME "cygnus-ngsi"
