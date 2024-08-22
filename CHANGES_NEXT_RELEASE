@@ -1,1 +1,3 @@
 - [cygnus-ngsi] Upgrade Debian version from 12.5 to 12.6 in Dockerfile
+- [cygnus-common][cygnus-ngsi] New setting mongo_uri (#2402)
+- [cygnus-common][cygnus-ngsi] Deprecate (mongo_hosts, mongo_username, mongo_password, mongo_auth_source, mongo_replica_set) (use mongo_uri instead)

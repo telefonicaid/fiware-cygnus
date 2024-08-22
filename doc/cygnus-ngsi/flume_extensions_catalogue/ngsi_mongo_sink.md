@@ -314,6 +314,7 @@ When datamodel changes Cygnus tries to recreate index (delete current and create
 | data\_model | no | dm-by-entity | <i>dm-by-service-path</i>, <i>dm-by-entity</i> or <dm-by-attribute</i>. <i>dm-by-service</i> is not currently supported. |
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
 | attr\_metadata\_store | no | false | <i>true</i> or <i>false</i>. |
+| mongo\_uri | no | <i>empty</i> | Mongo DB Connection String. In case of non empty mongo\_uri parameters (mongo\_hosts, mongo\_username, mongo\_password, mongo\_auth_source, mongo\_replica_set) would be ignored. |
 | mongo\_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
 | mongo\_username | no | <i>empty</i> | If empty, no authentication is done. |
 | mongo\_password | no | <i>empty</i> | If empty, no authentication is done. |
