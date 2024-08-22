@@ -34,7 +34,11 @@ import org.apache.flume.Context;
 public abstract class NGSIMongoBaseSink extends NGSISink {
 
     protected static final CygnusLogger LOGGER = new CygnusLogger(NGSIMongoBaseSink.class);
-    protected String mongoURI;
+    protected String mongoHosts;
+    protected String mongoUsername;
+    protected String mongoPassword;
+    protected String mongoAuthSource;
+    protected String mongoReplicaSet;
     protected Boolean sslEnabled;
     protected Boolean sslInvalidHostNameAllowed;
     protected String sslKeystorePathFile;
@@ -48,12 +52,44 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     protected boolean ignoreWhiteSpaces;
 
     /**
-     * Gets the mongo uri. It is protected since it is used by the tests.
+     * Gets the mongo hosts. It is protected since it is used by the tests.
      * @return
      */
-    protected String getMongoURI() {
-        return mongoURI;
-    } // getMongoURI
+    protected String getMongoHosts() {
+        return mongoHosts;
+    } // getMongoHosts
+
+    /**
+     * Gets the mongo username. It is protected since it is used by the tests.
+     * @return
+     */
+    protected String getUsername() {
+        return mongoUsername;
+    } // getUsername
+
+    /**
+     * Gets the mongo password. It is protected since it is used by the tests.
+     * @return
+     */
+    protected String getPassword() {
+        return mongoPassword;
+    } // getPassword
+
+    /**
+     * Gets the mongo auth_source. It is protected since it is used by the tests.
+     * @return
+     */
+    protected String getAuthSource() {
+        return mongoAuthSource;
+    } // getAuthSource
+
+    /**
+     * Gets the mongo replica_set. It is protected since it is used by the tests.
+     * @return
+     */
+    protected String getReplicaSet() {
+        return mongoReplicaSet;
+    } // getReplicaSet
 
     /**
      * Gets the database prefix. It is protected since it is used by the tests.
@@ -91,8 +127,17 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     public void configure(Context context) {
         super.configure(context);
 
-        mongoURI = context.getString("mongo_uri", "mongodb://localhost:27017");
-        LOGGER.info("[" + this.getName() + "] Reading configuration (mongo_uri=" + mongoURI + ")");
+        mongoHosts = context.getString("mongo_hosts", "localhost:27017");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_hosts=" + mongoHosts + ")");
+        mongoUsername = context.getString("mongo_username", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_username=" + mongoUsername + ")");
+        // FIXME: mongoPassword should be read as a SHA1 and decoded here
+        mongoPassword = context.getString("mongo_password", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_password=" + mongoPassword + ")");
+        mongoAuthSource = context.getString("mongo_auth_source", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_auth_source=" + mongoAuthSource + ")");
+        mongoReplicaSet = context.getString("mongo_replica_set", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_replica_set=" + mongoReplicaSet + ")");
 
         if (enableEncoding) {
             dbPrefix = NGSICharsets.encodeMongoDBDatabase(context.getString("db_prefix", "sth_"));
@@ -170,7 +215,8 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     @Override
     public void start() {
         try {
-            backend = new MongoBackendImpl(mongoURI, dataModel,
+            backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword,
+                                           mongoAuthSource, mongoReplicaSet, dataModel,
                                            sslEnabled, sslInvalidHostNameAllowed,
                                            sslKeystorePathFile, sslKeystorePassword,
                                            sslTruststorePathFile, sslTruststorePassword);
