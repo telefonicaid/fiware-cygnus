@@ -315,11 +315,11 @@ When datamodel changes Cygnus tries to recreate index (delete current and create
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
 | attr\_metadata\_store | no | false | <i>true</i> or <i>false</i>. |
 | mongo\_uri | no | <i>empty</i> | Mongo DB Connection String. In case of non empty mongo\_uri parameters (mongo\_hosts, mongo\_username, mongo\_password, mongo\_auth_source, mongo\_replica_set) would be ignored. |
-| mongo\_hosts | no | localhost:27017 | FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
-| mongo\_username | no | <i>empty</i> | If empty, no authentication is done. |
-| mongo\_password | no | <i>empty</i> | If empty, no authentication is done. |
-| mongo\_auth_source | no | <i>empty</i> | Auth source database use to authenticate the user. Usually could be `admin`. |
-| mongo\_replica_set | no | <i>empty</i> | Replica Set name. Note that this parameter is optional because Cygnus is able to connect to a MongoDB replica set without needing to specify its name.|
+| mongo\_hosts | no | localhost:27017 | **DEPRECATED** (use mongo_uri instead). FQDN/IP:port where the MongoDB server runs (standalone case) or comma-separated list of FQDN/IP:port pairs where the MongoDB replica set members run. |
+| mongo\_username | no | <i>empty</i> | **DEPRECATED** (use mongo_uri instead). If empty, no authentication is done. |
+| mongo\_password | no | <i>empty</i> | **DEPRECATED** (use mongo_uri instead). If empty, no authentication is done. |
+| mongo\_auth_source | no | <i>empty</i> | **DEPRECATED** (use mongo_uri instead). Auth source database use to authenticate the user. Usually could be `admin`. |
+| mongo\_replica_set | no | <i>empty</i> | **DEPRECATED** (use mongo_uri instead). Replica Set name. Note that this parameter is optional because Cygnus is able to connect to a MongoDB replica set without needing to specify its name.|
 | db\_prefix | no | sth_ ||
 | mongo\_ssl | no | false | Enable SSL in mongodb connection |
 | mongo\_ssl\_invalid\_host\_allowed | no | false | Allow invalid host name in mongo SSL connections |
