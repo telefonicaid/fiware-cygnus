@@ -18,6 +18,7 @@
 package com.telefonica.iot.cygnus.backends.mongo;
 
 import com.mongodb.*;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
@@ -25,14 +26,10 @@ import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.WriteModel;
 import com.mongodb.client.model.UpdateOneModel;
-import com.mongodb.client.result.UpdateResult;
+import com.mongodb.connection.SslSettings;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
-import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYATTRIBUTE;
-import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITY;
-import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYSERVICEPATH;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -41,14 +38,12 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
-import java.security.NoSuchAlgorithmException;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import java.security.KeyStore;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.io.FileInputStream;
 import java.io.InputStream;
+
+import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
 
 /**
@@ -64,6 +59,8 @@ public class MongoBackendImpl implements MongoBackend {
     public enum Resolution { SECOND, MINUTE, HOUR, DAY, MONTH }
 
     private MongoClient client;
+    private com.mongodb.client.MongoClient clientI;
+    private final String mongoURI;
     private final String mongoHosts;
     private final String mongoUsername;
     private final String mongoPassword;
@@ -87,12 +84,14 @@ public class MongoBackendImpl implements MongoBackend {
      * @param mongoReplicaSet
      * @param dataModel
      */
-    public MongoBackendImpl(String mongoHosts, String mongoUsername, String mongoPassword,
+    public MongoBackendImpl(String mongoURI, String mongoHosts, String mongoUsername, String mongoPassword,
                             String mongoAuthSource, String mongoReplicaSet, DataModel dataModel,
                             Boolean sslEnabled, Boolean sslInvalidHostNameAllowed,
                             String sslKeystorePathFile, String sslKeystorePassword,
                             String sslTruststorePathFile, String sslTruststorePassword) {
         client = null;
+        clientI = null;
+        this.mongoURI = mongoURI;
         this.mongoHosts = mongoHosts;
         this.mongoUsername = mongoUsername;
         this.mongoPassword = mongoPassword;
@@ -589,6 +588,9 @@ public class MongoBackendImpl implements MongoBackend {
      * @return
      */
     private MongoDatabase getDatabase(String dbName) {
+        if(StringUtils.isNotEmpty(mongoURI)) {
+			return 	getDatabaseByUsingMongoURI(dbName);
+        }
         // create a ServerAddress object for each configured URI
         List<ServerAddress> servers = new ArrayList<>();
         String[] uris = mongoHosts.split(",");
@@ -678,6 +680,48 @@ public class MongoBackendImpl implements MongoBackend {
         // get the database
         return client.getDatabase(dbName);
     } // getDatabase
+
+    /**
+     * Gets a Mongo database by using mongouri.
+     * @param dbName
+     * @return
+     */
+    private MongoDatabase getDatabaseByUsingMongoURI(String dbName) {
+     if (clientI == null) {
+        SSLContext sslContext = null;
+        if (sslEnabled) {
+            try {
+                KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+                if ((sslKeystorePathFile != null) && !sslKeystorePathFile.isEmpty()) {
+                        InputStream keyStoreStream = new FileInputStream(sslKeystorePathFile);
+                        keyStore.load(keyStoreStream, sslKeystorePassword.toCharArray());
+                } else {
+                        keyStore.load(null);
+                }
+                if ((sslTruststorePathFile != null) && !sslTruststorePathFile.isEmpty()) {
+                        InputStream trustStoreStream = new FileInputStream(sslTruststorePathFile);
+                        keyStore.load(trustStoreStream, sslTruststorePassword.toCharArray());
+                }
+                TrustManagerFactory trustManagerFactory = TrustManagerFactory
+                                .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                trustManagerFactory.init(keyStore);
+                sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, trustManagerFactory.getTrustManagers(), new java.security.SecureRandom());
+            } catch (Exception e) {
+                    LOGGER.warn("Error when init SSL Context: " + e.getMessage());
+            }
+        }
+
+        SslSettings sslSetting = SslSettings.builder().enabled(sslEnabled)
+                        .invalidHostNameAllowed(sslInvalidHostNameAllowed).context(sslContext).build();
+        MongoClientSettings settings = MongoClientSettings.builder()
+                        .applyConnectionString(new ConnectionString(mongoURI))
+                        .applyToSslSettings(builder -> builder.applySettings(sslSetting).build()).build();
+
+        clientI = MongoClients.create(settings);
+    }
+     return clientI.getDatabase(dbName);
+    }
 
     /**
      * Given a resolution, gets the range. It is protected for testing purposes.

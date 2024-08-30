@@ -34,6 +34,7 @@ import org.apache.flume.Context;
 public abstract class NGSIMongoBaseSink extends NGSISink {
 
     protected static final CygnusLogger LOGGER = new CygnusLogger(NGSIMongoBaseSink.class);
+    protected String mongoURI;
     protected String mongoHosts;
     protected String mongoUsername;
     protected String mongoPassword;
@@ -50,6 +51,14 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     protected MongoBackendImpl backend;
     protected long dataExpiration;
     protected boolean ignoreWhiteSpaces;
+    
+    /**
+     * Gets the mongo uri. It is protected since it is used by the tests.
+     * @return
+     */
+    protected String getMongoURI() {
+        return mongoURI;
+    } // getMongoURI
 
     /**
      * Gets the mongo hosts. It is protected since it is used by the tests.
@@ -127,6 +136,8 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     public void configure(Context context) {
         super.configure(context);
 
+        mongoURI = context.getString("mongo_uri", "");
+        LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_uri=" + mongoURI + ")");
         mongoHosts = context.getString("mongo_hosts", "localhost:27017");
         LOGGER.debug("[" + this.getName() + "] Reading configuration (mongo_hosts=" + mongoHosts + ")");
         mongoUsername = context.getString("mongo_username", "");
@@ -215,7 +226,7 @@ public abstract class NGSIMongoBaseSink extends NGSISink {
     @Override
     public void start() {
         try {
-            backend = new MongoBackendImpl(mongoHosts, mongoUsername, mongoPassword,
+            backend = new MongoBackendImpl(mongoURI, mongoHosts, mongoUsername, mongoPassword,
                                            mongoAuthSource, mongoReplicaSet, dataModel,
                                            sslEnabled, sslInvalidHostNameAllowed,
                                            sslKeystorePathFile, sslKeystorePassword,
