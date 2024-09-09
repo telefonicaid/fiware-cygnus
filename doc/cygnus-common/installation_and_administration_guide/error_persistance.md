@@ -18,7 +18,7 @@ $database_name_error_log
 Postgis / PostgreSQL
 
 ```
-$schema_name_error_log
+$schema_name.database_name_error_log
 ```
 
 with the following scheme.
