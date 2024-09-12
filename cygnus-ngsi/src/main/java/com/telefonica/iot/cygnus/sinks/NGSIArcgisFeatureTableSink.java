@@ -621,7 +621,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                             // Try to insert as Double
                             feature.addAttribute(attrName, Double.parseDouble(attrValue.toString()));
                         } catch (NumberFormatException e3) {
-                            LOGGER.warn(
+                            LOGGER.info(
                                     "[NGSIArcgisAggregator] Unquoted String attribute: " + attrName + ":" + attrValue);
                             // If all fails, insert as String, except if null
                             if (attrValue != null &&
