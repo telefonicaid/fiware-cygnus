@@ -99,6 +99,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_project_install_dir}
 
 %changelog
+
+* Thu Sep 18 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.11.0
+
+- [cygnus-ngsi] Upgrade Debian version from 12.5 to 12.6 in Dockerfile
+- [cygnus-ngsi][arcgis-sink] fix log warn to info level in arcgis feature when attribute string (#2407)
+
 * Thu Aug 8 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.10.0
 - [cygnus-ngsi] [mongo-sink] Add mongo_ssl, mongo_ssl_invalid_host_allowed, mongo_ssl_keystore_path_file, mongo_ssl_keystore_password, mongo_ssl_truststore_path_file and mongo_ssl_truststore_password options for mongoDB connections
 - [cygnus-ngsi] [arcgis-sink] Add esri Geometry PolyLine, MultiPoint and Polygon support (#2392)
