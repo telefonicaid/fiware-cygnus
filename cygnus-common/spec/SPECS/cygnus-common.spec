@@ -172,7 +172,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
-* Wed Sep 18 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.11.0
+* Thu Sep 19 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.11.0
 
 - [cygnus-common][cygnus-ngsi] New setting mongo_uri (#2387)
 - [cygnus-common][cygnus-ngsi] Deprecate (mongo_hosts, mongo_username, mongo_password, mongo_auth_source, mongo_replica_set) (use mongo_uri instead)
