@@ -1,5 +1,0 @@
-- [cygnus-ngsi][restHandler] Add header value to logs about bad header (#2410)
-- [cygnus-ngsi] Upgrade Debian version from 12.5 to 12.6 in Dockerfile
-- [cygnus-common][cygnus-ngsi] New setting mongo_uri (#2387)
-- [cygnus-common][cygnus-ngsi] Deprecate (mongo_hosts, mongo_username, mongo_password, mongo_auth_source, mongo_replica_set) (use mongo_uri instead)
-- [cygnus-ngsi][arcgis] fix log warn to info level in arcgis feature when attribute string (#2407)
