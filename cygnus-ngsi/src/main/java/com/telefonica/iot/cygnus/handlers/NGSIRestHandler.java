@@ -238,7 +238,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                         } else if (wrongServicePathHeaderInitialCharacter(splitValue)) {
                             LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('"
                                     + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                                    + "' header value " + headerValue + " must start with '/'");task/add_header_value_logs_about_bad_header
+                                    + "' header value " + headerValue + " must start with '/'");
                             throw new HTTPBadRequestException(
                                     "'" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
                                             + "' header value " + headerValue + " must start with '/'");
