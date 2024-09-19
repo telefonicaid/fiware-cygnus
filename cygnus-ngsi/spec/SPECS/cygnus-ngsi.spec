@@ -100,8 +100,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
-* Thu Sep 18 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.11.0
+* Thu Sep 19 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.11.0
 
+- [cygnus-ngsi][restHandler] Add header value to logs about bad header (#2410)
 - [cygnus-ngsi] Upgrade Debian version from 12.5 to 12.6 in Dockerfile
 - [cygnus-ngsi][arcgis-sink] fix log warn to info level in arcgis feature when attribute string (#2407)
 
