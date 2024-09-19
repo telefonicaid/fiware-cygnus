@@ -40,7 +40,7 @@ ENV CYGNUS_API_PORT "8081"
 # PR https://github.com/telefonicaid/fiware-cygnus/pull/1801 should be also done in this Dockerfile
 # NOTE: Configure correctly GIT_URL_CYGNUS and GIT_REV_CYGNUS for each git branch/fork used
 ENV GIT_URL_CYGNUS "https://github.com/telefonicaid/fiware-cygnus.git"
-ENV GIT_REV_CYGNUS "release/3.10.0"
+ENV GIT_REV_CYGNUS "release/3.11.0"
 
 ENV MVN_VER "3.5.4"
 ENV MVN_TGZ "apache-maven-${MVN_VER}-bin.tar.gz"
