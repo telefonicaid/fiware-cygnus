@@ -213,11 +213,11 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                         LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('"
                                 + CommonConstants.HEADER_FIWARE_SERVICE
                                 + "' header length greater than "
-                                + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
+                                + NGSIConstants.SERVICE_HEADER_MAX_LEN + ") for " + headerValue);
                         throw new HTTPBadRequestException(
                                 "'" + CommonConstants.HEADER_FIWARE_SERVICE
                                 + "' header length greater than "
-                                        + NGSIConstants.SERVICE_HEADER_MAX_LEN + ")");
+                                        + NGSIConstants.SERVICE_HEADER_MAX_LEN + ") for " + headerValue);
                     } else {
                         service = headerValue;
                     } // if else
@@ -231,17 +231,17 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                             LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('"
                                     + CommonConstants.HEADER_FIWARE_SERVICE_PATH
                                     + "' header value length greater than "
-                                    + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
+                                    + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ") for " + headerValue);
                             throw new HTTPBadRequestException(
                                     "'fiware-servicePath' header length greater than "
-                                            + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ")");
+                                            + NGSIConstants.SERVICE_PATH_HEADER_MAX_LEN + ") for " + headerValue));
                         } else if (wrongServicePathHeaderInitialCharacter(splitValue)) {
                             LOGGER.warn("[NGSIRestHandler] Bad HTTP notification ('"
                                     + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                                    + "' header value must start with '/'");
+                                    + "' header value " + headerValue + " must start with '/'");
                             throw new HTTPBadRequestException(
                                     "'" + CommonConstants.HEADER_FIWARE_SERVICE_PATH
-                                            + "' header value must start with '/'");
+                                            + "' header value " + headerValue + " must start with '/'");
                         } // if else
                     } // for
                     
@@ -252,7 +252,7 @@ public class NGSIRestHandler extends CygnusHandler implements HTTPSourceHandler 
                     ngsiVersion = headerValue;
                     break;
                 default:
-                    LOGGER.debug("[NGSIRestHandler] Unnecessary header");
+                    LOGGER.debug("[NGSIRestHandler] Unnecessary header: "  + headerName + " value " + headerValue);
             } // switch
         } // while
         
