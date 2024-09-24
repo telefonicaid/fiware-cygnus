@@ -354,8 +354,10 @@ public class Feature {
             Geometry geometry = null;
             if (json.has(GEOMETRY_TAG)) {
                 JsonElement jsonGeometryElement = json.get(GEOMETRY_TAG);
+                LOGGER.debug("createInstanceFromJson jsonGeometryElement: " + jsonGeometryElement);
                 if (jsonGeometryElement.isJsonObject()) {
                     JsonObject jsonGeometry = jsonGeometryElement.getAsJsonObject();
+                    LOGGER.debug("createInstanceFromJson jsonGeometry as JsonObject: " + jsonGeometry);
                     if (jsonGeometry.get("x") != null) {
                         geometry = Point.createInstanceFromJson(jsonGeometry);
                     } else if (jsonGeometry.get("paths") != null) {
