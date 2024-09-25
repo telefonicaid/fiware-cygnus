@@ -133,8 +133,8 @@ public class Polygon implements Geometry {
         try {
             return new Polygon(json.get(RINGS_TAG).getAsString());
         } catch (Exception e) {
-            LOGGER.error(e.getClass().getSimpleName() + "  " + e.getMessage());
-            throw new ArcgisException("Unable to parse Polygon from json " + e.getMessage());
+            LOGGER.error(e.getClass().getSimpleName() + " error " + e.getMessage() + " parsing Polygon from json " + json);
+            throw new ArcgisException("Unable to parse Polygon from json " + json + " due to " + e.getMessage());
         }
 
     }
