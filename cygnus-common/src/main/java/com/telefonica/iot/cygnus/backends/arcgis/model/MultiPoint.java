@@ -144,18 +144,16 @@ public class MultiPoint implements Geometry {
      */
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{ \"points\": [");
+        sb.append("[");
         for (int i = 0; i < this.points.size(); i++) {
             sb.append("[");
-            double[] array = points.get(i);                
+            double[] array = points.get(i);
             for (double value : array) {
                 sb.append(" ").append(value).append(",");
             }
-            sb.setLength(sb.length() - 2);
             sb.append(" ],");
         }
-        sb.setLength(sb.length() - 2);
-        sb.append(" ]}");
+        sb.append(" ]");
         return sb.toString();
     }
 

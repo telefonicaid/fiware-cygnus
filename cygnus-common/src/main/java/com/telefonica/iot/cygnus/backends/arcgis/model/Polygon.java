@@ -144,23 +144,21 @@ public class Polygon implements Geometry {
      */
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{ \"rings\": [");
+        sb.append("[");
         for (int i = 0; i < this.rings.size(); i++) {
             List<double[]> innerList = this.rings.get(i);
+            sb.append("[");
             for (int j = 0; j < innerList.size(); j++) {
                 sb.append(" [");
-                sb.append("[");
                 double[] array = innerList.get(j);
                 for (double value : array) {
                     sb.append(" ").append(value).append(",");
                 }
-                sb.append(" ]");
-                sb.setLength(sb.length() - 2);
                 sb.append(" ],");
             }
+            sb.append(" ]");
         }
-        sb.setLength(sb.length() - 2);
-        sb.append(" ]}");
+        sb.append(" ]");
         return sb.toString();
     }
 
