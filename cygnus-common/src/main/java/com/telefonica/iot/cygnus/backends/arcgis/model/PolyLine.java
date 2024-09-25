@@ -144,23 +144,21 @@ public class PolyLine implements Geometry {
      */
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{ \"paths\": [");
+        sb.append("[");
         for (int i = 0; i < this.paths.size(); i++) {
             List<double[]> innerList = this.paths.get(i);
+            sb.append("[");
             for (int j = 0; j < innerList.size(); j++) {
                 sb.append(" [");
-                sb.append("[");
                 double[] array = innerList.get(j);
                 for (double value : array) {
                     sb.append(" ").append(value).append(",");
                 }
-                sb.append(" ]");
-                sb.setLength(sb.length() - 2);
                 sb.append(" ],");
             }
+            sb.append(" ]");
         }
-        sb.setLength(sb.length() - 2);
-        sb.append(" ]}");
+        sb.append(" ]");
         return sb.toString();
     }
 

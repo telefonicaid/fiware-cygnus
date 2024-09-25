@@ -1,2 +1,3 @@
+- [cygnus-common][arcgis] toString of complex geometry is not returning equivalent input (#2418)
 - [cygnus-ngsi][arcgis] Log json geometry before create instance
 - [cygnus-ngsi][arcgis] Fix CygnusRuntimeError due to Cannot invoke "java.util.List.size()" because "serverFeatures" is null (#2413)
