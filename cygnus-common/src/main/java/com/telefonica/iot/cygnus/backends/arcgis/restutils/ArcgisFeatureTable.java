@@ -387,19 +387,21 @@ public class ArcgisFeatureTable {
             }
 
             int i = 0;
-            while (!found && i < serverFeatures.size()) {
-                Feature serverFeature = serverFeatures.get(i);
-                String serverFeatureId = null;
-                if ( serverFeature.getAttributes().containsKey(uniqueField)) {
-                    serverFeatureId = serverFeature.getAttributes().get(uniqueField).toString();
+            if (serverFeatures != null) {
+                while (!found && i < serverFeatures.size()) {
+                    Feature serverFeature = serverFeatures.get(i);
+                    String serverFeatureId = null;
+                    if ( serverFeature.getAttributes().containsKey(uniqueField)) {
+                        serverFeatureId = serverFeature.getAttributes().get(uniqueField).toString();
+                    }
+                    if (featureId.equalsIgnoreCase(serverFeatureId)) {
+                        found = true;
+                        Integer oid = serverFeature.getObjectId();
+                        feature.setObjectId(oid);
+                        existentFeatures.add(feature);
+                    }
+                    i++;
                 }
-                if (featureId.equalsIgnoreCase(serverFeatureId)) {
-                    found = true;
-                    Integer oid = serverFeature.getObjectId();
-                    feature.setObjectId(oid);
-                    existentFeatures.add(feature);
-                }
-                i++;
             }
 
             if (!found) {
