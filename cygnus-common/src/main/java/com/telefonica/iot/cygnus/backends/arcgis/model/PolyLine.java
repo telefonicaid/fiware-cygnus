@@ -133,8 +133,8 @@ public class PolyLine implements Geometry {
         try {
             return new PolyLine(json.get(PATHS_TAG).getAsString());
         } catch (Exception e) {
-            LOGGER.error(e.getClass().getSimpleName() + "  " + e.getMessage());
-            throw new ArcgisException("Unable to parse PolyLine from json " + e.getMessage());
+            LOGGER.error(e.getClass().getSimpleName() + " error " + e.getMessage() + " parsing PolyLine from json " + json);
+            throw new ArcgisException("Unable to parse PolyLine from json " + json + " due to " + e.getMessage());
         }
 
     }

@@ -142,8 +142,8 @@ public class Point implements Geometry {
 
             return new Point(x, y, SpatialReference.WGS84);
         } catch (Exception e) {
-            LOGGER.error(e.getClass().getSimpleName() + "  " + e.getMessage());
-            throw new ArcgisException("Unable to parse Point from json " + e.getMessage());
+            LOGGER.error(e.getClass().getSimpleName() + " error " + e.getMessage() + " parsing Point from json " + json);
+            throw new ArcgisException("Unable to parse Point from json " + json + " due to " + e.getMessage());
         }
 
     }
