@@ -172,6 +172,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Fri Sep 27 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.12.0
+
+- [cygnus-common][arcgis] toString of complex geometry is not returning equivalent input (#2418)
+
 * Thu Sep 19 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.11.0
 
 - [cygnus-common][cygnus-ngsi] New setting mongo_uri (#2387)
