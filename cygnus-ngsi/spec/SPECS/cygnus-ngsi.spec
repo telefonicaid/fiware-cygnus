@@ -100,6 +100,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Fri Sep 27 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.12.0
+
+- [cygnus-ngsi][arcgis] Log json geometry before create instance and in errors related
+- [cygnus-ngsi][arcgis] Fix CygnusRuntimeError due to Cannot invoke "java.util.List.size()" because "serverFeatures" is null (#2413)
+
 * Thu Sep 19 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.11.0
 
 - [cygnus-ngsi][restHandler] Add header value to logs about bad header (#2410)
