@@ -166,7 +166,8 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
      */
     protected ArcgisFeatureTable getPersistenceBackend(String featureServiceUrl) throws CygnusRuntimeError {
 
-        if (arcgisPersistenceBackend.containsKey(featureServiceUrl)) {
+        if (arcgisPersistenceBackend.containsKey(featureServiceUrl) &&
+            arcgisPersistenceBackend.get(featureServiceUrl).connected() ){
             LOGGER.debug("Using persistenceBackend which contains key for Feature table: " + featureServiceUrl);
             return arcgisPersistenceBackend.get(featureServiceUrl);
         } else {
