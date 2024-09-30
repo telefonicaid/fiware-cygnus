@@ -168,10 +168,10 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 
         if (arcgisPersistenceBackend.containsKey(featureServiceUrl) &&
             arcgisPersistenceBackend.get(featureServiceUrl).connected() ){
-            LOGGER.debug("Using persistenceBackend which contains key for Feature table: " + featureServiceUrl);
+            LOGGER.info("Using persistenceBackend which contains key for Feature table: " + featureServiceUrl);
             return arcgisPersistenceBackend.get(featureServiceUrl);
         } else {
-            LOGGER.debug("Creating new persistenceBackend for Feature table: " + featureServiceUrl);
+            LOGGER.info("Creating new persistenceBackend for Feature table: " + featureServiceUrl);
             LOGGER.debug("Token url: " + getGetTokenUrl());
             try {
                 NGSIArcgisFeatureTable newTable = new NGSIArcgisFeatureTable(featureServiceUrl, getUsername(),
