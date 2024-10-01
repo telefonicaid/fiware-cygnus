@@ -1,1 +1,2 @@
-
+- [cygnus-ngsi][arcgis] Check feature table is connected before use it (#2405)
+- [cygnus-ngsi][arcgis] Set feature table to not connected after a connection error (#2405)

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.net.SocketException;
 
 import com.telefonica.iot.cygnus.backends.arcgis.exceptions.ArcgisException;
 import com.telefonica.iot.cygnus.backends.arcgis.model.Credential;
@@ -593,6 +594,9 @@ public class ArcgisFeatureTable {
             this.errorCode = agsEx.getCode();
         } else {
             if (e != null && e.getCause() != null) {
+                if (e.getCause() instanceof SocketException) {
+                    connected = false;
+                }
                 LOGGER.error("Error Cause: " + e.getCause().getMessage());
             }
             LOGGER.error("Error Message: " + e.getMessage());
