@@ -131,7 +131,7 @@ public class MultiPoint implements Geometry {
      */
     public static Geometry createInstanceFromJson(JsonObject json) throws ArcgisException {
         try {
-            return new MultiPoint(json.get(POINTS_TAG).getAsString());
+            return new MultiPoint(json.toString());
         } catch (Exception e) {
             LOGGER.error(e.getClass().getSimpleName() + " error " + e.getMessage() + " parsing MultiPoint from json " + json);
             throw new ArcgisException("Unable to parse MultiPoint from json " + json + " due to " + e.getMessage());
