@@ -131,7 +131,7 @@ public class Polygon implements Geometry {
      */
     public static Geometry createInstanceFromJson(JsonObject json) throws ArcgisException {
         try {
-            return new Polygon(json.getAsString());
+            return new Polygon(json.toString());
         } catch (Exception e) {
             LOGGER.error(e.getClass().getSimpleName() + " error " + e.getMessage() + " parsing Polygon from json " + json);
             throw new ArcgisException("Unable to parse Polygon from json " + json + " due to " + e.getMessage());

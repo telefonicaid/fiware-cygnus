@@ -131,7 +131,7 @@ public class PolyLine implements Geometry {
      */
     public static Geometry createInstanceFromJson(JsonObject json) throws ArcgisException {
         try {
-            return new PolyLine(json.getAsString());
+            return new PolyLine(json.toString());
         } catch (Exception e) {
             LOGGER.error(e.getClass().getSimpleName() + " error " + e.getMessage() + " parsing PolyLine from json " + json);
             throw new ArcgisException("Unable to parse PolyLine from json " + json + " due to " + e.getMessage());
