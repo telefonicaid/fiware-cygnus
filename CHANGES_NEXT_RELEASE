@@ -1,4 +1,4 @@
-- [cygnus-ngsi][arcgis] Fix getObjectId to raise error when ObjectId is not retrieved from entity
+- [cygnus-ngsi][arcgis] Fix getObjectId to raise error when ObjectId is not retrieved from entity (#2424)
 - [cygnus-ngsi][arcgis] Fix json parse for instance of PolyLine, Polygon and Multipoint (#2423)
 - [cygnus-ngsi][arcgis] Check feature table is connected before use it (#2405)
 - [cygnus-ngsi][arcgis] Set feature table to not connected after a connection error (#2405)
