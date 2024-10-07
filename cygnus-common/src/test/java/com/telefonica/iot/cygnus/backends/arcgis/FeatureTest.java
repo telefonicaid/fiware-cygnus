@@ -43,7 +43,6 @@ import com.telefonica.iot.cygnus.backends.arcgis.model.MultiPoint;
 import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
-import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
@@ -177,16 +176,16 @@ public class FeatureTest {
             String paths = "{ \"paths\": [ [ [-97.06138, 32.837], [-97.06133, 33.836], [-98.2, 34.834], [-97, 40] ] ] }";
             PolyLine polyline = new PolyLine(paths);
             System.out.println("POLYLINE: " + polyline.toString());
-
         } catch (Exception e) {
             System.out.println("Exception");
             System.out.println(e.getClass().getSimpleName() + "  " + e.getMessage());
         }
         Feature polyline = FeatureTestFactory.getNewPolyLineFeature("Mi PolyLine", 33);
         System.out.println("feature with polyline -  " + polyline.toJson());
+        Feature polyline2 = FeatureTestFactory.getNewPolyLineFeature2("Mi PolyLine2", 33);
+        System.out.println("feature with polyline2 -  " + polyline2.toJson());
         assertTrue("ok.", true);
     }
-
 
     /**
      *
@@ -198,13 +197,14 @@ public class FeatureTest {
             String rings = "{ \"rings\": [ [ [-97.06138,32.837,35.1,4.8], [-97.06133,32.836,35.2,4.1], [-97.06124,32.834,35.3,4.2], [-97.06138,32.837,35.1,4.8] ], [ [-97.06326,32.759,35.4],  [-97.06298,32.755,35.5], [-97.06153,32.749,35.6], [-97.06326,32.759,35.4] ] ] }";
             Polygon poly = new Polygon(rings);
             System.out.println("POLYGON: " + poly.toString());
-
         } catch (Exception e) {
             System.out.println("Exception");
             System.out.println(e.getClass().getSimpleName() + "  " + e.getMessage());
         }
         Feature polygon = FeatureTestFactory.getNewPolygonFeature("Mi Polygon", 33);
         System.out.println("feature with polygon -  " + polygon.toJson());
+        Feature polygon2 = FeatureTestFactory.getNewPolygonFeature("Mi Polygon2", 33);
+        System.out.println("feature with polygon2 -  " + polygon2.toJson());
         assertTrue("ok.", true);
     }
 
@@ -225,7 +225,9 @@ public class FeatureTest {
         }
         Feature multipoint = FeatureTestFactory.getNewMultiPointFeature("Mi MultiPoint", 33);
         System.out.println("feature with multipoint -  " + multipoint.toJson());
+        Feature multipoint2 = FeatureTestFactory.getNewMultiPointFeature("Mi MultiPoint2", 33);
+        System.out.println("feature with multipoint2 -  " + multipoint2.toJson());
         assertTrue("ok.", true);
-    }    
+    }
 
 }
