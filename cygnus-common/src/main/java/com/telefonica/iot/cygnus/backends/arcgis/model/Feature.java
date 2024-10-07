@@ -275,8 +275,7 @@ public class Feature {
                 break;
             }
         }
-
-        if ("".equals(objectId)) {
+        if (objectId.equals(-1)) {
             throw new ArcgisException("Cant find " + GisAttributeType.OID + " in Feature Object.");
         } else {
             return objectId;
