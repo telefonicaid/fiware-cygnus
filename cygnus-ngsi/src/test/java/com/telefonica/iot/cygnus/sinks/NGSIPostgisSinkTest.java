@@ -476,7 +476,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             String builtSchemaName = sink.buildSchemaName(service, servicePath);
-            String expectedDBName = "somex0053ervice";
+            String expectedDBName = "someService";
 
             try {
                 assertEquals(expectedDBName, builtSchemaName);
@@ -568,7 +568,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             String builtSchemaName = sink.buildDBName(service);
-            String expectedDBName = "somex0053ervice";
+            String expectedDBName = "someService";
 
             try {
                 assertEquals(expectedDBName, builtSchemaName);
@@ -615,7 +615,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             String builtSchemaName = sink.buildDBName(service);
-            String expectedDBName = "somex0053ervice";
+            String expectedDBName = "someService";
 
             try {
                 assertEquals(expectedDBName, builtSchemaName);
@@ -715,7 +715,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "x002fsomex0050ath";
+            String expecetedTableName = "x002fsomePath";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);
@@ -821,7 +821,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "x002fsomex0050athxffffsomex0049dxffffsomex0054ype";
+             String expecetedTableName = "x002fsomePathxffffsomeIdxffffsomeType";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);
@@ -929,7 +929,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "x002fsomex0050athxffffsomex0054ype";
+            String expecetedTableName = "x002fsomePathxffffsomeType";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);
@@ -1031,7 +1031,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "somex0054ype";
+            String expecetedTableName = "someType";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);
@@ -1225,7 +1225,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "x002fxffffsomex0049dxffffsomex0054ype";
+             String expecetedTableName = "x002fxffffsomeIdxffffsomeType";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);
@@ -1323,7 +1323,7 @@ public class NGSIPostgisSinkTest {
 
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, entityType, attribute);
-            String expecetedTableName = "x002fxffffsomex0054ype";
+             String expecetedTableName = "x002fxffffsomeType";
 
             try {
                 assertEquals(expecetedTableName, builtTableName);
