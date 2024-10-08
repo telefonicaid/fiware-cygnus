@@ -275,8 +275,8 @@ public class Feature {
                 break;
             }
         }
-
-        if ("".equals(objectId)) {
+        if (objectId.equals(-1)) {
+            LOGGER.warn("Cant find " + GisAttributeType.OID + " in Feature Object.");
             throw new ArcgisException("Cant find " + GisAttributeType.OID + " in Feature Object.");
         } else {
             return objectId;
@@ -306,7 +306,7 @@ public class Feature {
             }
         } catch (Exception e) {
             throw new ArcgisException(
-                    "Error setting OBJECTID for feature " + this.toString() + " - Error: " + e);
+                    "Error setting OBJECTID for feature " + this.toString() + " with value " + objectId + " - Error: " + e);
         }
     }
 
