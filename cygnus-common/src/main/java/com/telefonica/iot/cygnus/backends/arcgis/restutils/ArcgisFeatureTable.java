@@ -398,6 +398,7 @@ public class ArcgisFeatureTable {
                     if (featureId.equalsIgnoreCase(serverFeatureId)) {
                         found = true;
                         Integer oid = serverFeature.getObjectId();
+                        LOGGER.debug("retrieved ObjectId: " + oid + " from feature " + serverFeatureId);
                         feature.setObjectId(oid);
                         existentFeatures.add(feature);
                     }
