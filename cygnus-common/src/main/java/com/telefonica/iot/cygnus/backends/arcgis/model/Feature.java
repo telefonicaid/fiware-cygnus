@@ -54,6 +54,7 @@ public class Feature {
     
     private static final String DATE_PATTERN = "MM/dd/yyyy hh:mm:ss";
     private static final String OBJECTID_FIELDNAME = "OBJECTID";
+    private static final String GLOBALID_FIELDNAME = "GLOBALID";
 
     private Geometry geometry;
     private Map<String, Object> attributes;
@@ -275,7 +276,9 @@ public class Feature {
                 break;
             }
         }
-
+        if (objectId.equals(-1)) {
+            LOGGER.warn("Cant find " + GisAttributeType.OID + " in Feature Object.");
+        }
         if ("".equals(objectId)) {
             throw new ArcgisException("Cant find " + GisAttributeType.OID + " in Feature Object.");
         } else {
@@ -306,7 +309,59 @@ public class Feature {
             }
         } catch (Exception e) {
             throw new ArcgisException(
-                    "Error setting OBJECTID for feature " + this.toString() + " - Error: " + e);
+                    "Error setting OBJECTID for feature " + this.toString() + " with value " + objectId + " - Error: " + e);
+        }
+    }
+
+
+    /**
+     * Retorna el GLOBALID del GIS de la entidad.
+     *
+     * @return GLOBALID value
+     * @throws ArcgisException
+     */
+    public Integer getGlobalId() throws ArcgisException {
+        Integer globalId = -1;
+        for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+            if (GLOBALID_FIELDNAME.equalsIgnoreCase(attribute.getKey())) {
+                globalId = (Integer) attribute.getValue();
+                break;
+            }
+        }
+        if (globalId.equals(-1)) {
+            LOGGER.warn("Cant find " + GisAttributeType.GID + " in Feature Object.");
+        }
+        if ("".equals(globalId)) {
+            throw new ArcgisException("Cant find " + GisAttributeType.GID + " in Feature Object.");
+        } else {
+            return globalId;
+        }
+    }
+
+    /**
+     * Establece el GLOBALID del GIS de la entidad.
+     *
+     * @param globalId
+     * @return
+     * @throws ArcgisException
+     */
+    public void setGlobalId(Integer globalId) throws ArcgisException {
+        try {
+            boolean found = false;
+
+            for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+                if (GLOBALID_FIELDNAME.equalsIgnoreCase(attribute.getKey())) {
+                    found = true;
+                    attribute.setValue(globalId);
+                    break;
+                }
+            }
+            if (!found) {
+                attributes.put(GLOBALID_FIELDNAME, globalId);
+            }
+        } catch (Exception e) {
+            throw new ArcgisException(
+                    "Error setting GLOBALID for feature " + this.toString() + " with value " + globalId + " - Error: " + e);
         }
     }
 
