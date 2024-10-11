@@ -404,6 +404,7 @@ public class ArcgisFeatureTable {
                         } else {
                             Integer gid = serverFeature.getGlobalId();
                             if (!gid.equals(-1)) {
+                                LOGGER.info(" GlobalId " + gid + " found in serverFeature " + serverFeatureId);
                                 feature.setGlobalId(gid);
                             } else {
                                 LOGGER.warn("None ObjectId neither GlobalId were found in serverFeature " + serverFeatureId);
