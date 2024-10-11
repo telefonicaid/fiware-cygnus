@@ -399,7 +399,17 @@ public class ArcgisFeatureTable {
                         found = true;
                         Integer oid = serverFeature.getObjectId();
                         LOGGER.debug("retrieved ObjectId: " + oid + " from feature " + serverFeatureId);
-                        feature.setObjectId(oid);
+                        if (!oid.equals(-1)) {
+                            feature.setObjectId(oid);
+                        } else {
+                            Integer gid = serverFeature.getGlobalId();
+                            if (!gid.equals(-1)) {
+                                feature.setGlobalId(gid);
+                            } else {
+                                LOGGER.warn("None ObjectId neither GlobalId were found in serverFeature " + serverFeatureId);
+                                feature.setObjectId(oid);
+                            }
+                        }
                         existentFeatures.add(feature);
                     }
                     i++;
