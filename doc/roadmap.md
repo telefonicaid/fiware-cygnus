@@ -32,7 +32,7 @@ Disclaimer:
 The following list of features are planned to be addressed in the short term,
 and incorporated in a next release of the product in the short term:
 
-* *None at the present moment*
+- Performance / scalability / sizing and reliability analisys.
 
 ## Medium term
 
@@ -40,7 +40,10 @@ The following list of features are planned to be addressed in the medium term,
 typically within the subsequent release(s) generated in the next **9 months**
 after next planned release:
 
-* *None at the present moment*
+- Brand new sink able to write to IoTAs and NGSI endpoints.
+- Add last data features to MongoDB sink. 
+- Binary CB-Cygnus communication (based in MQTT). Need to be validated before.
+
 
 ## Long term
 
@@ -49,7 +52,8 @@ of the product even though development of these features has not yet been
 scheduled for a release in the near future. Please feel free to contact us if
 you wish to get involved in the implementation or influence the roadmap.
 
--   Binary CB-Cygnus communication (based in MQTT). Need to be validated before.
+- Add data operators (aggregates, modify..). Need to be studied in detail
+- Multitenant Administration API. Enable multitenant Cygnus usage. Need to be studied in detail
 
 ## Features already completed
 
