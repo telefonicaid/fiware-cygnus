@@ -54,7 +54,7 @@ public class Feature {
     
     private static final String DATE_PATTERN = "MM/dd/yyyy hh:mm:ss";
     private static final String OBJECTID_FIELDNAME = "OBJECTID";
-    private static final String GLOBALID_FIELDNAME = "GLOBALID";
+    private static final String GLOBALID_FIELDNAME = "gid";
 
     private Geometry geometry;
     private Map<String, Object> attributes;
