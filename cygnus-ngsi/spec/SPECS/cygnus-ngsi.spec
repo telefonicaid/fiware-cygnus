@@ -100,6 +100,13 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Mon Oct 14 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.13.0
+
+- [cygnus-ngsi][arcgis] Try to get GlobalID if OID is not found in retrieved feature (#2424)
+- [cygnus-ngsi][arcgis] Fix json parse for instance of PolyLine, Polygon and Multipoint (#2423)
+- [cygnus-ngsi][arcgis] Check feature table is connected before use it (#2405)
+- [cygnus-ngsi][arcgis] Set feature table to not connected after a connection error (#2405)
+
 * Fri Sep 27 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.12.0
 
 - [cygnus-ngsi][arcgis] Log json geometry before create instance and in errors related
