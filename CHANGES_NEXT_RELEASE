@@ -1,1 +1,1 @@
-- [cygnus-ngsi][arcgis] fix log warn to debug level in arcgis feature when no object id is found 
+- [cygnus-ngsi][arcgis] fix log warn to debug level in arcgis feature when no object id is found (#2430)
