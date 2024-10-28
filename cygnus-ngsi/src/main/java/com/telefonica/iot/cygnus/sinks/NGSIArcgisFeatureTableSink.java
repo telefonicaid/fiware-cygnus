@@ -396,7 +396,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 
                 featureTable.addToBatch(aggregation.getFeature());
                 if (featureTable.hasError()){
-                    logger.error("feature table " + featureTableUrl + " has error code " + featureTable.getErrorCode() + " with desc " + featureTable.getErrorDesc());
+                    LOGGER.error("feature table " + featureTableUrl + " has error code " + featureTable.getErrorCode() + " with desc " + featureTable.getErrorDesc());
                     throw new ArcgisException(featureTable.getErrorCode(), featureTable.getErrorDesc());
                 }
             }
