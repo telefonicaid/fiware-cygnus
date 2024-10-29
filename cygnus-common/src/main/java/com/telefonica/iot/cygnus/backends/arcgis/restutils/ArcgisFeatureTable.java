@@ -570,7 +570,7 @@ public class ArcgisFeatureTable {
                                     + featureList.size());
                 }
             } else {
-                LOGGER.error("WARN - Argis.commitFeatures called with 0 entities.");
+                LOGGER.error("WARN - Argis.commitFeatures called with " + sizeList + " entities and hasError() " + hasError());
             }
 
         } else {

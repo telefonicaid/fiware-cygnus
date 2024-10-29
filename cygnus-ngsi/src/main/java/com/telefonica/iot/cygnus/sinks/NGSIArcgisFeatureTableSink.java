@@ -166,6 +166,8 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
      */
     protected ArcgisFeatureTable getPersistenceBackend(String featureServiceUrl) throws CygnusRuntimeError {
 
+        LOGGER.debug("Current persistenceBackend has " + arcgisPersistenceBackend.size() +" tables ");
+
         if (arcgisPersistenceBackend.containsKey(featureServiceUrl) &&
             arcgisPersistenceBackend.get(featureServiceUrl).connected() ){
             LOGGER.info("Using persistenceBackend which contains key for Feature table: " + featureServiceUrl);
@@ -394,6 +396,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 
                 featureTable.addToBatch(aggregation.getFeature());
                 if (featureTable.hasError()){
+                    LOGGER.error("feature table " + featureTableUrl + " has error code " + featureTable.getErrorCode() + " with desc " + featureTable.getErrorDesc());
                     throw new ArcgisException(featureTable.getErrorCode(), featureTable.getErrorDesc());
                 }
             }
