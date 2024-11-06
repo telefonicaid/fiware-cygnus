@@ -175,7 +175,7 @@ The name mappings configuration would be:
 | arcgis\_username | yes | N/A |  |
 | arcgis\_password | yes | N/A |  |
 | arcgis\_gettoken\_url | yes | N/A |https://{url\_host}/sharing/generateToken|
-| arcgis\_maxBatchSize | no | 10 | Number of feature updated accumulated in table before persist it. |
+| arcgis\_maxBatchSize | no | 10 | Number of feature updates accumulated in feature table before persist it. |
 | arcgis_timeoutSec | no | 60 | feature table timeout |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
