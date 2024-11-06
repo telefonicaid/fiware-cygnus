@@ -610,6 +610,8 @@ public class ArcgisFeatureTable {
                     connected = false;
                 }
                 LOGGER.error("Error Cause: " + e.getCause().getMessage());
+            } else if (e != null && e.getMessage().contains("Connection reset")) {
+                connected = false;
             }
             LOGGER.error("Error Message: " + e.getMessage());
 
