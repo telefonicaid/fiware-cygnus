@@ -172,6 +172,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Thu Nov 7 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.14.0
+
 * Mon Oct 14 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.13.0
 
 * Fri Sep 27 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.12.0
