@@ -1,4 +1,1 @@
-- [cygnus-ngsi][arcgis] Log feature table error
-- [cygnus-ngsi][arcgis] fix log warn to debug level in arcgis feature when no object id is found (#2430)
-- [cygnus-ngsi][arcgis] Add another check to connection reset when no java.net.SocketException has no cause (#2405)
-- [cygnus-ngsi] Upgrade Debian version from 12.6 to 12.7 in Dockerfile
+

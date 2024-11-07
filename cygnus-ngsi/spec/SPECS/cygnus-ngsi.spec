@@ -102,6 +102,11 @@ rm -rf $RPM_BUILD_ROOT
 
 * Thu Nov 7 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.14.0
 
+- [cygnus-ngsi][arcgis] Log feature table error
+- [cygnus-ngsi][arcgis] fix log warn to debug level in arcgis feature when no object id is found (#2430)
+- [cygnus-ngsi][arcgis] Add another check to connection reset when no java.net.SocketException has no cause (#2405)
+- [cygnus-ngsi] Upgrade Debian version from 12.6 to 12.7 in Dockerfile
+
 * Mon Oct 14 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.13.0
 
 - [cygnus-ngsi][arcgis] Try to get GlobalID if OID is not found in retrieved feature (#2424)
