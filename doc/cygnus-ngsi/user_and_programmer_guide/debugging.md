@@ -53,7 +53,7 @@ Warning: JAVA_HOME is not set!
 Listening for transport dt_socket at address: 6006
 ```
 
-## Attaching java jdb debugger 
+## Attaching java jdb debugger and set a breakpoint 
 ```
  jdb -attach 127.0.0.1:6006
 ```
@@ -61,7 +61,10 @@ Listening for transport dt_socket at address: 6006
 Set uncaught java.lang.Throwable
 Set deferred uncaught java.lang.Throwable
 Initializing jdb ...
-> 
+> stop in com.telefonica.iot.cygnus.sinks.NGSIArcgisFeatureTableSink.getPersistenceBackend
+Set breakpoint com.telefonica.iot.cygnus.sinks.NGSIArcgisFeatureTableSink.getPersistenceBackend
+> run
+Nothing suspended.
 ```
 
 ## Attaching IntelliJ debugger.
