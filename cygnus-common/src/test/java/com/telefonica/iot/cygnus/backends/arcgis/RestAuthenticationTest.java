@@ -59,7 +59,7 @@ public class RestAuthenticationTest implements ArcgisBaseTest {
                 System.out.println("------- TEST getPortalTokenTest()");
                 credential = RestAuthentication.createUserToken(PORTAL_USER, PORTAL_PASSWORD,
                         new URL(PORTAL_GENERATE_TOKEN_URL),
-                        "https://sags1.int.ayto-santander.es/arcgis/rest/services/Policia");
+                                                                "https://sags1.int.ayto-santander.es/arcgis/rest/services/Policia", 0, 0);
                 System.out.println("Recovered credential: " + credential);
                 assertTrue(!"".equals(credential.getToken()));
             } catch (MalformedURLException e) {
@@ -88,7 +88,7 @@ public class RestAuthenticationTest implements ArcgisBaseTest {
                 System.out.println("------- TEST getOnlineTokenTest()");
     
                 credential = RestAuthentication.createUserToken(ONLINE_USER, ONLINE_PASSWORD,
-                        new URL(ONLINE_GENERATE_TOKEN_URL), "*");
+                                                                new URL(ONLINE_GENERATE_TOKEN_URL), "*", 0, 0);
                 System.out.println("Recovered Token: " + credential);
                 assertTrue(!"".equals(credential.getToken()));
             } catch (MalformedURLException e) {

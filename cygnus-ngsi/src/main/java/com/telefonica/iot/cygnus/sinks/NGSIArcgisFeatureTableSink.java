@@ -76,6 +76,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     private static final String DEFAULT_PASSWORD = "";
     private static final int DEFAULT_MAX_BATCH_SIZE = 10;
     private static final int DEFAULT_BATCH_TIMEOUT_SECS = 60;
+    private static final int DEFAULT_TIMEOUT = 0;
     private static final String ARCGIS_INSTANCE_NAME = "arcgis";
     
     private static final String GEO_JSON_COORDINATES_TAG = "coordinates";
@@ -89,6 +90,8 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
     private String password;
     private int maxBatchSize;
     private long timeoutSecs;
+    private int connectionTimeout;
+    private int readTimeout;
     private static volatile Map<String, NGSIArcgisFeatureTable> arcgisPersistenceBackend;
 
     /**
@@ -177,7 +180,8 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
             LOGGER.debug("Token url: " + getGetTokenUrl());
             try {
                 NGSIArcgisFeatureTable newTable = new NGSIArcgisFeatureTable(featureServiceUrl, getUsername(),
-                        getPassword(), getGetTokenUrl(), timeoutSecs);
+                                                                             getPassword(), getGetTokenUrl(), timeoutSecs,
+                                                                             connectionTimeout, readTimeout);
                 newTable.setBatchAction(ArcgisFeatureTable.ADD_UPDATE_ACTION);
                 newTable.setBatchSize(maxBatchSize);
 
@@ -243,6 +247,22 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
             LOGGER.debug("[" + this.getName() + "] Reading configuration (arcgis_timeoutSecs=" + maxBatchSize + ")");
         }
 
+        connectionTimeout = context.getInteger("arcgis_connectionTimeout", DEFAULT_TIMEOUT);
+        if (connectionTimeout < 0 || connectionTimeout > Integer.MAX_VALUE) {
+            invalidConfiguration = true;
+            LOGGER.error("[" + this.getName() + "] Invalid configuration (arcgis_connectionTimeout=" + connectionTimeout + ") "
+                    + "must be an integer between 0 and Integer.MAX_VALUE");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (arcgis_connectionTimeout=" + connectionTimeout + ")");
+        }
+        readTimeout = context.getInteger("arcgis_readTimeout", DEFAULT_TIMEOUT);
+        if (readTimeout < 0 || readTimeout > Integer.MAX_VALUE) {
+            invalidConfiguration = true;
+            LOGGER.error("[" + this.getName() + "] Invalid configuration (arcgis_readTimeout=" + readTimeout + ") "
+                    + "must be an integer between 0 and Integer.MAX_VALUE");
+        } else {
+            LOGGER.debug("[" + this.getName() + "] Reading configuration (arcgis_connectionTimeout=" + connectionTimeout + ")");
+        }
         super.configure(context);
     } // configure
 

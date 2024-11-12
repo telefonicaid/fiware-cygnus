@@ -151,7 +151,8 @@ public class RestAuthentication extends RestApi {
      * @throws ArcGisException
      */
     public static Credential createUserToken(String user, String password, URL tokenGenUrl,
-            String referer, Integer expirationMins) throws ArcgisException {
+                                             String referer, Integer expirationMins,
+                                             int connectionTimeout, int readTimeout) throws ArcgisException {
         String tokenJSON = null;
         try {
             Map<String, String> bodyParams = new LinkedHashMap<String, String>();
@@ -163,7 +164,7 @@ public class RestAuthentication extends RestApi {
             }
             bodyParams.put(PARAM_REQUEST_FORMAT, REQUEST_FORMAT_PARAMETER);
 
-            HttpResponse response = httpPost(tokenGenUrl.toString(), bodyParams);
+            HttpResponse response = httpPost(tokenGenUrl.toString(), bodyParams, connectionTimeout, readTimeout);
 
             if (response.getResponseCode() == 200) {
                 tokenJSON = response.getBody();
@@ -194,8 +195,8 @@ public class RestAuthentication extends RestApi {
      * @throws ArcGisException
      */
     public static Credential createUserToken(String user, String password, URL tokenGenUrl,
-            String referer) throws ArcgisException {
-        return createUserToken(user, password, tokenGenUrl, referer, null);
+                                             String referer, int connectionTimeout, int readTimeout) throws ArcgisException {
+        return createUserToken(user, password, tokenGenUrl, referer, null, connectionTimeout, readTimeout);
     }
 
     /**
@@ -208,13 +209,13 @@ public class RestAuthentication extends RestApi {
      * @return
      * @throws ArcgisException
      */
-    public static Credential createToken(Credential credential, URL tokenGenUrl, String referer)
+    public static Credential createToken(Credential credential, URL tokenGenUrl, String referer, int connectionTimeout, int readTimeout)
             throws ArcgisException {
 
         if (credential instanceof UserCredential) {
             UserCredential userCredential = (UserCredential) credential;
             credential = createUserToken(userCredential.getUser(), userCredential.getPassword(),
-                    tokenGenUrl, referer);
+                                         tokenGenUrl, referer, connectionTimeout, readTimeout);
 
         } else {
             throw new ArcgisException("Invalid Credential type.");

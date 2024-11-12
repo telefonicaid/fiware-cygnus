@@ -78,6 +78,9 @@ public class RestFeatureTable extends CredentialRestApi {
 
     protected URL serviceUrl;
 
+    protected int connectionTimeout = 0;
+    protected int readTimeout = 0;
+
     // Table info
     private String uniqueIdField = "";
     private Map<String, Field> tableAttributes = new HashMap<String, Field>();
@@ -90,9 +93,12 @@ public class RestFeatureTable extends CredentialRestApi {
      * @param referer
      * @param expirationMins
      */
-    private RestFeatureTable(URL serviceUrl, Credential credential) {
-        super((URL) null, credential, serviceUrl.toString());
+    private RestFeatureTable(URL serviceUrl, Credential credential,
+                             int connectionTimeout, int readTimeout) {
+        super((URL) null, credential, serviceUrl.toString(), connectionTimeout, readTimeout);
         this.serviceUrl = serviceUrl;
+        this.connectionTimeout = connectionTimeout;
+        this.readTimeout = readTimeout;
     }
 
 
@@ -103,10 +109,12 @@ public class RestFeatureTable extends CredentialRestApi {
      * @param credential
      * @throws MalformedURLException
      */
-    public RestFeatureTable(String url, Credential credential, String tokenGenUrl)
+    public RestFeatureTable(String url, Credential credential, String tokenGenUrl,
+                            int connectionTimeout, int readTimeout)
             throws ArcgisException {
-        super(tokenGenUrl, credential, url);
-
+        super(tokenGenUrl, credential, url, connectionTimeout, readTimeout);
+        this.connectionTimeout = connectionTimeout;
+        this.readTimeout = readTimeout;
         try {
             this.serviceUrl = new URL(url);
         } catch (MalformedURLException e) {
@@ -212,7 +220,7 @@ public class RestFeatureTable extends CredentialRestApi {
             fullUrl += QUERY_RELATIVE_PATH;
         }
 
-        HttpResponse response = httpGet(fullUrl, params);
+        HttpResponse response = httpGet(fullUrl, params, this.connectionTimeout, this.readTimeout);
         LOGGER.debug("Response code: " + response.getResponseCode() + "\n\t" + response.getBody());
 
         checkResponse(response);
@@ -265,7 +273,7 @@ public class RestFeatureTable extends CredentialRestApi {
             fullUrl += "/" + action;
         }
 
-        HttpResponse response = httpPost(fullUrl, params, bodyParams);
+        HttpResponse response = httpPost(fullUrl, params, bodyParams, this.connectionTimeout, this.readTimeout);
         LOGGER.debug("Response code: " + response.getResponseCode() + "\n\t" + response.getBody());
 
         checkResponse(response);
@@ -350,7 +358,7 @@ public class RestFeatureTable extends CredentialRestApi {
             fullUrl += DELETE_FEATURES_RELATIVE_PATH;
         }
 
-        HttpResponse response = httpPost(fullUrl, params, bodyParams);
+        HttpResponse response = httpPost(fullUrl, params, bodyParams, this.connectionTimeout, this.readTimeout);
         LOGGER.debug("Response code: " + response.getResponseCode() + "\n\t" + response.getBody());
 
         checkResponse(response);
@@ -397,7 +405,7 @@ public class RestFeatureTable extends CredentialRestApi {
             params.put(OUTPUT_FORMAT_PARAM, DEFAULT_OUTPUT_FORMAT);
 
             LOGGER.debug("HttpGet " + fullUrl.toString() + " number of params: " + params.size());
-            HttpResponse response = httpGet(fullUrl, params);
+            HttpResponse response = httpGet(fullUrl, params, this.connectionTimeout, this.readTimeout);
             LOGGER.debug("Response code: " + response.getResponseCode() + "\n\t" + response.getBody());
 
             checkResponse(response);

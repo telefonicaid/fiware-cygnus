@@ -57,7 +57,7 @@ public class RestApiTest extends RestApi{
         HashMap<String, String> params = new HashMap<String, String>();
 
         try {
-            HttpResponse response = RestApi.httpGet(urlRequest, params);
+            HttpResponse response = RestApi.httpGet(urlRequest, params, 0, 0);
             System.out.println(response.toString());
             Assert.assertTrue(response.getResponseCode() == 200);
         } catch (Exception e) {
@@ -79,7 +79,7 @@ public class RestApiTest extends RestApi{
         params.put("f", "pjson");
 
         try {
-            HttpResponse response = RestApi.httpGet(urlRequest, params);
+            HttpResponse response = RestApi.httpGet(urlRequest, params, 0, 0);
             System.out.println(response.toString());
             Assert.assertTrue(response.getResponseCode() == 200);
         } catch (Exception e) {

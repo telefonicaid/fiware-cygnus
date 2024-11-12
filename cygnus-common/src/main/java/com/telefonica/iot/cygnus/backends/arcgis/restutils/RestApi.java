@@ -162,7 +162,8 @@ public class RestApi  {
      * @throws Exception
      */
     public static HttpResponse requestHTTP(String urlToRead, Map<String, String> params,
-            HttpMethod httpMethod, String body) {
+                                           HttpMethod httpMethod, String body,
+                                           int connectionTimeout, int readTimeout) {
 
         HttpResponse httpResponse = new HttpResponse();
         StringBuilder result = new StringBuilder("");
@@ -209,7 +210,9 @@ public class RestApi  {
             URL url = new java.net.URL(strUrl);
             conn = (java.net.HttpURLConnection) url.openConnection();
             conn.setRequestMethod(httpMethod.toString());
-
+            conn.setConnectTimeout(connectionTimeout);
+            conn.setReadTimeout(readTimeout);
+            
             // Si es necesario ponemos el body
             if (httpMethod != HttpMethod.GET) {
                 conn.setDoOutput(true);
@@ -283,8 +286,9 @@ public class RestApi  {
      * @param params
      * @return
      */
-    public static HttpResponse httpGet(String urlToRead, Map<String, String> params) {
-        return requestHTTP(urlToRead, params, HttpMethod.GET, "");
+    public static HttpResponse httpGet(String urlToRead, Map<String, String> params,
+                                       int connectionTimeout, int readTimeout) {
+        return requestHTTP(urlToRead, params, HttpMethod.GET, "", connectionTimeout, readTimeout);
     }
 
     /**
@@ -295,8 +299,9 @@ public class RestApi  {
      * @param body
      * @return
      */
-    public static HttpResponse httpPost(String urlToRead, Map<String, String> params, String body) {
-        return requestHTTP(urlToRead, params, HttpMethod.POST, body);
+    public static HttpResponse httpPost(String urlToRead, Map<String, String> params, String body,
+                                        int connectionTimeout, int readTimeout) {
+        return requestHTTP(urlToRead, params, HttpMethod.POST, body, connectionTimeout, readTimeout );
     }
 
     /**
@@ -309,9 +314,10 @@ public class RestApi  {
      * @throws UnsupportedEncodingException
      */
     public static HttpResponse httpPost(String urlToRead, Map<String, String> params,
-            Map<String, String> bodyParams) {
+                                        Map<String, String> bodyParams,
+                                        int connectionTimeout, int readTimeout) {
         bodyParams = checkParameters(bodyParams);
-        return requestHTTP(urlToRead, params, HttpMethod.POST, getPostParameters(bodyParams));
+        return requestHTTP(urlToRead, params, HttpMethod.POST, getPostParameters(bodyParams), connectionTimeout, readTimeout);
     }
 
     /**
@@ -322,8 +328,9 @@ public class RestApi  {
      * @param body
      * @return
      */
-    public static HttpResponse httpPost(String urlToRead, Map<String, String> bodyParams) {
-        return httpPost(urlToRead, null, bodyParams);
+    public static HttpResponse httpPost(String urlToRead, Map<String, String> bodyParams,
+                                        int connectionTimeout, int readTimeout) {
+        return httpPost(urlToRead, null, bodyParams, connectionTimeout, readTimeout);
     }
 
     /**

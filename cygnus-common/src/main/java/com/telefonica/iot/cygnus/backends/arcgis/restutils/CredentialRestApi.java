@@ -37,17 +37,23 @@ public abstract class CredentialRestApi extends RestApi {
     protected Credential credential;
     protected String referer;
 
+    protected int connectionTimeout = 0;
+    protected int readTimeout = 0;
+
     /**
      * @param tokenGenUrl
      * @param credential
      * @param referer
      * @param expirationMins
      */
-    public CredentialRestApi(URL tokenGenUrl, Credential credential, String referer) {
+    public CredentialRestApi(URL tokenGenUrl, Credential credential, String referer,
+                             int connectionTimeout, int readTimeout) {
         super();
         this.tokenGenUrl = tokenGenUrl;
         this.credential = credential;
         this.referer = referer;
+        this.connectionTimeout = connectionTimeout;
+        this.readTimeout = readTimeout;
     }
 
     /**
@@ -57,12 +63,15 @@ public abstract class CredentialRestApi extends RestApi {
      * @param expirationMins
      * @throws ArcgisException
      */
-    public CredentialRestApi(String tokenGenUrl, Credential credential, String referer)
+    public CredentialRestApi(String tokenGenUrl, Credential credential, String referer,
+                             int connectionTimeout, int readTimeout)
             throws ArcgisException {
         super();
 
         this.credential = credential;
         this.referer = referer;
+        this.connectionTimeout = connectionTimeout;
+        this.readTimeout = readTimeout;
         try {
             if (tokenGenUrl != null && !"".equals(tokenGenUrl.trim())) {
                 this.tokenGenUrl = new URL(tokenGenUrl);
@@ -88,7 +97,7 @@ public abstract class CredentialRestApi extends RestApi {
                 + (credential != null ? credential.isExpired() : null));
         if (tokenGenUrl != null && (credential == null || credential.isExpired())) {
             LOGGER.debug("Creating/Refreshing token.");
-            credential = RestAuthentication.createToken(credential, tokenGenUrl, referer);
+            credential = RestAuthentication.createToken(credential, tokenGenUrl, referer, this.connectionTimeout, this.readTimeout);
         }
 
         return credential;

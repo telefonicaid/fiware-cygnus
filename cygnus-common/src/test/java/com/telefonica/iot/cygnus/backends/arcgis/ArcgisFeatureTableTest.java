@@ -51,7 +51,7 @@ public class ArcgisFeatureTableTest implements ArcgisBaseTest {
 
     private ArcgisFeatureTable connectArcgis() {
         return new ArcgisFeatureTable(ArcgisBaseTest.getFeatureUrl(), ArcgisBaseTest.getUser(),
-                ArcgisBaseTest.getPassword(), ArcgisBaseTest.getGenerateTokenUrl(), false);
+                                      ArcgisBaseTest.getPassword(), ArcgisBaseTest.getGenerateTokenUrl(), false, 0, 0);
     }
 
     /**
@@ -154,7 +154,7 @@ public class ArcgisFeatureTableTest implements ArcgisBaseTest {
         if (!ArcgisBaseTest.connectionTestsSkipped()){
             ArcgisFeatureTable arcgis = new ArcgisFeatureTable(
                     "https://sags1/arcgis/rest/services/Urbanismo/MobiliarioUrbano_ETRS89/FeatureServer/5",
-                    "", "", "", false);
+                    "", "", "", false, 0, 0);
             List<Feature> resultList;
             try {
                 resultList = arcgis.queryFeatures(arcgis.getUniqueIdField() + ">0");
@@ -178,7 +178,7 @@ public class ArcgisFeatureTableTest implements ArcgisBaseTest {
         System.out.println("----------------  arcgisGetSecuredFeatures");
         if (!ArcgisBaseTest.connectionTestsSkipped()){
             ArcgisFeatureTable arcgis = new ArcgisFeatureTable(PORTAL_FEATURETABLE_URL, PORTAL_USER,
-                    PORTAL_PASSWORD, PORTAL_GENERATE_TOKEN_URL, false);
+                                                               PORTAL_PASSWORD, PORTAL_GENERATE_TOKEN_URL, false, 0, 0);
             List<Feature> resultList;
             try {
                 resultList = arcgis.queryFeatures(arcgis.getUniqueIdField() + ">0");
