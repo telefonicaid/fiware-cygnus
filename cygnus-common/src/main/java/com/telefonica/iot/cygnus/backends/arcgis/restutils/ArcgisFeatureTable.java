@@ -103,7 +103,7 @@ public class ArcgisFeatureTable {
             LOGGER.debug("Table successfully connected.");
             connected = true;
         } catch (ArcgisException e) {
-            LOGGER.error("Argis error while connecting to Feature Table: (" + e.getMessage() + ")"
+            LOGGER.error("Arcgis error while connecting to Feature Table: (" + e.getMessage() + ")"
                 + "\n\t URL: " + url
                 + "\n\t tokenGenURL: " + tokenGenUrl);
             connected = false;
@@ -570,7 +570,7 @@ public class ArcgisFeatureTable {
                                     + featureList.size());
                 }
             } else {
-                LOGGER.error("WARN - Argis.commitFeatures called with " + sizeList + " entities and hasError() " + hasError());
+                LOGGER.error("WARN - Arcgis.commitFeatures called with " + sizeList + " entities and hasError() " + hasError());
             }
 
         } else {
