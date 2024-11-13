@@ -70,7 +70,7 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
             try {
                 Credential credential = new UserCredential(ArcgisBaseTest.getUser(),
                         ArcgisBaseTest.getPassword());
-                RestFeatureTable featureTable = new RestFeatureTable(serviceUrl, credential, tokenUrl);
+                RestFeatureTable featureTable = new RestFeatureTable(serviceUrl, credential, tokenUrl, 0, 0);
     
                 System.out.println("Connecting....");
     
@@ -105,7 +105,7 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
         System.out.println("----------------  createFeatureTable");
         Credential credential = new UserCredential(ArcgisBaseTest.getUser(),
                 ArcgisBaseTest.getPassword());
-        return new RestFeatureTable(serviceUrl, credential, tokenUrl);
+        return new RestFeatureTable(serviceUrl, credential, tokenUrl, 0, 0);
     }
 
     /**
@@ -243,7 +243,7 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
                 String tokenUrl = ArcgisBaseTest.getGenerateTokenUrl();
                 Credential credential = new UserCredential(ArcgisBaseTest.getUser(),
                         ArcgisBaseTest.getPassword());
-                RestFeatureTable featureTable = new RestFeatureTable(serviceUrl, credential, tokenUrl);
+                RestFeatureTable featureTable = new RestFeatureTable(serviceUrl, credential, tokenUrl, 0, 0);
     
                 String whereClause = "OBJECTID>0";
     
@@ -304,7 +304,7 @@ public class RestFeatureTableTest implements ArcgisBaseTest {
                         ArcgisBaseTest.getPassword());
     
                 RestFeatureTable featureTable = new RestFeatureTable(serviceUrl, credential,
-                        ArcgisBaseTest.getGenerateTokenUrl());
+                                                                     ArcgisBaseTest.getGenerateTokenUrl(), 0, 0);
     
                 featureTable.getTableAttributesInfo();
                 System.out.println(

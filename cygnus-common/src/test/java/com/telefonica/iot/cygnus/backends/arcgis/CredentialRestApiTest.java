@@ -43,7 +43,7 @@ public class CredentialRestApiTest extends CredentialRestApi implements ArcgisBa
      * @throws ArcgisException
      */
     public CredentialRestApiTest() throws ArcgisException {
-        super(PORTAL_GENERATE_TOKEN_URL, null, PORTAL_FEATURETABLE_URL);
+        super(PORTAL_GENERATE_TOKEN_URL, null, PORTAL_FEATURETABLE_URL, 0, 0);
     }
 
     /**
@@ -55,7 +55,7 @@ public class CredentialRestApiTest extends CredentialRestApi implements ArcgisBa
         if (!ArcgisBaseTest.connectionTestsSkipped()){
             try {
                 Credential credential = RestAuthentication.createUserToken(PORTAL_USER, PORTAL_PASSWORD,
-                        new URL(PORTAL_GENERATE_TOKEN_URL), PORTAL_FEATURETABLE_URL, new Integer(1));
+                                                                           new URL(PORTAL_GENERATE_TOKEN_URL), PORTAL_FEATURETABLE_URL, new Integer(1), 0, 0);
                 System.out.println("ExpirationTime: " + credential.getExpirationTime());
                 this.setCredential(credential);
                 credential = getCredential();

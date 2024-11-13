@@ -56,6 +56,7 @@ public class ArcgisFeatureTable {
     private boolean connected;
 
     private int batchSize;
+
     private String errorDesc = "";
     private int errorCode = 0;
     private List<Feature> featureBatch = Collections.synchronizedList(new ArrayList<Feature>());
@@ -86,9 +87,8 @@ public class ArcgisFeatureTable {
      * @param readOnly
      */
     public ArcgisFeatureTable(String url, String user, String password, String tokenGenUrl,
-            boolean readOnly) {
+                              boolean readOnly, int connectionTimeout, int readTimeout) {
         this();
-        
         LOGGER.debug("Arcgis constructor.. " + url);
 
         LOGGER.debug("Arcgis url.. " + url);
@@ -97,13 +97,13 @@ public class ArcgisFeatureTable {
 
         Credential credential = new UserCredential(user, password);
         try {
-            arcGISFeatureTable = new RestFeatureTable(url, credential, tokenGenUrl);
+            arcGISFeatureTable = new RestFeatureTable(url, credential, tokenGenUrl, connectionTimeout, readTimeout);
             LOGGER.debug("Recovering attribute info from feature table. ->" + url);
             arcGISFeatureTable.getTableAttributesInfo();
             LOGGER.debug("Table successfully connected.");
             connected = true;
         } catch (ArcgisException e) {
-            LOGGER.error("Argis error while connecting to Feature Table: (" + e.getMessage() + ")"
+            LOGGER.error("Arcgis error while connecting to Feature Table: (" + e.getMessage() + ")"
                 + "\n\t URL: " + url
                 + "\n\t tokenGenURL: " + tokenGenUrl);
             connected = false;
@@ -570,7 +570,7 @@ public class ArcgisFeatureTable {
                                     + featureList.size());
                 }
             } else {
-                LOGGER.error("WARN - Argis.commitFeatures called with " + sizeList + " entities and hasError() " + hasError());
+                LOGGER.error("WARN - Arcgis.commitFeatures called with " + sizeList + " entities and hasError() " + hasError());
             }
 
         } else {

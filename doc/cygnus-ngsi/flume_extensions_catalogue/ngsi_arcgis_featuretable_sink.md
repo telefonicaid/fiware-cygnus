@@ -177,6 +177,8 @@ The name mappings configuration would be:
 | arcgis\_gettoken\_url | yes | N/A |https://{url\_host}/sharing/generateToken|
 | arcgis\_maxBatchSize | no | 10 | Number of feature updates accumulated in feature table before persist it. |
 | arcgis_timeoutSec | no | 60 | feature table timeout |
+| arcgis\_connectionTimeout | no | 0 | Sets a specified timeout value, in milliseconds, to be used when opening a communications link to the arcgis. A timeout of zero is interpreted as an infinite timeout |
+| arcgis\_readTimeout | no | 0 | Sets the read timeout to a specified timeout, in milliseconds. A timeout of zero is interpreted as an infinite timeout |
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 | batch\_size | no | 1 | Number of events accumulated before persistence. |
