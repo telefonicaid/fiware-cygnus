@@ -172,7 +172,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
-* Web Nov 13 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.15.0
+* Thu Nov 14 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.15.0
 
 - [cygnus-ngsi][cygnus-common] Add arcgis_connectionTimeout and arcgis_readTimeout sink options to allow set non infinite conection timeouts with arcgis (#2440)
 
