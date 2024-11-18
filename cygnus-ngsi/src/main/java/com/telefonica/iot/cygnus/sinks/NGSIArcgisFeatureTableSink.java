@@ -396,7 +396,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
      * @param aggregator
      * @throws CygnusRuntimeError
      */
-    public void persistAggregation(NGSIArcgisAggregator aggregator) throws CygnusRuntimeError {
+    public void persistAggregation(NGSIArcgisAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         try {
             List<ArcgisAggregatorDomain> aggregationList = aggregator.getListArcgisAggregatorDomain();
             LOGGER.debug("[" + this.getName() + "] persisting aggregation, "
@@ -424,6 +424,10 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
             String stackTrace = ExceptionUtils.getFullStackTrace(e);
             LOGGER.debug(" PersistAggregation Error: " + stackTrace);
             throw (e);
+        } catch (ArcgisException e) {
+            LOGGER.error("[" + this.getName() + "] Error persisting batch, " + e.getClass().getSimpleName() + " - "
+                    + e.getMessage());
+            throw new CygnusPersistenceError(e.getMessage());
         } catch (Exception e) {
             LOGGER.error("[" + this.getName() + "] Error persisting batch, " + e.getClass().getSimpleName() + " - "
                     + e.getMessage());
