@@ -1,1 +1,1 @@
-- Fix way to handle CygnusPersistenceException to allow batch retries in arcgis-sink
+- Fix way to handle CygnusPersistenceException to allow batch retries in arcgis-sink if `.batch_ttl` configured
