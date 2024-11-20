@@ -92,8 +92,8 @@ public abstract class CredentialRestApi extends RestApi {
      * @throws ArcgisException
      */
     public Credential getCredential() throws ArcgisException {
-        LOGGER.debug("------------------ getCredential() " + "\n\t tokenGenUrl: " + tokenGenUrl
-                + "\n\t credential: " + credential + "\n\t credential.isExpired(): "
+        LOGGER.debug("------------------ getCredential() " + "\t tokenGenUrl: " + tokenGenUrl
+                + "\t credential: " + credential + "\t credential.isExpired(): "
                 + (credential != null ? credential.isExpired() : null));
         if (tokenGenUrl != null && (credential == null || credential.isExpired())) {
             LOGGER.debug("Creating/Refreshing token.");

@@ -89,11 +89,7 @@ public class ArcgisFeatureTable {
     public ArcgisFeatureTable(String url, String user, String password, String tokenGenUrl,
                               boolean readOnly, int connectionTimeout, int readTimeout) {
         this();
-        LOGGER.debug("Arcgis constructor.. " + url);
-
-        LOGGER.debug("Arcgis url.. " + url);
-        LOGGER.debug("Arcgis tokenGenUrl.. " + tokenGenUrl);
-        LOGGER.debug("Arcgis readOnly.. " + readOnly);
+        LOGGER.debug("ArcgisFeatureTable constructor. Url: " + url + " tokenGenUrl: " + tokenGenUrl + " readOnly: " + readOnly);
 
         Credential credential = new UserCredential(user, password);
         try {
@@ -104,8 +100,8 @@ public class ArcgisFeatureTable {
             connected = true;
         } catch (ArcgisException e) {
             LOGGER.error("Arcgis error while connecting to Feature Table: (" + e.getMessage() + ")"
-                + "\n\t URL: " + url
-                + "\n\t tokenGenURL: " + tokenGenUrl);
+                + "\t URL: " + url
+                + "\t tokenGenURL: " + tokenGenUrl);
             connected = false;
             setError(e);
             this.errorDesc += "    " + url + "  -  " + tokenGenUrl;
