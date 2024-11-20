@@ -221,7 +221,7 @@ public class RestFeatureTable extends CredentialRestApi {
         }
 
         HttpResponse response = httpGet(fullUrl, params, this.connectionTimeout, this.readTimeout);
-        LOGGER.debug("Response code: " + response.getResponseCode() + "\n\t" + response.getBody());
+        LOGGER.debug("Response code: " + response.getResponseCode() + "\t response body: " + response.getBody());
 
         checkResponse(response);
 
@@ -238,7 +238,7 @@ public class RestFeatureTable extends CredentialRestApi {
      */
     protected void checkResponse(HttpResponse response) throws ArcgisException {
         if (!checkHttpResponse(response)) {
-            String errorMsg = "Error: " + response.getErrorCode() + "\n"
+            String errorMsg = "Error code: " + response.getErrorCode() + " error message: "
                     + response.getErrorMessage();
             LOGGER.error(errorMsg);
             throw new ArcgisException(errorMsg);
@@ -274,7 +274,7 @@ public class RestFeatureTable extends CredentialRestApi {
         }
 
         HttpResponse response = httpPost(fullUrl, params, bodyParams, this.connectionTimeout, this.readTimeout);
-        LOGGER.debug("Response code: " + response.getResponseCode() + "\n\t" + response.getBody());
+        LOGGER.debug("Response code: " + response.getResponseCode() + "\t response body: " + response.getBody());
 
         checkResponse(response);
     }
@@ -359,7 +359,7 @@ public class RestFeatureTable extends CredentialRestApi {
         }
 
         HttpResponse response = httpPost(fullUrl, params, bodyParams, this.connectionTimeout, this.readTimeout);
-        LOGGER.debug("Response code: " + response.getResponseCode() + "\n\t" + response.getBody());
+        LOGGER.debug("Response code: " + response.getResponseCode() + "\t response body: " + response.getBody());
 
         checkResponse(response);
 
@@ -406,7 +406,7 @@ public class RestFeatureTable extends CredentialRestApi {
 
             LOGGER.debug("HttpGet " + fullUrl.toString() + " number of params: " + params.size());
             HttpResponse response = httpGet(fullUrl, params, this.connectionTimeout, this.readTimeout);
-            LOGGER.debug("Response code: " + response.getResponseCode() + "\n\t" + response.getBody());
+            LOGGER.debug("Response code: " + response.getResponseCode() + "\t response body: " + response.getBody());
 
             checkResponse(response);
 
@@ -421,8 +421,8 @@ public class RestFeatureTable extends CredentialRestApi {
 
             } else {
                 String errorMsg = "getTableAttributesInfo: Unexpected server response, Error: "
-                        + response.getErrorCode() + "\n" + response.getErrorMessage();
-                errorMsg += " \n\t token: " + token;
+                        + response.getErrorCode() + " error message: " + response.getErrorMessage();
+                errorMsg += " \t token: " + token;
                 LOGGER.error(errorMsg);
                 throw new ArcgisException(errorMsg);
             }
