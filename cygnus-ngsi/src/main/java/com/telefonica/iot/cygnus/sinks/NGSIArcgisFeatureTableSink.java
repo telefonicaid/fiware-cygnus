@@ -543,7 +543,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                 throw new CygnusRuntimeError(e.getMessage());
             } catch (Exception e) {
                 LOGGER.error("[NGSIArcgisAggregator] aggregate - Unexpected Error" + e.getMessage()
-                        + "\n contextElement: " + contextElement.toString());
+                        + " contextElement: " + contextElement.toString());
                 throw new CygnusRuntimeError(e.getMessage());
             }
 

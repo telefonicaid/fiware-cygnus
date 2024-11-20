@@ -256,12 +256,12 @@ public class RestApi  {
 
         } catch (UnknownHostException e) {
             httpResponse.setResponseCode(HttpURLConnection.HTTP_NOT_FOUND);
-            httpResponse.setResponseMessage(e.getClass() + "\n" + e.getMessage());
+            httpResponse.setResponseMessage(e.getClass() + " error message: " + e.getMessage());
         } catch (IllegalArgumentException e) {
             httpResponse.setResponseMessage("Check url, it may have 'http:/' instead of 'http://' "
-                    + e.getClass() + "\n" + e.getMessage());
+                    + e.getClass() + " error message: " + e.getMessage());
         } catch (Exception e) {
-            httpResponse.setResponseMessage(e.getClass() + "\n" + e.getMessage());
+            httpResponse.setResponseMessage(e.getClass() + " error message: " + e.getMessage());
         } finally {
             LOGGER.debug("Disposing connection objects");
             if (rd != null) {
@@ -357,7 +357,7 @@ public class RestApi  {
             throw new ArcgisException("Unexpected response format" + httpResponse);
         } catch (IllegalStateException | ClassCastException e) {
             throw new ArcgisException("checkHttpResponse, Unexpected exception" + e.getMessage()
-                    + " \n\t" + httpResponse);
+                    + " httpResponse: " + httpResponse);
         } catch (NullPointerException e) {
             throw new ArcgisException(
                     "checkHttpResponse, Null Body recived from server." + httpResponse);
@@ -470,7 +470,7 @@ public class RestApi  {
             }
 
             throw new ArcgisException(errorCode,
-                    "Response Error " + errorCode + "  " + message + "\n" + details);
+                    "Response ErrorCode: " + errorCode + " message: " + message + " details: " + details);
         }
     }
 

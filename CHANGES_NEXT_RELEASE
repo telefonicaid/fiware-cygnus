@@ -1,1 +1,2 @@
 - [cygnus-ngsi][cygnus-common] Fix way to handle CygnusPersistenceException to allow batch retries in arcgis-sink if `.batch_ttl` configured
+- [cygnus-ngsi][cygnus-common] Remove new line chars from Arcgis logs
