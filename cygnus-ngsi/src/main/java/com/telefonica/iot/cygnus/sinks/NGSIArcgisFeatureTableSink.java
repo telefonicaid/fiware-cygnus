@@ -167,7 +167,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
      * @return The persistence backend
      * @throws CygnusRuntimeError
      */
-    protected ArcgisFeatureTable getPersistenceBackend(String featureServiceUrl) throws CygnusRuntimeError {
+    protected ArcgisFeatureTable getPersistenceBackend(String featureServiceUrl) throws CygnusPersistenceError, CygnusRuntimeError {
 
         LOGGER.debug("Current persistenceBackend has " + arcgisPersistenceBackend.size() +" tables ");
 
@@ -187,7 +187,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
 
                 if (newTable.hasError() || !newTable.connected()) {
                     LOGGER.error("Error creating new persistence Backend. " + newTable.getErrorDesc());
-                    throw new CygnusRuntimeError("[" + this.getName() + "Error creating Persistence backend: "
+                    throw new CygnusPersistenceError("[" + this.getName() + "Error creating Persistence backend: "
                             + newTable.getErrorCode() + " - " + newTable.getErrorDesc());
                 } else {
                     arcgisPersistenceBackend.put(featureServiceUrl, newTable);
@@ -199,7 +199,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
                 LOGGER.error("Error creating new persistence Backend. " +e.getClass().getSimpleName());
                 LOGGER.debug(stackTrace);
                 
-                throw new CygnusRuntimeError("Error creating new persistence Backend. ", e.getClass().getName(),
+                throw new CygnusPersistenceError("Error creating new persistence Backend. ", e.getClass().getName(),
                         e.getMessage());
             }
         }
@@ -306,34 +306,29 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
             return;
         } // if
 
-        try {
-            // Iterate on the destinations
-            batch.startIterator();
+        // Iterate on the destinations
+        batch.startIterator();
 
-            while (batch.hasNext()) {
-                String destination = batch.getNextDestination();
-                LOGGER.debug(
-                        "[" + this.getName() + "] Processing sub-batch regarding the " + destination + " destination");
+        while (batch.hasNext()) {
+            String destination = batch.getNextDestination();
+            LOGGER.debug(
+                         "[" + this.getName() + "] Processing sub-batch regarding the " + destination + " destination");
 
-                // Get the events within the current sub-batch
-                ArrayList<NGSIEvent> events = batch.getNextEvents();
+            // Get the events within the current sub-batch
+            ArrayList<NGSIEvent> events = batch.getNextEvents();
 
-                // Get an aggregator for this destination and initialize it
-                NGSIArcgisAggregator aggregator = new NGSIArcgisAggregator(getrAcgisServicesUrl(), enableNameMappings);
-                
-                for (NGSIEvent event : events) {
-                    aggregator.aggregate(event);
-                } // for
+            // Get an aggregator for this destination and initialize it
+            NGSIArcgisAggregator aggregator = new NGSIArcgisAggregator(getrAcgisServicesUrl(), enableNameMappings);
 
-                // Persist the aggregation
-                persistAggregation(aggregator);
-                batch.setNextPersisted(true);
+            for (NGSIEvent event : events) {
+                aggregator.aggregate(event);
+            } // for
 
-            } // while
-        } catch (Exception e) {
-            LOGGER.error("[" + this.getName() + "] Error persisting batch, " + e.getClass().getSimpleName() + "." + e.getMessage());
-            throw new CygnusRuntimeError(e.getMessage());
-        }
+            // Persist the aggregation
+            persistAggregation(aggregator);
+            batch.setNextPersisted(true);
+
+        } // while
     } // persistBatch
 
     /*
@@ -396,7 +391,7 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
      * @param aggregator
      * @throws CygnusRuntimeError
      */
-    public void persistAggregation(NGSIArcgisAggregator aggregator) throws CygnusRuntimeError {
+    public void persistAggregation(NGSIArcgisAggregator aggregator) throws CygnusPersistenceError, CygnusRuntimeError, CygnusBadContextData {
         try {
             List<ArcgisAggregatorDomain> aggregationList = aggregator.getListArcgisAggregatorDomain();
             LOGGER.debug("[" + this.getName() + "] persisting aggregation, "
@@ -422,8 +417,16 @@ public class NGSIArcgisFeatureTableSink extends NGSISink {
             }
         } catch (CygnusRuntimeError e) {
             String stackTrace = ExceptionUtils.getFullStackTrace(e);
-            LOGGER.debug(" PersistAggregation Error: " + stackTrace);
+            LOGGER.debug(" PersistAggregation CygnusRuntimeError: " + stackTrace);
             throw (e);
+        } catch (CygnusPersistenceError e) {
+            String stackTrace = ExceptionUtils.getFullStackTrace(e);
+            LOGGER.debug(" PersistAggregation CygnusPersistenceError: " + stackTrace);
+            throw (e);
+        } catch (ArcgisException e) {
+            LOGGER.error("[" + this.getName() + "] Error persisting batch, " + e.getClass().getSimpleName() + " - "
+                    + e.getMessage());
+            throw new CygnusPersistenceError(e.getMessage());
         } catch (Exception e) {
             LOGGER.error("[" + this.getName() + "] Error persisting batch, " + e.getClass().getSimpleName() + " - "
                     + e.getMessage());
