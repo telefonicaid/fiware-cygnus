@@ -1,3 +1,3 @@
-- [cygnus-ngsi] Upgrade jinja2 from 3.1.4 to 3.1.5 due to CVE-2024-56201 and CVE-2024-56326
+- [doc] Upgrade jinja2 from 3.1.4 to 3.1.5 due to CVE-2024-56201 and CVE-2024-56326
 - [cygnus-ngsi][cygnus-common] Fix way to handle CygnusPersistenceException to allow batch retries in arcgis-sink if `.batch_ttl` configured
 - [cygnus-ngsi][cygnus-common] Remove new line chars from Arcgis logs
