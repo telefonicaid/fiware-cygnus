@@ -240,43 +240,29 @@ public class VirtuosoBackendImpl implements VirtuosoBackend{
             connection = driver.getConnection(dataBase);
             connection.setAutoCommit(false);
 
-            //ArrayList<StringBuffer> upsertQuerysList = new ArrayList<>();
-            // ArrayList<StringBuffer> upsertQuerysList = SQLQueryUtils.sqlUpsertQuery(aggregation,
-            //         lastData,
-            //         lastDataDelete,
-            //         tableName,
-            //         tableSuffix,
-            //         uniqueKey,
-            //         timestampKey,
-            //         timestampFormat,
-            //         dataBase,
-            //         schema,
-            //         attrNativeTypes);
+            ArrayList<StringBuffer> upsertQuerysList = VirtuosoQueryUtils.virtuosoUpsertQuery(aggregation,
+                    lastData,
+                    lastDataDelete,
+                    tableName,
+                    tableSuffix,
+                    uniqueKey,
+                    timestampKey,
+                    timestampFormat,
+                    dataBase,
+                    schema,
+                    attrNativeTypes);
             
-            // // Ordering queries to avoid deadlocks. See issue #2197 for more detail
-            // upsertQuerysList.sort(Comparator.comparing(buff -> buff.toString()));
+            // Ordering queries to avoid deadlocks. See issue #2197 for more detail
+            upsertQuerysList.sort(Comparator.comparing(buff -> buff.toString()));
 
-            // for (StringBuffer query : upsertQuerysList) {
-            //     PreparedStatement upsertStatement;
-            //     currentUpsertQuery = query.toString();
-            //     upsertStatement = connection.prepareStatement(currentUpsertQuery);
-            //     // FIXME https://github.com/telefonicaid/fiware-cygnus/issues/1959
-            //     upsertStatement.executeUpdate();
-            //     upsertQuerys = upsertQuerys + " " + query;
-            // }
-
-            PreparedStatement pstmt = null;
-            String graphUri = "http://example.org/graph";
-            String triple = "<http://example.org/Subject> <http://example.org/Predicate> \"Objeto\" .";
-            // Insertar el triple usando DB.DBA.TTLP
-            currentUpsertQuery = "DB.DBA.TTLP(?, '', ?)";
-            pstmt = connection.prepareStatement(currentUpsertQuery);
-            pstmt.setString(1, triple);
-            pstmt.setString(2, graphUri);
-
-            pstmt.executeUpdate();
-
-            upsertQuerys = upsertQuerys + " " + currentUpsertQuery;
+            for (StringBuffer query : upsertQuerysList) {
+                PreparedStatement upsertStatement;
+                currentUpsertQuery = query.toString();
+                upsertStatement = connection.prepareStatement(currentUpsertQuery);
+                // FIXME https://github.com/telefonicaid/fiware-cygnus/issues/1959
+                upsertStatement.executeUpdate();
+                upsertQuerys = upsertQuerys + " " + query;
+            }
 
             connection.commit();
             LOGGER.info(" Finished transactions into database: " +
