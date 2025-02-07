@@ -70,23 +70,6 @@ public class VirtuosoBackendImpl implements VirtuosoBackend{
         this(virtuosoHost, virtuosoPort, virtuosoUsername, virtuosoPassword, maxPoolSize, maxPoolIdle, minPoolIdle, minPoolIdleTimeMillis, null);
     } // VirtuosoBackendImpl
 
-    // /**
-    //  * Constructor. (invoked by ngsild sinks)
-    //  *
-    //  * @param virtuosoHost
-    //  * @param virtuosoPort
-    //  * @param virtuosoUsername
-    //  * @param virtuosoPassword
-    //  * @param maxPoolSize
-    //  * @param maxPoolIdle
-    //  * @param minPoolIdle
-    //  * @param minPoolIdleTimeMillis
-    //  * @param virtuosoOptions
-    //  */
-    // public VirtuosoBackendImpl(String virtuosoHost, String virtuosoPort, String virtuosoUsername, String virtuosoPassword, int maxPoolSize, int maxPoolIdle, int minPoolIdle, int minPoolIdleTimeMillis, String virtuosoOptions) {
-    //     this(virtuosoHost, virtuosoPort, virtuosoUsername, virtuosoPassword, maxPoolSize, maxPoolIdle, minPoolIdle, minPoolIdleTimeMillis, virtuosoOptions, true);
-    // } // VirtuosoBackendImpl
-
     /**
      * Constructor.
      *
