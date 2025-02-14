@@ -1,3 +1,4 @@
 - [cygnus-ngsi] Upgrade Debian version from 12.7 to 12.9 in Dockerfile
 - [cygnus-ngsi][cygnus-common] Fix way to handle CygnusPersistenceException to allow batch retries in arcgis-sink if `.batch_ttl` configured
 - [cygnus-ngsi][cygnus-common] Remove new line chars from Arcgis logs
+- [cygnus-ngsi][cygnus-hdfs] hive-exec from 2.3.4 to 4.0.1 due to CVE-2024-29869
