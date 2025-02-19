@@ -991,7 +991,7 @@ public class NGSICartoDBSinkTest {
         
         try {
             String builtSchemaName = sink.buildSchemaName(service);
-            String expectedSchemaName = "somex0053ervice";
+            String expectedSchemaName = "someService";
         
             try {
                 assertEquals(expectedSchemaName, builtSchemaName);
@@ -1042,7 +1042,7 @@ public class NGSICartoDBSinkTest {
         
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, attribute);
-            String expecetedTableName = "x002fsomex0050ath";
+            String expecetedTableName = "x002fsomePath";
         
             try {
                 assertEquals(expecetedTableName, builtTableName);
@@ -1096,7 +1096,7 @@ public class NGSICartoDBSinkTest {
             String builtTableName = sink.buildTableName(servicePath, entity, attribute);
         
             try {
-                assertEquals("x002fsomex0050athxffffsomex0049dxffffsomex0054ype", builtTableName);
+                assertEquals("x002fsomePathxffffsomeIdxffffsomeType", builtTableName);
                 System.out.println(getTestTraceHead("[NGSICartoDBSink.buildTableName]")
                         + "-  OK  - '" + builtTableName + "' is equals to the lower case of "
                         + "x002f<servicePath>xffff<entityId>xffff<entityType>");
@@ -1198,7 +1198,7 @@ public class NGSICartoDBSinkTest {
         
         try {
             String builtTableName = sink.buildTableName(servicePath, entity, attribute);
-            String expectedTableName = "x002fxffffsomex0049dxffffsomex0054ype";
+            String expectedTableName = "x002fxffffsomeIdxffffsomeType";
         
             try {
                 assertEquals(expectedTableName, builtTableName);
