@@ -157,6 +157,11 @@
           <artifactId>jetty-util</artifactId>
           <version>6.1.25</version>
         </dependency>
+        <dependency>
+          <groupId>com.openlinksw</groupId>
+          <artifactId>virtjdbc4_3</artifactId>
+          <version>3.123</version>
+        </dependency>
     </dependencies>
 
     <build>
