@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.backends.virtuoso;
 
 import com.google.gson.JsonElement;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
+import com.telefonica.iot.cygnus.backends.sql.SQLQueryUtils;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -29,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Arrays;
 import java.util.List;
+
 
 /**
  * The type Ngsivirtuoso utils.
@@ -68,6 +70,8 @@ public class VirtuosoQueryUtils {
 
         ArrayList<StringBuffer> upsertList = new ArrayList<>();
 
+        LOGGER.debug("[VirtuosoQueryUtils.virtuosoUpsertQuery] tableName: " + tableName + " tableSuffix " + tableSuffix + " uniqueKey " + uniqueKey + " dataBase " + dataBase + " schema " + schema);
+        
         for (int i = 0 ; i < collectionSizeOnLinkedHashMap(lastData) ; i++) {
             StringBuffer query = new StringBuffer();
             // StringBuffer values = new StringBuffer("(");
@@ -76,11 +80,12 @@ public class VirtuosoQueryUtils {
             // String valuesSeparator = "";
             // String fieldsSeparator = "";
             // String updateSetSeparator = "";
-            // ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
-            // for (int j = 0 ; j < keys.size() ; j++) {
-            //     // values
-            //     JsonElement value = lastData.get(keys.get(j)).get(i);
-            //     String valueToAppend = value == null ? "null" : getStringValueFromJsonElement(value, "'", attrNativeTypes);
+            ArrayList<String> keys = new ArrayList<>(aggregation.keySet());
+            for (int j = 0 ; j < keys.size() ; j++) {
+                // values
+                JsonElement value = lastData.get(keys.get(j)).get(i);
+                String valueToAppend = value == null ? "null" : SQLQueryUtils.getStringValueFromJsonElement(value, "'", attrNativeTypes);
+                LOGGER.debug("[VirtuosoQueryUtils.virtuosoUpsertQuery] key: " + keys.get(j) + " value: " + value + " valueToAppend " + valueToAppend);
             //     values.append(valuesSeparator).append(valueToAppend);
             //     valuesSeparator = ",";
 
@@ -94,7 +99,7 @@ public class VirtuosoQueryUtils {
             //         updateSetSeparator = ",";
             //     }
 
-            // }
+            }
 
             String graphUri = "http://example.org/graph";
             String triple = "<http://example.org/Subject> <http://example.org/Predicate> \"Objeto\" .";
@@ -109,7 +114,7 @@ public class VirtuosoQueryUtils {
         // }
 
         
-        LOGGER.debug("[VirtuosoQueryUtils.virtuosoUpsertQuery] Preparing Upsert querys: " + upsertList.toString());        
+        LOGGER.debug("[VirtuosoQueryUtils.virtuosoUpsertQuery] Preparing Upsert querys: " + upsertList.toString());
         return upsertList;
     }
 
