@@ -172,6 +172,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Fri Mar 14 2025 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.16.0
+
+- [cygnus-ngsi][cygnus-common] Fix way to handle CygnusPersistenceException to allow batch retries in arcgis-sink if `.batch_ttl` configured
+- [cygnus-ngsi][cygnus-common] Remove new line chars from Arcgis logs
+
 * Thu Nov 14 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.15.0
 
 - [cygnus-ngsi][cygnus-common] Add arcgis_connectionTimeout and arcgis_readTimeout sink options to allow set non infinite conection timeouts with arcgis (#2440)

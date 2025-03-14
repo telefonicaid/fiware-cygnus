@@ -100,6 +100,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Fri Mar 14 2025 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.16.0
+
+- [cygnus-ngsi] Upgrade Debian version from 12.7 to 12.9 in Dockerfile
+- [cygnus-ngsi][cygnus-hdfs] hive-exec from 2.3.4 to 4.0.1 due to CVE-2024-29869
+
 * Thu Nov 14 2024 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.15.0
 
 - [cygnus-ngsi][cygnus-common] Add arcgis_connectionTimeout and arcgis_readTimeout sink options to allow set non infinite conection timeouts with arcgis (#2440)
