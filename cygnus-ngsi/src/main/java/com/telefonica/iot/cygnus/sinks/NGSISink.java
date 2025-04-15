@@ -58,6 +58,7 @@ import org.apache.flume.EventDeliveryException;
 import org.apache.flume.Sink.Status;
 import org.apache.flume.Transaction;
 import org.apache.flume.ChannelException;
+import org.apache.flume.ChannelFullException;
 import org.apache.flume.conf.Configurable;
 import org.apache.logging.log4j.ThreadContext;
 
@@ -649,9 +650,12 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             num_rollback_by_channel_exception++;
             if (num_rollback_by_channel_exception >= NGSIConstants.ROLLBACK_CHANNEL_EXCEPTION_THRESHOLD) {
                 LOGGER.warn("Rollback (" + num_rollback_by_channel_exception +
-                            " times) transaction by ChannelException  (" + ex.getMessage() + ")  Sink: " +
+                            " times) transaction by ChannelException   (" + ex.getMessage() + ")  Sink: " +
                         this.getName());
                 num_rollback_by_channel_exception = 0;
+            }
+            if (ex instanceof ChannelFullException) {
+                LOGGER.error("ChannelFullException " + ex.getMessage());
             }
             txn.rollback();
         } catch (Exception ex) {
