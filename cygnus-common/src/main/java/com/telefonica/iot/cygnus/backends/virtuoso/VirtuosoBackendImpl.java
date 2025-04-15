@@ -216,7 +216,6 @@ public class VirtuosoBackendImpl implements VirtuosoBackend{
         Connection connection = null;
         String upsertQuerys = new String();
         String currentUpsertQuery = new String();
-        //int insertedRows[];
 
         try {
 
