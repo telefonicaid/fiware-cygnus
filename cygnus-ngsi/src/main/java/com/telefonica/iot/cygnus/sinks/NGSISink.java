@@ -31,6 +31,7 @@ import com.telefonica.iot.cygnus.errors.CygnusRuntimeError;
 import com.telefonica.iot.cygnus.interceptors.NGSIEvent;
 import com.telefonica.iot.cygnus.log.CygnusLogger;
 import com.telefonica.iot.cygnus.sinks.Enums.DataModel;
+import com.telefonica.iot.cygnus.channels.CygnusChannel;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYATTRIBUTE;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITY;
 import static com.telefonica.iot.cygnus.sinks.Enums.DataModel.DMBYENTITYTYPE;
@@ -59,8 +60,12 @@ import org.apache.flume.Sink.Status;
 import org.apache.flume.Transaction;
 import org.apache.flume.ChannelException;
 import org.apache.flume.ChannelFullException;
+import org.apache.flume.instrumentation.ChannelCounter;
+import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.conf.Configurable;
 import org.apache.logging.log4j.ThreadContext;
+// import java.lang.reflect.Method;
+// import java.lang.reflect.Field;
 
 /**
  *
@@ -501,14 +506,23 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         } // if else
     } // doRollbackAgain
 
+
     private Status processNewBatches() {
         // Get the channel
         Channel ch = getChannel();
+
+        double channelUsage = 0;
         
         // Start a Flume transaction (it is not the same than a Cygnus transaction!)
         Transaction txn = ch.getTransaction();
         try {
             txn.begin();
+
+            CygnusChannel cygnusch = (CygnusChannel) ch;
+            channelUsage = cygnusch.getUsage();
+            if (channelUsage > NGSIConstants.HIGH_CHANNEL_PERCENT_USAGE) {
+                LOGGER.warn("High Channel usage: " + channelUsage + "% in sink " + this.getName());
+            }
 
             // Get and process as many events as the batch size
             int currentIndex;
@@ -653,9 +667,6 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                             " times) transaction by ChannelException   (" + ex.getMessage() + ")  Sink: " +
                         this.getName());
                 num_rollback_by_channel_exception = 0;
-            }
-            if (ex instanceof ChannelFullException) {
-                LOGGER.error("ChannelFullException " + ex.getMessage());
             }
             txn.rollback();
         } catch (Exception ex) {

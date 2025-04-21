@@ -53,6 +53,8 @@ public final class NGSIConstants {
 
     public static final int ROLLBACK_CHANNEL_EXCEPTION_THRESHOLD = 10;
     public static final int ROLLBACK_EXCEPTION_THRESHOLD = 10;
+
+    public static final int HIGH_CHANNEL_PERCENT_USAGE = 90;
     
     // FIWARE service and FIWARE service path specific constants
     public static final int SERVICE_HEADER_MAX_LEN      = 50;
