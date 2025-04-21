@@ -520,6 +520,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
 
             CygnusChannel cygnusch = (CygnusChannel) ch;
             channelUsage = cygnusch.getUsage();
+            LOGGER.debug("Channel usage: " + channelUsage + "% in sink " + this.getName());
             if (channelUsage > NGSIConstants.HIGH_CHANNEL_PERCENT_USAGE) {
                 LOGGER.warn("High Channel usage: " + channelUsage + "% in sink " + this.getName());
             }
