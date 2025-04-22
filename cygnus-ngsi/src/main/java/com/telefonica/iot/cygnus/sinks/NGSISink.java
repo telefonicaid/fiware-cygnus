@@ -60,12 +60,8 @@ import org.apache.flume.Sink.Status;
 import org.apache.flume.Transaction;
 import org.apache.flume.ChannelException;
 import org.apache.flume.ChannelFullException;
-import org.apache.flume.instrumentation.ChannelCounter;
-import org.apache.flume.channel.MemoryChannel;
 import org.apache.flume.conf.Configurable;
 import org.apache.logging.log4j.ThreadContext;
-// import java.lang.reflect.Method;
-// import java.lang.reflect.Field;
 
 /**
  *
