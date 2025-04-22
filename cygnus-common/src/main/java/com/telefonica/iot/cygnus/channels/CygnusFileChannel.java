@@ -115,5 +115,13 @@ public class CygnusFileChannel extends FileChannel implements CygnusChannel {
     public void setNumTakesFail(long n) {
         accTakesFail = channelCounterRef.getEventTakeAttemptCount() - channelCounterRef.getEventTakeSuccessCount();
     } // setNumTakesFail
+
+    @Override
+    public double getUsage() {
+        long currentSize = channelCounterRef.getChannelSize();
+        long maxCapacity = channelCounterRef.getChannelCapacity();
+        double usagePercentage = (double) currentSize / maxCapacity * 100;
+        return usagePercentage;
+    } // getUsage
     
 } // CygnusFileChannel

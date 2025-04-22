@@ -120,4 +120,13 @@ public class CygnusMemoryChannel extends MemoryChannel implements CygnusChannel 
         accTakesFail = channelCounterRef.getEventTakeAttemptCount() - channelCounterRef.getEventTakeSuccessCount();
     } // setNumTakesFail
 
+    @Override
+    public double getUsage() {
+        long currentSize = channelCounterRef.getChannelSize();
+        long maxCapacity = channelCounterRef.getChannelCapacity();
+        double usagePercentage = (double) currentSize / maxCapacity * 100;
+        return usagePercentage;
+    } // getUsage
+
 } // CygnusMemoryChannel
+
