@@ -661,7 +661,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
             num_rollback_by_channel_exception++;
             if (num_rollback_by_channel_exception >= NGSIConstants.ROLLBACK_CHANNEL_EXCEPTION_THRESHOLD) {
                 LOGGER.warn("Rollback (" + num_rollback_by_channel_exception +
-                            " times) transaction by ChannelException   (" + ex.getMessage() + ")  Sink: " +
+                            " times) transaction by ChannelException  (" + ex.getMessage() + ")  Sink: " +
                         this.getName());
                 num_rollback_by_channel_exception = 0;
             }
