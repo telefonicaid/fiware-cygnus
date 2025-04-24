@@ -60,7 +60,13 @@ public interface CygnusChannel {
      * @return The number of take operations on the channel that failed
      */
     long getNumTakesFail();
-    
+
+    /**
+     * Gets the number of usage percent of the channel.
+     * @return The number of usage percente of the channel
+     */
+    double getUsage();
+
     /**
      * Sets the number of put operations on the channel that went OK.
      * @param n The number to be set
