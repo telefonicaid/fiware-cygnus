@@ -34,15 +34,9 @@ Next sections will explain this in detail.
 | last\_data\_timestamp\_key | no | recvTime | This must be a timestamp key on the aggregation to know which record is older. Check this [link](./last_data_function.md) for more details. |
 | last\_data\_sql_timestamp\_format | no | YYYY-MM-DD HH24:MI:SS.MS | This must be a timestamp format to cast [SQL Text to timestamp](https://www.postgresql.org/docs/9.1/functions-formatting.html). Check this [link](./last_data_function.md) for more details. |
 | data\_model | no | dm-by-entity | <i>dm-by-service-path</i> or <i>dm-by-entity</i> or <i>dm-by-entity-type</i> or <i>dm-by-entity-database</i> or <i>dm-by-entity-database-schema</i> or <i>dm-by-entity-type-database</i> or <i>dm-by-entity-type-database-schema</i>. <i>dm-by-service</i> and <dm-by-attribute</i> are not currently supported. |
-| graphql\_host | no | localhost | FQDN/IP address where the GraphSQL server runs. |
-| graphql\_port | no | 1111 ||
-| graphql\_database | no | vdb | `vdb` is the default database that is created automatically when install. 
-| graphql\_username | no | dba | `dba` is the default username that is created automatically when install |
-| graphql\_password | no | N/A | Empty value by default (No password is created when install) |
-| graphql\_maxPoolSize | no | 3 | Max number of connections per database pool |
-| graphql\_maxPoolIdle | no | 2 | Max number of idle connections per database pool |
-| graphql\_minPoolIdle | no | 0 | Min number of idle connections per database pool |
-| graphql\_minPoolIdleTimeMillis | no | 10000 | minimum amount of time an idle connection before is eligible for eviction |
+| graphql\_endpoint | no | localhost | URL address where the GraphSQL endpoint runs. |
+| graphql\_maxPoolSize | no | 100 | Max number of connections per database pool |
+| graphql\_maxPoolPerRoute | no | 50 | Max number of connections per endpoint |
 | graphql\_options | no | N/A | optional connection parameter(s) concatinated to jdbc url if necessary<br/> |
 | attr\_persistence | no | row | <i>row</i> or <i>column</i>. |
 | attr\_metadata\_store | no | false | <i>true</i> or <i>false</i>. |
@@ -51,28 +45,24 @@ Next sections will explain this in detail.
 | batch\_timeout | no | 30 | Number of seconds the batch will be building before it is persisted as it is. |
 | batch\_ttl | no | 10 | Number of retries when a batch cannot be persisted. Use `0` for no retries, `-1` for infinite retries. Please, consider an infinite TTL (even a very large one) may consume all the sink's channel capacity very quickly. |
 | batch\_retry\_intervals | no | 5000 | Comma-separated list of intervals (in miliseconds) at which the retries regarding not persisted batches will be done. First retry will be done as many miliseconds after as the first value, then the second retry will be done as many miliseconds after as second value, and so on. If the batch\_ttl is greater than the number of intervals, the last interval is repeated. |
-| backend.enable\_cache | no | false | <i>true</i> or <i>false</i>, <i>true</i> enables the creation of a Cache, <i>false</i> disables the creation of a Cache. |
-| persist\_errors | no | true | if there is an exception when trying to persist data into storage then error is persisted into a table |
+
+
 
 
 A configuration example could be:
 
-    cygnus-ngsi.sinks = mysql-sink
-    cygnus-ngsi.channels = mysql-channel
+    cygnus-ngsi.sinks = graphql-ink
+    cygnus-ngsi.channels = graphql-channel
     ...
-    cygnus-ngsi.sinks.mysql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIMySQLSink
-    cygnus-ngsi.sinks.mysql-sink.channel = mysql-channel
+    cygnus-ngsi.sinks.graphql-sink.type = com.telefonica.iot.cygnus.sinks.NGSIGraphQLSink
+    cygnus-ngsi.sinks.graphql-sink.channel = graphql-channel
     
     
     
     cygnus-ngsi.sinks.graphql-sink.enable_grouping = false
     cygnus-ngsi.sinks.graphql-sink.enable_name_mappings = true
     cygnus-ngsi.sinks.graphql-sink.data_model = dm-by-entity
-    cygnus-ngsi.sinks.graphql-sink.graphql_host = 172.17.0.1
-    cygnus-ngsi.sinks.graphql-sink.graphql_port = 1111
-    cygnus-ngsi.sinks.graphql-sink.graphql_username = dba
-    cygnus-ngsi.sinks.graphql-sink.graphql_password = dba
-    cygnus-ngsi.sinks.graphql-sink.graphql_database = vdb
+    cygnus-ngsi.sinks.graphql-sink.graphql_endpoint = http://172.17.0.1:2345
     cygnus-ngsi.sinks.graphql-sink.attr_persistence = column
     cygnus-ngsi.sinks.graphql-sink.attr_native_types = true
     cygnus-ngsi.sinks.graphql-sink.attr_metadata_store = false
