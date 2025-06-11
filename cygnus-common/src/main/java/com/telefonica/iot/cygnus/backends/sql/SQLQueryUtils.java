@@ -558,7 +558,7 @@ public class SQLQueryUtils {
      * @param attrNativeTypes the attr native types
      * @return the string value from json element
      */
-    protected static String getStringValueFromJsonElement(JsonElement value, String quotationMark, boolean attrNativeTypes) {
+    public static String getStringValueFromJsonElement(JsonElement value, String quotationMark, boolean attrNativeTypes) {
         String stringValue;
         if (attrNativeTypes) {
             if (value == null || value.isJsonNull()) {
