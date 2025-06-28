@@ -20,6 +20,7 @@ package com.telefonica.iot.cygnus.sinks;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericColumnAggregator;
 import com.telefonica.iot.cygnus.aggregation.NGSIGenericRowAggregator;
@@ -354,9 +355,30 @@ public class NGSICKANSink extends NGSISink {
         } // try catch
     } // truncateByTime
 
+    private class NGSICKANRowAggregator extends NGSIGenericRowAggregator {
+		@Override
+		public long getRecvTimeTsValue(NGSIEvent cygnusEvent) {
+			return cygnusEvent.getRecvTimeTs() / 1000;
+		}
+
+		@Override
+		public JsonElement adaptAttrValue(JsonElement attrValue) {
+			JsonElement adaptedValue = attrValue;
+	           // JR 2020-10-7: Attempt to fix a coerce error at CKAN, not coercing 0 to the nested data type. 
+            if (attrValue.isJsonPrimitive()) {
+            	JsonPrimitive jp = attrValue.getAsJsonPrimitive();
+            	if (jp.isNumber() && "0".equals(jp.getAsString())) {
+            		adaptedValue = new JsonPrimitive("0");
+            	}
+            }
+            return adaptedValue;
+		}
+    	
+    }
+
     protected NGSIGenericAggregator getAggregator(boolean rowAttrPersistence) {
         if (rowAttrPersistence) {
-            return new NGSIGenericRowAggregator();
+            return new NGSICKANRowAggregator();
         } else {
             return new NGSIGenericColumnAggregator();
         } // if else

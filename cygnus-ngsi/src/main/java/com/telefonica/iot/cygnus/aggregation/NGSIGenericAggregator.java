@@ -855,4 +855,22 @@ public abstract class NGSIGenericAggregator {
      */
     public abstract void initialize(NGSIEvent cygnusEvent);
 
+    /**
+     * Returns the timestamp to use for the RECV_TIME_TS field. 
+     * @param cygnusEvent the event to produce the timestamp for.
+     * @return the timestamp value to use. Default milliseconds.
+     */
+    public long getRecvTimeTsValue(NGSIEvent cygnusEvent) {
+    	return cygnusEvent.getRecvTimeTs();
+    }
+    
+	/**
+	 * Returns a possible adapted value for attribute value. 
+	 * @param attrValue The input
+	 * @return the adapted output. Default unchanged, same object.
+	 */
+    public JsonElement adaptAttrValue(JsonElement attrValue) {
+    	// Default: No adaptation.
+    	return attrValue;
+    }
 }

@@ -93,14 +93,14 @@ public class NGSIGenericRowAggregator extends NGSIGenericAggregator{
                 attrValue = jsonParser.parse(getEscapedString(attrValue, "'"));
             }
             // aggregate the attribute information
-            aggregation.get(NGSIConstants.RECV_TIME_TS).add(new JsonPrimitive(Long.toString(recvTimeTs)));
+            aggregation.get(NGSIConstants.RECV_TIME_TS).add(new JsonPrimitive(Long.toString(getRecvTimeTsValue(event))));
             aggregation.get(NGSIConstants.RECV_TIME).add(new JsonPrimitive(recvTime));
             aggregation.get(NGSIConstants.FIWARE_SERVICE_PATH).add(new JsonPrimitive(eventServicePath));
             aggregation.get(NGSIConstants.ENTITY_ID).add(new JsonPrimitive(entityId));
             aggregation.get(NGSIConstants.ENTITY_TYPE).add(new JsonPrimitive(entityType));
             aggregation.get(NGSIConstants.ATTR_NAME).add(new JsonPrimitive(attrName));
             aggregation.get(NGSIConstants.ATTR_TYPE).add(new JsonPrimitive(attrType));
-            aggregation.get(NGSIConstants.ATTR_VALUE).add(attrValue);
+            aggregation.get(NGSIConstants.ATTR_VALUE).add(adaptAttrValue(attrValue));
             aggregation.get(NGSIConstants.ATTR_MD).add(jsonAttrMetadata);
         } // for
         setAggregation(aggregation);
