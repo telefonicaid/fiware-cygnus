@@ -668,7 +668,6 @@ public class SQLBackendImpl implements SQLBackend{
         Connection connection = null;
         String upsertQuerys = new String();
         String currentUpsertQuery = new String();
-        int insertedRows[];
 
         try {
 
