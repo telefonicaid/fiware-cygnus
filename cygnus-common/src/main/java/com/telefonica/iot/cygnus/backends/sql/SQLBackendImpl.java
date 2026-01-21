@@ -31,6 +31,7 @@ import org.apache.commons.dbcp.DriverManagerConnectionFactory;
 import org.apache.commons.dbcp.PoolableConnectionFactory;
 import org.apache.commons.dbcp.PoolingDataSource;
 import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.logging.log4j.ThreadContext;
 
 import javax.sql.DataSource;
 import javax.sql.rowset.CachedRowSet;
@@ -705,6 +706,7 @@ public class SQLBackendImpl implements SQLBackend{
 
         } catch (SQLTimeoutException e) {
             cygnusSQLRollback(connection);
+            ThreadContext.put(CommonConstants.LOG4J_SVC, database);
             if (upsertQuerys.isEmpty() && currentUpsertQuery.isEmpty()) {
                 throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
                                                  " Data insertion error. database: " + dataBase +
@@ -719,6 +721,7 @@ public class SQLBackendImpl implements SQLBackend{
             }
         } catch (SQLException e) {
             cygnusSQLRollback(connection);
+            ThreadContext.put(CommonConstants.LOG4J_SVC, database);
             if (upsertQuerys.isEmpty() && currentUpsertQuery.isEmpty()) {
                 persistError(dataBase, schema, null, e);
                 throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
