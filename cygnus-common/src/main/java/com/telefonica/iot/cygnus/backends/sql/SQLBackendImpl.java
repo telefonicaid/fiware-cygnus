@@ -706,7 +706,7 @@ public class SQLBackendImpl implements SQLBackend{
 
         } catch (SQLTimeoutException e) {
             cygnusSQLRollback(connection);
-            ThreadContext.put(CommonConstants.LOG4J_SVC, database);
+            ThreadContext.put(CommonConstants.LOG4J_SVC, dataBase);
             if (upsertQuerys.isEmpty() && currentUpsertQuery.isEmpty()) {
                 throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
                                                  " Data insertion error. database: " + dataBase +
@@ -721,7 +721,7 @@ public class SQLBackendImpl implements SQLBackend{
             }
         } catch (SQLException e) {
             cygnusSQLRollback(connection);
-            ThreadContext.put(CommonConstants.LOG4J_SVC, database);
+            ThreadContext.put(CommonConstants.LOG4J_SVC, dataBase);
             if (upsertQuerys.isEmpty() && currentUpsertQuery.isEmpty()) {
                 persistError(dataBase, schema, null, e);
                 throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
