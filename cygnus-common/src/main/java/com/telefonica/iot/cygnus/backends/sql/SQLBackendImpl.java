@@ -709,7 +709,7 @@ public class SQLBackendImpl implements SQLBackend{
         } catch (SQLTimeoutException e) {
             cygnusSQLRollback(connection);
             ThreadContext.put(CommonConstants.LOG4J_SVC, dataBase);
-            ThreadContext.put(CommonConstants.LOG4J_SUBSVC, tableName.substring(tableName.lastIndexOf('.') + 1).replaceFirst(suffixTable + "$", ""));
+            ThreadContext.put(CommonConstants.LOG4J_SUBSVC, tableName.substring(tableName.lastIndexOf('.') + 1).replaceFirst(tableSuffix + "$", ""));
             if (upsertQuerys.isEmpty() && currentUpsertQuery.isEmpty()) {
                 throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
                                                  " Data insertion error. database: " + dataBase +
@@ -725,7 +725,7 @@ public class SQLBackendImpl implements SQLBackend{
         } catch (SQLException e) {
             cygnusSQLRollback(connection);
             ThreadContext.put(CommonConstants.LOG4J_SVC, dataBase);
-            ThreadContext.put(CommonConstants.LOG4J_SUBSVC, tableName.substring(tableName.lastIndexOf('.') + 1).replaceFirst(suffixTable + "$", ""));
+            ThreadContext.put(CommonConstants.LOG4J_SUBSVC, tableName.substring(tableName.lastIndexOf('.') + 1).replaceFirst(tableSuffix + "$", ""));
             if (upsertQuerys.isEmpty() && currentUpsertQuery.isEmpty()) {
                 persistError(dataBase, schema, null, e);
                 throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
@@ -791,7 +791,7 @@ public class SQLBackendImpl implements SQLBackend{
         } catch (SQLTimeoutException e) {
             cygnusSQLRollback(connection);
             ThreadContext.put(CommonConstants.LOG4J_SVC, dataBase);
-            ThreadContext.put(CommonConstants.LOG4J_SUBSVC, tableName.substring(tableName.lastIndexOf('.') + 1).replaceFirst(suffixTable + "$", ""));
+            ThreadContext.put(CommonConstants.LOG4J_SUBSVC, tableName.substring(tableName.lastIndexOf('.') + 1).replaceFirst(tableSuffix + "$", ""));
             if (insertQuery.isEmpty()) {
                 throw new CygnusPersistenceError(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
                                                  " Data insertion error. database: " + dataBase +
@@ -806,7 +806,7 @@ public class SQLBackendImpl implements SQLBackend{
         } catch (SQLException e) {
             cygnusSQLRollback(connection);
             ThreadContext.put(CommonConstants.LOG4J_SVC, dataBase);
-            ThreadContext.put(CommonConstants.LOG4J_SUBSVC, tableName.substring(tableName.lastIndexOf('.') + 1).replaceFirst(suffixTable + "$", ""));
+            ThreadContext.put(CommonConstants.LOG4J_SUBSVC, tableName.substring(tableName.lastIndexOf('.') + 1).replaceFirst(tableSuffix + "$", ""));
             if (insertQuery.isEmpty()) {
                 persistError(dataBase, schema, null, e);
                 throw new CygnusBadContextData(sqlInstance.toString().toUpperCase() + " " + e.getNextException() +
