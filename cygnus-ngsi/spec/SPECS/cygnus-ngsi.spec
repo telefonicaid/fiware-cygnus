@@ -100,6 +100,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Fri Jan 23 2026 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.17.0
+
+- [cygnus-ngsi] Log warn when channel is near to be full (>90%) (#2459)
+- [cygnus-ngsi] Upgrade Debian version from 12.9 to 12.11 in Dockerfile
+
 * Fri Mar 14 2025 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.16.0
 
 - [cygnus-ngsi] Upgrade Debian version from 12.7 to 12.9 in Dockerfile

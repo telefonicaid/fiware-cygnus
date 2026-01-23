@@ -172,6 +172,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Fri Jan 23 2026 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.17.0
+
+- [cygnus-common] fix srv and subsrv in logs when persistence or bad data errors in SQL sinks (#1983)
+- [cygnus-common] Upgrade postgresql from 42.7.2 to 42.7.7 due to CVE-2025-49146
+
 * Fri Mar 14 2025 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.16.0
 
 - [cygnus-ngsi][cygnus-common] Fix way to handle CygnusPersistenceException to allow batch retries in arcgis-sink if `.batch_ttl` configured
