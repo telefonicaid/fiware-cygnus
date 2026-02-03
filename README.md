@@ -12,7 +12,7 @@
 ![Status](https://fiware.github.io/catalogue/badges/statuses/status-deprecated.svg)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4851/badge)](https://bestpractices.coreinfrastructure.org/projects/4851)
 
-**This repository is now archived. Cygnus uses a not supported framework (Apache Flume), and further development is not envisaged.**
+**This repository is now archived. Cygnus uses an unsupported framework (Apache Flume), and further development is not envisaged. Users should upgrade to the newer Kafka-based [Kafnus](https://github.com/telefonicaid/kafnus) component instead**
 
 Cygnus is a connector in charge of persisting context data sources into other third-party databases and storage systems, creating a historical view of the context. Internally, Cygnus is based on [Apache Flume](http://flume.apache.org/), Flume is a data flow system based on the concepts of flow-based programming. It supports powerful and scalable directed graphs of data routing, transformation, and system mediation logic. It was built to automate the flow of data between systems. While the term 'dataflow' can be used in a variety of contexts, we use it here to mean the automated and managed flow of information between systems.
 
