@@ -120,8 +120,11 @@ public class CygnusFileChannel extends FileChannel implements CygnusChannel {
     public double getUsage() {
         long currentSize = channelCounterRef.getChannelSize();
         long maxCapacity = channelCounterRef.getChannelCapacity();
-        double usagePercentage = (double) currentSize / maxCapacity * 100;
-        return usagePercentage;
+        if (currentSize < 0 || maxCapacity <= 0) {
+            return 0.0;
+        }
+
+        return (currentSize * 100.0) / maxCapacity;
     } // getUsage
     
 } // CygnusFileChannel
