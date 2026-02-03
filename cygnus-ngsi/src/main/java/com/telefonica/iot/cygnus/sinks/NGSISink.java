@@ -524,8 +524,7 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
                 }
             } else {
                 // Flumec channel "vanilla": do not get usage
-                LOGGER.debug("Channel is not a CygnusChannel ({}). Skipping channel usage.",
-                             ch.getClass().getName());
+                LOGGER.debug("Channel is not a CygnusChannel (" + ch.getClass().getName() +"). Skipping channel usage.");
             }
 
             // Get and process as many events as the batch size
