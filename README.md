@@ -1,6 +1,6 @@
 # Cygnus
 
-[![](https://nexus.lab.fiware.org/repository/raw/public/badges/chapters/core.svg)](https://www.fiware.org/developers/catalogue/)
+[![](https://fiware.github.io/catalogue/badges/chapters/core.svg)](https://www.fiware.org/developers/catalogue/)
 [![License](https://img.shields.io/github/license/telefonicaid/fiware-cygnus.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![Quay badge](https://img.shields.io/badge/quay.io-fiware%2Fcygnus--ngsi-grey?logo=red%20hat&labelColor=EE0000)](https://quay.io/repository/fiware/cygnus-ngsi)
 [![Docker badge](https://img.shields.io/badge/docker-telefonicaiot%2Ffiware--cygnus-blue?logo=docker)](https://hub.docker.com/r/telefonicaiot/fiware-cygnus)
@@ -9,14 +9,16 @@
 <br/>
 [![Documentation badge](https://readthedocs.org/projects/fiware-cygnus/badge/?version=latest)](http://fiware-cygnus.rtfd.io)
 [![CI](https://github.com/telefonicaid/fiware-cygnus/workflows/CI/badge.svg)](https://github.com/telefonicaid/fiware-cygnus/actions?query=workflow%3ACI)
-![Status](https://nexus.lab.fiware.org/static/badges/statuses/cygnus.svg)
+![Status](https://fiware.github.io/catalogue/badges/statuses/status-deprecated.svg)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4851/badge)](https://bestpractices.coreinfrastructure.org/projects/4851)
+
+**This repository is now archived. Cygnus used a not supporte framework (Apache Flume), and further development is not envisaged.**
 
 Cygnus is a connector in charge of persisting context data sources into other third-party databases and storage systems, creating a historical view of the context. Internally, Cygnus is based on [Apache Flume](http://flume.apache.org/), Flume is a data flow system based on the concepts of flow-based programming. It supports powerful and scalable directed graphs of data routing, transformation, and system mediation logic. It was built to automate the flow of data between systems. While the term 'dataflow' can be used in a variety of contexts, we use it here to mean the automated and managed flow of information between systems.
 
 Each data persistence agent within Cygnus is composed of three parts - a listener or source in charge of receiving the data, a channel where the source puts the data once it has been transformed into a Flume event, and a sink, which takes Flume events from the channel in order to persist the data within its body into a third-party storage.
 
-This project is part of [FIWARE](https://www.fiware.org/). For more information
+Whilst active, this project was part of [FIWARE](https://www.fiware.org/). For more information
 check the FIWARE Catalogue entry for the
 [Core Context Management](https://github.com/Fiware/catalogue/tree/master/core).
 
