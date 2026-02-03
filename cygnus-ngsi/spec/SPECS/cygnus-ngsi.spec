@@ -100,6 +100,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Tue Feb 03 2026 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.18.0
+
+- [cygnus-ngsi] Fix log about channel usage when no CygnusChannel type is used (bug introduced in 3.17.0) (#2478)
+
 * Fri Jan 23 2026 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.17.0
 
 - [cygnus-ngsi] Log warn when channel is near to be full (>90%) (#2459)
