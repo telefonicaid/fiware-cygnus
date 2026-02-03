@@ -8,7 +8,7 @@ edit_uri: edit/master/doc/
 markdown_extensions: [toc,fenced_code]
 use_directory_urls: false
 theme: readthedocs
-extra_css: ["https://fiware.github.io/catalogue/style/fiware_readthedocs.css", "https://fiware.github.io/catalogue/style/fiware_readthedocs_core.css"]
+extra_css: ["https://fiware.github.io/style/fiware_readthedocs.css", "https://fiware.github.io/style/fiware_readthedocs_core.css"]
 google_analytics: ['UA-84866051-2', 'fiware-cygnus.readthedocs.io']
 pages:
   - Home: index.md
