@@ -1,1 +1,1 @@
-
+- [cygnus-ngsi] Fix log about channel usage when no CygnusChannel type is used (bug introduced in 3.17.0) (#2478)

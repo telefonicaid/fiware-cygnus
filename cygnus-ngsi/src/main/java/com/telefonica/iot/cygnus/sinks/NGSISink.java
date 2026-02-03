@@ -514,11 +514,17 @@ public abstract class NGSISink extends CygnusSink implements Configurable {
         try {
             txn.begin();
 
-            CygnusChannel cygnusch = (CygnusChannel) ch;
-            channelUsage = cygnusch.getUsage();
-            LOGGER.debug("Channel usage: " + channelUsage + "% in sink " + this.getName());
-            if (channelUsage > NGSIConstants.HIGH_CHANNEL_PERCENT_USAGE) {
-                LOGGER.warn("High Channel usage: " + channelUsage + "% in sink " + this.getName());
+            if (ch instanceof CygnusChannel) {
+                CygnusChannel cygnusch = (CygnusChannel) ch;
+                channelUsage = cygnusch.getUsage();
+
+                LOGGER.debug("Channel usage: " + channelUsage + "% in sink " + this.getName());
+                if (channelUsage > NGSIConstants.HIGH_CHANNEL_PERCENT_USAGE) {
+                    LOGGER.warn("High Channel usage: " + channelUsage + "% in sink " + this.getName());
+                }
+            } else {
+                // Flume channel "vanilla": do not get usage
+                LOGGER.debug("Channel is not a CygnusChannel (" + ch.getClass().getName() + "). Skipping channel usage.");
             }
 
             // Get and process as many events as the batch size
