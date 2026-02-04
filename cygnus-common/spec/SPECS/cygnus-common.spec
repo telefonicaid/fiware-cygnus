@@ -172,6 +172,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
+* Tue Feb 03 2026 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.18.0
+
 * Fri Jan 23 2026 Alvaro Vega <alvaro.vegagarcia@telefonica.com> 3.17.0
 
 - [cygnus-common] fix srv and subsrv in logs when persistence or bad data errors in SQL sinks (#1983)
