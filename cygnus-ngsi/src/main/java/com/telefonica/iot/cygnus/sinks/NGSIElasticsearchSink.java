@@ -760,7 +760,7 @@ public class NGSIElasticsearchSink extends NGSISink {
             } // if else
 
             v.recvTimeDt = new Date(v.recvTimeTs);
-            v.idx = this.index + "-" + this.indexDateFormatter.format(v.recvTimeDt);
+            v.idx = this.index;
             return v;
         } // getTimeRelatedValues
 
