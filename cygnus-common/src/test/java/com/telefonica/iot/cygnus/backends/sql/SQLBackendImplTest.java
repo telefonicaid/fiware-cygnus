@@ -89,10 +89,10 @@ public class SQLBackendImplTest {
         backend = new SQLBackendImpl(host, port, user, password, maxPoolSize, maxPoolIdle, minPoolIdle, minPoolIdleTimeMillis, MYSQL_INSTANCE_NAME, MYSQL_DRIVER_NAME, null, persistErrors, maxLatestErrors);
 
         // set up the behaviour of the mocked classes
-        when(mockDriverDbCreate.getConnection(Mockito.anyString())).thenReturn(mockConnection);
+        when(mockDriverDbCreate.getConnection(Mockito.anyString(), Mockito.anyString())).thenReturn(mockConnection);
         when(mockDriverDbCreate.isConnectionCreated(Mockito.anyString())).thenReturn(true);
         when(mockDriverDbCreate.numConnectionsCreated()).thenReturn(1);
-        when(mockDriverTableCreate.getConnection(Mockito.anyString())).thenReturn(mockConnection);
+        when(mockDriverTableCreate.getConnection(Mockito.anyString(), Mockito.anyString())).thenReturn(mockConnection);
         when(mockDriverTableCreate.isConnectionCreated(Mockito.anyString())).thenReturn(true, true, true, true, true);
         when(mockConnection.createStatement()).thenReturn(mockStatement);
         when(mockStatement.executeUpdate(Mockito.anyString())).thenReturn(1);
