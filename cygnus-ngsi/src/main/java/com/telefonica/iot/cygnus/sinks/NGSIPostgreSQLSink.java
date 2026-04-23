@@ -669,32 +669,32 @@ public class NGSIPostgreSQLSink extends NGSISink {
                                 + "dm-by-service-path data model");
                     } // if
                     
-                    name = NGSIUtils.encode(servicePath, true, false);
+                    name = NGSIUtils.encodePostgresTable(servicePath);
                     break;
                 case DMBYENTITYDATABASE:
                 case DMBYENTITYDATABASESCHEMA:
                 case DMBYENTITY:
-                    String truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
+                    String truncatedServicePath = NGSIUtils.encodePostgresTable(servicePath);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
-                            + NGSIUtils.encode(entity, false, true);
+                            + NGSIUtils.encodePostgresTable(entity);
                     break;
                 case DMBYENTITYTYPEDATABASE:
                 case DMBYENTITYTYPEDATABASESCHEMA:
                 case DMBYENTITYTYPE:
-                    truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
+                    truncatedServicePath = NGSIUtils.encodePostgresTable(servicePath);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
-                            + NGSIUtils.encode(entityType, false, true);
+                            + NGSIUtils.encodePostgresTable(entityType);
                     break;
                 case DMBYATTRIBUTE:
-                    truncatedServicePath = NGSIUtils.encode(servicePath, true, false);
+                    truncatedServicePath = NGSIUtils.encodePostgresTable(servicePath);
                     name = (truncatedServicePath.isEmpty() ? "" : truncatedServicePath + '_')
-                            + NGSIUtils.encode(entity, false, true)
-                            + '_' + NGSIUtils.encode(attribute, false, true);
+                            + NGSIUtils.encodePostgresTable(entity)
+                            + '_' + NGSIUtils.encodePostgresTable(attribute);
                     break;
                 case DMBYFIXEDENTITYTYPEDATABASE:
                 case DMBYFIXEDENTITYTYPEDATABASESCHEMA:
                 case DMBYFIXEDENTITYTYPE:
-                    name = NGSIUtils.encode(entityType, false, true);
+                    name = NGSIUtils.encodePostgresTable(entityType);
                     break;
                 default:
                     throw new CygnusBadConfiguration("Unknown data model '" + dataModel.toString()

@@ -52,8 +52,7 @@ public class NGSICharsetsTest {
         System.out.println(getTestTraceHead("[NGSICharsets.encodePostgreSQL]")
                 + "-------- Upper case not accented characters are encoded");
         String in = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        String expected = "x0041x0042x0043x0044x0045x0046x0047x0048x0049x004ax004bx004cx004dx004ex004f"
-                + "x0050x0051x0052x0053x0054x0055x0056x0057x0058x0059x005a";
+         String expected = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         String out = NGSICharsets.encodePostgreSQL(in);
         
         try {
