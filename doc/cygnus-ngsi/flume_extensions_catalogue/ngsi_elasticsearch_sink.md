@@ -61,7 +61,6 @@ So `NGSIElasticsearchSink` constructs the index name according to the following 
 4. when you use `Column-like storing`, append a hash string calculated by the attribute names to be stored
     * MD5 hash is calculated by concatinated attribute names such as  `attrName1:attrName2:...`.
 5. when it starts with `-, _, +`, append 'idx' at the beggning of the base string.
-6. append the created &lt;date&gt; such as `yyyy.mm.dd`.
 
 According to the above rules, `NGSIElasticsearchSink` can handle the multiple subscriptions with different attributes of the same entity.
 
